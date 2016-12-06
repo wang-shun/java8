@@ -8,7 +8,6 @@ import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,9 +26,6 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
     private final DoctorBarnDao doctorBarnDao;
     private final CoreEventDispatcher coreEventDispatcher;
 
-    @Autowired(required = false)
-    private Publisher publisher;
-
     @Autowired
     public DoctorBarnWriteServiceImpl(DoctorBarnDao doctorBarnDao,
                                       CoreEventDispatcher coreEventDispatcher) {
@@ -43,7 +39,7 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
             //校验猪舍名称是否重复
             checkBarnNameRepeat(barn.getFarmId(), barn.getName());
             doctorBarnDao.create(barn);
-            publistBarnEvent(barn.getId());
+            coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barn.getId()).build());
             return Response.ok(barn.getId());
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -57,21 +53,11 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
     public Response<Boolean> updateBarn(DoctorBarn barn) {
         try {
             doctorBarnDao.update(barn);
-            publistBarnEvent(barn.getId());
+            coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barn.getId()).build());
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("update barn failed, barn:{}, cause:{}", barn, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.update.fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> deleteBarnById(Long barnId) {
-        try {
-            return Response.ok(doctorBarnDao.delete(barnId));
-        } catch (Exception e) {
-            log.error("delete barn failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
-            return Response.fail("barn.delete.fail");
         }
     }
 
@@ -83,37 +69,14 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
             DoctorBarn barn = new DoctorBarn();
             barn.setId(barnId);
             barn.setStatus(status);
-            return Response.ok(doctorBarnDao.update(barn));
+            doctorBarnDao.update(barn);
+            coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barn.getId()).build());
+            return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("update barn status failed, barnId:{}, status:{}, cause:{}",
                     barnId, status, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.update.fail");
         }
-    }
-
-    @Override
-    public Response<Boolean> publistBarnEvent(Long barnId) {
-        try {
-            publishZookeeperEvent(barnId);
-            return Response.ok(Boolean.TRUE);
-        } catch (Exception e) {
-            log.error("pub barn event failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
-            return Response.fail("publist.barn.event.fail");
-        }
-    }
-
-    private void publishZookeeperEvent(Long barnId){
-//        Integer eventType = DataEventType.BarnUpdate.getKey();
-//        Map<String, Long> data = ImmutableMap.of("doctorBarnId", barnId);
-//        if(notNull(publisher)) {
-//            try {
-//                publisher.publish(DataEvent.toBytes(eventType, data));
-//            } catch (Exception e) {
-//                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
-//            }
-//        } else {
-            coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barnId).build());
-        //}
     }
 
     private void checkBarnNameRepeat(Long farmId, String barnName) {
