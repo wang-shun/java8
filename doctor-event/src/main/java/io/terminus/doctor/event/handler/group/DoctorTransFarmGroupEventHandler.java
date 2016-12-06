@@ -73,7 +73,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
 
         //转入猪舍
         DoctorBarn toBarn = getBarn(transFarm.getToBarnId());
-        checkUnweanTrans(group.getPigType(), toBarn.getPigType(), groupTrack, transFarm.getQuantity());
+        //checkUnweanTrans(group.getPigType(), toBarn.getPigType(), groupTrack, transFarm.getQuantity());
 
         //1.转换转场事件
         DoctorTransFarmGroupEvent transFarmEvent = BeanMapper.map(transFarm, DoctorTransFarmGroupEvent.class);
