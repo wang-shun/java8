@@ -195,11 +195,11 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
                     .filter(pt -> pt.getGroup().getPigType() != null)
                     .collect(Collectors.groupingBy(gd -> gd.getGroup().getPigType()));
 
-            List<DoctorGroupDetail> farrows = MoreObjects.firstNonNull(groupMap.get(PigType.DELIVER_SOW.getValue()), Lists.newArrayList());
+            List<DoctorGroupDetail> farrows = MoreObjects.firstNonNull(groupMap.get(PigType.DELIVER_SOW.getValue()), Lists.<DoctorGroupDetail>newArrayList());
 
-            List<DoctorGroupDetail> nurseries = MoreObjects.firstNonNull(groupMap.get(PigType.NURSERY_PIGLET.getValue()), Lists.newArrayList());
-            List<DoctorGroupDetail> fattens = MoreObjects.firstNonNull(groupMap.get(PigType.FATTEN_PIG.getValue()), Lists.newArrayList());
-            List<DoctorGroupDetail> houbei = MoreObjects.firstNonNull(groupMap.get(PigType.RESERVE.getValue()), Lists.newArrayList());
+            List<DoctorGroupDetail> nurseries = MoreObjects.firstNonNull(groupMap.get(PigType.NURSERY_PIGLET.getValue()), Lists.<DoctorGroupDetail>newArrayList());
+            List<DoctorGroupDetail> fattens = MoreObjects.firstNonNull(groupMap.get(PigType.FATTEN_PIG.getValue()), Lists.<DoctorGroupDetail>newArrayList());
+            List<DoctorGroupDetail> houbei = MoreObjects.firstNonNull(groupMap.get(PigType.RESERVE.getValue()), Lists.<DoctorGroupDetail>newArrayList());
 
 
             //根据猪类统计
