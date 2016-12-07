@@ -32,6 +32,7 @@
 
     <!-- auth services -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.user.auth.UserRoleLoader" ref="doctorUserRoleLoaderImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserRoleLoader" ref="doctorUserRoleLoaderReadServiceImpl"/>
 
     <!-- article service -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleReadService" ref="articleReadServiceImpl"/>

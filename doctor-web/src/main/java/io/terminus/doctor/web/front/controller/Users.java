@@ -17,8 +17,10 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.enums.SmsCodeType;
+import io.terminus.doctor.user.model.DoctorRoleContent;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.DoctorUserRoleLoader;
 import io.terminus.doctor.web.core.Constants;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
@@ -67,6 +69,7 @@ public class Users {
     private final PermissionHelper permissionHelper;
     private final DoctorCommonSessionBean doctorCommonSessionBean;
     private final AFSessionManager sessionManager;
+    private final DoctorUserRoleLoader doctorUserRoleLoader;
 
 
     @Autowired
@@ -77,7 +80,7 @@ public class Users {
                  AclLoader aclLoader,
                  PermissionHelper permissionHelper,
                  DoctorCommonSessionBean doctorCommonSessionBean,
-                 AFSessionManager sessionManager) {
+                 AFSessionManager sessionManager, DoctorUserRoleLoader doctorUserRoleLoader) {
         this.userWriteService = userWriteService;
         this.doctorUserReadService = doctorUserReadService;
         this.captchaGenerator = captchaGenerator;
@@ -86,6 +89,7 @@ public class Users {
         this.aclLoader = aclLoader;
         this.permissionHelper = permissionHelper;
         this.sessionManager = sessionManager;
+        this.doctorUserRoleLoader = doctorUserRoleLoader;
     }
 
     /**
@@ -115,6 +119,10 @@ public class Users {
             throw new JsonResponseException(userResponse.getError());
         }
         return userResponse.getResult();
+    }
+    @RequestMapping(value = "/{userId}/roles", method = {RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response<DoctorRoleContent> getUserRolesByUserId(@PathVariable Long userId) {
+        return doctorUserRoleLoader.hardLoadRoles(userId);
     }
     /**
      * 生成sessionId
