@@ -90,7 +90,7 @@ public class OPDoctorUsers {
         this.serviceBetaStatusHandler = serviceBetaStatusHandler;
     }
 
-    @Value("service-domain.pigmall:m.xrnm.com")
+    @Value("${service-domain.pigmall:m.xrnm.com}")
     private String pigmallURL;
 
     /**
