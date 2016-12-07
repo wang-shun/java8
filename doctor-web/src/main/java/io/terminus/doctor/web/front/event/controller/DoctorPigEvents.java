@@ -216,6 +216,7 @@ public class DoctorPigEvents {
         return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize));
     }
 
+
     /**
      * 获取相应的猪类型事件列表
      *
