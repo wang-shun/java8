@@ -2,6 +2,7 @@ package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.user.dao.*;
@@ -25,6 +26,7 @@ import static io.terminus.doctor.common.util.UserRoleUtil.isNormal;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader {
     private final UserDao userDao;
 

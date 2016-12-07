@@ -9,6 +9,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
@@ -69,7 +70,8 @@ public class Users {
     private final PermissionHelper permissionHelper;
     private final DoctorCommonSessionBean doctorCommonSessionBean;
     private final AFSessionManager sessionManager;
-    private final DoctorUserRoleLoader doctorUserRoleLoader;
+    @RpcConsumer
+    private DoctorUserRoleLoader doctorUserRoleLoader;
 
 
     @Autowired
@@ -80,7 +82,7 @@ public class Users {
                  AclLoader aclLoader,
                  PermissionHelper permissionHelper,
                  DoctorCommonSessionBean doctorCommonSessionBean,
-                 AFSessionManager sessionManager, DoctorUserRoleLoader doctorUserRoleLoader) {
+                 AFSessionManager sessionManager) {
         this.userWriteService = userWriteService;
         this.doctorUserReadService = doctorUserReadService;
         this.captchaGenerator = captchaGenerator;
@@ -89,7 +91,6 @@ public class Users {
         this.aclLoader = aclLoader;
         this.permissionHelper = permissionHelper;
         this.sessionManager = sessionManager;
-        this.doctorUserRoleLoader = doctorUserRoleLoader;
     }
 
     /**
