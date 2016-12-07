@@ -33,6 +33,7 @@ import io.terminus.parana.auth.model.PermissionData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -89,6 +90,9 @@ public class OPDoctorUsers {
         this.serviceBetaStatusHandler = serviceBetaStatusHandler;
     }
 
+    @Value("${service-domain.pigmall:m.xrnm.com}")
+    private String pigmallURL;
+
     /**
      * 根据用户id查询 用户服务开通情况
      * @return 服务开通情况
@@ -124,7 +128,9 @@ public class OPDoctorUsers {
                 case PIGMALL:
                     innerDto.setServiceStatus(serviceStatus.getPigmallStatus());
                     innerDto.setReason(serviceStatus.getPigmallReason());
-                    innerDto.setUrl("http://www.xrnm.com"); // TODO: 2016/11/23 just test
+                    if(Objects.equals(serviceStatus.getPigmallStatus(), DoctorServiceStatus.Status.OPENED.value())) {
+                        innerDto.setUrl(pigmallURL);
+                    }
                     dto.setPigmall(innerDto);
                     break;
                 case NEVEREST:
