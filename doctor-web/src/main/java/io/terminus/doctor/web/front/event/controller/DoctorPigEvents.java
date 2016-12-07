@@ -218,6 +218,7 @@ public class DoctorPigEvents {
         return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize));
     }
 
+
     //针对公猪、母猪、猪群pagingEvent事件集成
     @RequestMapping(value = "/queryEvents", method = RequestMethod.GET)
     @ResponseBody
