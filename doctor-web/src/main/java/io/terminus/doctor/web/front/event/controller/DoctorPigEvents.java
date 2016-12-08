@@ -223,8 +223,11 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/queryEvents", method = RequestMethod.GET)
     @ResponseBody
     public Object queryEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
-        if (params == null || params.isEmpty() || params.get("kind") == null) {
+        if (params == null || params.isEmpty() ) {
             return Paging.empty();
+        }
+        if (params.get("kind")==null||"".equals(params.get("kind"))){
+            params.put("kind",1);
         }
         //针对  kind进行识别
         String kind = String.valueOf(params.get("kind"));

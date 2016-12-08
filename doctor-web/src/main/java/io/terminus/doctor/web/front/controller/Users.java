@@ -36,6 +36,7 @@ import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
 import io.terminus.session.AFSessionManager;
+import io.terminus.session.util.WebUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -45,6 +46,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Collections;
@@ -148,10 +150,11 @@ public class Users {
         if (session == null) {
             throw new JsonResponseException(500, "session.expired");
         }
-        Object sessionId = session.getAttribute(Constants.SESSION_USER_ID);
-        if (sessionId == null) {
+        Cookie cookie=WebUtil.findCookie(request,"msid");
+        if (cookie==null){
             throw new JsonResponseException(500, "session.expired");
         }
+        Object sessionId = cookie.getValue();
         return doctorCommonSessionBean.register(password, mobile, code, String.valueOf(sessionId));
     }
 
@@ -259,10 +262,12 @@ public class Users {
         if (session == null) {
             return false;
         }
-        Object sessionId = session.getAttribute(Constants.SESSION_USER_ID);
-        if (sessionId == null) {
+        Cookie cookie=WebUtil.findCookie(request,"msid");
+        if (cookie==null){
             return false;
         }
+        Object sessionId = cookie.getValue();
+
         return doctorCommonSessionBean.sendSmsCode(mobile, String.valueOf(sessionId), SmsCodeType.from(smsCodeType).template());
     }
 
