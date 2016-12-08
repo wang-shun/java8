@@ -584,4 +584,18 @@ public class DoctorSearches {
         }
     }
 
+    /**
+     * 初始化ES索引
+     * @param type 0.所有 1.猪 2.猪群 3.猪舍
+     * @return
+     */
+    @RequestMapping(value = "/initIndex", method = RequestMethod.GET)
+    public Boolean initIndex(Integer type) {
+        if (pigSearchReadService.initIndex(type).isSuccess()) {
+            return Boolean.TRUE;
+        }else {
+            return Boolean.FALSE;
+        }
+    }
+
 }
