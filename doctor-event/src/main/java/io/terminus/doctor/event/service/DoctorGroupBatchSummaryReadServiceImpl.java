@@ -12,7 +12,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -20,11 +20,12 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -42,20 +43,20 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @RpcProvider
 public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchSummaryReadService {
 
-    private final DoctorPigTrackDao doctorPigTrackDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
     private final DoctorGroupReadService doctorGroupReadService;
+    private final DoctorKpiDao doctorKpiDao;
 
     @Autowired
-    public DoctorGroupBatchSummaryReadServiceImpl(DoctorPigTrackDao doctorPigTrackDao,
-                                                  DoctorGroupEventDao doctorGroupEventDao,
+    public DoctorGroupBatchSummaryReadServiceImpl(DoctorGroupEventDao doctorGroupEventDao,
                                                   DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao,
-                                                  DoctorGroupReadService doctorGroupReadService) {
-        this.doctorPigTrackDao = doctorPigTrackDao;
+                                                  DoctorGroupReadService doctorGroupReadService,
+                                                  DoctorKpiDao doctorKpiDao) {
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupBatchSummaryDao = doctorGroupBatchSummaryDao;
         this.doctorGroupReadService = doctorGroupReadService;
+        this.doctorKpiDao = doctorKpiDao;
     }
 
     /**
@@ -97,7 +98,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
     private DoctorGroupBatchSummary getSummary(DoctorGroup group, DoctorGroupTrack groupTrack, Double fcrFeed) {
         List<DoctorGroupEvent> events = doctorGroupEventDao.findByGroupId(group.getId());
 
-        //转入
+        //转入 // TODO: 2016/12/8 目前是全部转入事件
         int inCount = CountUtil.intStream(events, DoctorGroupEvent::getQuantity, event -> Objects.equals(GroupEventType.MOVE_IN.getValue(), event.getType())).sum();
         double inAvgWeight = CountUtil.doubleStream(events, DoctorGroupEvent::getAvgWeight, event -> Objects.equals(GroupEventType.MOVE_IN.getValue(), event.getType())).average().orElse(0D);
 
@@ -114,35 +115,29 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         summary.setBarnName(group.getCurrentBarnName());                             //猪舍名称
         summary.setUserId(group.getStaffId());                                       //工作人员id
         summary.setUserName(group.getStaffName());                                   //工作人员name
-        summary.setLiveCount(groupTrack.getQuantity());                              //活仔数
 
-        //如果小于0, 弱仔数也有置成0
-        int healthCount = groupTrack.getQuantity() - MoreObjects.firstNonNull(groupTrack.getWeakQty(), 0);
-        if (healthCount <= 0) {
-            summary.setWeakCount(0);                                                 //弱仔数
-            summary.setHealthCount(groupTrack.getQuantity());                        //健仔数
-        } else {
-            summary.setWeakCount(MoreObjects.firstNonNull(groupTrack.getWeakQty(), 0));//弱仔数
-            summary.setHealthCount(healthCount);                                     //健仔数
-        }
-        summary.setWeanCount(groupTrack.getQuantity() - MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0)); //断奶数 = 总 - 未断奶数
-        summary.setUnqCount(groupTrack.getUnqQty());                                 //合格数
+
+        summary.setNest(groupTrack.getNest());                                       //窝数
+        summary.setLiveCount(groupTrack.getLiveQty());                               //活仔数
+        summary.setHealthCount(groupTrack.getHealthyQty());                          //健仔数
+        summary.setWeakCount(groupTrack.getWeakQty());                               //弱仔数
+        summary.setBirthAvgWeight(EventUtil.getAvgWeight(groupTrack.getBirthWeight(), groupTrack.getLiveQty()));//出生均重(kg)
+        summary.setDeadRate(doctorKpiDao.getDeadRateByGroupId(group.getId()));       //死淘率
+        summary.setWeanCount(groupTrack.getWeanQty());                               //断奶数
+        summary.setUnqCount(groupTrack.getQuaQty());                                 //注意：合格数(需求变更，只需要合格数了，这里翻一下)
+        summary.setWeanAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeanWeight(), groupTrack.getWeanQty()));  //断奶均重(kg)
         summary.setSaleCount(getSaleCount(events));                                  //销售头数
         summary.setSaleAmount(getSaleAmount(events));                                //销售金额(分)
         summary.setInCount(inCount);                                                 //转入数
         summary.setInAvgWeight(inAvgWeight);                                         //转入均重(kg)
-        summary.setDeadRate(getDeatRate(events, inCount));                           //死淘率
 
         Double fcrWeight = getFcrDeltaWeight(events, inCount, inAvgWeight);
         if (fcrFeed == null) {
-            summary.setFcr(fcrWeight);            //料肉比(这里只放分母，由上层算出物料的分子，出一下)2
+            summary.setFcr(0D);              //料肉比(这里只放分母，由上层算出物料的分子，出一下)2
         } else {
             summary.setFcr(fcrFeed / fcrWeight);
         }
-
-        List<DoctorPigTrack> farrowTracks = doctorPigTrackDao.findFeedSowTrackByGroupId(groupTrack.getGroupId());
-        summary.setNest(farrowTracks.size());                                        //窝数
-
+        summary.setDailyWeightGain(EventUtil.getAvgWeight(fcrWeight, groupTrack.getAvgDayAge() - getFirstMoveInEvent(events)));//日增重(kg)
         setToNurseryOrFatten(summary, events);                                       //阶段转
 
         // TODO: 16/9/13 上线后再弄
@@ -154,14 +149,12 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         return summary;
     }
 
-    //获取死淘率
-    private static double getDeatRate(List<DoctorGroupEvent> events, int inCount) {
-        int deadCount = CountUtil.intStream(events, DoctorGroupEvent::getQuantity,
-                event -> Objects.equals(GroupEventType.CHANGE.getValue(), event.getType()) &&
-                        (Objects.equals(DoctorBasicEnums.DEAD.getId(), event.getChangeTypeId()) ||
-                                Objects.equals(DoctorBasicEnums.ELIMINATE.getId(), event.getChangeTypeId())))
-                .sum();
-        return deadCount / (inCount == 0D ? 1D : inCount);
+    private int getFirstMoveInEvent(List<DoctorGroupEvent> events) {
+        DoctorGroupEvent event = events.stream()
+                .filter(e -> Objects.equals(e.getType(), GroupEventType.MOVE_IN.getValue()))
+                .sorted(Comparator.comparing(DoctorGroupEvent::getId)).findFirst()
+                .orElse(null);
+        return event == null ? 0 : event.getAvgDayAge();
     }
 
     //获取销售数量
@@ -182,28 +175,37 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
 
     //阶段转
     private void setToNurseryOrFatten(DoctorGroupBatchSummary summary, List<DoctorGroupEvent> events) {
-        int toCount = CountUtil.intStream(events, DoctorGroupEvent::getQuantity,
-                event -> Objects.equals(event.getType(), GroupEventType.TRANS_GROUP.getValue()) &&
-                        Objects.equals(event.getTransGroupType(), DoctorGroupEvent.TransGroupType.OUT.getValue()))
-                .sum();
-        double toAvgWeight = CountUtil.doubleStream(events, DoctorGroupEvent::getAvgWeight,
-                event -> Objects.equals(event.getType(), GroupEventType.TRANS_GROUP.getValue()) &&
-                        Objects.equals(event.getTransGroupType(), DoctorGroupEvent.TransGroupType.OUT.getValue()))
-                .average().orElse(0D);
-
         //产房仔猪 => 保育猪
         if (PigType.FARROW_TYPES.contains(summary.getPigType())) {
-            summary.setToNurseryCount(toCount);       //转保育数量
-            summary.setToNurseryAvgWeight(toAvgWeight);   //转保育均重(kg)
+            summary.setToNurseryCount(CountUtil.intStream(events, DoctorGroupEvent::getQuantity, 
+                    event -> isToNursery(event.getType(), event.getOtherBarnType())).sum());       //转保育数量
+            
+            double toWeight = CountUtil.doubleStream(events, event -> event.getQuantity() * event.getAvgWeight(), 
+                    event -> isToNursery(event.getType(), event.getOtherBarnType())).sum();
+            summary.setToNurseryAvgWeight(EventUtil.getAvgWeight(toWeight, summary.getToNurseryCount()));   //转保育均重(kg)
         }
 
         //保育猪 => 育肥猪
         if (Objects.equals(summary.getPigType(), PigType.NURSERY_PIGLET.getValue())) {
-            summary.setToFattenCount(toCount);        //转育肥数量
-            summary.setToFattenAvgWeight(toAvgWeight);    //转育肥均重(kg)
+            summary.setToFattenCount(CountUtil.intStream(events, DoctorGroupEvent::getQuantity,
+                    event -> isToFatten(event.getType(), event.getOtherBarnType())).sum());        //转育肥数量
+
+            double toWeight = CountUtil.doubleStream(events, event -> event.getQuantity() * event.getAvgWeight(),
+                    event -> isToFatten(event.getType(), event.getOtherBarnType())).sum();
+            summary.setToFattenAvgWeight(EventUtil.getAvgWeight(toWeight, summary.getToNurseryCount()));    //转育肥均重(kg)
         }
     }
+    
+    private static boolean isToNursery(Integer eventType, Integer toPigType) {
+        return Objects.equals(eventType, GroupEventType.TRANS_GROUP.getValue()) 
+                && Objects.equals(toPigType, PigType.NURSERY_PIGLET.getValue());
+    }
 
+    private static boolean isToFatten(Integer eventType, Integer toPigType) {
+        return Objects.equals(eventType, GroupEventType.TRANS_GROUP.getValue())
+                && Objects.equals(toPigType, PigType.FATTEN_PIG.getValue());
+    }
+    
     //获取料肉比增重: 增重 = 转出重 - 转入重
     private static double getFcrDeltaWeight(List<DoctorGroupEvent> events, int inCount, double inAvgWeight) {
         if (!notEmpty(events)) {

@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.util;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
 import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
@@ -20,11 +19,11 @@ public class EventUtil {
         return avgWeight * quantity;
     }
 
-    public static double getAvgWeight(double weight, int quantity) {
-        if (quantity == 0) {
+    public static double getAvgWeight(Double weight, Integer quantity) {
+        if (quantity == null || quantity == 0) {
             return 0D;
         }
-        return weight / quantity;
+        return MoreObjects.firstNonNull(weight, 0.0D) / quantity;
     }
 
     /**
@@ -48,19 +47,6 @@ public class EventUtil {
 
     public static int minusQuantity(int aq, int bq) {
         return aq - bq;
-    }
-
-    /**
-     * 根据公猪母猪数 判断猪群性别
-     */
-    public static int getSex(int boarQty, int sowQty) {
-        if (boarQty != 0 && sowQty == 0) {
-            return DoctorGroupTrack.Sex.MALE.getValue();
-        }
-        if (boarQty == 0 && sowQty != 0) {
-            return DoctorGroupTrack.Sex.FEMALE.getValue();
-        }
-        return DoctorGroupTrack.Sex.MIX.getValue();
     }
 
     /**

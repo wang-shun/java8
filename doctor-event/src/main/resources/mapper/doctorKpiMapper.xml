@@ -12,6 +12,29 @@
         <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
     </sql>
 
+    <!-- 某一猪群死淘率 -->
+    <select id="getDeadRateByGroupId" parameterType="map" resultType="double">
+        SELECT
+        (
+          SELECT
+            ifnull(sum(quantity),0) AS dead_count
+          FROM doctor_group_events
+          WHERE
+            change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+            group_id = #{groupId}
+        )
+        /
+        (
+          SELECT
+            ifnull(sum(quantity),1) AS trans_in_count
+          FROM doctor_group_events
+          WHERE
+            type = 2 AND -- 转入猪群事件
+            group_id = #{groupId}
+        )
+        FROM DUAL
+    </select>
+
     <!-- 预产胎数-->
     <select id="preDeliveryCounts" parameterType="map" resultType="int">
         select ifnull(count(1),0) from doctor_pig_events
