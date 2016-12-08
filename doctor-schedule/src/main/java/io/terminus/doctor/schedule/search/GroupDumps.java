@@ -62,4 +62,24 @@ public class GroupDumps {
             log.error("delta dump failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
     }
+
+    /**
+     * dump 指定时间到现在数据
+     * @param before 指定时间
+     */
+    @RequestMapping(value = "/fullDump", method = RequestMethod.GET)
+    public void fullDump(String before) {
+        try{
+            if(!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("before {}", before);
+            log.info("group full dump fired");
+            groupDumpService.fullDump(before);
+            log.info("group full dump end");
+        } catch (Exception e) {
+            log.error("group full dump failed, cause by {}", Throwables.getStackTraceAsString(e));
+        }
+    }
 }
