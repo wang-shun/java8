@@ -141,6 +141,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         input.setBreedId(fromGroup.getGroup().getBreedId());
         input.setBreedName(fromGroup.getGroup().getBreedName());
         input.setSource(PigSource.LOCAL.getKey());
+        input.setSowEvent(true);    //由母猪触发的猪群事件
 
         //未断奶的数量 = 总 - 断奶
         input.setQuantity(pigTrack.getUnweanQty());

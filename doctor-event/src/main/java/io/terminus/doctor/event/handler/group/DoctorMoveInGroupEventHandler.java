@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Desc: 转入猪群事件处理器
@@ -35,7 +37,6 @@ import java.util.Date;
 public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
     private final DoctorGroupEventDao doctorGroupEventDao;
-    private final DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
     public DoctorMoveInGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -45,7 +46,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
                                          DoctorBarnReadService doctorBarnReadService) {
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
-        this.doctorGroupTrackDao = doctorGroupTrackDao;
     }
 
 
@@ -75,6 +75,14 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
             event.setOtherBarnId(moveIn.getFromBarnId());  //来源猪舍id
             event.setOtherBarnType(fromBarn.getPigType());   //来源猪舍类型
         }
+
+        //空降产房仔猪，断奶统计要重新计算
+        if (moveIn.getFromBarnId() == null && Objects.equals(group.getPigType(), PigType.DELIVER_SOW.getValue())) {
+            groupTrack.setQuaQty(EventUtil.plusInt(groupTrack.getQuaQty(), event.getQuantity()));
+            groupTrack.setWeanQty(EventUtil.plusInt(groupTrack.getWeanQty(), event.getQuantity()));
+            groupTrack.setWeanWeight(EventUtil.plusDouble(groupTrack.getWeanWeight(), event.getAvgWeight() * event.getQuantity()));
+        }
+
         event.setExtraMap(moveInEvent);
         doctorGroupEventDao.create(event);
 
@@ -88,7 +96,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
         groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()) + deltaDays);
 
-        //如果是母猪分娩转入，窝数，分娩统计字段需要累加
+        //如果是母猪分娩转入或母猪转舍转入，窝数，分娩统计字段需要累加
         if (moveIn.isSowEvent()) {
             groupTrack.setNest(EventUtil.plusInt(groupTrack.getNest(), 1));  //窝数加 1
             groupTrack.setLiveQty(EventUtil.plusInt(groupTrack.getLiveQty(), moveIn.getQuantity()));

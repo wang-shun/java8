@@ -4,6 +4,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -66,7 +68,10 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         DoctorGroupEvent<DoctorTurnSeedGroupEvent> event = dozerGroupEvent(group, GroupEventType.TURN_SEED, turnSeed);
         event.setExtraMap(turnSeedEvent);
         event.setQuantity(1);
-        event.setAvgDayAge(groupTrack.getAvgDayAge());  //日龄取猪群的平均日龄
+
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
+
         event.setWeight(turnSeed.getWeight());
         event.setAvgWeight(turnSeed.getWeight());
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id

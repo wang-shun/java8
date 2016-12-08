@@ -5,6 +5,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -69,7 +71,10 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         //2.创建猪群变动事件
         DoctorGroupEvent<DoctorChangeGroupEvent> event = dozerGroupEvent(group, GroupEventType.CHANGE, change);
         event.setQuantity(change.getQuantity());
-        event.setAvgDayAge(groupTrack.getAvgDayAge());  //变动的日龄不需要录入, 直接取猪群的日龄
+
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
+
         event.setWeight(change.getWeight());            //总重
         event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
         event.setChangeTypeId(changeEvent.getChangeTypeId());   //变动类型id
@@ -91,6 +96,14 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         boarQty = boarQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : boarQty;
         groupTrack.setBoarQty(boarQty < 0 ? 0 : boarQty);
         groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
+
+        //母猪触发的变动，要减掉未断奶数
+        if (change.isSowEvent()) {
+            if (groupTrack.getUnweanQty() == null || groupTrack.getUnweanQty() <= 0) {
+                groupTrack.setUnweanQty(0);
+            }
+            groupTrack.setUnweanQty(groupTrack.getUnweanQty() - change.getQuantity());
+        }
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像

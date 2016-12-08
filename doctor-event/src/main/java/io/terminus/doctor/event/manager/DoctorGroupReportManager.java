@@ -41,28 +41,20 @@ public class DoctorGroupReportManager {
      * @param pigType 猪类
      * @return 猪群跟踪
      */
-    public DoctorGroupTrack updateFarrowGroupTrack(DoctorGroupTrack groupTrack, Integer pigType) {
+    public DoctorGroupTrack updateGroupTrackReport(DoctorGroupTrack groupTrack, Integer pigType) {
         if (!PigType.FARROW_TYPES.contains(pigType)) {
             return groupTrack;
         }
 
-        double weanWeight = 0D;
-        double birthWeight = 0D;
-        int farrowQty = 0;
         int weakQty = 0;
         int unWeanQty = 0;
-        int weanQty = 0;
         int unqQty = 0;
 
         List<DoctorPigTrack> pigTracks = doctorPigTrackDao.findFeedSowTrackByGroupId(groupTrack.getGroupId());
         for (DoctorPigTrack pigTrack : pigTracks) {
             Map<String, Object> extraMap = pigTrack.getExtraMap();
-            weanWeight += MoreObjects.firstNonNull(pigTrack.getWeanAvgWeight(), 0D) * MoreObjects.firstNonNull(pigTrack.getWeanQty(), 0);
-            birthWeight += MoreObjects.firstNonNull(pigTrack.getFarrowAvgWeight(), 0D) * MoreObjects.firstNonNull(pigTrack.getFarrowQty(), 0);
-            farrowQty += MoreObjects.firstNonNull(pigTrack.getFarrowQty(), 0);
             weakQty += getIntFromExtra(extraMap, "weakCount");
             unWeanQty += MoreObjects.firstNonNull(pigTrack.getUnweanQty(), 0);
-            weanQty += MoreObjects.firstNonNull(pigTrack.getWeanQty(), 0);
             unqQty += getIntFromExtra(extraMap, "qualifiedCount");
         }
 

@@ -178,7 +178,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
         groupTrack.setExtraEntity(extra);
 
-        groupTrack = doctorGroupReportManager.updateFarrowGroupTrack(groupTrack, event.getPigType());
         doctorGroupTrackDao.update(groupTrack);
     }
 

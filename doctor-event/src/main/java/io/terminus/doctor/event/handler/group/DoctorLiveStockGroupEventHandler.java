@@ -53,7 +53,9 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
         //2.创建猪只存栏事件
         DoctorGroupEvent<DoctorLiveStockGroupEvent> event = dozerGroupEvent(group, GroupEventType.LIVE_STOCK, liveStock);
         event.setQuantity(groupTrack.getQuantity());  //猪群存栏数量 = 猪群数量
-        event.setAvgDayAge(groupTrack.getAvgDayAge());
+
+
+
         event.setAvgWeight(liveStock.getAvgWeight());
         event.setWeight(event.getQuantity() * event.getAvgWeight()); // 总活体重 = 数量 * 均重
         event.setExtraMap(liveStockEvent);

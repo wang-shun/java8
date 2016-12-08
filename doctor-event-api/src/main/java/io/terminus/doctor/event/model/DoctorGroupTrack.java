@@ -117,7 +117,7 @@ public class DoctorGroupTrack implements Serializable {
     private Integer quaQty;
 
     /**
-     * 不合格数(分娩时累加)
+     * 不合格数
      */
     private Integer unqQty;
 

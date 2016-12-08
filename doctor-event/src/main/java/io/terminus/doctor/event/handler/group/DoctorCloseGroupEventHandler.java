@@ -63,12 +63,15 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //2.创建关闭猪群事件
         DoctorGroupEvent<DoctorCloseGroupEvent> event = dozerGroupEvent(group, GroupEventType.CLOSE, close);
+
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        int dayAge = getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays);
+        event.setAvgDayAge(dayAge);  //重算日龄
         event.setExtraMap(closeEvent);
         doctorGroupEventDao.create(event);
 
         //3.更新猪群跟踪, 日龄是事件发生时的日龄
-        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        groupTrack.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));
+        groupTrack.setAvgDayAge(dayAge);
         updateGroupTrack(groupTrack, event);
 
         //4.猪群状态改为关闭

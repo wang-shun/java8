@@ -237,7 +237,7 @@ public class DoctorMoveDataService {
 
             DoctorGroupTrack updateTrack = new DoctorGroupTrack();
             updateTrack.setId(groupTrack.getId());
-            doctorGroupTrackDao.update(doctorGroupReportManager.updateFarrowGroupTrack(groupTrack, group.getPigType()));
+            doctorGroupTrackDao.update(doctorGroupReportManager.updateGroupTrackReport(groupTrack, group.getPigType()));
         });
     }
 
@@ -2225,7 +2225,7 @@ public class DoctorMoveDataService {
         groupTrack.setRelEventId(lastEvent == null ? null : lastEvent.getId());
 
         //更新产房仔猪
-        return doctorGroupReportManager.updateFarrowGroupTrack(groupTrack, group.getPigType());
+        return doctorGroupReportManager.updateGroupTrackReport(groupTrack, group.getPigType());
     }
 
     //关闭猪群的猪群跟踪

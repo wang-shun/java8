@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -82,7 +84,10 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         //2.创建转场事件
         DoctorGroupEvent<DoctorTransFarmGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_FARM, transFarm);
         event.setQuantity(transFarm.getQuantity());
-        event.setAvgDayAge(groupTrack.getAvgDayAge());  //转群的日龄不需要录入, 直接取猪群的日龄
+
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
+
         event.setWeight(transFarm.getWeight());
         event.setAvgWeight(EventUtil.getAvgWeight(transFarm.getWeight(), transFarm.getQuantity()));
         event.setTransGroupType(DoctorGroupEvent.TransGroupType.OUT.getValue());   //转场肯定是外转

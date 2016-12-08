@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.group;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -86,7 +88,10 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         //2.创建转群事件
         DoctorGroupEvent<DoctorTransGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
         event.setQuantity(transGroup.getQuantity());
-        event.setAvgDayAge(groupTrack.getAvgDayAge());  //转群的日龄不需要录入, 直接取猪群的日龄 // TODO: 2016/12/5 日龄重新计算
+
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
+
         event.setAvgWeight(transGroup.getAvgWeight());  //均重
         event.setWeight(realWeight);                    //总重
         event.setTransGroupType(getTransType(null, group.getPigType(), toBarn).getValue());   //区别内转还是外转(null是因为不用判断转入类型)
@@ -106,6 +111,14 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         boarQty = boarQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : boarQty;
         groupTrack.setBoarQty(boarQty < 0 ? 0 : boarQty);
         groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
+
+        //如果是母猪触发的转群事件，窝数-1，活仔，健仔数累减
+        if (transGroup.isSowEvent()) {
+            groupTrack.setNest(EventUtil.plusInt(groupTrack.getNest(), -1));
+            groupTrack.setLiveQty(EventUtil.plusInt(groupTrack.getLiveQty(), -transGroup.getQuantity()));
+            groupTrack.setHealthyQty(EventUtil.plusInt(groupTrack.getHealthyQty(), -transGroup.getQuantity()));
+            groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), -transGroup.getQuantity()));
+        }
 
         updateGroupTrack(groupTrack, event);
 

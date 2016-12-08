@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -17,6 +18,8 @@ import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 /**
  * Desc: 疾病事件处理器
@@ -53,6 +56,10 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
 
         //2.创建疾病事件
         DoctorGroupEvent<DoctorDiseaseGroupEvent> event = dozerGroupEvent(group, GroupEventType.DISEASE, disease);
+
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
+
         event.setQuantity(disease.getQuantity());
         event.setExtraMap(diseaseEvent);
         doctorGroupEventDao.create(event);

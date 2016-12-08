@@ -21,7 +21,6 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -97,7 +96,18 @@ public class DoctorGroupManager {
         int age = DateUtil.getDeltaDaysAbs(groupTrack.getBirthDate(), new Date());
         groupTrack.setAvgDayAge(age + 1);             //日龄
 
-        groupTrack.setSex(EventUtil.getSex(groupTrack.getBoarQty(), groupTrack.getSowQty()));
+        groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
+        groupTrack.setWeanWeight(0D);
+        groupTrack.setBirthWeight(0D);
+        groupTrack.setNest(0);
+        groupTrack.setLiveQty(0);
+        groupTrack.setHealthyQty(0);
+        groupTrack.setWeakQty(0);
+        groupTrack.setWeanQty(0);
+        groupTrack.setWeanWeight(0D);
+        groupTrack.setUnweanQty(0);
+        groupTrack.setQuaQty(0);
+        groupTrack.setUnqQty(0);
         doctorGroupTrackDao.create(groupTrack);
 
         //4. 创建猪群镜像

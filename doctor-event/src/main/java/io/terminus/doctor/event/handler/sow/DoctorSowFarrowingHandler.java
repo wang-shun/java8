@@ -80,7 +80,6 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
             doctorPigEvent.setPregDays(Math.abs(Days.daysBetween(farrowingDate, mattingDate).getDays()));
         }
 
-
         //分娩窝重
         doctorPigEvent.setFarrowWeight(Doubles.tryParse(Objects.toString(extra.get("birthNestAvg"))));
         //分娩仔猪只数信息
@@ -173,7 +172,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setCreatorId(basic.getStaffId());
         input.setCreatorName(basic.getStaffName());
 
-        input.setFarrow(true);  //设置为分娩转入
+        input.setSowEvent(true);  //设置为分娩转入
         input.setWeakQty(Ints.tryParse(Objects.toString(extra.get("weakCount"))));
         input.setHealthyQty(Ints.tryParse(Objects.toString(extra.get("healthCount"))));
 
@@ -213,9 +212,5 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
             firstMate.setIsDelivery(1);
             doctorPigEventDao.update(firstMate);
         }
-
-        //触发一下修改猪群的事件
-        Integer pigType = doctorBarnDao.findById(farrowBarnId).getPigType();
-        updateFarrowGroupTrack(doctorPigTrack.getGroupId(), pigType);  //分娩之后才会有groupId, 所以取track里的groupId
     }
 }
