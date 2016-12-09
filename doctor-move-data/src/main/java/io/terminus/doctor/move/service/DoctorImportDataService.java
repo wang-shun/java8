@@ -53,6 +53,8 @@ import io.terminus.doctor.move.util.ImportExcelUtils;
 import io.terminus.doctor.msg.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
+import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
+import io.terminus.doctor.user.dao.DoctorServiceStatusDao;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.SubDao;
@@ -63,6 +65,8 @@ import io.terminus.doctor.user.interfaces.model.UserDto;
 import io.terminus.doctor.user.manager.UserInterfaceManager;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.model.DoctorServiceReview;
+import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.Sub;
@@ -164,6 +168,10 @@ public class DoctorImportDataService {
     private DoctorWareHouseWriteService doctorWareHouseWriteService;
     @Autowired
     private UserInterfaceManager userInterfaceManager;
+    @Autowired
+    private DoctorServiceStatusDao doctorServiceStatusDao;
+    @Autowired
+    private DoctorServiceReviewDao doctorServiceReviewDao;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -338,47 +346,66 @@ public class DoctorImportDataService {
         }
 
         // 主账号
+        User user;
+        Long userId;
         Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
         if(result.isSuccess() && result.getResult() != null){
             log.warn("primary user has existed, mobile={}", mobile);
-            Long userId = result.getResult().getId();
-            DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
-            if(!permission.getFarmIdsList().contains(farm.getId())){
-                permission.setFarmIds(permission.getFarmIds() + "," + farm.getId());
-                doctorUserDataPermissionDao.update(permission);
-            }
-            return new Object[]{result.getResult(), farm};
+            user = result.getResult();
+            userId = user.getId();
         }else{
-            User user = new User();
+            user = new User();
             user.setMobile(mobile);
             user.setPassword("123456");
             user.setName(loginName);
             user.setStatus(UserStatus.NORMAL.value());
             user.setType(UserType.FARM_ADMIN_PRIMARY.value());
             user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
-            Long userId = RespHelper.or500(userWriteService.create(user));
+            userId = RespHelper.or500(userWriteService.create(user));
             user.setId(userId);
 
             // 把真实姓名存进 user profile
             UserProfile userProfile = userProfileDao.findByUserId(userId);
             userProfile.setRealName(realName);
             userProfileDao.update(userProfile);
+        }
 
-            //初始化服务状态
-            userInitService.initDefaultServiceStatus(userId);
-            //初始化服务的申请审批状态
-            userInitService.initServiceReview(userId, mobile);
-
-            // 主账号的staff
-            this.createStaff(user, org, DoctorStaff.Sex.MALE);
-
+        DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
+        if(permission == null){
             //创建数据权限
-            DoctorUserDataPermission permission = new DoctorUserDataPermission();
+            permission = new DoctorUserDataPermission();
             permission.setUserId(userId);
             permission.setFarmIds(farm.getId().toString());
             doctorUserDataPermissionDao.create(permission);
-            return new Object[]{user, farm};
+        }else if(permission.getFarmIdsList() == null || !permission.getFarmIdsList().contains(farm.getId())){
+            permission.setFarmIds(permission.getFarmIds() + "," + farm.getId());
+            doctorUserDataPermissionDao.update(permission);
         }
+
+        if(doctorStaffDao.findByUserId(userId) == null){
+            // 主账号的staff
+            this.createStaff(user, org, DoctorStaff.Sex.MALE);
+        }
+
+        DoctorServiceStatus serviceStatus = doctorServiceStatusDao.findByUserId(userId);
+        if(serviceStatus == null){
+            //初始化服务状态
+            userInitService.initDefaultServiceStatus(userId);
+        }else{
+            serviceStatus.setPigdoctorStatus(1);
+            doctorServiceStatusDao.update(serviceStatus);
+        }
+
+        DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR);
+        if(review == null){
+            //初始化服务的申请审批状态
+            userInitService.initServiceReview(userId, mobile);
+        }else{
+            review.setStatus(DoctorServiceReview.Status.OK.getValue());
+            doctorServiceReviewDao.update(review);
+        }
+
+        return new Object[]{user, farm};
     }
 
     private void createStaff(User user, DoctorOrg org, DoctorStaff.Sex sex){
