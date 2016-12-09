@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.Date;
 
 /**
@@ -14,6 +15,7 @@ import java.util.Date;
  */
 
 public class EventUtil {
+    private static final DecimalFormat DECIMAL_FMT_2 = new DecimalFormat("0.00");
 
     public static double getWeight(double avgWeight, int quantity) {
         return avgWeight * quantity;
@@ -77,5 +79,9 @@ public class EventUtil {
             return 0L;
         }
         return amount / quantity;
+    }
+
+    public static double get2(double number) {
+        return new BigDecimal(number).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 }

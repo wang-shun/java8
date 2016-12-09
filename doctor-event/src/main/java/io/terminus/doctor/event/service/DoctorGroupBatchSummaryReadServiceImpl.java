@@ -121,15 +121,15 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         summary.setLiveCount(groupTrack.getLiveQty());                               //活仔数
         summary.setHealthCount(groupTrack.getHealthyQty());                          //健仔数
         summary.setWeakCount(groupTrack.getWeakQty());                               //弱仔数
-        summary.setBirthAvgWeight(EventUtil.getAvgWeight(groupTrack.getBirthWeight(), groupTrack.getLiveQty()));//出生均重(kg)
-        summary.setDeadRate(doctorKpiDao.getDeadRateByGroupId(group.getId()));       //死淘率
+        summary.setBirthAvgWeight(EventUtil.get2(EventUtil.getAvgWeight(groupTrack.getBirthWeight(), groupTrack.getLiveQty())));//出生均重(kg)
+        summary.setDeadRate(EventUtil.get2(doctorKpiDao.getDeadRateByGroupId(group.getId())));       //死淘率
         summary.setWeanCount(groupTrack.getWeanQty());                               //断奶数
         summary.setUnqCount(groupTrack.getQuaQty());                                 //注意：合格数(需求变更，只需要合格数了，这里翻一下)
-        summary.setWeanAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeanWeight(), groupTrack.getWeanQty()));  //断奶均重(kg)
+        summary.setWeanAvgWeight(EventUtil.get2(EventUtil.getAvgWeight(groupTrack.getWeanWeight(), groupTrack.getWeanQty())));  //断奶均重(kg)
         summary.setSaleCount(getSaleCount(events));                                  //销售头数
         summary.setSaleAmount(getSaleAmount(events));                                //销售金额(分)
         summary.setInCount(inCount);                                                 //转入数
-        summary.setInAvgWeight(inAvgWeight);                                         //转入均重(kg)
+        summary.setInAvgWeight(EventUtil.get2(inAvgWeight));                                         //转入均重(kg)
 
         Double fcrWeight = getFcrDeltaWeight(events, inCount, inAvgWeight);
         if (fcrFeed == null) {
@@ -137,7 +137,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         } else {
             summary.setFcr(fcrFeed / fcrWeight);
         }
-        summary.setDailyWeightGain(EventUtil.getAvgWeight(fcrWeight, groupTrack.getAvgDayAge() - getFirstMoveInEvent(events)));//日增重(kg)
+        summary.setDailyWeightGain(EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, groupTrack.getAvgDayAge() - getFirstMoveInEvent(events))));//日增重(kg)
         setToNurseryOrFatten(summary, events);                                       //阶段转
 
         // TODO: 16/9/13 上线后再弄
@@ -182,7 +182,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
             
             double toWeight = CountUtil.doubleStream(events, event -> event.getQuantity() * event.getAvgWeight(), 
                     event -> isToNursery(event.getType(), event.getOtherBarnType())).sum();
-            summary.setToNurseryAvgWeight(EventUtil.getAvgWeight(toWeight, summary.getToNurseryCount()));   //转保育均重(kg)
+            summary.setToNurseryAvgWeight(EventUtil.get2(EventUtil.getAvgWeight(toWeight, summary.getToNurseryCount())));   //转保育均重(kg)
         }
 
         //保育猪 => 育肥猪
@@ -192,7 +192,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
 
             double toWeight = CountUtil.doubleStream(events, event -> event.getQuantity() * event.getAvgWeight(),
                     event -> isToFatten(event.getType(), event.getOtherBarnType())).sum();
-            summary.setToFattenAvgWeight(EventUtil.getAvgWeight(toWeight, summary.getToNurseryCount()));    //转育肥均重(kg)
+            summary.setToFattenAvgWeight(EventUtil.get2(EventUtil.getAvgWeight(toWeight, summary.getToNurseryCount())));    //转育肥均重(kg)
         }
     }
     
