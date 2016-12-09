@@ -14,6 +14,7 @@ import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -115,6 +116,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     @Override
     public Response<Long> createNewGroup(DoctorNewGroupInput newGroupInput) {
         try {
+            checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId());
+
             //1.构造猪群信息
             return doctorGroupWriteService.createNewGroup(getNewGroup(newGroupInput), newGroupInput);
         } catch (ServiceException e) {
@@ -122,6 +125,17 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         } catch (Exception e) {
             log.error("create new group failed, newGroupInput:{}, cause:{}", newGroupInput, Throwables.getStackTraceAsString(e));
             return Response.fail("group.event.create.fail");
+        }
+    }
+
+    //产房只能有1个猪群
+    private void checkFarrowGroupUnique(Integer pigType, Long barnId) {
+        if (!Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) {
+            return;
+        }
+        List<DoctorGroup> groups = RespHelper.orServEx(doctorGroupReadService.findGroupByCurrentBarnId(barnId));
+        if (notEmpty(groups)) {
+            throw new ServiceException("farrow.group.exist");
         }
     }
 
