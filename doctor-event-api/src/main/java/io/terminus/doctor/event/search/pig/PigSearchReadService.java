@@ -22,4 +22,11 @@ public interface PigSearchReadService {
      */
     Response<SearchedPigDto> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params);
 
+    /**
+     * 初始化ES搜索索引
+     * @param type 0.所有 1 猪 2 猪群 3 猪舍
+     * @return
+     */
+    Response<Boolean> initIndex(Integer type);
+
 }

@@ -9,6 +9,8 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.search.barn.BarnSearchESInitiator;
+import io.terminus.doctor.event.search.group.GroupSearchESInitiator;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.search.api.Searcher;
 import io.terminus.search.api.model.WithAggregations;
@@ -47,6 +49,13 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
 
     @Autowired
     private DoctorPigReadService doctorPigReadService;
+
+    @Autowired
+    private PigSearchESInitiator pigSearchESInitiator;
+    @Autowired
+    private GroupSearchESInitiator groupSearchESInitiator;
+    @Autowired
+    private BarnSearchESInitiator barnSearchESInitiator;
 
     @Override
     public Response<SearchedPigDto> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params) {
@@ -130,6 +139,33 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
         String key = "checkDate";
         if (map != null && map.get(key) != null) {
             searchedPig.getExtra().put(key, new Date((long)map.get(key)));
+        }
+    }
+
+    public Response<Boolean> initIndex(Integer type){
+        try {
+            switch (type) {
+                case 0:
+                    pigSearchESInitiator.init();
+                    groupSearchESInitiator.init();
+                    barnSearchESInitiator.init();
+                    break;
+                case 1:
+                    pigSearchESInitiator.init();
+                    break;
+                case 2:
+                    groupSearchESInitiator.init();
+                    break;
+                case 3:
+                    barnSearchESInitiator.init();
+                    break;
+                default:
+                    break;
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("init index failed , cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("init.index.failed");
         }
     }
 }

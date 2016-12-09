@@ -62,4 +62,25 @@ public class BarnDumps {
             log.error("barn delta dump failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
     }
+
+    /**
+     * dump 指定时间到现在数据
+     * @param before 指定时间
+     */
+    @RequestMapping(value = "/fullDump", method = RequestMethod.GET)
+    public void fullDump(String before) {
+        try {
+            if(!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("before {}", before);
+            log.info("barn full dump fired");
+            barnSearchDumpService.fullDump(before);
+            log.info("barn full dump end");
+        } catch (Exception e) {
+            log.error("barn full dump failed, cause by {}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
 }

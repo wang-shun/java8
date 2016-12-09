@@ -720,7 +720,7 @@ public class DoctorImportDataService {
 
     //同一胎次的事件id，放到同一个list里
     private void putParityMap(Map<Integer, List<Long>> parityMap, Integer parity, List<Long> eventIds) {
-        List<Long> ids = MoreObjects.firstNonNull(parityMap.get(parity), Lists.newArrayList());
+        List<Long> ids = MoreObjects.firstNonNull(parityMap.get(parity), Lists.<Long>newArrayList());
         ids.addAll(eventIds);
         parityMap.put(parity, ids);
     }
