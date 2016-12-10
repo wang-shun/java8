@@ -248,7 +248,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                         params.put("toGroupCode", getGroupCode(getLong(params, "toGroupId")));
                     }
                     params.put("fcrFeed", RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, groupId, null, null), 0D));
-                    orServEx(doctorGroupWriteService.groupEventTransFarm(groupDetail, map(putBasicFields(params), DoctorTransFarmGroupInput.class)));
+                    DoctorTransFarmGroupInput input = map(putBasicFields(params), DoctorTransFarmGroupInput.class);
+                    input.setAvgWeight(input.getWeight() / input.getQuantity());
+                    orServEx(doctorGroupWriteService.groupEventTransFarm(groupDetail, input));
                     break;
                 case CLOSE:
                     orServEx(doctorGroupWriteService.groupEventClose(groupDetail, map(putBasicFields(params), DoctorCloseGroupInput.class)));
