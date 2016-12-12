@@ -582,9 +582,20 @@ public class DoctorImportDataService {
             groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
             groupTrack.setAvgDayAge(dayAge);
             groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge()).toDate());
-            groupTrack.setWeakQty(0);
-            groupTrack.setUnweanQty(0);
-            groupTrack.setUnqQty(0);
+            groupTrack.setBirthWeight(ImportExcelUtils.getDoubleOrDefault(row, 5, 0) * groupTrack.getQuantity());
+
+            //产房仔猪的批次总结字段
+            if (PigType.FARROW_TYPES.contains(group.getPigType())) {
+                groupTrack.setWeanWeight(groupTrack.getBirthWeight());
+                groupTrack.setNest(0);
+                groupTrack.setLiveQty(groupTrack.getQuantity());
+                groupTrack.setHealthyQty(groupTrack.getQuantity());
+                groupTrack.setWeakQty(0);
+                groupTrack.setUnweanQty(0);
+                groupTrack.setUnqQty(0);
+                groupTrack.setWeanQty(groupTrack.getQuantity());    //默认全部断奶
+                groupTrack.setQuaQty(groupTrack.getQuantity());
+            }
             doctorGroupTrackDao.create(groupTrack);
         }
     }
