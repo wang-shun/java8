@@ -121,6 +121,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
             groupTrack.setLiveQty(EventUtil.plusInt(groupTrack.getLiveQty(), -transGroup.getQuantity()));
             groupTrack.setHealthyQty(groupTrack.getLiveQty() - MoreObjects.firstNonNull(groupTrack.getWeakQty(), 0));
             groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), -transGroup.getQuantity()));
+            groupTrack.setBirthWeight(EventUtil.plusDouble(groupTrack.getBirthWeight(), -realWeight));
         }
 
         updateGroupTrack(groupTrack, event);
