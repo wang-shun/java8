@@ -317,10 +317,6 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                 if (checkFixedDate(warn, vaccDate)) {
                     getGroupMessage(groupInfo, ruleRole, sUsers, rule.getUrl(), warn, vaccDate);
                 }
-                // 3. 固定体重
-                if (checkFixedWeight(warn, vaccDate, groupTrack.getAvgWeight(), null)) {
-                    getGroupMessage(groupInfo, ruleRole, sUsers, rule.getUrl(), warn, vaccDate);
-                }
                 // 4. 转群
                 if (checkChangeGroup(warn, vaccDate, getChangeGroupDate(groupTrack))) {
                     getGroupMessage(groupInfo, ruleRole, sUsers, rule.getUrl(), warn, vaccDate);

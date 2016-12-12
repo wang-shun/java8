@@ -239,7 +239,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
     }
 
-    //发布猪群猪舍事件
+    //发布猪群猪舍事件(不发统计事件了，事务里套事务，事件区分不开，改成同步统计)
     protected void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
         doctorGroupEventListener.handleGroupEvent(ListenedGroupEvent.builder()
                 .doctorGroupEventId(eventId)

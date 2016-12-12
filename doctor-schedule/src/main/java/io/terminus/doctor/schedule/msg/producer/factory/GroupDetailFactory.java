@@ -37,7 +37,6 @@ public class GroupDetailFactory {
         jsonData.put("pigType", group.getPigType());
         jsonData.put("quantity", track.getQuantity());
         jsonData.put("avgDayAge", track.getAvgDayAge());
-        jsonData.put("avgWeight", track.getAvgWeight());
         jsonData.put("url", url);
         if (track.getQuantity() != null){
             jsonData.put("quantity", track.getQuantity());
