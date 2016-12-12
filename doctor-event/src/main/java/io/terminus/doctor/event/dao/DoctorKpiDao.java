@@ -34,6 +34,13 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 获取某一猪群的死淘率
+     */
+    public double getDeadRateByGroupId(Long groupId) {
+        return sqlSession.selectOne(sqlId("getDeadRateByGroupId"), groupId);
+    }
+
+    /**
      * 预产胎数
      */
     public int getPreDelivery(Long farmId, Date startAt, Date endAt) {

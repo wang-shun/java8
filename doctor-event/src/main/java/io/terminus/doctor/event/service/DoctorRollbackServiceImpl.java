@@ -11,7 +11,6 @@ import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
@@ -54,7 +53,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     private final GroupSearchWriteService groupSearchWriteService;
     private final BarnSearchWriteService barnSearchWriteService;
     private final DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
-    private final DailyReport2UpdateDao dailyReport2UpdateDao;
     private final DoctorKpiDao doctorKpiDao;
     private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     private final DoctorRollbackManager doctorRollbackManager;
@@ -67,7 +65,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                                      GroupSearchWriteService groupSearchWriteService,
                                      BarnSearchWriteService barnSearchWriteService,
                                      DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao,
-                                     DailyReport2UpdateDao dailyReport2UpdateDao,
                                      DoctorKpiDao doctorKpiDao,
                                      DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
                                      DoctorRollbackManager doctorRollbackManager,
@@ -78,7 +75,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         this.groupSearchWriteService = groupSearchWriteService;
         this.barnSearchWriteService = barnSearchWriteService;
         this.doctorGroupBatchSummaryDao = doctorGroupBatchSummaryDao;
-        this.dailyReport2UpdateDao = dailyReport2UpdateDao;
         this.doctorKpiDao = doctorKpiDao;
         this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
         this.doctorRollbackManager = doctorRollbackManager;

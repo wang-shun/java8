@@ -2,13 +2,6 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorAntiepidemicGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorChangeGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorDiseaseGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorLiveStockGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorMoveInGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorNewGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorTransEdit;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -114,69 +107,6 @@ public interface DoctorGroupWriteService {
      * @return 是否成功
      */
     Response<Boolean> groupEventTurnSeed(DoctorGroupDetail groupDetail, @Valid DoctorTurnSeedGroupInput turnSeed);
-
-    /**
-     * 编辑新建猪群事件
-     * @param groupDetail 猪群明细
-     * @param event 猪群事件
-     * @param newEdit 编辑的信息
-     * @return 是否成功
-     */
-    Response<Boolean> editEventNew(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorNewGroupEdit newEdit);
-    /**
-
-     * 编辑猪群防疫事件
-     * @param groupDetail 猪群明细
-     * @param event 猪群事件
-     * @param antiepidemic 编辑的信息
-     * @return 是否成功
-     */
-    Response<Boolean> editEventAntiepidemic(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorAntiepidemicGroupEdit antiepidemic);
-
-    /**
-     * 编辑猪群变动事件
-     * @param groupDetail 猪群明细
-     * @param event 猪群事件
-     * @param change 编辑的信息
-     * @return 是否成功
-     */
-    Response<Boolean> editEventChange(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorChangeGroupEdit change);
-
-    /**
-     * 编辑猪群疾病事件
-     * @param groupDetail 猪群明细
-     * @param event 猪群事件
-     * @param disease 编辑的信息
-     * @return 是否成功
-     */
-    Response<Boolean> editEventDisease(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorDiseaseGroupEdit disease);
-
-    /**
-     * 编辑猪群存栏事件
-     * @param groupDetail 猪群明细
-     * @param event 猪群事件
-     * @param liveStock 编辑的信息
-     * @return 是否成功
-     */
-    Response<Boolean> editEventLiveStock(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorLiveStockGroupEdit liveStock);
-
-    /**
-     * 编辑猪群转入事件
-     * @param groupDetail 猪群明细
-     * @param event 猪群事件
-     * @param moveIn 编辑的信息
-     * @return 是否成功
-     */
-    Response<Boolean> editEventMoveIn(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorMoveInGroupEdit moveIn);
-
-    /**
-     * 编辑猪群转群/转场事件
-     * @param groupDetail 猪群明细
-     * @param event 猪群事件
-     * @param trans 编辑的信息
-     * @return 是否成功
-     */
-    Response<Boolean> editEventTrans(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorTransEdit trans);
 
     /**
      * 回滚猪群事件, 回滚规则: 自动生成的事件不可回滚, 不是最新录入的事件需要先回滚上层事件后再回滚

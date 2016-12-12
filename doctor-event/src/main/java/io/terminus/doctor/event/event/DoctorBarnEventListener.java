@@ -24,7 +24,7 @@ public class DoctorBarnEventListener implements EventListener{
      * @param event
      */
     @Subscribe
-    public void DoctorBarnEventListener(ListenedBarnEvent event){
+    public void doctorBarnEventListener(ListenedBarnEvent event){
         log.info("[DoctorBarnEventListener] -> handle.barn.event, event -> {}", event);
         RespHelper.orServEx(barnSearchWriteService.update(event.getBarnId()));
     }

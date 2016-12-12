@@ -101,6 +101,16 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     @Min(value = 0L, message = "amount.gt.0")
     private Long amount;
 
+    /**
+     * 健仔数
+     */
+    private Integer healthyQty;
+
+    /**
+     * 弱仔数
+     */
+    private Integer weakQty;
+
     @Override
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();

@@ -27,6 +27,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +44,7 @@ import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
  * Email:yaoqj@terminus.io
  * Descirbe:
  */
+@Slf4j
 @Component
 public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
@@ -90,6 +92,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         // 来源和前往都是 1 和 7 时, 仔猪也要跟着转群
         if(PigType.FARROW_TYPES.contains(fromBarn.getPigType()) && PigType.FARROW_TYPES.contains(toBarn.getPigType())
                 && doctorPigTrack.getGroupId() != null){
+            log.info("this is a buru sow trans barn event!");
             Long groupId = pigletTrans(doctorPigTrack, basic, extra, toBarn, pigEventId);
             extraMap.put("farrowingPigletGroupId", groupId);
             doctorPigTrack.setExtraMap(extraMap);
@@ -141,6 +144,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         input.setBreedId(fromGroup.getGroup().getBreedId());
         input.setBreedName(fromGroup.getGroup().getBreedName());
         input.setSource(PigSource.LOCAL.getKey());
+        input.setSowEvent(true);    //由母猪触发的猪群事件
 
         //未断奶的数量 = 总 - 断奶
         input.setQuantity(pigTrack.getUnweanQty());

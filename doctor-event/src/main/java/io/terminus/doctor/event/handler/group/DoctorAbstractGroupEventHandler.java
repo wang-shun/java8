@@ -15,23 +15,21 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
-import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.event.DoctorBarnEventListener;
+import io.terminus.doctor.event.event.DoctorGroupEventListener;
 import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
-import io.terminus.doctor.event.manager.DoctorGroupReportManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.event.util.EventUtil;
-import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -80,10 +78,10 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private DoctorGroupDao doctorGroupDao;
 
     @Autowired
-    private DoctorGroupReportManager doctorGroupReportManager;
+    private DoctorGroupEventListener doctorGroupEventListener;
 
-    @Autowired(required = false)
-    private Publisher publisher;
+    @Autowired
+    private DoctorBarnEventListener doctorBarnEventListener;
 
     @Autowired
     public DoctorAbstractGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -103,11 +101,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         handleEvent(group, groupTrack, input);
     }
 
-    @Override
-    public <E extends BaseGroupEdit> void edit(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-        editEvent(group, groupTrack, event, edit);
-    }
-
     /**
      * 处理事件的抽象方法, 由继承的子类去实现
      * @param group       猪群
@@ -116,16 +109,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
      * @param <I>         规定输入上界
      */
     protected abstract <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input);
-
-    /**
-     * 编辑事件的抽象方法, 由继承的子类去实现
-     * @param group       猪群
-     * @param groupTrack  猪群跟踪
-     * @param event       猪群事件
-     * @param edit        编辑信息
-     * @param <E>         规定输入上界
-     */
-    protected abstract <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit);
 
     //转换下猪群基本数据
     protected DoctorGroupEvent dozerGroupEvent(DoctorGroup group, GroupEventType eventType, BaseGroupInput baseInput) {
@@ -162,7 +145,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         groupTrack.setRelEventId(event.getId());    //关联此次的事件id
         groupTrack.setUpdatorId(event.getCreatorId());
         groupTrack.setUpdatorName(event.getCreatorName());
-        groupTrack.setSex(EventUtil.getSex(groupTrack.getBoarQty(), groupTrack.getSowQty()));
+        groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
 
         DoctorGroupTrack.Extra extra = groupTrack.getExtraEntity();
         switch (GroupEventType.from(event.getType())) {
@@ -198,7 +181,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
         groupTrack.setExtraEntity(extra);
 
-        groupTrack =  doctorGroupReportManager.updateFarrowGroupTrack(groupTrack, event.getPigType());
         doctorGroupTrackDao.update(groupTrack);
     }
 
@@ -241,21 +223,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         return groupSnapshot;
     }
 
-    //更新猪群事件
-    protected <E extends BaseGroupEdit> void editGroupEvent(DoctorGroupEvent event, E edit) {
-        event.setRemark(edit.getRemark());
-        event.setUpdatorId(edit.getUpdatorId());
-        event.setUpdatorName(edit.getUpdatorName());
-        doctorGroupEventDao.update(event);
-    }
-
-    //更新猪群跟踪
-    protected void editGroupSnapShot(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event) {
-        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(event.getId());
-        snapshot.setToInfo(JSON_MAPPER.toJson(new DoctorGroupSnapShotInfo(group, event, groupTrack)));
-        doctorGroupSnapshotDao.update(snapshot);
-    }
-
     //校验数量
     protected static void checkQuantity(Integer max, Integer actual) {
         if (actual > max) {
@@ -272,23 +239,15 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
     }
 
-    //发布猪群猪舍事件
+    //发布猪群猪舍事件(不发统计事件了，事务里套事务，事件区分不开，改成同步统计)
     protected void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
-        publishZookeeperEvent(ListenedGroupEvent.builder().doctorGroupEventId(eventId).farmId(farmId).orgId(orgId).groupId(groupId).build());
-        publishZookeeperEvent(ListenedBarnEvent.builder().barnId(barnId).build());
-    }
-
-    //发布zk事件, 用于更新es索引
-    private <T> void publishZookeeperEvent(T data){
-//        if(notNull(publisher)) {
-//            try {
-//                publisher.publish(DataEvent.toBytes(eventType, data));
-//            } catch (Exception e) {
-//                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
-//            }
-//        } else {
-        coreEventDispatcher.publish(data);
-        //}
+        doctorGroupEventListener.handleGroupEvent(ListenedGroupEvent.builder()
+                .doctorGroupEventId(eventId)
+                .orgId(orgId)
+                .farmId(farmId)
+                .groupId(groupId)
+                .build());
+        doctorBarnEventListener.doctorBarnEventListener(ListenedBarnEvent.builder().barnId(barnId).build());
     }
 
     //品种校验, 如果猪群的品种已经确定, 那么录入的品种必须和猪群的品种一致
@@ -396,7 +355,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         return RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId));
     }
 
-    //校验产房仔猪未断奶数量，如果还有未断奶的仔猪，转群/变动数量要限制
+    //校验产房0仔猪未断奶数量，如果还有未断奶的仔猪，转群/变动数量要限制
     protected void checkUnweanTrans(Integer pigType, Integer toType, DoctorGroupTrack groupTrack, Integer eventQty) {
         if (!Objects.equals(pigType, PigType.DELIVER_SOW.getValue()) || Objects.equals(pigType, toType)) {
             return;
@@ -405,5 +364,13 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         if (eventQty > (groupTrack.getQuantity() - unwean)) {
             throw new ServiceException("group.has.unwean");
         }
+    }
+    //获取事件发生时，猪群的日龄
+    protected static int getGroupEventAge(int groupAge, int deltaDays) {
+        int eventAge = groupAge - deltaDays;
+        if (eventAge <= 0) {
+            throw new ServiceException("day.age.error");
+        }
+        return eventAge;
     }
 }

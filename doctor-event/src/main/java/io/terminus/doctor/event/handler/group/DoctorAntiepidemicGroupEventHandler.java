@@ -2,13 +2,12 @@ package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
-import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorAntiepidemicGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -19,6 +18,8 @@ import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 /**
  * Desc: 防疫事件处理器
@@ -54,6 +55,10 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
         //2.创建防疫事件
         DoctorGroupEvent<DoctorAntiepidemicGroupEvent> event = dozerGroupEvent(group, GroupEventType.ANTIEPIDEMIC, antiepidemic);
+
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
+
         event.setQuantity(antiepidemic.getQuantity());
         event.setExtraMap(antiEvent);
         doctorGroupEventDao.create(event);
@@ -63,23 +68,5 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.ANTIEPIDEMIC);
-    }
-
-    @Override
-    protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-        DoctorAntiepidemicGroupEdit antiEdit = (DoctorAntiepidemicGroupEdit) edit;
-
-        //更新字段
-        DoctorAntiepidemicGroupEvent antiEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorAntiepidemicGroupEvent.class);
-        antiEvent.setVaccinResult(antiEdit.getVaccinResult());
-        antiEvent.setVaccinItemId(antiEdit.getVaccinItemId());
-        antiEvent.setVaccinItemName(antiEdit.getVaccinItemName());
-        antiEvent.setVaccinStaffId(antiEdit.getVaccinStaffId());
-        antiEvent.setVaccinStaffName(antiEdit.getVaccinStaffName());
-
-        event.setExtraMap(antiEvent);
-        editGroupEvent(event, edit);
-        //更新猪群镜像
-        editGroupSnapShot(group, groupTrack, event);
     }
 }
