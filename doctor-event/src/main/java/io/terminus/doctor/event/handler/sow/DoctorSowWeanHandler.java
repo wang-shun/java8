@@ -127,12 +127,13 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
     protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, Long farrowGroupId, Long farrowBarnId) {
         //触发一下修改猪群的事件
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(farrowGroupId);
-        if (groupTrack!= null) {
+        if (groupTrack != null) {
             groupTrack.setQuaQty(EventUtil.plusInt(groupTrack.getQuaQty(), doctorPigEvent.getHealthCount()));
             groupTrack.setUnqQty(EventUtil.plusInt(groupTrack.getUnqQty(), doctorPigEvent.getWeakCount()));
             groupTrack.setWeanQty(EventUtil.plusInt(groupTrack.getWeanQty(), doctorPigEvent.getWeanCount()));
             groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), -doctorPigEvent.getWeanCount()));
             groupTrack.setWeanWeight(EventUtil.plusDouble(groupTrack.getWeanWeight(), doctorPigEvent.getWeanAvgWeight() * doctorPigEvent.getWeanCount()));
+            doctorGroupTrackDao.update(groupTrack);
         }
     }
 }
