@@ -19,10 +19,11 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.event.DoctorBarnEventListener;
+import io.terminus.doctor.event.event.DoctorGroupEventListener;
 import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
-import io.terminus.doctor.event.manager.DoctorGroupReportManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -77,7 +78,10 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private DoctorGroupDao doctorGroupDao;
 
     @Autowired
-    private DoctorGroupReportManager doctorGroupReportManager;
+    private DoctorGroupEventListener doctorGroupEventListener;
+
+    @Autowired
+    private DoctorBarnEventListener doctorBarnEventListener;
 
     @Autowired
     public DoctorAbstractGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -237,14 +241,13 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //发布猪群猪舍事件
     protected void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
-        coreEventDispatcher.publish(ListenedGroupEvent.builder()
+        doctorGroupEventListener.handleGroupEvent(ListenedGroupEvent.builder()
                 .doctorGroupEventId(eventId)
-                .farmId(farmId)
                 .orgId(orgId)
+                .farmId(farmId)
                 .groupId(groupId)
                 .build());
-
-        coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barnId).build());
+        doctorBarnEventListener.doctorBarnEventListener(ListenedBarnEvent.builder().barnId(barnId).build());
     }
 
     //品种校验, 如果猪群的品种已经确定, 那么录入的品种必须和猪群的品种一致
