@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
@@ -118,7 +119,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         if (transGroup.isSowEvent()) {
             groupTrack.setNest(EventUtil.plusInt(groupTrack.getNest(), -1));
             groupTrack.setLiveQty(EventUtil.plusInt(groupTrack.getLiveQty(), -transGroup.getQuantity()));
-            groupTrack.setHealthyQty(EventUtil.plusInt(groupTrack.getHealthyQty(), -transGroup.getQuantity()));
+            groupTrack.setHealthyQty(groupTrack.getLiveQty() - MoreObjects.firstNonNull(groupTrack.getWeakQty(), 0));
             groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), -transGroup.getQuantity()));
         }
 

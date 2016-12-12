@@ -100,8 +100,8 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         if (moveIn.isSowEvent()) {
             groupTrack.setNest(EventUtil.plusInt(groupTrack.getNest(), 1));  //窝数加 1
             groupTrack.setLiveQty(EventUtil.plusInt(groupTrack.getLiveQty(), moveIn.getQuantity()));
-            groupTrack.setHealthyQty(EventUtil.plusInt(groupTrack.getHealthyQty(), moveIn.getHealthyQty()));
             groupTrack.setWeakQty(EventUtil.plusInt(groupTrack.getWeakQty(), moveIn.getWeakQty()));
+            groupTrack.setHealthyQty(groupTrack.getLiveQty() - groupTrack.getWeakQty());    //健仔数 = 活仔数 - 弱仔数
             groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), moveIn.getQuantity()));    //分娩时，未断奶数累加
             groupTrack.setBirthWeight(EventUtil.plusDouble(groupTrack.getBirthWeight(), moveIn.getAvgWeight() * moveIn.getQuantity()));
         }
