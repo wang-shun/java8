@@ -160,6 +160,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
         doctorChangeGroupInput.setCreatorId(basic.getStaffId());
         doctorChangeGroupInput.setCreatorName(basic.getStaffName());
         doctorChangeGroupInput.setRelPigEventId(pigEventId);        //猪事件id
+        doctorChangeGroupInput.setSowEvent(true);   //母猪触发的变动事件
         return doctorChangeGroupInput;
     }
 }

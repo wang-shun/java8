@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.event;
 
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
@@ -47,6 +48,7 @@ public class DoctorGroupEventListener implements EventListener {
     @Autowired
     private DoctorDailyReportCache doctorDailyReportCache;
 
+    @AllowConcurrentEvents
     @Subscribe
     public void handleGroupEvent(ListenedGroupEvent groupEvent) {
         log.info("[DoctorGroupEventListener]-> handle.group.event, groupEvent -> {}", groupEvent);

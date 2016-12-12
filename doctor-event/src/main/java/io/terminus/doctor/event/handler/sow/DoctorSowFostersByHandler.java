@@ -102,7 +102,6 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
         Long fromGroupId = fromSowTrack.getGroupId();
 
         //被拼窝的数据extra
-        Map<String, Object> toSowTrackMap = JSON_MAPPER.fromJson(doctorPigTrack.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
         Long toGroupId = doctorPigTrack.getGroupId();
         String toGroupCode = RespHelper.orServEx(doctorGroupReadService.findGroupById(toGroupId)).getGroupCode();
 

@@ -5,14 +5,13 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorChangeGroupEvent;
-import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorChangeGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -25,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -40,7 +40,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
-    private final DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
     public DoctorChangeGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -52,7 +51,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
-        this.doctorGroupTrackDao = doctorGroupTrackDao;
     }
 
     @Override
@@ -62,7 +60,12 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
-        //checkUnweanTrans(group.getPigType(), null, groupTrack, change.getQuantity());
+
+        //非母猪触发事件
+        if (!input.isSowEvent()) {
+            checkUnweanTrans(group.getPigType(), null, groupTrack, change.getQuantity());
+        }
+
         if(Objects.equals(group.getPigType(), PigType.NURSERY_PIGLET.getValue())){
             checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getBaseWeight(), change.getOverPrice());
         }
@@ -73,7 +76,10 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         //2.创建猪群变动事件
         DoctorGroupEvent<DoctorChangeGroupEvent> event = dozerGroupEvent(group, GroupEventType.CHANGE, change);
         event.setQuantity(change.getQuantity());
-        event.setAvgDayAge(groupTrack.getAvgDayAge());  //变动的日龄不需要录入, 直接取猪群的日龄
+
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
+
         event.setWeight(change.getWeight());            //总重
         event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
         event.setChangeTypeId(changeEvent.getChangeTypeId());   //变动类型id
@@ -95,7 +101,14 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         boarQty = boarQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : boarQty;
         groupTrack.setBoarQty(boarQty < 0 ? 0 : boarQty);
         groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
-        groupTrack.setSaleQty(Objects.equals(DoctorBasicEnums.SALE.getId(), change.getChangeTypeId()) ? change.getQuantity() : 0);  //直接判断是否是销售
+
+        //母猪触发的变动，要减掉未断奶数
+        if (change.isSowEvent()) {
+            if (groupTrack.getUnweanQty() == null || groupTrack.getUnweanQty() <= 0) {
+                groupTrack.setUnweanQty(0);
+            }
+            groupTrack.setUnweanQty(groupTrack.getUnweanQty() - change.getQuantity());
+        }
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
@@ -103,55 +116,11 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         //5.判断变动数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, change.getQuantity())) {
-            doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt(), change.getFcrFeed());
-            doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, change);
+            doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, change, event.getEventAt(), change.getFcrFeed());
         }
 
         //发布统计事件
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
-    }
-
-    @Override
-    protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-        DoctorChangeGroupEdit changeEdit = (DoctorChangeGroupEdit) edit;
-        checkQuantityEqual(event.getQuantity(), changeEdit.getBoarQty(), changeEdit.getSowQty());
-
-        DoctorChangeGroupEvent changeEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorChangeGroupEvent.class);
-
-        //更新track(如果相关字段没有变动, 就不改了)
-        if (!Objects.equals(event.getWeight(), changeEdit.getWeight())) {
-            groupTrack.setWeight(groupTrack.getWeight() + event.getWeight() - changeEdit.getWeight());
-            groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
-        }
-        if (changeEdit.getAmount() != null) {
-            groupTrack.setAmount(groupTrack.getAmount() + MoreObjects.firstNonNull(changeEvent.getAmount(), 0L) - changeEdit.getAmount());
-            groupTrack.setPrice(EventUtil.getPrice(groupTrack.getAmount(), groupTrack.getQuantity()));
-        }
-        if (!Objects.equals(changeEdit.getBoarQty(), changeEvent.getBoarQty())) {
-            groupTrack.setBoarQty(groupTrack.getBoarQty() + changeEvent.getBoarQty() - changeEdit.getBoarQty());
-            groupTrack.setSowQty(groupTrack.getSowQty() + changeEvent.getSowQty() - changeEdit.getSowQty());
-        }
-        doctorGroupTrackDao.update(groupTrack);
-
-        //更新事件字段
-        changeEvent.setChangeReasonId(changeEdit.getChangeReasonId());
-        changeEvent.setChangeReasonName(changeEdit.getChangeReasonName());
-        changeEvent.setBreedId(changeEdit.getBreedId());
-        changeEvent.setBreedName(changeEdit.getBreedName());
-        changeEvent.setBoarQty(changeEdit.getBoarQty());
-        changeEvent.setSowQty(changeEdit.getSowQty());
-        changeEvent.setPrice(changeEdit.getPrice());
-        changeEvent.setAmount(changeEdit.getAmount());
-        changeEvent.setCustomerId(changeEdit.getCustomerId());
-        changeEvent.setCustomerName(changeEdit.getCustomerName());
-        event.setExtraMap(changeEvent);
-
-        event.setWeight(changeEdit.getWeight());
-        event.setAvgWeight(EventUtil.getAvgWeight(event.getWeight(), event.getQuantity()));
-        editGroupEvent(event, edit);
-
-        //更新猪群镜像
-        editGroupSnapShot(group, groupTrack, event);
     }
 
     //校验金额不能为空, 基础重量不能为空

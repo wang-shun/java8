@@ -3,13 +3,13 @@ package io.terminus.doctor.event.handler.group;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorCloseGroupEvent;
-import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -20,6 +20,8 @@ import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 /**
  * Desc: 关闭猪群事件处理器
@@ -61,10 +63,15 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //2.创建关闭猪群事件
         DoctorGroupEvent<DoctorCloseGroupEvent> event = dozerGroupEvent(group, GroupEventType.CLOSE, close);
+
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        int dayAge = getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays);
+        event.setAvgDayAge(dayAge);  //重算日龄
         event.setExtraMap(closeEvent);
         doctorGroupEventDao.create(event);
 
-        //3.更新猪群跟踪
+        //3.更新猪群跟踪, 日龄是事件发生时的日龄
+        groupTrack.setAvgDayAge(dayAge);
         updateGroupTrack(groupTrack, event);
 
         //4.猪群状态改为关闭
@@ -77,11 +84,6 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //发布统计事件
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
-    }
-
-    @Override
-    protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-        // 关闭猪群事件不可编辑, 因为已经关闭的猪群不可操作了
     }
 
     //猪群里还有猪不可关闭!

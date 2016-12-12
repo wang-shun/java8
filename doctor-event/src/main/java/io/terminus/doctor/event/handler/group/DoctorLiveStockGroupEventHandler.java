@@ -7,7 +7,6 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorLiveStockGroupEvent;
-import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorLiveStockGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -54,7 +53,9 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
         //2.创建猪只存栏事件
         DoctorGroupEvent<DoctorLiveStockGroupEvent> event = dozerGroupEvent(group, GroupEventType.LIVE_STOCK, liveStock);
         event.setQuantity(groupTrack.getQuantity());  //猪群存栏数量 = 猪群数量
-        event.setAvgDayAge(groupTrack.getAvgDayAge());
+
+
+
         event.setAvgWeight(liveStock.getAvgWeight());
         event.setWeight(event.getQuantity() * event.getAvgWeight()); // 总活体重 = 数量 * 均重
         event.setExtraMap(liveStockEvent);
@@ -65,12 +66,5 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
 
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.LIVE_STOCK);
-    }
-
-    @Override
-    protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-        editGroupEvent(event, edit);
-        //更新猪群镜像
-        editGroupSnapShot(group, groupTrack, event);
     }
 }

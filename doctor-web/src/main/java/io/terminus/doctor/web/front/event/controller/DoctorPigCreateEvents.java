@@ -428,7 +428,7 @@ public class DoctorPigCreateEvents {
         checkEventAt(pigId, PigEvent.from(eventType), sowInfoDtoJson);
         Long tempPigId = pigId;
         if (Objects.equals(eventType, PigEvent.FOSTERS.getKey())) {
-            List<DoctorBasicInputInfoDto> basics = buildBasicInputPigDtoContent(farmId, pigId, sowInfoDtoJson);
+            List<DoctorBasicInputInfoDto> basics = fosterInfo(farmId, pigId, sowInfoDtoJson);
             RespHelper.or500(doctorSowEventCreateService.sowEventsCreate(basics, sowInfoDtoJson));
             // 猪批量事件操作， 返回PigId
         } else {
@@ -551,13 +551,16 @@ public class DoctorPigCreateEvents {
      *
      * @return
      */
-    private List<DoctorBasicInputInfoDto> buildBasicInputPigDtoContent(Long farmId, Long pigId, String fosterJson) {
+    private List<DoctorBasicInputInfoDto> fosterInfo(Long farmId, Long pigId, String fosterJson) {
         try {
-            List<DoctorBasicInputInfoDto> basics = Lists.newArrayList();
-            basics.add(buildBasicInputInfoDto(farmId, pigId, PigEvent.FOSTERS, null));
+            DoctorBasicInputInfoDto foster = buildBasicInputInfoDto(farmId, pigId, PigEvent.FOSTERS, null);
             Map<String, Object> dtoData = OBJECT_MAPPER.readValue(fosterJson, JacksonType.MAP_OF_OBJECT);
-            basics.add(buildBasicInputInfoDto(farmId, Long.valueOf(dtoData.get("fosterSowId").toString()), PigEvent.FOSTERS_BY, null));
-            return basics;
+            DoctorBasicInputInfoDto fosterBy = buildBasicInputInfoDto(farmId, Long.valueOf(dtoData.get("fosterSowId").toString()), PigEvent.FOSTERS_BY, null);
+
+            if (!Objects.equals(foster.getBarnId(), fosterBy.getBarnId())) {
+                throw new JsonResponseException("barn.not.equal");
+            }
+            return Lists.newArrayList(foster, fosterBy);
         } catch (Exception e) {
             log.error("foster data build error fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException("foster.builder.error");

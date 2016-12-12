@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.event;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.event.EventListener;
@@ -63,6 +64,7 @@ public class DoctorPigEventListener implements EventListener {
     /**
      * 监听猪相关事件，处理下日报统计
      */
+    @AllowConcurrentEvents
     @Subscribe
     public void handlePigEvent(ListenedPigEvent listenedPigEvent) {
         log.info("[DoctorPigEventListener]-> handle.pig.event, listenedPigEvent:{}", listenedPigEvent);

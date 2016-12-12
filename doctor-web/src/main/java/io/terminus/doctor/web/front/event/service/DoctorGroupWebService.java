@@ -33,17 +33,6 @@ public interface DoctorGroupWebService {
     Response<Boolean> createGroupEvent(@NotNull(message = "groupId.not.null") Long groupId,
                                        @NotNull(message = "eventType.not.null") Integer eventType,
                                        @NotEmpty(message = "data.not.empty") String data);
-
-    /**
-     * 编辑猪群事件
-     * @param eventId 猪群事件id
-     * @param data 入参
-     * @see io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit
-     * @return 是否成功
-     */
-    Response<Boolean> editGroupEvent(@NotNull(message = "eventId.not.null") Long eventId,
-                                       @NotEmpty(message = "data.not.empty") String data);
-
     /**
      * 生成猪群号 猪舍名(yyyy-MM-dd)
      * @param barnName 猪舍名称

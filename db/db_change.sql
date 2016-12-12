@@ -525,3 +525,22 @@ CREATE TABLE `doctor_weekly_reports` (
   PRIMARY KEY (`id`),
   KEY `idx_doctor_monthly_reports_farm_id_agg_sumat` (`farm_id`,`sum_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场周报表';
+
+-- 2016-12-05 猪群跟踪字段重构
+ALTER TABLE doctor_group_tracks DROP COLUMN customer_id;
+ALTER TABLE doctor_group_tracks DROP COLUMN customer_name;
+ALTER TABLE doctor_group_tracks DROP COLUMN price;
+ALTER TABLE doctor_group_tracks DROP COLUMN weight;
+ALTER TABLE doctor_group_tracks DROP COLUMN avg_weight;
+ALTER TABLE doctor_group_tracks DROP COLUMN amount;
+ALTER TABLE doctor_group_tracks DROP COLUMN sale_qty;
+
+ALTER TABLE doctor_group_tracks CHANGE unq_qty  qua_qty INT(11)  COMMENT '合格数';
+ALTER TABLE doctor_group_tracks CHANGE wean_avg_weight  wean_weight DOUBLE COMMENT '断奶重kg';
+ALTER TABLE doctor_group_tracks CHANGE birth_avg_weight  birth_weight DOUBLE COMMENT '出生重kg';
+
+ALTER TABLE doctor_group_tracks ADD COLUMN unq_qty INT(11) DEFAULT NULL COMMENT '不合格数(分娩时累加)' AFTER qua_qty;
+ALTER TABLE doctor_group_tracks ADD COLUMN nest INT(11) DEFAULT NULL COMMENT '窝数(分娩时累加)' AFTER birth_weight;
+ALTER TABLE doctor_group_tracks ADD COLUMN live_qty INT(11) DEFAULT NULL COMMENT '活仔数(分娩时累加)' AFTER nest;
+ALTER TABLE doctor_group_tracks ADD COLUMN healthy_qty INT(11) DEFAULT NULL COMMENT '健仔数(分娩时累加)' AFTER live_qty;
+ALTER TABLE doctor_group_tracks ADD COLUMN wean_qty INT(11) DEFAULT NULL COMMENT '断奶数(断奶时累加)' AFTER unwean_qty;
