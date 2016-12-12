@@ -700,7 +700,14 @@ public class DoctorPigCreateEvents {
         }
         try {
             Map<String, Object> map = OBJECT_MAPPER.readValue(json, JacksonType.MAP_OF_OBJECT);
-            Date eventAt = DateUtil.toDate((String) map.get(key));
+            String eventAtInMap = (String) map.get(key);
+            if(eventAtInMap == null && PigEvent.CONDITION == eventType){
+                eventAtInMap = (String) map.get("checkAt");
+            }
+            Date eventAt = DateUtil.toDate(eventAtInMap);
+            if(eventAt == null){
+                throw new JsonResponseException("event.at.illegal");
+            }
             DoctorPigEvent lastEvent = RespHelper.or500(doctorPigEventReadService.lastEvent(pigIds));
             if (lastEvent != null) {
                 if (new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime()) && eventAt.before(DateUtil.toDate(DateTime.now().plusDays(1).toString(DateTimeFormat.forPattern("yyyy-MM-dd"))))) {
