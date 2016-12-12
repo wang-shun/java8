@@ -293,10 +293,13 @@ public class DoctorGroupEvents {
     @RequestMapping(value = "/breeds", method = RequestMethod.GET)
     public List<DoctorBasic> findCanBreed(@RequestParam("groupId") Long groupId) {
         DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(groupId));
-        if (group.getBreedId() == null) {
-            return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCache(DoctorBasic.Type.BREED.getValue(), null));
+        if(group.getBreedId() != null){
+            DoctorBasic breed = RespHelper.or500(doctorBasicReadService.findBasicById(group.getBreedId()));
+            if(breed != null){
+                return Lists.newArrayList(breed);
+            }
         }
-        return Lists.newArrayList(RespHelper.or500(doctorBasicReadService.findBasicById(group.getBreedId())));
+        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCache(DoctorBasic.Type.BREED.getValue(), null));
     }
 
     /**

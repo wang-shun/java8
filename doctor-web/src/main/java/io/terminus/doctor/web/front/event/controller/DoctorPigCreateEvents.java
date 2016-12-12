@@ -664,6 +664,7 @@ public class DoctorPigCreateEvents {
                 break;
             case CHG_FARM:
                 key = "chgFarmDate";
+                break;
             case CHG_LOCATION:
             case TO_MATING:
             case TO_FARROWING:
