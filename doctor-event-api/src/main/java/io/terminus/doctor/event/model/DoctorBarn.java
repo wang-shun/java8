@@ -70,6 +70,7 @@ public class DoctorBarn implements Serializable {
     /**
      * 猪舍容量
      */
+    @NotNull(message = "capacity.not.null")
     private Integer capacity;
     
     /**
