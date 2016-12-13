@@ -351,6 +351,31 @@ public class DoctorSearches {
     }
 
     /**
+     * PC端猪舍搜索方法(每个猪舍里要有根据状态聚合的数据)
+     *
+     * @param pageNo   起始页
+     * @param pageSize 页大小
+     * @param params   搜索参数
+     *                 搜索参数可以参照:
+     * @return 分页结果
+     * @see `DefaultBarnQueryBuilder#buildTerm`
+     */
+    @RequestMapping(value = "/barns/pc", method = RequestMethod.GET)
+    public Paging<SearchedBarn> searchBarnsPC(@RequestParam(required = false) Integer pageNo,
+                                              @RequestParam(required = false) Integer pageSize,
+                                              @RequestParam Map<String, String> params) {
+        List<String> barnIdList = getUserAccessBarnIds(params);
+
+        // 查询出分页后的猪舍
+        if (farmIdNotExist(params) || barnIdList == null) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
+        params.put("barnIds", barnIdList.get(0));
+        createSearchWord(SearchType.BARN.getValue(), params);
+        return RespHelper.orServEx(barnSearchReadService.searchTypeWithAggs(pageNo, pageSize, "search/search.mustache", params));
+    }
+
+    /**
      * 获取所有的猪舍信息
      *
      * @param params 搜索参数

@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.search.pig;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.search.barn.SearchedBarn;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,4 +31,11 @@ public interface PigSearchReadService {
      */
     Response<Boolean> initIndex(Integer type);
 
+    /**
+     * 聚合一个猪舍里猪的状态
+     * @param barnId 猪舍id
+     * @param template 模板路径
+     * @return 状态list
+     */
+    Response<List<SearchedBarn.BarnStatus>> searchBarnStatusByBarnId(Long barnId, String template);
 }

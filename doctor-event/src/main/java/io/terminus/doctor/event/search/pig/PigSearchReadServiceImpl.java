@@ -1,8 +1,10 @@
 package io.terminus.doctor.event.search.pig;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
@@ -10,6 +12,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.search.barn.BarnSearchESInitiator;
+import io.terminus.doctor.event.search.barn.SearchedBarn;
 import io.terminus.doctor.event.search.group.GroupSearchESInitiator;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.search.api.Searcher;
@@ -22,10 +25,14 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc: 猪(索引对象)查询服务
@@ -166,6 +173,39 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
         } catch (Exception e) {
             log.error("init index failed , cause by {}", Throwables.getStackTraceAsString(e));
             return Response.fail("init.index.failed");
+        }
+    }
+
+    @Override
+    public Response<List<SearchedBarn.BarnStatus>> searchBarnStatusByBarnId(Long barnId, String template) {
+        try {
+            PageInfo pageInfo = PageInfo.of(null, null);
+            ImmutableMap<String, String> params = ImmutableMap.of("aggs", "aggs_sowStatus:status:0", "barnId", String.valueOf(barnId));
+
+            Criterias criterias = basePigQueryBuilder.buildCriterias(pageInfo.getOffset(), pageInfo.getLimit(), params);
+            WithAggregations<SearchedPig> searchedPigs = searcher.searchWithAggs(
+                    pigSearchProperties.getIndexName(),
+                    pigSearchProperties.getIndexType(),
+                    template,
+                    criterias,
+                    SearchedPig.class
+            );
+
+            // 处理聚合属性
+            Map<String, List<Bucket>> aggregations = searchedPigs.getAggregations();
+            if (aggregations == null || !notEmpty(aggregations.get("aggs_sowStatus"))) {
+                return Response.ok(Collections.emptyList());
+            }
+
+            // 母猪状态
+            List<SearchedBarn.BarnStatus> barnStatuses = aggregations.get("aggs_sowStatus").stream()
+                    .map(bucket -> SearchedBarn.createPigStatus(
+                            PigStatus.from(Integer.parseInt(bucket.getKey())), bucket.getDoc_count().intValue()))
+                    .collect(Collectors.toList());
+            return Response.ok(barnStatuses);
+        } catch (Exception e) {
+            log.error("pig search failed, barnId:{}, template:{} cause by {}", barnId, template, Throwables.getStackTraceAsString(e));
+            return Response.fail("search.pig.fail");
         }
     }
 }
