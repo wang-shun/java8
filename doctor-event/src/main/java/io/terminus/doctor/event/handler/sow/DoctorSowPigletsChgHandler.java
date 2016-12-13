@@ -68,7 +68,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
         //变动数量
         Integer changeCount = (Integer) extra.get("pigletsCount");
         checkState(changeCount != null, "quantity.not.null");
-        checkState(changeCount <= unweanCount, "wean.countInput.error");
+        checkState(changeCount <= unweanCount, "change.countInput.error");
         doctorPigTrack.setUnweanQty(unweanCount - changeCount);  //未断奶数量 - 变动数量, 已断奶数量不用变
 
         //变动重量

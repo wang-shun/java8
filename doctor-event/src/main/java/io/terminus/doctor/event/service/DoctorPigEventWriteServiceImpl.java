@@ -441,7 +441,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             publishEvent(result);
             return Response.ok(Boolean.TRUE);
-        } catch (ServiceException e) {
+        } catch (ServiceException | IllegalStateException | IllegalArgumentException e) {
             return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("sow pigs event creates fail, cause:{}", Throwables.getStackTraceAsString(e));
