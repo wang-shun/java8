@@ -67,7 +67,12 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
         //断奶只数和断奶均重
         doctorPigEvent.setWeanCount(Ints.tryParse(Objects.toString(extra.get("partWeanPigletsCount"))));
         doctorPigEvent.setWeanAvgWeight(Doubles.tryParse(Objects.toString(extra.get("partWeanAvgWeight"))));
-        doctorPigEvent.setHealthCount(Ints.tryParse(Objects.toString(extra.get("qualifiedCount"))));    //额 这个字段存一下合格数吧
+
+        Integer quaQty = doctorPigEvent.getWeanCount();
+        if (extra.containsKey("qualifiedCount") && extra.get("qualifiedCount") != null) {
+            quaQty = Ints.tryParse(Objects.toString(extra.get("qualifiedCount")));
+        }
+        doctorPigEvent.setHealthCount(quaQty);    //额 这个字段存一下合格数吧
         doctorPigEvent.setWeakCount(Ints.tryParse(Objects.toString(extra.get("notQualifiedCount"))));
         return IsOrNot.NO;
     }
