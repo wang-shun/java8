@@ -94,6 +94,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -642,7 +643,16 @@ public class DoctorImportDataService {
             groupTrack.setBirthDate(openAt);
             groupTrack.setWeakQty(weak);
             groupTrack.setUnweanQty(pigletCount);
-            groupTrack.setUnqQty(pigletCount);
+
+            //批次总结数据
+            groupTrack.setNest(sows.size());
+            groupTrack.setWeanWeight(groupTrack.getBirthWeight());
+            groupTrack.setLiveQty(groupTrack.getQuantity());
+            groupTrack.setHealthyQty(groupTrack.getQuantity());
+            groupTrack.setUnqQty(0);
+            groupTrack.setWeanQty(0);    //默认全部未断奶
+            groupTrack.setQuaQty(0);
+
             doctorGroupTrackDao.create(groupTrack);
 
             // 把 产房仔猪群 的groupId 存入相应猪舍的所有母猪
@@ -664,7 +674,7 @@ public class DoctorImportDataService {
         List<DoctorPigTrack> feedSowTrack = new ArrayList<>();
         Map<String, List<DoctorImportSow>> sowMap = getImportSows(shit).stream().collect(Collectors.groupingBy(DoctorImportSow::getSowCode));
         sowMap.entrySet().forEach(map -> {
-            List<DoctorImportSow> importSows = map.getValue().stream().sorted((a, b) -> a.getParity().compareTo(b.getParity())).collect(Collectors.toList());
+            List<DoctorImportSow> importSows = map.getValue().stream().sorted(Comparator.comparing(DoctorImportSow::getParity)).collect(Collectors.toList());
             int size = importSows.size();
 
             DoctorImportSow first = importSows.get(0);
