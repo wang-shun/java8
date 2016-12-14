@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.proxy;
 
 import com.github.kevinsawicki.http.HttpRequest;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
@@ -12,10 +13,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yudi on 2016/11/16.
@@ -30,15 +34,21 @@ public class HttpProxy {
     @Value("${openApi.url}")
     private  String urlConf="";
     @RequestMapping(value = "",method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String proxy(String pampasCall,String sid){
+    public String proxy(@RequestParam String pampasCall, @RequestParam String sid,@RequestParam Map<String,String> params){
         if (Arguments.isEmpty(pampasCall)){
             throw new JsonResponseException("param.not.allow.null");
         }
+        if (Arguments.isEmpty(sid)){
+            throw new JsonResponseException("sid.not.allow.null");
+        }
         List<String> paramList= Lists.newArrayList();
-        paramList.add("pampasCall="+pampasCall);
         paramList.add("appKey="+APP_KEY);
         paramList.add("timestamp="+System.currentTimeMillis());
-        paramList.add("sid="+sid);
+        if (params!=null){
+            params.forEach((k,v)->{
+                paramList.add(k+"="+v);
+            });
+        }
         paramList.sort(new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
