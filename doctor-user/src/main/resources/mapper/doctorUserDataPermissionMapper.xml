@@ -10,6 +10,7 @@
         <result column="user_id" property="userId"/>
         <result column="farm_ids" property="farmIds"/>
         <result column="barn_ids" property="barnIds"/>
+        <result column="org_ids" property="orgIds"/>
         <result column="ware_house_types" property="wareHouseTypes"/>
         <result column="extra" property="extra"/>
         <result column="creator_id" property="creatorId"/>
@@ -30,11 +31,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        user_id, farm_ids, barn_ids, ware_house_types, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
+        user_id, farm_ids, barn_ids,org_ids, ware_house_types, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{userId}, #{farmIds}, #{barnIds}, #{wareHouseTypes}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{userId}, #{farmIds}, #{barnIds},#{orgIds}, #{wareHouseTypes}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorUserDataPermission" keyProperty="id" useGeneratedKeys="true">
@@ -73,6 +74,7 @@
             <if test="userId != null">user_id = #{userId},</if>
             <if test="farmIds != null">farm_ids = #{farmIds},</if>
             <if test="barnIds != null">barn_ids = #{barnIds},</if>
+            <if test="orgIds != null">org_ids = #{orgIds},</if>
             <if test="wareHouseTypes != null">ware_house_types = #{wareHouseTypes},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="creatorId != null">creator_id = #{creatorId},</if>
