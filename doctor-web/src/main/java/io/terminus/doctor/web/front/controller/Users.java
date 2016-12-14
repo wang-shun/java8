@@ -18,8 +18,12 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.enums.SmsCodeType;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorRoleContent;
 import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.DoctorUserRoleLoader;
 import io.terminus.doctor.web.core.Constants;
@@ -72,6 +76,8 @@ public class Users {
     private final PermissionHelper permissionHelper;
     private final DoctorCommonSessionBean doctorCommonSessionBean;
     private final AFSessionManager sessionManager;
+    private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
+    private final DoctorOrgReadService doctorOrgReadService;
     @RpcConsumer
     private DoctorUserRoleLoader doctorUserRoleLoader;
 
@@ -84,7 +90,7 @@ public class Users {
                  AclLoader aclLoader,
                  PermissionHelper permissionHelper,
                  DoctorCommonSessionBean doctorCommonSessionBean,
-                 AFSessionManager sessionManager) {
+                 AFSessionManager sessionManager, DoctorUserDataPermissionReadService doctorUserDataPermissionReadService, DoctorOrgReadService doctorOrgReadService) {
         this.userWriteService = userWriteService;
         this.doctorUserReadService = doctorUserReadService;
         this.captchaGenerator = captchaGenerator;
@@ -93,6 +99,8 @@ public class Users {
         this.aclLoader = aclLoader;
         this.permissionHelper = permissionHelper;
         this.sessionManager = sessionManager;
+        this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
+        this.doctorOrgReadService = doctorOrgReadService;
     }
 
     /**
@@ -334,5 +342,24 @@ public class Users {
         }
         resp.getResult().setPassword(null); // for security
         return Lists.newArrayList(resp.getResult());
+    }
+
+    @RequestMapping(value = "/orgList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<DoctorOrg> orgList() {
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if(baseUser == null){
+            throw new JsonResponseException("user.not.login");
+        }
+        Response<DoctorUserDataPermission> dataPermissionResponse=doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()){
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> orgIds=dataPermissionResponse.getResult().getOrgIdsList();
+        Response<List<DoctorOrg>> result=doctorOrgReadService.findOrgByIds(orgIds);
+        if (!result.isSuccess()){
+            throw new JsonResponseException(result.getError());
+        }
+        return result.getResult();
     }
 }

@@ -130,5 +130,13 @@ public class DoctorFarms {
     public List<DoctorFarm> permissionFarm(){
         return RespHelper.or500(doctorFarmReadService.findFarmsByUserId(UserUtil.getUserId()));
     }
+    /**
+     * 根据orgId查询猪场
+     * @return
+     */
+    @RequestMapping(value = "/org/farm-list", method = RequestMethod.GET)
+    public List<DoctorFarm> findFarmByOrgId(Long orgId){
+        return RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(orgId));
+    }
 
 }

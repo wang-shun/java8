@@ -40,6 +40,11 @@ public class DoctorUserDataPermission implements Serializable {
      */
     @Getter
     private String barnIds;
+    /**
+     * 公司Id，逗号分隔
+     */
+    @Getter
+    private String orgIds;
     
     /**
      * 仓库类型, 逗号分隔
@@ -117,6 +122,20 @@ public class DoctorUserDataPermission implements Serializable {
             this.barnIdsList = Splitters.COMMA.splitToList(barnIds).stream().map(Long::valueOf).collect(Collectors.toList());
         } else {
             this.barnIdsList = Lists.newArrayList();
+        }
+    }
+    /**
+     * 将 orgIds 转为集合, 方便使用,不存数据库
+     */
+    @Getter
+    private List<Long> orgIdsList;
+
+    public void setOrgIds(String orgIds) {
+        this.orgIds = orgIds;
+        if (StringUtils.isNotBlank(barnIds)) {
+            this.orgIdsList = Splitters.COMMA.splitToList(orgIds).stream().map(Long::valueOf).collect(Collectors.toList());
+        } else {
+            this.orgIdsList = Lists.newArrayList();
         }
     }
 }
