@@ -47,7 +47,7 @@ public class DoctorReportJobs {
     private DoctorDailyReportReadService doctorDailyReportReadService;
     @RpcConsumer
     private DoctorDailyReportWriteService doctorDailyReportWriteService;
-    @RpcConsumer
+    @RpcConsumer(timeout = "60000")
     private DoctorCommonReportWriteService doctorCommonReportWriteService;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
@@ -162,9 +162,10 @@ public class DoctorReportJobs {
 
             List<Long> farmIds = getAllFarmIds();
             RespHelper.or500(doctorCommonReportWriteService.createMonthlyReports(farmIds, yesterday));
-            RespHelper.or500(doctorCommonReportWriteService.createWeeklyReports(farmIds, yesterday));
+            log.info("monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            log.info("monthly and weekly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+            RespHelper.or500(doctorCommonReportWriteService.createWeeklyReports(farmIds, yesterday));
+            log.info("weekly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("monthly and weekly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
