@@ -94,14 +94,14 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
 
     @Override
     public Response<Boolean> sowEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson) {
+        Map<String, Object> extra;
         try{
-            Map<String, Object> extra = OBJECT_MAPPER.readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
-            RespHelper.orServEx(doctorPigEventWriteService.sowPigsEventCreate(dtoList, extra));
-            return Response.ok(Boolean.TRUE);
+            extra = OBJECT_MAPPER.readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
         }catch (Exception e){
             log.error("create sow events list fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.sowEvents.fail");
         }
+        return doctorPigEventWriteService.sowPigsEventCreate(dtoList, extra);
     }
 
     @Override

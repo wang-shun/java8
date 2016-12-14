@@ -132,7 +132,6 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             flowDataMap.put("track", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack));
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
         } catch (IllegalStateException | ServiceException e) {
-            log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw e;
         } catch (Exception e) {
             DoctorAbstractEventFlowHandler.log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
