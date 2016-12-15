@@ -96,7 +96,7 @@ public class GroupSearchReadServiceImpl implements GroupSearchReadService {
 
     private Long getGroupQty(String template, Map<String, String> params) {
         params.remove("aggs");
-        Criterias criterias = baseGroupQueryBuilder.buildCriterias(0, Integer.MAX_VALUE, params);
+        Criterias criterias = baseGroupQueryBuilder.buildCriteriasWithoutPageing(params);
         Pagination<SearchedGroup> searchedGroups = searcher.search(
                 groupSearchProperties.getIndexName(),
                 groupSearchProperties.getIndexType(),

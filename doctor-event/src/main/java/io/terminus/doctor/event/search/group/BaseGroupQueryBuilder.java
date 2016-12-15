@@ -25,6 +25,49 @@ import java.util.Map;
  */
 public abstract class BaseGroupQueryBuilder {
 
+    public Criterias buildCriteriasWithoutPageing(Map<String, String> params) {
+
+        CriteriasBuilder criteriasBuilder = new CriteriasBuilder();
+
+        // 2. 关键词 keyword 处理
+        Keyword keyword = buildKeyword(params);
+        criteriasBuilder.withKeyword(keyword);
+
+        // 3. 构建单值 term 查询
+        List<Term> termList = buildTerm(params);
+        criteriasBuilder.withTerm(termList);
+
+        // 4. 构建多值 terms 查询
+        List<Terms> termsList = buildTerms(params);
+        criteriasBuilder.withTerms(termsList);
+
+        // 5. 构建范围 range 查询
+        List<Range> ranges = buildRanges(params);
+        criteriasBuilder.withRanges(ranges);
+
+        // 6. 处理排序 sorts
+        List<Sort> sorts = buildSort(params);
+        criteriasBuilder.withSorts(sorts);
+
+        // 7. 处理高亮 highlight
+        List<Highlight> highlightList = buildHighlight(params);
+        criteriasBuilder.withHighlights(highlightList);
+
+        // 8. 构建聚合查询
+        List<Aggs> aggsList = buildAggs(params);
+        criteriasBuilder.withAggs(aggsList);
+
+        // 处理WildCard
+        WildCard wildCard = buildWildCard(params);
+        if (wildCard != null) {
+            PigCriterias pigCriterias = new PigCriterias(criteriasBuilder);
+            pigCriterias.setWildCard(wildCard);
+            return pigCriterias;
+        }
+
+        return criteriasBuilder.build();
+    }
+
     @SuppressWarnings("all")
     public Criterias buildCriterias(Integer pageNo, Integer pageSize, Map<String, String> params) {
 
