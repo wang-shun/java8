@@ -209,6 +209,7 @@ public class DoctorPigs {
     public List<DoctorPigMessage> queryPigNotifyMessages(Long pigId) {
         DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
         doctorMessageSearchDto.setBusinessId(pigId);
+        doctorMessageSearchDto.setBusinessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue());
         List<DoctorMessage> messages =  RespHelper.or500(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
         List<DoctorPigMessage> doctorPigMessageList = Lists.newArrayList();
         Map<Integer, DoctorMessage> map = Maps.newHashMap();

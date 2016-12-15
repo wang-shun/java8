@@ -13,6 +13,7 @@
         <result column="template_id" property="templateId"/>
         <result column="template_name" property="templateName"/>
         <result column="business_id" property="businessId"/>
+        <result column="business_type" property="businessType"/>
         <result column="rule_value_id" property="ruleValueId"/>
         <result column="message_template" property="messageTemplate"/>
         <result column="type" property="type"/>
@@ -34,11 +35,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, rule_id, role_id, template_id, template_name, business_id, rule_value_id, message_template, type, event_type, category, data , url, created_by, created_at, updated_at
+        farm_id, rule_id, role_id, template_id, template_name, business_id, business_type, rule_value_id, message_template, type, event_type, category, data , url, created_by, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId}, #{ruleValueId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{url}, #{createdBy}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId},#{businessType}, #{ruleValueId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{url}, #{createdBy}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -55,7 +56,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" item="i" separator=",">
-            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{i.messageTemplate}, #{i.type}, #{i.eventType},#{i.category}, #{i.data}, #{i.url} ,#{i.createdBy}, now(), now())
+            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{businessType}, #{i.messageTemplate}, #{i.type}, #{i.eventType},#{i.category}, #{i.data}, #{i.url} ,#{i.createdBy}, now(), now())
         </foreach>
     </insert>
 
@@ -84,7 +85,8 @@
             <if test="templateId != null">template_id = #{templateId},</if>
             <if test="templateName != null">template_name = #{templateName},</if>
             <if test="businessId != null">business_id = #{businessId},</if>
-            <if test="businessId != null">rule_value_id = #{ruleValueId},</if>
+            <if test="businessType != null">business_type = #{businessType},</if>
+            <if test="ruleValueId != null">rule_value_id = #{ruleValueId},</if>
             <if test="messageTemplate != null">message_template = #{messageTemplate},</if>
             <if test="type != null">type = #{type},</if>
             <if test="eventType != null">event_type = #{eventType},</if>
@@ -118,6 +120,7 @@
             <if test="templateId != null">AND template_id = #{templateId}</if>
             <if test="templateName != null">AND template_name = #{templateName}</if>
             <if test="businessId != null">AND business_id = #{businessId}</if>
+            <if test="businessType != null">AND business_type = #{businessType}</if>
             <if test="ruleValueId != null">AND rule_value_id = #{ruleValueId}</if>
             <if test="type != null">AND `type` = #{type}</if>
             <if test="eventType != null">AND `event_type` = #{eventType}</if>
