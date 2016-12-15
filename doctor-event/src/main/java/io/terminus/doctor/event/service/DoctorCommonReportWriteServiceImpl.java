@@ -281,7 +281,7 @@ public class DoctorCommonReportWriteServiceImpl implements DoctorCommonReportWri
 
         //保育猪
         report.setNurseryBegin(begin.getNurseryBegin());                                                    //期初
-        report.setNurseryIn(in.getNurseryIn());                                                             //转入
+        report.setNurseryIn(report.getFarrowToNursery());                                                             //转入
         report.setNurseryToFatten(doctorKpiDao.getMonthlyLiveStockChangeToFatten(farmId, startAt, endAt));  //转育肥
         report.setNurseryDead(groupDead.getNurseryDead());                                                  //死淘
         report.setNurserySale(sale.getNurserySale());                                                       //销售
@@ -293,7 +293,7 @@ public class DoctorCommonReportWriteServiceImpl implements DoctorCommonReportWri
 
         //育肥猪
         report.setFattenBegin(begin.getFattenBegin());                                                      //期初
-        report.setFattenIn(in.getFattenIn());                                                               //转入
+        report.setFattenIn(report.getNurseryToFatten());                                                               //转入
         report.setFattenDead(groupDead.getFattenDead());                                                    //死淘
         report.setFattenSale(sale.getFattenSale());                                                         //销售
         report.setFattenFeedCount(feedCount.getFattenFeedCount());                                          //饲料数量
