@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
@@ -24,10 +25,12 @@ import io.terminus.doctor.user.service.PrimaryUserWriteService;
 import io.terminus.pampas.client.Export;
 import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.common.utils.RespHelper;
+import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -142,9 +145,16 @@ public class SubService {
             if(!Objects.equals(subUser.getName(), userName)){
                 checkSubUserAccount(userName);
             }
-
             subUser.setName(userName);
-            subUser.setMobile(sub.getContact());
+
+            if(StringUtils.isNotBlank(sub.getContact())){
+                Response<User> mobileRes = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
+                if(mobileRes.isSuccess() && mobileRes.getResult() != null && !Objects.equals(mobileRes.getResult().getId(), sub.getId())){
+                    throw new JsonResponseException("user.register.mobile.has.been.used");
+                }
+                subUser.setMobile(sub.getContact());
+            }
+
             this.updateSubStaffStatus(subUser, io.terminus.doctor.user.model.Sub.Status.from(sub.getStatus()));
             // TODO: 自定义角色冗余进 user 表
             List<String> roles = Lists.newArrayList("SUB");
@@ -160,7 +170,7 @@ public class SubService {
             RespHelper.orServEx(userWriteService.update(subUser));
             this.updateSubPermission(user, subUser.getId(), sub.getFarmIds(), sub.getBarnIds());
             return Response.ok(true);
-        } catch (ServiceException e) {
+        } catch (ServiceException | JsonResponseException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("update sub failed, user={}, sub={}, cause:{}",
@@ -227,11 +237,16 @@ public class SubService {
 
             //子账号@主账号
             String userName = subAccount(sub, user);
-
             checkSubUserAccount(userName);
-
             subUser.setName(userName);
-            subUser.setMobile(sub.getContact());
+
+            if(StringUtils.isNotBlank(sub.getContact())){
+                Response<User> mobileRes = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
+                if(mobileRes.isSuccess() && mobileRes.getResult() != null){
+                    throw new JsonResponseException("user.register.mobile.has.been.used");
+                }
+                subUser.setMobile(sub.getContact());
+            }
             subUser.setPassword(sub.getPassword());
             subUser.setType(UserType.FARM_SUB.value());
             subUser.setStatus(UserStatus.NORMAL.value());
@@ -249,7 +264,7 @@ public class SubService {
             Long subUserId = RespHelper.orServEx(userWriteService.create(subUser));
             this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds());
             return Response.ok(subUserId);
-        } catch (ServiceException e) {
+        } catch (ServiceException | JsonResponseException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("creat sub failed, user={}, sub={}, cause:{}", user, sub, Throwables.getStackTraceAsString(e));
