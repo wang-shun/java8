@@ -3,6 +3,7 @@ package io.terminus.doctor.web.core.login;
 import com.github.cage.token.RandomCharacterGeneratorFactory;
 import com.github.cage.token.RandomTokenGenerator;
 import com.google.common.base.Charsets;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -288,7 +289,7 @@ public class DoctorCommonSessionBean {
         token.setSessionId(sessionId);
         token.setDeviceId(deviceId);
         token.setCookieName(sessionProperties.getCookieName());
-        log.info("login token:{}", token);
+        token.setRoles(MoreObjects.firstNonNull(user.getRoles(), Lists.newArrayList()));
         return token;
     }
 
@@ -642,5 +643,6 @@ public class DoctorCommonSessionBean {
         String deviceId;
         String cookieName;
         String domain;
+        List<String> roles;
     }
 }

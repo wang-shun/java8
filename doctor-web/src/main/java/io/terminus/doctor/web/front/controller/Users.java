@@ -193,6 +193,7 @@ public class Users {
                 .put("sid", token.getSessionId())
                 .put("redirect", !StringUtils.hasText(target) ? "/" : target)
                 .put("expiredAt", token.getExpiredAt())
+                .put("roles", token.getRoles())
                 .map();
     }
 
