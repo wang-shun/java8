@@ -160,6 +160,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             BeanMapper.copy(doctorVaccinationDto, dto);
 
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
+            publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -202,6 +203,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             BeanMapper.copy(doctorConditionDto, dto);
 
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
+            publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
