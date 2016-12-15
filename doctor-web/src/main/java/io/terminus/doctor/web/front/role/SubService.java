@@ -12,7 +12,6 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.model.DoctorStaff;
-import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorStaffReadService;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
@@ -93,10 +92,7 @@ public class SubService {
             UserProfile userProfile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(userId));
             DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
 
-            Sub result = makeSub(sub, u, userProfile);
-            result.setFarmIds(permission.getFarmIdsList());
-            result.setBarnIds(permission.getBarnIdsList());
-            return Response.ok(result);
+            return Response.ok(makeSub(sub, u, userProfile, permission));
         } catch (ServiceException e) {
             log.warn("find sub failed, user={}, userId={}, error={}",
                     user, userId, e.getMessage());
@@ -108,7 +104,7 @@ public class SubService {
         }
     }
 
-    private Sub makeSub(io.terminus.doctor.user.model.Sub sub, User u, UserProfile userProfile){
+    private Sub makeSub(io.terminus.doctor.user.model.Sub sub, User u, UserProfile userProfile, DoctorUserDataPermission permission){
         Sub op = new Sub();
         if (u != null && userProfile != null) {
             op.setId(u.getId());
@@ -119,6 +115,8 @@ public class SubService {
             op.setContact(sub.getContact());
             op.setRealName(userProfile.getRealName());
             op.setStatus(sub.getStatus());
+            op.setBarnIds(permission.getBarnIdsList());
+            op.setFarmIds(permission.getFarmIdsList());
         }
         return op;
     }
@@ -311,19 +309,22 @@ public class SubService {
     }
 
     private List<Sub> setSubInfo(List<io.terminus.doctor.user.model.Sub> subList){
-        List<Long> userIds = subList.stream().map(s -> s.getUserId()).collect(Collectors.toList());
+        List<Long> userIds = subList.stream().map(io.terminus.doctor.user.model.Sub::getUserId).collect(Collectors.toList());
         List<User> users = RespHelper.orServEx(doctorUserReadService.findByIds(userIds));
 
         List<UserProfile> profiles = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserIds(userIds));
 
         Map<Long, User> userMap = users.stream().collect(Collectors.toMap(User::getId, u -> u));
         Map<Long, UserProfile> profileMap = profiles.stream().collect(Collectors.toMap(UserProfile::getUserId, u -> u));
-        List<Sub> result = subList.stream().map(s -> {
-            User u = userMap.get(s.getUserId());
-            UserProfile up = profileMap.get(s.getUserId());
-            return makeSub(s, u, up);
-        }).collect(Collectors.toList());
-        return result;
+
+        return subList.stream()
+                .map(s -> {
+                    User u = userMap.get(s.getUserId());
+                    UserProfile up = profileMap.get(s.getUserId());
+                    DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(s.getUserId()));
+                    return makeSub(s, u, up, permission);
+                })
+                .collect(Collectors.toList());
     }
 
     /**
