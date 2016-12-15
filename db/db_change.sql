@@ -544,3 +544,5 @@ ALTER TABLE doctor_group_tracks ADD COLUMN nest INT(11) DEFAULT NULL COMMENT '�
 ALTER TABLE doctor_group_tracks ADD COLUMN live_qty INT(11) DEFAULT NULL COMMENT '活仔数(分娩时累加)' AFTER nest;
 ALTER TABLE doctor_group_tracks ADD COLUMN healthy_qty INT(11) DEFAULT NULL COMMENT '健仔数(分娩时累加)' AFTER live_qty;
 ALTER TABLE doctor_group_tracks ADD COLUMN wean_qty INT(11) DEFAULT NULL COMMENT '断奶数(断奶时累加)' AFTER unwean_qty;
+
+ALTER TABLE doctor_messages ADD COLUMN business_type INT(11) DEFAULT NULL COMMENT '消息目标类型,1、猪 2、猪群 3、仓库' AFTER business_id;
