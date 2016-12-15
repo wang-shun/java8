@@ -1,8 +1,13 @@
 package io.terminus.doctor.event.handler.group;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.event.DataEvent;
+import io.terminus.doctor.common.event.DoctorZkGroupEvent;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -17,11 +22,13 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Desc: 关闭猪群事件处理器
@@ -36,6 +43,8 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
+    @Autowired
+    private Publisher publisher;
 
     @Autowired
     public DoctorCloseGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -84,6 +93,17 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //发布统计事件
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
+
+        //发布zk事件
+        try{
+            // 向zk发送刷新消息的事件
+            Map<String, Object> publishData = Maps.newHashMap();
+            publishData.put("eventType", GroupEventType.CLOSE.getValue());
+            publishData.put("doctorGroupId", group.getId());
+            publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new DoctorZkGroupEvent(publishData)));
+        }catch(Exception e){
+            log.error(Throwables.getStackTraceAsString(e));
+        }
     }
 
     //猪群里还有猪不可关闭!

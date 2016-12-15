@@ -8,6 +8,7 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.schedule.msg.producer.factory.MaterialDtoFactory;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeAvgDto;
@@ -68,7 +69,7 @@ public class StorageShortageProducer extends AbstractJobProducer {
         // 创建消息
         Map<String, Object> jsonData = MaterialDtoFactory.getInstance().createMaterialMessage(materialConsumeAvg, url);
             try {
-                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, materialConsumeAvg.getMaterialId(), ruleValue.getId(), null);
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, materialConsumeAvg.getMaterialId(), DoctorMessage.BUSINESS_TYPE.WAREHOUSE.getValue(), ruleValue.getId(), null);
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }

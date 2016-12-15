@@ -21,7 +21,8 @@ public enum DataEventType {
     RollBackReport(7, "统计报表回滚"),
     ImportExcel(8, "excel导数"),
     UpdateMessageRule(9, "消息规则变动"),
-    UpdateMessageRules(10, "批量规则变动");
+    UpdateMessageRules(10, "批量规则变动"),
+    GroupEventClose(11, "猪群关闭事件信息");
 
     @Getter
     private int key;

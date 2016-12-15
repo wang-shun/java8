@@ -6,6 +6,8 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
+import io.terminus.doctor.common.event.DoctorZkGroupEvent;
+import io.terminus.doctor.common.event.DoctorZkPigEvent;
 import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -67,25 +69,30 @@ public class DoctorMessageEventListener implements EventListener{
         log.info("data event data:{}", dataEvent);
         // 1. 如果是猪创建事件信息
         if (DataEventType.PigEventCreate.getKey() == dataEvent.getEventType()) {
-            PigCreateEvent pigCreateEvent = DataEvent.analyseContent(dataEvent, PigCreateEvent.class);
+            DoctorZkPigEvent pigCreateEvent = DataEvent.analyseContent(dataEvent, DoctorZkPigEvent.class);
             if (pigCreateEvent != null && pigCreateEvent.getContext() != null) {
                 Map<String, Object> context = pigCreateEvent.getContext();
                 handlePigEvent(context);
             }
         }
-//
-//        // 2. 如果是猪群信息修改
-//        if (DataEventType.GroupEventCreate.getKey() == dataEvent.getEventType()) {
-//            Map<String, Serializable> context = DataEvent.analyseContent(dataEvent, Map.class);
-//            Long groupId = Params.getWithConvert(context, "doctorGroupId", d -> Long.valueOf(d.toString()));
-//        }
+
+        // 2. 如果是猪群信息修改
+        if (DataEventType.GroupEventClose.getKey() == dataEvent.getEventType()) {
+            DoctorZkGroupEvent zkGroupEvent = DataEvent.analyseContent(dataEvent, DoctorZkGroupEvent.class);
+            if (zkGroupEvent != null && zkGroupEvent.getContext() != null) {
+                Map<String, Object> context = zkGroupEvent.getContext();
+                Long groupId = Params.getWithConvert(context, "doctorGroupId", d -> Long.valueOf(d.toString()));
+                Integer eventType = Params.getWithConvert(context, "eventType", d -> Integer.valueOf(d.toString()));
+                updateMessage(groupId, eventType, DoctorMessage.BUSINESS_TYPE.GROUP.getValue());
+            }
+        }
     }
 
     private void handlePigEvent(Map<String, Object> context){
         if("single".equals(context.get("contextType"))) {
             Long pigId = Params.getWithConvert(context, "doctorPigId", d -> Long.valueOf(d.toString()));
             Integer eventType = Params.getWithConvert(context, "type", d -> Integer.valueOf(d.toString()));
-            updateMessage(pigId, eventType);
+            updateMessage(pigId, eventType, DoctorMessage.BUSINESS_TYPE.PIG.getValue());
         }else {
             context.remove("contextType");
             context.values().forEach(inContext -> {
@@ -93,7 +100,7 @@ public class DoctorMessageEventListener implements EventListener{
                     Map inContextMap = (Map) inContext;
                     Long pigId = Params.getWithConvert(inContextMap, "doctorPigId", d -> Long.valueOf(d.toString()));
                     Integer eventType = Params.getWithConvert(inContextMap, "type", d -> Integer.valueOf(d.toString()));
-                    updateMessage(pigId, eventType);
+                    updateMessage(pigId, eventType, DoctorMessage.BUSINESS_TYPE.PIG.getValue());
                 }
             });
         }
@@ -104,10 +111,11 @@ public class DoctorMessageEventListener implements EventListener{
      * @param businessId
      * @param eventType
      */
-    private void updateMessage(Long businessId, Integer eventType) {
+    private void updateMessage(Long businessId, Integer eventType, Integer businessType) {
         DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
         doctorMessageSearchDto.setBusinessId(businessId);
-        if (eventType != 6){
+        doctorMessageSearchDto.setBusinessType(businessType);
+        if (eventType != 6 && eventType != 10){
             doctorMessageSearchDto.setEventType(eventType);
         }
         List<Long> messageIds = RespHelper.orServEx(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto)).stream().map(DoctorMessage::getId).collect(Collectors.toList());;
@@ -115,6 +123,5 @@ public class DoctorMessageEventListener implements EventListener{
             doctorMessageWriteService.deleteMessagesByIds(messageIds);
             doctorMessageUserWriteService.deletesByMessageIds(messageIds);
         }
-
     }
 }
