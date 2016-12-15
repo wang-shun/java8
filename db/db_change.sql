@@ -544,3 +544,6 @@ ALTER TABLE doctor_group_tracks ADD COLUMN nest INT(11) DEFAULT NULL COMMENT '�
 ALTER TABLE doctor_group_tracks ADD COLUMN live_qty INT(11) DEFAULT NULL COMMENT '活仔数(分娩时累加)' AFTER nest;
 ALTER TABLE doctor_group_tracks ADD COLUMN healthy_qty INT(11) DEFAULT NULL COMMENT '健仔数(分娩时累加)' AFTER live_qty;
 ALTER TABLE doctor_group_tracks ADD COLUMN wean_qty INT(11) DEFAULT NULL COMMENT '断奶数(断奶时累加)' AFTER unwean_qty;
+
+-- 2016-12-15 增加org_ids 字段
+ALTER TABLE doctor_user_data_permissions ADD COLUMN org_ids text DEFAULT NULL COMMENT '公司id,逗号分隔';

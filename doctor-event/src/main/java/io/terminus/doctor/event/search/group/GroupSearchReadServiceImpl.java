@@ -9,6 +9,7 @@ import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.event.search.barn.SearchedBarnDto;
 import io.terminus.doctor.event.search.query.GroupPaging;
 import io.terminus.search.api.Searcher;
+import io.terminus.search.api.model.Pagination;
 import io.terminus.search.api.model.WithAggregations;
 import io.terminus.search.api.query.Criterias;
 import io.terminus.search.model.Bucket;
@@ -94,8 +95,9 @@ public class GroupSearchReadServiceImpl implements GroupSearchReadService {
     }
 
     private Long getGroupQty(String template, Map<String, String> params) {
-        Criterias criterias = baseGroupQueryBuilder.buildCriteriasWithoutPaging(params);
-        WithAggregations<SearchedGroup> searchedGroups = searcher.searchWithAggs(
+        params.remove("aggs");
+        Criterias criterias = baseGroupQueryBuilder.buildCriterias(0, Integer.MAX_VALUE, params);
+        Pagination<SearchedGroup> searchedGroups = searcher.search(
                 groupSearchProperties.getIndexName(),
                 groupSearchProperties.getIndexType(),
                 template,
