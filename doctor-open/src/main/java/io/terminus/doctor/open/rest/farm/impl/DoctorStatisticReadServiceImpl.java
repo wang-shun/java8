@@ -1,5 +1,6 @@
 package io.terminus.doctor.open.rest.farm.impl;
 
+import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
@@ -24,8 +25,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static lombok.patcher.Symbols.isEmpty;
 
 /**
  * Desc:
@@ -104,9 +109,14 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
             if (!doctorUserDataPermission.getOrgIdsList().contains(orgId)){
                 return Response.fail("user.not.permission.org");
             }
+            List<Long> farmList=doctorUserDataPermission.getFarmIdsList();
             //查询有权限的公司与猪场
             DoctorOrg org = OPRespHelper.orOPEx(doctorOrgReadService.findOrgById(orgId));
-            List<DoctorFarm> farms = OPRespHelper.orOPEx(doctorFarmReadService.findFarmsByUserId(userId));
+            List<DoctorFarm> farms=OPRespHelper.orOPEx(doctorFarmReadService.findFarmsByOrgId(org.getId()));
+            if (farms!=null){
+                farms.stream().filter(t-> farmList.contains(t.getId()));
+            }
+//            List<DoctorFarm> farms = OPRespHelper.orOPEx(doctorFarmReadService.findFarmsByUserId(userId));
 
             //查询公司统计
             List<DoctorPigTypeStatistic> stats = OPRespHelper.orOPEx(doctorPigTypeStatisticReadService.findPigTypeStatisticsByOrgId(org.getId()));
