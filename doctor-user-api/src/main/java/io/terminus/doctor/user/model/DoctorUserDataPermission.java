@@ -1,5 +1,6 @@
 package io.terminus.doctor.user.model;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -128,14 +130,23 @@ public class DoctorUserDataPermission implements Serializable {
      * 将 orgIds 转为集合, 方便使用,不存数据库
      */
     @Getter
-    private List<Long> orgIdsList;
+    private List<Long> orgIdsList = new ArrayList<>();
 
     public void setOrgIds(String orgIds) {
         this.orgIds = orgIds;
-        if (StringUtils.isNotBlank(barnIds)) {
+        if (StringUtils.isNotBlank(orgIds)) {
             this.orgIdsList = Splitters.COMMA.splitToList(orgIds).stream().map(Long::valueOf).collect(Collectors.toList());
         } else {
             this.orgIdsList = Lists.newArrayList();
+        }
+    }
+
+    public void setOrgIdsList(List<Long> orgIdsList){
+        this.orgIdsList = orgIdsList == null ? new ArrayList<>() : orgIdsList;
+        if(orgIdsList != null && !orgIdsList.isEmpty()){
+            this.orgIds = Joiner.on(",").join(orgIdsList);
+        }else{
+            this.orgIds = null;
         }
     }
 }
