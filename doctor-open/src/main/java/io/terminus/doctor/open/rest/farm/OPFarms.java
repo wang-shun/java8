@@ -57,7 +57,7 @@ public class OPFarms {
         return OPRespHelper.orOPEx(doctorStatisticReadService.getOrgStatistic(UserUtil.getUserId()));
     }
     /**
-     * 根据用户id查询所拥有权限的猪场信息
+     * 根据orgId查询所拥有权限的猪场信息
      * @return 猪场信息list
      * @see DoctorStatisticReadService#getOrgStatistic(java.lang.Long) 正式接口
      */
