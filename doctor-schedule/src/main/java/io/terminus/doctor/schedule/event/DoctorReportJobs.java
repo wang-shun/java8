@@ -161,10 +161,10 @@ public class DoctorReportJobs {
             }
 
             List<Long> farmIds = getAllFarmIds();
-            RespHelper.or500(doctorCommonReportWriteService.createMonthlyReports(farmIds, yesterday));
+            farmIds.forEach(farmId -> doctorCommonReportWriteService.createMonthlyReport(farmId, yesterday));
             log.info("monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            RespHelper.or500(doctorCommonReportWriteService.createWeeklyReports(farmIds, yesterday));
+            farmIds.forEach(farmId -> doctorCommonReportWriteService.createWeeklyReport(farmId, yesterday));
             log.info("weekly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("monthly and weekly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
