@@ -441,6 +441,22 @@ public class DoctorMoveDataController {
     /**
      * 月报
      */
+    @RequestMapping(value = "/monthly/all", method = RequestMethod.GET)
+    public Boolean moveMonthlyReport(@RequestParam("index") Integer index) {
+        try {
+            log.warn("move monthly report all farm start, index:{}", index);
+            doctorMoveReportService.moveMonthlyReport(index);
+            log.warn("move monthly report end");
+            return true;
+        } catch (Exception e) {
+            log.error("move monthly report failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 月报
+     */
     @RequestMapping(value = "/monthly/date", method = RequestMethod.GET)
     public Boolean moveMonthlyReport(@RequestParam("farmId") Long farmId,
                                      @RequestParam("date") String date) {

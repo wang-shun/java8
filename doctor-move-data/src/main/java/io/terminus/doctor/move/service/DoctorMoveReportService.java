@@ -163,6 +163,13 @@ public class DoctorMoveReportService {
                 .forEach(date -> doctorCommonReportWriteService.createMonthlyReport(farmId, date));
     }
 
+    @Transactional
+    public void moveMonthlyReport(Integer index) {
+        DateUtil.getBeforeMonthEnds(DateTime.now().plusDays(-1).toDate(), MoreObjects.firstNonNull(index, MONTH_INDEX))
+                .forEach(date -> doctorFarmDao.findAll()
+                        .forEach(farm -> doctorCommonReportWriteService.createMonthlyReport(farm.getId(), date)));
+    }
+
     /**
      * 迁移猪场周报(放在日报迁移之后进行)
      * @param farmId 猪场id
