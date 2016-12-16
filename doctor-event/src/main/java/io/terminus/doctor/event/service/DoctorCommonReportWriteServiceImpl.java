@@ -224,7 +224,9 @@ public class DoctorCommonReportWriteServiceImpl implements DoctorCommonReportWri
     private DoctorLiveStockChangeCommonReport getLiveStockChangeReport(Long farmId, Date startAt, Date endAt) {
         DoctorLiveStockChangeCommonReport report = new DoctorLiveStockChangeCommonReport();
 
-        DoctorLiveStockChangeCommonReport begin = doctorKpiDao.getMonthlyLiveStockChangeBegin(farmId, startAt);
+        //这里的期初应该是每月1号的0点，也就是前一天的天末，所以要减一天
+        DoctorLiveStockChangeCommonReport begin = doctorKpiDao.getMonthlyLiveStockChangeBegin(farmId, new DateTime(startAt).plusDays(-1).toDate());
+        
         DoctorLiveStockChangeCommonReport in = doctorKpiDao.getMonthlyLiveStockChangeIn(farmId, startAt, endAt);
         DoctorLiveStockChangeCommonReport groupDead = doctorKpiDao.getMonthlyLiveStockChangeGroupDead(farmId, startAt, endAt);
         DoctorLiveStockChangeCommonReport sowDead = doctorKpiDao.getMonthlyLiveStockChangeSowDead(farmId, startAt, endAt);
