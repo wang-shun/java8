@@ -106,16 +106,14 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
 
     @Override
     public Response<DoctorCommonReportTrendDto> findWeeklyReportTrendByFarmIdAndSumAt(Long farmId, Integer year, Integer week, Integer index) {
-        DateTime yearDate = year == null ? new DateTime() : new DateTime(year, 1, 1, 1, 1);
-        week = week == null ? DateTime.now().getWeekOfWeekyear() : week;
-        DateTime weekDateTime = yearDate.withWeekOfWeekyear(week).withTimeAtStartOfDay();
+        DateTime weekDateTime = withWeekOfYear(year, week);
         String weekStr = getWeekStr(weekDateTime.withDayOfWeek(1)); //取周一代表一周
 
         try {
             //如果查询未来的数据, 返回失败查询
-            if (weekDateTime.isAfter(DateUtil.getDateEnd(DateTime.now()))) {
-                return Response.ok(failReportTrend(weekStr));
-            }
+//            if (weekDateTime.isAfter(DateUtil.getDateEnd(DateTime.now()))) {
+//                return Response.ok(failReportTrend(weekStr));
+//            }
 
             DoctorCommonReportDto reportDto;
 
@@ -124,7 +122,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 reportDto = new DoctorCommonReportDto();
             }else{
                 //查询周报结果, 如果没查到, 返回失败的结果
-                DoctorWeeklyReport report = doctorWeeklyReportDao.findByFarmIdAndSumAt(farmId, getLastWeek(weekDateTime.toDate()));
+                DoctorWeeklyReport report = doctorWeeklyReportDao.findByFarmIdAndSumAt(farmId, weekDateTime.toDate());
                 if (report == null) {
                     return Response.ok(failReportTrend(weekStr));
                 }
@@ -251,5 +249,30 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     private static boolean todayIsMonday(Date date) {
         return DateTime.now().withTimeAtStartOfDay().isEqual(new DateTime(date).withTimeAtStartOfDay())
                 && DateTime.now().getDayOfWeek() == 1;
+    }
+
+    /**
+     * 获取指定年份和周的日期
+     * @param year 年
+     * @param week 周
+     * @return 日期
+     */
+    private DateTime withWeekOfYear(Integer year, Integer week) {
+        DateTime yearDate = year == null ? new DateTime() : new DateTime(year, 1, 1, 0, 0);
+        week = week == null ? DateTime.now().getWeekOfWeekyear() : week;
+        while (true) {
+            if (yearDate.getDayOfWeek() == 7) {
+                break;
+            }
+            yearDate = yearDate.plusDays(1);
+        }
+        yearDate = yearDate.plusWeeks(week);
+        if (!yearDate.isAfter(DateTime.now())) {
+            return yearDate.withTimeAtStartOfDay();
+        }
+        if (DateTime.now().getDayOfWeek() == 1){
+            return DateTime.now().withTimeAtStartOfDay();
+        }
+        return DateTime.now().plusDays(-1).withTimeAtStartOfDay();
     }
 }
