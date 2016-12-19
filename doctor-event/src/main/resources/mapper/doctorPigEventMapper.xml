@@ -837,4 +837,8 @@
         <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
         <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
     </select>
+
+    <update id="updatePigCode" parameterType="map">
+        update <include refid="tb"/> set pig_code = #{pigCode}, updated_at=now() where pig_id = #{pigId}
+    </update>
 </mapper>

@@ -22,4 +22,11 @@ public interface PigDumpService {
      * @return
      */
     Response<Boolean> deltaDump(Integer interval);
+
+    /**
+     * 只更新一个指定的猪
+     * @param pigId
+     * @return
+     */
+    Response<Boolean> dump(Long pigId);
 }
