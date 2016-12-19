@@ -138,4 +138,18 @@ public class PigDumpServiceImpl implements PigDumpService {
         }
         return dumpCount;
     }
+
+    @Override
+    public Response<Boolean> dump(Long pigId){
+        try{
+            DoctorPig pig = doctorPigDao.findById(pigId);
+            DoctorPigTrack track = doctorPigTrackDao.findByPigId(pigId);
+            IndexedPig indexedPig = indexedPigFactory.create(pig, track);
+            indexExecutor.submit(indexedPigTaskAction.indexTask(indexedPig));
+            return Response.ok(true);
+        }catch (Exception e){
+            log.error("failed to index pig(id={}),cause:{}", pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail("pig.dump.fail");
+        }
+    }
 }

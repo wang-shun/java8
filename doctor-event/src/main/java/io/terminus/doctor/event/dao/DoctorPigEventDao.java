@@ -267,4 +267,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public void updatePigEvents(DoctorPigEvent doctorPigEvent){
         sqlSession.update("updatePigEvents", doctorPigEvent);
     }
+
+    public void updatePigCode(Long pigId, String code) {
+        sqlSession.update(sqlId("updatePigCode"), ImmutableMap.of("pigId", pigId, "pigCode", code));
+    }
 }

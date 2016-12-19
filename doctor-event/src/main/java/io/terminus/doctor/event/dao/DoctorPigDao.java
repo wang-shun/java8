@@ -53,12 +53,12 @@ public class DoctorPigDao extends MyBatisDao<DoctorPig> {
     }
 
     /**
-     * 通过CompanyId 获取对应的PigCode
-     * @param companyId
+     * 通过farmId 获取未离场的PigCode
+     * @param farmId
      * @return
      */
-    public List<String> findPigCodesByCompanyId(Long companyId){
-        return this.getSqlSession().selectList(sqlId("findPigCodesByCompanyId"), companyId);
+    public List<String> findPresentPigCodesByFarmId(Long farmId){
+        return this.getSqlSession().selectList(sqlId("findPresentPigCodesByFarmId"), farmId);
     }
 
     /**

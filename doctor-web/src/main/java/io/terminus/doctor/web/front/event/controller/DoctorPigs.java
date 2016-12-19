@@ -5,6 +5,7 @@ import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
@@ -19,7 +20,9 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.search.pig.PigDumpService;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -32,6 +35,7 @@ import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBoarDetailDto;
 import io.terminus.doctor.web.front.event.dto.DoctorFosterDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorMatingDetail;
@@ -70,22 +74,28 @@ public class DoctorPigs {
     private final DoctorPigWriteService doctorPigWriteService;
     private final DoctorGroupReadService doctorGroupReadService;
     private final TransFromUtil transFromUtil;
+    private final DoctorFarmAuthCenter doctorFarmAuthCenter;
 
     @RpcConsumer
     private DoctorMessageReadService doctorMessageReadService;
-
     @RpcConsumer
     private DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService;
-
     @RpcConsumer
-    private  DoctorBarnReadService doctorBarnReadService;
+    private DoctorBarnReadService doctorBarnReadService;
+    @RpcConsumer
+    private PigDumpService pigDumpService;
 
     @Autowired
-    public DoctorPigs(DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService, DoctorGroupReadService doctorGroupReadService, TransFromUtil transFromUtil){
+    public DoctorPigs(DoctorPigReadService doctorPigReadService,
+                      DoctorPigWriteService doctorPigWriteService,
+                      DoctorGroupReadService doctorGroupReadService,
+                      TransFromUtil transFromUtil,
+                      DoctorFarmAuthCenter doctorFarmAuthCenter){
         this.doctorPigReadService = doctorPigReadService;
         this.doctorPigWriteService = doctorPigWriteService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.transFromUtil = transFromUtil;
+        this.doctorFarmAuthCenter = doctorFarmAuthCenter;
     }
 
     @RequestMapping(value = "/queryByStatus", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -343,5 +353,42 @@ public class DoctorPigs {
     public DoctorBarn findCurrentBarnByPigId(@RequestParam("pigId") Long pigId){
         DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
         return RespHelper.or500(doctorBarnReadService.findBarnById(pigTrack.getCurrentBarnId()));
+    }
+
+    /**
+     * 修改猪的耳号
+     * @param pigId
+     * @param code
+     * @return
+     */
+    @RequestMapping(value = "/updateCode", method = RequestMethod.PUT)
+    @ResponseBody
+    public boolean updatePigCode(@RequestParam Long pigId, @RequestParam String code){
+        DoctorPig pig = RespHelper.or500(doctorPigReadService.findPigById(pigId));
+        if(pig == null){
+            throw new JsonResponseException("pig.not.found");
+        }
+        if(Objects.equals(pig.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())){
+            throw new JsonResponseException("boar.code.forbid.update");
+        }
+
+        boolean notExist = RespHelper.or500(doctorPigReadService.validatePigCodeByFarmId(pig.getFarmId(), code));
+        if(!notExist){
+            throw new JsonResponseException("validate.pigCode.fail");
+        }
+
+        try{
+            DoctorPigTrack track = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
+            doctorFarmAuthCenter.checkBarnAuth(track.getCurrentBarnId());
+        }catch(ServiceException e){
+            throw new JsonResponseException(e.getMessage());
+        }
+
+        RespHelper.or500(doctorPigWriteService.updatePigCode(pigId, code));
+
+        // 更新下 elastic search
+        pigDumpService.dump(pigId);
+
+        return true;
     }
 }
