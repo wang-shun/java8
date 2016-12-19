@@ -106,7 +106,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
 
     @Override
     public Response<DoctorCommonReportTrendDto> findWeeklyReportTrendByFarmIdAndSumAt(Long farmId, Integer year, Integer week, Integer index) {
-        DateTime weekDateTime = withWeekOfYear(year, week).withTimeAtStartOfDay();
+        DateTime weekDateTime = withWeekOfYear(year, week);
         String weekStr = getWeekStr(weekDateTime.withDayOfWeek(1)); //取周一代表一周
 
         try {
@@ -122,7 +122,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 reportDto = new DoctorCommonReportDto();
             }else{
                 //查询周报结果, 如果没查到, 返回失败的结果
-                DoctorWeeklyReport report = doctorWeeklyReportDao.findByFarmIdAndSumAt(farmId, getLastWeek(weekDateTime.toDate()));
+                DoctorWeeklyReport report = doctorWeeklyReportDao.findByFarmIdAndSumAt(farmId, weekDateTime.toDate());
                 if (report == null) {
                     return Response.ok(failReportTrend(weekStr));
                 }
@@ -268,8 +268,11 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         }
         yearDate = yearDate.plusWeeks(week);
         if (!yearDate.isAfter(DateTime.now())) {
-            return yearDate;
+            return yearDate.withTimeAtStartOfDay();
         }
-        return DateTime.now().plusDays(-1);
+        if (DateTime.now().getDayOfWeek() == 1){
+            return DateTime.now().withTimeAtStartOfDay();
+        }
+        return DateTime.now().plusDays(-1).withTimeAtStartOfDay();
     }
 }
