@@ -1088,12 +1088,12 @@
     <select id="getBoarSowPregCount" parameterType="map" resultType="int">
         select count(1)
         FROM
-        (select farm_id, boar_code, pig_code, parity
+        (select farm_id, boar_code, pig_id, parity
         from doctor_pig_events
         where type = 9
         <include refid="criteria"/>
-        group by farm_id, boar_code, pig_code,parity) as t1
-        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        group by farm_id, boar_code, pig_id,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 11
         and t2.preg_check_result = 1
     </select>
@@ -1102,12 +1102,12 @@
     <select id="getBoarSowFarrowCount" parameterType="map" resultType="int">
         select ifnull(count(1),0)
         FROM
-        (select farm_id, boar_code, pig_code, parity
+        (select farm_id, boar_code, pig_id, parity
         from doctor_pig_events
         where type = 9
         <include refid="criteria"/>
-        group by farm_id, boar_code, pig_code,parity) as t1
-        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        group by farm_id, boar_code, pig_id,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
     </select>
 
@@ -1116,12 +1116,12 @@
     <select id="getBoarSowFarrowAvgCount" parameterType="map" resultType="double">
         select ifnull(sum(t2.live_count + t2.dead_count + t2.jx_count + t2.mny_count + t2.black_count),0)/case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end
         FROM
-        (select farm_id, boar_code, pig_code, parity
+        (select farm_id, boar_code, pig_id, parity
         from doctor_pig_events
         where type = 9
         <include refid="criteria"/>
-        group by farm_id, boar_code, pig_code,parity) as t1
-        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        group by farm_id, boar_code, pig_id,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
     </select>
 
@@ -1129,12 +1129,12 @@
     <select id="getBoarSowFarrowLiveAvgCount" parameterType="map" resultType="double">
         select ifnull(sum(live_count),0)/case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end
         FROM
-        (select farm_id, boar_code, pig_code, parity
+        (select farm_id, boar_code, pig_id, parity
         from doctor_pig_events
         where type = 9
         <include refid="criteria"/>
-        group by farm_id, boar_code, pig_code,parity) as t1
-        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        group by farm_id, boar_code, pig_id,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
     </select>
 
@@ -1143,12 +1143,12 @@
         SELECT
         (select ifnull(count(1), 0)
         FROM
-        (select farm_id, boar_code, pig_code, parity
+        (select farm_id, boar_code, pig_id, parity
         from doctor_pig_events
         where type = 9
         <include refid="criteria"/>
-        group by farm_id, boar_code, pig_code,parity) as t1
-        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        group by farm_id, boar_code, pig_id,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 11
         and t2.preg_check_result = 1)
         / (
@@ -1166,12 +1166,12 @@
         SELECT
         (select ifnull(count(1), 0)
         FROM
-        (select farm_id, boar_code, pig_code, parity
+        (select farm_id, boar_code, pig_id, parity
         from doctor_pig_events
         where type = 9
         <include refid="criteria"/>
-        group by farm_id, boar_code, pig_code,parity) as t1
-        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        group by farm_id, boar_code, pig_id,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15)
         / (
         select case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end as pzcs
@@ -1520,7 +1520,7 @@
                sum(case type when 6 then 1 else 0 end) as outCounts,
                 sum(case type when 7 then 1 else 0 end) as inCounts
            FROM doctor_pig_events t1
-           join doctor_pigs t2 on t1.pig_code = t2.pig_code
+           join doctor_pigs t2 on t1.pig_id = t2.pig_id
           WHERE t1.kind = 1
             AND t1.type IN (6, 7)
             and t1.event_at &gt;= #{startAt}
@@ -1546,7 +1546,7 @@
         select count(1)
         from
         (
-        select  pig_code, event_at, parity
+        select  pig_id, event_at, parity
         from doctor_pig_events
         where
         pig_status_after = 9
@@ -1554,21 +1554,21 @@
         <include refid="criteria"/>
         ) t1 left join
         (
-        select  pig_code, event_at, parity
+        select  pig_id, event_at, parity
         from doctor_pig_events
         where type = 9
         and farm_id = 1
         <include refid="criteria"/>
         and current_mating_count = 1
-        and pig_code in(
-        select  pig_code
+        and pig_id in(
+        select  pig_id
         from doctor_pig_events
         where
         pig_status_after = 9
         and type in (16,17,18)
         <include refid="criteria"/>
         )
-        ) t2 on t1.pig_code = t2.pig_code and t1.parity + 1 = t2.parity
+        ) t2 on t1.pig_id = t2.pig_id and t1.parity + 1 = t2.parity
         where t1.event_at > date_add(t2.event_at, interval -7 day)
         )/
         (
@@ -1601,8 +1601,8 @@
         and farm_id = 1
         and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
         and event_at &lt;= #{endAt}
-        and pig_code in(
-        select pig_code
+        and pig_id in(
+        select pig_id
         from  doctor_pig_events
         where
         pig_status_after = 9
