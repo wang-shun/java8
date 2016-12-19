@@ -87,7 +87,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
             DoctorPigTrack doctorPigTrack = buildEntryFarmPigDoctorTrack(doctorFarmEntryDto, basic);
 
             // pig create
-            checkState(doctorPigInfoCache.judgePigCodeNotContain(doctorPig.getOrgId(), doctorPig.getPigCode()), "validate.pigCode.fail");
+            checkState(doctorPigInfoCache.judgePigCodeNotContain(doctorPig.getFarmId(), doctorPig.getPigCode()), "validate.pigCode.fail");
             doctorPigDao.create(doctorPig);
 
             // event create
@@ -125,7 +125,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
                             ImmutableMap.of("doctorPigId", doctorPig.getId(), "doctorEventId", doctorPigEvent.getId(),
                                     "doctorPigTrackId", doctorPigTrack.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())
                     ));
-            doctorPigInfoCache.addPigCodeToFarm(doctorPig.getOrgId(), doctorPig.getPigCode());
+            doctorPigInfoCache.addPigCodeToFarm(doctorPig.getFarmId(), doctorPig.getPigCode());
         }catch(RuntimeException e){
             throw new ServiceException(e.getMessage());
         }catch (Exception e){
