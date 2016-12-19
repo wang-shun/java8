@@ -112,7 +112,7 @@ public interface DoctorPigReadService {
      * 校验 farmId pigCode 不存在
      * @param farmId
      * @param pigCode
-     * @return
+     * @return 不存在则返回true
      */
     Response<Boolean> validatePigCodeByFarmId(Long farmId, String pigCode);
 

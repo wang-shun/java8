@@ -38,7 +38,7 @@ public class DoctorPigInfoCache {
     /**
      * 校验pigCode 是否存在
      * @param pigCode
-     * @return
+     * @return 不存在则返回true
      */
     public Boolean judgePigCodeNotContain(Long farmId, String pigCode){
         try{

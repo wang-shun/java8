@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.manager.DoctorPigManager;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -37,6 +38,7 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
     private final DoctorPigSnapshotDao doctorPigSnapshotDao;
     private final DoctorPigInfoCache doctorPigInfoCache;
     private final WorkFlowService workFlowService;
+    private final DoctorPigManager doctorPigManager;
 
     @Autowired
     public DoctorPigWriteServiceImpl(DoctorPigDao doctorPigDao,
@@ -44,20 +46,22 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
                                      DoctorPigEventDao doctorPigEventDao,
                                      DoctorPigSnapshotDao doctorPigSnapshotDao,
                                      DoctorPigInfoCache doctorPigInfoCache,
-                                     WorkFlowService workFlowService) {
+                                     WorkFlowService workFlowService,
+                                     DoctorPigManager doctorPigManager) {
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigSnapshotDao = doctorPigSnapshotDao;
         this.doctorPigInfoCache = doctorPigInfoCache;
         this.workFlowService=workFlowService;
+        this.doctorPigManager = doctorPigManager;
     }
 
     @Override
     public Response<Long> createPig(DoctorPig pig) {
         try {
-            doctorPigDao.create(pig);
             checkState(doctorPigInfoCache.judgePigCodeNotContain(pig.getFarmId(), pig.getPigCode()), "validate.pigCode.fail");
+            doctorPigDao.create(pig);
             doctorPigInfoCache.addPigCodeToFarm(pig.getFarmId(), pig.getPigCode());
             return Response.ok(pig.getId());
         } catch (IllegalStateException e){
@@ -120,6 +124,16 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
         } catch (Exception e) {
             log.error("deploy() failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("deploy() fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> updatePigCode(Long pigId, String pigCode){
+        try{
+            return  Response.ok(doctorPigManager.updatePigCode(pigId, pigCode));
+        }catch(Exception e){
+            log.error("update pig code failed, pigId={}, pigCode={}, cause:{}", pigId, pigCode, Throwables.getStackTraceAsString(e));
+            return Response.fail("update.pig.code.fail");
         }
     }
 }

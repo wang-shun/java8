@@ -25,4 +25,12 @@ public interface DoctorPigWriteService {
      * @return
      */
     Response<Boolean> deploy();
+
+    /**
+     * 修改猪的耳号
+     * @param pigId
+     * @param pigCode 新的耳号
+     * @return
+     */
+    Response<Boolean> updatePigCode(Long pigId, String pigCode);
 }
