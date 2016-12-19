@@ -57,8 +57,8 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
     public Response<Long> createPig(DoctorPig pig) {
         try {
             doctorPigDao.create(pig);
-            checkState(doctorPigInfoCache.judgePigCodeNotContain(pig.getOrgId(), pig.getPigCode()), "validate.pigCode.fail");
-            doctorPigInfoCache.addPigCodeToFarm(pig.getOrgId(), pig.getPigCode());
+            checkState(doctorPigInfoCache.judgePigCodeNotContain(pig.getFarmId(), pig.getPigCode()), "validate.pigCode.fail");
+            doctorPigInfoCache.addPigCodeToFarm(pig.getFarmId(), pig.getPigCode());
             return Response.ok(pig.getId());
         } catch (IllegalStateException e){
             log.info("illegal state doctor pig info cache error, pig:{}, cause:{}", pig, Throwables.getStackTraceAsString(e));

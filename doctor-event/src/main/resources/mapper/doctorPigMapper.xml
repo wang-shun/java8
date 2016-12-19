@@ -169,8 +169,8 @@
         select pig_code from doctor_pigs where farm_id = #{farmId};
     </select>
 
-    <select id="findPigCodesByCompanyId" parameterType="long" resultType="string">
-        select pig_code from doctor_pigs WHERE `org_id` = #{orgId}
+    <select id="findPresentPigCodesByFarmId" parameterType="long" resultType="string">
+        select pig_code from doctor_pigs WHERE `farm_id` = #{farmId} and is_removal = 0
     </select>
 
     <update id="removalPig" parameterType="long">
