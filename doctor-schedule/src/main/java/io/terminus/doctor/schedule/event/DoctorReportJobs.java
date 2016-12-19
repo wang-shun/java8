@@ -152,19 +152,19 @@ public class DoctorReportJobs {
             }
             log.info("monthly report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            //获取昨天的天初
-            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
-            List<DoctorDailyReport> dailyReports = RespHelper.orServEx(doctorDailyReportReadService.findDailyReportBySumAt(yesterday));
+            //获取今天的天初
+            Date today = Dates.startOfDay(new Date());
+            List<DoctorDailyReport> dailyReports = RespHelper.orServEx(doctorDailyReportReadService.findDailyReportBySumAt(today));
             if (!notEmpty(dailyReports)) {
                 log.error("daily report not found, so can not monthly report!");
                 throw new ServiceException("daily.report.find.fail");
             }
 
             List<Long> farmIds = getAllFarmIds();
-            farmIds.forEach(farmId -> doctorCommonReportWriteService.createMonthlyReport(farmId, yesterday));
+            farmIds.forEach(farmId -> doctorCommonReportWriteService.createMonthlyReport(farmId, today));
             log.info("monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            farmIds.forEach(farmId -> doctorCommonReportWriteService.createWeeklyReport(farmId, yesterday));
+            farmIds.forEach(farmId -> doctorCommonReportWriteService.createWeeklyReport(farmId, today));
             log.info("weekly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("monthly and weekly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
