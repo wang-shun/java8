@@ -1520,10 +1520,10 @@
                sum(case type when 6 then 1 else 0 end) as outCounts,
                 sum(case type when 7 then 1 else 0 end) as inCounts
            FROM doctor_pig_events t1
-           join doctor_pigs t2 on t1.pig_id = t2.pig_id
+           join doctor_pigs t2 on t1.pig_id = t2.id
           WHERE t1.kind = 1
             AND t1.type IN (6, 7)
-            and t1.event_at &gt;= #{startAt}
+            and t1.event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
             AND t1.farm_id = #{farmId}
         GROUP BY t2.breed_id, t2.breed_name
         ) t12 on t11.breed_id = t12.breed_id and t11.breed_name = t12.breed_name;
