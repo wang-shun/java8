@@ -256,7 +256,10 @@ public class DoctorImportDataService {
         Map<String, Long> existRole = existRoles.stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
 
         List<String> existSubName = subDao.findByParentUserId(primaryUser.getId()).stream().map(Sub::getRealName).collect(Collectors.toList());
-        String farmIds = Joiner.on(",").join(doctorFarmDao.findByOrgId(doctorStaffDao.findByUserId(primaryUser.getId()).getOrgId()).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
+
+        // 主账号的 staff 信息
+        DoctorStaff priStaff = doctorStaffDao.findByUserId(primaryUser.getId());
+        String farmIds = Joiner.on(",").join(doctorFarmDao.findByOrgId(priStaff.getOrgId()).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
 
         for(Row row : staffShit){
             if(canImport(row)){
@@ -303,6 +306,7 @@ public class DoctorImportDataService {
                 DoctorUserDataPermission permission = new DoctorUserDataPermission();
                 permission.setUserId(subUserId);
                 permission.setFarmIds(farmIds);
+                permission.setOrgIds(priStaff.getOrgId().toString());
                 doctorUserDataPermissionDao.create(permission);
             }
         }
@@ -377,6 +381,7 @@ public class DoctorImportDataService {
             permission = new DoctorUserDataPermission();
             permission.setUserId(userId);
             permission.setFarmIds(farm.getId().toString());
+            permission.setOrgIdsList(Lists.newArrayList(org.getId()));
             doctorUserDataPermissionDao.create(permission);
         }else if(permission.getFarmIdsList() == null || !permission.getFarmIdsList().contains(farm.getId())){
             permission.setFarmIds(permission.getFarmIds() + "," + farm.getId());
@@ -632,7 +637,7 @@ public class DoctorImportDataService {
             group.setCurrentBarnName(group.getInitBarnName());
             doctorGroupDao.create(group);
 
-            final double baseWeight = 1.5D;
+            //final double baseWeight = 1.5D;
             DoctorGroupTrack groupTrack = new DoctorGroupTrack();
             groupTrack.setGroupId(group.getId());
             groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
