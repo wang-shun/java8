@@ -31,6 +31,8 @@ public interface DoctorPigWriteService {
      * @param pigId
      * @param pigCode 新的耳号
      * @return
+     * @deprecated 只更新了事件表中的冗余猪号，json 中的没有关注，所以更新并不完整
      */
+    @Deprecated
     Response<Boolean> updatePigCode(Long pigId, String pigCode);
 }
