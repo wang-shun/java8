@@ -111,9 +111,9 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
 
         try {
             //如果查询未来的数据, 返回失败查询
-            if (weekDateTime.isAfter(DateUtil.getDateEnd(DateTime.now()))) {
-                return Response.ok(failReportTrend(weekStr));
-            }
+//            if (weekDateTime.isAfter(DateUtil.getDateEnd(DateTime.now()))) {
+//                return Response.ok(failReportTrend(weekStr));
+//            }
 
             DoctorCommonReportDto reportDto;
 
@@ -258,15 +258,18 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
      * @return 日期
      */
     private DateTime withWeekOfYear(Integer year, Integer week) {
-        DateTime yearDate = year == null ? new DateTime() : new DateTime(year, 1, 1, 1, 1);
+        DateTime yearDate = year == null ? new DateTime() : new DateTime(year, 1, 1, 0, 0);
         week = week == null ? DateTime.now().getWeekOfWeekyear() : week;
         while (true) {
             if (yearDate.getDayOfWeek() == 7) {
-                System.out.println(year);
                 break;
             }
             yearDate = yearDate.plusDays(1);
         }
-        return yearDate.plusWeeks(week);
+        yearDate = yearDate.plusWeeks(week);
+        if (!yearDate.isAfter(DateTime.now())) {
+            return yearDate;
+        }
+        return DateTime.now().plusDays(-1);
     }
 }
