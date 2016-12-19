@@ -1465,7 +1465,7 @@
         where kind = 1
         and type in (6, 7)
         and farm_id = #{farmId}
-        and event_at &gt;= #{startAt}
+        and event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
         group by case when parity &lt; 10 then parity else '10' end
         ) t13 on t11.parity = t13.parity
         left join
@@ -1477,7 +1477,7 @@
         where kind = 1
         and type = 9
         and farm_id = #{farmId}
-        and event_at &gt;= #{startAt}
+        and event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
         group by case when parity-1 &lt; 9 then parity-1 else '10' end
         ) t14 on t11.parity = t14.parity
         left join (
@@ -1489,7 +1489,7 @@
         and type = 9
         and parity > 1
         and farm_id = #{farmId}
-        and event_at &gt;= #{startAt}
+        and event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
         group by case when parity &lt; 10 then parity else '10' end
         ) t15 on t11.parity = t15.parity
     </select>

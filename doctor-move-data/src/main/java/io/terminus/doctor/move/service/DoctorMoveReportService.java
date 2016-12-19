@@ -159,7 +159,7 @@ public class DoctorMoveReportService {
      */
     @Transactional
     public void moveMonthlyReport(Long farmId, Integer index) {
-        DateUtil.getBeforeMonthEnds(DateTime.now().plusDays(-1).toDate(), MoreObjects.firstNonNull(index, MONTH_INDEX))
+        DateUtil.getBeforeMonthEnds(DateTime.now().toDate(), MoreObjects.firstNonNull(index, MONTH_INDEX))
                 .forEach(date -> doctorCommonReportWriteService.createMonthlyReport(farmId, date));
     }
 
