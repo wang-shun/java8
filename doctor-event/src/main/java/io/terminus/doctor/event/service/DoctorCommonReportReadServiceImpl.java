@@ -224,22 +224,15 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         DateTime now = DateTime.now();
         //当月
         if (DateUtil.inSameYearMonth(datetime.toDate(), now.toDate())) {
-            if(now.getDayOfMonth() == 1){
-                return now.withTimeAtStartOfDay().toDate();
-            }else{
-                return now.withTimeAtStartOfDay().plusDays(-1).toDate();
-            }
+            return now.withTimeAtStartOfDay().toDate();
         }
         return datetime.withDayOfMonth(1).plusMonths(1).plusDays(-1).toDate();
     }
     
-    //本星期非周一：前一天，本星期周一：周一，上星期：周日
+    //本星期非周一: 今天，本星期周一：周一，上星期：周日
     private static Date getLastWeek(Date date) {
         if (DateTime.now().withTimeAtStartOfDay().isEqual(new DateTime(date).withTimeAtStartOfDay())) {
-            if (DateTime.now().getDayOfWeek() == 1) {
-                return new DateTime(date).withTimeAtStartOfDay().toDate();
-            }
-            return new DateTime(date).plusDays(-1).withTimeAtStartOfDay().toDate();
+            return new DateTime(date).withTimeAtStartOfDay().toDate();
         }
         return new DateTime(date).withDayOfWeek(7).withTimeAtStartOfDay().toDate();
     }
