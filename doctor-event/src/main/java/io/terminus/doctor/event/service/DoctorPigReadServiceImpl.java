@@ -308,11 +308,11 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
-    public Response<Boolean> validatePigCodeByFarmId(Long orgId, String pigCode) {
+    public Response<Boolean> validatePigCodeByFarmId(Long farmId, String pigCode) {
         try{
-            return Response.ok(doctorPigInfoCache.judgePigCodeNotContain(orgId, pigCode));
+            return Response.ok(doctorPigInfoCache.judgePigCodeNotContain(farmId, pigCode));
         }catch (Exception e){
-            log.error("validate pig code not in farm fail, farmId:{}, pigCode:{}, cause:{}", orgId, pigCode, Throwables.getStackTraceAsString(e));
+            log.error("validate pig code not in farm fail, farmId:{}, pigCode:{}, cause:{}", farmId, pigCode, Throwables.getStackTraceAsString(e));
             return Response.fail("validate.pigCode.fail");
         }
     }
