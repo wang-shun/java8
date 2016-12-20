@@ -11,11 +11,13 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -296,6 +298,16 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         } catch (Exception e) {
             log.error("add.wean.event.after.failed, cause{}", Throwables.getStackTraceAsString(e));
             return Response.fail("add.wean.event.after.failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorSowParityAvgDto> querySowParityAvg(@NotNull(message = "input.pigId.empty") Long pigId) {
+        try {
+            return Response.ok(BeanMapper.map(doctorPigEventDao.querySowParityAvg(pigId), DoctorSowParityAvgDto.class));
+        } catch (Exception e) {
+            log.error("");
+            return Response.fail("");
         }
     }
 }

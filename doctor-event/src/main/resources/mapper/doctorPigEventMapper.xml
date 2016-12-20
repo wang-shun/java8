@@ -841,4 +841,11 @@
     <update id="updatePigCode" parameterType="map">
         update <include refid="tb"/> set pig_code = #{pigCode}, updated_at=now() where pig_id = #{pigId}
     </update>
+
+    <select id="querySowParityAvg" parameterType="long" resultType="map">
+        SELECT round(AVG (live_count), 2) avgPigLetCount, round(AVG (wean_count), 2) avgWeanCount, round(AVG (farrow_weight), 2) avgBirthWeight, round(AVG (wean_count * wean_avg_weight), 2) avgWeanWeight,
+         round(AVG (health_count), 2) avgHealthCount, round(AVG (weak_count), 2) avgWeakCount, round(AVG (dead_count), 2) avgDeadCount, round(AVG (mny_count), 2) avgMujiCount
+        FROM <include refid="tb"/>
+        WHERE pig_id = #{pigId}
+    </select>
 </mapper>

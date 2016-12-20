@@ -271,4 +271,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public void updatePigCode(Long pigId, String code) {
         sqlSession.update(sqlId("updatePigCode"), ImmutableMap.of("pigId", pigId, "pigCode", code));
     }
+
+    /**
+     * 查询母猪胎次中数据平均值
+     * @param pigId
+     * @return
+     */
+    public Map<String, Object> querySowParityAvg(Long pigId) {
+        return sqlSession.selectOne("querySowParityAvg", pigId);
+    }
 }
