@@ -304,20 +304,10 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     @Override
     public Response<DoctorSowParityAvgDto> querySowParityAvg(@NotNull(message = "input.pigId.empty") Long pigId) {
         try {
-            DoctorSowParityAvgDto doctorSowParityAvgDto = new DoctorSowParityAvgDto();
-            Map<String, Object> resultMap = doctorPigEventDao.querySowParityAvg(pigId);
-            if (resultMap != null) {
-                doctorSowParityAvgDto = BeanMapper.map(resultMap, DoctorSowParityAvgDto.class);
-            }
-            return Response.ok(doctorSowParityAvgDto);
+            return Response.ok(BeanMapper.map(doctorPigEventDao.querySowParityAvg(pigId), DoctorSowParityAvgDto.class));
         } catch (Exception e) {
             log.error("query.sow.parity.failed, cause: {}", Throwables.getStackTraceAsString(e));
             return Response.fail("query sow parity failed");
         }
     }
-
-    private Object nullToZero(Object value) {
-        return value == null ? 0 : value;
-    }
-
 }
