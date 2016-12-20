@@ -9,6 +9,7 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorStaff;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorStaffReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
@@ -131,12 +132,18 @@ public class DoctorFarms {
         return RespHelper.or500(doctorFarmReadService.findFarmsByUserId(UserUtil.getUserId()));
     }
     /**
-     * 根据orgId查询猪场
+     * 根据orgId及用户权限查询猪场
      * @return
      */
     @RequestMapping(value = "/org/farm-list", method = RequestMethod.GET)
     public List<DoctorFarm> findFarmByOrgId(Long orgId){
-        return RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(orgId));
+        DoctorUserDataPermission doctorUserDataPermission=RespHelper.or500( doctorUserDataPermissionReadService.findDataPermissionByUserId(UserUtil.getUserId()));
+        List<Long> doctorFarmIds=doctorUserDataPermission.getFarmIdsList();
+        List<DoctorFarm> doctorFarms=RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(orgId));
+        if (doctorFarms!=null){
+            doctorFarms.stream().filter(t->doctorFarmIds.contains(t.getId()));
+        }
+        return doctorFarms;
     }
 
 }
