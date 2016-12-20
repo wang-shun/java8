@@ -80,9 +80,12 @@ public class DoctorReportJobs {
 
             //获取昨天的最后一秒(必须是昨天, 因为统计日期设置的是此字段)
             Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusSeconds(-1).toDate();
-            RespHelper.or500(doctorDailyReportWriteService.createDailyReports(getAllFarmIds(), yesterday));
+            doctorDailyReportWriteService.createDailyReports(getAllFarmIds(), yesterday);
+            log.info("yesterday daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            log.info("daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+            //生成一下当天的日报，为月报做准备
+            doctorDailyReportWriteService.createDailyReports(getAllFarmIds(), new Date());
+            log.info("today daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("daily report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
