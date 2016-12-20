@@ -16,19 +16,19 @@ import java.io.Serializable;
 public class DoctorSowParityAvgDto implements Serializable{
     private static final long serialVersionUID = 3691167155073069630L;
 
-    private Double avgPigLetCount;    //平均产仔数量
+    private double avgPigLetCount;    //平均产仔数量
 
-    private Double avgWeanCount;
+    private double avgWeanCount;
 
-    private Double avgBirthWeight;  //所有出生的平均出生均重
+    private double avgBirthWeight;  //所有出生的平均出生均重
 
-    private Double avgWeanWeight;
+    private double avgWeanWeight;
 
-    private Double avgHealthCount;    //平均健崽数量
+    private double avgHealthCount;    //平均健崽数量
 
-    private Double avgWeakCount;  // 平均弱仔数量
+    private double avgWeakCount;  // 平均弱仔数量
 
-    private Double avgDeadCount;  //平均死亡数量
+    private double avgDeadCount;  //平均死亡数量
 
-    private Double avgMujiCount;  //平均畸形数量
+    private double avgMujiCount;  //平均畸形数量
 }
