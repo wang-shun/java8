@@ -13,6 +13,7 @@ import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -44,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.ImmutableMultimap.of;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -178,6 +178,17 @@ public class DoctorPigEvents {
     @ResponseBody
     public List<DoctorSowParityCount> queryDoctorSowParityCount(@RequestParam("pigId") Long pigId) {
         return RespHelper.or500(doctorPigEventReadService.querySowParityCount(pigId));
+    }
+
+    /**
+     * 查询母猪胎次中数据平均值
+     * @param pigId
+     * @return
+     */
+    @RequestMapping(value = "/querySowParityAvg", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorSowParityAvgDto querySowParityAvg(Long pigId) {
+        return RespHelper.or500(doctorPigEventReadService.querySowParityAvg(pigId));
     }
 
     /**

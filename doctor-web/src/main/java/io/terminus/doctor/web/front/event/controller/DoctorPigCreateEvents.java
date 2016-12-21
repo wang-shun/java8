@@ -77,7 +77,7 @@ public class DoctorPigCreateEvents {
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     //状态转舍允许类型
-    private static final List<Integer> CHG_SOW_ALLOWS = Lists.newArrayList(DELIVER_SOW.getValue(), MATE_SOW.getValue());
+    private static final List<Integer> CHG_SOW_ALLOWS = Lists.newArrayList(DELIVER_SOW.getValue(), MATE_SOW.getValue(), PREG_SOW.getValue());
 
     private final DoctorPigEventWriteService doctorPigEventWriteService;
     private final DoctorFarmReadService doctorFarmReadService;
@@ -532,13 +532,17 @@ public class DoctorPigCreateEvents {
 
     //调用状态转换事件: 母猪转舍
     private Long createSowChgLocation(DoctorChgLocationDto chg, DoctorBasicInputInfoDto basic, DoctorBarn fromBarn, DoctorBarn toBarn) {
-        if (!CHG_SOW_ALLOWS.contains(toBarn.getPigType()) ||
-                !(fromBarn.getPigType() == PREG_SOW.getValue() && FARROW_TYPES.contains(toBarn.getPigType()))) {
+//        if (!CHG_SOW_ALLOWS.contains(toBarn.getPigType()) ||
+//                !(fromBarn.getPigType() == PREG_SOW.getValue() && FARROW_TYPES.contains(toBarn.getPigType())) || !(Objects.equals(fromBarn.getPigType(), DELIVER_SOW.getValue()) && MATING_FARROW_TYPES.contains(toBarn.getPigType()))) {
+//            throw new JsonResponseException(500, "input.sowToBarnId.error");
+//        }
+
+        if(!(MATING_FARROW_TYPES.contains(fromBarn.getPigType()) && MATING_FARROW_TYPES.contains(toBarn.getPigType()))) {
             throw new JsonResponseException(500, "input.sowToBarnId.error");
         }
 
         //判断去配种还是去分娩
-        basic.setEventType(Objects.equals(toBarn.getPigType(), PigType.MATE_SOW.getValue()) ? PigEvent.TO_MATING.getKey() : PigEvent.TO_FARROWING.getKey());
+        basic.setEventType(Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) ? PigEvent.TO_MATING.getKey() : PigEvent.TO_FARROWING.getKey());
         return RespHelper.or500(doctorPigEventWriteService.chgSowLocationEvent(chg, basic));
     }
 

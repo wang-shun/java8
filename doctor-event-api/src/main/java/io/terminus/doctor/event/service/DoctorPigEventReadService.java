@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
@@ -127,6 +128,13 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<List<DoctorPigEvent>> addWeanEventAfterFosAndPigLets();
+
+    /**
+     * 查询母猪胎次中数据平均值
+     * @param pigId
+     * @return
+     */
+    Response<DoctorSowParityAvgDto> querySowParityAvg(@NotNull(message = "input.pigId.empty") Long pigId);
 
 
 }
