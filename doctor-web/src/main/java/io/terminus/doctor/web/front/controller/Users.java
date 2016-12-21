@@ -319,8 +319,8 @@ public class Users {
     }
 
     private void checkMobileExist(String mobile) {
-        User exist = RespHelper.or500(doctorUserReadService.findBy(mobile, LoginType.MOBILE));
-        if (exist != null) {
+        Response<User> exist = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
+        if (!exist.isSuccess()) {
             log.error("change mobile exist, loginerId:{} mobile:{}", UserUtil.getUserId(), mobile);
             throw new JsonResponseException("mobile.already.exist");
         }

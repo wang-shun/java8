@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.DoctorPigEntryEventDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -37,7 +38,12 @@ public interface DoctorPigEventWriteService {
      */
     Response<Long> pigEntryEvent(@NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto,
                                     @NotNull(message = "input.dto.empty") DoctorFarmEntryDto doctorFarmEntryDto);
-
+    /**
+     * 批量公猪， 母猪 进仓事件信息
+     * @param doctorPigEntryEventDtos 事件dto
+     * @return
+     */
+    Response<List<Long>> batchPigEntryEvent(List<DoctorPigEntryEventDto> doctorPigEntryEventDtos);
     /**
      * 猪只疾病事件录入
      * @param doctorDiseaseDto

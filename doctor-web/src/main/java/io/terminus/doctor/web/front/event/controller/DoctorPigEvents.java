@@ -250,13 +250,16 @@ public class DoctorPigEvents {
                 break;
             case "1":
                 //母猪
+                params.put("ordered",0);
                 result = this.queryPigEventsByCriteria(params, pageNo, pageSize);
                 break;
             //公猪
             case "2":
+                params.put("ordered",0);
                 result = this.queryPigEventsByCriteria(params, pageNo, pageSize);
                 break;
             case "3":
+                params.put("ordered",0);
                 result = this.queryPigEventsByCriteria(params, pageNo, pageSize);
                 break;
             default:
