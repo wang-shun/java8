@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -233,10 +234,10 @@ public class DoctorBarns {
         List<Integer> barnTypes;
         if (Objects.equals(eventType, PigEvent.CHG_LOCATION.getKey())) {
             barnTypes = getTransBarnTypes(pigIds);
-        } else if (Objects.equals(eventType, PigEvent.TO_MATING.getKey())) {
-            barnTypes = PigType.MATING_TYPES;
-        } else if (Objects.equals(eventType, PigEvent.TO_FARROWING.getKey())) {
-            barnTypes = PigType.FARROW_TYPES;
+//        } else if (Objects.equals(eventType, PigEvent.TO_MATING.getKey())) {
+//            barnTypes = PigType.MATING_TYPES;
+//        } else if (Objects.equals(eventType, PigEvent.TO_FARROWING.getKey())) {
+//            barnTypes = PigType.FARROW_TYPES;
         } else {
             //转舍类型: 普通转舍, 去配种, 去分娩, 其他报错
             throw new JsonResponseException("not.trans.barn.type");
@@ -251,11 +252,22 @@ public class DoctorBarns {
         //遍历求猪舍类型交集
         for (Long pigId : Splitters.splitToLong(pigIds, Splitters.COMMA)) {
             DoctorBarn pigBarn = RespHelper.or500(doctorPigReadService.findBarnByPigId(pigId));
-            if (PigType.MATING_TYPES.contains(pigBarn.getPigType())) {
+            DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
+            if (Objects.equals(pigBarn.getPigType(), PigType.MATE_SOW.getValue())) {
                 barnTypes.retainAll(PigType.MATING_TYPES);
+            } else if (Objects.equals(pigBarn.getPigType(), PigType.PREG_SOW.getValue())) {
+                if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Pregnancy.getKey())) {
+                    barnTypes.retainAll(PigType.MATING_FARROW_TYPES);
+                } else {
+                    barnTypes.retainAll(PigType.MATING_TYPES);
+                }
             }
             else if (PigType.FARROW_TYPES.contains(pigBarn.getPigType())) {
-                barnTypes.retainAll(PigType.FARROW_TYPES);
+                if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey())) {
+                    barnTypes.retainAll(PigType.MATING_FARROW_TYPES);
+                } else {
+                    barnTypes.retainAll(PigType.FARROW_TYPES);
+                }
             }
             else if (PigType.HOUBEI_TYPES.contains(pigBarn.getPigType())) {
                 barnTypes.retainAll(PigType.HOUBEI_TYPES);

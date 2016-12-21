@@ -84,6 +84,8 @@ public enum PigType {
     //后备舍类型
     public static final List<Integer> HOUBEI_TYPES = Lists.newArrayList(RESERVE.getValue());
 
+    //配种与分娩
+    public static final List<Integer> MATING_FARROW_TYPES = Lists.newArrayList(MATE_SOW.getValue(), PREG_SOW.getValue(), DELIVER_SOW.getValue());
     //所有类型
     public static final List<Integer> ALL_TYPES = Lists.newArrayList(
             NURSERY_PIGLET.getValue(),
