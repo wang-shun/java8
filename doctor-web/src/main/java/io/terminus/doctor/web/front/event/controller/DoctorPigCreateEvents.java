@@ -859,10 +859,4 @@ public class DoctorPigCreateEvents {
         }
 
     }
-
-    public static void main(String[] args) {
-        String str = "{\"doctorFarmEntryDtos\":[{\"pigCode\":\"3\",\"barnId\":\"1\",\"intoDate\":\"2\",\"birthDate\":\"2\",\"source\":\"0\",\"breed\":\"1\",\"breedType\":\"0\",\"parity\":\"1\"}]}";
-        DoctorFarmEntryDtoList  dto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(str, DoctorFarmEntryDtoList.class);
-        System.out.println(dto);
-    }
 }
