@@ -16,5 +16,6 @@ import java.util.List;
 @AllArgsConstructor
 public class DoctorFarmEntryDtoList implements Serializable {
     private static final long serialVersionUID = -5405285433515914820L;
-    List<DoctorFarmEntryDto> doctorFarmEntryDtos;
+    private Long farmId;
+    private List<DoctorFarmEntryDto> doctorFarmEntryDtos;
 }

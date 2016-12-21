@@ -50,6 +50,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -62,6 +63,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.PigType.*;
 import static java.util.Objects.isNull;
 
@@ -77,7 +79,7 @@ import static java.util.Objects.isNull;
 @SuppressWarnings("all")
 public class DoctorPigCreateEvents {
 
-    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JSON_NON_DEFAULT_MAPPER.getMapper();
 
     //状态转舍允许类型
     private static final List<Integer> CHG_SOW_ALLOWS = Lists.newArrayList(DELIVER_SOW.getValue(), MATE_SOW.getValue(), PREG_SOW.getValue());
@@ -91,7 +93,7 @@ public class DoctorPigCreateEvents {
     private final DoctorPigEventReadService doctorPigEventReadService;
     private final DoctorGroupWebService doctorGroupWebService;
 
-    private static JsonMapper jsonMapper = JsonMapper.JSON_NON_DEFAULT_MAPPER;
+    private static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
 
     @Autowired
     public DoctorPigCreateEvents(DoctorPigEventWriteService doctorPigEventWriteService,
@@ -427,8 +429,7 @@ public class DoctorPigCreateEvents {
 
     @RequestMapping(value = "/batchCreateEntryInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<Long> batchCreateEntryInfo(@RequestParam("farmId") Long farmId,
-                                 @RequestParam("doctorFarmEntryJsonList") DoctorFarmEntryDtoList doctorFarmEntryDtoList) {
+    public List<Long> batchCreateEntryInfo(@RequestBody DoctorFarmEntryDtoList doctorFarmEntryDtoList) {
         if (doctorFarmEntryDtoList == null || Arguments.isNullOrEmpty(doctorFarmEntryDtoList.getDoctorFarmEntryDtos())) {
             Lists.newArrayList();
         }
@@ -440,7 +441,7 @@ public class DoctorPigCreateEvents {
                 throw new JsonResponseException("input.pigEntryJsonConvert.error");
             }
             doctorPigEntryEventDto.setDoctorFarmEntryDto(doctorFarmEntryDto);
-            doctorPigEntryEventDto.setDoctorBasicInputInfoDto(buildBasicEntryInputInfo(farmId, doctorFarmEntryDto, PigEvent.ENTRY));
+            doctorPigEntryEventDto.setDoctorBasicInputInfoDto(buildBasicEntryInputInfo(doctorFarmEntryDtoList.getFarmId(), doctorFarmEntryDto, PigEvent.ENTRY));
             result.add(doctorPigEntryEventDto);
         }
         return RespHelper.or500(doctorPigEventWriteService.batchPigEntryEvent(result));
@@ -857,5 +858,11 @@ public class DoctorPigCreateEvents {
             return Boolean.FALSE;
         }
 
+    }
+
+    public static void main(String[] args) {
+        String str = "{\"doctorFarmEntryDtos\":[{\"pigCode\":\"3\",\"barnId\":\"1\",\"intoDate\":\"2\",\"birthDate\":\"2\",\"source\":\"0\",\"breed\":\"1\",\"breedType\":\"0\",\"parity\":\"1\"}]}";
+        DoctorFarmEntryDtoList  dto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(str, DoctorFarmEntryDtoList.class);
+        System.out.println(dto);
     }
 }
