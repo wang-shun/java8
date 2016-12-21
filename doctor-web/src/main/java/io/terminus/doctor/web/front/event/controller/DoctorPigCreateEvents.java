@@ -15,6 +15,7 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.DoctorPigEntryEventDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
@@ -420,6 +421,24 @@ public class DoctorPigCreateEvents {
         }
         return RespHelper.or500(doctorPigEventWriteService.pigEntryEvent(
                 buildBasicEntryInputInfo(farmId, doctorFarmEntryDto, PigEvent.ENTRY), doctorFarmEntryDto));
+    }
+
+    @RequestMapping(value = "/batchCreateEntryInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<Long> batchCreateEntryInfo(@RequestParam("farmId") Long farmId,
+                                 @RequestParam("doctorFarmEntryJsonList") List<String> doctorFarmEntryDtoJsonList) {
+        List<DoctorPigEntryEventDto> result=Lists.newArrayList();
+        for (String str:doctorFarmEntryDtoJsonList) {
+            DoctorPigEntryEventDto doctorPigEntryEventDto=new DoctorPigEntryEventDto();
+            DoctorFarmEntryDto doctorFarmEntryDto = jsonMapper.fromJson(str, DoctorFarmEntryDto.class);
+            if (isNull(doctorFarmEntryDto)) {
+                throw new JsonResponseException("input.pigEntryJsonConvert.error");
+            }
+            doctorPigEntryEventDto.setDoctorFarmEntryDto(doctorFarmEntryDto);
+            doctorPigEntryEventDto.setDoctorBasicInputInfoDto(buildBasicEntryInputInfo(farmId, doctorFarmEntryDto, PigEvent.ENTRY));
+            result.add(doctorPigEntryEventDto);
+        }
+        return RespHelper.or500(doctorPigEventWriteService.batchPigEntryEvent(result));
     }
 
     @RequestMapping(value = "/createSowEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

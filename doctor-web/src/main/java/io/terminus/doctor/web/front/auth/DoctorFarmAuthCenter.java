@@ -66,7 +66,7 @@ public class DoctorFarmAuthCenter {
             throw new ServiceException("user.not.auth.barn");
         }
 
-        List<Long> barnIds = MoreObjects.firstNonNull(permission.getBarnIdsList(), new ArrayList<>());
+        List<Long> barnIds = MoreObjects.firstNonNull(permission.getBarnIdsList(), new ArrayList<Long>());
         if (!barnIds.contains(barnId)) {
             throw new ServiceException("user.not.auth.barn");
         }
