@@ -152,6 +152,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
                 .isRemoval(IsOrNot.NO.getValue()).currentMatingCount(0)
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
                 .currentParity(dto.getParity())
+                .weight(dto.getWeight())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
         if (Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())) {

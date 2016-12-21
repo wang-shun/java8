@@ -72,6 +72,8 @@ public class DoctorFarmEntryDto extends AbstractPigEventInputDto implements Seri
 
     private String boarTypeName;
 
+    private Double weight;
+
     // sow
     private String earCode; // 耳缺号
 
