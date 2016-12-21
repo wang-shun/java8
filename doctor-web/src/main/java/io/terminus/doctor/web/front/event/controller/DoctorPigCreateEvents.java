@@ -7,6 +7,7 @@ import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
@@ -38,6 +39,7 @@ import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.web.front.event.dto.DoctorFarmEntryDtoList;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.event.service.DoctorSowEventCreateService;
 import io.terminus.pampas.common.UserUtil;
@@ -426,9 +428,12 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/batchCreateEntryInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<Long> batchCreateEntryInfo(@RequestParam("farmId") Long farmId,
-                                 @RequestParam("doctorFarmEntryJsonList") List<DoctorFarmEntryDto> doctorFarmEntryDtoJsonList) {
+                                 @RequestParam("doctorFarmEntryJsonList") DoctorFarmEntryDtoList doctorFarmEntryDtoList) {
+        if (doctorFarmEntryDtoList == null || Arguments.isNullOrEmpty(doctorFarmEntryDtoList.getDoctorFarmEntryDtos())) {
+            Lists.newArrayList();
+        }
         List<DoctorPigEntryEventDto> result=Lists.newArrayList();
-        for (DoctorFarmEntryDto doctorFarmEntryDto :doctorFarmEntryDtoJsonList) {
+        for (DoctorFarmEntryDto doctorFarmEntryDto : doctorFarmEntryDtoList.getDoctorFarmEntryDtos()) {
             DoctorPigEntryEventDto doctorPigEntryEventDto=new DoctorPigEntryEventDto();
 //            DoctorFarmEntryDto doctorFarmEntryDto = jsonMapper.fromJson(str, DoctorFarmEntryDto.class);
             if (isNull(doctorFarmEntryDto)) {
