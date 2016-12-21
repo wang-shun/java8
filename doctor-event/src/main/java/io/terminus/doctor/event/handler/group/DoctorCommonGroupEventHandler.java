@@ -211,6 +211,7 @@ public class DoctorCommonGroupEventHandler {
         farmEntryDto.setBreedTypeName(input.getGeneticName());
         farmEntryDto.setMotherCode(input.getMotherEarCode());
         farmEntryDto.setEarCode(input.getEarCode());
+        farmEntryDto.setWeight(input.getWeight());
 
         Long pigId = orServEx(doctorPigEventWriteService.pigEntryEvent(basicDto, farmEntryDto));
 
