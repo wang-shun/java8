@@ -13,11 +13,8 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
@@ -25,7 +22,6 @@ import io.terminus.doctor.workflow.core.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
@@ -90,36 +86,6 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
             doctorPigTrack.setFarrowQty(0);  //分娩数 0
             doctorPigTrack.setFarrowAvgWeight(0D);
             doctorPigTrack.setWeanAvgWeight(0D);
-            DoctorPig doctorPig = doctorPigDao.findById(doctorPigTrack.getPigId());
-            DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
-                    .type(PigEvent.WEAN.getKey())
-                    .pigId(doctorPigTrack.getPigId())
-                    .pigStatusBefore(PigStatus.FEED.getKey())
-                    .pigStatusAfter(PigStatus.Wean.getKey())
-                    .isAuto(IsOrNot.YES.getValue())
-                    .barnId(doctorPigTrack.getCurrentBarnId())
-                    .barnName(doctorPigTrack.getCurrentBarnName())
-                    .relPigEventId(pigEventId)
-                    .partweanDate(new Date())
-                    .farmId(doctorPigTrack.getFarmId())
-                    .weanCount(changeCount)
-                    .pigCode(doctorPig.getPigCode())
-                    .name(PigEvent.WEAN.getName())
-                    .weanAvgWeight(0D)
-                    .farmName(basic.getFarmName())
-                    .eventAt(basic.generateEventAtFromExtra(extra))
-                    .kind(DoctorPig.PIG_TYPE.SOW.getKey())
-                    .orgId(basic.getOrgId()).orgName(basic.getOrgName())
-                    .npd(0)
-                    .dpnpd(0)
-                    .pfnpd(0)
-                    .plnpd(0)
-                    .psnpd(0)
-                    .pynpd(0)
-                    .ptnpd(0)
-                    .jpnpd(0)
-                    .build();
-            doctorPigEventDao.create(doctorPigEvent);
 
         }
         doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
