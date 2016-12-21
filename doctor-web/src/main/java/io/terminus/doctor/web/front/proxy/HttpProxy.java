@@ -1,7 +1,6 @@
 package io.terminus.doctor.web.front.proxy;
 
 import com.github.kevinsawicki.http.HttpRequest;
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -29,39 +27,36 @@ import java.util.Map;
 @RequestMapping("/api/gateway/proxy")
 @Slf4j
 public class HttpProxy {
-    private final String APP_KEY="pigDoctorPC";
-    private final String APP_SECRET="pigDoctorPCSecret";
-    @Value("${openApi.url}")
-    private  String urlConf="";
-    @RequestMapping(value = "",method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String proxy(@RequestParam String pampasCall, @RequestParam String sid,@RequestParam Map<String,String> params){
+    private static final String APP_KEY="pigDoctorPC";
+    private static final String APP_SECRET="pigDoctorPCSecret";
+
+    @Value("${openApi.url:}")
+    private String urlConf;
+
+    @RequestMapping(value = "", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String proxy(@RequestParam String pampasCall,
+                        @RequestParam String sid,
+                        @RequestParam Map<String,String> params){
         if (Arguments.isEmpty(pampasCall)){
             throw new JsonResponseException("param.not.allow.null");
         }
         if (Arguments.isEmpty(sid)){
             throw new JsonResponseException("sid.not.allow.null");
         }
-        List<String> paramList= Lists.newArrayList();
-        paramList.add("appKey="+APP_KEY);
-        paramList.add("timestamp="+System.currentTimeMillis());
+        List<String> paramList = Lists.newArrayList();
+        paramList.add("appKey=" + APP_KEY);
+        paramList.add("timestamp=" + System.currentTimeMillis());
         if (params!=null){
-            params.forEach((k,v)->{
-                paramList.add(k+"="+v);
-            });
+            params.forEach((k,v) -> paramList.add(k+"="+v));
         }
-        paramList.sort(new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return o1.toLowerCase().compareTo(o2.toLowerCase());
-            }
-        });
-       String param= StringUtils.join(paramList,"&");
-       String sign= Hashing.md5().hashString(param+APP_SECRET, Charsets.UTF_8).toString();
+        paramList.sort(Comparator.comparing(String::toLowerCase));
+        String param= StringUtils.join(paramList,"&");
+        String sign= Hashing.md5().hashString(param+APP_SECRET, Charsets.UTF_8).toString();
         param+="&sign="+sign;
         String url=urlConf+"/api/gateway?"+param;
-        log.info(url);
-        String result=new HttpRequest(url,"GET").body();
-        log.info(result);
+        log.info("open api url:{}", url);
+        String result = HttpRequest.get(url).body();
+        log.info("open api result:{}", result);
         return result;
     }
 }
