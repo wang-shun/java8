@@ -55,7 +55,7 @@ public class HttpProxy {
         param+="&sign="+sign;
         String url=urlConf+"/api/gateway?"+param;
         log.info("open api url:{}", url);
-        String result = HttpRequest.get(url).body();
+        String result = HttpRequest.get(url).trustAllCerts().trustAllHosts().body();
         log.info("open api result:{}", result);
         return result;
     }
