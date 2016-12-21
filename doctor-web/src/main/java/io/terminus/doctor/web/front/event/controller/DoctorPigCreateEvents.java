@@ -426,11 +426,11 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/batchCreateEntryInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<Long> batchCreateEntryInfo(@RequestParam("farmId") Long farmId,
-                                 @RequestParam("doctorFarmEntryJsonList") List<String> doctorFarmEntryDtoJsonList) {
+                                 @RequestParam("doctorFarmEntryJsonList") List<DoctorFarmEntryDto> doctorFarmEntryDtoJsonList) {
         List<DoctorPigEntryEventDto> result=Lists.newArrayList();
-        for (String str:doctorFarmEntryDtoJsonList) {
+        for (DoctorFarmEntryDto doctorFarmEntryDto :doctorFarmEntryDtoJsonList) {
             DoctorPigEntryEventDto doctorPigEntryEventDto=new DoctorPigEntryEventDto();
-            DoctorFarmEntryDto doctorFarmEntryDto = jsonMapper.fromJson(str, DoctorFarmEntryDto.class);
+//            DoctorFarmEntryDto doctorFarmEntryDto = jsonMapper.fromJson(str, DoctorFarmEntryDto.class);
             if (isNull(doctorFarmEntryDto)) {
                 throw new JsonResponseException("input.pigEntryJsonConvert.error");
             }
