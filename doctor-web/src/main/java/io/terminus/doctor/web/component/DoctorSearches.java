@@ -276,8 +276,16 @@ public class DoctorSearches {
         searchFromMessage(params);
         createSearchWord(SearchType.GROUP.getValue(), params);
 
+        replaceKey(params, "q", "groupCode");
+        replaceKey(params, "pigTypes", "pigTypeCommas");
         Paging<DoctorGroupDetail> groupDetailPaging = RespHelper.or500(doctorGroupReadService.pagingGroup(BeanMapper.map(params, DoctorGroupSearchDto.class), pageNo, pageSize));
         return transGroupPaging(groupDetailPaging);
+    }
+
+    private static void replaceKey(Map<String, String> params, String oldKey, String newKey) {
+        if (params.containsKey(oldKey)) {
+            params.put(newKey, params.get(oldKey));
+        }
     }
 
     private Paging<SearchedGroup> transGroupPaging(Paging<DoctorGroupDetail> groupDetailPaging) {
