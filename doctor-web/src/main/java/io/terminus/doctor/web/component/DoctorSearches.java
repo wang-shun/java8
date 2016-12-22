@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -122,15 +123,15 @@ public class DoctorSearches {
     public Paging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
                                              @RequestParam Map<String, String> params) {
-        List<String> barnIdList = getUserAccessBarnIds(params);
-        if (farmIdNotExist(params) || barnIdList == null) {
+        if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
-        params.put("barnIds", barnIdList.get(0));
         searchFromMessage(params);
         createSearchWord(SearchType.SOW.getValue(), params);
         params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
-        return RespHelper.or500(doctorPigReadService.pagingPig(params, pageNo, pageSize)).getPigs();
+        Map<String, Object> objectMap = transMapType(params);
+        objectMap.put("barnIds", RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(UserUtil.getUserId())).getBarnIdsList());
+        return RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
     }
 
     /**
@@ -675,4 +676,17 @@ public class DoctorSearches {
         });
     }
 
+    private Map<String, Object> transMapType(Map<String, String> map){
+        if(map == null){
+            return null;
+        }
+        Map<String, Object> result = new HashMap<>();
+        for(Map.Entry<String, String> entry : map.entrySet()){
+            String value = entry.getValue();
+            if(!Strings.isNullOrEmpty(value)){
+                result.put(entry.getKey(), value);
+            }
+        }
+        return result;
+    }
 }

@@ -7,11 +7,30 @@
 
 <mapper namespace="SearchedPig">
 
+    <sql id="criteria">
+        <if test="farmId != null">AND a.farm_id = #{farmId}</if>
+        <if test="barnIds != null  &amp;&amp; barnIds.size() > 0">AND b.current_barn_id IN
+            <foreach collection="barnIds" item="barnId" open="(" separator="," close=")">
+                #{barnId}
+            </foreach>
+        </if>
+        <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND a.pig_type IN
+            <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
+                #{type}
+            </foreach>
+        </if>
+        <if test="status != null">AND b.status = #{status}</if>
+        <if test="pigType != null">AND a.pig_type = #{pigType}</if>
+        <if test="pigCode != null">AND a.pig_code like concat('%', #{pigCode}, '%')</if>
+    </sql>
+
     <select id="count" parameterType="map" resultType="long" >
         SELECT count(1) FROM doctor_pigs a
         LEFT JOIN doctor_pig_tracks b
           ON a.id = b.pig_id
-        WHERE id = #{id}
+        <where>
+            <include refid="criteria"/>
+        </where>
     </select>
 
     <select id="paging" parameterType="map" resultType="io.terminus.doctor.event.search.pig.SearchedPig" >
@@ -19,20 +38,7 @@
         LEFT JOIN doctor_pig_tracks b
           ON a.id = b.pig_id
         <where>
-            <if test="farmId != null">AND a.farm_id = #{farmId}</if>
-            <if test="barnIds != null  &amp;&amp; barnIds.size() > 0">AND b.current_barn_id IN
-                <foreach collection="barnIds" item="barnId" open="(" separator="," close=")">
-                    #{barnId}
-                </foreach>
-            </if>
-            <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND a.pig_type IN
-                <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
-                    #{type}
-                </foreach>
-            </if>
-            <if test="status != null">AND b.status = #{status}</if>
-            <if test="pigType != null">AND a.pigType = #{pigType}</if>
-            <if test="pigCode != null">AND a.pig_code like concat('%', #{pigCode}, '%')</if>
+            <include refid="criteria"/>
         </where>
         ORDER BY a.pig_code
         LIMIT #{offset}, #{limit}
