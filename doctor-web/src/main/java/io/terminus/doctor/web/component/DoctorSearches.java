@@ -5,6 +5,7 @@ import com.google.api.client.util.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.enums.SearchType;
@@ -12,7 +13,10 @@ import io.terminus.doctor.basic.search.material.MaterialSearchReadService;
 import io.terminus.doctor.basic.search.material.SearchedMaterial;
 import io.terminus.doctor.basic.service.DoctorSearchHistoryService;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
+import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -26,8 +30,8 @@ import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.msg.dto.DoctorMessageUserDto;
-import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageUserReadService;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
@@ -71,7 +75,7 @@ public class DoctorSearches {
 
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
-    private final DoctorMessageReadService doctorMessageReadService;
+    private final DoctorGroupReadService doctorGroupReadService;
 
     private final DoctorMessageUserReadService doctorMessageUserReadService;
 
@@ -85,7 +89,7 @@ public class DoctorSearches {
                           BarnSearchReadService barnSearchReadService,
                           MaterialSearchReadService materialSearchReadService,
                           DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
-                          DoctorMessageReadService doctorMessageReadService,
+                          DoctorGroupReadService doctorGroupReadService,
                           DoctorMessageUserReadService doctorMessageUserReadService) {
         this.pigSearchReadService = pigSearchReadService;
         this.groupSearchReadService = groupSearchReadService;
@@ -93,7 +97,7 @@ public class DoctorSearches {
         this.barnSearchReadService = barnSearchReadService;
         this.materialSearchReadService = materialSearchReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
-        this.doctorMessageReadService = doctorMessageReadService;
+        this.doctorGroupReadService = doctorGroupReadService;
         this.doctorMessageUserReadService = doctorMessageUserReadService;
     }
 
@@ -271,7 +275,24 @@ public class DoctorSearches {
         params.put("barnIds", barnIdList.get(0));
         searchFromMessage(params);
         createSearchWord(SearchType.GROUP.getValue(), params);
-        return RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
+
+        Paging<DoctorGroupDetail> groupDetailPaging = RespHelper.or500(doctorGroupReadService.pagingGroup(BeanMapper.map(params, DoctorGroupSearchDto.class), pageNo, pageSize));
+        return transGroupPaging(groupDetailPaging);
+    }
+
+    private Paging<SearchedGroup> transGroupPaging(Paging<DoctorGroupDetail> groupDetailPaging) {
+        List<SearchedGroup> searchedGroups = groupDetailPaging.getData().stream()
+                .map(gd -> {
+                    SearchedGroup group = BeanMapper.map(gd.getGroup(), SearchedGroup.class);
+                    PigType pigType = PigType.from(group.getPigType());
+                    group.setPigTypeName(pigType == null ? "" : pigType.getDesc());
+                    group.setSex(gd.getGroupTrack().getSex());
+                    group.setQuantity(gd.getGroupTrack().getQuantity());
+                    group.setAvgDayAge(gd.getGroupTrack().getAvgDayAge());
+                    return group;
+                })
+                .collect(Collectors.toList());
+        return new Paging<>(groupDetailPaging.getTotal(), searchedGroups);
     }
 
     /**
