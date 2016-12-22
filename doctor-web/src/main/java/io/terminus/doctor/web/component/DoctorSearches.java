@@ -2,6 +2,8 @@ package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
@@ -268,6 +270,7 @@ public class DoctorSearches {
     public Paging<SearchedGroup> searchGroups(@RequestParam(required = false) Integer pageNo,
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
+        params = filterNullOrEmpty(params);
         List<String> barnIdList = getUserAccessBarnIds(params);
         if (farmIdNotExist(params) || barnIdList == null) {
             return new Paging<>(0L, Collections.emptyList());
@@ -278,7 +281,15 @@ public class DoctorSearches {
 
         replaceKey(params, "q", "groupCode");
         replaceKey(params, "pigTypes", "pigTypeCommas");
-        Paging<DoctorGroupDetail> groupDetailPaging = RespHelper.or500(doctorGroupReadService.pagingGroup(BeanMapper.map(params, DoctorGroupSearchDto.class), pageNo, pageSize));
+
+        List<Integer> pigTypes = null;
+        if(params.get("pigTypes") != null){
+            pigTypes = Splitters.splitToInteger(params.get("pigTypes"), Splitters.COMMA);
+            params.remove("pigTypes");
+        }
+        DoctorGroupSearchDto searchDto = JsonMapper.nonEmptyMapper().fromJson(JsonMapper.nonEmptyMapper().toJson(params), DoctorGroupSearchDto.class);
+        searchDto.setPigTypes(pigTypes);
+        Paging<DoctorGroupDetail> groupDetailPaging = RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, pageSize));
         return transGroupPaging(groupDetailPaging);
     }
 
@@ -650,6 +661,13 @@ public class DoctorSearches {
         }else {
             return Boolean.FALSE;
         }
+    }
+
+    private Map<String, String> filterNullOrEmpty(Map<String, String> criteria) {
+        return Maps.filterEntries(criteria, entry -> {
+            String v = entry.getValue();
+            return !Strings.isNullOrEmpty(v);
+        });
     }
 
 }
