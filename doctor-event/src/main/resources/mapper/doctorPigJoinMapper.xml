@@ -31,9 +31,10 @@
                 </foreach>
             </if>
             <if test="status != null">AND b.status = #{status}</if>
+            <if test="pigType != null">AND a.pigType = #{pigType}</if>
             <if test="pigCode != null">AND a.pig_code like concat('%', #{pigCode}, '%')</if>
         </where>
-        LIMIT #{offset}, #{limit}
         ORDER BY a.pig_code
+        LIMIT #{offset}, #{limit}
     </select>
 </mapper>

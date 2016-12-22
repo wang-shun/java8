@@ -158,7 +158,7 @@
         <where>
             <include refid="criteria"/>
         </where>
-        ORDER BY updated_at DESC
+        ORDER BY groupCode DESC
         LIMIT #{offset}, #{limit}
     </select>
 
