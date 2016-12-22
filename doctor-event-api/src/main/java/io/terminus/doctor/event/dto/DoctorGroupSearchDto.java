@@ -39,11 +39,9 @@ public class DoctorGroupSearchDto extends DoctorGroup implements Serializable {
     private String pigTypeCommas; //逗号分隔类型
 
     @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private List<Long> barnIdList;
 
     @Setter(AccessLevel.NONE)
-    @Getter(AccessLevel.NONE)
     private String barnIds;
 
     public void setBarnIds(String barnIds) {
