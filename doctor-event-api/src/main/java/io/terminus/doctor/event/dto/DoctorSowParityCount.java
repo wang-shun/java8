@@ -28,7 +28,7 @@ public class DoctorSowParityCount implements Serializable{
 
     private static final long serialVersionUID = -8894596972819863250L;
 
-    private Integer parity;     // 当前胎次信息
+    private int parity;     // 当前胎次信息
 
     private Date farrowingDate; // 母猪分娩时间
 
@@ -36,21 +36,21 @@ public class DoctorSowParityCount implements Serializable{
 
     private String matingStaff; //配种人员
 
-    private Integer pigLetCount;    //产仔数量
+    private int pigLetCount;    //产仔数量
 
-    private Double avgBirthWeight;  //出生均重
+    private double avgBirthWeight;  //出生均重
 
-    private Integer healthCount;    //健崽数量
+    private int healthCount;    //健崽数量
 
-    private Integer weakCount;  // 弱仔数量
+    private int weakCount;  // 弱仔数量
 
-    private Integer deadCount;  //死亡数量
+    private int deadCount;  //死亡数量
 
-    private Integer mujiCount;  //畸形数量
+    private int mujiCount;  //畸形数量
 
-    private Integer weanCount;  // 断奶数量
+    private int weanCount;  // 断奶数量
 
-    private Double weanAvgWeight; //断奶均重
+    private double weanAvgWeight; //断奶均重
 
     private String boarCode;
 
@@ -102,5 +102,4 @@ public class DoctorSowParityCount implements Serializable{
         }
         return doctorSowParityCount;
     }
-
 }
