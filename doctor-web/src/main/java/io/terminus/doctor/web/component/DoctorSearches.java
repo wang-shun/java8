@@ -31,6 +31,7 @@ import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.msg.dto.DoctorMessageUserDto;
 import io.terminus.doctor.msg.service.DoctorMessageUserReadService;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
@@ -79,6 +80,8 @@ public class DoctorSearches {
 
     private final DoctorMessageUserReadService doctorMessageUserReadService;
 
+    private final DoctorPigReadService doctorPigReadService;
+
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
 
@@ -90,7 +93,8 @@ public class DoctorSearches {
                           MaterialSearchReadService materialSearchReadService,
                           DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                           DoctorGroupReadService doctorGroupReadService,
-                          DoctorMessageUserReadService doctorMessageUserReadService) {
+                          DoctorMessageUserReadService doctorMessageUserReadService,
+                          DoctorPigReadService doctorPigReadService) {
         this.pigSearchReadService = pigSearchReadService;
         this.groupSearchReadService = groupSearchReadService;
         this.doctorSearchHistoryService = doctorSearchHistoryService;
@@ -99,6 +103,7 @@ public class DoctorSearches {
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorMessageUserReadService = doctorMessageUserReadService;
+        this.doctorPigReadService = doctorPigReadService;
     }
 
     /**
@@ -123,7 +128,7 @@ public class DoctorSearches {
         searchFromMessage(params);
         createSearchWord(SearchType.SOW.getValue(), params);
         params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
-        return RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
+        return RespHelper.or500(doctorPigReadService.pagingPig(params, pageNo, pageSize)).getPigs();
     }
 
     /**

@@ -17,6 +17,7 @@ import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.DoctorPigJoinDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -27,6 +28,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.search.pig.SearchedPig;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -69,19 +71,22 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
     private final DoctorPigEventDao doctorPigEventDao;
 
+    private final DoctorPigJoinDao doctorPigJoinDao;
+
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM");
 
     @Autowired
     public DoctorPigReadServiceImpl(DoctorPigDao doctorPigDao, DoctorPigTrackDao doctorPigTrackDao,
                                     DoctorPigEventReadService doctorPigEventReadService,
                                     DoctorBarnDao doctorBarnDao, DoctorPigInfoCache doctorPigInfoCache,
-                                    DoctorPigEventDao doctorPigEventDao){
+                                    DoctorPigEventDao doctorPigEventDao, DoctorPigJoinDao doctorPigJoinDao){
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventReadService = doctorPigEventReadService;
         this.doctorBarnDao = doctorBarnDao;
         this.doctorPigInfoCache = doctorPigInfoCache;
         this.doctorPigEventDao = doctorPigEventDao;
+        this.doctorPigJoinDao = doctorPigJoinDao;
     }
 
     @Override
@@ -202,6 +207,17 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         }catch (Exception e){
             log.error("paging doctor info dto by track pig fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("paging.doctorInfoTrack.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<SearchedPig>> pagingPig(Map<String, Object> params, Integer pageNo, Integer pageSize) {
+        try {
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            return Response.ok(doctorPigJoinDao.pigPagingWithJoin(params, pageInfo.getOffset(), pageInfo.getLimit()));
+        } catch (Exception e) {
+            log.error("paging pig failed, params:{}, pageNo:{}, pageSize:{}, cause:{}", params, pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.pig.fail");
         }
     }
 
