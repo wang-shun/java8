@@ -701,24 +701,24 @@ public class DoctorImportDataService {
                         continue;
                     }
                     if (Objects.equals(is.getStatus(), PigStatus.Mate.getKey())) {
-                        DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP);
+                        DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP, null, null);
                         putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId()));
                         continue;
                     }
                     if (Objects.equals(is.getStatus(), PigStatus.Pregnancy.getKey())) {
-                        DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP);
+                        DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP, 1, null);
                         DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG);
                         putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId(), pregYang.getId()));
                         continue;
                     }
                     if (Objects.equals(is.getStatus(), PigStatus.KongHuai.getKey())) {
-                        DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP);
+                        DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP, null, null);
                         DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, getCheckResultByRemark(is.getRemark()));
                         putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId(), pregYang.getId()));
                         continue;
                     }
                     if (Objects.equals(is.getStatus(), PigStatus.FEED.getKey())) {
-                        DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP);
+                        DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP, 1, 1);
                         DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG);
                         DoctorPigEvent farrowEvent = createFarrowEvent(is, sow, pregYang);
                         putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId(), pregYang.getId(), farrowEvent.getId()));
@@ -729,7 +729,7 @@ public class DoctorImportDataService {
                 }
 
                 //上一胎次生成：配种 -> 妊检 -> 分娩 -> 断奶
-                DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP);
+                DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP, 1, 1);
                 putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId()));
 
                 //如果妊检是不是阳性，只生成到妊检事件
@@ -958,7 +958,7 @@ public class DoctorImportDataService {
     }
 
     //创建配种事件
-    private DoctorPigEvent createMateEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent, DoctorMatingType mateType) {
+    private DoctorPigEvent createMateEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent, DoctorMatingType mateType, Integer isPreg, Integer isDevelivery) {
         DoctorPigEvent event = createSowEvent(info, sow);
         event.setEventAt(info.getMateDate());
         event.setType(PigEvent.MATING.getKey());
@@ -971,6 +971,8 @@ public class DoctorImportDataService {
         event.setMattingDate(event.getEventAt());
         event.setDoctorMateType(mateType.getKey());
         event.setBoarCode(info.getBoarCode());
+        event.setIsImpregnation(isPreg);        //是否受胎
+        event.setIsDelivery(isDevelivery);      //是否分娩
 
         DoctorMatingDto mate = new DoctorMatingDto();
         mate.setMatingBoarPigCode(info.getBoarCode());
