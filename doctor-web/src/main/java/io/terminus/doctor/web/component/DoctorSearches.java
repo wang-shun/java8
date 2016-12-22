@@ -284,7 +284,7 @@ public class DoctorSearches {
 
         List<Integer> pigTypes = null;
         if(params.get("pigTypes") != null){
-            pigTypes = Splitters.splitToInteger(params.get("pigTypes"), Splitters.COMMA);
+            pigTypes = Splitters.splitToInteger(params.get("pigTypes"), Splitters.UNDERSCORE);
             params.remove("pigTypes");
         }
         DoctorGroupSearchDto searchDto = JsonMapper.nonEmptyMapper().fromJson(JsonMapper.nonEmptyMapper().toJson(params), DoctorGroupSearchDto.class);

@@ -58,7 +58,7 @@
     <sql id="criteria">
         <if test="orgId != null">AND org_id = #{orgId}</if>
         <if test="farmId != null">AND farm_id = #{farmId}</if>
-        <if test="groupCode != null">AND group_code = #{groupCode}</if>
+        <if test="groupCode != null">AND group_code like concat('%', #{groupCode}, '%') </if>
         <if test="status != null">AND status = #{status}</if>
         <if test="initBarnId != null">AND init_barn_id = #{initBarnId}</if>
         <if test="currentBarnId != null">AND current_barn_id = #{currentBarnId}</if>
