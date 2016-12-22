@@ -34,7 +34,26 @@
     </select>
 
     <select id="paging" parameterType="map" resultType="io.terminus.doctor.event.search.pig.SearchedPig" >
-        SELECT count(1) FROM doctor_pigs a
+        SELECT
+            a.id AS id,
+            a.pig_code AS pigCode,
+            a.pig_type AS pigType,
+            a.farm_id AS farmId,
+            a.farm_name AS farmName,
+            a.in_farm_date AS inFarmDate,
+            b.out_farm_date AS outFarmDate,
+            b.status AS status,
+            a.breed_id AS breedId,
+            a.breed_name AS breedName,
+            a.genetic_id AS geneticId,
+            a.genetic_name AS geneticName,
+            b.current_barn_id AS currentBarnId,
+            b.current_barn_name AS currentBarnName,
+            a.birth_date AS birthDate,
+            b.weight AS weight,
+            a.in_farm_day_age AS dayAge,
+            b.current_parity AS currentParity
+        FROM doctor_pigs a
         LEFT JOIN doctor_pig_tracks b
           ON a.id = b.pig_id
         <where>
