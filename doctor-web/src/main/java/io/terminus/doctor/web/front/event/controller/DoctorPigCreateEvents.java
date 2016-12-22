@@ -7,6 +7,7 @@ import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
@@ -38,6 +39,7 @@ import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.web.front.event.dto.DoctorFarmEntryDtoList;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.event.service.DoctorSowEventCreateService;
 import io.terminus.pampas.common.UserUtil;
@@ -48,6 +50,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,6 +63,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.PigType.*;
 import static java.util.Objects.isNull;
 
@@ -75,7 +79,7 @@ import static java.util.Objects.isNull;
 @SuppressWarnings("all")
 public class DoctorPigCreateEvents {
 
-    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JSON_NON_DEFAULT_MAPPER.getMapper();
 
     //状态转舍允许类型
     private static final List<Integer> CHG_SOW_ALLOWS = Lists.newArrayList(DELIVER_SOW.getValue(), MATE_SOW.getValue(), PREG_SOW.getValue());
@@ -89,7 +93,7 @@ public class DoctorPigCreateEvents {
     private final DoctorPigEventReadService doctorPigEventReadService;
     private final DoctorGroupWebService doctorGroupWebService;
 
-    private static JsonMapper jsonMapper = JsonMapper.JSON_NON_DEFAULT_MAPPER;
+    private static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
 
     @Autowired
     public DoctorPigCreateEvents(DoctorPigEventWriteService doctorPigEventWriteService,
@@ -425,17 +429,19 @@ public class DoctorPigCreateEvents {
 
     @RequestMapping(value = "/batchCreateEntryInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<Long> batchCreateEntryInfo(@RequestParam("farmId") Long farmId,
-                                 @RequestParam("doctorFarmEntryJsonList") List<String> doctorFarmEntryDtoJsonList) {
+    public List<Long> batchCreateEntryInfo(@RequestBody DoctorFarmEntryDtoList doctorFarmEntryDtoList) {
+        if (doctorFarmEntryDtoList == null || Arguments.isNullOrEmpty(doctorFarmEntryDtoList.getDoctorFarmEntryDtos())) {
+            Lists.newArrayList();
+        }
         List<DoctorPigEntryEventDto> result=Lists.newArrayList();
-        for (String str:doctorFarmEntryDtoJsonList) {
+        for (DoctorFarmEntryDto doctorFarmEntryDto : doctorFarmEntryDtoList.getDoctorFarmEntryDtos()) {
             DoctorPigEntryEventDto doctorPigEntryEventDto=new DoctorPigEntryEventDto();
-            DoctorFarmEntryDto doctorFarmEntryDto = jsonMapper.fromJson(str, DoctorFarmEntryDto.class);
+//            DoctorFarmEntryDto doctorFarmEntryDto = jsonMapper.fromJson(str, DoctorFarmEntryDto.class);
             if (isNull(doctorFarmEntryDto)) {
                 throw new JsonResponseException("input.pigEntryJsonConvert.error");
             }
             doctorPigEntryEventDto.setDoctorFarmEntryDto(doctorFarmEntryDto);
-            doctorPigEntryEventDto.setDoctorBasicInputInfoDto(buildBasicEntryInputInfo(farmId, doctorFarmEntryDto, PigEvent.ENTRY));
+            doctorPigEntryEventDto.setDoctorBasicInputInfoDto(buildBasicEntryInputInfo(doctorFarmEntryDtoList.getFarmId(), doctorFarmEntryDto, PigEvent.ENTRY));
             result.add(doctorPigEntryEventDto);
         }
         return RespHelper.or500(doctorPigEventWriteService.batchPigEntryEvent(result));
