@@ -7,6 +7,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.DataEvent;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.search.barn.BarnSearchDumpService;
 import io.terminus.doctor.event.search.group.GroupDumpService;
 import io.terminus.doctor.event.search.pig.PigDumpService;
@@ -14,6 +15,7 @@ import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -63,6 +65,8 @@ public class DoctorImportDataController {
     private DoctorMoveReportService doctorMoveReportService;
     @Autowired
     private JedisTemplate jedisTemplate;
+    @Autowired
+    private DoctorFarmReadService doctorFarmReadService;
 
     @PostConstruct
     public void init () throws Exception{
@@ -110,6 +114,7 @@ public class DoctorImportDataController {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
+                    //ignore this exception
                 }
             }
         }
@@ -209,4 +214,19 @@ public class DoctorImportDataController {
         }
     }
 
+
+    @RequestMapping(value = "/updateMateEvent", method = RequestMethod.GET)
+    public boolean updateMateEvent(@RequestParam(value = "farmId", required = false) Long farmId) {
+        try {
+            if (farmId != null) {
+                doctorImportDataService.updateMateRate(farmId);
+            } else {
+                RespHelper.or500(doctorFarmReadService.findAllFarms()).forEach(farm -> doctorImportDataService.updateMateRate(farm.getId()));
+            }
+            return true;
+        } catch (Exception e) {
+            log.error("update mate event failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }
