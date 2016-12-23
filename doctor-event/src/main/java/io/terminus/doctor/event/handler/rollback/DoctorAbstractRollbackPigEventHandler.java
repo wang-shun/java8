@@ -11,7 +11,6 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
-import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -73,7 +72,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
      */
     @Override
     public final boolean canRollback(DoctorPigEvent pigEvent) {
-        return Objects.equals(pigEvent.getIsAuto(), IsOrNot.NO.getValue()) &&
+        return isLastManualEvent(pigEvent) &&
                 pigEvent.getEventAt().after(DateTime.now().plusMonths(-3).toDate()) &&
                 handleCheck(pigEvent);
     }
@@ -89,8 +88,8 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
     /**
      * 是否是最新事件
      */
-    protected boolean isLastEvent(DoctorPigEvent pigEvent) {
-        return RespHelper.orFalse(doctorPigEventReadService.isLastEvent(pigEvent.getPigId(), pigEvent.getId()));
+    protected boolean isLastManualEvent(DoctorPigEvent pigEvent) {
+        return RespHelper.orFalse(doctorPigEventReadService.isLastManualEvent(pigEvent.getPigId(), pigEvent.getId()));
     }
 
     /**

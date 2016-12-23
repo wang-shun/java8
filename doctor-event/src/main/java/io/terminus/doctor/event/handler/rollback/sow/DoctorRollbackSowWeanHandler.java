@@ -2,7 +2,6 @@ package io.terminus.doctor.event.handler.rollback.sow;
 
 import com.google.common.collect.Lists;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -48,10 +47,14 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
             if (toPigEvent == null) {
                 return false;
             }
-            DoctorPigEvent doctorPigEvent = RespHelper.orServEx(doctorPigEventReadService.canRollbackEvent(pigEvent.getPigId()));
-            return doctorPigEvent != null && Objects.equals(pigEvent.getId(), doctorPigEvent.getId());
+            DoctorBarn doctorBarn = doctorBarnDao.findById(weanDto.getChgLocationToBarnId());
+            if (Objects.equals(doctorBarn.getPigType(), PigType.MATE_SOW.getValue()) || Objects.equals(doctorBarn.getPigType(), PigType.PREG_SOW.getValue())) {
+                return doctorRollbackSowToChgLocationEventHandler.handleCheck(toPigEvent);
+            } else {
+                return doctorRollbackSowChgLocationEventHandler.handleCheck(toPigEvent);
+            }
         }
-        return isLastEvent(pigEvent);
+        return true;
     }
 
     @Override

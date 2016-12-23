@@ -450,6 +450,15 @@
         order by event_at desc, id desc limit 1;
     </select>
 
+    <select id="queryLastManualPigEventById" parameterType="long" resultMap="DoctorPigEventMap">
+        select
+        <include refid="cols_all"/>
+        from
+        <include refid="tb"/>
+        where pig_id = #{pigId} AND is_auto = 0
+        order by event_at desc, id desc limit 1;
+    </select>
+
     <select id="queryLastPigEventInWorkflow" parameterType="map" resultMap="DoctorPigEventMap">
         select
         <include refid="cols_all"/>

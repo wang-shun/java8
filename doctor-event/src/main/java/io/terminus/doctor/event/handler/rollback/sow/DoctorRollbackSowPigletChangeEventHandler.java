@@ -29,7 +29,7 @@ public class DoctorRollbackSowPigletChangeEventHandler extends DoctorAbstractRol
 
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-            if (!Objects.equals(pigEvent.getType(), PigEvent.PIGLETS_CHG.getKey()) || !isLastEvent(pigEvent)) {
+            if (!Objects.equals(pigEvent.getType(), PigEvent.PIGLETS_CHG.getKey())) {
             return false;
         }
 
