@@ -131,7 +131,22 @@ public class DoctorSearches {
         params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
         Map<String, Object> objectMap = transMapType(params);
         objectMap.put("barnIds", RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(UserUtil.getUserId())).getBarnIdsList());
-        return RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+        Paging<SearchedPig> paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+        paging.getData().forEach(searchedPig -> {
+            if(searchedPig.getPigType() != null){
+                DoctorPig.PIG_TYPE pig_type = DoctorPig.PIG_TYPE.from(searchedPig.getPigType());
+                if(pig_type != null){
+                    searchedPig.setPigTypeName(pig_type.getDesc());
+                }
+            }
+            if(searchedPig.getStatus() != null){
+                PigStatus pigStatus = PigStatus.from(searchedPig.getStatus());
+                if(pigStatus != null){
+                    searchedPig.setStatusName(pigStatus.getName());
+                }
+            }
+        });
+        return paging;
     }
 
     /**
