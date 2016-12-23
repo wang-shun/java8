@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -81,10 +82,10 @@ public class DoctorSowParityCount implements Serializable{
             } else {
                 doctorSowParityCount.setAvgBirthWeight(0d);
             }
-            doctorSowParityCount.setHealthCount(event.getHealthCount());
-            doctorSowParityCount.setWeakCount(event.getWeakCount());
-            doctorSowParityCount.setDeadCount(event.getDeadCount());
-            doctorSowParityCount.setMujiCount((event.getMnyCount() == null ? 0 : event.getMnyCount()) + (event.getJxCount() == null ? 0 : event.getJxCount()));
+            doctorSowParityCount.setHealthCount(MoreObjects.firstNonNull(event.getHealthCount(), 0));
+            doctorSowParityCount.setWeakCount(MoreObjects.firstNonNull(event.getWeakCount(), 0));
+            doctorSowParityCount.setDeadCount(MoreObjects.firstNonNull(event.getDeadCount(), 0));
+            doctorSowParityCount.setMujiCount(MoreObjects.firstNonNull(event.getMnyCount(), 0) + MoreObjects.firstNonNull(event.getJxCount(), 0));
         }
 
         if(eventTypeMap.containsKey(PigEvent.WEAN.getKey())){

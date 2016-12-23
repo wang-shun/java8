@@ -54,4 +54,15 @@ public class CountUtil {
     public static <T> DoubleStream doubleStream(List<T> datas, ToDoubleFunction<T> function, Predicate<T> predicate) {
         return datas.stream().filter(predicate).mapToDouble(function);
     }
+
+    public static Integer getIntegerDefault0(Object value) {
+        if (value == null) {
+            return 0;
+        }
+        try {
+            return Integer.valueOf(String.valueOf(value));
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 }
