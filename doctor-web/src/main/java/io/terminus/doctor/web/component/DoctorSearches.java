@@ -127,6 +127,7 @@ public class DoctorSearches {
             return new Paging<>(0L, Collections.emptyList());
         }
         searchFromMessage(params);
+        params.put("pigCode", params.get("q"));
         createSearchWord(SearchType.SOW.getValue(), params);
         params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
         Map<String, Object> objectMap = transMapType(params);
