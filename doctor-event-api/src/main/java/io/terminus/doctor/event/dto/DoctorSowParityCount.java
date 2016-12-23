@@ -76,7 +76,7 @@ public class DoctorSowParityCount implements Serializable{
         if(eventTypeMap.containsKey(PigEvent.FARROWING.getKey())){
             DoctorPigEvent event = eventTypeMap.get(PigEvent.FARROWING.getKey());
             doctorSowParityCount.setFarrowingDate(event.getFarrowingDate());
-            doctorSowParityCount.setPigLetCount(event.getLiveCount());
+            doctorSowParityCount.setPigLetCount(MoreObjects.firstNonNull(event.getLiveCount(), 0));
             if (event.getFarrowWeight() != null && event.getLiveCount() != null && event.getLiveCount() != 0) {
                 doctorSowParityCount.setAvgBirthWeight(Double.valueOf(String.format("%.2f", event.getFarrowWeight() / event.getLiveCount())));
             } else {
@@ -90,8 +90,8 @@ public class DoctorSowParityCount implements Serializable{
 
         if(eventTypeMap.containsKey(PigEvent.WEAN.getKey())){
             DoctorPigEvent event = eventTypeMap.get(PigEvent.WEAN.getKey());
-            doctorSowParityCount.setWeanCount(event.getWeanCount());
-            doctorSowParityCount.setWeanAvgWeight(event.getWeanAvgWeight());
+            doctorSowParityCount.setWeanCount(MoreObjects.firstNonNull(event.getWeanCount(), 0));
+            doctorSowParityCount.setWeanAvgWeight(MoreObjects.firstNonNull(event.getWeanAvgWeight(), 0D));
         }
 
         Optional<DoctorPigEvent> optional = doctorPigEvents.stream()
