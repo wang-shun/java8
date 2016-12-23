@@ -131,6 +131,10 @@ public class DoctorSearches {
         params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
         Map<String, Object> objectMap = transMapType(params);
         objectMap.put("barnIds", RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(UserUtil.getUserId())).getBarnIdsList());
+
+        if(objectMap.containsKey("statuses")){
+            objectMap.put("statuses", Splitters.splitToInteger(objectMap.get("statuses").toString(), Splitters.UNDERSCORE));
+        }
         Paging<SearchedPig> paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
         paging.getData().forEach(searchedPig -> {
             if(searchedPig.getPigType() != null){
@@ -698,7 +702,7 @@ public class DoctorSearches {
         Map<String, Object> result = new HashMap<>();
         for(Map.Entry<String, String> entry : map.entrySet()){
             String value = entry.getValue();
-            if(!Strings.isNullOrEmpty(value)){
+            if(StringUtils.isNotBlank(value)){
                 result.put(entry.getKey(), value);
             }
         }
