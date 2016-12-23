@@ -1,8 +1,8 @@
 package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.util.Lists;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
@@ -16,6 +16,7 @@ import io.terminus.doctor.basic.search.material.SearchedMaterial;
 import io.terminus.doctor.basic.service.DoctorSearchHistoryService;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
@@ -123,15 +124,23 @@ public class DoctorSearches {
     public Paging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
                                              @RequestParam Map<String, String> params) {
+        return pagePigs(pageNo, pageSize, params, SearchType.SOW, DoctorPig.PIG_TYPE.SOW);
+    }
+
+    private Paging<SearchedPig> pagePigs(Integer pageNo, Integer pageSize, Map<String, String> params, SearchType searchType, DoctorPig.PIG_TYPE pigType){
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
         searchFromMessage(params);
         params.put("pigCode", params.get("q"));
-        createSearchWord(SearchType.SOW.getValue(), params);
-        params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
+        createSearchWord(searchType.getValue(), params);
+        params.put("pigType", pigType.getKey().toString());
         Map<String, Object> objectMap = transMapType(params);
-        objectMap.put("barnIds", RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(UserUtil.getUserId())).getBarnIdsList());
+
+        BaseUser user = UserUtil.getCurrentUser();
+        if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+            objectMap.put("barnIds", RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId())).getBarnIdsList());
+        }
 
         if(objectMap.containsKey("statuses")){
             objectMap.put("statuses", Splitters.splitToInteger(objectMap.get("statuses").toString(), Splitters.UNDERSCORE));
@@ -237,15 +246,7 @@ public class DoctorSearches {
     public Paging<SearchedPig> searchBoarPigs(@RequestParam(required = false) Integer pageNo,
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
-        List<String> barnIdList = getUserAccessBarnIds(params);
-        if (farmIdNotExist(params) || barnIdList == null) {
-            return new Paging<>(0L, Collections.emptyList());
-        }
-        searchFromMessage(params);
-        params.put("barnIds", barnIdList.get(0));
-        createSearchWord(SearchType.BOAR.getValue(), params);
-        params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
-        return RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
+        return pagePigs(pageNo, pageSize, params, SearchType.BOAR, DoctorPig.PIG_TYPE.BOAR);
     }
 
     /**
@@ -297,11 +298,9 @@ public class DoctorSearches {
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
         params = filterNullOrEmpty(params);
-        List<String> barnIdList = getUserAccessBarnIds(params);
-        if (farmIdNotExist(params) || barnIdList == null) {
+        if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
-        params.put("barnIds", barnIdList.get(0));
         searchFromMessage(params);
         createSearchWord(SearchType.GROUP.getValue(), params);
 
@@ -315,6 +314,22 @@ public class DoctorSearches {
         }
         DoctorGroupSearchDto searchDto = JsonMapper.nonEmptyMapper().fromJson(JsonMapper.nonEmptyMapper().toJson(params), DoctorGroupSearchDto.class);
         searchDto.setPigTypes(pigTypes);
+
+        BaseUser user = UserUtil.getCurrentUser();
+        List<Long> permission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId())).getBarnIdsList();
+        if(StringUtils.isBlank(params.get("barnId"))){
+            if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+                searchDto.setBarnIdList(permission);
+            }
+        }else{
+            Long barnId = Long.valueOf(params.get("barnId"));
+            if(Objects.equals(user.getType(), UserType.FARM_SUB.value()) && !permission.contains(barnId)){
+                return new Paging<>(0L, Collections.emptyList());
+            }else{
+                searchDto.setBarnIdList(Lists.newArrayList(barnId));
+            }
+        }
+
         Paging<DoctorGroupDetail> groupDetailPaging = RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, pageSize));
         return transGroupPaging(groupDetailPaging);
     }

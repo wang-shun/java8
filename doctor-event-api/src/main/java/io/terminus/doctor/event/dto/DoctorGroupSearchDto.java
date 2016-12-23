@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -38,7 +39,7 @@ public class DoctorGroupSearchDto extends DoctorGroup implements Serializable {
 
     private String pigTypeCommas; //逗号分隔类型
 
-    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private List<Long> barnIdList;
 
     @Setter(AccessLevel.NONE)
@@ -53,10 +54,12 @@ public class DoctorGroupSearchDto extends DoctorGroup implements Serializable {
         }
     }
 
-    public List<Long> getBarnIdList() {
-        if (notEmpty(barnIds)) {
-            return Splitters.splitToLong(barnIds, Splitters.COMMA);
+    public void setBarnIdList(List<Long> barnIdList) {
+        this.barnIdList = barnIdList;
+        if(barnIdList == null){
+            barnIds = null;
+        }else{
+            barnIds = Joiner.on(",").join(barnIdList);
         }
-        return Lists.newArrayList();
     }
 }

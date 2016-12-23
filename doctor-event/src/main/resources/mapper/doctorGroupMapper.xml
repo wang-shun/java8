@@ -61,6 +61,12 @@
         <if test="status != null">AND status = #{status}</if>
         <if test="initBarnId != null">AND init_barn_id = #{initBarnId}</if>
         <if test="currentBarnId != null">AND current_barn_id = #{currentBarnId}</if>
+        <if test="barnIdList != null">
+            and current_barn_id in
+            <foreach collection="barnIdList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
         <if test="pigType != null">AND pig_type = #{pigType}</if>
         <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND pig_type IN
             <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
