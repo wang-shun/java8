@@ -11,6 +11,8 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
@@ -30,6 +32,7 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -214,10 +217,48 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     public Response<Paging<SearchedPig>> pagingPig(Map<String, Object> params, Integer pageNo, Integer pageSize) {
         try {
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
-            return Response.ok(doctorPigJoinDao.pigPagingWithJoin(params, pageInfo.getOffset(), pageInfo.getLimit()));
+            Paging<SearchedPig> paging = doctorPigJoinDao.pigPagingWithJoin(params, pageInfo.getOffset(), pageInfo.getLimit());
+
+            return Response.ok(new Paging<>(paging.getTotal(), mapSearchPig(paging.getData())));
         } catch (Exception e) {
             log.error("paging pig failed, params:{}, pageNo:{}, pageSize:{}, cause:{}", params, pageNo, pageSize, Throwables.getStackTraceAsString(e));
             return Response.fail("paging.pig.fail");
+        }
+    }
+
+    private List<SearchedPig> mapSearchPig(List<SearchedPig> pigs) {
+        return pigs.stream()
+                .map(pig -> {
+                    if (pig.getBirthDate() != null) {
+                        pig.setDayAge((int)(DateTime.now().minus(pig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1));
+                    }
+
+                    // 如果是待分娩状态, 获取妊娠检查的时间
+                    if (Objects.equals(pig.getStatus(), PigStatus.Farrow.getKey()) || Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey())) {
+                        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pig.getId());
+                        if (pigTrack == null || StringUtils.isNotBlank(pigTrack.getExtra())) {
+                            return pig;
+                        }
+                        Map<String, Object> map = pigTrack.getExtraMap();
+                        setCheckDate(pig, map);
+
+                        // 处理 KongHuaiPregCheckResult
+                        if (Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey()) && map.get("pregCheckResult") != null) {
+                            pig.setStatus(Integer.valueOf(String.valueOf(map.get("pregCheckResult"))));
+                        }
+                    }
+                    return pig;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取妊娠检查的时间
+     */
+    private static void setCheckDate(SearchedPig searchedPig, Map<String, Object> map) {
+        String key = "checkDate";
+        if (map != null && map.get(key) != null) {
+            searchedPig.getExtra().put(key, new Date((long)map.get(key)));
         }
     }
 
