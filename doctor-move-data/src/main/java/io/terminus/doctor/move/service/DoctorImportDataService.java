@@ -1310,4 +1310,60 @@ public class DoctorImportDataService {
         return row.getRowNum() > 0 && notEmpty(ImportExcelUtils.getString(row, 0));
     }
 
+    /**
+     * 修复配种率的各种统计
+     */
+    @Transactional
+    public void updateMateRate(Long farmId) {
+        //取出所有的配种，妊检，分娩事件
+        List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farmId, DoctorPig.PIG_TYPE.SOW.getKey(),
+                Lists.newArrayList(PigEvent.MATING.getKey(), PigEvent.PREG_CHECK.getKey(), PigEvent.FARROWING.getKey()));
+        events.stream()
+                .filter(event -> {
+                    if (Objects.equals(event.getType(), PigEvent.FARROWING.getKey())) {
+                        return true;
+                    }
+                    if (Objects.equals(event.getType(), PigEvent.PREG_CHECK.getKey())) {
+                        return Objects.equals(event.getPregCheckResult(), PregCheckResult.YANG.getKey());
+                    }
+                    return Objects.equals(event.getType(), PigEvent.MATING.getKey()) && event.getCurrentMatingCount() == 1;
+                })
+                .collect(Collectors.groupingBy(DoctorPigEvent::getPigId))
+                .entrySet()
+                .forEach(map -> map.getValue().stream()
+                        .collect(Collectors.groupingBy(DoctorPigEvent::getParity))
+                        .values()
+                        .forEach(this::updateMate));
+    }
+
+    //根据妊检和分娩 更新配种事件标记
+    private void updateMate(List<DoctorPigEvent> events) {
+        Map<Integer, DoctorPigEvent> eventMap = Maps.newHashMap();
+        events.forEach(event -> eventMap.put(event.getType(), event));
+
+        if (!eventMap.containsKey(PigEvent.MATING.getKey())) {
+            return;
+        }
+        DoctorPigEvent mateEvent = eventMap.get(PigEvent.MATING.getKey());
+        boolean needUpdate = false;
+        if (eventMap.containsKey(PigEvent.PREG_CHECK.getKey())) {
+            if (mateEvent.getIsImpregnation() == null || mateEvent.getIsImpregnation() != 1) {
+                needUpdate = true;
+                mateEvent.setIsImpregnation(1);
+            }
+        }
+        if (eventMap.containsKey(PigEvent.FARROWING.getKey())) {
+            if (mateEvent.getIsDelivery() == null || mateEvent.getIsDelivery() != 1) {
+                needUpdate = true;
+                mateEvent.setIsDelivery(1);
+            }
+        }
+        if (needUpdate) {
+            DoctorPigEvent updateEvent = new DoctorPigEvent();
+            updateEvent.setId(mateEvent.getId());
+            updateEvent.setIsImpregnation(mateEvent.getIsImpregnation());
+            updateEvent.setIsDelivery(mateEvent.getIsDelivery());
+            doctorPigEventDao.update(updateEvent);
+        }
+    }
 }
