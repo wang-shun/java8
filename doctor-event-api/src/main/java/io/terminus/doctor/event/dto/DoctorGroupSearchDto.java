@@ -1,12 +1,20 @@
 package io.terminus.doctor.event.dto;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.event.model.DoctorGroup;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc: 猪群查询条件
@@ -30,4 +38,28 @@ public class DoctorGroupSearchDto extends DoctorGroup implements Serializable {
     private List<Integer> pigTypes; //猪类list
 
     private String pigTypeCommas; //逗号分隔类型
+
+    @Setter(AccessLevel.NONE)
+    private List<Long> barnIdList;
+
+    @Setter(AccessLevel.NONE)
+    private String barnIds;
+
+    public void setBarnIds(String barnIds) {
+        this.barnIds = barnIds;
+        if (notEmpty(barnIds)) {
+            barnIdList = Splitters.splitToLong(barnIds, Splitters.COMMA);
+        } else {
+            barnIdList = Lists.newArrayList();
+        }
+    }
+
+    public void setBarnIdList(List<Long> barnIdList) {
+        this.barnIdList = barnIdList;
+        if(barnIdList == null){
+            barnIds = null;
+        }else{
+            barnIds = Joiner.on(",").join(barnIdList);
+        }
+    }
 }
