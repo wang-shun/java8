@@ -30,7 +30,6 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -233,31 +232,20 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
                     // 如果是待分娩状态, 获取妊娠检查的时间
                     if (Objects.equals(pig.getStatus(), PigStatus.Farrow.getKey()) || Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey())) {
-                        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pig.getId());
-                        if (pigTrack == null || StringUtils.isBlank(pigTrack.getExtra())) {
+                        DoctorPigEvent pregEvent = doctorPigEventDao.queryLastPregCheck(pig.getId());
+                        if (pregEvent == null) {
                             return pig;
                         }
-                        Map<String, Object> map = pigTrack.getExtraMap();
-                        setCheckDate(pig, map);
+                        pig.getExtra().put("checkDate", pregEvent.getEventAt());
 
                         // 处理 KongHuaiPregCheckResult
-                        if (Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey()) && map.get("pregCheckResult") != null) {
-                            pig.setStatus(Integer.valueOf(String.valueOf(map.get("pregCheckResult"))));
+                        if (Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey())) {
+                            pig.setStatus(pregEvent.getPregCheckResult() + 49); //+ 49  展示字段刚好差49
                         }
                     }
                     return pig;
                 })
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * 获取妊娠检查的时间
-     */
-    private static void setCheckDate(SearchedPig searchedPig, Map<String, Object> map) {
-        String key = "checkDate";
-        if (map != null && map.get(key) != null) {
-            searchedPig.getExtra().put(key, new Date((long)map.get(key)));
-        }
     }
 
     @Override
