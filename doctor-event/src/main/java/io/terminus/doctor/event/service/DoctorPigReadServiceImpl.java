@@ -232,6 +232,13 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                         pig.setDayAge((int)(DateTime.now().minus(pig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1));
                     }
 
+                    if(pig.getStatus() != null){
+                        PigStatus pigStatus = PigStatus.from(pig.getStatus());
+                        if(pigStatus != null){
+                            pig.setStatusName(pigStatus.getName());
+                        }
+                    }
+
                     // 如果是待分娩状态, 获取妊娠检查的时间
                     if (Objects.equals(pig.getStatus(), PigStatus.Farrow.getKey()) || Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey())) {
                         DoctorPigEvent pregEvent = doctorPigEventDao.queryLastPregCheck(pig.getId());
@@ -242,7 +249,11 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
                         // 处理 KongHuaiPregCheckResult
                         if (Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey())) {
-                            pig.setStatus(getPreg(pregEvent.getPregCheckResult()));
+                            KongHuaiPregCheckResult result = getPreg(pregEvent.getPregCheckResult());
+                            if (result != null) {
+                                pig.setStatus(result.getKey());
+                                pig.setStatusName(result.getName());
+                            }
                         }
                     }
                     return pig;
@@ -250,17 +261,16 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                 .collect(Collectors.toList());
     }
 
-    private static Integer getPreg(Integer pregCheckResult) {
+    private static KongHuaiPregCheckResult getPreg(Integer pregCheckResult) {
         if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
-            return KongHuaiPregCheckResult.FANQING.getKey();
+            return KongHuaiPregCheckResult.FANQING;
         } else if (Objects.equals(pregCheckResult, PregCheckResult.YING.getKey())) {
-            return KongHuaiPregCheckResult.YING.getKey();
+            return KongHuaiPregCheckResult.YING;
         } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
-            return KongHuaiPregCheckResult.LIUCHAN.getKey();
-        }else if (Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())){
-            return PigStatus.Pregnancy.getKey();
+            return KongHuaiPregCheckResult.LIUCHAN;
+        } else {
+            return null;
         }
-        return pregCheckResult;
     }
 
     @Override

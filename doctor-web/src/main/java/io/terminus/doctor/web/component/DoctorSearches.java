@@ -154,12 +154,6 @@ public class DoctorSearches {
                     searchedPig.setPigTypeName(pig_type.getDesc());
                 }
             }
-            if(searchedPig.getStatus() != null){
-                PigStatus pigStatus = PigStatus.from(searchedPig.getStatus());
-                if(pigStatus != null){
-                    searchedPig.setStatusName(pigStatus.getName());
-                }
-            }
         });
         return paging;
     }
