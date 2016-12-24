@@ -22,8 +22,10 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
+import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -240,12 +242,25 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
                         // 处理 KongHuaiPregCheckResult
                         if (Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey())) {
-                            pig.setStatus(pregEvent.getPregCheckResult() + 49); //+ 49  展示字段刚好差49
+                            pig.setStatus(getPreg(pregEvent.getPregCheckResult()));
                         }
                     }
                     return pig;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private static Integer getPreg(Integer pregCheckResult) {
+        if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
+            return KongHuaiPregCheckResult.FANQING.getKey();
+        } else if (Objects.equals(pregCheckResult, PregCheckResult.YING.getKey())) {
+            return KongHuaiPregCheckResult.YING.getKey();
+        } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
+            return KongHuaiPregCheckResult.LIUCHAN.getKey();
+        }else if (Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())){
+            return PigStatus.Pregnancy.getKey();
+        }
+        return pregCheckResult;
     }
 
     @Override
