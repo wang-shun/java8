@@ -11,8 +11,6 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
-import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
@@ -236,7 +234,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                     // 如果是待分娩状态, 获取妊娠检查的时间
                     if (Objects.equals(pig.getStatus(), PigStatus.Farrow.getKey()) || Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey())) {
                         DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pig.getId());
-                        if (pigTrack == null || StringUtils.isNotBlank(pigTrack.getExtra())) {
+                        if (pigTrack == null || StringUtils.isBlank(pigTrack.getExtra())) {
                             return pig;
                         }
                         Map<String, Object> map = pigTrack.getExtraMap();
