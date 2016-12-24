@@ -16,6 +16,7 @@ import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupJoinDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupCount;
@@ -33,6 +34,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
@@ -57,16 +59,18 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    private final DoctorGroupJoinDao doctorGroupJoinDao;
 
     @Autowired
     public DoctorGroupReadServiceImpl(DoctorGroupDao doctorGroupDao,
                                       DoctorGroupEventDao doctorGroupEventDao,
                                       DoctorGroupTrackDao doctorGroupTrackDao,
-                                      DoctorGroupSnapshotDao doctorGroupSnapshotDao) {
+                                      DoctorGroupSnapshotDao doctorGroupSnapshotDao, DoctorGroupJoinDao doctorGroupJoinDao) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
+        this.doctorGroupJoinDao = doctorGroupJoinDao;
     }
 
     @Override
@@ -149,6 +153,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             log.error("paging group by groupSearchDto failed, groupSearchDto:{}, pageNo:{}, size:{}, cause:{}",
                     groupSearchDto, pageNo, size, Throwables.getStackTraceAsString(e));
             return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Long> getGroupCount(@Valid DoctorGroupSearchDto groupSearchDto) {
+        try {
+            return Response.ok(doctorGroupJoinDao.getPigCount(groupSearchDto));
+        } catch (Exception e) {
+            log.error("get group count failed, data:{} cause:{}", groupSearchDto, Throwables.getStackTraceAsString(e));
+            return Response.fail("get.group.count");
         }
     }
 

@@ -33,6 +33,7 @@ import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
+import io.terminus.doctor.event.search.query.GroupPaging;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.msg.dto.DoctorMessageUserDto;
@@ -294,12 +295,12 @@ public class DoctorSearches {
      * @see `DefaultGroupQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/groups", method = RequestMethod.GET)
-    public Paging<SearchedGroup> searchGroups(@RequestParam(required = false) Integer pageNo,
-                                              @RequestParam(required = false) Integer pageSize,
-                                              @RequestParam Map<String, String> params) {
+    public GroupPaging<SearchedGroup> searchGroups(@RequestParam(required = false) Integer pageNo,
+                                                   @RequestParam(required = false) Integer pageSize,
+                                                   @RequestParam Map<String, String> params) {
         params = filterNullOrEmpty(params);
         if (farmIdNotExist(params)) {
-            return new Paging<>(0L, Collections.emptyList());
+            return new GroupPaging<>(0L, Collections.emptyList());
         }
         searchFromMessage(params);
         createSearchWord(SearchType.GROUP.getValue(), params);
@@ -324,14 +325,15 @@ public class DoctorSearches {
         }else{
             Long barnId = Long.valueOf(params.get("barnId"));
             if(Objects.equals(user.getType(), UserType.FARM_SUB.value()) && !permission.contains(barnId)){
-                return new Paging<>(0L, Collections.emptyList());
+                return new GroupPaging<>(0L, Collections.emptyList());
             }else{
                 searchDto.setBarnIdList(Lists.newArrayList(barnId));
             }
         }
 
         Paging<DoctorGroupDetail> groupDetailPaging = RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, pageSize));
-        return transGroupPaging(groupDetailPaging);
+        Long groupCount = RespHelper.orServEx(doctorGroupReadService.getGroupCount(searchDto));
+        return transGroupPaging(groupDetailPaging, groupCount);
     }
 
     private static void replaceKey(Map<String, String> params, String oldKey, String newKey) {
@@ -340,7 +342,7 @@ public class DoctorSearches {
         }
     }
 
-    private Paging<SearchedGroup> transGroupPaging(Paging<DoctorGroupDetail> groupDetailPaging) {
+    private GroupPaging<SearchedGroup> transGroupPaging(Paging<DoctorGroupDetail> groupDetailPaging, Long count) {
         List<SearchedGroup> searchedGroups = groupDetailPaging.getData().stream()
                 .map(gd -> {
                     SearchedGroup group = BeanMapper.map(gd.getGroup(), SearchedGroup.class);
@@ -352,7 +354,7 @@ public class DoctorSearches {
                     return group;
                 })
                 .collect(Collectors.toList());
-        return new Paging<>(groupDetailPaging.getTotal(), searchedGroups);
+        return new GroupPaging<>(groupDetailPaging.getTotal(), searchedGroups, count);
     }
 
     /**
