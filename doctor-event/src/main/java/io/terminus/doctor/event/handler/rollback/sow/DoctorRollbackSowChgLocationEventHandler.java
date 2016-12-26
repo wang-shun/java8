@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Created by xiao on 16/9/22.
+ * Created by xjn on 16/9/22.
  */
 @Component
 public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRollbackPigEventHandler {

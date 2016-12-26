@@ -473,7 +473,7 @@ public class DoctorPigCreateEvents {
                     doctorChgLocationDto.setChgLocationFromBarnId(doctorPigTrack.getCurrentBarnId());
                     doctorChgLocationDto.setChgLocationFromBarnName(doctorPigTrack.getCurrentBarnName());
                     if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), doctorPartWeanDto.getFarrowingLiveCount()) && doctorPartWeanDto.getChgLocationToBarnId() != null) {
-                        if (Objects.equals(doctorBarn.getPigType(), PigType.MATE_SOW.getValue()) || Objects.equals(doctorBarn.getPigType(), PigType.PREG_SOW.getValue())) {
+                        if (MATING_TYPES.contains(doctorBarn.getPigType())) {
                             doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.TO_MATING, IsOrNot.YES.getValue()), jsonMapper.toJson(doctorChgLocationDto));
                         } else {
                             createCasualChangeLocationInfo(doctorChgLocationDto, buildBasicInputInfoDto(farmId, tempPigId, PigEvent.CHG_LOCATION, IsOrNot.YES.getValue()));

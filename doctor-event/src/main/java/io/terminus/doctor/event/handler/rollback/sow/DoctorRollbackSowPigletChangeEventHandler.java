@@ -45,7 +45,7 @@ public class DoctorRollbackSowPigletChangeEventHandler extends DoctorAbstractRol
         doctorRollbackGroupChangeHandler.rollback(toGroupEvent, operatorId, operatorName);
 
         //2. 回滚母猪仔猪变动
-        handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
+        handleRollbackWithStatus(pigEvent, operatorId, operatorName);
     }
 
     @Override
