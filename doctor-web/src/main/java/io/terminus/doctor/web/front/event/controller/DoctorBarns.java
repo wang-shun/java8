@@ -182,8 +182,9 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigType", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
                                                      @RequestParam("pigType") Integer pigType,
+                                                     @RequestParam("status") Integer status,
                                                      @RequestParam(value = "pigIds", required = false) String pigIds) {
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, pigType, null, null)), pigIds);
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, Lists.newArrayList(pigType), null, status)), pigIds);
     }
 
     //根据猪id过滤猪舍: 取出猪的猪舍type, 过滤一把
@@ -210,12 +211,13 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigTypes", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
                                                      @RequestParam(value = "pigTypes", required = false) String pigTypes,
+                                                     @RequestParam("status") Integer status,
                                                      @RequestParam(value = "pigIds", required = false) String pigIds) {
         List<Integer> types = Lists.newArrayList();
         if (notEmpty(pigTypes)) {
             types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
         }
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, types)), pigIds);
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, types, null, status)), pigIds);
     }
 
 
@@ -230,6 +232,7 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigTypes/trans", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndTypeWhenBatchTransBarn(@RequestParam("farmId") Long farmId,
                                                                        @RequestParam("eventType") Integer eventType,
+                                                                       @RequestParam("status") Integer status,
                                                                        @RequestParam("pigIds") String pigIds) {
         List<Integer> barnTypes;
         if (Objects.equals(eventType, PigEvent.CHG_LOCATION.getKey())) {
@@ -242,7 +245,7 @@ public class DoctorBarns {
             //转舍类型: 普通转舍, 去配种, 去分娩, 其他报错
             throw new JsonResponseException("not.trans.barn.type");
         }
-        return notEmpty(barnTypes) ? RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, barnTypes))
+        return notEmpty(barnTypes) ? RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, barnTypes, null, status))
                 : Collections.emptyList();
     }
 

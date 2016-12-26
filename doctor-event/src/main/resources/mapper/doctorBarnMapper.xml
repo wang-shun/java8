@@ -136,22 +136,14 @@
         FROM <include refid="tb"/>
         <where>
             <if test="farmId != null">AND farm_id = #{farmId}</if>
-            <if test="pigType != null">AND pig_type = #{pigType}</if>
-            <if test="canOpenGroup != null">AND can_open_group = #{canOpenGroup}</if>
-            <if test="status != null">AND status = #{status}</if>
-        </where>
-    </select>
-
-    <select id="findByPigTypes" parameterType="map" resultMap="DoctorBarnMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
-        <where>
-            <if test="farmId != null">AND farm_id = #{farmId}</if>
             <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND pig_type IN
                 <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
                     #{type}
                 </foreach>
             </if>
+            <if test="canOpenGroup != null">AND can_open_group = #{canOpenGroup}</if>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="status == null">AND status = 1</if>
         </where>
     </select>
 
