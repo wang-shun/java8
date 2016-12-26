@@ -226,7 +226,8 @@ public class SubService {
         try {
             Long primaryId = this.getPrimaryUserId(user);
             //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
-            List<Long> primaryFarms = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryId)).getFarmIdsList();
+            DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryId));
+            List<Long> primaryFarms = permission.getFarmIdsList();
             for(Long farmId : sub.getFarmIds()){
                 if(!primaryFarms.contains(farmId)){
                     throw new ServiceException("authorize.fail");
@@ -262,7 +263,7 @@ public class SubService {
                     .put("realName", sub.getRealName())
                     .map());
             Long subUserId = RespHelper.orServEx(userWriteService.create(subUser));
-            this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds());
+            this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds(), permission.getOrgIdsList());
             return Response.ok(subUserId);
         } catch (ServiceException | JsonResponseException e) {
             return Response.fail(e.getMessage());
@@ -272,7 +273,7 @@ public class SubService {
         }
     }
 
-    private void createPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds){
+    private void createPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds, List<Long> orgIds){
         //创建 数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
         permission.setUserId(userId);
@@ -284,6 +285,7 @@ public class SubService {
         permission.setCreatorName(currentUser.getName());
         permission.setUpdatorId(currentUser.getId());
         permission.setUpdatorName(currentUser.getName());
+        permission.setOrgIdsList(orgIds);
         RespHelper.orServEx(doctorUserDataPermissionWriteService.createDataPermission(permission));
     }
 

@@ -9,9 +9,10 @@
 
     <sql id="criteria">
         <if test="farmId != null">AND a.farm_id = #{farmId}</if>
+        <if test="barnId != null">AND b.current_barn_id = #{barnId}</if>
         <if test="barnIds != null  &amp;&amp; barnIds.size() > 0">AND b.current_barn_id IN
-            <foreach collection="barnIds" item="barnId" open="(" separator="," close=")">
-                #{barnId}
+            <foreach collection="barnIds" item="barn" open="(" separator="," close=")">
+                #{barn}
             </foreach>
         </if>
         <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND a.pig_type IN

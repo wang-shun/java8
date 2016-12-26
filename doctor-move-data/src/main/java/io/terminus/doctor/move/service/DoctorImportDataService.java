@@ -611,6 +611,8 @@ public class DoctorImportDataService {
      * @param feedSowLast 所有哺乳母猪各自的最后一条数据
      */
     private void importFarrowPiglet(List<DoctorPigTrack> feedSowTrack, List<DoctorImportSow> feedSowLast, Map<String, DoctorBarn> barnMap, DoctorFarm farm){
+        Map<Long, List<DoctorPigTrack>> feedMap = feedSowTrack.stream().collect(Collectors.groupingBy(DoctorPigTrack::getCurrentBarnId));
+
         // 先按所在猪舍分组
         Map<String, List<DoctorImportSow>> sowMap = feedSowLast.stream().collect(Collectors.groupingBy(DoctorImportSow::getBarnName));
         sowMap.entrySet().forEach(entry -> {
@@ -661,12 +663,15 @@ public class DoctorImportDataService {
             doctorGroupTrackDao.create(groupTrack);
 
             // 把 产房仔猪群 的groupId 存入相应猪舍的所有母猪
-            feedSowTrack.forEach(track -> {
-                DoctorPigTrack newTrack = new DoctorPigTrack();
-                newTrack.setId(track.getId());
-                newTrack.setGroupId(group.getId());
-                doctorPigTrackDao.update(newTrack);
-            });
+            List<DoctorPigTrack> feedTracks = feedMap.get(group.getInitBarnId());
+            if (notEmpty(feedTracks)) {
+                feedTracks.forEach(feedTrack -> {
+                    DoctorPigTrack newTrack = new DoctorPigTrack();
+                    newTrack.setId(feedTrack.getId());
+                    newTrack.setGroupId(group.getId());
+                    doctorPigTrackDao.update(newTrack);
+                });
+            }
         });
     }
 

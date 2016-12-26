@@ -11,8 +11,6 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
-import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
@@ -24,15 +22,16 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
+import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -233,18 +232,28 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                         pig.setDayAge((int)(DateTime.now().minus(pig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1));
                     }
 
+                    if(pig.getStatus() != null){
+                        PigStatus pigStatus = PigStatus.from(pig.getStatus());
+                        if(pigStatus != null){
+                            pig.setStatusName(pigStatus.getName());
+                        }
+                    }
+
                     // 如果是待分娩状态, 获取妊娠检查的时间
                     if (Objects.equals(pig.getStatus(), PigStatus.Farrow.getKey()) || Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey())) {
-                        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pig.getId());
-                        if (pigTrack == null || StringUtils.isNotBlank(pigTrack.getExtra())) {
+                        DoctorPigEvent pregEvent = doctorPigEventDao.queryLastPregCheck(pig.getId());
+                        if (pregEvent == null) {
                             return pig;
                         }
-                        Map<String, Object> map = pigTrack.getExtraMap();
-                        setCheckDate(pig, map);
+                        pig.getExtra().put("checkDate", pregEvent.getEventAt());
 
                         // 处理 KongHuaiPregCheckResult
-                        if (Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey()) && map.get("pregCheckResult") != null) {
-                            pig.setStatus(Integer.valueOf(String.valueOf(map.get("pregCheckResult"))));
+                        if (Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey())) {
+                            KongHuaiPregCheckResult result = getPreg(pregEvent.getPregCheckResult());
+                            if (result != null) {
+                                pig.setStatus(result.getKey());
+                                pig.setStatusName(result.getName());
+                            }
                         }
                     }
                     return pig;
@@ -252,13 +261,15 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 获取妊娠检查的时间
-     */
-    private static void setCheckDate(SearchedPig searchedPig, Map<String, Object> map) {
-        String key = "checkDate";
-        if (map != null && map.get(key) != null) {
-            searchedPig.getExtra().put(key, new Date((long)map.get(key)));
+    private static KongHuaiPregCheckResult getPreg(Integer pregCheckResult) {
+        if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
+            return KongHuaiPregCheckResult.FANQING;
+        } else if (Objects.equals(pregCheckResult, PregCheckResult.YING.getKey())) {
+            return KongHuaiPregCheckResult.YING;
+        } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
+            return KongHuaiPregCheckResult.LIUCHAN;
+        } else {
+            return null;
         }
     }
 

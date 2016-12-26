@@ -78,6 +78,11 @@ public interface DoctorGroupReadService {
     Response<Paging<DoctorGroupDetail>> pagingGroup(@Valid DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size);
 
     /**
+     * 获取猪群数量
+     */
+    Response<Long> getGroupCount(@Valid DoctorGroupSearchDto groupSearchDto);
+
+    /**
      * 根据查询条件分页猪群
      * @param groupSearchDto 查询条件dto
      * @return 分页后的猪群列表
