@@ -570,6 +570,8 @@ public class DoctorImportDataService {
                 group.setPigType(barn.getPigType());
                 group.setStaffId(barn.getStaffId());
                 group.setStaffName(barn.getStaffName());
+            }else{
+                throw new JsonResponseException("找不到猪群（" + group.getGroupCode() + "）所属的猪舍（" + group.getInitBarnName() + "）");
             }
             group.setCurrentBarnId(group.getInitBarnId());
             group.setCurrentBarnName(group.getInitBarnName());
