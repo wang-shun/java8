@@ -311,7 +311,7 @@ public class DoctorMessages {
                 } catch (Exception e) {
                     log.error("get.rule.pig.count.failed");
                 }
-            } else if (!Objects.equals(doctorMessageRule.getCategory(), Category.STORAGE_SHORTAGE.getKey())) {
+            } else {
                 pigCount = RespHelper.or500(doctorMessageUserReadService.findBusinessListByCriteria(doctorMessageUserDto)).size();
             }
             DoctorMessageRule messageRule = BeanMapper.map(doctorMessageRule, DoctorMessageRule.class);
