@@ -164,9 +164,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         group.setOrgId(org.getId());
         group.setOrgName(org.getName());
 
-        //根据猪舍id设置猪类
-        DoctorBarn doctorBarn = orServEx(doctorBarnReadService.findBarnById(newGroupInput.getBarnId()));
-        group.setPigType(doctorBarn.getPigType());
         return group;
     }
 

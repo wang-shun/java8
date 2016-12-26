@@ -6,6 +6,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -16,6 +17,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -48,6 +50,7 @@ public class DoctorGroupManager {
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupReadService doctorGroupReadService;
     private final CoreEventDispatcher coreEventDispatcher;
+    private final DoctorBarnDao doctorBarnDao;
 
     @Autowired
     public DoctorGroupManager(DoctorGroupDao doctorGroupDao,
@@ -55,13 +58,15 @@ public class DoctorGroupManager {
                               DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                               DoctorGroupTrackDao doctorGroupTrackDao,
                               DoctorGroupReadService doctorGroupReadService,
-                              CoreEventDispatcher coreEventDispatcher) {
+                              CoreEventDispatcher coreEventDispatcher,
+                              DoctorBarnDao doctorBarnDao) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupReadService = doctorGroupReadService;
         this.coreEventDispatcher = coreEventDispatcher;
+        this.doctorBarnDao = doctorBarnDao;
     }
 
     /**
@@ -133,6 +138,14 @@ public class DoctorGroupManager {
         group.setInitBarnName(newGroupInput.getBarnName());
         group.setCurrentBarnId(newGroupInput.getBarnId());
         group.setCurrentBarnName(newGroupInput.getBarnName());
+
+        DoctorBarn barn = doctorBarnDao.findById(group.getInitBarnId());
+        if (barn == null) {
+            throw new ServiceException("barn.not.null");
+        }
+        group.setPigType(barn.getPigType());
+        group.setStaffId(barn.getStaffId());
+        group.setStaffName(barn.getStaffName());
 
         //建群时间与状态
         group.setOpenAt(DateUtil.toDate(newGroupInput.getEventAt()));

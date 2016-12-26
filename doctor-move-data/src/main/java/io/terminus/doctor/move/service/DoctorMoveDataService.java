@@ -2321,6 +2321,7 @@ public class DoctorMoveDataService {
         }
         if (notEmpty(gain.getStaffName())) {
             group.setStaffId(subMap.get(gain.getStaffName()));
+            group.setStaffName(gain.getStaffName());
         }
         if (DoctorGroup.Status.CREATED.getValue() == group.getStatus()) {
             group.setCloseAt(null);
