@@ -591,10 +591,8 @@ public class DoctorPigCreateEvents {
             DoctorBasicInputInfoDto foster = buildBasicInputInfoDto(farmId, pigId, PigEvent.FOSTERS, null);
             Map<String, Object> dtoData = OBJECT_MAPPER.readValue(fosterJson, JacksonType.MAP_OF_OBJECT);
             DoctorBasicInputInfoDto fosterBy = buildBasicInputInfoDto(farmId, Long.valueOf(dtoData.get("fosterSowId").toString()), PigEvent.FOSTERS_BY, null);
+            fosterBy.setNeed(!Objects.equals(foster.getBarnId(), fosterBy.getBarnId()));
 
-            if (!Objects.equals(foster.getBarnId(), fosterBy.getBarnId())) {
-                throw new JsonResponseException("barn.not.equal");
-            }
             return Lists.newArrayList(foster, fosterBy);
         } catch (Exception e) {
             log.error("foster data build error fail, cause:{}", Throwables.getStackTraceAsString(e));

@@ -92,6 +92,8 @@ public class DoctorBasicInputInfoDto implements Serializable{
      */
     private Integer isAuto;
 
+    private Boolean need; //逻辑判断字段
+
     /**
      * 相同宿舍, 不同pig构建
      * @param pigId

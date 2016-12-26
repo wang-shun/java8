@@ -68,8 +68,12 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
 
         Long pigEventId = (Long) context.get("doctorPigEventId");
 
-        // 转群操作
-        Long groupId = groupSowEventCreate(doctorPigTrack, basic, extra, pigEventId);
+        Long groupId = doctorPigTrack.getGroupId();
+
+        //如果不是一个猪舍的拼窝，需要转群操作
+        if (basic.getNeed()) {
+            groupId = groupSowEventCreate(doctorPigTrack, basic, extra, pigEventId);
+        }
 
         //被拼窝数量
         Integer fosterCount = (Integer) extra.get("fostersCount");
