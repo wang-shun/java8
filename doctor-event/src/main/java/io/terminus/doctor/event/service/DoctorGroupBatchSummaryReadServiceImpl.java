@@ -122,7 +122,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         summary.setHealthCount(groupTrack.getHealthyQty());                          //健仔数
         summary.setWeakCount(groupTrack.getWeakQty());                               //弱仔数
         summary.setBirthAvgWeight(EventUtil.get2(EventUtil.getAvgWeight(groupTrack.getBirthWeight(), groupTrack.getLiveQty())));//出生均重(kg)
-        summary.setDeadRate(EventUtil.get2(doctorKpiDao.getDeadRateByGroupId(group.getId())));       //死淘率
+        summary.setDeadRate(EventUtil.get4(doctorKpiDao.getDeadRateByGroupId(group.getId())));       //死淘率
         summary.setWeanCount(groupTrack.getWeanQty());                               //断奶数
         summary.setUnqCount(groupTrack.getQuaQty());                                 //注意：合格数(需求变更，只需要合格数了，这里翻一下)
         summary.setWeanAvgWeight(EventUtil.get2(EventUtil.getAvgWeight(groupTrack.getWeanWeight(), groupTrack.getWeanQty())));  //断奶均重(kg)

@@ -275,9 +275,9 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             BeanMapper.copy(doctorChgFarmDto, dto);
 
             Map<String, Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
-            publishEvent(result);
             publishBarnEvent(doctorChgFarmDto.getFromBarnId());
             publishBarnEvent(doctorChgFarmDto.getToBarnId());
+            publishEvent(result);
             return Response.ok(Params.getWithConvert(result, "doctorEventId", a -> Long.valueOf(a.toString())));
         } catch (IllegalStateException e) {
             log.error("chg farm event illegal state, cause:{}", Throwables.getStackTraceAsString(e));

@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -109,8 +108,7 @@ public class DoctorPigEventManager {
             /**
              * 母猪创建对应的事件流信息
              */
-            Map<String, Object> ids = null;
-            ids = OBJECT_MAPPER.readValue(context.get("createEventResult").toString(), JacksonType.MAP_OF_OBJECT);
+            Map<String, Object> ids = OBJECT_MAPPER.readValue(context.get("createEventResult").toString(), JacksonType.MAP_OF_OBJECT);
             ids.put("barnId",doctorFarmEntryDto.getBarnId());
             ids.put("contextType","single");
             ids.put("type", doctorBasicInputInfoDto.getEventType());
