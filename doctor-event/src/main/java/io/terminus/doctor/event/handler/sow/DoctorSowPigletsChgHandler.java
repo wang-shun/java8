@@ -79,15 +79,15 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
         Long groupId = doctorPigTrack.getGroupId();
         //全部断奶后, 初始化所有本次哺乳的信息
         Long pigEventId = (Long) context.get("doctorPigEventId");
-        //全部断奶后, 初始化所有本次哺乳的信息
-        if (doctorPigTrack.getUnweanQty() == 0) {
-            doctorPigTrack.setStatus(PigStatus.Wean.getKey());
-            doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
-            doctorPigTrack.setFarrowQty(0);  //分娩数 0
-            doctorPigTrack.setFarrowAvgWeight(0D);
-            doctorPigTrack.setWeanAvgWeight(0D);
-
-        }
+//        //全部断奶后, 初始化所有本次哺乳的信息
+//        if (doctorPigTrack.getUnweanQty() == 0) {
+//            doctorPigTrack.setStatus(PigStatus.Wean.getKey());
+//            doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
+//            doctorPigTrack.setFarrowQty(0);  //分娩数 0
+//            doctorPigTrack.setFarrowAvgWeight(0D);
+//            doctorPigTrack.setWeanAvgWeight(0D);
+//
+//        }
         doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
         execution.getExpression().put("leftCount", (doctorPigTrack.getUnweanQty()));
 

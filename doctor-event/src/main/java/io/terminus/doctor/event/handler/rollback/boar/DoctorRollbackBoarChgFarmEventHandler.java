@@ -21,8 +21,7 @@ public class DoctorRollbackBoarChgFarmEventHandler extends DoctorAbstractRollbac
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
         return Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey()) &&
-                Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.BOAR.getKey()) &&
-                isLastEvent(pigEvent);
+                Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.BOAR.getKey());
     }
 
     @Override

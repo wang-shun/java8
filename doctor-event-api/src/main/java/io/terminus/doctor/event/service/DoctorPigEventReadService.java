@@ -102,6 +102,13 @@ public interface DoctorPigEventReadService {
     Response<Boolean> isLastEvent(@NotNull(message = "input.pigId.empty") Long pigId, @NotNull(message = "eventId.not.null") Long eventId);
 
     /**
+     * 判断是否是最新手动事件
+     * @param pigId 猪id
+     * @return true 是最新事件, false 不是
+     */
+    Response<Boolean> isLastManualEvent(@NotNull(message = "input.pigId.empty") Long pigId, @NotNull(message = "eventId.not.null") Long eventId);
+
+    /**
      * 查询猪回滚事件
      * @param pigId
      * @return

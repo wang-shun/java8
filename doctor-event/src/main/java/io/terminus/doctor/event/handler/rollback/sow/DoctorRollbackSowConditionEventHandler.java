@@ -18,8 +18,7 @@ public class DoctorRollbackSowConditionEventHandler extends DoctorAbstractRollba
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
         return Objects.equals(pigEvent.getType(), PigEvent.CONDITION.getKey()) &&
-                Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
-                isLastEvent(pigEvent);
+                Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey());
     }
 
     @Override

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Created by xiao on 16/9/22.
+ * Created by xjn on 16/9/22.
  */
 @Component
 public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRollbackPigEventHandler {
@@ -30,7 +30,6 @@ public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRoll
     @Autowired private DoctorRollbackGroupTransHandler doctorRollbackGroupTransHandler;
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-
         return Objects.equals(pigEvent.getType(), PigEvent.CHG_LOCATION.getKey()) && Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey());
     }
 

@@ -261,6 +261,19 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }
     }
 
+    public Response<Boolean> isLastManualEvent(Long pigId, Long eventId) {
+        try {
+            DoctorPigEvent lastEvent = doctorPigEventDao.queryLastManualPigEventById(pigId);
+            if (!Objects.equals(eventId, lastEvent.getId())) {
+                return Response.ok(Boolean.FALSE);
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("find pig event is last manual event failed, pigId:{}, eventId:{}, cause:{}", pigId, eventId, Throwables.getStackTraceAsString(e));
+            return Response.ok(Boolean.FALSE);
+        }
+    }
+
     @Override
     public Response<DoctorPigEvent> canRollbackEvent(@NotNull(message = "input.pigId.empty") Long pigId) {
         try {

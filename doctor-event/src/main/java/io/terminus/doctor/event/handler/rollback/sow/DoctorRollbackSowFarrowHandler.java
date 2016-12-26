@@ -35,9 +35,12 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
     @Autowired
     private DoctorRollbackGroupNewHandler doctorRollbackGroupNewHandler;
 
+    @Autowired
+    private DoctorRollbackSowWeanHandler doctorRollbackSowWeanHandler;
+
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        if (!Objects.equals(pigEvent.getType(), PigEvent.FARROWING.getKey()) || !isLastEvent(pigEvent)) {
+        if (!Objects.equals(pigEvent.getType(), PigEvent.FARROWING.getKey())) {
             return false;
         }
 
@@ -46,8 +49,11 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
             //母猪分娩会触发转入猪群事件，如果有新建猪群，还要校验最新事件(分娩)
             DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
             return isRelLastGroupEvent(toGroupEvent);
+        } else {
+            //母猪分娩全部死亡触发断奶事件
+            DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
+            return doctorRollbackSowWeanHandler.handleCheck(toPigEvent);
         }
-        return true;
     }
 
     @Override
@@ -62,6 +68,10 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
             } else {
                 doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
             }
+            //2.断奶事件
+        } else {
+            DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
+            doctorRollbackSowWeanHandler.handleRollback(toPigEvent, operatorId, operatorName);
         }
         //3. 母猪分娩
         handleRollbackWithStatus(pigEvent, operatorId, operatorName);

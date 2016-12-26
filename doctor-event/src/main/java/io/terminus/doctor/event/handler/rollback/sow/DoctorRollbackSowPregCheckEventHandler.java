@@ -29,7 +29,7 @@ public class DoctorRollbackSowPregCheckEventHandler extends DoctorAbstractRollba
 
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        return Objects.equals(pigEvent.getType(), PigEvent.PREG_CHECK.getKey()) && isLastEvent(pigEvent);
+        return Objects.equals(pigEvent.getType(), PigEvent.PREG_CHECK.getKey());
     }
 
     @Override

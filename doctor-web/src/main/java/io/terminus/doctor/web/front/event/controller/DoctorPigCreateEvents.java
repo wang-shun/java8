@@ -21,6 +21,7 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
@@ -452,6 +453,7 @@ public class DoctorPigCreateEvents {
     public Long createSowEventInfo(@RequestParam("farmId") Long farmId,
                                    @RequestParam("pigId") Long pigId, @RequestParam("eventType") Integer eventType,
                                    @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
+        try {
         checkEventAt(pigId, PigEvent.from(eventType), sowInfoDtoJson);
         Long tempPigId = pigId;
         if (Objects.equals(eventType, PigEvent.FOSTERS.getKey())) {
@@ -460,53 +462,63 @@ public class DoctorPigCreateEvents {
             // 猪批量事件操作， 返回PigId
         } else {
             pigId = RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType), null), sowInfoDtoJson));
+            //1.断奶后触发转舍事件
             if (Objects.equals(eventType, PigEvent.WEAN.getKey())) {
                 DoctorPartWeanDto doctorPartWeanDto = jsonMapper.fromJson(sowInfoDtoJson, DoctorPartWeanDto.class);
-                try {
-                    Map<String, Object> temp = jsonMapper.getMapper().readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
-                    temp.put("changeLocationDate", temp.get("partWeanDate"));
-                    String sowInfoDto = jsonMapper.getMapper().writeValueAsString(temp);
-                    DoctorChgLocationDto doctorChgLocationDto = jsonMapper.fromJson(sowInfoDto, DoctorChgLocationDto.class);
-                    DoctorBarn doctorBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationToBarnId()));
-                    doctorChgLocationDto.setChgLocationToBarnName(doctorBarn.getName());
-                    DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(tempPigId));
-                    doctorChgLocationDto.setChgLocationFromBarnId(doctorPigTrack.getCurrentBarnId());
-                    doctorChgLocationDto.setChgLocationFromBarnName(doctorPigTrack.getCurrentBarnName());
-                    if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), doctorPartWeanDto.getFarrowingLiveCount()) && doctorPartWeanDto.getChgLocationToBarnId() != null) {
-                        if (Objects.equals(doctorBarn.getPigType(), PigType.MATE_SOW.getValue()) || Objects.equals(doctorBarn.getPigType(), PigType.PREG_SOW.getValue())) {
-                            doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.TO_MATING, IsOrNot.YES.getValue()), jsonMapper.toJson(doctorChgLocationDto));
-                        } else {
-                            createCasualChangeLocationInfo(doctorChgLocationDto, buildBasicInputInfoDto(farmId, tempPigId, PigEvent.CHG_LOCATION, IsOrNot.YES.getValue()));
-                        }
+                Map<String, Object> temp = jsonMapper.getMapper().readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
+                temp.put("changeLocationDate", temp.get("partWeanDate"));
+                String sowInfoDto = jsonMapper.getMapper().writeValueAsString(temp);
+                DoctorChgLocationDto doctorChgLocationDto = jsonMapper.fromJson(sowInfoDto, DoctorChgLocationDto.class);
+                DoctorBarn doctorBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationToBarnId()));
+                doctorChgLocationDto.setChgLocationToBarnName(doctorBarn.getName());
+                DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(tempPigId));
+                doctorChgLocationDto.setChgLocationFromBarnId(doctorPigTrack.getCurrentBarnId());
+                doctorChgLocationDto.setChgLocationFromBarnName(doctorPigTrack.getCurrentBarnName());
+                if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), doctorPartWeanDto.getFarrowingLiveCount()) && doctorPartWeanDto.getChgLocationToBarnId() != null) {
+                    if (MATING_TYPES.contains(doctorBarn.getPigType())) {
+                        doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.TO_MATING, IsOrNot.YES.getValue()), jsonMapper.toJson(doctorChgLocationDto));
+                    } else {
+                        createCasualChangeLocationInfo(doctorChgLocationDto, buildBasicInputInfoDto(farmId, tempPigId, PigEvent.CHG_LOCATION, IsOrNot.YES.getValue()));
                     }
-                } catch (Exception e) {
-                    log.error("to.chglocation.failed");
-                    throw new JsonResponseException("to.chglocation.fail");
+                }
+                //2.分娩后全部死亡触发断奶事件
+            } else if (Objects.equals(eventType, PigEvent.FARROWING.getKey())) {
+                DoctorFarrowingDto farrowingDto = jsonMapper.fromJson(sowInfoDtoJson, DoctorFarrowingDto.class);
+                if (Objects.equals(farrowingDto.getFarrowingLiveCount(), 0)) {
+                    autoCreateWeanEvent(farrowingDto.getFarrowingDate(), farmId, tempPigId);
+                }
+                //3.全部仔猪变动触发断奶事件
+            } else if (Objects.equals(eventType, PigEvent.PIGLETS_CHG.getKey())) {
+                DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(tempPigId));
+                DoctorPigletsChgDto pigletsChgDto = jsonMapper.fromJson(sowInfoDtoJson, DoctorPigletsChgDto.class);
+                if (Objects.equals(doctorPigTrack.getUnweanQty(), 0)) {
+                    autoCreateWeanEvent(pigletsChgDto.getPigletsChangeDate(), farmId, tempPigId);
                 }
             }
-            if (Objects.equals(eventType, PigEvent.FARROWING.getKey())) {
-                try {
-                    DoctorFarrowingDto farrowingDto = jsonMapper.fromJson(sowInfoDtoJson, DoctorFarrowingDto.class);
-                    if (Objects.equals(farrowingDto.getFarrowingLiveCount(), Integer.valueOf(0))) {
-                        // Integer chgCount = farrowingDto.getDeadCount()+farrowingDto.getBlackCount()+farrowingDto.getMnyCount()+farrowingDto.getJxCount();
-                        DoctorPartWeanDto doctorPartWeanDto = DoctorPartWeanDto.builder()
-                                .partWeanDate(farrowingDto.getFarrowingDate())
-                                .partWeanPigletsCount(0)
-                                .partWeanAvgWeight(0d)
-                                .build();
-                        String partWeanJson = jsonMapper.toJson(doctorPartWeanDto);
-                        doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.WEAN, IsOrNot.YES.getValue()), partWeanJson);
-                    }
-
-                } catch (Exception e) {
-                    log.error("to.wean.failed");
-                    throw new JsonResponseException(e.getMessage());
-                }
-            }
+        }
+        } catch (Exception e) {
+            log.error("pig.event.create.failed, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException("pig.event.create.fail");
         }
         return pigId;
     }
 
+    /**
+     * 由其他事件触发的断奶事件
+     * @param weanDate
+     * @param farmId
+     * @param pigId
+     */
+    private void autoCreateWeanEvent(Date weanDate, Long farmId, Long pigId){
+        DoctorPartWeanDto doctorPartWeanDto = DoctorPartWeanDto.builder()
+                .partWeanDate(weanDate)
+                .partWeanPigletsCount(0)
+                .partWeanAvgWeight(0d)
+                .build();
+        String partWeanJson = jsonMapper.toJson(doctorPartWeanDto);
+        doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.WEAN, IsOrNot.YES.getValue()), partWeanJson);
+
+    }
 
     @RequestMapping(value = "/createSowEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
