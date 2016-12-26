@@ -61,7 +61,7 @@
 
     <decision name="仔猪变动事件判断">
         <transition name="部分仔猪变动" expression="#{leftCount} > 0" target="哺乳"/>
-        <transition name="全部仔猪变动" expression="#{leftCount} equals '0'" target="断奶"/>
+        <transition name="全部仔猪变动" expression="#{leftCount} equals '0'" target="哺乳"/>
     </decision>
 
     <decision name="断奶事件判断">
