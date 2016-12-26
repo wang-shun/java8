@@ -130,13 +130,16 @@ public class DoctorBarns {
      * 根据farmId查询猪舍表, 根据pigIds过滤
      *
      * @param farmId 猪场id
+     * @param barnStatus 筛选猪舍状态
+     *                   @see DoctorBarn.Status
      * @param pigIds 猪id 逗号分隔
      * @return 猪舍表列表
      */
     @RequestMapping(value = "/farmId", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmId(@RequestParam("farmId") Long farmId,
+                                              @RequestParam(value = "status", required = false) Integer barnStatus,
                                               @RequestParam(value = "pigIds", required = false) String pigIds) {
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId)), pigIds);
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null, null, barnStatus)), pigIds);
     }
 
     /**
