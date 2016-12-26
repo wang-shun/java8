@@ -23,10 +23,12 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
@@ -35,6 +37,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.FarrowingType;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
@@ -42,6 +45,7 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -79,6 +83,8 @@ import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
+import io.terminus.parana.user.address.model.Address;
+import io.terminus.parana.user.impl.address.dao.AddressDao;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
@@ -173,6 +179,10 @@ public class DoctorImportDataService {
     private DoctorServiceStatusDao doctorServiceStatusDao;
     @Autowired
     private DoctorServiceReviewDao doctorServiceReviewDao;
+    @Autowired
+    private DoctorGroupEventDao doctorGroupEventDao;
+    @Autowired
+    private AddressDao addressDao;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -312,6 +322,14 @@ public class DoctorImportDataService {
         }
     }
 
+    private Integer getAddressId(String name) {
+        Address address = addressDao.findByName(name);
+        if (address == null) {
+            throw new JsonResponseException("address.not.standard");
+        }
+        return address.getId();
+    }
+
     /**
      * 公司、猪场、主账号
      * @return 主账号的 user
@@ -324,6 +342,10 @@ public class DoctorImportDataService {
         String loginName = ImportExcelUtils.getStringOrThrow(row1, 2);
         String mobile = ImportExcelUtils.getStringOrThrow(row1, 3);
         String realName = ImportExcelUtils.getStringOrThrow(row1, 4);
+        String province = ImportExcelUtils.getStringOrThrow(row1, 5);
+        String city = ImportExcelUtils.getStringOrThrow(row1, 6);
+        String district = ImportExcelUtils.getStringOrThrow(row1, 7);
+        String detail = ImportExcelUtils.getStringOrThrow(row1, 8);
 
         // 公司
         DoctorOrg org = doctorOrgDao.findByName(orgName);
@@ -343,6 +365,13 @@ public class DoctorImportDataService {
             farm.setOrgId(org.getId());
             farm.setOrgName(org.getName());
             farm.setName(farmName);
+            farm.setProvinceId(getAddressId(province));
+            farm.setProvinceName(province);
+            farm.setCityId(getAddressId(city));
+            farm.setCityName(city);
+            farm.setDistrictId(getAddressId(district));
+            farm.setDistrictName(district);
+            farm.setDetailAddress(detail);
             doctorFarmDao.create(farm);
             RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
         }else{
@@ -605,7 +634,35 @@ public class DoctorImportDataService {
                 groupTrack.setQuaQty(groupTrack.getQuantity());
             }
             doctorGroupTrackDao.create(groupTrack);
+            createMoveInGroupEvent(group, groupTrack);
         }
+    }
+
+    /**
+     * 创建默认的转入时间
+     */
+    private void createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack) {
+        DoctorGroupEvent event = new DoctorGroupEvent();
+        event.setOrgId(group.getOrgId());
+        event.setOrgName(group.getOrgName());
+        event.setFarmId(group.getFarmId());
+        event.setFarmName(group.getFarmName());
+        event.setGroupId(group.getId());
+        event.setGroupCode(group.getGroupCode());
+        event.setEventAt(group.getOpenAt());
+        event.setType(GroupEventType.MOVE_IN.getValue());
+        event.setName(GroupEventType.MOVE_IN.getDesc());
+        event.setDesc("转移类型：仔猪转入#猪只数：" + groupTrack.getQuantity() + "#平均日龄：" + groupTrack.getAvgDayAge() + "");
+        event.setBarnId(group.getInitBarnId());
+        event.setBarnName(group.getInitBarnName());
+        event.setPigType(group.getPigType());
+        event.setQuantity(groupTrack.getQuantity());
+        event.setAvgWeight(groupTrack.getBirthWeight());
+        event.setWeight(event.getQuantity() * MoreObjects.firstNonNull(event.getAvgWeight(), 0D));
+        event.setAvgDayAge(groupTrack.getAvgDayAge());
+        event.setIsAuto(IsOrNot.YES.getValue());
+        event.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
+        doctorGroupEventDao.create(event);
     }
 
     /**
@@ -663,6 +720,7 @@ public class DoctorImportDataService {
             groupTrack.setQuaQty(0);
 
             doctorGroupTrackDao.create(groupTrack);
+            createMoveInGroupEvent(group, groupTrack);
 
             // 把 产房仔猪群 的groupId 存入相应猪舍的所有母猪
             List<DoctorPigTrack> feedTracks = feedMap.get(group.getInitBarnId());
