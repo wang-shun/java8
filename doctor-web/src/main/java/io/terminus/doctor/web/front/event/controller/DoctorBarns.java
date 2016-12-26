@@ -182,7 +182,7 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigType", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
                                                      @RequestParam("pigType") Integer pigType,
-                                                     @RequestParam("status") Integer status,
+                                                     @RequestParam(value = "status", required = false) Integer status,
                                                      @RequestParam(value = "pigIds", required = false) String pigIds) {
         return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, Lists.newArrayList(pigType), null, status)), pigIds);
     }
@@ -211,7 +211,7 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigTypes", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
                                                      @RequestParam(value = "pigTypes", required = false) String pigTypes,
-                                                     @RequestParam("status") Integer status,
+                                                     @RequestParam(value = "status", required = false) Integer status,
                                                      @RequestParam(value = "pigIds", required = false) String pigIds) {
         List<Integer> types = Lists.newArrayList();
         if (notEmpty(pigTypes)) {
@@ -232,7 +232,7 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigTypes/trans", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndTypeWhenBatchTransBarn(@RequestParam("farmId") Long farmId,
                                                                        @RequestParam("eventType") Integer eventType,
-                                                                       @RequestParam("status") Integer status,
+                                                                       @RequestParam(value = "status", required = false) Integer status,
                                                                        @RequestParam("pigIds") String pigIds) {
         List<Integer> barnTypes;
         if (Objects.equals(eventType, PigEvent.CHG_LOCATION.getKey())) {
