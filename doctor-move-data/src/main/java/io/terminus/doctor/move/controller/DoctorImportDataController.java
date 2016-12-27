@@ -202,7 +202,7 @@ public class DoctorImportDataController {
         } catch (Exception e) {
             log.error(Throwables.getStackTraceAsString(e));
             jedisTemplate.execute(jedis -> {
-                jedis.set(redisKey, Throwables.getStackTraceAsString(e));
+                jedis.set(redisKey, e.getMessage());
             });
         } finally {
             if(inputStream != null){
