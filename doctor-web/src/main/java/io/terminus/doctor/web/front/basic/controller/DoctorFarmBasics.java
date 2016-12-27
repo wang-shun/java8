@@ -46,33 +46,13 @@ public class DoctorFarmBasics {
      * @return 基础数据ids
      */
     @RequestMapping(value = "/farmBasic/basicIds", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<DoctorBasic> findBasicIdsByFarmId(@RequestParam("farmId") Long farmId) {
-        DoctorFarmBasic farmBasic = RespHelper.or500(doctorFarmBasicReadService.findFarmBasicByFarmId(farmId));
+    public DoctorFarmBasic findBasicIdsByFarmId(@RequestParam("farmId") Long farmId) {
         try {
-            return farmBasic == null ? Collections.emptyList() :
-                    RespHelper.or500(doctorBasicReadService.findBasicByIds(farmBasic.getBasicIdList()));
+            return RespHelper.or500(doctorFarmBasicReadService.findFarmBasicByFarmId(farmId));
         } catch (Exception e) {
-            log.error("find basic ids by farm id failed, farmId:{}, farmBasic:{}, cause:{}",
-                    farmId, farmBasic, Throwables.getStackTraceAsString(e));
-            return Collections.emptyList();
-        }
-    }
-
-    /**
-     * 根据猪场id查询猪场有权限的变动原因ids
-     * @param farmId 猪场id
-     * @return 变动原因ids
-     */
-    @RequestMapping(value = "/farmBasic/reasonIds", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<DoctorChangeReason> findChangeReasonIdsByFarmId(@RequestParam("farmId") Long farmId) {
-        DoctorFarmBasic farmBasic = RespHelper.or500(doctorFarmBasicReadService.findFarmBasicByFarmId(farmId));
-        try {
-            return farmBasic == null ? Collections.emptyList() :
-                    RespHelper.or500(doctorBasicReadService.findChangeReasonByIds(farmBasic.getReasonIdList()));
-        } catch (Exception e) {
-            log.error("find reason ids by farm id failed, farmId:{}, farmBasic:{}, cause:{}",
-                    farmId, farmBasic, Throwables.getStackTraceAsString(e));
-            return Collections.emptyList();
+            log.error("find basic ids by farm id failed, farmId:{}, cause:{}",
+                    farmId, Throwables.getStackTraceAsString(e));
+            return null;
         }
     }
 
