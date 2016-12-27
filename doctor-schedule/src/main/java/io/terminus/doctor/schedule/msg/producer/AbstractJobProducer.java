@@ -215,7 +215,7 @@ public abstract class AbstractJobProducer {
      * @param ruleRole 规则角色
      * @param jsonData 填充数据
      */
-    protected void createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, String jsonData, Integer eventType, Long businessId, Integer ruleValueId, String url) {
+    protected void createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, String jsonData, Integer eventType, Long businessId, Integer businessType, Integer ruleValueId, String url) {
         DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
         //1.当消息无人有权限时直接返回
         if (Arguments.isNullOrEmpty(subUsers)){
@@ -229,6 +229,7 @@ public abstract class AbstractJobProducer {
                 .templateName(template.getName())
                 .templateId(ruleRole.getTemplateId())
                 .businessId(businessId)
+                .businessType(businessType)
                 .ruleValueId(ruleValueId)
                 .messageTemplate(template.getMessageTemplate())
                 .type(template.getType())
@@ -474,7 +475,7 @@ public abstract class AbstractJobProducer {
         String jumpUrl = url.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + ruleRole.getFarmId());
         Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, ruleTimeDiff, url);
         try {
-            createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, pigDto.getPigId(), ruleValueId, jumpUrl);
+            createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, pigDto.getPigId(), DoctorMessage.BUSINESS_TYPE.PIG.getValue(), ruleValueId, jumpUrl);
         } catch (JsonProcessingException e) {
             log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
         }

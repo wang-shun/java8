@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
@@ -12,7 +13,6 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.model.DoctorStaff;
-import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorStaffReadService;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
@@ -25,10 +25,12 @@ import io.terminus.doctor.user.service.PrimaryUserWriteService;
 import io.terminus.pampas.client.Export;
 import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.common.utils.RespHelper;
+import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -93,10 +95,7 @@ public class SubService {
             UserProfile userProfile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(userId));
             DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
 
-            Sub result = makeSub(sub, u, userProfile);
-            result.setFarmIds(permission.getFarmIdsList());
-            result.setBarnIds(permission.getBarnIdsList());
-            return Response.ok(result);
+            return Response.ok(makeSub(sub, u, userProfile, permission));
         } catch (ServiceException e) {
             log.warn("find sub failed, user={}, userId={}, error={}",
                     user, userId, e.getMessage());
@@ -108,7 +107,7 @@ public class SubService {
         }
     }
 
-    private Sub makeSub(io.terminus.doctor.user.model.Sub sub, User u, UserProfile userProfile){
+    private Sub makeSub(io.terminus.doctor.user.model.Sub sub, User u, UserProfile userProfile, DoctorUserDataPermission permission){
         Sub op = new Sub();
         if (u != null && userProfile != null) {
             op.setId(u.getId());
@@ -119,6 +118,8 @@ public class SubService {
             op.setContact(sub.getContact());
             op.setRealName(userProfile.getRealName());
             op.setStatus(sub.getStatus());
+            op.setBarnIds(permission.getBarnIdsList());
+            op.setFarmIds(permission.getFarmIdsList());
         }
         return op;
     }
@@ -144,9 +145,16 @@ public class SubService {
             if(!Objects.equals(subUser.getName(), userName)){
                 checkSubUserAccount(userName);
             }
-
             subUser.setName(userName);
-            subUser.setMobile(sub.getContact());
+
+            if(StringUtils.isNotBlank(sub.getContact())){
+                Response<User> mobileRes = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
+                if(mobileRes.isSuccess() && mobileRes.getResult() != null && !Objects.equals(mobileRes.getResult().getId(), sub.getId())){
+                    throw new JsonResponseException("user.register.mobile.has.been.used");
+                }
+                subUser.setMobile(sub.getContact());
+            }
+
             this.updateSubStaffStatus(subUser, io.terminus.doctor.user.model.Sub.Status.from(sub.getStatus()));
             // TODO: 自定义角色冗余进 user 表
             List<String> roles = Lists.newArrayList("SUB");
@@ -162,7 +170,7 @@ public class SubService {
             RespHelper.orServEx(userWriteService.update(subUser));
             this.updateSubPermission(user, subUser.getId(), sub.getFarmIds(), sub.getBarnIds());
             return Response.ok(true);
-        } catch (ServiceException e) {
+        } catch (ServiceException | JsonResponseException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("update sub failed, user={}, sub={}, cause:{}",
@@ -218,7 +226,8 @@ public class SubService {
         try {
             Long primaryId = this.getPrimaryUserId(user);
             //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
-            List<Long> primaryFarms = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryId)).getFarmIdsList();
+            DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryId));
+            List<Long> primaryFarms = permission.getFarmIdsList();
             for(Long farmId : sub.getFarmIds()){
                 if(!primaryFarms.contains(farmId)){
                     throw new ServiceException("authorize.fail");
@@ -229,11 +238,16 @@ public class SubService {
 
             //子账号@主账号
             String userName = subAccount(sub, user);
-
             checkSubUserAccount(userName);
-
             subUser.setName(userName);
-            subUser.setMobile(sub.getContact());
+
+            if(StringUtils.isNotBlank(sub.getContact())){
+                Response<User> mobileRes = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
+                if(mobileRes.isSuccess() && mobileRes.getResult() != null){
+                    throw new JsonResponseException("user.register.mobile.has.been.used");
+                }
+                subUser.setMobile(sub.getContact());
+            }
             subUser.setPassword(sub.getPassword());
             subUser.setType(UserType.FARM_SUB.value());
             subUser.setStatus(UserStatus.NORMAL.value());
@@ -249,9 +263,9 @@ public class SubService {
                     .put("realName", sub.getRealName())
                     .map());
             Long subUserId = RespHelper.orServEx(userWriteService.create(subUser));
-            this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds());
+            this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds(), permission.getOrgIdsList());
             return Response.ok(subUserId);
-        } catch (ServiceException e) {
+        } catch (ServiceException | JsonResponseException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("creat sub failed, user={}, sub={}, cause:{}", user, sub, Throwables.getStackTraceAsString(e));
@@ -259,7 +273,7 @@ public class SubService {
         }
     }
 
-    private void createPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds){
+    private void createPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds, List<Long> orgIds){
         //创建 数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
         permission.setUserId(userId);
@@ -271,6 +285,7 @@ public class SubService {
         permission.setCreatorName(currentUser.getName());
         permission.setUpdatorId(currentUser.getId());
         permission.setUpdatorName(currentUser.getName());
+        permission.setOrgIdsList(orgIds);
         RespHelper.orServEx(doctorUserDataPermissionWriteService.createDataPermission(permission));
     }
 
@@ -311,19 +326,22 @@ public class SubService {
     }
 
     private List<Sub> setSubInfo(List<io.terminus.doctor.user.model.Sub> subList){
-        List<Long> userIds = subList.stream().map(s -> s.getUserId()).collect(Collectors.toList());
+        List<Long> userIds = subList.stream().map(io.terminus.doctor.user.model.Sub::getUserId).collect(Collectors.toList());
         List<User> users = RespHelper.orServEx(doctorUserReadService.findByIds(userIds));
 
         List<UserProfile> profiles = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserIds(userIds));
 
         Map<Long, User> userMap = users.stream().collect(Collectors.toMap(User::getId, u -> u));
         Map<Long, UserProfile> profileMap = profiles.stream().collect(Collectors.toMap(UserProfile::getUserId, u -> u));
-        List<Sub> result = subList.stream().map(s -> {
-            User u = userMap.get(s.getUserId());
-            UserProfile up = profileMap.get(s.getUserId());
-            return makeSub(s, u, up);
-        }).collect(Collectors.toList());
-        return result;
+
+        return subList.stream()
+                .map(s -> {
+                    User u = userMap.get(s.getUserId());
+                    UserProfile up = profileMap.get(s.getUserId());
+                    DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(s.getUserId()));
+                    return makeSub(s, u, up, permission);
+                })
+                .collect(Collectors.toList());
     }
 
     /**

@@ -15,18 +15,16 @@
         <result column="sow_qty" property="sowQty"/>
         <result column="birth_date" property="birthDate"/>
         <result column="avg_day_age" property="avgDayAge"/>
-        <result column="weight" property="weight"/>
-        <result column="avg_weight" property="avgWeight"/>
-        <result column="wean_avg_weight" property="weanAvgWeight"/>
-        <result column="birth_avg_weight" property="birthAvgWeight"/>
+        <result column="wean_weight" property="weanWeight"/>
+        <result column="birth_weight" property="birthWeight"/>
+        <result column="nest" property="nest"/>
+        <result column="live_qty" property="liveQty"/>
+        <result column="healthy_qty" property="healthyQty"/>
         <result column="weak_qty" property="weakQty"/>
         <result column="unwean_qty" property="unweanQty"/>
+        <result column="wean_qty" property="weanQty"/>
+        <result column="qua_qty" property="quaQty"/>
         <result column="unq_qty" property="unqQty"/>
-        <result column="price" property="price"/>
-        <result column="amount" property="amount"/>
-        <result column="customer_id" property="customerId"/>
-        <result column="customer_name" property="customerName"/>
-        <result column="sale_qty" property="saleQty"/>
         <result column="extra" property="extra"/>
         <result column="creator_id" property="creatorId"/>
         <result column="creator_name" property="creatorName"/>
@@ -34,7 +32,6 @@
         <result column="updator_name" property="updatorName"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
-
     </resultMap>
 
     <sql id="tb">
@@ -54,18 +51,16 @@
         sow_qty,
         birth_date,
         avg_day_age,
-        weight,
-        avg_weight,
-        wean_avg_weight,
-        birth_avg_weight,
+        wean_weight,
+        birth_weight,
+        nest,
+        live_qty,
+        healthy_qty,
         weak_qty,
         unwean_qty,
+        wean_qty,
+        qua_qty,
         unq_qty,
-        price,
-        amount,
-        customer_id,
-        customer_name,
-        sale_qty,
         extra,
         creator_id,
         creator_name,
@@ -85,18 +80,16 @@
         #{sowQty},
         #{birthDate},
         #{avgDayAge},
-        #{weight},
-        #{avgWeight},
-        #{weanAvgWeight},
-        #{birthAvgWeight},
+        #{weanWeight},
+        #{birthWeight},
+        #{nest},
+        #{liveQty},
+        #{healthyQty},
         #{weakQty},
         #{unweanQty},
+        #{weanQty},
+        #{quaQty},
         #{unqQty},
-        #{price},
-        #{amount},
-        #{customerId},
-        #{customerName},
-        #{saleQty},
         #{extra},
         #{creatorId},
         #{creatorName},
@@ -132,18 +125,16 @@
             <if test="sowQty != null">sow_qty = #{sowQty},</if>
             <if test="birthDate != null">birth_date = #{birthDate},</if>
             <if test="avgDayAge != null">avg_day_age = #{avgDayAge},</if>
-            <if test="weight != null">weight = #{weight},</if>
-            <if test="avgWeight != null">avg_weight = #{avgWeight},</if>
-            <if test="weanAvgWeight != null">wean_avg_weight = #{weanAvgWeight},</if>
-            <if test="birthAvgWeight != null">birth_avg_weight = #{birthAvgWeight},</if>
+            <if test="weanWeight != null">wean_weight = #{weanWeight},</if>
+            <if test="birthWeight != null">birth_weight = #{birthWeight},</if>
+            <if test="nest != null">nest = #{nest},</if>
+            <if test="liveQty != null">live_qty = #{liveQty},</if>
+            <if test="healthyQty != null">healthy_qty = #{healthyQty},</if>
             <if test="weakQty != null">weak_qty = #{weakQty},</if>
             <if test="unweanQty != null">unwean_qty = #{unweanQty},</if>
+            <if test="weanQty != null">wean_qty = #{weanQty},</if>
+            <if test="quaQty != null">qua_qty = #{quaQty},</if>
             <if test="unqQty != null">unq_qty = #{unqQty},</if>
-            <if test="price != null">price = #{price},</if>
-            <if test="amount != null">amount = #{amount},</if>
-            <if test="customerId != null">customer_id = #{customerId},</if>
-            <if test="customerName != null">customer_name = #{customerName},</if>
-            <if test="saleQty != null">sale_qty = #{saleQty},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="creatorId != null">creator_id = #{creatorId},</if>
             <if test="creatorName != null">creator_name = #{creatorName},</if>
@@ -207,18 +198,16 @@
             #{item.sowQty},
             #{item.birthDate},
             #{item.avgDayAge},
-            #{item.weight},
-            #{item.avgWeight},
-            #{item.weanAvgWeight},
-            #{item.birthAvgWeight},
+            #{item.weanWeight},
+            #{item.birthWeight},
+            #{item.nest},
+            #{item.liveQty},
+            #{item.healthyQty},
             #{item.weakQty},
             #{item.unweanQty},
+            #{item.weanQty},
+            #{item.quaQty},
             #{item.unqQty},
-            #{item.price},
-            #{item.amount},
-            #{item.customerId},
-            #{item.customerName},
-            #{item.saleQty},
             #{item.extra},
             #{item.creatorId},
             #{item.creatorName},

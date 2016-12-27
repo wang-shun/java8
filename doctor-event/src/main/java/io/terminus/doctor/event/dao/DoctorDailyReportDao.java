@@ -17,6 +17,10 @@ import java.util.List;
 @Repository
 public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
 
+    public void updateByFarmIdAndSumAt(DoctorDailyReport report) {
+        getSqlSession().update(sqlId("updateByFarmIdAndSumAt"), report);
+    }
+
     public DoctorDailyReport findByFarmIdAndSumAt(Long farmId, Date sumAt) {
         return getSqlSession().selectOne(sqlId("findByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
     }

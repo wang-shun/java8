@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.model;
 
+import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -24,7 +25,7 @@ public class DoctorMonthlyReport implements Serializable {
     
     /**
      * 月报数据，json存储
-     * @see io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportDto
+     * @see DoctorCommonReportDto
      */
     private String data;
     

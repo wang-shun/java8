@@ -526,3 +526,38 @@ CREATE TABLE `doctor_farm_basics` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_doctor_farm_basics_farm_id` (`farm_id`)
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COMMENT='猪场基础数据关联表';
+
+-- 2016-11-18 新建周报表
+CREATE TABLE `doctor_weekly_reports` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `data` text COMMENT '周报数据，json存储',
+  `extra` text COMMENT '附加字段',
+  `sum_at` date DEFAULT NULL COMMENT '统计时间',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间(仅做记录创建时间，不参与查询)',
+  PRIMARY KEY (`id`),
+  KEY `idx_doctor_monthly_reports_farm_id_agg_sumat` (`farm_id`,`sum_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场周报表';
+
+-- 2016-12-05 猪群跟踪字段重构
+ALTER TABLE doctor_group_tracks DROP COLUMN customer_id;
+ALTER TABLE doctor_group_tracks DROP COLUMN customer_name;
+ALTER TABLE doctor_group_tracks DROP COLUMN price;
+ALTER TABLE doctor_group_tracks DROP COLUMN weight;
+ALTER TABLE doctor_group_tracks DROP COLUMN avg_weight;
+ALTER TABLE doctor_group_tracks DROP COLUMN amount;
+ALTER TABLE doctor_group_tracks DROP COLUMN sale_qty;
+
+ALTER TABLE doctor_group_tracks CHANGE unq_qty  qua_qty INT(11)  COMMENT '合格数';
+ALTER TABLE doctor_group_tracks CHANGE wean_avg_weight  wean_weight DOUBLE COMMENT '断奶重kg';
+ALTER TABLE doctor_group_tracks CHANGE birth_avg_weight  birth_weight DOUBLE COMMENT '出生重kg';
+
+ALTER TABLE doctor_group_tracks ADD COLUMN unq_qty INT(11) DEFAULT NULL COMMENT '不合格数(分娩时累加)' AFTER qua_qty;
+ALTER TABLE doctor_group_tracks ADD COLUMN nest INT(11) DEFAULT NULL COMMENT '窝数(分娩时累加)' AFTER birth_weight;
+ALTER TABLE doctor_group_tracks ADD COLUMN live_qty INT(11) DEFAULT NULL COMMENT '活仔数(分娩时累加)' AFTER nest;
+ALTER TABLE doctor_group_tracks ADD COLUMN healthy_qty INT(11) DEFAULT NULL COMMENT '健仔数(分娩时累加)' AFTER live_qty;
+ALTER TABLE doctor_group_tracks ADD COLUMN wean_qty INT(11) DEFAULT NULL COMMENT '断奶数(断奶时累加)' AFTER unwean_qty;
+
+-- 2016-12-15 增加org_ids 字段
+ALTER TABLE doctor_user_data_permissions ADD COLUMN org_ids text DEFAULT NULL COMMENT '公司id,逗号分隔';
+ALTER TABLE doctor_messages ADD COLUMN business_type INT(11) DEFAULT NULL COMMENT '消息目标类型,1、猪 2、猪群 3、仓库' AFTER business_id;

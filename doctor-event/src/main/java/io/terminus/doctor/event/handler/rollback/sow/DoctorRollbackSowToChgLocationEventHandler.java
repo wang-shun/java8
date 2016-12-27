@@ -19,7 +19,7 @@ import java.util.Objects;
 public class DoctorRollbackSowToChgLocationEventHandler extends DoctorAbstractRollbackPigEventHandler{
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        return (Objects.equals(pigEvent.getType(), PigEvent.TO_MATING.getKey()) || Objects.equals(pigEvent.getType(), PigEvent.TO_FARROWING.getKey())) && isLastEvent(pigEvent);
+        return (Objects.equals(pigEvent.getType(), PigEvent.TO_MATING.getKey()) || Objects.equals(pigEvent.getType(), PigEvent.TO_FARROWING.getKey()));
     }
 
     @Override

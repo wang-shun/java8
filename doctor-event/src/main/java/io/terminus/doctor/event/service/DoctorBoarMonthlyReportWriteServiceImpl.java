@@ -105,7 +105,7 @@ public class DoctorBoarMonthlyReportWriteServiceImpl implements DoctorBoarMonthl
         DoctorBoarMonthlyReport report = new DoctorBoarMonthlyReport();
         List<DoctorBoarMonthlyReport> doctorBoarMonthlyReportLists =  doctorBoarMonthlyReportDao.constructorDoctorBoarMonthlyReports(farmId, startAt, endAt);
         if(  doctorBoarMonthlyReportLists != null && !doctorBoarMonthlyReportLists.isEmpty()){
-            doctorBoarMonthlyReportManager.createMonthlyReports(doctorBoarMonthlyReportLists, new DateTime(sumAt).toString(DateUtil.YYYYMM));
+            doctorBoarMonthlyReportManager.createMonthlyReports(farmId, doctorBoarMonthlyReportLists, new DateTime(sumAt).toString(DateUtil.YYYYMM));
         }
 
     }

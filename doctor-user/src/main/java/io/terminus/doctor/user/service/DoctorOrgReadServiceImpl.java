@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RpcProvider
@@ -31,6 +33,17 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
         Response<DoctorOrg> response = new Response<>();
         try {
             response.setResult(doctorOrgDao.findById(orgId));
+        } catch (Exception e) {
+            log.error("find org by id failed, cause : {}", Throwables.getStackTraceAsString(e));
+            response.setError("find.org.by.id.failed");
+        }
+        return response;
+    }
+    @Override
+    public Response<List<DoctorOrg>> findOrgByIds(List<Long> orgIds) {
+        Response<List<DoctorOrg>> response = new Response<>();
+        try {
+            response.setResult(doctorOrgDao.findByIds(orgIds));
         } catch (Exception e) {
             log.error("find org by id failed, cause : {}", Throwables.getStackTraceAsString(e));
             response.setError("find.org.by.id.failed");

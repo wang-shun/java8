@@ -46,11 +46,6 @@ public abstract class BaseIndexedGroupFactory<T extends IndexedGroup> implements
         if (groupTrack != null) {
             indexedGroup.setQuantity(groupTrack.getQuantity());
             indexedGroup.setAvgDayAge(groupTrack.getAvgDayAge());
-            indexedGroup.setWeight(groupTrack.getWeight());
-            indexedGroup.setAvgWeight(groupTrack.getAvgWeight());
-            indexedGroup.setPrice(groupTrack.getPrice());
-            indexedGroup.setAmount(groupTrack.getAmount());
-            indexedGroup.setSaleQty(groupTrack.getSaleQty());
             indexedGroup.setUpdatedAt(groupTrack.getUpdatedAt());
         }
         return indexedGroup;

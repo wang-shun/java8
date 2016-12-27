@@ -12,6 +12,29 @@
         <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
     </sql>
 
+    <!-- 某一猪群死淘率 -->
+    <select id="getDeadRateByGroupId" parameterType="map" resultType="double">
+        SELECT
+        (
+          SELECT
+            ifnull(sum(quantity),0) AS dead_count
+          FROM doctor_group_events
+          WHERE
+            change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+            group_id = #{groupId}
+        )
+        /
+        (
+          SELECT
+            ifnull(sum(quantity),1) AS trans_in_count
+          FROM doctor_group_events
+          WHERE
+            type = 2 AND -- 转入猪群事件
+            group_id = #{groupId}
+        )
+        FROM DUAL
+    </select>
+
     <!-- 预产胎数-->
     <select id="preDeliveryCounts" parameterType="map" resultType="int">
         select ifnull(count(1),0) from doctor_pig_events
@@ -195,7 +218,7 @@
         FROM doctor_group_events
         WHERE
         change_type_id = 109 AND -- 变动类型是销售
-        pig_type IN (1, 2) -- 产房 + 保育
+        pig_type IN (1, 7, 2) -- 产房 + 保育
         <include refid="criteria"/>
     </select>
 
@@ -1065,12 +1088,12 @@
     <select id="getBoarSowPregCount" parameterType="map" resultType="int">
         select count(1)
         FROM
-        (select farm_id, boar_code, pig_code, parity
+        (select farm_id, boar_code, pig_id, parity
         from doctor_pig_events
         where type = 9
         <include refid="criteria"/>
-        group by farm_id, boar_code, pig_code,parity) as t1
-        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        group by farm_id, boar_code, pig_id,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 11
         and t2.preg_check_result = 1
     </select>
@@ -1079,12 +1102,12 @@
     <select id="getBoarSowFarrowCount" parameterType="map" resultType="int">
         select ifnull(count(1),0)
         FROM
-        (select farm_id, boar_code, pig_code, parity
+        (select farm_id, boar_code, pig_id, parity
         from doctor_pig_events
         where type = 9
         <include refid="criteria"/>
-        group by farm_id, boar_code, pig_code,parity) as t1
-        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        group by farm_id, boar_code, pig_id,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
     </select>
 
@@ -1093,12 +1116,12 @@
     <select id="getBoarSowFarrowAvgCount" parameterType="map" resultType="double">
         select ifnull(sum(t2.live_count + t2.dead_count + t2.jx_count + t2.mny_count + t2.black_count),0)/case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end
         FROM
-        (select farm_id, boar_code, pig_code, parity
+        (select farm_id, boar_code, pig_id, parity
         from doctor_pig_events
         where type = 9
         <include refid="criteria"/>
-        group by farm_id, boar_code, pig_code,parity) as t1
-        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        group by farm_id, boar_code, pig_id,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
     </select>
 
@@ -1106,12 +1129,12 @@
     <select id="getBoarSowFarrowLiveAvgCount" parameterType="map" resultType="double">
         select ifnull(sum(live_count),0)/case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end
         FROM
-        (select farm_id, boar_code, pig_code, parity
+        (select farm_id, boar_code, pig_id, parity
         from doctor_pig_events
         where type = 9
         <include refid="criteria"/>
-        group by farm_id, boar_code, pig_code,parity) as t1
-        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        group by farm_id, boar_code, pig_id,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
     </select>
 
@@ -1120,12 +1143,12 @@
         SELECT
         (select ifnull(count(1), 0)
         FROM
-        (select farm_id, boar_code, pig_code, parity
+        (select farm_id, boar_code, pig_id, parity
         from doctor_pig_events
         where type = 9
         <include refid="criteria"/>
-        group by farm_id, boar_code, pig_code,parity) as t1
-        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        group by farm_id, boar_code, pig_id,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 11
         and t2.preg_check_result = 1)
         / (
@@ -1143,12 +1166,12 @@
         SELECT
         (select ifnull(count(1), 0)
         FROM
-        (select farm_id, boar_code, pig_code, parity
+        (select farm_id, boar_code, pig_id, parity
         from doctor_pig_events
         where type = 9
         <include refid="criteria"/>
-        group by farm_id, boar_code, pig_code,parity) as t1
-        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        group by farm_id, boar_code, pig_id,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15)
         / (
         select case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end as pzcs
@@ -1160,7 +1183,7 @@
     </select>
 
     <!--存栏变动月报: 转入(后备,产房仔猪,保育,育肥)-->
-    <select id="getMonthlyLiveStockChangeIn" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+    <select id="getMonthlyLiveStockChangeIn" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
             ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
             ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowIn,
@@ -1247,7 +1270,7 @@
     </select>
 
     <!--存栏变动月报: 死淘(后备,产房仔猪,保育,育肥)-->
-    <select id="getMonthlyLiveStockChangeGroupDead" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+    <select id="getMonthlyLiveStockChangeGroupDead" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
             ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
             ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowDead,
@@ -1268,7 +1291,7 @@
     </select>
 
     <!--存栏变动月报: 死淘(配怀,产房母猪)-->
-    <select id="getMonthlyLiveStockChangeSowDead" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+    <select id="getMonthlyLiveStockChangeSowDead" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
             ifnull(max(CASE WHEN pig_type = 5 THEN result ELSE 0 END), 0) +
             ifnull(max(CASE WHEN pig_type = 6 THEN result ELSE 0 END), 0) AS peiHuaiDead,
@@ -1297,7 +1320,7 @@
     </select>
 
     <!--存栏变动月报: 销售(后备,产房仔猪,保育,育肥)-->
-    <select id="getMonthlyLiveStockChangeSale" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+    <select id="getMonthlyLiveStockChangeSale" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
             ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
             ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowSale,
@@ -1318,7 +1341,7 @@
     </select>
 
     <!--存栏变动月报: 饲料数量-->
-    <select id="getMonthlyLiveStockChangeFeedCount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+    <select id="getMonthlyLiveStockChangeFeedCount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
             ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
             ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowSowFeedCount,
@@ -1347,7 +1370,7 @@
     </select>
 
     <!--存栏变动月报: 饲料金额-->
-    <select id="getMonthlyLiveStockChangeMaterielAmount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+    <select id="getMonthlyLiveStockChangeMaterielAmount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
             -- 饲料
             ifnull(max(CASE WHEN pig_type = 4 AND material_type = 1 THEN amount ELSE 0 END), 0) +
@@ -1410,7 +1433,7 @@
         ) AS res
     </select>
 
-    <select id="getParityStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorStockStructureMonthlyReport">
+    <select id="getParityStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorStockStructureCommonReport">
         select  date_format(#{endAt}, '%Y-%m-%d') as sumAt,
                 1 as type,
                 null as businessId,
@@ -1442,7 +1465,7 @@
         where kind = 1
         and type in (6, 7)
         and farm_id = #{farmId}
-        and event_at &gt;= #{startAt}
+        and event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
         group by case when parity &lt; 10 then parity else '10' end
         ) t13 on t11.parity = t13.parity
         left join
@@ -1454,7 +1477,7 @@
         where kind = 1
         and type = 9
         and farm_id = #{farmId}
-        and event_at &gt;= #{startAt}
+        and event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
         group by case when parity-1 &lt; 9 then parity-1 else '10' end
         ) t14 on t11.parity = t14.parity
         left join (
@@ -1466,12 +1489,12 @@
         and type = 9
         and parity > 1
         and farm_id = #{farmId}
-        and event_at &gt;= #{startAt}
+        and event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
         group by case when parity &lt; 10 then parity else '10' end
         ) t15 on t11.parity = t15.parity
     </select>
 
-    <select id="getBreedStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorStockStructureMonthlyReport">
+    <select id="getBreedStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorStockStructureCommonReport">
         select
               date_format(#{endAt}, '%Y-%m-%d') as sumAt,
               2 as type,
@@ -1497,10 +1520,10 @@
                sum(case type when 6 then 1 else 0 end) as outCounts,
                 sum(case type when 7 then 1 else 0 end) as inCounts
            FROM doctor_pig_events t1
-           join doctor_pigs t2 on t1.pig_code = t2.pig_code
+           join doctor_pigs t2 on t1.pig_id = t2.id
           WHERE t1.kind = 1
             AND t1.type IN (6, 7)
-            and t1.event_at &gt;= #{startAt}
+            and t1.event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
             AND t1.farm_id = #{farmId}
         GROUP BY t2.breed_id, t2.breed_name
         ) t12 on t11.breed_id = t12.breed_id and t11.breed_name = t12.breed_name;
@@ -1523,7 +1546,7 @@
         select count(1)
         from
         (
-        select  pig_code, event_at, parity
+        select  pig_id, event_at, parity
         from doctor_pig_events
         where
         pig_status_after = 9
@@ -1531,21 +1554,21 @@
         <include refid="criteria"/>
         ) t1 left join
         (
-        select  pig_code, event_at, parity
+        select  pig_id, event_at, parity
         from doctor_pig_events
         where type = 9
         and farm_id = 1
         <include refid="criteria"/>
         and current_mating_count = 1
-        and pig_code in(
-        select  pig_code
+        and pig_id in(
+        select  pig_id
         from doctor_pig_events
         where
         pig_status_after = 9
         and type in (16,17,18)
         <include refid="criteria"/>
         )
-        ) t2 on t1.pig_code = t2.pig_code and t1.parity + 1 = t2.parity
+        ) t2 on t1.pig_id = t2.pig_id and t1.parity + 1 = t2.parity
         where t1.event_at > date_add(t2.event_at, interval -7 day)
         )/
         (
@@ -1578,8 +1601,8 @@
         and farm_id = 1
         and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
         and event_at &lt;= #{endAt}
-        and pig_code in(
-        select pig_code
+        and pig_id in(
+        select pig_id
         from  doctor_pig_events
         where
         pig_status_after = 9

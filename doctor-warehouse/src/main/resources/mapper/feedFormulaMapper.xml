@@ -60,6 +60,7 @@
             <if test="feedName != null">feed_name = #{feedName},</if>
             <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="farmName != null">farm_name = #{farmName},</if>
+            <if test="formula != null">formula = #{formula},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}

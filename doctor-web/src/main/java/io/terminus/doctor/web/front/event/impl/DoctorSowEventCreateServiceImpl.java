@@ -19,7 +19,6 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.web.front.event.service.DoctorSowEventCreateService;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,9 +40,6 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
 
     private final DoctorPigEventWriteService doctorPigEventWriteService;
     private final DoctorBasicWriteService doctorBasicWriteService;
-
-    @Autowired(required = false)
-    private Subscriber subscriber;
 
     @Autowired
     public DoctorSowEventCreateServiceImpl(DoctorPigEventWriteService doctorPigEventWriteService,
@@ -98,14 +94,14 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
 
     @Override
     public Response<Boolean> sowEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson) {
+        Map<String, Object> extra;
         try{
-            Map<String, Object> extra = OBJECT_MAPPER.readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
-            RespHelper.orServEx(doctorPigEventWriteService.sowPigsEventCreate(dtoList, extra));
-            return Response.ok(Boolean.TRUE);
+            extra = OBJECT_MAPPER.readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
         }catch (Exception e){
             log.error("create sow events list fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.sowEvents.fail");
         }
+        return doctorPigEventWriteService.sowPigsEventCreate(dtoList, extra);
     }
 
     @Override

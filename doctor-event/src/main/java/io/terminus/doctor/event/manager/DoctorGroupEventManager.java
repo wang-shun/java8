@@ -10,7 +10,6 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
-import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -80,19 +79,6 @@ public class DoctorGroupEventManager {
     public <I extends BaseGroupInput>
     void handleEvent(DoctorGroupDetail groupDetail, I input, Class<? extends DoctorGroupEventHandler> handlerClass) {
         getHandler(handlerClass).handle(groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
-    }
-
-    /**
-     * 事务方式执行编辑猪群事件
-     * @param groupDetail  猪群明细
-     * @param event        事件
-     * @param edit         编辑信息
-     * @param handlerClass 事件handler的实现类
-     */
-    @Transactional
-    public <E extends BaseGroupEdit>
-    void editEvent(DoctorGroupDetail groupDetail, DoctorGroupEvent event, E edit, Class<? extends DoctorGroupEventHandler> handlerClass) {
-        getHandler(handlerClass).edit(groupDetail.getGroup(), groupDetail.getGroupTrack(), event, edit);
     }
 
     /**

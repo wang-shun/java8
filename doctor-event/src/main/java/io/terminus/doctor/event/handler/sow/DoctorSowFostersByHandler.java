@@ -68,8 +68,12 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
 
         Long pigEventId = (Long) context.get("doctorPigEventId");
 
-        // 转群操作
-        Long groupId = groupSowEventCreate(doctorPigTrack, basic, extra, pigEventId);
+        Long groupId = doctorPigTrack.getGroupId();
+
+        //如果不是一个猪舍的拼窝，需要转群操作
+        if (basic.getNeed()) {
+            groupId = groupSowEventCreate(doctorPigTrack, basic, extra, pigEventId);
+        }
 
         //被拼窝数量
         Integer fosterCount = (Integer) extra.get("fostersCount");
@@ -102,7 +106,6 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
         Long fromGroupId = fromSowTrack.getGroupId();
 
         //被拼窝的数据extra
-        Map<String, Object> toSowTrackMap = JSON_MAPPER.fromJson(doctorPigTrack.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
         Long toGroupId = doctorPigTrack.getGroupId();
         String toGroupCode = RespHelper.orServEx(doctorGroupReadService.findGroupById(toGroupId)).getGroupCode();
 

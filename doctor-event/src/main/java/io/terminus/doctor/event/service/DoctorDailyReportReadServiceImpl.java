@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.service;
 
-import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -12,7 +11,6 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
-import io.terminus.doctor.event.dao.redis.DailyReportHistoryDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
@@ -40,26 +38,23 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
 
     private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorDailyReportCache doctorDailyReportCache;
-    private final DailyReportHistoryDao dailyReportHistoryDao;
     private final DailyReport2UpdateDao dailyReport2UpdateDao;
 
     @Autowired
     public DoctorDailyReportReadServiceImpl(DoctorDailyReportDao doctorDailyReportDao,
                                             DoctorDailyReportCache doctorDailyReportCache,
-                                            DailyReportHistoryDao dailyReportHistoryDao,
                                             DailyReport2UpdateDao dailyReport2UpdateDao) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorDailyReportCache = doctorDailyReportCache;
-        this.dailyReportHistoryDao = dailyReportHistoryDao;
         this.dailyReport2UpdateDao = dailyReport2UpdateDao;
     }
 
-    @PostConstruct
+    //@PostConstruct
     public void init() {
         try {
             Date now = new Date();
             List<DoctorDailyReportDto> reportDtos = RespHelper.orServEx(initDailyReportByDate(now));
-            reportDtos.forEach(report -> doctorDailyReportCache.putDailyReport(report.getFarmId(), now, report));
+            reportDtos.forEach(report -> doctorDailyReportCache.putDailyReportToMySQL(report.getFarmId(), now, report));
             log.info("init daily report cache success!");
         } catch (ServiceException e) {
             log.error("init daily report failed, cause:{}", Throwables.getStackTraceAsString(e));
@@ -73,18 +68,26 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
             if(date == null){
                 return Response.ok(failReport(sumAt));
             }
-            DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
-            if(report == null){
-                // 如果查当天的日报, 查不到就直接计算并存入redis
-                if(date.equals(Dates.startOfDay(new Date()))){
-                    report = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, date);
-                    dailyReportHistoryDao.saveDailyReport(report, farmId, date);
-                    return Response.ok(report);
+            DoctorDailyReport report = doctorDailyReportCache.getDailyReport(farmId, date);
+            if(report == null || report.getReportData() == null){
+                // 如果查当天的日报, 查不到就直接计算并存入redis, 如果查未来，返回失败查询
+                if(!date.after(Dates.startOfDay(new Date()))){
+                    DoctorDailyReportDto reportDto = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, date);
+                    report = new DoctorDailyReport();
+                    report.setFarmId(farmId);
+                    report.setSumAt(date);
+                    report.setReportData(reportDto);
+                    report.setSowCount(reportDto.getSowCount());
+                    report.setFarrowCount(reportDto.getLiveStock().getFarrow());
+                    report.setNurseryCount(reportDto.getLiveStock().getNursery());
+                    report.setFattenCount(reportDto.getLiveStock().getFatten());
+                    doctorDailyReportDao.create(report);
+                    return Response.ok(reportDto);
                 }else{
                     return Response.ok(failReport(sumAt));
                 }
             }else{
-                return Response.ok(report);
+                return Response.ok(report.getReportData());
             }
         } catch (Exception e) {
             log.error("find dailyReport by farm id and sumat fail, farmId:{}, sumat:{}, cause:{}",
@@ -146,17 +149,6 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         }
     }
 
-    @Override
-    public Response<Boolean> clearAllReportCache() {
-        try {
-            doctorDailyReportCache.clearAllReport();
-            return Response.ok(Boolean.TRUE);
-        } catch (Exception e) {
-            log.error("clear report cache failed, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.ok(Boolean.FALSE);
-        }
-    }
-
     /**
      * 根据查询查询日报
      *
@@ -171,17 +163,6 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
             log.error("find daily report by sumat failed, date:{}, cause:{}", date, Throwables.getStackTraceAsString(e));
             return Response.fail("daily.report.find.fail");
         }
-    }
-
-    //根据farmId和sumAt从数据库查询, 并转换成日报统计
-    private DoctorDailyReportDto getDailyReportWithSql(Long farmId, Date sumAt) {
-        DoctorDailyReport report = doctorDailyReportDao.findByFarmIdAndSumAt(farmId, sumAt);
-
-        //如果没有查到, 要返回null, 交给上层判断
-        if (report == null || Strings.isNullOrEmpty(report.getData())) {
-            return null;
-        }
-        return report.getReportData();
     }
 
     @Override

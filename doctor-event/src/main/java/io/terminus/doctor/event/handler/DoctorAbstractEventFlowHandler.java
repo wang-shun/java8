@@ -9,9 +9,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
-import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -22,9 +20,7 @@ import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.manager.DoctorGroupReportManager;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -49,12 +45,6 @@ import static io.terminus.common.utils.Arguments.notNull;
 public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
-
-    @Autowired
-    private DoctorGroupReportManager doctorGroupReportManager;
-
-    @Autowired
-    private DoctorGroupTrackDao doctorGroupTrackDao;
 
     protected final DoctorPigDao doctorPigDao;
     protected final DoctorPigEventDao doctorPigEventDao;
@@ -142,7 +132,6 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             flowDataMap.put("track", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack));
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
         } catch (IllegalStateException | ServiceException e) {
-            log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw e;
         } catch (Exception e) {
             DoctorAbstractEventFlowHandler.log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -294,16 +283,5 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             doctorPigEvent.setRelEventId(lastEvent.getId());
         }
         return doctorPigEvent;
-    }
-
-    /**
-     * 分娩, 断奶 等不涉及到猪群数量变动的, 需要在母猪这边触发一下修改猪群的事件
-     */
-    protected void updateFarrowGroupTrack(Long groupId, Integer pigType) {
-        log.info("update groupId:{}, pigType:{}", groupId, pigType);
-        if (groupId != null && PigType.FARROW_TYPES.contains(pigType)) {
-            DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
-            doctorGroupTrackDao.update(doctorGroupReportManager.updateFarrowGroupTrack(groupTrack, pigType));
-        }
     }
 }

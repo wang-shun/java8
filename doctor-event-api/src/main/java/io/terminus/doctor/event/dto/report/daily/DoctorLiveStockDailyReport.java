@@ -60,12 +60,4 @@ public class DoctorLiveStockDailyReport implements Serializable {
      * 育肥猪
      */
     private int fatten;
-
-    public void addSowBoar(DoctorLiveStockDailyReport dto){
-        this.houbeiSow = dto.getHoubeiSow();
-        this.peihuaiSow = dto.getPeihuaiSow();
-        this.buruSow = dto.getBuruSow();
-        this.konghuaiSow = dto.getKonghuaiSow();
-        this.boar = dto.getBoar();
-    }
 }

@@ -29,25 +29,25 @@ public class WarehouseReport implements Serializable {
         /**
          * 当前库存
          */
-        private double currentStock;
+        private Double currentStock=0.0;
         /**
          * 当前库存的金额
          */
-        private double currentStockAmount;
+        private Double currentStockAmount=0.0;
 
         /**
          * 入库数量
          */
-        private double inCount;
-        private double inAmount;
+        private Double inCount=0.0;
+        private Double inAmount=0.0;
 
         /**
          * 出库数量
          */
-        private double outCount;
-        private double outAmount;
+        private Double outCount=0.0;
+        private Double outAmount=0.0;
 
-        private Long warehouseId;
+        private Long warehouseId=0l;
         private String warehouseName;
     }
 }

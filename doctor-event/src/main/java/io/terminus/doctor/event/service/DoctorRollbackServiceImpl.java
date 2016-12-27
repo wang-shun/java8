@@ -6,12 +6,11 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
-import io.terminus.doctor.event.dao.redis.DailyReportHistoryDao;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
@@ -54,11 +53,10 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     private final GroupSearchWriteService groupSearchWriteService;
     private final BarnSearchWriteService barnSearchWriteService;
     private final DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
-    private final DailyReport2UpdateDao dailyReport2UpdateDao;
-    private final DailyReportHistoryDao dailyReportHistoryDao;
     private final DoctorKpiDao doctorKpiDao;
     private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     private final DoctorRollbackManager doctorRollbackManager;
+    private final DoctorDailyReportCache doctorDailyReportCache;
 
     @Autowired
     public DoctorRollbackServiceImpl(DoctorGroupEventDao doctorGroupEventDao,
@@ -67,22 +65,20 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                                      GroupSearchWriteService groupSearchWriteService,
                                      BarnSearchWriteService barnSearchWriteService,
                                      DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao,
-                                     DailyReport2UpdateDao dailyReport2UpdateDao,
-                                     DailyReportHistoryDao dailyReportHistoryDao,
                                      DoctorKpiDao doctorKpiDao,
                                      DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
-                                     DoctorRollbackManager doctorRollbackManager) {
+                                     DoctorRollbackManager doctorRollbackManager,
+                                     DoctorDailyReportCache doctorDailyReportCache) {
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.pigSearchWriteService = pigSearchWriteService;
         this.groupSearchWriteService = groupSearchWriteService;
         this.barnSearchWriteService = barnSearchWriteService;
         this.doctorGroupBatchSummaryDao = doctorGroupBatchSummaryDao;
-        this.dailyReport2UpdateDao = dailyReport2UpdateDao;
-        this.dailyReportHistoryDao = dailyReportHistoryDao;
         this.doctorKpiDao = doctorKpiDao;
         this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
         this.doctorRollbackManager = doctorRollbackManager;
+        this.doctorDailyReportCache = doctorDailyReportCache;
     }
 
     @Override
@@ -150,10 +146,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         Date endAt = DateUtil.getDateEnd(new DateTime(dto.getEventAt())).toDate();
         Long farmId = dto.getFarmId();
 
-        //记录事件, 晚上job更新月报
-        dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
-
-        DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+        DoctorDailyReportDto report = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
         if (report == null) {
             return;
         }
@@ -217,7 +210,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                     break;
             }
         }
-        dailyReportHistoryDao.saveDailyReport(report, farmId, startAt);
+        doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, report);
     }
 
     //更新从回滚日期到今天的存栏
@@ -244,12 +237,12 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
             liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
 
-            DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
-            if (everyRedis == null) {
+            DoctorDailyReportDto everyRedis = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+            if (everyRedis == null ) {
                 continue;
             }
             everyRedis.setLiveStock(liveStock);
-            dailyReportHistoryDao.saveDailyReport(everyRedis, farmId, startAt);
+            doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, everyRedis);
             startAt = new DateTime(startAt).plusDays(1).toDate();
         }
 
@@ -275,6 +268,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         dead.setFarrow(doctorKpiDao.getDeadFarrow(farmId, startAt, endAt));
         dead.setNursery(doctorKpiDao.getDeadNursery(farmId, startAt, endAt));
         dead.setFatten(doctorKpiDao.getDeadFatten(farmId, startAt, endAt));
+        dead.setHoubei(doctorKpiDao.getDeadHoubei(farmId, startAt, endAt));
         return dead;
     }
 

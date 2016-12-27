@@ -58,10 +58,15 @@
     <sql id="criteria">
         <if test="orgId != null">AND org_id = #{orgId}</if>
         <if test="farmId != null">AND farm_id = #{farmId}</if>
-        <if test="groupCode != null">AND group_code = #{groupCode}</if>
         <if test="status != null">AND status = #{status}</if>
         <if test="initBarnId != null">AND init_barn_id = #{initBarnId}</if>
         <if test="currentBarnId != null">AND current_barn_id = #{currentBarnId}</if>
+        <if test="barnIdList != null">
+            and current_barn_id in
+            <foreach collection="barnIdList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
         <if test="pigType != null">AND pig_type = #{pigType}</if>
         <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND pig_type IN
             <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
@@ -74,6 +79,7 @@
         <if test="endOpenAt != null">AND open_at &lt;= #{endOpenAt}</if>
         <if test="startCloseAt != null">AND close_at &gt;= #{startCloseAt}</if>
         <if test="endCloseAt != null">AND close_at &lt;= #{endCloseAt}</if>
+        <if test="groupCode != null">AND group_code like concat('%', #{groupCode}, '%') </if>
     </sql>
 
     <insert id="create" parameterType="DoctorGroup" keyProperty="id" useGeneratedKeys="true">
@@ -158,7 +164,7 @@
         <where>
             <include refid="criteria"/>
         </where>
-        ORDER BY updated_at DESC
+        ORDER BY group_code DESC
         LIMIT #{offset}, #{limit}
     </select>
 

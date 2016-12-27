@@ -9,6 +9,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
@@ -16,8 +17,15 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.msg.enums.SmsCodeType;
+import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.model.DoctorRoleContent;
 import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.DoctorUserRoleLoader;
 import io.terminus.doctor.web.core.Constants;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
@@ -33,6 +41,7 @@ import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
 import io.terminus.session.AFSessionManager;
+import io.terminus.session.util.WebUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -40,12 +49,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Collections;
@@ -70,6 +76,10 @@ public class Users {
     private final PermissionHelper permissionHelper;
     private final DoctorCommonSessionBean doctorCommonSessionBean;
     private final AFSessionManager sessionManager;
+    private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
+    private final DoctorOrgReadService doctorOrgReadService;
+    @RpcConsumer
+    private DoctorUserRoleLoader doctorUserRoleLoader;
 
 
     @Autowired
@@ -80,7 +90,7 @@ public class Users {
                  AclLoader aclLoader,
                  PermissionHelper permissionHelper,
                  DoctorCommonSessionBean doctorCommonSessionBean,
-                 AFSessionManager sessionManager) {
+                 AFSessionManager sessionManager, DoctorUserDataPermissionReadService doctorUserDataPermissionReadService, DoctorOrgReadService doctorOrgReadService) {
         this.userWriteService = userWriteService;
         this.doctorUserReadService = doctorUserReadService;
         this.captchaGenerator = captchaGenerator;
@@ -89,6 +99,8 @@ public class Users {
         this.aclLoader = aclLoader;
         this.permissionHelper = permissionHelper;
         this.sessionManager = sessionManager;
+        this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
+        this.doctorOrgReadService = doctorOrgReadService;
     }
 
     /**
@@ -111,7 +123,18 @@ public class Users {
             throw new JsonResponseException("auth.permission.find.fail");
         }
     }
-
+    @RequestMapping(value = "/getUserById/{id}",method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
+    public User getUserById(@PathVariable(value = "id") Long id) {
+        Response<User> userResponse=doctorUserReadService.findById(id);
+        if (!userResponse.isSuccess()){
+            throw new JsonResponseException(userResponse.getError());
+        }
+        return userResponse.getResult();
+    }
+    @RequestMapping(value = "/{userId}/roles", method = {RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response<DoctorRoleContent> getUserRolesByUserId(@PathVariable Long userId) {
+        return doctorUserRoleLoader.hardLoadRoles(userId);
+    }
     /**
      * 生成sessionId
      */
@@ -126,15 +149,22 @@ public class Users {
      * @param password   密码
      * @param mobile     手机号
      * @param code       手机验证码
-     * @param sessionId  前台传入的会话session
      * @return 注册成功之后的用户ID
      */
     @RequestMapping(value = "/register", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Long register(@RequestParam("password") String password,
                          @RequestParam("mobile") String mobile,
-                         @RequestParam("code") String code,
-                         @RequestParam("sid") String sessionId){
-        return doctorCommonSessionBean.register(password, mobile, code, sessionId);
+                         @RequestParam("code") String code, HttpServletRequest request){
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            throw new JsonResponseException(500, "session.expired");
+        }
+        Cookie cookie=WebUtil.findCookie(request,"msid");
+        if (cookie==null){
+            throw new JsonResponseException(500, "session.expired");
+        }
+        Object sessionId = cookie.getValue();
+        return doctorCommonSessionBean.register(password, mobile, code, String.valueOf(sessionId));
     }
 
     /**
@@ -159,9 +189,11 @@ public class Users {
 
         //将后台生成的sessionId返回给前台，用于以后的sid
         return MapBuilder.<String, Object>of()
+                .put("userId",snapshot.get(Sessions.USER_ID))
                 .put("sid", token.getSessionId())
                 .put("redirect", !StringUtils.hasText(target) ? "/" : target)
                 .put("expiredAt", token.getExpiredAt())
+                .put("roles", token.getRoles())
                 .map();
     }
 
@@ -229,16 +261,24 @@ public class Users {
      * 发送短信验证码
      *
      * @param mobile 手机号
-     * @param sessionId 请求
-     * @param templateName 短信模板名称
+     * @param smsCodeType 短信模板ID
      * @return 短信发送结果
      */
     @RequestMapping(value = "/sms", method = RequestMethod.POST)
     @ResponseBody
     public Boolean sendSms(@RequestParam("mobile") String mobile,
-                           @RequestParam("sid") String sessionId,
-                           @RequestParam("templateName") String templateName) {
-        return doctorCommonSessionBean.sendSmsCode(mobile, sessionId, templateName);
+                           @RequestParam("smsCodeType") Integer smsCodeType, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return false;
+        }
+        Cookie cookie=WebUtil.findCookie(request,"msid");
+        if (cookie==null){
+            return false;
+        }
+        Object sessionId = cookie.getValue();
+
+        return doctorCommonSessionBean.sendSmsCode(mobile, String.valueOf(sessionId), SmsCodeType.from(smsCodeType).template());
     }
 
     /**
@@ -279,8 +319,8 @@ public class Users {
     }
 
     private void checkMobileExist(String mobile) {
-        User exist = RespHelper.or500(doctorUserReadService.findBy(mobile, LoginType.MOBILE));
-        if (exist != null) {
+        Response<User> exist = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
+        if (exist.isSuccess()) {
             log.error("change mobile exist, loginerId:{} mobile:{}", UserUtil.getUserId(), mobile);
             throw new JsonResponseException("mobile.already.exist");
         }
@@ -303,5 +343,24 @@ public class Users {
         }
         resp.getResult().setPassword(null); // for security
         return Lists.newArrayList(resp.getResult());
+    }
+
+    @RequestMapping(value = "/orgList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<DoctorOrg> orgList() {
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if(baseUser == null){
+            throw new JsonResponseException("user.not.login");
+        }
+        Response<DoctorUserDataPermission> dataPermissionResponse=doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()){
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> orgIds=dataPermissionResponse.getResult().getOrgIdsList();
+        Response<List<DoctorOrg>> result=doctorOrgReadService.findOrgByIds(orgIds);
+        if (!result.isSuccess()){
+            throw new JsonResponseException(result.getError());
+        }
+        return result.getResult();
     }
 }

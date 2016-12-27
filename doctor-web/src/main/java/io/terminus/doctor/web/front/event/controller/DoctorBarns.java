@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -129,13 +130,16 @@ public class DoctorBarns {
      * 根据farmId查询猪舍表, 根据pigIds过滤
      *
      * @param farmId 猪场id
+     * @param barnStatus 筛选猪舍状态
+     *                   @see DoctorBarn.Status
      * @param pigIds 猪id 逗号分隔
      * @return 猪舍表列表
      */
     @RequestMapping(value = "/farmId", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmId(@RequestParam("farmId") Long farmId,
+                                              @RequestParam(value = "status", required = false) Integer barnStatus,
                                               @RequestParam(value = "pigIds", required = false) String pigIds) {
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId)), pigIds);
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null, null, barnStatus)), pigIds);
     }
 
     /**
@@ -181,14 +185,15 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigType", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
                                                      @RequestParam("pigType") Integer pigType,
+                                                     @RequestParam(value = "status", required = false) Integer status,
                                                      @RequestParam(value = "pigIds", required = false) String pigIds) {
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, pigType, null, null)), pigIds);
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, Lists.newArrayList(pigType), null, status)), pigIds);
     }
 
     //根据猪id过滤猪舍: 取出猪的猪舍type, 过滤一把
     private List<DoctorBarn> filterBarnByPigIds(List<DoctorBarn> barns, String pigIds) {
         if (barns == null || isEmpty(pigIds)) {
-            return MoreObjects.firstNonNull(barns, Lists.newArrayList());
+            return MoreObjects.firstNonNull(barns, Lists.<DoctorBarn>newArrayList());
         }
 
         List<Integer> barnTypes = Splitters.splitToLong(pigIds, Splitters.COMMA).stream()
@@ -209,12 +214,13 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigTypes", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
                                                      @RequestParam(value = "pigTypes", required = false) String pigTypes,
+                                                     @RequestParam(value = "status", required = false) Integer status,
                                                      @RequestParam(value = "pigIds", required = false) String pigIds) {
         List<Integer> types = Lists.newArrayList();
         if (notEmpty(pigTypes)) {
             types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
         }
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, types)), pigIds);
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, types, null, status)), pigIds);
     }
 
 
@@ -229,19 +235,20 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigTypes/trans", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndTypeWhenBatchTransBarn(@RequestParam("farmId") Long farmId,
                                                                        @RequestParam("eventType") Integer eventType,
+                                                                       @RequestParam(value = "status", required = false) Integer status,
                                                                        @RequestParam("pigIds") String pigIds) {
         List<Integer> barnTypes;
         if (Objects.equals(eventType, PigEvent.CHG_LOCATION.getKey())) {
             barnTypes = getTransBarnTypes(pigIds);
-        } else if (Objects.equals(eventType, PigEvent.TO_MATING.getKey())) {
-            barnTypes = PigType.MATING_TYPES;
-        } else if (Objects.equals(eventType, PigEvent.TO_FARROWING.getKey())) {
-            barnTypes = PigType.FARROW_TYPES;
+//        } else if (Objects.equals(eventType, PigEvent.TO_MATING.getKey())) {
+//            barnTypes = PigType.MATING_TYPES;
+//        } else if (Objects.equals(eventType, PigEvent.TO_FARROWING.getKey())) {
+//            barnTypes = PigType.FARROW_TYPES;
         } else {
             //转舍类型: 普通转舍, 去配种, 去分娩, 其他报错
             throw new JsonResponseException("not.trans.barn.type");
         }
-        return notEmpty(barnTypes) ? RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, barnTypes))
+        return notEmpty(barnTypes) ? RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, barnTypes, null, status))
                 : Collections.emptyList();
     }
 
@@ -251,11 +258,22 @@ public class DoctorBarns {
         //遍历求猪舍类型交集
         for (Long pigId : Splitters.splitToLong(pigIds, Splitters.COMMA)) {
             DoctorBarn pigBarn = RespHelper.or500(doctorPigReadService.findBarnByPigId(pigId));
-            if (PigType.MATING_TYPES.contains(pigBarn.getPigType())) {
+            DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
+            if (Objects.equals(pigBarn.getPigType(), PigType.MATE_SOW.getValue())) {
                 barnTypes.retainAll(PigType.MATING_TYPES);
+            } else if (Objects.equals(pigBarn.getPigType(), PigType.PREG_SOW.getValue())) {
+                if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Pregnancy.getKey())) {
+                    barnTypes.retainAll(PigType.MATING_FARROW_TYPES);
+                } else {
+                    barnTypes.retainAll(PigType.MATING_TYPES);
+                }
             }
             else if (PigType.FARROW_TYPES.contains(pigBarn.getPigType())) {
-                barnTypes.retainAll(PigType.FARROW_TYPES);
+                if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey())) {
+                    barnTypes.retainAll(PigType.MATING_FARROW_TYPES);
+                } else {
+                    barnTypes.retainAll(PigType.FARROW_TYPES);
+                }
             }
             else if (PigType.HOUBEI_TYPES.contains(pigBarn.getPigType())) {
                 barnTypes.retainAll(PigType.HOUBEI_TYPES);
@@ -318,6 +336,12 @@ public class DoctorBarns {
                 if(!RespHelper.or500(doctorPigReadService.findActivePigTrackByCurrentBarnId(barnId)).isEmpty()){
                     throw new JsonResponseException("barn.type.forbid.update");
                 }
+                RespHelper.or500(doctorGroupReadService.findGroupByCurrentBarnId(barnId)).forEach(group -> {
+                    DoctorGroupDetail detail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(group.getId()));
+                    if(detail.getGroupTrack().getQuantity() != null && detail.getGroupTrack().getQuantity() > 0){
+                        throw new JsonResponseException("barn.type.forbid.update");
+                    }
+                });
             }
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
         }

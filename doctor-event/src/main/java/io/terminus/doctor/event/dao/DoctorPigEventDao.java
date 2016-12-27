@@ -38,6 +38,15 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return this.getSqlSession().selectOne(sqlId("queryLastPigEventById"), pigId);
     }
 
+    /**
+     *查询最新的手动事件
+     * @param pigId 猪id
+     * @return 最新事件
+     */
+    public DoctorPigEvent queryLastManualPigEventById(Long pigId) {
+        return this.getSqlSession().selectOne(sqlId("queryLastManualPigEventById"), pigId);
+    }
+
     public DoctorPigEvent queryLastPigEventByPigIds(List<Long> pigIds) {
         return this.getSqlSession().selectOne(sqlId("queryLastPigEventByPigIds"), pigIds);
     }
@@ -249,5 +258,35 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      */
     public DoctorPigEvent canRollbackEvent(Map<String, Object> criteria){
         return getSqlSession().selectOne(sqlId("canRollbackEvent"), criteria);
+    }
+
+    /**
+     * 根据事件类型和时间区间查询
+     */
+    public List<DoctorPigEvent> findByFarmIdAndTypeAndDate(long farmId, int type, Date startAt, Date endAt) {
+        return getSqlSession().selectList(sqlId("findByFarmIdAndTypeAndDate"),
+                ImmutableMap.of("farmId", farmId, "type", type, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 临时使用
+     * @param doctorPigEvent
+     */
+    @Deprecated
+    public void updatePigEvents(DoctorPigEvent doctorPigEvent){
+        sqlSession.update("updatePigEvents", doctorPigEvent);
+    }
+
+    public void updatePigCode(Long pigId, String code) {
+        sqlSession.update(sqlId("updatePigCode"), ImmutableMap.of("pigId", pigId, "pigCode", code));
+    }
+
+    /**
+     * 查询母猪胎次中数据平均值
+     * @param pigId
+     * @return
+     */
+    public Map<String, Object> querySowParityAvg(Long pigId) {
+        return sqlSession.selectOne("querySowParityAvg", pigId);
     }
 }

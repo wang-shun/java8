@@ -38,12 +38,4 @@ public class DoctorMatingDailyReport implements Serializable {
      * 流产
      */
     private int liuchan;
-
-    public void addMatingDaily(DoctorMatingDailyReport doctorMatingDailyReport){
-        this.houbei += doctorMatingDailyReport.getHoubei();
-        this.pregCheckResultYing += doctorMatingDailyReport.getPregCheckResultYing();
-        this.duannai += doctorMatingDailyReport.getDuannai();
-        this.fanqing += doctorMatingDailyReport.getFanqing();
-        this.liuchan += doctorMatingDailyReport.getLiuchan();
-    }
 }

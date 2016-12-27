@@ -6,15 +6,17 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
-import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportTrendDto;
+import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
-import io.terminus.doctor.event.service.DoctorMonthlyReportReadService;
+import io.terminus.doctor.event.service.DoctorCommonReportReadService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,13 +49,16 @@ public class DoctorReports {
     private DoctorDailyReportWriteService doctorDailyReportWriteService;
 
     @RpcConsumer
-    private DoctorMonthlyReportReadService doctorMonthlyReportReadService;
+    private DoctorCommonReportReadService doctorCommonReportReadService;
 
     @RpcConsumer
     private DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
 
     @RpcConsumer
     private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
+
+    @RpcConsumer
+    private DoctorGroupReadService doctorGroupReadService;
 
     /**
      * 根据farmId和日期查询猪场日报表(缓存方式)
@@ -88,33 +93,27 @@ public class DoctorReports {
      * @return 猪场月报表
      */
     @RequestMapping(value = "/monthly", method = RequestMethod.GET)
-    public DoctorMonthlyReportTrendDto findMonthlyReportTrendByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
-                                                                              @RequestParam("date") String date,
-                                                                              @RequestParam(value = "index", required = false) Integer index) {
-        return RespHelper.or500(doctorMonthlyReportReadService.findMonthlyReportTrendByFarmIdAndSumAt(farmId, date, index));
+    public DoctorCommonReportTrendDto findMonthlyReportTrendByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
+                                                                             @RequestParam("date") String date,
+                                                                             @RequestParam(value = "index", required = false) Integer index) {
+        return RespHelper.or500(doctorCommonReportReadService.findMonthlyReportTrendByFarmIdAndSumAt(farmId, date, index));
     }
 
     /**
-     * 清理日报缓存
-     * @return 是否成功
+     * 根据farmId和日期查询猪场周报表
+     * @param farmId 猪场id
+     * @param year   年份  2016
+     * @param week   当年第几周 20
+     * @return 猪场周报报表
      */
-    @RequestMapping(value = "/daily/clear", method = RequestMethod.GET)
-    public Boolean clearCache() {
-        return RespHelper.or500(doctorDailyReportReadService.clearAllReportCache());
+    @RequestMapping(value = "/weekly", method = RequestMethod.GET)
+    public DoctorCommonReportTrendDto findWeeklyReportTrendByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
+                                                                            @RequestParam(value = "year", required = false) Integer year,
+                                                                            @RequestParam(value = "week", required = false) Integer week,
+                                                                            @RequestParam(value = "index", required = false) Integer index) {
+        return RespHelper.or500(doctorCommonReportReadService.findWeeklyReportTrendByFarmIdAndSumAt(farmId, year, week, index));
     }
-
-    /**
-     * 清除某猪场在redis中的日报
-     * @param farmId
-     * @return
-     */
-    @RequestMapping(value = "/daily/clearRedis", method = RequestMethod.GET)
-    public Boolean clearRedis(@RequestParam("farmId") Long farmId) {
-        RespHelper.or500(doctorDailyReportWriteService.deleteDailyReportFromRedis(farmId));
-        return true;
-    }
-
-
+    
     /**
      * 分页查询猪群批次总结
      * @return 批次总结
@@ -140,5 +139,15 @@ public class DoctorReports {
                 })
                 .collect(Collectors.toList());
         return new Paging<>(paging.getTotal(), summaries);
+    }
+
+    /**
+     * 分页查询猪群批次总结
+     * @return 批次总结
+     */
+    @RequestMapping(value = "/group/batch", method = RequestMethod.GET)
+    public DoctorGroupBatchSummary getGroupBatchSummary(@RequestParam("groupId") Long groupId, @RequestParam("fcc") Double fcc) {
+        DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
+        return RespHelper.or500(doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(groupDetail, fcc));
     }
 }

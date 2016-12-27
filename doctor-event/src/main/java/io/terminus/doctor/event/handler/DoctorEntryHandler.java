@@ -87,7 +87,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
             DoctorPigTrack doctorPigTrack = buildEntryFarmPigDoctorTrack(doctorFarmEntryDto, basic);
 
             // pig create
-            checkState(doctorPigInfoCache.judgePigCodeNotContain(doctorPig.getOrgId(), doctorPig.getPigCode()), "validate.pigCode.fail");
+            checkState(doctorPigDao.findPigByFarmIdAndPigCode(doctorPig.getFarmId(), doctorPig.getPigCode()) == null, "猪号:" + doctorPig.getPigCode() + " 已存在");
             doctorPigDao.create(doctorPig);
 
             // event create
@@ -125,7 +125,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
                             ImmutableMap.of("doctorPigId", doctorPig.getId(), "doctorEventId", doctorPigEvent.getId(),
                                     "doctorPigTrackId", doctorPigTrack.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())
                     ));
-            doctorPigInfoCache.addPigCodeToFarm(doctorPig.getOrgId(), doctorPig.getPigCode());
+            doctorPigInfoCache.addPigCodeToFarm(doctorPig.getFarmId(), doctorPig.getPigCode());
         }catch(RuntimeException e){
             throw new ServiceException(e.getMessage());
         }catch (Exception e){
@@ -152,6 +152,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
                 .isRemoval(IsOrNot.NO.getValue()).currentMatingCount(0)
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
                 .currentParity(dto.getParity())
+                .weight(dto.getWeight())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
         if (Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())) {

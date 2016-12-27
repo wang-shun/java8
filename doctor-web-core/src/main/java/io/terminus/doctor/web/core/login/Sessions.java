@@ -11,7 +11,7 @@ public class Sessions {
     public static final String MSG_PREFIX = "message";
     public static final String LIMIT_PREFIX = "limit";
 
-    public static final String USER_ID = "session_user_id";
+    public static final String USER_ID = "userId";
 
     //设备号
     public static final String DEVICE_ID = "session_device_id";

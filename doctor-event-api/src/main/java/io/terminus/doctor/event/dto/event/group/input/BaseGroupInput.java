@@ -60,6 +60,11 @@ public abstract class BaseGroupInput implements Serializable {
      */
     private Double fcrFeed;
 
+    /**
+     * 是否是母猪事件触发
+     */
+    private boolean sowEvent;
+
     public final String generateEventDesc(){
         Map<String, String> descMap = this.descMap();
         if(descMap == null){

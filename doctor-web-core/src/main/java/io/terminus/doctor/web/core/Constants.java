@@ -9,5 +9,5 @@ package io.terminus.doctor.web.core;
  * Date: 2016-01-31
  */
 public class Constants {
-    public static final String SESSION_USER_ID = "session_user_id";
+    public static final String SESSION_USER_ID = "userId";
 }

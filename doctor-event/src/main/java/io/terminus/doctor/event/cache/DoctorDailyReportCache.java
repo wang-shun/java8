@@ -2,10 +2,10 @@ package io.terminus.doctor.event.cache;
 
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
-import io.terminus.doctor.event.dao.redis.DailyReportHistoryDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDeadDailyReport;
@@ -14,8 +14,7 @@ import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorSaleDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,115 +36,53 @@ public class DoctorDailyReportCache {
 
     private final DoctorKpiDao doctorKpiDao;
     private final DoctorPigTypeStatisticDao doctorPigTypeStatisticDao;
-    private final DailyReportHistoryDao dailyReportHistoryDao;
     private final DailyReport2UpdateDao dailyReport2UpdateDao;
+    private final DoctorDailyReportDao doctorDailyReportDao;
 
     @Autowired
-    public DoctorDailyReportCache(DoctorKpiDao doctorKpiDao, DailyReportHistoryDao dailyReportHistoryDao,
+    public DoctorDailyReportCache(DoctorKpiDao doctorKpiDao,
                                   DoctorPigTypeStatisticDao doctorPigTypeStatisticDao,
-                                  DailyReport2UpdateDao dailyReport2UpdateDao) {
+                                  DailyReport2UpdateDao dailyReport2UpdateDao,
+                                  DoctorDailyReportDao doctorDailyReportDao) {
         this.doctorKpiDao = doctorKpiDao;
         this.doctorPigTypeStatisticDao = doctorPigTypeStatisticDao;
-        this.dailyReportHistoryDao = dailyReportHistoryDao;
         this.dailyReport2UpdateDao = dailyReport2UpdateDao;
+        this.doctorDailyReportDao = doctorDailyReportDao;
     }
 
     /**
-     * report put 到redis, 覆盖原先的report
-     * @param farmId 猪场id
-     * @param date   统计日期
-     * @param report 日报统计
+     * 从redis中取report，如果没有取数据库的
+     * @param farmId  猪场id
+     * @param date    日期
+     * @return  日报
      */
-    public void putDailyReport(Long farmId, Date date, DoctorDailyReportDto report) {
-        dailyReportHistoryDao.saveDailyReport(report, farmId, date);
+    public DoctorDailyReport getDailyReport(Long farmId, Date date) {
+        return doctorDailyReportDao.findByFarmIdAndSumAt(farmId, Dates.startOfDay(date));
+    }
+
+    public DoctorDailyReportDto getDailyReportDto(Long farmId, Date date) {
+        DoctorDailyReport report = getDailyReport(farmId, date);
+        if (report == null || report.getReportData() == null) {
+            return null;
+        }
+        return report.getReportData();
     }
 
     /**
-     * 更新redis中的日报
-     * @param reportDto 猪日报
-     * @param date 日报的日期
+     * report put 到MySQL
      */
-    public void putDailyPigReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
-        log.info("put daily report pig dto:{}", reportDto);
-        Date startAt = Dates.startOfDay(date);
+    public void putDailyReportToMySQL(Long farmId, Date date, DoctorDailyReportDto reportDto) {
+        saveEventAtWhenLiveStock(farmId, date);
+        doctorDailyReportDao.updateByFarmIdAndSumAt(makeDailyReport(farmId, date, reportDto));
+    }
+
+    //每次创建今天之前的事件，需要记录事件时间，晚上的job会扫到这个时间，然后刷一遍日报
+    private void saveEventAtWhenLiveStock(Long farmId, Date eventAt) {
+        Date startAt = Dates.startOfDay(eventAt);
         Date endAt = Dates.startOfDay(new Date());
-        DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
-        log.info("put daily report redis dto:{}", redisDto);
-        if (redisDto != null) {
-            redisDto.setPig(reportDto);
-            dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
+        if (!startAt.equals(endAt)) {
+            dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
         }
-        dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
-
-        //第一天已经算过了, 不用重新算
-        startAt = new DateTime(startAt).plusDays(1).toDate();
-
-        //更新猪存栏
-        while (!startAt.after(endAt)) {
-            DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
-
-            //存栏
-            DoctorLiveStockDailyReport liveStock = everyRedis.getLiveStock();
-            liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));    //产房母猪
-            liveStock.setPeihuaiSow(doctorKpiDao.realTimeLiveStockSow(farmId, startAt) - liveStock.getBuruSow());    //配怀 = 总存栏 - 产房母猪
-            liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
-            liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
-
-            everyRedis.setLiveStock(liveStock);
-            dailyReportHistoryDao.saveDailyReport(everyRedis, farmId, startAt);
-            startAt = new DateTime(startAt).plusDays(1).toDate();
-        }
-    }
-
-    /**
-     * 更新redis中的日报
-     * @param reportDto 猪群日报
-     */
-    public void putDailyGroupReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
-        Date startAt = Dates.startOfDay(date);
-        Date endAt = Dates.startOfDay(new Date());
-
-        DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
-        if (redisDto != null) {
-            redisDto.setGroup(reportDto);
-            dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
-        }
-        dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
-
-        //第一天已经算过了, 不用重新算
-        startAt = new DateTime(startAt).plusDays(1).toDate();
-
-        //更新猪群存栏
-        while (!startAt.after(endAt)) {
-            DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
-            //存栏
-            DoctorLiveStockDailyReport liveStock = everyRedis.getLiveStock();
-            liveStock.setHoubeiBoar(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId, startAt));
-            liveStock.setHoubeiSow(doctorKpiDao.realTimeLiveStockHoubeiSow(farmId, startAt));  //后备母猪
-            liveStock.setFarrow(doctorKpiDao.realTimeLiveStockFarrow(farmId, startAt));
-            liveStock.setNursery(doctorKpiDao.realTimeLiveStockNursery(farmId, startAt));
-            liveStock.setFatten(doctorKpiDao.realTimeLiveStockFatten(farmId, startAt));
-
-            everyRedis.setLiveStock(liveStock);
-            dailyReportHistoryDao.saveDailyReport(everyRedis, farmId, startAt);
-            startAt = new DateTime(startAt).plusDays(1).toDate();
-        }
-    }
-
-    /**
-     * 清理所有redis中的日报
-     */
-    public void clearAllReport() {
-        dailyReportHistoryDao.deleteDailyReport();
-    }
-
-    /**
-     * 清理指定猪场在指定日期的缓存
-     * @param farmId 猪场
-     * @param date 日期
-     */
-    public void clearFarmReport(Long farmId, Date date) {
-        dailyReportHistoryDao.deleteDailyReport(farmId, date);
     }
 
     //实时Sql查询某猪场的日报统计
@@ -240,10 +177,27 @@ public class DoctorDailyReportCache {
                 .collect(Collectors.toList());
     }
 
-    @Data
-    @AllArgsConstructor
-    private static class FarmDate {
-        private Long farmId;
-        private Date date;
+    //日报是否已被全量更新
+    public boolean reportIsFullInit(Long farmId, Date date) {
+        DoctorDailyReport report = this.getDailyReport(farmId, date);
+        if (report == null || report.getReportData() == null) {
+            DoctorDailyReportDto reportDto = this.initDailyReportByFarmIdAndDate(farmId, date);
+            doctorDailyReportDao.create(makeDailyReport(farmId, date, reportDto));
+            return true;
+        }
+        return false;
+    }
+
+    //拼装dailReport
+    private DoctorDailyReport makeDailyReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
+        DoctorDailyReport report = new DoctorDailyReport();
+        report.setFarmId(farmId);
+        report.setSumAt(Dates.startOfDay(date));
+        report.setSowCount(reportDto.getSowCount());
+        report.setFarrowCount(reportDto.getLiveStock().getFarrow());
+        report.setNurseryCount(reportDto.getLiveStock().getNursery());
+        report.setFattenCount(reportDto.getLiveStock().getFatten());
+        report.setReportData(reportDto);
+        return report;
     }
 }

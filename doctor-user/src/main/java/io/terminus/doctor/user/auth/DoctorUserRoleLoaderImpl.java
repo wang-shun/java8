@@ -7,13 +7,9 @@ import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.user.dao.OperatorDao;
 import io.terminus.doctor.user.dao.SellerDao;
 import io.terminus.doctor.user.dao.SubDao;
-import io.terminus.doctor.user.dao.SubRoleDao;
 import io.terminus.doctor.user.dao.SubSellerDao;
-import io.terminus.doctor.user.model.Operator;
-import io.terminus.doctor.user.model.Seller;
-import io.terminus.doctor.user.model.Sub;
-import io.terminus.doctor.user.model.SubRole;
-import io.terminus.doctor.user.model.SubSeller;
+import io.terminus.doctor.user.model.*;
+import io.terminus.doctor.user.service.DoctorUserRoleLoader;
 import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.auth.UserRoleLoader;
 import io.terminus.parana.user.impl.dao.UserDao;
@@ -60,6 +56,7 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
         this.operatorDao = operatorDao;
         this.subDao = subDao;
     }
+
 
     @Override
     public Response<List<String>> hardLoadRoles(Long userId) {

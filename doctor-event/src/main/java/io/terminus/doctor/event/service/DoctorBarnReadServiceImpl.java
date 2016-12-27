@@ -79,23 +79,12 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     }
 
     @Override
-    public Response<List<DoctorBarn>> findBarnsByEnums(Long farmId, Integer pigType, Integer canOpenGroup, Integer status) {
+    public Response<List<DoctorBarn>> findBarnsByEnums(Long farmId, List<Integer> pigTypes, Integer canOpenGroup, Integer status) {
         try {
-            return Response.ok(doctorBarnDao.findByEnums(farmId, pigType, canOpenGroup, status));
+            return Response.ok(doctorBarnDao.findByEnums(farmId, pigTypes, canOpenGroup, status));
         } catch (Exception e) {
-            log.error("find barn by enums fail, farmId:{}, pigType:{}, canOpenGroup:{}, status:{}, cause:{}",
-                    farmId, pigType, canOpenGroup, status, Throwables.getStackTraceAsString(e));
-            return Response.fail("barn.find.fail");
-        }
-    }
-
-    @Override
-    public Response<List<DoctorBarn>> findBarnsByFarmIdAndPigTypes(Long farmId, List<Integer> pigTypes) {
-        try {
-            return Response.ok(doctorBarnDao.findByPigTypes(farmId, pigTypes));
-        } catch (Exception e) {
-            log.error("find barns by farm id and pig types failed, farmId:{}, pigTypes:{}, cause:{}",
-                    farmId, pigTypes, Throwables.getStackTraceAsString(e));
+            log.error("find barn by enums fail, farmId:{}, pigTypes:{}, canOpenGroup:{}, status:{}, cause:{}",
+                    farmId, pigTypes, canOpenGroup, status, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.find.fail");
         }
     }

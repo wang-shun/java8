@@ -1,15 +1,20 @@
 package io.terminus.doctor.event.handler.group;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.event.DataEvent;
+import io.terminus.doctor.common.event.DoctorZkGroupEvent;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorCloseGroupEvent;
-import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -17,9 +22,13 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.Map;
 
 /**
  * Desc: 关闭猪群事件处理器
@@ -34,6 +43,8 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
+    @Autowired
+    private Publisher publisher;
 
     @Autowired
     public DoctorCloseGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -61,10 +72,15 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //2.创建关闭猪群事件
         DoctorGroupEvent<DoctorCloseGroupEvent> event = dozerGroupEvent(group, GroupEventType.CLOSE, close);
+
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        int dayAge = getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays);
+        event.setAvgDayAge(dayAge);  //重算日龄
         event.setExtraMap(closeEvent);
         doctorGroupEventDao.create(event);
 
-        //3.更新猪群跟踪
+        //3.更新猪群跟踪, 日龄是事件发生时的日龄
+        groupTrack.setAvgDayAge(dayAge);
         updateGroupTrack(groupTrack, event);
 
         //4.猪群状态改为关闭
@@ -77,11 +93,17 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //发布统计事件
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
-    }
 
-    @Override
-    protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-        // 关闭猪群事件不可编辑, 因为已经关闭的猪群不可操作了
+        //发布zk事件
+        try{
+            // 向zk发送刷新消息的事件
+            Map<String, Object> publishData = Maps.newHashMap();
+            publishData.put("eventType", GroupEventType.CLOSE.getValue());
+            publishData.put("doctorGroupId", group.getId());
+            publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new DoctorZkGroupEvent(publishData)));
+        }catch(Exception e){
+            log.error(Throwables.getStackTraceAsString(e));
+        }
     }
 
     //猪群里还有猪不可关闭!

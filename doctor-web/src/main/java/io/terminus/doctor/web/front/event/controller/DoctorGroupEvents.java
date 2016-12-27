@@ -1,16 +1,22 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -112,19 +118,6 @@ public class DoctorGroupEvents {
                                     @RequestParam("eventType") Integer eventType,
                                     @RequestParam("data") String data) {
         return RespHelper.or500(doctorGroupWebService.createGroupEvent(groupId, eventType, data));
-    }
-
-    /**
-     * 编辑猪群事件
-     *
-     * @param eventId 猪群事件id
-     * @param data    入参
-     * @return 是否成功
-     * @see io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit
-     */
-    @RequestMapping(value = "/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean editGroupEvent(@RequestParam("eventId") Long eventId, @RequestParam("data") String data) {
-        return RespHelper.or500(doctorGroupWebService.editGroupEvent(eventId, data));
     }
 
     /**
@@ -300,10 +293,13 @@ public class DoctorGroupEvents {
     @RequestMapping(value = "/breeds", method = RequestMethod.GET)
     public List<DoctorBasic> findCanBreed(@RequestParam("groupId") Long groupId) {
         DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(groupId));
-        if (group.getBreedId() == null) {
-            return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCacheFilterByFarmId(group.getFarmId(), DoctorBasic.Type.BREED.getValue(), null));
+        if(group.getBreedId() != null){
+            DoctorBasic breed = RespHelper.or500(doctorBasicReadService.findBasicById(group.getBreedId()));
+            if(breed != null){
+                return Lists.newArrayList(breed);
+            }
         }
-        return Lists.newArrayList(RespHelper.or500(doctorBasicReadService.findBasicByIdFilterByFarmId(group.getFarmId(), group.getBreedId())));
+        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCache(DoctorBasic.Type.BREED.getValue(), null));
     }
 
     /**
@@ -344,10 +340,45 @@ public class DoctorGroupEvents {
             return Paging.empty();
         }
         params = Params.filterNullOrEmpty(params);
-        if (params.containsKey("eventName")) {
-            params.put("type", String.valueOf(GroupEventType.from((String) params.get("eventName")).getValue()));
-            params.remove("eventName");
+        if (params.get("eventTypes") !=null) {
+            params.put("types", Splitters.COMMA.splitToList((String)params.get("eventTypes")));
+            params.remove("eventTypes");
         }
         return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize));
+    }
+
+    /**
+     * 猪群转群事件的extra中添加groupid(暂时)
+     * @return
+     */
+    @RequestMapping(value = "/fix/groupExtra", method = RequestMethod.GET)
+    public Boolean fixGroupEventExtra() {
+        try {
+            Map<String, Object> map = Maps.newHashMap();
+            map.put("type", GroupEventType.NEW.getValue());
+            map.put("isAuto", IsOrNot.YES.getValue());
+            Paging<DoctorGroupEvent> paging = RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(map, 1, Integer.MAX_VALUE));
+            if (paging.isEmpty()) {
+                return Boolean.TRUE;
+            }
+            paging.getData().forEach(doctorGroupEvent -> {
+                try {
+                    DoctorGroupEvent relEvent = RespHelper.or500(doctorGroupReadService.findGroupEventById(doctorGroupEvent.getRelGroupEventId()));
+                    if (Objects.equals(relEvent.getType(), GroupEventType.TRANS_GROUP.getValue())) {
+                        DoctorTransGroupEvent doctorTransGroupEvent = JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(relEvent.getExtra(), DoctorTransGroupEvent.class);
+                        doctorTransGroupEvent.setToGroupId(doctorGroupEvent.getGroupId());
+                        relEvent.setExtraMap(doctorTransGroupEvent);
+                        doctorGroupWriteService.updateGroupEvent(relEvent);
+                    }
+                } catch (Exception e) {
+                    log.error("eventId {}", doctorGroupEvent.getId());
+                }
+            });
+            return Boolean.TRUE;
+        } catch (Exception e) {
+            log.error("fix group event extra error, cause by {}", Throwables.getStackTraceAsString(e));
+            return Boolean.FALSE;
+        }
+
     }
 }

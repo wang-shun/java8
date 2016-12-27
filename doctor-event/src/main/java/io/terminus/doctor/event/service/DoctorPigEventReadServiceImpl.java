@@ -11,11 +11,13 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -33,6 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -172,23 +175,15 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             checkState(!isNull(doctorPigTrack), "input.pigIdCode.error");
             checkState(Objects.equals(doctorPigTrack.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()), "count.pigType.error");
 
-            // 获取胎次关联的 PigId : eventIds
-            String relEventIds = doctorPigTrack.getRelEventIds();
-
             // 获取Pig 所有的 EventId
-            Map<Long, DoctorPigEvent> doctorPigEventMap = doctorPigEventDao.queryAllEventsByPigId(pigId)
-                    .stream().collect(Collectors.toMap(k->k.getId(), v->v));
-
-            Map<Integer, List<Long>> pigRelEventIds = convertPigRelEventId(relEventIds);
-
-            List<DoctorSowParityCount> doctorSowParityCounts = pigRelEventIds.entrySet().stream()
-                    .map(s -> DoctorSowParityCount.doctorSowParityCountConvert(
-                            s.getKey(),
-                            s.getValue().stream().map(v -> doctorPigEventMap.get(v)).collect(Collectors.toList())))
-                    .collect(Collectors.toList());
-
-            doctorSowParityCounts.sort((a, b)->b.getParity().compareTo(a.getParity()));
-        	return Response.ok(doctorSowParityCounts);
+            Map<Integer, List<DoctorPigEvent>> map = doctorPigEventDao.queryAllEventsByPigId(pigId).stream()
+                    .sorted(Comparator.comparing(DoctorPigEvent::getParity))
+                    .collect(Collectors.groupingBy(k -> k.getParity(), Collectors.toList()));
+            List<DoctorSowParityCount> doctorSowParityCounts = Lists.newArrayList();
+            map.keySet().forEach(parity ->
+                    doctorSowParityCounts.add(DoctorSowParityCount.doctorSowParityCountConvert(parity, map.get(parity)))
+            );
+            return Response.ok(doctorSowParityCounts);
         }catch (IllegalStateException se){
             log.warn("query sow parity illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
             return Response.fail(se.getMessage());
@@ -266,6 +261,19 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }
     }
 
+    public Response<Boolean> isLastManualEvent(Long pigId, Long eventId) {
+        try {
+            DoctorPigEvent lastEvent = doctorPigEventDao.queryLastManualPigEventById(pigId);
+            if (!Objects.equals(eventId, lastEvent.getId())) {
+                return Response.ok(Boolean.FALSE);
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("find pig event is last manual event failed, pigId:{}, eventId:{}, cause:{}", pigId, eventId, Throwables.getStackTraceAsString(e));
+            return Response.ok(Boolean.FALSE);
+        }
+    }
+
     @Override
     public Response<DoctorPigEvent> canRollbackEvent(@NotNull(message = "input.pigId.empty") Long pigId) {
         try {
@@ -303,6 +311,16 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         } catch (Exception e) {
             log.error("add.wean.event.after.failed, cause{}", Throwables.getStackTraceAsString(e));
             return Response.fail("add.wean.event.after.failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorSowParityAvgDto> querySowParityAvg(@NotNull(message = "input.pigId.empty") Long pigId) {
+        try {
+            return Response.ok(BeanMapper.map(doctorPigEventDao.querySowParityAvg(pigId), DoctorSowParityAvgDto.class));
+        } catch (Exception e) {
+            log.error("query.sow.parity.failed, cause: {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query sow parity failed");
         }
     }
 }

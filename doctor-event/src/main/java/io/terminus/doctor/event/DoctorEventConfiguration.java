@@ -47,13 +47,6 @@ import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
 import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
 import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
 import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
-import io.terminus.doctor.event.report.DoctorDailyPigCountChain;
-import io.terminus.doctor.event.report.count.DoctorDailyEntryEventCount;
-import io.terminus.doctor.event.report.count.DoctorDailyFarrowingEventCount;
-import io.terminus.doctor.event.report.count.DoctorDailyMatingEventCount;
-import io.terminus.doctor.event.report.count.DoctorDailyPregEventCount;
-import io.terminus.doctor.event.report.count.DoctorDailyRemovalEventCount;
-import io.terminus.doctor.event.report.count.DoctorDailyWeanEventCount;
 import io.terminus.doctor.event.search.barn.BarnSearchProperties;
 import io.terminus.doctor.event.search.barn.BaseBarnQueryBuilder;
 import io.terminus.doctor.event.search.barn.DefaultBarnQueryBuilder;
@@ -200,19 +193,6 @@ public class  DoctorEventConfiguration {
                 doctorConditionHandler, doctorDiseaseHandler,
                 doctorRemovalHandler, doctorVaccinationHandler));
         return chain;
-    }
-
-    @Bean
-    public DoctorDailyPigCountChain doctorDailyPigCountChain(DoctorDailyEntryEventCount doctorDailyEntryEventCount,
-                                                             DoctorDailyFarrowingEventCount doctorDailyFarrowingEventCount,
-                                                             DoctorDailyMatingEventCount doctorDailyMatingEventCount,
-                                                             DoctorDailyPregEventCount doctorDailyPregEventCount,
-                                                             DoctorDailyRemovalEventCount doctorDailyRemovalEventCount,
-                                                             DoctorDailyWeanEventCount doctorDailyWeanEventCount){
-        List<DoctorDailyEventCount> doctorDailyEventCounts = Lists.newArrayList(
-                doctorDailyEntryEventCount, doctorDailyFarrowingEventCount, doctorDailyMatingEventCount,
-                doctorDailyPregEventCount,doctorDailyRemovalEventCount, doctorDailyWeanEventCount);
-        return new DoctorDailyPigCountChain(doctorDailyEventCounts);
     }
 
     @Configuration

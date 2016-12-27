@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
@@ -101,6 +102,13 @@ public interface DoctorPigEventReadService {
     Response<Boolean> isLastEvent(@NotNull(message = "input.pigId.empty") Long pigId, @NotNull(message = "eventId.not.null") Long eventId);
 
     /**
+     * 判断是否是最新手动事件
+     * @param pigId 猪id
+     * @return true 是最新事件, false 不是
+     */
+    Response<Boolean> isLastManualEvent(@NotNull(message = "input.pigId.empty") Long pigId, @NotNull(message = "eventId.not.null") Long eventId);
+
+    /**
      * 查询猪回滚事件
      * @param pigId
      * @return
@@ -127,6 +135,13 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<List<DoctorPigEvent>> addWeanEventAfterFosAndPigLets();
+
+    /**
+     * 查询母猪胎次中数据平均值
+     * @param pigId
+     * @return
+     */
+    Response<DoctorSowParityAvgDto> querySowParityAvg(@NotNull(message = "input.pigId.empty") Long pigId);
 
 
 }

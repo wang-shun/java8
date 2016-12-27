@@ -1,15 +1,14 @@
 package io.terminus.doctor.event.handler.group;
 
-import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
-import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorMoveInGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -38,7 +37,6 @@ import java.util.Objects;
 public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
     private final DoctorGroupEventDao doctorGroupEventDao;
-    private final DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
     public DoctorMoveInGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -48,7 +46,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
                                          DoctorBarnReadService doctorBarnReadService) {
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
-        this.doctorGroupTrackDao = doctorGroupTrackDao;
     }
 
 
@@ -78,31 +75,36 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
             event.setOtherBarnId(moveIn.getFromBarnId());  //来源猪舍id
             event.setOtherBarnType(fromBarn.getPigType());   //来源猪舍类型
         }
+
+        //空降产房仔猪，断奶统计要重新计算
+        if (moveIn.getFromBarnId() == null && Objects.equals(group.getPigType(), PigType.DELIVER_SOW.getValue())) {
+            groupTrack.setQuaQty(EventUtil.plusInt(groupTrack.getQuaQty(), event.getQuantity()));
+            groupTrack.setWeanQty(EventUtil.plusInt(groupTrack.getWeanQty(), event.getQuantity()));
+            groupTrack.setWeanWeight(EventUtil.plusDouble(groupTrack.getWeanWeight(), event.getAvgWeight() * event.getQuantity()));
+        }
+
         event.setExtraMap(moveInEvent);
         doctorGroupEventDao.create(event);
 
         //3.更新猪群跟踪
         Integer oldQty = groupTrack.getQuantity();
-        groupTrack.setQuantity(EventUtil.plusQuantity(groupTrack.getQuantity(), moveIn.getQuantity()));
-        groupTrack.setBoarQty(EventUtil.plusQuantity(groupTrack.getBoarQty(), moveIn.getBoarQty()));
-        groupTrack.setSowQty(EventUtil.plusQuantity(groupTrack.getSowQty(), moveIn.getSowQty()));
+        groupTrack.setQuantity(EventUtil.plusInt(groupTrack.getQuantity(), moveIn.getQuantity()));
+        groupTrack.setBoarQty(EventUtil.plusInt(groupTrack.getBoarQty(), moveIn.getBoarQty()));
+        groupTrack.setSowQty(EventUtil.plusInt(groupTrack.getSowQty(), moveIn.getSowQty()));
 
-        //重新计算日龄
-        if (oldQty + moveIn.getQuantity() == 0){
-            groupTrack.setAvgDayAge(0);
-        }else {
-            groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(groupTrack.getAvgDayAge(), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()));
+        //重新计算日龄, 按照事件录入日期计算
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()) + deltaDays);
+
+        //如果是母猪分娩转入或母猪转舍转入，窝数，分娩统计字段需要累加
+        if (moveIn.isSowEvent()) {
+            groupTrack.setNest(EventUtil.plusInt(groupTrack.getNest(), 1));  //窝数加 1
+            groupTrack.setLiveQty(EventUtil.plusInt(groupTrack.getLiveQty(), moveIn.getQuantity()));
+            groupTrack.setWeakQty(EventUtil.plusInt(groupTrack.getWeakQty(), moveIn.getWeakQty()));
+            groupTrack.setHealthyQty(groupTrack.getLiveQty() - groupTrack.getWeakQty());    //健仔数 = 活仔数 - 弱仔数
+            groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), moveIn.getQuantity()));    //分娩时，未断奶数累加
+            groupTrack.setBirthWeight(EventUtil.plusDouble(groupTrack.getBirthWeight(), moveIn.getAvgWeight() * moveIn.getQuantity()));
         }
-
-        groupTrack.setBirthDate(EventUtil.getBirthDate(new Date(), groupTrack.getAvgDayAge()));
-
-        //重新计算重量
-        groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), EventUtil.getWeight(moveIn.getAvgWeight(), moveIn.getQuantity()), groupTrack.getQuantity()));
-        groupTrack.setWeight(EventUtil.getWeight(groupTrack.getAvgWeight(), groupTrack.getQuantity()));
-
-        //重新计算金额
-        groupTrack.setAmount(MoreObjects.firstNonNull(groupTrack.getAmount() , 0L)+ MoreObjects.firstNonNull(moveIn.getAmount(), 0L));
-        groupTrack.setPrice(EventUtil.getPrice(groupTrack.getAmount(), groupTrack.getQuantity()));
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
@@ -110,44 +112,5 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         //发布统计事件
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
-    }
-
-    @Override
-    protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-        DoctorMoveInGroupEdit moveInEdit = (DoctorMoveInGroupEdit) edit;
-        DoctorMoveInGroupEvent moveInEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorMoveInGroupEvent.class);
-
-        //更新track(更新均重和金额)
-        if (!Objects.equals(event.getAvgWeight(), moveInEdit.getAvgWeight())) {
-            groupTrack.setAvgWeight(editAvgWeight(groupTrack, event, moveInEdit));
-            groupTrack.setWeight(EventUtil.getWeight(groupTrack.getAvgWeight(), groupTrack.getQuantity()));
-        }
-        if (moveInEdit.getAmount() != null) {
-            groupTrack.setAmount(groupTrack.getAmount() - MoreObjects.firstNonNull(moveInEvent.getAmount(), 0L) + moveInEdit.getAmount());
-            groupTrack.setPrice(EventUtil.getPrice(groupTrack.getAmount(), groupTrack.getQuantity()));
-        }
-        doctorGroupTrackDao.update(groupTrack);
-
-        //更新事件字段
-        moveInEvent.setSource(moveInEdit.getSource());
-        moveInEvent.setBreedId(moveInEdit.getBreedId());
-        moveInEvent.setBreedName(moveInEdit.getBreedName());
-        event.setExtraMap(moveInEvent);
-
-        if (!Objects.equals(event.getAvgWeight(), moveInEdit.getAvgWeight())) {
-            event.setAvgWeight(moveInEdit.getAvgWeight());
-            event.setWeight(EventUtil.getWeight(event.getAvgWeight(), event.getQuantity()));
-        }
-        editGroupEvent(event, edit);
-
-        //更新猪群镜像
-        editGroupSnapShot(group, groupTrack, event);
-    }
-
-    //重新计算下均重
-    private Double editAvgWeight(DoctorGroupTrack groupTrack, DoctorGroupEvent event, DoctorMoveInGroupEdit moveInEdit) {
-        Double allWeight = groupTrack.getAvgWeight() * groupTrack.getQuantity() -
-                event.getAvgWeight() * event.getQuantity() + moveInEdit.getAvgWeight() * event.getQuantity();
-        return allWeight / groupTrack.getQuantity();
     }
 }

@@ -6,24 +6,23 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorNewGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.util.EventUtil;
-import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -52,9 +50,7 @@ public class DoctorGroupManager {
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupReadService doctorGroupReadService;
     private final CoreEventDispatcher coreEventDispatcher;
-
-    @Autowired(required = false)
-    private Publisher publisher;
+    private final DoctorBarnDao doctorBarnDao;
 
     @Autowired
     public DoctorGroupManager(DoctorGroupDao doctorGroupDao,
@@ -62,13 +58,15 @@ public class DoctorGroupManager {
                               DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                               DoctorGroupTrackDao doctorGroupTrackDao,
                               DoctorGroupReadService doctorGroupReadService,
-                              CoreEventDispatcher coreEventDispatcher) {
+                              CoreEventDispatcher coreEventDispatcher,
+                              DoctorBarnDao doctorBarnDao) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupReadService = doctorGroupReadService;
         this.coreEventDispatcher = coreEventDispatcher;
+        this.doctorBarnDao = doctorBarnDao;
     }
 
     /**
@@ -98,13 +96,23 @@ public class DoctorGroupManager {
         groupTrack.setBoarQty(0);
         groupTrack.setSowQty(0);
         groupTrack.setQuantity(0);
-        groupTrack.setAvgDayAge(0);             //日龄
-        groupTrack.setBirthDate(new Date());    //出生日期(用于计算日龄)
-        groupTrack.setAvgWeight(0D);            //均重
-        groupTrack.setWeight(0D);               //总重
-        groupTrack.setPrice(0L);                //单价
-        groupTrack.setAmount(0L);               //金额
-        groupTrack.setSex(EventUtil.getSex(groupTrack.getBoarQty(), groupTrack.getSowQty()));
+        groupTrack.setBirthDate(DateUtil.toDate(newGroupInput.getEventAt()));    //出生日期(用于计算日龄)
+
+        int age = DateUtil.getDeltaDaysAbs(groupTrack.getBirthDate(), new Date());
+        groupTrack.setAvgDayAge(age + 1);             //日龄
+
+        groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
+        groupTrack.setWeanWeight(0D);
+        groupTrack.setBirthWeight(0D);
+        groupTrack.setNest(0);
+        groupTrack.setLiveQty(0);
+        groupTrack.setHealthyQty(0);
+        groupTrack.setWeakQty(0);
+        groupTrack.setWeanQty(0);
+        groupTrack.setWeanWeight(0D);
+        groupTrack.setUnweanQty(0);
+        groupTrack.setQuaQty(0);
+        groupTrack.setUnqQty(0);
         doctorGroupTrackDao.create(groupTrack);
 
         //4. 创建猪群镜像
@@ -124,43 +132,20 @@ public class DoctorGroupManager {
         return groupId;
     }
 
-    /**
-     * 编辑新建猪群事件
-     * @param group         猪群
-     * @param event         猪群事件
-     * @param newEdit       编辑信息
-     */
-    @Transactional
-    public void editNewGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, DoctorNewGroupEdit newEdit) {
-        //1. 更新猪群
-        group.setGroupCode(newEdit.getGroupCode());
-        group.setBreedId(newEdit.getBreedId());
-        group.setBreedName(newEdit.getBreedName());
-        group.setGeneticId(newEdit.getGeneticId());
-        group.setGeneticName(newEdit.getGeneticName());
-        doctorGroupDao.update(group);
-
-        //2. 更新事件
-        event.setRemark(newEdit.getRemark());
-        doctorGroupEventDao.update(event);
-
-        //3. 更新所有事件的猪群号(如果有变更)
-        if (!Objects.equals(group.getGroupCode(), newEdit.getGroupCode())) {
-            doctorGroupEventDao.updateGroupCodeByGroupId(group.getId(), group.getGroupCode());
-        }
-
-        //4. 更新镜像
-        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(event.getId());
-        snapshot.setToInfo(JSON_MAPPER.toJson(new DoctorGroupSnapShotInfo(group, event, groupTrack)));
-        doctorGroupSnapshotDao.update(snapshot);
-    }
-
     private DoctorGroup getNewGroup(DoctorGroup group, DoctorNewGroupInput newGroupInput) {
         //设置猪舍
         group.setInitBarnId(newGroupInput.getBarnId());
         group.setInitBarnName(newGroupInput.getBarnName());
         group.setCurrentBarnId(newGroupInput.getBarnId());
         group.setCurrentBarnName(newGroupInput.getBarnName());
+
+        DoctorBarn barn = doctorBarnDao.findById(group.getInitBarnId());
+        if (barn == null) {
+            throw new ServiceException("barn.not.null");
+        }
+        group.setPigType(barn.getPigType());
+        group.setStaffId(barn.getStaffId());
+        group.setStaffName(barn.getStaffName());
 
         //建群时间与状态
         group.setOpenAt(DateUtil.toDate(newGroupInput.getEventAt()));
@@ -213,20 +198,7 @@ public class DoctorGroupManager {
 
     //发布猪群猪舍事件
     private void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
-        publishZookeeperEvent(ListenedGroupEvent.builder().doctorGroupEventId(eventId).farmId(farmId).orgId(orgId).groupId(groupId).build());
-        publishZookeeperEvent(ListenedBarnEvent.builder().barnId(barnId).build());
-    }
-
-    //发布zk事件, 用于更新es索引
-    private <T> void publishZookeeperEvent(T data){
-//        if(notNull(publisher)) {
-//            try {
-//                publisher.publish(DataEvent.toBytes(eventType, data));
-//            } catch (Exception e) {
-//                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
-//            }
-//        } else {
-            coreEventDispatcher.publish(data);
-        //}
+        coreEventDispatcher.publish(ListenedGroupEvent.builder().doctorGroupEventId(eventId).farmId(farmId).orgId(orgId).groupId(groupId).build());
+        coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barnId).build());
     }
 }

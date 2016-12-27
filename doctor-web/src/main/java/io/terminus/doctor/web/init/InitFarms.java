@@ -310,7 +310,7 @@ public class InitFarms {
             group.setFarmId(farm.getId());
             group.setFarmName(farm.getName());
 
-            DoctorBarn barn = or500(doctorBarnReadService.findBarnsByEnums(farm.getId(), group.getPigType(), null, null)).get(0);
+            DoctorBarn barn = or500(doctorBarnReadService.findBarnsByEnums(farm.getId(), Lists.newArrayList(group.getPigType()), null, null)).get(0);
             group.setGroupCode(barn.getName() + "(" + DateUtil.toDateString(new Date()) + ")");
             group.setOpenAt(new Date());
 
@@ -466,7 +466,7 @@ public class InitFarms {
 
     private DoctorBarn getPigBarn(DoctorPig pig) {
         DoctorBarn initBarn = or500(doctorBarnReadService.findBarnById(pig.getInitBarnId()));
-        List<DoctorBarn> barns = or500(doctorBarnReadService.findBarnsByEnums(pig.getFarmId(), initBarn.getPigType(), null, null));
+        List<DoctorBarn> barns = or500(doctorBarnReadService.findBarnsByEnums(pig.getFarmId(), Lists.newArrayList(initBarn.getPigType()), null, null));
         return !notEmpty(barns) ? initBarn : barns.get(0);
     }
 }

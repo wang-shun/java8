@@ -28,6 +28,7 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.schedule.msg.producer.factory.GroupDetailFactory;
 import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
@@ -317,10 +318,6 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                 if (checkFixedDate(warn, vaccDate)) {
                     getGroupMessage(groupInfo, ruleRole, sUsers, rule.getUrl(), warn, vaccDate);
                 }
-                // 3. 固定体重
-                if (checkFixedWeight(warn, vaccDate, groupTrack.getAvgWeight(), null)) {
-                    getGroupMessage(groupInfo, ruleRole, sUsers, rule.getUrl(), warn, vaccDate);
-                }
                 // 4. 转群
                 if (checkChangeGroup(warn, vaccDate, getChangeGroupDate(groupTrack))) {
                     getGroupMessage(groupInfo, ruleRole, sUsers, rule.getUrl(), warn, vaccDate);
@@ -579,7 +576,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
 
         try {
-            createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), PigEvent.VACCINATION.getKey(), pigDto.getPigId(), null, jumpUrl);
+            createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), PigEvent.VACCINATION.getKey(), pigDto.getPigId(), DoctorMessage.BUSINESS_TYPE.PIG.getValue(), null, jumpUrl);
         } catch (JsonProcessingException e) {
             log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
         }
@@ -602,7 +599,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("vaccinationDateType", warn.getVaccinationDateType());
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
         try {
-            createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), PigEvent.VACCINATION.getKey(), detail.getGroup().getId(), null, jumpUrl);
+            createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), PigEvent.VACCINATION.getKey(), detail.getGroup().getId(), DoctorMessage.BUSINESS_TYPE.GROUP.getValue(), null, jumpUrl);
         } catch (JsonProcessingException e) {
             log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
         }

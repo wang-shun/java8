@@ -12,7 +12,7 @@ import io.terminus.doctor.event.search.group.GroupDumpService;
 import io.terminus.doctor.event.search.pig.PigDumpService;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
-import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
@@ -30,6 +30,7 @@ import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -66,7 +67,7 @@ public class DoctorMoveDataController {
     private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorDailyReportWriteService doctorDailyReportWriteService;
-    private final DoctorMonthlyReportWriteService doctorMonthlyReportWriteService;
+    private final DoctorCommonReportWriteService doctorCommonReportWriteService;
     private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
     private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
     private final BarnSearchDumpService barnSearchDumpService;
@@ -86,7 +87,7 @@ public class DoctorMoveDataController {
                                     DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
                                     DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
                                     DoctorDailyReportWriteService doctorDailyReportWriteService,
-                                    DoctorMonthlyReportWriteService doctorMonthlyReportWriteService,
+                                    DoctorCommonReportWriteService doctorCommonReportWriteService,
                                     DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
                                     DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService, BarnSearchDumpService barnSearchDumpService,
                                     GroupDumpService groupDumpService, PigDumpService pigDumpService, DoctorImportDataService doctorImportDataService) {
@@ -101,7 +102,7 @@ public class DoctorMoveDataController {
         this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorDailyReportWriteService = doctorDailyReportWriteService;
-        this.doctorMonthlyReportWriteService = doctorMonthlyReportWriteService;
+        this.doctorCommonReportWriteService = doctorCommonReportWriteService;
         this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
         this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
         this.barnSearchDumpService = barnSearchDumpService;
@@ -223,6 +224,12 @@ public class DoctorMoveDataController {
         log.warn("move daily start, moveId:{}", moveId);
         doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
         log.warn("move daily end");
+
+        //7.迁移猪场周报
+        log.warn("move weekly start, moveId:{}", moveId);
+        doctorMoveReportService.moveWeeklyReport(farm.getId(), monthIndex == null ? null : monthIndex * 4);
+        log.warn("move weekly end");
+
 
         //7.迁移猪场月报
         log.warn("move monthly start, moveId:{}", moveId);
@@ -443,17 +450,51 @@ public class DoctorMoveDataController {
     /**
      * 月报
      */
+    @RequestMapping(value = "/monthly/all", method = RequestMethod.GET)
+    public Boolean moveMonthlyReport(@RequestParam("index") Integer index) {
+        try {
+            log.warn("move monthly report all farm start, index:{}", index);
+            doctorMoveReportService.moveMonthlyReport(index);
+            log.warn("move monthly report end");
+            return true;
+        } catch (Exception e) {
+            log.error("move monthly report failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 月报
+     */
     @RequestMapping(value = "/monthly/date", method = RequestMethod.GET)
     public Boolean moveMonthlyReport(@RequestParam("farmId") Long farmId,
                                      @RequestParam("date") String date) {
         try {
             log.warn("move monthly report date start, farmId:{}, date:{}", farmId, date);
-            doctorMonthlyReportWriteService.createMonthlyReport(farmId, DateUtil.toDate(date));
+            doctorCommonReportWriteService.createMonthlyReport(farmId, DateUtil.toDate(date));
             log.warn("move monthly report date end");
             
             return true;
         } catch (Exception e) {
             log.error("move monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 周报
+     */
+    @RequestMapping(value = "/weekly/date", method = RequestMethod.GET)
+    public Boolean moveWeeklyReport(@RequestParam("farmId") Long farmId,
+                                    @RequestParam("date") String date) {
+        try {
+            log.warn("move weekly report date start, farmId:{}, date:{}", farmId, date);
+            doctorCommonReportWriteService.createWeeklyReport(farmId, new DateTime(DateUtil.toDate(date)).withDayOfWeek(1).toDate());
+            log.warn("move weekly report date end");
+
+            return true;
+        } catch (Exception e) {
+            log.error("move weekly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

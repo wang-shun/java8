@@ -20,13 +20,13 @@ public class LoggerInterceptor implements Interceptor {
         FlowDefinitionNode currNode = execution.getWorkFlowService().getFlowQueryService().getFlowDefinitionNodeQuery()
                 .id(execution.getFlowProcess().getFlowDefinitionNodeId())
                 .single();
-        log.info("[workflow logger interceptor] -> {} 开始执行, name属性为: {}, 处理标识(人)为: {}, 操作人id: {}, 操作人姓名: {}",
-                FlowDefinitionNode.Type.describe(currNode.getType()),
-                currNode.getName(),
-                currNode.getAssignee(),
-                execution.getOperatorId(),
-                execution.getOperatorName()
-        );
+//        log.info("[workflow logger interceptor] -> {} 开始执行, name属性为: {}, 处理标识(人)为: {}, 操作人id: {}, 操作人姓名: {}",
+//                FlowDefinitionNode.Type.describe(currNode.getType()),
+//                currNode.getName(),
+//                currNode.getAssignee(),
+//                execution.getOperatorId(),
+//                execution.getOperatorName()
+//        );
     }
 
     @Override

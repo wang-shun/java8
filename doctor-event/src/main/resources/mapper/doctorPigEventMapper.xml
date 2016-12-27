@@ -287,6 +287,12 @@
         <if test="creatorName != null">AND creator_name = #{creatorName}</if>
         <if test="updatorId != null">AND updator_id = #{updatorId}</if>
         <if test="updatorName != null">AND updator_name = #{updatorName}</if>
+        <if test="types != null &amp;&amp; types.size() > 0">
+            AND `type` IN
+            <foreach collection="types" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
     </sql>
 
     <insert id="create" parameterType="DoctorPigEvent" keyProperty="id" useGeneratedKeys="true">
@@ -441,6 +447,15 @@
         from
         <include refid="tb"/>
         where pig_id = #{pigId}
+        order by event_at desc, id desc limit 1;
+    </select>
+
+    <select id="queryLastManualPigEventById" parameterType="long" resultMap="DoctorPigEventMap">
+        select
+        <include refid="cols_all"/>
+        from
+        <include refid="tb"/>
+        where pig_id = #{pigId} AND is_auto = 0
         order by event_at desc, id desc limit 1;
     </select>
 
@@ -809,5 +824,44 @@
             <include refid="criteria"/>
         </where>
         order by event_at desc ,id DESC limit 1;
+    </select>
+
+    <update id="updatePigEvents" parameterType="DoctorPigEvent">
+        UPDATE
+        <include refid="tb"/>
+        SET
+        `name` = #{name}
+        <if test="desc != null">,`desc` = #{desc}</if>
+        WHERE
+        1=1
+        <if test="type != null">AND `type` = #{type}</if>
+        <if test="id != null">AND `id` = #{id}</if>
+
+    </update>
+
+    <select id="findByFarmIdAndTypeAndDate" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId} AND `type` = #{type}
+        <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
+    </select>
+
+    <update id="updatePigCode" parameterType="map">
+        update <include refid="tb"/> set pig_code = #{pigCode}, updated_at=now() where pig_id = #{pigId}
+    </update>
+
+    <select id="querySowParityAvg" parameterType="long" resultType="map">
+        SELECT
+        ifnull(round(AVG (live_count), 2), 0) avgPigLetCount,
+        ifnull(round(AVG (wean_count), 2), 0) avgWeanCount,
+        ifnull(round(AVG (farrow_weight), 2), 0) avgBirthWeight,
+        ifnull(round(AVG (wean_count * wean_avg_weight), 2), 0) avgWeanWeight,
+        ifnull(round(AVG (health_count), 2), 0) avgHealthCount,
+        ifnull(round(AVG (weak_count), 2), 0) avgWeakCount,
+        ifnull(round(AVG (dead_count), 2), 0) avgDeadCount,
+        ifnull(round(AVG (mny_count), 2), 0) avgMujiCount
+        FROM <include refid="tb"/>
+        WHERE pig_id = #{pigId}
     </select>
 </mapper>

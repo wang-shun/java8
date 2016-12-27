@@ -14,18 +14,12 @@ import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorAntiepidemicGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorChangeGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorDiseaseGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorLiveStockGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorMoveInGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorNewGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorTransEdit;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -122,6 +116,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     @Override
     public Response<Long> createNewGroup(DoctorNewGroupInput newGroupInput) {
         try {
+            checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId());
+
             //1.构造猪群信息
             return doctorGroupWriteService.createNewGroup(getNewGroup(newGroupInput), newGroupInput);
         } catch (ServiceException e) {
@@ -129,6 +125,17 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         } catch (Exception e) {
             log.error("create new group failed, newGroupInput:{}, cause:{}", newGroupInput, Throwables.getStackTraceAsString(e));
             return Response.fail("group.event.create.fail");
+        }
+    }
+
+    //产房只能有1个猪群
+    private void checkFarrowGroupUnique(Integer pigType, Long barnId) {
+        if (!Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) {
+            return;
+        }
+        List<DoctorGroup> groups = RespHelper.orServEx(doctorGroupReadService.findGroupByCurrentBarnId(barnId));
+        if (notEmpty(groups)) {
+            throw new ServiceException("farrow.group.exist");
         }
     }
 
@@ -157,9 +164,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         group.setOrgId(org.getId());
         group.setOrgName(org.getName());
 
-        //根据猪舍id设置猪类
-        DoctorBarn doctorBarn = orServEx(doctorBarnReadService.findBarnById(newGroupInput.getBarnId()));
-        group.setPigType(doctorBarn.getPigType());
         return group;
     }
 
@@ -248,7 +252,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                         params.put("toGroupCode", getGroupCode(getLong(params, "toGroupId")));
                     }
                     params.put("fcrFeed", RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, groupId, null, null), 0D));
-                    orServEx(doctorGroupWriteService.groupEventTransFarm(groupDetail, map(putBasicFields(params), DoctorTransFarmGroupInput.class)));
+                    DoctorTransFarmGroupInput input = map(putBasicFields(params), DoctorTransFarmGroupInput.class);
+                    input.setAvgWeight(input.getWeight() / input.getQuantity());
+                    orServEx(doctorGroupWriteService.groupEventTransFarm(groupDetail, input));
                     break;
                 case CLOSE:
                     orServEx(doctorGroupWriteService.groupEventClose(groupDetail, map(putBasicFields(params), DoctorCloseGroupInput.class)));
@@ -263,73 +269,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             log.error("create group event failed, groupId:{}, eventType:{}, params:{}, cause:{}",
                     groupId, eventType, data, Throwables.getStackTraceAsString(e));
             return Response.fail("create.group.event.fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> editGroupEvent(Long eventId, String data) {
-        try {
-            //1.校验猪群是否存在
-            DoctorGroupEvent event = RespHelper.or500(doctorGroupReadService.findGroupEventById(eventId));
-            DoctorGroupDetail groupDetail = checkGroupExist(event.getGroupId());
-
-            //2.校验系统自动事件, 自动事件不可编辑
-            checkEventAuto(event);
-
-            //3.根据不同的事件类型调用不同的接口
-            Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
-            if (params == null || params.isEmpty()) {
-                log.info("edit group event data is empty, eventId:{}, data:{}", eventId, data);
-                return Response.ok(Boolean.TRUE);
-            }
-
-            switch (checkNotNull(GroupEventType.from(event.getType()))) {
-                case NEW:
-                    params.put("breedName", getBasicName(getLong(params, "breedId")));
-                    params.put("geneticName", getBasicName(getLong(params, "geneticId")));
-                    orServEx(doctorGroupWriteService.editEventNew(groupDetail, event, map(pubUpdatorFields(params), DoctorNewGroupEdit.class)));
-                    break;
-                case MOVE_IN:
-                    params.put("breedName", getBasicName(getLong(params, "breedId")));
-                    orServEx(doctorGroupWriteService.editEventMoveIn(groupDetail, event, map(pubUpdatorFields(params), DoctorMoveInGroupEdit.class)));
-                    break;
-                case CHANGE:
-                    checkParam(params);
-                    params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
-                    params.put("customerName", getCustomerName(getLong(params, "customerId")));
-                    params.put("breedName", getBasicName(getLong(params, "breedId")));
-                    orServEx(doctorGroupWriteService.editEventChange(groupDetail, event, map(pubUpdatorFields(params), DoctorChangeGroupEdit.class)));
-                    break;
-                case TRANS_GROUP:
-                    params.put("breedName", getBasicName(getLong(params, "breedId")));
-                    orServEx(doctorGroupWriteService.editEventTrans(groupDetail, event, map(pubUpdatorFields(params), DoctorTransEdit.class)));
-                    break;
-                case LIVE_STOCK:
-                    orServEx(doctorGroupWriteService.editEventLiveStock(groupDetail, event, map(pubUpdatorFields(params), DoctorLiveStockGroupEdit.class)));
-                    break;
-                case DISEASE:
-                    params.put("diseaseName", getBasicName(getLong(params, "diseaseId")));
-                    params.put("doctorName", orServEx(this.findRealName(getLong(params, "doctorId"))));
-                    orServEx(doctorGroupWriteService.editEventDisease(groupDetail, event, map(pubUpdatorFields(params), DoctorDiseaseGroupEdit.class)));
-                    break;
-                case ANTIEPIDEMIC:
-                    params.put("vaccinStaffName", orServEx(this.findRealName(getLong(params, "vaccinStaffId"))));
-                    params.put("vaccinItemName", getVaccinItemName(getLong(params, "vaccinItemId")));
-                    orServEx(doctorGroupWriteService.editEventAntiepidemic(groupDetail, event, map(pubUpdatorFields(params), DoctorAntiepidemicGroupEdit.class)));
-                    break;
-                case TRANS_FARM:
-                    params.put("breedName", getBasicName(getLong(params, "breedId")));
-                    orServEx(doctorGroupWriteService.editEventTrans(groupDetail, event, map(pubUpdatorFields(params), DoctorTransEdit.class)));
-                    break;
-                default:
-                    return Response.fail("event.type.error");
-            }
-            return Response.ok(Boolean.TRUE);
-        } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
-        } catch (Exception e) {
-            log.error("edit group event failed, eventId:{}, data:{}, cause:{}", eventId, data, Throwables.getStackTraceAsString(e));
-            return Response.fail("edit.group.event.fail");
         }
     }
 

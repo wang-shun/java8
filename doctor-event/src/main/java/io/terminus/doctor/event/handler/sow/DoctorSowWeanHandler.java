@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -13,8 +14,10 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.doctor.workflow.core.Execution;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -34,6 +37,9 @@ import static com.google.common.base.Preconditions.checkState;
  */
 @Component
 public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
+
+    @Autowired
+    private DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
     public DoctorSowWeanHandler(DoctorPigDao doctorPigDao,
@@ -61,6 +67,13 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
         //断奶只数和断奶均重
         doctorPigEvent.setWeanCount(Ints.tryParse(Objects.toString(extra.get("partWeanPigletsCount"))));
         doctorPigEvent.setWeanAvgWeight(Doubles.tryParse(Objects.toString(extra.get("partWeanAvgWeight"))));
+
+        Integer quaQty = doctorPigEvent.getWeanCount();
+        if (extra.containsKey("qualifiedCount") && extra.get("qualifiedCount") != null) {
+            quaQty = Ints.tryParse(Objects.toString(extra.get("qualifiedCount")));
+        }
+        doctorPigEvent.setHealthCount(quaQty);    //额 这个字段存一下合格数吧
+        doctorPigEvent.setWeakCount(Ints.tryParse(Objects.toString(extra.get("notQualifiedCount"))));
         return IsOrNot.NO;
     }
 
@@ -118,7 +131,14 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
     @Override
     protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, Long farrowGroupId, Long farrowBarnId) {
         //触发一下修改猪群的事件
-        Integer pigType = doctorBarnDao.findById(farrowBarnId).getPigType();
-        updateFarrowGroupTrack(farrowGroupId, pigType);
+        DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(farrowGroupId);
+        if (groupTrack != null) {
+            groupTrack.setQuaQty(EventUtil.plusInt(groupTrack.getQuaQty(), doctorPigEvent.getHealthCount()));
+            groupTrack.setUnqQty(EventUtil.plusInt(groupTrack.getUnqQty(), doctorPigEvent.getWeakCount()));
+            groupTrack.setWeanQty(EventUtil.plusInt(groupTrack.getWeanQty(), doctorPigEvent.getWeanCount()));
+            groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), -doctorPigEvent.getWeanCount()));
+            groupTrack.setWeanWeight(EventUtil.plusDouble(groupTrack.getWeanWeight(), doctorPigEvent.getWeanAvgWeight() * doctorPigEvent.getWeanCount()));
+            doctorGroupTrackDao.update(groupTrack);
+        }
     }
 }

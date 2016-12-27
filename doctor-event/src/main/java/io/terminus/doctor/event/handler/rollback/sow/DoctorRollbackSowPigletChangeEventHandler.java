@@ -26,16 +26,19 @@ public class DoctorRollbackSowPigletChangeEventHandler extends DoctorAbstractRol
 
     @Autowired
     private DoctorRollbackGroupChangeHandler doctorRollbackGroupChangeHandler;
+    @Autowired
+    private DoctorRollbackSowWeanHandler doctorRollbackSowWeanHandler;
 
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-            if (!Objects.equals(pigEvent.getType(), PigEvent.PIGLETS_CHG.getKey()) || !isLastEvent(pigEvent)) {
+            if (!Objects.equals(pigEvent.getType(), PigEvent.PIGLETS_CHG.getKey())) {
             return false;
         }
 
         //母猪仔猪变动会触发猪群变动事件，校验猪群变动事件是否是最新事件
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
-        return isRelLastGroupEvent(toGroupEvent);
+        DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
+        return isRelLastGroupEvent(toGroupEvent) & doctorRollbackSowWeanHandler.handleCheck(toPigEvent);
     }
 
     @Override
@@ -44,8 +47,14 @@ public class DoctorRollbackSowPigletChangeEventHandler extends DoctorAbstractRol
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
         doctorRollbackGroupChangeHandler.rollback(toGroupEvent, operatorId, operatorName);
 
-        //2. 回滚母猪仔猪变动
-        handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
+        //2. 如果全部仔猪变动回滚其触发的自动断奶事件
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
+        if (Objects.equals(doctorPigTrack.getUnweanQty(), 0)) {
+            DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
+            doctorRollbackSowWeanHandler.handleRollback(toPigEvent, operatorId, operatorName);
+        }
+        //3. 回滚母猪仔猪变动
+        handleRollbackWithStatus(pigEvent, operatorId, operatorName);
     }
 
     @Override

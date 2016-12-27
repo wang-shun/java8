@@ -40,7 +40,7 @@ public interface DoctorBarnReadService {
     /**
      * 根据一些枚举条件查询猪舍
      * @param farmId  猪场id
-     * @param pigType 猪类
+     * @param pigTypes 猪类
      * @see io.terminus.doctor.common.enums.PigType
      * @param canOpenGroup 能否新建猪群
      * @see io.terminus.doctor.event.model.DoctorBarn.CanOpenGroup
@@ -49,16 +49,7 @@ public interface DoctorBarnReadService {
      * @return 猪舍列表
      */
     Response<List<DoctorBarn>> findBarnsByEnums(@NotNull(message = "farmId.not.null") Long farmId,
-                                                Integer pigType, Integer canOpenGroup, Integer status);
-
-    /**
-     * 根据猪场id和猪类list查
-     * @param farmId  猪场id
-     * @param pigTypes 猪类list, 如果为null或empty, 返回全部的结果
-     * @return 猪舍list
-     */
-    Response<List<DoctorBarn>> findBarnsByFarmIdAndPigTypes(@NotNull(message = "farmId.not.null") Long farmId,
-                                                           List<Integer> pigTypes);
+                                                List<Integer> pigTypes, Integer canOpenGroup, Integer status);
 
     /**
      * 查询当前猪舍的存栏量

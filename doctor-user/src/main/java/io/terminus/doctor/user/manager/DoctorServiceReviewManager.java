@@ -230,6 +230,7 @@ public class DoctorServiceReviewManager {
             permission.setFarmIds(newFarmIdStr);
             permission.setUpdatorId(user.getId());
             permission.setUpdatorName(user.getName());
+            permission.setOrgIdsList(Lists.newArrayList(org.getId()));
             RespHelper.orServEx(doctorUserDataPermissionWriteService.updateDataPermission(permission));
         }else{
             permission = new DoctorUserDataPermission();
@@ -239,6 +240,7 @@ public class DoctorServiceReviewManager {
             permission.setCreatorId(user.getId());
             permission.setUpdatorId(user.getId());
             permission.setUpdatorName(user.getName());
+            permission.setOrgIdsList(Lists.newArrayList(org.getId()));
             doctorUserDataPermissionWriteService.createDataPermission(permission);
         }
 

@@ -3,6 +3,8 @@ package io.terminus.doctor.web.front.event.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
@@ -11,10 +13,13 @@ import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -24,6 +29,7 @@ import io.terminus.doctor.workflow.core.WorkFlowService;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +44,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Created by yaoqijun.
@@ -57,6 +65,7 @@ public class DoctorPigEvents {
     private final DoctorPigEventWriteService doctorPigEventWriteService;
 
     private final UserReadService userReadService;
+    private final DoctorGroupReadService doctorGroupReadService;
 
     private final WorkFlowService workFlowService;
 
@@ -71,11 +80,12 @@ public class DoctorPigEvents {
                            DoctorPigEventReadService doctorPigEventReadService,
                            DoctorPigEventWriteService doctorPigEventWriteService,
                            UserReadService userReadService,
-                           WorkFlowService workFlowService, TransFromUtil transFromUtil) {
+                           DoctorGroupReadService doctorGroupReadService, WorkFlowService workFlowService, TransFromUtil transFromUtil) {
         this.doctorPigReadService = doctorPigReadService;
         this.doctorPigEventReadService = doctorPigEventReadService;
         this.doctorPigEventWriteService = doctorPigEventWriteService;
         this.userReadService = userReadService;
+        this.doctorGroupReadService = doctorGroupReadService;
         this.workFlowService = workFlowService;
         this.transFromUtil = transFromUtil;
     }
@@ -105,7 +115,6 @@ public class DoctorPigEvents {
 
             Paging<DoctorPigEvent> doctorPigEventPaging = RespHelper.or500(doctorPigEventReadService.queryPigDoctorEvents(farmId, pigId, pageNo, pageSize, beginDateTime, endDateTime));
             transFromUtil.transFromExtraMap(doctorPigEventPaging.getData());
-            DoctorPigEvent doctorPigEvent = RespHelper.or500(doctorPigEventReadService.canRollbackEvent(pigId));
             return doctorPigEventPaging;
         } catch (Exception e) {
             log.error("pig event paging error, cause:{}", Throwables.getStackTraceAsString(e));
@@ -124,7 +133,7 @@ public class DoctorPigEvents {
         Paging<DoctorPigEvent> doctorPigEventPaging = pagingDoctorPigEvent(farmId, pigId, pageNo, pageSize, startDate, endDate);
         DoctorPigEvent doctorPigEvent = RespHelper.or500(doctorPigEventReadService.canRollbackEvent(pigId));
         Long canRollback = null;
-        if (doctorPigEvent != null){
+        if (doctorPigEvent != null) {
             canRollback = doctorPigEvent.getId();
         }
         return DoctorPigEventPagingDto.builder().paging(doctorPigEventPaging).canRollback(canRollback).build();
@@ -171,7 +180,19 @@ public class DoctorPigEvents {
     }
 
     /**
+     * 查询母猪胎次中数据平均值
+     * @param pigId
+     * @return
+     */
+    @RequestMapping(value = "/querySowParityAvg", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorSowParityAvgDto querySowParityAvg(Long pigId) {
+        return RespHelper.or500(doctorPigEventReadService.querySowParityAvg(pigId));
+    }
+
+    /**
      * 同步流程数据
+     *
      * @param key
      * @param businessId
      * @return
@@ -184,6 +205,7 @@ public class DoctorPigEvents {
 
     /**
      * 分页查询某一类型的猪事件
+     *
      * @param params
      * @param pageNo
      * @param pageSize
@@ -196,15 +218,60 @@ public class DoctorPigEvents {
             return Paging.empty();
         }
         params = Params.filterNullOrEmpty(params);
-        if (params.containsKey("eventName")) {
-            params.put("type", PigEvent.fromDesc((String) params.get("eventName")).getKey().toString());
-            params.remove("eventName");
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
+            params.remove("eventTypes");
+        }
+        if (StringUtils.isNotBlank((String) params.get("endDate"))) {
+            params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusSeconds(1).toDate());
         }
         return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize));
     }
 
+
+    //针对公猪、母猪、猪群pagingEvent事件集成
+    @RequestMapping(value = "/queryEvents", method = RequestMethod.GET)
+    @ResponseBody
+    public Object queryEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        if (params == null || params.isEmpty() ) {
+            return Paging.empty();
+        }
+        if (params.get("kind")==null||"".equals(params.get("kind"))){
+            params.put("kind",1);
+        }
+        //针对  kind进行识别
+        String kind = String.valueOf(params.get("kind"));
+        Object result = null;
+        switch (kind) {
+            case "4":
+                //猪群查询事件
+                result = this.queryGroupEventsByCriteria(params, pageNo, pageSize);
+                break;
+            case "1":
+                //母猪
+                params.put("ordered",0);
+                result = this.queryPigEventsByCriteria(params, pageNo, pageSize);
+                break;
+            //公猪
+            case "2":
+                params.put("ordered",0);
+                result = this.queryPigEventsByCriteria(params, pageNo, pageSize);
+                break;
+            case "3":
+                params.put("ordered",0);
+                result = this.queryPigEventsByCriteria(params, pageNo, pageSize);
+                break;
+            default:
+                result = Paging.empty();
+                break;
+        }
+        return result;
+    }
+
+
     /**
      * 获取相应的猪类型事件列表
+     *
      * @param types
      * @return
      * @see PigEvent
@@ -217,18 +284,50 @@ public class DoctorPigEvents {
     }
 
     /**
+     * 获取相应的猪类型事件列表<K,V>形式
+     *
+     * @param types
+     * @return
+     * @see PigEvent
+     */
+    @RequestMapping(value = "/getPigEvents")
+    @ResponseBody
+    public List<ImmutableMap<String, Object>> getPigEvents(@RequestParam String types) {
+        List<PigEvent> events = PigEvent.from(Splitters.UNDERSCORE.splitToList(types).stream().filter(type -> StringUtils.isNotBlank(type)).map(type -> Integer.parseInt(type)).collect(toList()));
+        List<ImmutableMap<String, Object>> list = Lists.newArrayList();
+        for (PigEvent p : events) {
+            list.add(ImmutableMap.of("id", p.getKey(), "name", p.getDesc()));
+        }
+        return list;
+    }
+
+
+    /**
      * 获取拥有猪事件的操作人列表
+     *
      * @param params
      * @return
      */
     @RequestMapping(value = "/event/operators")
     @ResponseBody
-    public List<DoctorPigEvent> queryOperatorForEvent(@RequestParam  Map<String, Object> params){
+    public List<DoctorPigEvent> queryOperatorForEvent(@RequestParam Map<String, Object> params) {
         params = Params.filterNullOrEmpty(params);
-        if (params.containsKey("eventName")) {
-            params.put("type", PigEvent.fromDesc((String) params.get("eventName")).getKey().toString());
-            params.remove("eventName");
+        if (params.get("eventTypes") != null) {
+            params.put("type", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
+            params.remove("eventTypes");
         }
         return RespHelper.or500(doctorPigEventReadService.queryOperators(params));
+    }
+
+    private Paging<DoctorGroupEvent> queryGroupEventsByCriteria( Map<String, Object> params, Integer pageNo, Integer pageSize) {
+        if (params == null || params.isEmpty()) {
+            return Paging.empty();
+        }
+        params = Params.filterNullOrEmpty(params);
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
+            params.remove("eventTypes");
+        }
+        return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize));
     }
 }

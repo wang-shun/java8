@@ -2,9 +2,10 @@ package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.primitives.Doubles;
-import com.google.common.primitives.Ints;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.CountUtil;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -79,17 +80,16 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
             doctorPigEvent.setPregDays(Math.abs(Days.daysBetween(farrowingDate, mattingDate).getDays()));
         }
 
-
         //分娩窝重
         doctorPigEvent.setFarrowWeight(Doubles.tryParse(Objects.toString(extra.get("birthNestAvg"))));
         //分娩仔猪只数信息
-        doctorPigEvent.setLiveCount(Ints.tryParse(Objects.toString(extra.get("farrowingLiveCount"))));
-        doctorPigEvent.setHealthCount(Ints.tryParse(Objects.toString(extra.get("healthCount"))));
-        doctorPigEvent.setWeakCount(Ints.tryParse(Objects.toString(extra.get("weakCount"))));
-        doctorPigEvent.setMnyCount(Ints.tryParse(Objects.toString(extra.get("mnyCount"))));
-        doctorPigEvent.setJxCount(Ints.tryParse(Objects.toString(extra.get("jxCount"))));
-        doctorPigEvent.setDeadCount(Ints.tryParse(Objects.toString(extra.get("deadCount"))));
-        doctorPigEvent.setBlackCount(Ints.tryParse(Objects.toString(extra.get("blackCount"))));
+        doctorPigEvent.setLiveCount(CountUtil.getIntegerDefault0(extra.get("farrowingLiveCount")));
+        doctorPigEvent.setHealthCount(CountUtil.getIntegerDefault0(extra.get("healthCount")));
+        doctorPigEvent.setWeakCount(CountUtil.getIntegerDefault0(extra.get("weakCount")));
+        doctorPigEvent.setMnyCount(CountUtil.getIntegerDefault0(extra.get("mnyCount")));
+        doctorPigEvent.setJxCount(CountUtil.getIntegerDefault0(extra.get("jxCount")));
+        doctorPigEvent.setDeadCount(CountUtil.getIntegerDefault0(extra.get("deadCount")));
+        doctorPigEvent.setBlackCount(CountUtil.getIntegerDefault0(extra.get("blackCount")));
 
         if (farrowingDate.isBefore(pregJudgeDate)) {
             extra.put("farrowingType", FarrowingType.EARLY.getKey());
@@ -165,12 +165,16 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setQuantity(farrowingLiveCount);
         input.setSowQty(sowCount);
         input.setBoarQty(boarCount);
-        input.setAvgDayAge(Integer.valueOf(MoreObjects.firstNonNull(extra.get("dayAgeAvg"), 1).toString()));
+        input.setAvgDayAge(1);
         input.setAvgWeight(Double.valueOf(extra.get("birthNestAvg").toString()));
-        input.setEventAt(DateTime.now().toString(DTF));
+        input.setEventAt(DateUtil.toDateString(basic.generateEventAtFromExtra(extra)));
         input.setIsAuto(1);
         input.setCreatorId(basic.getStaffId());
         input.setCreatorName(basic.getStaffName());
+
+        input.setSowEvent(true);  //设置为分娩转入
+        input.setWeakQty(CountUtil.getIntegerDefault0(extra.get("weakCount")));
+        input.setHealthyQty(CountUtil.getIntegerDefault0(extra.get("healthCount")));
 
         input.setRelPigEventId(pigEventId);
         Response<Long> response = doctorGroupWriteService.sowGroupEventMoveIn(input);
@@ -208,9 +212,5 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
             firstMate.setIsDelivery(1);
             doctorPigEventDao.update(firstMate);
         }
-
-        //触发一下修改猪群的事件
-        Integer pigType = doctorBarnDao.findById(farrowBarnId).getPigType();
-        updateFarrowGroupTrack(doctorPigTrack.getGroupId(), pigType);  //分娩之后才会有groupId, 所以取track里的groupId
     }
 }

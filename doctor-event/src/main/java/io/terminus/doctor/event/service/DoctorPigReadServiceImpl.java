@@ -10,21 +10,27 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.DoctorPigJoinDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
+import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.search.pig.SearchedPig;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -67,19 +73,22 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
     private final DoctorPigEventDao doctorPigEventDao;
 
+    private final DoctorPigJoinDao doctorPigJoinDao;
+
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM");
 
     @Autowired
     public DoctorPigReadServiceImpl(DoctorPigDao doctorPigDao, DoctorPigTrackDao doctorPigTrackDao,
                                     DoctorPigEventReadService doctorPigEventReadService,
                                     DoctorBarnDao doctorBarnDao, DoctorPigInfoCache doctorPigInfoCache,
-                                    DoctorPigEventDao doctorPigEventDao){
+                                    DoctorPigEventDao doctorPigEventDao, DoctorPigJoinDao doctorPigJoinDao){
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventReadService = doctorPigEventReadService;
         this.doctorBarnDao = doctorBarnDao;
         this.doctorPigInfoCache = doctorPigInfoCache;
         this.doctorPigEventDao = doctorPigEventDao;
+        this.doctorPigJoinDao = doctorPigJoinDao;
     }
 
     @Override
@@ -204,6 +213,67 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
+    public Response<Paging<SearchedPig>> pagingPig(Map<String, Object> params, Integer pageNo, Integer pageSize) {
+        try {
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            Paging<SearchedPig> paging = doctorPigJoinDao.pigPagingWithJoin(params, pageInfo.getOffset(), pageInfo.getLimit());
+
+            return Response.ok(new Paging<>(paging.getTotal(), mapSearchPig(paging.getData())));
+        } catch (Exception e) {
+            log.error("paging pig failed, params:{}, pageNo:{}, pageSize:{}, cause:{}", params, pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.pig.fail");
+        }
+    }
+
+    private List<SearchedPig> mapSearchPig(List<SearchedPig> pigs) {
+        return pigs.stream()
+                .map(pig -> {
+                    if (pig.getBirthDate() != null) {
+                        pig.setDayAge((int)(DateTime.now().minus(pig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1));
+                    }
+
+                    if(pig.getStatus() != null){
+                        PigStatus pigStatus = PigStatus.from(pig.getStatus());
+                        if(pigStatus != null){
+                            pig.setStatusName(pigStatus.getName());
+                        }
+                    }
+
+                    // 如果是待分娩状态, 获取妊娠检查的时间
+                    if (Objects.equals(pig.getStatus(), PigStatus.Farrow.getKey()) || Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey())) {
+                        DoctorPigEvent pregEvent = doctorPigEventDao.queryLastPregCheck(pig.getId());
+                        if (pregEvent == null) {
+                            return pig;
+                        }
+                        pig.getExtra().put("checkDate", pregEvent.getEventAt());
+
+                        // 处理 KongHuaiPregCheckResult
+                        if (Objects.equals(pig.getStatus(), PigStatus.KongHuai.getKey())) {
+                            KongHuaiPregCheckResult result = getPreg(pregEvent.getPregCheckResult());
+                            if (result != null) {
+                                pig.setStatus(result.getKey());
+                                pig.setStatusName(result.getName());
+                            }
+                        }
+                    }
+                    return pig;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private static KongHuaiPregCheckResult getPreg(Integer pregCheckResult) {
+        if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
+            return KongHuaiPregCheckResult.FANQING;
+        } else if (Objects.equals(pregCheckResult, PregCheckResult.YING.getKey())) {
+            return KongHuaiPregCheckResult.YING;
+        } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
+            return KongHuaiPregCheckResult.LIUCHAN;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public Response<DoctorPigInfoDto> queryDoctorInfoDtoById(@NotNull(message = "input.pigId.empty") Long pigId) {
         try{
             DoctorPig doctorPig = doctorPigDao.findById(pigId);
@@ -219,14 +289,15 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
-    public Response<String> generateFostersCode(Long farmId) {
+    public Response<String> generateFostersCode(String eventAt, Long farmId) {
         try{
+            DateTime dateTime = Arguments.isEmpty(eventAt) ? DateTime.now() : DateUtil.DATE.parseDateTime(eventAt);
             Long farrowingCount =  doctorPigEventDao.countPigEventTypeDuration(
                     farmId, PigEvent.FARROWING.getKey(),
-                    DateTime.now().withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
-                    DateTime.now().plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().toDate());
+                    dateTime.withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
+                    dateTime.plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().toDate());
             farrowingCount += 1;
-            return Response.ok(DateTime.now().toString(DTF)+ "-"+ farrowingCount);
+            return Response.ok(dateTime.toString(DTF) + "-" + farrowingCount);
         }catch (IllegalStateException e){
             log.error(" input pigId not exist, farmId:{} ", farmId);
             return Response.fail(e.getMessage());
@@ -305,11 +376,11 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
-    public Response<Boolean> validatePigCodeByFarmId(Long orgId, String pigCode) {
+    public Response<Boolean> validatePigCodeByFarmId(Long farmId, String pigCode) {
         try{
-            return Response.ok(doctorPigInfoCache.judgePigCodeNotContain(orgId, pigCode));
+            return Response.ok(doctorPigInfoCache.judgePigCodeNotContain(farmId, pigCode));
         }catch (Exception e){
-            log.error("validate pig code not in farm fail, farmId:{}, pigCode:{}, cause:{}", orgId, pigCode, Throwables.getStackTraceAsString(e));
+            log.error("validate pig code not in farm fail, farmId:{}, pigCode:{}, cause:{}", farmId, pigCode, Throwables.getStackTraceAsString(e));
             return Response.fail("validate.pigCode.fail");
         }
     }

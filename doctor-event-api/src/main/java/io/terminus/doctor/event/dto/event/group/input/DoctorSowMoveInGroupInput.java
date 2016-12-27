@@ -78,6 +78,16 @@ public class DoctorSowMoveInGroupInput extends DoctorMoveInGroupInput implements
      */
     private String geneticName;
 
+    /**
+     * 健仔数
+     */
+    private Integer healthyQty;
+
+    /**
+     * 弱仔数
+     */
+    private Integer weakQty;
+
     @Override
     public Map<String, String> descMap() {
         Map<String, String> map = super.descMap();

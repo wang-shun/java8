@@ -1,8 +1,6 @@
 package io.terminus.doctor.event.dto.event.usual;
 
 import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
-import io.terminus.doctor.event.enums.PigSource;
-import io.terminus.doctor.event.model.DoctorPig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,7 +9,7 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -74,6 +72,8 @@ public class DoctorFarmEntryDto extends AbstractPigEventInputDto implements Seri
 
     private String boarTypeName;
 
+    private Double weight;
+
     // sow
     private String earCode; // 耳缺号
 
@@ -85,46 +85,46 @@ public class DoctorFarmEntryDto extends AbstractPigEventInputDto implements Seri
 
     @Override
     public Map<String, String> descMap() {
-        Map<String, String> map = new HashMap<>();
-        if(pigType != null){
-            DoctorPig.PIG_TYPE pig = DoctorPig.PIG_TYPE.from(pigType);
-            if(pig != null){
-                map.put("猪类型", pig.getDesc());
-            }
-        }
-        if(pigCode != null){
-            map.put("猪编号", pigCode);
-        }
-        if(barnName != null){
-            map.put("进场猪舍", barnName);
-        }
-        if(source != null){
-            PigSource pigSource = PigSource.from(source);
-            if(pigSource != null){
-                map.put("来源", pigSource.getDesc());
-            }
-        }
+        Map<String, String> map = new LinkedHashMap<>();
+//        if(pigType != null){
+//            DoctorPig.PIG_TYPE pig = DoctorPig.PIG_TYPE.from(pigType);
+//            if(pig != null){
+//                map.put("猪类型", pig.getDesc());
+//            }
+//        }
+//        if(pigCode != null){
+//            map.put("猪编号", pigCode);
+//        }
+//        if(barnName != null){
+//            map.put("进场猪舍", barnName);
+//        }
+//        if(source != null){
+//            PigSource pigSource = PigSource.from(source);
+//            if(pigSource != null){
+//                map.put("来源", pigSource.getDesc());
+//            }
+//        }
         if(breedName != null){
             map.put("品种", breedName);
         }
         if(breedTypeName != null){
             map.put("品系", breedTypeName);
         }
-        if(boarTypeName != null){
-            map.put("公猪进场类型", boarTypeName);
-        }
-        if(earCode != null){
-            map.put("耳缺号", earCode);
-        }
-        if(parity != null){
-            map.put("胎次", parity.toString());
-        }
-        if(left != null){
-            map.put("左乳头数", left.toString());
-        }
-        if(right != null){
-            map.put("右乳头数", right.toString());
-        }
+//        if(boarTypeName != null){
+//            map.put("公猪进场类型", boarTypeName);
+//        }
+//        if(earCode != null){
+//            map.put("耳缺号", earCode);
+//        }
+//        if(parity != null){
+//            map.put("胎次", parity.toString());
+//        }
+//        if(left != null){
+//            map.put("左乳头数", left.toString());
+//        }
+//        if(right != null){
+//            map.put("右乳头数", right.toString());
+//        }
         return map;
     }
 

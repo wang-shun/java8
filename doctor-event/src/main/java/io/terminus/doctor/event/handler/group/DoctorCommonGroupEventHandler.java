@@ -80,9 +80,11 @@ public class DoctorCommonGroupEventHandler {
     }
 
     /**
-     * 系统触发的自动关闭猪群事件
+     * 系统触发的自动关闭猪群事件(先生成一发批次总结)
      */
-    public void autoGroupEventClose(DoctorGroup group, DoctorGroupTrack groupTrack, BaseGroupInput baseInput) {
+    public void autoGroupEventClose(DoctorGroup group, DoctorGroupTrack groupTrack, BaseGroupInput baseInput, Date eventAt, Double fcrFeed) {
+        createGroupBatchSummaryWhenClosed(group, groupTrack, eventAt, fcrFeed);
+
         DoctorCloseGroupInput closeInput = new DoctorCloseGroupInput();
         closeInput.setIsAuto(IsOrNot.YES.getValue());   //系统触发事件, 属于自动生成
         closeInput.setEventAt(baseInput.getEventAt());
@@ -116,6 +118,7 @@ public class DoctorCommonGroupEventHandler {
         moveIn.setSowQty(transGroup.getSowQty());
         moveIn.setAvgDayAge(fromGroupTrack.getAvgDayAge());     //日龄
         moveIn.setAvgWeight(EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity()));  //转入均重
+        moveIn.setSowEvent(transGroup.isSowEvent());    //是否是由母猪触发的转入
 
         //调用转入猪群事件
         DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(transGroup.getToGroupId()));
@@ -148,10 +151,11 @@ public class DoctorCommonGroupEventHandler {
 
         //4. 转入猪群事件
         DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId));
-        DoctorMoveInGroupInput moveIn = BeanMapper.map(input, DoctorMoveInGroupInput.class);
-        moveIn.setRelPigEventId(null); //转入猪群事件 relPigEventId 置成空
-        moveIn.setRelGroupEventId(groupDetail.getGroupTrack().getRelEventId());      //记录新建猪群事件的id(新建猪群时，track.relEventId = 新建猪群事件id)
-        doctorMoveInGroupEventHandler.handleEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
+
+        input.setRelPigEventId(null); //转入猪群事件 relPigEventId 置成空
+        input.setRelGroupEventId(groupDetail.getGroupTrack().getRelEventId());      //记录新建猪群事件的id(新建猪群时，track.relEventId = 新建猪群事件id)
+        input.setSowEvent(true);
+        doctorMoveInGroupEventHandler.handleEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
         return groupId;
     }
 
@@ -207,6 +211,7 @@ public class DoctorCommonGroupEventHandler {
         farmEntryDto.setBreedTypeName(input.getGeneticName());
         farmEntryDto.setMotherCode(input.getMotherEarCode());
         farmEntryDto.setEarCode(input.getEarCode());
+        farmEntryDto.setWeight(input.getWeight());
 
         Long pigId = orServEx(doctorPigEventWriteService.pigEntryEvent(basicDto, farmEntryDto));
 
@@ -217,7 +222,7 @@ public class DoctorCommonGroupEventHandler {
     /**
      * 当猪群关闭时, 创建猪群批次总结(这个统计放到猪群关闭之前进行)
      */
-    public void createGroupBatchSummaryWhenClosed(DoctorGroup group, DoctorGroupTrack groupTrack, Date eventAt, Double fcrFeed) {
+    private void createGroupBatchSummaryWhenClosed(DoctorGroup group, DoctorGroupTrack groupTrack, Date eventAt, Double fcrFeed) {
         DoctorGroupBatchSummary summary = RespHelper.orServEx(doctorGroupBatchSummaryReadService
                 .getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack), fcrFeed));
 

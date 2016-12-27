@@ -13,11 +13,8 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
@@ -25,7 +22,6 @@ import io.terminus.doctor.workflow.core.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
@@ -68,7 +64,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
         //变动数量
         Integer changeCount = (Integer) extra.get("pigletsCount");
         checkState(changeCount != null, "quantity.not.null");
-        checkState(changeCount <= unweanCount, "wean.countInput.error");
+        checkState(changeCount <= unweanCount, "change.countInput.error");
         doctorPigTrack.setUnweanQty(unweanCount - changeCount);  //未断奶数量 - 变动数量, 已断奶数量不用变
 
         //变动重量
@@ -83,45 +79,15 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
         Long groupId = doctorPigTrack.getGroupId();
         //全部断奶后, 初始化所有本次哺乳的信息
         Long pigEventId = (Long) context.get("doctorPigEventId");
-        //全部断奶后, 初始化所有本次哺乳的信息
-        if (doctorPigTrack.getUnweanQty() == 0) {
-            doctorPigTrack.setStatus(PigStatus.Wean.getKey());
-            doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
-            doctorPigTrack.setFarrowQty(0);  //分娩数 0
-            doctorPigTrack.setFarrowAvgWeight(0D);
-            doctorPigTrack.setWeanAvgWeight(0D);
-            DoctorPig doctorPig = doctorPigDao.findById(doctorPigTrack.getPigId());
-            DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
-                    .type(PigEvent.WEAN.getKey())
-                    .pigId(doctorPigTrack.getPigId())
-                    .pigStatusBefore(PigStatus.FEED.getKey())
-                    .pigStatusAfter(PigStatus.Wean.getKey())
-                    .isAuto(IsOrNot.YES.getValue())
-                    .barnId(doctorPigTrack.getCurrentBarnId())
-                    .barnName(doctorPigTrack.getCurrentBarnName())
-                    .relPigEventId(pigEventId)
-                    .partweanDate(new Date())
-                    .farmId(doctorPigTrack.getFarmId())
-                    .weanCount(changeCount)
-                    .pigCode(doctorPig.getPigCode())
-                    .name(PigEvent.WEAN.getName())
-                    .weanAvgWeight(0D)
-                    .farmName(basic.getFarmName())
-                    .eventAt(basic.generateEventAtFromExtra(extra))
-                    .kind(DoctorPig.PIG_TYPE.SOW.getKey())
-                    .orgId(basic.getOrgId()).orgName(basic.getOrgName())
-                    .npd(0)
-                    .dpnpd(0)
-                    .pfnpd(0)
-                    .plnpd(0)
-                    .psnpd(0)
-                    .pynpd(0)
-                    .ptnpd(0)
-                    .jpnpd(0)
-                    .build();
-            doctorPigEventDao.create(doctorPigEvent);
-
-        }
+//        //全部断奶后, 初始化所有本次哺乳的信息
+//        if (doctorPigTrack.getUnweanQty() == 0) {
+//            doctorPigTrack.setStatus(PigStatus.Wean.getKey());
+//            doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
+//            doctorPigTrack.setFarrowQty(0);  //分娩数 0
+//            doctorPigTrack.setFarrowAvgWeight(0D);
+//            doctorPigTrack.setWeanAvgWeight(0D);
+//
+//        }
         doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
         execution.getExpression().put("leftCount", (doctorPigTrack.getUnweanQty()));
 
@@ -160,6 +126,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
         doctorChangeGroupInput.setCreatorId(basic.getStaffId());
         doctorChangeGroupInput.setCreatorName(basic.getStaffName());
         doctorChangeGroupInput.setRelPigEventId(pigEventId);        //猪事件id
+        doctorChangeGroupInput.setSowEvent(true);   //母猪触发的变动事件
         return doctorChangeGroupInput;
     }
 }

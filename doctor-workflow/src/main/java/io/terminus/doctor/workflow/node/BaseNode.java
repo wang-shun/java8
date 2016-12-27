@@ -1,6 +1,7 @@
 package io.terminus.doctor.workflow.node;
 
 import com.google.common.base.Throwables;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.workflow.core.Execution;
 import io.terminus.doctor.workflow.event.IHandler;
 import io.terminus.doctor.workflow.event.Interceptor;
@@ -69,8 +70,7 @@ public abstract class BaseNode implements Node {
                 handler.handle(execution);
                 handler.afterHandle(execution);
             }
-        } catch (IllegalStateException e){
-            log.error("[handler execute] -> handler execute failed cause by {}", Throwables.getStackTraceAsString(e));
+        } catch (IllegalStateException | ServiceException | IllegalArgumentException e){
             throw e;
         }catch (Exception e) {
             log.error("[handler execute] -> handler execute failed cause by {}", Throwables.getStackTraceAsString(e));

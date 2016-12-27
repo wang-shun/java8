@@ -143,7 +143,7 @@ public class DoctorUserManager {
             doctorStaff.setOrgId(pstaff.getOrgId());
             doctorStaff.setOrgName(pstaff.getOrgName());
             doctorStaff.setStatus(pstaff.getStatus());
-            doctorStaffWriteService.createDoctorStaff(doctorStaff);
+            doctorStaffDao.create(doctorStaff);
 
         }
         return userId;

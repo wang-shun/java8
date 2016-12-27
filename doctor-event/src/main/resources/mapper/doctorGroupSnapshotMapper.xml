@@ -59,9 +59,6 @@
             <if test="toEventId != null">to_event_id = #{toEventId},</if>
             <if test="fromInfo != null">from_info = #{fromInfo},</if>
             <if test="toInfo != null">to_info = #{toInfo},</if>
-            
-            
-            updated_at=now()
         </set>
         WHERE id = #{id}
     </update>

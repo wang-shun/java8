@@ -2,6 +2,7 @@ package io.terminus.doctor.msg.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -111,6 +112,33 @@ public class DoctorMessage implements Serializable {
      */
     private Long businessId;
 
+    private Integer businessType;
+
     private Integer ruleValueId;
 
+    public enum BUSINESS_TYPE{
+        PIG(1, "猪"),
+        GROUP(2, "猪群"),
+        WAREHOUSE(3, "仓库");
+
+        BUSINESS_TYPE(Integer value, String name) {
+            this.value = value;
+            this.name = name;
+        }
+        @Getter
+        Integer value;
+
+        @Getter
+        String name;
+
+        public BUSINESS_TYPE from(Integer value) {
+            for (BUSINESS_TYPE type : BUSINESS_TYPE.values()) {
+                if (type.getValue().equals(value)) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+    }
 }

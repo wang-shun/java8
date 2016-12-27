@@ -7,10 +7,13 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.search.pig.SearchedPig;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -65,6 +68,12 @@ public interface DoctorPigReadService {
     Response<Paging<DoctorPigInfoDto>> pagingDoctorInfoDtoByPigTrack(DoctorPigTrack doctorPigTrack, Integer pageNo, Integer pageSize);
 
     /**
+     * 分页查询猪
+     */
+    Response<Paging<SearchedPig>> pagingPig(Map<String, Object> params, Integer pageNo, Integer pageSize);
+
+
+    /**
      * 通过pigId 获取对应的 pigDto 信息内容
      * @param pigId
      * @return
@@ -76,7 +85,8 @@ public interface DoctorPigReadService {
      * @param farmId
      * @return
      */
-    Response<String> generateFostersCode(@NotNull(message = "input.farmId.empty") Long farmId);
+    Response<String> generateFostersCode(@Nullable String eventAt,
+                                         @NotNull(message = "input.farmId.empty") Long farmId);
 
     /**
      * 获取猪舍pig 信息内容
@@ -108,11 +118,11 @@ public interface DoctorPigReadService {
 
     /**
      * 校验 farmId pigCode 不存在
-     * @param orgId
+     * @param farmId
      * @param pigCode
-     * @return
+     * @return 不存在则返回true
      */
-    Response<Boolean> validatePigCodeByFarmId(Long orgId, String pigCode);
+    Response<Boolean> validatePigCodeByFarmId(Long farmId, String pigCode);
 
     /**
      * 获取猪舍内的所有猪的猪类
