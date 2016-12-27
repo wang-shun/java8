@@ -1,6 +1,8 @@
 package io.terminus.doctor.user.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.user.model.DoctorServiceReviewExt;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 
 /**
@@ -24,5 +26,7 @@ public interface DoctorServiceStatusReadService {
      * @return
      */
     Response<DoctorServiceStatus> findByUserId(Long userId);
+
+    Response<Paging<DoctorServiceReviewExt>> page(Long userId, Integer type, String userMobile, String orgName, Integer pageNo, Integer pageSize);
 
 }

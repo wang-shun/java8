@@ -16,10 +16,10 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceReviewExt;
-import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
+import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
 import io.terminus.doctor.web.admin.service.DoctorInitBarnService;
@@ -58,9 +58,10 @@ public class DoctorServiceReviewController {
 
     @RpcConsumer
     private DoctorBarnWriteService doctorBarnWriteService;
-
     @RpcConsumer
     private DoctorBarnReadService doctorBarnReadService;
+    @RpcConsumer
+    private DoctorServiceStatusReadService serviceStatusReadService;
 
     @Autowired
     public DoctorServiceReviewController(DoctorServiceReviewService doctorServiceReviewService,
@@ -223,15 +224,14 @@ public class DoctorServiceReviewController {
 
     @RequestMapping(value = "/opened/page", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorServiceStatus> pageOpenedService(@RequestParam(value = "userId", required = false) Long userId,
-                                                         @RequestParam(value = "type", required = false) Integer type,
-                                                         @RequestParam(value = "userMobile", required = false) String userMobile,
-                                                         @RequestParam(value = "orgName", required = false) String orgName,
-                                                         @RequestParam(required = false) Integer pageNo,
-                                                         @RequestParam(required = false) Integer pageSize){
-
-
-        return null;
+    public Paging<DoctorServiceReviewExt> pageOpenedService(
+            @RequestParam(value = "userId", required = false) Long userId,
+            @RequestParam(value = "type", required = false, defaultValue = "1") Integer type,
+            @RequestParam(value = "userMobile", required = false) String userMobile,
+            @RequestParam(value = "orgName", required = false) String orgName,
+            @RequestParam(required = false) Integer pageNo,
+            @RequestParam(required = false) Integer pageSize){
+        return RespHelper.or500(serviceStatusReadService.page(userId, type, userMobile, orgName, pageNo, pageSize));
     }
 
     /**
