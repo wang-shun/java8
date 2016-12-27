@@ -59,6 +59,7 @@ import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.dto.DoctorImportSow;
 import io.terminus.doctor.move.util.ImportExcelUtils;
 import io.terminus.doctor.msg.service.DoctorMessageRuleWriteService;
+import io.terminus.doctor.user.dao.DoctorAddressDao;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
@@ -88,7 +89,6 @@ import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteServic
 import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
 import io.terminus.parana.user.address.model.Address;
-import io.terminus.parana.user.impl.address.dao.AddressDao;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
@@ -190,7 +190,7 @@ public class DoctorImportDataService {
     @Autowired
     private DoctorGroupEventDao doctorGroupEventDao;
     @Autowired
-    private AddressDao addressDao;
+    private DoctorAddressDao addressDao;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -342,10 +342,10 @@ public class DoctorImportDataService {
         }
     }
 
-    private Integer getAddressId(String name) {
-        Address address = addressDao.findByName(name);
+    private Integer getAddressId(String name, Integer pid) {
+        Address address = addressDao.findByNameAndPid(name, pid);
         if (address == null) {
-            throw new JsonResponseException("address.not.standard");
+            throw new JsonResponseException("猪场地址错误（" + name + "）");
         }
         return address.getId();
     }
@@ -385,11 +385,11 @@ public class DoctorImportDataService {
             farm.setOrgId(org.getId());
             farm.setOrgName(org.getName());
             farm.setName(farmName);
-            farm.setProvinceId(getAddressId(province));
+            farm.setProvinceId(getAddressId(province, 1));
             farm.setProvinceName(province);
-            farm.setCityId(getAddressId(city));
+            farm.setCityId(getAddressId(city, farm.getProvinceId()));
             farm.setCityName(city);
-            farm.setDistrictId(getAddressId(district));
+            farm.setDistrictId(getAddressId(district, farm.getCityId()));
             farm.setDistrictName(district);
             farm.setDetailAddress(detail);
             doctorFarmDao.create(farm);
@@ -590,11 +590,20 @@ public class DoctorImportDataService {
         }
     }
 
+    //校验猪群号是否重复
+    private void checkGroupCodeExist(Long farmId, String groupCode) {
+        List<DoctorGroup> groups = doctorGroupDao.findByFarmId(farmId);
+        if (groups.stream().map(DoctorGroup::getGroupCode).collect(Collectors.toList()).contains(groupCode)) {
+            throw new ServiceException("猪群号重复（" + groupCode + "）");
+        }
+    }
+
     /**
      * 导入猪群
      */
     @Transactional
     private void importGroup(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Sheet shit) {
+        List<String> existGroupCode = new ArrayList<>();
         for (Row row : shit) {
             if (!canImport(row)) {
                 continue;
@@ -606,8 +615,13 @@ public class DoctorImportDataService {
             group.setOrgName(farm.getOrgName());
             group.setFarmId(farm.getId());
             group.setFarmName(farm.getName());
-            group.setGroupCode(ImportExcelUtils.getString(row, 0));
-
+            String code = ImportExcelUtils.getString(row, 0);
+            group.setGroupCode(code);
+            if(existGroupCode.contains(code)){
+                throw new JsonResponseException("猪群号（" + code + "）重复");
+            }else{
+                existGroupCode.add(code);
+            }
             Integer dayAge = MoreObjects.firstNonNull(ImportExcelUtils.getInt(row, 4), 1);
             group.setOpenAt(DateTime.now().minusDays(dayAge).toDate());  //建群时间 = 当前时间 - 日龄
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
@@ -659,7 +673,7 @@ public class DoctorImportDataService {
     }
 
     /**
-     * 创建默认的转入时间
+     * 创建默认的转入事件
      */
     private void createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack) {
         DoctorGroupEvent event = new DoctorGroupEvent();
@@ -707,6 +721,9 @@ public class DoctorImportDataService {
             group.setFarmId(farm.getId());
             group.setFarmName(farm.getName());
             group.setGroupCode(barn.getName() + "(" + DateUtil.toDateString(openAt) + ")");
+            // 校验猪群号是否重复
+            checkGroupCodeExist(farm.getId(), group.getGroupCode());
+
             group.setOpenAt(openAt);  //建群时间
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
             group.setInitBarnName(barn.getName());
