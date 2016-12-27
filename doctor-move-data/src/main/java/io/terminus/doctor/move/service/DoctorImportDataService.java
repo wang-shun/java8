@@ -570,11 +570,20 @@ public class DoctorImportDataService {
         }
     }
 
+    //校验猪群号是否重复
+    private void checkGroupCodeExist(Long farmId, String groupCode) {
+        List<DoctorGroup> groups = doctorGroupDao.findByFarmId(farmId);
+        if (groups.stream().map(DoctorGroup::getGroupCode).collect(Collectors.toList()).contains(groupCode)) {
+            throw new ServiceException("猪群号重复（" + groupCode + "）");
+        }
+    }
+
     /**
      * 导入猪群
      */
     @Transactional
     private void importGroup(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Sheet shit) {
+        List<String> existGroupCode = new ArrayList<>();
         for (Row row : shit) {
             if (!canImport(row)) {
                 continue;
@@ -586,8 +595,13 @@ public class DoctorImportDataService {
             group.setOrgName(farm.getOrgName());
             group.setFarmId(farm.getId());
             group.setFarmName(farm.getName());
-            group.setGroupCode(ImportExcelUtils.getString(row, 0));
-
+            String code = ImportExcelUtils.getString(row, 0);
+            group.setGroupCode(code);
+            if(existGroupCode.contains(code)){
+                throw new JsonResponseException("猪群号（" + code + "）重复");
+            }else{
+                existGroupCode.add(code);
+            }
             Integer dayAge = MoreObjects.firstNonNull(ImportExcelUtils.getInt(row, 4), 1);
             group.setOpenAt(DateTime.now().minusDays(dayAge).toDate());  //建群时间 = 当前时间 - 日龄
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
@@ -639,7 +653,7 @@ public class DoctorImportDataService {
     }
 
     /**
-     * 创建默认的转入时间
+     * 创建默认的转入事件
      */
     private void createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack) {
         DoctorGroupEvent event = new DoctorGroupEvent();
@@ -687,6 +701,9 @@ public class DoctorImportDataService {
             group.setFarmId(farm.getId());
             group.setFarmName(farm.getName());
             group.setGroupCode(barn.getName() + "(" + DateUtil.toDateString(openAt) + ")");
+            // 校验猪群号是否重复
+            checkGroupCodeExist(farm.getId(), group.getGroupCode());
+
             group.setOpenAt(openAt);  //建群时间
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
             group.setInitBarnName(barn.getName());
