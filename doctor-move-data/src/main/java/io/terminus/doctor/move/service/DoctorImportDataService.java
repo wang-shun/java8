@@ -55,6 +55,7 @@ import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.dto.DoctorImportSow;
 import io.terminus.doctor.move.util.ImportExcelUtils;
 import io.terminus.doctor.msg.service.DoctorMessageRuleWriteService;
+import io.terminus.doctor.user.dao.DoctorAddressDao;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
@@ -84,7 +85,6 @@ import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteServic
 import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
 import io.terminus.parana.user.address.model.Address;
-import io.terminus.parana.user.impl.address.dao.AddressDao;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
@@ -182,7 +182,7 @@ public class DoctorImportDataService {
     @Autowired
     private DoctorGroupEventDao doctorGroupEventDao;
     @Autowired
-    private AddressDao addressDao;
+    private DoctorAddressDao addressDao;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -322,10 +322,10 @@ public class DoctorImportDataService {
         }
     }
 
-    private Integer getAddressId(String name) {
-        Address address = addressDao.findByName(name);
+    private Integer getAddressId(String name, Integer pid) {
+        Address address = addressDao.findByNameAndPid(name, pid);
         if (address == null) {
-            throw new JsonResponseException("address.not.standard");
+            throw new JsonResponseException("猪场地址错误（" + name + "）");
         }
         return address.getId();
     }
@@ -365,11 +365,11 @@ public class DoctorImportDataService {
             farm.setOrgId(org.getId());
             farm.setOrgName(org.getName());
             farm.setName(farmName);
-            farm.setProvinceId(getAddressId(province));
+            farm.setProvinceId(getAddressId(province, 1));
             farm.setProvinceName(province);
-            farm.setCityId(getAddressId(city));
+            farm.setCityId(getAddressId(city, farm.getProvinceId()));
             farm.setCityName(city);
-            farm.setDistrictId(getAddressId(district));
+            farm.setDistrictId(getAddressId(district, farm.getCityId()));
             farm.setDistrictName(district);
             farm.setDetailAddress(detail);
             doctorFarmDao.create(farm);
