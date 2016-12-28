@@ -561,3 +561,8 @@ ALTER TABLE doctor_group_tracks ADD COLUMN wean_qty INT(11) DEFAULT NULL COMMENT
 -- 2016-12-15 增加org_ids 字段
 ALTER TABLE doctor_user_data_permissions ADD COLUMN org_ids text DEFAULT NULL COMMENT '公司id,逗号分隔';
 ALTER TABLE doctor_messages ADD COLUMN business_type INT(11) DEFAULT NULL COMMENT '消息目标类型,1、猪 2、猪群 3、仓库' AFTER business_id;
+
+-- 2016-12-28
+ALTER TABLE doctor_group_events ADD COLUMN group_id BIGINT(20) DEFAULT NULL COMMENT '哺乳状态的母猪关联的猪群id' AFTER npd;
+CREATE INDEX idx_doctor_group_events_group_id ON doctor_group_events(group_id);
+

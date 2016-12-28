@@ -94,6 +94,17 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         }
     }
 
+    @Override
+    public Response<DoctorGroupBatchSummary> getGroupBatchSummary(DoctorGroup group, DoctorGroupTrack groupTrack, Double fcrFeed) {
+        try {
+            return Response.ok(getSummary(group, groupTrack, fcrFeed));
+        } catch (Exception e) {
+            log.error("get group batch summary failed, group:{}, groupTrack:{}, fcrFeed:{}, cause:{}",
+                    group, groupTrack, fcrFeed, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.batch.summary.find.fail");
+        }
+    }
+
     //根据猪群与猪群跟踪实时计算批次总结
     private DoctorGroupBatchSummary getSummary(DoctorGroup group, DoctorGroupTrack groupTrack, Double fcrFeed) {
         List<DoctorGroupEvent> events = doctorGroupEventDao.findByGroupId(group.getId());
