@@ -9,6 +9,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.model.DoctorServiceReview;
+import io.terminus.doctor.user.model.DoctorServiceReviewExt;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -70,9 +71,11 @@ public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewRe
     }
 
     @Override
-    public Response<Paging<DoctorServiceReview>> page(Integer pageNo, Integer pageSize, Long userId, String userMobile, String realName,
-                                                      DoctorServiceReview.Type type, DoctorServiceReview.Status status){
-        Response<Paging<DoctorServiceReview>> response = new Response<>();
+    public Response<Paging<DoctorServiceReviewExt>> page(
+            Integer pageNo, Integer pageSize, Long userId, String userMobile, String realName,
+            DoctorServiceReview.Type type, DoctorServiceReview.Status status,
+            String orgName){
+        Response<Paging<DoctorServiceReviewExt>> response = new Response<>();
         Map<String, Object> criteria = Maps.newHashMap();
         if (type != null) {
             criteria.put("type", type.getValue());
@@ -83,11 +86,12 @@ public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewRe
         criteria.put("userId", userId);
         criteria.put("userMobile", userMobile);
         criteria.put("realName", realName);
+        criteria.put("orgName", orgName);
         PageInfo pageInfo = new PageInfo(pageNo, pageSize);
         criteria.putAll(pageInfo.toMap());
         criteria = Params.filterNullOrEmpty(criteria);
         try{
-            response.setResult(doctorServiceReviewDao.paging(criteria));
+            response.setResult(doctorServiceReviewDao.pagingExt(criteria));
         }catch(Exception e){
             log.error("page DoctorServiceReview failed,  cause : {}", Throwables.getStackTraceAsString(e));
             response.setError("page.doctor.service.review.failed");
