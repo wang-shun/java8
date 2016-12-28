@@ -214,7 +214,9 @@ public class DoctorImportDataController {
         }
     }
 
-
+    /**
+     * 修复配种率的各种统计
+     */
     @RequestMapping(value = "/updateMateEvent", method = RequestMethod.GET)
     public boolean updateMateEvent(@RequestParam(value = "farmId", required = false) Long farmId) {
         try {
@@ -226,6 +228,24 @@ public class DoctorImportDataController {
             return true;
         } catch (Exception e) {
             log.error("update mate event failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 修复分娩后的母猪事件，增加group_id 方便以后统计
+     */
+    @RequestMapping(value = "/flushFarrowGroupId", method = RequestMethod.GET)
+    public boolean flushFarrowGroupId(@RequestParam(value = "farmId", required = false) Long farmId) {
+        try {
+            if (farmId != null) {
+                doctorImportDataService.flushFarrowGroupId(farmId);
+            } else {
+                RespHelper.or500(doctorFarmReadService.findAllFarms()).forEach(farm -> doctorImportDataService.flushFarrowGroupId(farm.getId()));
+            }
+            return true;
+        } catch (Exception e) {
+            log.error("flush farrow groupId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

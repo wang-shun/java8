@@ -112,6 +112,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -1484,5 +1485,59 @@ public class DoctorImportDataService {
             updateEvent.setIsDelivery(mateEvent.getIsDelivery());
             doctorPigEventDao.update(updateEvent);
         }
+    }
+
+
+    /**
+     * 修复分娩后的母猪事件，增加group_id 方便以后统计
+     */
+    @Transactional
+    public void flushFarrowGroupId(Long farmId) {
+        //取出所有的分娩, 断奶事件
+        List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farmId, DoctorPig.PIG_TYPE.SOW.getKey(),
+                Lists.newArrayList(PigEvent.WEAN.getKey(), PigEvent.FARROWING.getKey()));
+
+        // Map<Long, Map<Integer, List<DoctorPigEvent>>> 按照猪id，胎次分组
+        events.stream()
+                .collect(Collectors.groupingBy(DoctorPigEvent::getPigId))
+                .entrySet()
+                .forEach(map -> map.getValue().stream()
+                        .collect(Collectors.groupingBy(DoctorPigEvent::getParity))
+                        .entrySet()
+                        .forEach(e -> updateFarrowGroupId(e.getValue(), map.getKey(), e.getKey()))
+                );
+
+    }
+
+    //更新历史的group_id
+    private void updateFarrowGroupId(List<DoctorPigEvent> events, Long sowId, Integer parity) {
+        Map<Integer, DoctorPigEvent> eventMap = Maps.newHashMap();
+        events.forEach(event -> eventMap.put(event.getType(), event));
+        
+        if (!eventMap.containsKey(PigEvent.FARROWING.getKey())) {
+            log.warn("dirty data, not found farrow event, sowId:{}, parity:{}, events:{}", sowId, parity, events);
+            return;
+        }
+
+        DoctorPigEvent farrowEvent = eventMap.get(PigEvent.FARROWING.getKey());
+        DoctorFarrowingDto farrow = MAPPER.fromJson(farrowEvent.getExtra(), DoctorFarrowingDto.class);
+        if (isEmpty(farrow.getGroupCode())) {
+            log.warn("dirty data, farrow event groupCode empty, sowId:{}, parity:{}, farrow:{}", sowId, parity, farrow);
+            return;
+        }
+
+        DoctorGroup group = doctorGroupDao.findByFarmIdAndGroupCode(farrowEvent.getFarmId(), farrow.getGroupCode());
+        if (group == null) {
+            log.warn("dirty data, farrow event group not found, sowId:{}, parity:{}, groupCode:{}", sowId, parity, farrow.getGroupCode());
+            return;
+        }
+
+        //每个事件都更新一发
+        events.forEach(event -> {
+            DoctorPigEvent updateEvent = new DoctorPigEvent();
+            updateEvent.setId(event.getId());
+            updateEvent.setGroupId(group.getId());
+            doctorPigEventDao.update(updateEvent);
+        });
     }
 }
