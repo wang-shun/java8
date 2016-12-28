@@ -139,6 +139,6 @@
         <if test="type == 4"> and a.pigtrade_status = 1 </if>
         <if test="userId != null"> and a.user_id = #{userId} </if>
         <if test="userMobile != null"> and c.mobile = #{userMobile} </if>
-        <if test="orgName != null"> and b.org_name = #{orgName} </if>
+        <if test="orgName != null"> and b.org_name like concat('%', #{orgName}, '%') </if>
     </sql>
 </mapper>
