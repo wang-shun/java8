@@ -3,6 +3,7 @@ package io.terminus.doctor.user.service;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.DoctorServiceReview;
+import io.terminus.doctor.user.model.DoctorServiceReviewExt;
 
 import java.util.List;
 
@@ -45,6 +46,8 @@ public interface DoctorServiceReviewReadService {
      * @param status 枚举 DoctorServiceReview.Status
      * @return
      */
-    Response<Paging<DoctorServiceReview>> page(Integer pageNo, Integer pageSize, Long userId, String userMobile, String realName,
-                                               DoctorServiceReview.Type type, DoctorServiceReview.Status status);
+    Response<Paging<DoctorServiceReviewExt>> page(
+            Integer pageNo, Integer pageSize, Long userId, String userMobile, String realName,
+            DoctorServiceReview.Type type, DoctorServiceReview.Status status,
+            String orgName);
 }
