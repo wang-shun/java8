@@ -94,6 +94,9 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             Long farrowGroupId = doctorPigTrack.getGroupId();
             Long farrowBarId = doctorPigTrack.getCurrentBarnId();
 
+            /** 重要！在事件上标记母猪的猪群id **/
+            doctorPigEvent.setGroupId(farrowGroupId);
+
             // 当前 猪 状态 对录入数据影响
             IsOrNot isRePregCheckPositive = eventCreatePrepare(execution, doctorPigEvent, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
 

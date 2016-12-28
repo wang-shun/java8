@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dao;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
@@ -288,5 +289,15 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      */
     public Map<String, Object> querySowParityAvg(Long pigId) {
         return sqlSession.selectOne("querySowParityAvg", pigId);
+    }
+
+    /**
+     * 查询最新的几个事件
+     * @param pigId 猪id
+     * @param limit 查询几条
+     * @return 猪事件列表
+     */
+    public List<DoctorPigEvent> limitPigEventOrderByEventAt(Long pigId, Integer limit) {
+        return getSqlSession().selectList(sqlId("limitPigEventOrderByEventAt"), ImmutableMap.of("pigId", pigId, "limit", MoreObjects.firstNonNull(limit, 1)));
     }
 }

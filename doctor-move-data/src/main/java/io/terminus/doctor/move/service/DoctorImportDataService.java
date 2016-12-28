@@ -767,9 +767,26 @@ public class DoctorImportDataService {
                     newTrack.setId(feedTrack.getId());
                     newTrack.setGroupId(group.getId());
                     doctorPigTrackDao.update(newTrack);
+
+                    //在事件上设置groupId
+                    setFarrowGroupId(feedTrack.getPigId(), group.getId());
                 });
             }
         });
+    }
+
+    //找到最新的两个事件，如果是分娩或断奶，设置groupId
+    private void setFarrowGroupId(Long pigId, Long groupId) {
+        List<DoctorPigEvent> pigEvents = doctorPigEventDao.limitPigEventOrderByEventAt(pigId, 2);
+        pigEvents.stream()
+                .filter(event -> Objects.equals(event.getType(), PigEvent.FARROWING.getKey())
+                        || Objects.equals(event.getType(), PigEvent.WEAN.getKey()))
+                .forEach(event -> {
+                    DoctorPigEvent updateEvent = new DoctorPigEvent();
+                    updateEvent.setId(event.getId());
+                    updateEvent.setGroupId(groupId);
+                    doctorPigEventDao.update(updateEvent);
+                });
     }
 
     /**
