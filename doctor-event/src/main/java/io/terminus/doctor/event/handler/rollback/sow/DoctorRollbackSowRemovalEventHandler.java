@@ -36,6 +36,7 @@ public class DoctorRollbackSowRemovalEventHandler extends DoctorAbstractRollback
                 .esPigId(pigEvent.getPigId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG, RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT))
                 .farmId(pigEvent.getFarmId())
+                .orgId(pigEvent.getOrgId())
                 .eventAt(new Date())
                 .build();
         return Lists.newArrayList(doctorRollbackDto);
