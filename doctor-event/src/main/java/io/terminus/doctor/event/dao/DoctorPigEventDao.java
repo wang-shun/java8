@@ -300,4 +300,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<DoctorPigEvent> limitPigEventOrderByEventAt(Long pigId, Integer limit) {
         return getSqlSession().selectList(sqlId("limitPigEventOrderByEventAt"), ImmutableMap.of("pigId", pigId, "limit", MoreObjects.firstNonNull(limit, 1)));
     }
+
+    /**
+     * 查询和猪群相关联的猪事件
+     * @param groupId 猪群id
+     * @return 猪事件
+     */
+    public List<DoctorPigEvent> findByGroupId(Long groupId) {
+        return getSqlSession().selectList(sqlId("findByGroupId"), ImmutableMap.of("groupId", groupId));
+    }
 }
