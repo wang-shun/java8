@@ -1,0 +1,25 @@
+export.tables:
+  web-pig-event:
+    display: 事件导出
+    columns:
+      - name: pigCode
+        display: 猪号
+      - name: barnName
+        display: 猪舍
+      - name: eventAt
+        display: 记录时间
+      - name: name
+        display: 事件名称
+      - name: desc
+        display: 事件描述
+  web-group-event:
+    display: 事件导出
+    columns:
+      - name: groupCode
+        display: 猪群号
+      - name: eventAt
+        display: 记录时间
+      - name: name
+        display: 事件名称
+      - name: desc
+        display: 事件描述
