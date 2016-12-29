@@ -27,6 +27,7 @@ import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.DoctorUserRoleLoader;
 import io.terminus.doctor.web.core.Constants;
+import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.login.DoctorCommonSessionBean;
@@ -312,7 +313,7 @@ public class Users {
                                   HttpServletRequest request) {
         Cookie cookie=WebUtil.findCookie(request,"msid");
         if (cookie==null){
-            return false;
+            throw new JsonResponseException("miss.msid");
         }
         Object sessionId = cookie.getValue();
         return  doctorCommonSessionBean.forgetPassword(mobile, code, newPassword, String.valueOf(sessionId));
