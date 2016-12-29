@@ -1492,9 +1492,12 @@ public class DoctorImportDataService {
      */
     @Transactional
     public void flushFarrowGroupId(Long farmId) {
-        //取出所有的分娩, 断奶事件
+        //取出所有的分娩, 断奶事件(过滤掉已经有group_id的)
         List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farmId, DoctorPig.PIG_TYPE.SOW.getKey(),
-                Lists.newArrayList(PigEvent.WEAN.getKey(), PigEvent.FARROWING.getKey()));
+                Lists.newArrayList(PigEvent.WEAN.getKey(), PigEvent.FARROWING.getKey()))
+                .stream()
+                .filter(e -> e.getGroupId() != null)
+                .collect(Collectors.toList());
 
         // Map<Long, Map<Integer, List<DoctorPigEvent>>> 按照猪id，胎次分组
         events.stream()
