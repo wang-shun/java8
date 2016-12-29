@@ -296,6 +296,28 @@ public class Users {
         return doctorCommonSessionBean.changePassword(oldPassword, newPassword, sessionId);
     }
 
+    /**
+     * 忘记密码
+     *
+     * @param mobile      手机号
+     * @param code        验证码
+     * @param newPassword 新密码
+     * @param request     请求
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/forgetPassword", method = RequestMethod.POST)
+    public Boolean forgetPassword(@RequestParam("mobile") String mobile,
+                                  @RequestParam("code") String code,
+                                  @RequestParam("newPassword") String newPassword,
+                                  HttpServletRequest request) {
+        Cookie cookie=WebUtil.findCookie(request,"msid");
+        if (cookie==null){
+            return false;
+        }
+        Object sessionId = cookie.getValue();
+        return  doctorCommonSessionBean.forgetPassword(mobile, code, newPassword, String.valueOf(sessionId));
+    }
+
     @RequestMapping(value = "changeMobile", method = RequestMethod.POST)
     public Boolean changeMobile(@RequestParam("mobile") String mobile){
         BaseUser baseUser = UserUtil.getCurrentUser();
