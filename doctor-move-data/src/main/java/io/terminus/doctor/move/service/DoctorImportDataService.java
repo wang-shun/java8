@@ -12,13 +12,13 @@ import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
+import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorFarmBasicDao;
 import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
-import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
-import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
@@ -112,7 +112,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -1503,41 +1502,59 @@ public class DoctorImportDataService {
                 .entrySet()
                 .forEach(map -> map.getValue().stream()
                         .collect(Collectors.groupingBy(DoctorPigEvent::getParity))
-                        .entrySet()
-                        .forEach(e -> updateFarrowGroupId(e.getValue(), map.getKey(), e.getKey()))
+                        .values()
+                        .forEach(this::updateFarrowGroupId)
                 );
 
     }
 
     //更新历史的group_id
-    private void updateFarrowGroupId(List<DoctorPigEvent> events, Long sowId, Integer parity) {
-        Map<Integer, DoctorPigEvent> eventMap = Maps.newHashMap();
-        events.forEach(event -> eventMap.put(event.getType(), event));
-        
-        if (!eventMap.containsKey(PigEvent.FARROWING.getKey())) {
-            log.warn("dirty data, not found farrow event, sowId:{}, parity:{}, events:{}", sowId, parity, events);
-            return;
-        }
+    private void updateFarrowGroupId(List<DoctorPigEvent> events) {
+        //排下序，让分娩在前面
+        events = events.stream().sorted(Comparator.comparing(DoctorPigEvent::getType)).collect(Collectors.toList());
+        DoctorGroup group = null;
 
-        DoctorPigEvent farrowEvent = eventMap.get(PigEvent.FARROWING.getKey());
+        for (DoctorPigEvent event : events) {
+            if (Objects.equals(event.getType(), PigEvent.FARROWING.getKey())) {
+                group = getHistoryFarrowGroup(event);
+            }
+            else if (Objects.equals(event.getType(), PigEvent.WEAN.getKey())) {
+                group = group == null ? getHistoryWeanGroup(event) : group;
+            }
+            updateEventGroupId(event.getId(), group);
+        }
+    }
+
+    /**
+     * 分娩事件的猪群
+     */
+    private DoctorGroup getHistoryFarrowGroup(DoctorPigEvent farrowEvent) {
         DoctorFarrowingDto farrow = MAPPER.fromJson(farrowEvent.getExtra(), DoctorFarrowingDto.class);
-        if (isEmpty(farrow.getGroupCode())) {
-            log.warn("dirty data, farrow event groupCode empty, sowId:{}, parity:{}, farrow:{}", sowId, parity, farrow);
-            return;
+        if (notEmpty(farrow.getGroupCode())) {
+            DoctorGroup group = doctorGroupDao.findByFarmIdAndGroupCode(farrowEvent.getFarmId(), farrow.getGroupCode());
+            if (group != null) {
+                return group;
+            }
+            log.warn("dirty data, farrow event group not found, sowId:{}, parity:{}, groupCode:{}", farrowEvent.getPigId(), farrowEvent.getParity(), farrow.getGroupCode());
         }
+        log.warn("dirty data, farrow event groupCode empty, sowId:{}, parity:{}, farrow:{}", farrowEvent.getPigId(), farrowEvent.getParity(), farrow);
+        return doctorGroupDao.findByFarmIdAndBarnIdAndDate(farrowEvent.getFarmId(), farrowEvent.getBarnId(), farrowEvent.getEventAt());
+    }
 
-        DoctorGroup group = doctorGroupDao.findByFarmIdAndGroupCode(farrowEvent.getFarmId(), farrow.getGroupCode());
-        if (group == null) {
-            log.warn("dirty data, farrow event group not found, sowId:{}, parity:{}, groupCode:{}", sowId, parity, farrow.getGroupCode());
-            return;
-        }
+    /**
+     * 断奶事件的猪群
+     */
+    private DoctorGroup getHistoryWeanGroup(DoctorPigEvent weanEvent) {
+        DoctorGroup group = doctorGroupDao.findByFarmIdAndBarnIdAndDate(weanEvent.getFarmId(), weanEvent.getBarnId(), weanEvent.getEventAt());
+        return MoreObjects.firstNonNull(group, new DoctorGroup());
+    }
 
-        //每个事件都更新一发
-        events.forEach(event -> {
+    private void updateEventGroupId(Long eventId, DoctorGroup group) {
+        if (group != null && group.getId() != null) {
             DoctorPigEvent updateEvent = new DoctorPigEvent();
-            updateEvent.setId(event.getId());
+            updateEvent.setId(eventId);
             updateEvent.setGroupId(group.getId());
             doctorPigEventDao.update(updateEvent);
-        });
+        }
     }
 }
