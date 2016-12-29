@@ -1555,6 +1555,9 @@ public class DoctorImportDataService {
             updateEvent.setId(eventId);
             updateEvent.setGroupId(group.getId());
             doctorPigEventDao.update(updateEvent);
+            log.warn("update event group id success! eventId:{}, group:{}", eventId, group);
+        } else {
+            log.warn("update event group id error, group not found! eventId:{}", eventId);
         }
     }
 }
