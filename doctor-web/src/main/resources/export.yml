@@ -8,6 +8,7 @@ export.tables:
         display: 猪舍
       - name: eventAt
         display: 记录时间
+        formatter: isoDateFormatter
       - name: name
         display: 事件名称
       - name: desc
@@ -19,6 +20,7 @@ export.tables:
         display: 猪群号
       - name: eventAt
         display: 记录时间
+        formatter: isoDateFormatter
       - name: name
         display: 事件名称
       - name: desc
