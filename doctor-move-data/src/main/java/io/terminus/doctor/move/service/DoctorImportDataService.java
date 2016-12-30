@@ -226,6 +226,9 @@ public class DoctorImportDataService {
 
             //最后仓库数据
             importWarehouse(farm, shit, primaryUser, userMap);
+
+            //猪场基础数据
+            importFarmBasics(farm.getId());
             return farm;
         } catch(Exception e) {
             // 导入猪场失败，需要删除一些数据

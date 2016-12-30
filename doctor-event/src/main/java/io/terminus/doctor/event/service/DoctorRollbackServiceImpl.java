@@ -222,6 +222,11 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         Date endAt = Dates.startOfDay(new Date());
         Long farmId = dto.getFarmId();
 
+        //更新 PigTypeStatistic
+        doctorPigTypeStatisticWriteService.statisticGroup(dto.getOrgId(), dto.getFarmId());
+        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.BOAR.getKey());
+        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey());
+
         while (!startAt.after(endAt)) {
             //猪群存栏
             DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
@@ -245,11 +250,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, everyRedis);
             startAt = new DateTime(startAt).plusDays(1).toDate();
         }
-
-        //更新 PigTypeStatistic
-        doctorPigTypeStatisticWriteService.statisticGroup(dto.getOrgId(), dto.getFarmId());
-        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.BOAR.getKey());
-        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey());
     }
 
     private DoctorCheckPregDailyReport getCheckPregDailyReport(Long farmId, Date startAt, Date endAt) {

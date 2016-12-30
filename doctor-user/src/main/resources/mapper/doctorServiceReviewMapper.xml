@@ -97,24 +97,28 @@
     </delete>
 
     <select id="count" resultType="long">
-        select count(id) from <include refid="tb"/>
+        select count(1) from <include refid="tb"/>
         <include refid="criteria" />
     </select>
 
-    <select id="paging" resultMap="DoctorServiceReviewMap">
-        SELECT <include refid="cols_all" />
+    <select id="paging" resultType="io.terminus.doctor.user.model.DoctorServiceReviewExt">
+        SELECT
+        a.id as id, a.user_id as userId, a.user_mobile as userMobile, a.real_name as realName, a.type, a.status, a.reviewer_id as reviewerId,
+        b.org_name as orgName
         FROM <include refid="tb" />
         <include refid="criteria" />
-        order by `status` desc, updated_at desc
+        order by a.`status` desc, a.updated_at desc
         limit #{offset}, #{limit}
     </select>
 
     <sql id="criteria">
+        a join doctor_staffs b on a.`user_id` = b.`user_id`
         where 1 = 1
-        <if test="userId != null"> and user_id = #{userId} </if>
-        <if test="userMobile != null"> and user_mobile = #{userMobile} </if>
-        <if test="realName != null"> and real_name = #{realName} </if>
-        <if test="type != null"> and `type` = #{type} </if>
-        <if test="status != null"> and status = #{status} </if>
+        <if test="userId != null"> and a.user_id = #{userId} </if>
+        <if test="userMobile != null"> and a.user_mobile = #{userMobile} </if>
+        <if test="realName != null"> and a.real_name = #{realName} </if>
+        <if test="type != null"> and a.`type` = #{type} </if>
+        <if test="status != null"> and a.status = #{status} </if>
+        <if test="orgName != null"> and b.org_name like concat('%', #{orgName}, '%') </if>
     </sql>
 </mapper>

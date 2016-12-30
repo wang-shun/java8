@@ -262,7 +262,7 @@ public class DoctorWareHouseEvents {
                 || Objects.equals(material.getType(), WareHouseType.MEDICINE.getKey())
                 || Objects.equals(material.getType(), WareHouseType.VACCINATION.getKey())){
             if(unitId != null){
-                DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicByIdFilterByFarmId(in.getFarmId(), unitId));
+                DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicByIdFilterByFarmId(wareHouse.getFarmId(), unitId));
                 if(doctorBasic == null || !Objects.equals(doctorBasic.getType(), DoctorBasic.Type.UNIT.getValue())){
                     throw new JsonResponseException("unit.miss");
                 }

@@ -35,12 +35,14 @@ public class DoctorRollbackBoarChgLocationEventHandler extends DoctorAbstractRol
         DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
                 .esBarnId(dto.getChgLocationFromBarnId())
                 .farmId(pigEvent.getFarmId())
+                .orgId(pigEvent.getOrgId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN))
                 .eventAt(pigEvent.getEventAt())
                 .build();
         DoctorRollbackDto doctorRollbackDto1 = DoctorRollbackDto.builder()
                 .esBarnId(dto.getChgLocationToBarnId())
                 .farmId(pigEvent.getFarmId())
+                .orgId(pigEvent.getOrgId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN))
                 .eventAt(pigEvent.getEventAt())
                 .build();
