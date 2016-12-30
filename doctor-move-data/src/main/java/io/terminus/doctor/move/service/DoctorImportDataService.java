@@ -1499,7 +1499,7 @@ public class DoctorImportDataService {
         List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farmId, DoctorPig.PIG_TYPE.SOW.getKey(),
                 Lists.newArrayList(PigEvent.WEAN.getKey(), PigEvent.FARROWING.getKey()))
                 .stream()
-                .filter(e -> e.getGroupId() != null)
+                .filter(e -> e.getGroupId() == null)
                 .collect(Collectors.toList());
 
         // Map<Long, Map<Integer, List<DoctorPigEvent>>> 按照猪id，胎次分组
