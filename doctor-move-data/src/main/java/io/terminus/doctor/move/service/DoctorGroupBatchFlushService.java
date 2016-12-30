@@ -143,7 +143,7 @@ public class DoctorGroupBatchFlushService {
 
         //合格数
         updateTrack.setQuaQty(CountUtil.intStream(weanEvents, e -> {
-            Integer quaQty = MoreObjects.firstNonNull(e.getHealthCount(), e.getWeanCount());
+            Integer quaQty = MoreObjects.firstNonNull(e.getHealthCount(), MoreObjects.firstNonNull(e.getWeanCount(), 0));
             Map<String, Object> extra = e.getExtraMap();
             if (extra.containsKey("qualifiedCount") && extra.get("qualifiedCount") != null) {
                 quaQty = Integer.valueOf(String.valueOf(extra.get("qualifiedCount")));
