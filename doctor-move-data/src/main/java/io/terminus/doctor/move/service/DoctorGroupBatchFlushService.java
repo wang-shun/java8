@@ -1,11 +1,13 @@
 package io.terminus.doctor.move.service;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -49,6 +51,8 @@ public class DoctorGroupBatchFlushService {
     private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
     @Autowired
     private DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
+    @Autowired
+    private DoctorKpiDao doctorKpiDao;
 
     /**
      * 刷猪群批次总结的历史数据，groupTrack
@@ -75,6 +79,9 @@ public class DoctorGroupBatchFlushService {
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
         DoctorGroupBatchSummary summary = RespHelper.orServEx(doctorGroupBatchSummaryReadService.getGroupBatchSummary(group, groupTrack, material));
 
+        //如果各种数量是0 处理下
+        correctSummary(summary);
+
         //创建或更新批次总结
         DoctorGroupBatchSummary exist = doctorGroupBatchSummaryDao.findByGroupId(group.getId());
         if (exist == null) {
@@ -89,6 +96,26 @@ public class DoctorGroupBatchFlushService {
     private void handleNotClose(DoctorGroup group) {
         updateGroupTrack(group.getId(), false);
     }
+
+    //纠正总结的错误数据
+    private void correctSummary(DoctorGroupBatchSummary summary) {
+        if (!PigType.FARROW_TYPES.contains(summary.getPigType())) {
+            return;
+        }
+
+        //关闭之前的存栏
+        Integer quantity = doctorKpiDao.farrowGroupQuantityWhenClose(summary.getGroupId());
+        if (summary.getLiveCount() == 0) {
+            summary.setLiveCount(quantity);
+            summary.setHealthCount(quantity);
+            summary.setWeakCount(0);
+        }
+        if (summary.getWeanCount() == 0) {
+            summary.setWeanCount(quantity);
+            summary.setUnqCount(quantity);
+        }
+    }
+
 
     private void updateGroupTrack(Long groupId, boolean removal) {
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
