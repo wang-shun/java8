@@ -13,6 +13,7 @@ import io.terminus.doctor.event.search.group.GroupDumpService;
 import io.terminus.doctor.event.search.pig.PigDumpService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
+import io.terminus.doctor.move.service.DoctorGroupBatchFlushService;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -67,6 +68,8 @@ public class DoctorImportDataController {
     private JedisTemplate jedisTemplate;
     @Autowired
     private DoctorFarmReadService doctorFarmReadService;
+    @Autowired
+    private DoctorGroupBatchFlushService doctorGroupBatchFlushService;
 
     @PostConstruct
     public void init () throws Exception{
@@ -246,6 +249,25 @@ public class DoctorImportDataController {
             return true;
         } catch (Exception e) {
             log.error("flush farrow groupId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 刷批次总结
+     */
+    @RequestMapping(value = "/flushGroupBatch", method = RequestMethod.GET)
+    public boolean flushGroupBatch(@RequestParam(value = "farmId", required = false) Long farmId,
+                                   @RequestParam(value = "all", defaultValue = "false") boolean all) {
+        try {
+            if (farmId != null) {
+                doctorGroupBatchFlushService.flushGroupBatch(farmId, all);
+            } else {
+                doctorGroupBatchFlushService.flushGroupBatches(all);
+            }
+            return true;
+        } catch (Exception e) {
+            log.error("flush group batch failed, farmId:{}, all:{}, cause:{}", farmId, all, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

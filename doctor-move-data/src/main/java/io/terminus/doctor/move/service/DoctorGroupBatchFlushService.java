@@ -5,7 +5,6 @@ import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -43,8 +42,6 @@ public class DoctorGroupBatchFlushService {
     @Autowired
     private DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired
-    private DoctorGroupEventDao doctorGroupEventDao;
-    @Autowired
     private DoctorPigEventDao doctorPigEventDao;
     @Autowired
     private DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
@@ -58,11 +55,12 @@ public class DoctorGroupBatchFlushService {
      * @param farmId 猪场id
      */
     @Transactional
-    public void flushGroupBatch(Long farmId) {
+    public void flushGroupBatch(Long farmId, boolean all) {
         doctorGroupDao.findByFarmId(farmId).forEach(group -> {
             if (Objects.equals(group.getStatus(), DoctorGroup.Status.CLOSED.getValue())) {
                 handleClose(group);
-            } else {
+            }
+            else if (all) {
                 handleNotClose(group);
             }
         });
@@ -141,7 +139,7 @@ public class DoctorGroupBatchFlushService {
     /**
      * 刷新所有猪场的批次总结历史数据
      */
-    public void flushGroupBatches() {
-        doctorFarmDao.findAll().forEach(farm -> flushGroupBatch(farm.getId()));
+    public void flushGroupBatches(boolean all) {
+        doctorFarmDao.findAll().forEach(farm -> flushGroupBatch(farm.getId(), all));
     }
 }
