@@ -1507,6 +1507,7 @@ public class DoctorImportDataService {
                 .collect(Collectors.groupingBy(DoctorPigEvent::getPigId))
                 .entrySet()
                 .forEach(map -> map.getValue().stream()
+                        .filter(e -> e.getParity() != null)
                         .collect(Collectors.groupingBy(DoctorPigEvent::getParity))
                         .values()
                         .forEach(this::updateFarrowGroupId)
