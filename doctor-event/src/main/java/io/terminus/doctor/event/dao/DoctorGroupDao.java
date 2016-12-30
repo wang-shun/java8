@@ -55,6 +55,9 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
      * @return  猪群
      */
     public DoctorGroup findByFarmIdAndBarnIdAndDate(Long farmId, Long barnId, Date date) {
+        if (farmId == null || barnId == null || date == null) {
+            return null;
+        }
         return getSqlSession().selectOne(sqlId("findByFarmIdAndBarnIdAndDate"), ImmutableMap.of("farmId", farmId, "barnId", barnId, "date", date));
 
     }
