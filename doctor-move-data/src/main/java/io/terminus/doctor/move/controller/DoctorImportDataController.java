@@ -241,11 +241,13 @@ public class DoctorImportDataController {
     @RequestMapping(value = "/flushFarrowGroupId", method = RequestMethod.GET)
     public boolean flushFarrowGroupId(@RequestParam(value = "farmId", required = false) Long farmId) {
         try {
+            log.info("******* flushFarrowGroupId start, farmId:{}", farmId);
             if (farmId != null) {
                 doctorImportDataService.flushFarrowGroupId(farmId);
             } else {
                 RespHelper.or500(doctorFarmReadService.findAllFarms()).forEach(farm -> doctorImportDataService.flushFarrowGroupId(farm.getId()));
             }
+            log.info("******* flushFarrowGroupId end");
             return true;
         } catch (Exception e) {
             log.error("flush farrow groupId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
@@ -260,11 +262,13 @@ public class DoctorImportDataController {
     public boolean flushGroupBatch(@RequestParam(value = "farmId", required = false) Long farmId,
                                    @RequestParam(value = "all", defaultValue = "false") boolean all) {
         try {
+            log.info("******* flushGroupBatch start, farmId:{}, all:{}", farmId, all);
             if (farmId != null) {
                 doctorGroupBatchFlushService.flushGroupBatch(farmId, all);
             } else {
                 doctorGroupBatchFlushService.flushGroupBatches(all);
             }
+            log.info("******* flushGroupBatch end");
             return true;
         } catch (Exception e) {
             log.error("flush group batch failed, farmId:{}, all:{}, cause:{}", farmId, all, Throwables.getStackTraceAsString(e));
