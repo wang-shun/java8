@@ -15,7 +15,7 @@
     <!-- 某一猪群死淘率 -->
     <select id="getDeadRateByGroupId" parameterType="map" resultType="double">
         SELECT
-        (
+        ifnull((
           SELECT
             ifnull(sum(quantity),0) AS dead_count
           FROM doctor_group_events
@@ -31,7 +31,7 @@
           WHERE
             type = 2 AND -- 转入猪群事件
             group_id = #{groupId}
-        )
+        ), 0)
         FROM DUAL
     </select>
 
