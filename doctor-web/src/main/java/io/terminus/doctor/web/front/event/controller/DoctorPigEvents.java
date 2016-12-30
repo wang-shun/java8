@@ -23,6 +23,9 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.web.core.export.Exporter;
+import io.terminus.doctor.web.front.event.dto.DoctorGroupEventExportData;
+import io.terminus.doctor.web.front.event.dto.DoctorPigEventExportData;
 import io.terminus.doctor.web.front.event.dto.DoctorPigEventPagingDto;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.doctor.workflow.core.WorkFlowService;
@@ -40,9 +43,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -74,6 +80,9 @@ public class DoctorPigEvents {
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
+
+    @Autowired
+    private Exporter exporter;
 
     @Autowired
     public DoctorPigEvents(DoctorPigReadService doctorPigReadService,
@@ -276,7 +285,7 @@ public class DoctorPigEvents {
      * @return
      * @see PigEvent
      */
-    @RequestMapping(value = "/pigEvents")
+    @RequestMapping(value = "/pigEvents", method = RequestMethod.GET)
     @ResponseBody
     public List<String> queryPigEvents(@RequestParam String types) {
         List<PigEvent> events = PigEvent.from(Splitters.UNDERSCORE.splitToList(types).stream().filter(type -> StringUtils.isNotBlank(type)).map(type -> Integer.parseInt(type)).collect(Collectors.toList()));
@@ -290,7 +299,7 @@ public class DoctorPigEvents {
      * @return
      * @see PigEvent
      */
-    @RequestMapping(value = "/getPigEvents")
+    @RequestMapping(value = "/getPigEvents", method = RequestMethod.GET)
     @ResponseBody
     public List<ImmutableMap<String, Object>> getPigEvents(@RequestParam String types) {
         List<PigEvent> events = PigEvent.from(Splitters.UNDERSCORE.splitToList(types).stream().filter(type -> StringUtils.isNotBlank(type)).map(type -> Integer.parseInt(type)).collect(toList()));
@@ -308,7 +317,7 @@ public class DoctorPigEvents {
      * @param params
      * @return
      */
-    @RequestMapping(value = "/event/operators")
+    @RequestMapping(value = "/event/operators", method = RequestMethod.GET)
     @ResponseBody
     public List<DoctorPigEvent> queryOperatorForEvent(@RequestParam Map<String, Object> params) {
         params = Params.filterNullOrEmpty(params);
@@ -329,5 +338,54 @@ public class DoctorPigEvents {
             params.remove("eventTypes");
         }
         return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize));
+    }
+
+    /**
+     * 事件导出
+     * @param eventCriteria
+     * @param request
+     * @param response
+     */
+    @RequestMapping(value = "/eventExport", method = RequestMethod.GET)
+    public void pigEventExport(@RequestParam Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response){
+        try {
+            String exportName;
+            if (Strings.isNullOrEmpty(eventCriteria.get("kind"))) {
+                return;
+            }
+            if (Objects.equals(eventCriteria.get("kind"), "4")) {
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingGroupEvent, request, response);
+            } else {
+                exporter.export("web-pig-event", eventCriteria, 1, 500, this::pagingPigEvent, request, response);
+            }
+        } catch (Exception e) {
+            log.error("event.export.failed");
+        }
+    }
+
+    /**
+     * 分页猪事件
+     * @param pigEventCriteria
+     * @return
+     */
+    private Paging<DoctorPigEventExportData> pagingPigEvent(Map<String, String> pigEventCriteria) {
+        Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
+        Paging<DoctorPigEvent> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
+        List<DoctorPigEventExportData> list = pigEventPaging.getData()
+                .stream().map(doctorPigEvent -> OBJECT_MAPPER.convertValue(doctorPigEvent, DoctorPigEventExportData.class)).collect(toList());
+        return new Paging<>(pigEventPaging.getTotal(), list);
+    }
+
+    /**
+     * 分页猪群事件
+     * @param groupEventCriteria
+     * @return
+     */
+    private Paging<DoctorGroupEventExportData> pagingGroupEvent(Map<String, String> groupEventCriteria) {
+        Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(groupEventCriteria, Map.class);
+        Paging<DoctorGroupEvent> groupEventPaging = queryGroupEventsByCriteria(criteriaMap, Integer.parseInt(groupEventCriteria.get("pageNo")), Integer.parseInt(groupEventCriteria.get("size")));
+        List<DoctorGroupEventExportData> list = groupEventPaging.getData()
+                .stream().map(doctorGroupEvent -> OBJECT_MAPPER.convertValue(doctorGroupEvent, DoctorGroupEventExportData.class)).collect(toList());
+        return new Paging<>(groupEventPaging.getTotal(), list);
     }
 }
