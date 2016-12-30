@@ -118,6 +118,7 @@ public class DoctorGroupBatchFlushService {
 
 
     private void updateGroupTrack(Long groupId, boolean removal) {
+        log.info("====== updateGroupTrack groupId:{}", groupId);
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
         DoctorGroupTrack updateTrack = new DoctorGroupTrack();
         updateTrack.setId(groupTrack.getId());
@@ -131,13 +132,13 @@ public class DoctorGroupBatchFlushService {
                 .collect(Collectors.toList());
 
         updateTrack.setNest(farrowEvents.size());
-        updateTrack.setBirthWeight(CountUtil.doubleStream(farrowEvents, DoctorPigEvent::getFarrowWeight).sum());
-        updateTrack.setLiveQty(CountUtil.intStream(farrowEvents, DoctorPigEvent::getLiveCount).sum());
-        updateTrack.setHealthyQty(CountUtil.intStream(farrowEvents, DoctorPigEvent::getHealthCount).sum());
-        updateTrack.setWeakQty(CountUtil.intStream(farrowEvents, DoctorPigEvent::getWeakCount).sum());
+        updateTrack.setBirthWeight(CountUtil.doubleStream(farrowEvents, e -> MoreObjects.firstNonNull(e.getFarrowWeight(), 0D)).sum());
+        updateTrack.setLiveQty(CountUtil.intStream(farrowEvents, e -> MoreObjects.firstNonNull(e.getLiveCount(), 0)).sum());
+        updateTrack.setHealthyQty(CountUtil.intStream(farrowEvents, e -> MoreObjects.firstNonNull(e.getHealthCount(), 0)).sum());
+        updateTrack.setWeakQty(CountUtil.intStream(farrowEvents, e -> MoreObjects.firstNonNull(e.getWeakCount(), 0)).sum());
 
-        updateTrack.setWeanWeight(CountUtil.doubleStream(weanEvents, e -> e.getWeanAvgWeight() * e.getWeanCount()).sum());
-        updateTrack.setWeanQty(CountUtil.intStream(weanEvents, DoctorPigEvent::getWeanCount).sum());
+        updateTrack.setWeanWeight(CountUtil.doubleStream(weanEvents, e -> MoreObjects.firstNonNull(e.getWeanAvgWeight(), 0D) * MoreObjects.firstNonNull(e.getWeanCount(), 0)).sum());
+        updateTrack.setWeanQty(CountUtil.intStream(weanEvents, e -> MoreObjects.firstNonNull(e.getWeanCount(), 0)).sum());
         updateTrack.setUnweanQty(getUnweanQty(removal, groupTrack.getQuantity(), updateTrack.getWeanQty()));
 
         //合格数
@@ -147,7 +148,7 @@ public class DoctorGroupBatchFlushService {
             if (extra.containsKey("qualifiedCount") && extra.get("qualifiedCount") != null) {
                 quaQty = Integer.valueOf(String.valueOf(extra.get("qualifiedCount")));
             }
-            return quaQty;
+            return MoreObjects.firstNonNull(quaQty, 0);
         }).sum());
         updateTrack.setUnqQty(updateTrack.getWeanQty() - updateTrack.getQuaQty());
 
