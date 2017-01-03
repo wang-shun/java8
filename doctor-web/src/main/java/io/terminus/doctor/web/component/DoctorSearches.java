@@ -359,12 +359,6 @@ public class DoctorSearches {
                                    @RequestParam Map<String, String> params) {
 
         try {
-            List<String> barnIdList = getUserAccessBarnIds(params);
-            if (farmIdNotExist(params) || barnIdList == null) {
-                return Collections.emptyList();
-            }
-            params.put("barnIds", barnIdList.get(0));
-
             // 母猪状态由前台传
             if (searchType.equals(SearchType.GROUP.getValue())) {
                 params.put("status", String.valueOf(DoctorGroup.Status.CREATED.getValue()));
@@ -373,39 +367,22 @@ public class DoctorSearches {
                 params.put("statuses", PigStatus.BOAR_ENTRY.toString());
             } else if (searchType.equals(SearchType.SOW.getValue())) {
                 params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
-                //只查询未离场的猪
-                params.put("isRemoval", String.valueOf(IsOrNot.NO.getValue()));
+                params.put("isRemoval", String.valueOf(IsOrNot.NO.getValue())); //只查询未离场的猪
             }
             params.remove("ids");
             params.remove("searchType");
 
             List<Long> allPigOrGroupIds;
             Integer pageNo = 1;
-            Integer pageSize = 100;
+            Integer pageSize = Integer.MAX_VALUE;
+            
             if (searchType.equals(SearchType.GROUP.getValue())) {
-                Paging<SearchedGroup> searchGroupPaging = RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
-                while (!searchGroupPaging.isEmpty()) {
-                    pageNo++;
-                    Paging<SearchedGroup> tempSearchGroups =
-                            RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
-                    if (tempSearchGroups.isEmpty()) {
-                        break;
-                    }
-                    searchGroupPaging.getData().addAll(tempSearchGroups.getData());
-                }
+                Paging<SearchedGroup> searchGroupPaging = this.searchGroups(pageNo, pageSize, params);
                 allPigOrGroupIds = searchGroupPaging.getData().stream().map(SearchedGroup::getId).collect(Collectors.toList());
             } else {
-                Paging<SearchedPig> searchPigPaging =
-                        RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
-                while (!searchPigPaging.isEmpty()) {
-                    pageNo++;
-                    Paging<SearchedPig> tempSearchPigs =
-                            RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
-                    if (tempSearchPigs.isEmpty()) {
-                        break;
-                    }
-                    searchPigPaging.getData().addAll(tempSearchPigs.getData());
-                }
+                DoctorPig.PIG_TYPE pigType = searchType.equals(SearchType.SOW.getValue()) ? DoctorPig.PIG_TYPE.SOW : DoctorPig.PIG_TYPE.BOAR;
+
+                Paging<SearchedPig> searchPigPaging = pagePigs(pageNo, pageSize, params, pigType);
                 allPigOrGroupIds = searchPigPaging.getData().stream().map(SearchedPig::getId).collect(Collectors.toList());
             }
 
