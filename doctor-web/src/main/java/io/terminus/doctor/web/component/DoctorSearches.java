@@ -11,8 +11,6 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.enums.SearchType;
-import io.terminus.doctor.basic.search.material.MaterialSearchReadService;
-import io.terminus.doctor.basic.search.material.SearchedMaterial;
 import io.terminus.doctor.basic.service.DoctorSearchHistoryService;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
@@ -77,8 +75,6 @@ public class DoctorSearches {
 
     private final BarnSearchReadService barnSearchReadService;
 
-    private final MaterialSearchReadService materialSearchReadService;
-
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
     private final DoctorGroupReadService doctorGroupReadService;
@@ -95,7 +91,6 @@ public class DoctorSearches {
                           GroupSearchReadService groupSearchReadService,
                           DoctorSearchHistoryService doctorSearchHistoryService,
                           BarnSearchReadService barnSearchReadService,
-                          MaterialSearchReadService materialSearchReadService,
                           DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                           DoctorGroupReadService doctorGroupReadService,
                           DoctorMessageUserReadService doctorMessageUserReadService,
@@ -104,7 +99,6 @@ public class DoctorSearches {
         this.groupSearchReadService = groupSearchReadService;
         this.doctorSearchHistoryService = doctorSearchHistoryService;
         this.barnSearchReadService = barnSearchReadService;
-        this.materialSearchReadService = materialSearchReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorMessageUserReadService = doctorMessageUserReadService;
@@ -482,79 +476,6 @@ public class DoctorSearches {
             searchBarns.getData().addAll(tempSearchBarns.getData());
         }
         return searchBarns.getData();
-    }
-
-    /**
-     * 物料搜索方法
-     *
-     * @param pageNo   起始页
-     * @param pageSize 页大小
-     * @param params   搜索参数
-     *                 搜索参数可以参照:
-     * @return
-     * @see `DefaultMaterialQueryBuilder#buildTerm`
-     */
-    @RequestMapping(value = "/materials", method = RequestMethod.GET)
-    public Paging<SearchedMaterial> searchMaterials(@RequestParam(required = false) Integer pageNo,
-                                                    @RequestParam(required = false) Integer pageSize,
-                                                    @RequestParam Map<String, String> params) {
-        if (farmIdNotExist(params)) {
-            return new Paging<>(0L, Collections.emptyList());
-        }
-        createSearchWord(SearchType.MATERIAL.getValue(), params);
-        return RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/masearch.mustache", params));
-    }
-
-    /**
-     * 获取所有的物料
-     *
-     * @param params 搜索参数
-     *               搜索参数可以参照:
-     * @return
-     * @see `DefaultMaterialQueryBuilder#buildTerm`
-     */
-    @RequestMapping(value = "/materials/all", method = RequestMethod.GET)
-    public List<SearchedMaterial> searchAllMaterials(@RequestParam Map<String, String> params) {
-        if (farmIdNotExist(params)) {
-            return Collections.emptyList();
-        }
-        // 游标法获取数据
-        Integer pageNo = 1;
-        Integer pageSize = 100;
-        Paging<SearchedMaterial> searchMaterials =
-                RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/masearch.mustache", params));
-        while (!searchMaterials.isEmpty()) {
-            pageNo++;
-            Paging<SearchedMaterial> tempSearchMaterials =
-                    RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/masearch.mustache", params));
-            if (tempSearchMaterials.isEmpty()) {
-                break;
-            }
-            searchMaterials.getData().addAll(tempSearchMaterials.getData());
-        }
-        return searchMaterials.getData();
-    }
-
-    /**
-     * 获取所有的物料
-     *
-     * @param params 搜索参数
-     *               搜索参数可以参照:
-     * @return
-     * @see `DefaultMaterialQueryBuilder#buildTerm`
-     */
-    @RequestMapping(value = "/materials/suggest", method = RequestMethod.GET)
-    public List<SearchedMaterial> searchSuggestMaterials(@RequestParam(required = false) Integer size,
-                                                         @RequestParam Map<String, String> params) {
-        if (farmIdNotExist(params)) {
-            return Collections.emptyList();
-        }
-        if (size == null) {
-            size = 8; // 默认获取 8 条
-        }
-        Integer pageNo = 1; // 默认取第一页的数据
-        Integer pageSize = size;
-        return RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/masearch.mustache", params)).getData();
     }
 
     /**

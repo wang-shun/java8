@@ -5,7 +5,6 @@ import io.terminus.doctor.event.search.group.GroupDumpService;
 import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +30,7 @@ public class GroupDumps {
         this.hostLeader = hostLeader;
     }
 
-    @Scheduled(cron = "0 0 1 * * ?")
+    //@Scheduled(cron = "0 0 1 * * ?")
     @RequestMapping(value = "/full", method = RequestMethod.GET)
     public void fullDump() {
         try{
@@ -47,7 +46,7 @@ public class GroupDumps {
         }
     }
 
-    @Scheduled(cron = "0 */15 * * * ?")
+    //@Scheduled(cron = "0 */15 * * * ?")
     @RequestMapping(value = "/delta", method = RequestMethod.GET)
     public void deltaDump() {
         try{
