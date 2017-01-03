@@ -87,17 +87,6 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
         //更新统计：存栏日报，存栏月报，猪舍统计，猪群统计
         fromDto.setRollbackTypes(Lists.newArrayList(RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT,
                 RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP));
-
-        DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(groupEvent.getId());
-        DoctorRollbackDto toDto = new DoctorRollbackDto();
-        toDto.setOrgId(toPigEvent.getOrgId());
-        toDto.setFarmId(toPigEvent.getFarmId());
-        toDto.setEventAt(groupEvent.getEventAt());
-        toDto.setEsBarnId(toPigEvent.getBarnId());
-        toDto.setEsPigId(toPigEvent.getPigId());
-
-        //更新统计：猪舍，猪
-        fromDto.setRollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG));
-        return Lists.newArrayList(fromDto, toDto);
+        return Lists.newArrayList(fromDto);
     }
 }
