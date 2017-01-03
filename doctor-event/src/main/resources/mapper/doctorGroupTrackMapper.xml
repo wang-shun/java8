@@ -223,4 +223,12 @@
         DELETE FROM <include refid="tb"/>
         WHERE group_id = #{groupId}
     </delete>
+
+    <select id="queryFattenOutBySumAt" parameterType="map" resultType="map">
+        SELECT g.farm_id AS farmId, ifnull(sum(t.quantity), 0) AS fattenOut
+        FROM doctor_group_tracks t, doctor_groups g
+        WHERE t.group_id = g.id
+        AND t.avg_day_age > #{avgDayAge} AND date_format(g.open_at, '%Y-%m-%d') &lt;= #{sumAt} AND g.pig_type = 3
+        GROUP BY g.farm_id
+    </select>
 </mapper>

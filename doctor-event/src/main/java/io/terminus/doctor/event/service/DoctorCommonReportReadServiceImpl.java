@@ -3,17 +3,21 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBoarMonthlyReportDao;
+import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorMonthlyReportDao;
 import io.terminus.doctor.event.dao.DoctorParityMonthlyReportDao;
 import io.terminus.doctor.event.dao.DoctorWeeklyReportDao;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
+import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
 import io.terminus.doctor.event.model.DoctorBoarMonthlyReport;
 import io.terminus.doctor.event.model.DoctorMonthlyReport;
 import io.terminus.doctor.event.model.DoctorParityMonthlyReport;
@@ -24,8 +28,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.validation.constraints.NotNull;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -47,16 +54,19 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     private final DoctorWeeklyReportDao doctorWeeklyReportDao;
     private final DoctorParityMonthlyReportDao doctorParityMonthlyReportDao;
     private final DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao;
+    private final DoctorKpiDao doctorKpiDao;
 
     @Autowired
     public DoctorCommonReportReadServiceImpl(DoctorMonthlyReportDao doctorMonthlyReportDao,
                                              DoctorWeeklyReportDao doctorWeeklyReportDao,
                                              DoctorParityMonthlyReportDao doctorParityMonthlyReportDao,
-                                             DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao) {
+                                             DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao,
+                                             DoctorKpiDao doctorKpiDao) {
         this.doctorMonthlyReportDao = doctorMonthlyReportDao;
         this.doctorWeeklyReportDao = doctorWeeklyReportDao;
         this.doctorParityMonthlyReportDao = doctorParityMonthlyReportDao;
         this.doctorBoarMonthlyReportDao = doctorBoarMonthlyReportDao;
+        this.doctorKpiDao = doctorKpiDao;
     }
 
     @Override
@@ -143,6 +153,45 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         }
     }
 
+    @Override
+    public Response<List<DoctorMonthlyReport>> findMonthlyReports(@NotNull(message = "date.not.null") String sumAt) {
+        try {
+            //如果查询未来的数据, 返回失败查询
+            if (new DateTime(DateUtil.toDate(sumAt)).isAfter(DateUtil.getDateEnd(DateTime.now()))) {
+                return Response.fail("find.monthly.report.data.failed");
+            }
+            return Response.ok(doctorMonthlyReportDao.findBySumAt(sumAt));
+        } catch (Exception e) {
+            log.error("find.monthly.report.data.failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.monthly.report.data.failed");
+        }
+    }
+
+
+    @Override
+    public Response<List<DoctorGroupLiveStockDetailDto>> findEveryGroupInfo(@NotNull(message = "date.not.null") String sumAt) {
+        try {
+            //如果查询未来的数据, 返回失败查询
+            if (new DateTime(DateUtil.toDate(sumAt)).isAfter(DateUtil.getDateEnd(DateTime.now()))) {
+                return Response.fail("find every group info failed");
+            }
+            Map<Integer, String> pigTypeMap = Maps.newHashMap();
+            for(PigType pigType : PigType.values()) {
+                pigTypeMap.put(pigType.getValue(), pigType.getDesc());
+            }
+            return Response.ok(doctorKpiDao.getEveryGroupInfo(sumAt).stream().map(map -> {
+                DoctorGroupLiveStockDetailDto detailDto = JSON_MAPPER.getMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd"))
+                        .convertValue(map, DoctorGroupLiveStockDetailDto.class);
+                detailDto.setSumAt(DateUtil.toDate(sumAt));
+                detailDto.setType(detailDto.getType() != null ? pigTypeMap.get(Integer.parseInt(detailDto.getType())) : null);
+                return detailDto;
+            }).collect(Collectors.toList()));
+
+        } catch (Exception e) {
+            log.error("find.every.group.info.failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find every group info failed");
+        }
+    }
     //查询趋势图
     private List<DoctorCommonReportDto> getMonthlyReportByIndex(Long farmId, Date date, Integer index) {
         return DateUtil.getBeforeMonthEnds(date, MoreObjects.firstNonNull(index, MONTH_INDEX)).stream()

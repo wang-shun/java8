@@ -1,15 +1,12 @@
 package io.terminus.doctor.event.test;
 
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.AsyncEventBus;
-import com.google.common.eventbus.EventBus;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
 import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.handler.DoctorEntryHandler;
-import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
@@ -39,7 +36,10 @@ import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFarrowHand
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFosterByHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFosterHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowMatingEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowPigletChangeEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowPregCheckEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowRemovalEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowToChgLocationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowVaccinationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowWeanHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
@@ -74,7 +74,6 @@ import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -82,10 +81,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Profile;
-
-import java.util.List;
-import java.util.concurrent.Executors;
 
 /**
  * Desc: 工作基础测试类配置类
@@ -105,6 +100,8 @@ public class ServiceConfiguration {
      */
     @Bean
     public DoctorRollbackHandlerChain doctorRollbackHandlerChain(
+            DoctorRollbackSowPigletChangeEventHandler rollbackSowPigletChangeEventHandler,
+            DoctorRollbackSowToChgLocationEventHandler rollbackSowToChgLocationEventHandler,
             DoctorRollbackGroupChangeHandler rollbackGroupChangeEventHandler,
             DoctorRollbackGroupDiseaseHandler rollbackGroupDiseaseHandler,
             DoctorRollbackGroupLiveStockHandler rollbackGroupLiveStockHandler,
@@ -133,7 +130,8 @@ public class ServiceConfiguration {
             DoctorRollbackSowMatingEventHandler rollbackSowMatingEventHandler,
             DoctorRollbackSowRemovalEventHandler rollbackSowRemovalEventHandler,
             DoctorRollbackSowVaccinationEventHandler rollbackSowVaccinationEventHandler,
-            DoctorRollbackSowWeanHandler rollbackSowWeanHandler
+            DoctorRollbackSowWeanHandler rollbackSowWeanHandler,
+            DoctorRollbackSowPregCheckEventHandler rollbackSowPregCheckEventHandler
     ) {
         DoctorRollbackHandlerChain chain = new DoctorRollbackHandlerChain();
         chain.setRollbackGroupEventHandlers(Lists.newArrayList(rollbackGroupChangeEventHandler,
@@ -148,6 +146,7 @@ public class ServiceConfiguration {
         ));
 
         chain.setRollbackPigEventHandlers(Lists.newArrayList(
+                rollbackSowPigletChangeEventHandler,
                 rollbackBoarChgFarmEventHandler,
                 rollbackBoarChgLocationEventHandler,
                 rollbackBoarConditionEventHandler,
@@ -167,14 +166,16 @@ public class ServiceConfiguration {
                 rollbackSowMatingEventHandler,
                 rollbackSowRemovalEventHandler,
                 rollbackSowVaccinationEventHandler,
-                rollbackSowWeanHandler
+                rollbackSowWeanHandler,
+                rollbackSowToChgLocationEventHandler,
+                rollbackSowPregCheckEventHandler
         ));
         return chain;
     }
 
+
     /**
      * 对应handler chain
-     * @return
      */
     @Bean
     public DoctorEventHandlerChain doctorEventHandlerChain(
@@ -183,24 +184,15 @@ public class ServiceConfiguration {
             DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
             DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
         DoctorEventHandlerChain chain = new DoctorEventHandlerChain();
-        List<DoctorEventCreateHandler> list = Lists.newArrayList(
+        chain.setDoctorEventCreateHandlers(Lists.newArrayList(
                 doctorSemenHandler,doctorEntryHandler,
                 doctorChgFarmHandler, doctorChgLocationHandler,
                 doctorConditionHandler, doctorDiseaseHandler,
-                doctorRemovalHandler, doctorVaccinationHandler);
-        chain.setDoctorEventCreateHandlers(Lists.newArrayList(list));
+                doctorRemovalHandler, doctorVaccinationHandler));
         return chain;
     }
 
-    @Bean
-    public EventBus eventBus(){
-        return new AsyncEventBus(
-                Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
-    }
-
     @Configuration
-    @ConditionalOnBean(ZKClientFactory.class)
-    @Profile("zookeeper")
     public static class ZookeeperConfiguration{
 
         @Bean
@@ -211,7 +203,7 @@ public class ServiceConfiguration {
 
         @Bean
         public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}}") String zkTopic) throws Exception{
+                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
             return new Publisher(zkClientFactory, zkTopic);
         }
     }

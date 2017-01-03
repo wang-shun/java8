@@ -1616,13 +1616,13 @@
     </select>
 
     <!--根据日期获取当时猪群的情况-->
-    <select id="getEveryGroupInfo" parameterType="date" resultType="map">
+    <select id="getEveryGroupInfo" parameterType="string" resultType="map">
         SELECT
-            g.farm_name,
-            g.group_code,
+            g.farm_name AS farmName,
+            g.group_code AS groupCode,
             g.quantity - ifnull(c.deltaQty, 0) AS qty,
-            TIMESTAMPDIFF(DAY, g.birth_date, #{start}) + 2 AS avg_age,
-            g.pig_type
+            TIMESTAMPDIFF(DAY, g.birth_date, #{start}) + 2 AS avgAge,
+            g.pig_type AS type
         FROM  (
             SELECT a.farm_id, a.farm_name, a.id, a.group_code, b.quantity, b.birth_date, a.pig_type
             FROM  doctor_groups a

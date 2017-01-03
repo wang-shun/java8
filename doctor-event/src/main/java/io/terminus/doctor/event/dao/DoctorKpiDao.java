@@ -691,7 +691,7 @@ public class DoctorKpiDao {
     /**
      * 根据日期获取当时猪群的情况
      */
-    public Map<String, Object> getEveryGroupInfo(Date date) {
-        return sqlSession.selectOne(sqlId("getEveryGroupInfo"), ImmutableMap.of("date", date));
+    public List<Map<String, Object>> getEveryGroupInfo(String date) {
+        return sqlSession.selectList(sqlId("getEveryGroupInfo"), ImmutableMap.of("date", date));
     }
 }
