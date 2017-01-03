@@ -11,7 +11,6 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.enums.SearchType;
-import io.terminus.doctor.basic.service.DoctorSearchHistoryService;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserType;
@@ -30,7 +29,6 @@ import io.terminus.doctor.event.search.group.SearchedGroup;
 import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
-import io.terminus.doctor.event.search.pig.SearchedPigDto;
 import io.terminus.doctor.event.search.query.GroupPaging;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -67,8 +65,6 @@ import static io.terminus.common.utils.Arguments.isEmpty;
 @RequestMapping("/api/doctor/search")
 public class DoctorSearches {
 
-    private final DoctorSearchHistoryService doctorSearchHistoryService;
-
     private final PigSearchReadService pigSearchReadService;
 
     private final GroupSearchReadService groupSearchReadService;
@@ -89,7 +85,6 @@ public class DoctorSearches {
     @Autowired
     public DoctorSearches(PigSearchReadService pigSearchReadService,
                           GroupSearchReadService groupSearchReadService,
-                          DoctorSearchHistoryService doctorSearchHistoryService,
                           BarnSearchReadService barnSearchReadService,
                           DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                           DoctorGroupReadService doctorGroupReadService,
@@ -97,7 +92,6 @@ public class DoctorSearches {
                           DoctorPigReadService doctorPigReadService) {
         this.pigSearchReadService = pigSearchReadService;
         this.groupSearchReadService = groupSearchReadService;
-        this.doctorSearchHistoryService = doctorSearchHistoryService;
         this.barnSearchReadService = barnSearchReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorGroupReadService = doctorGroupReadService;
@@ -128,7 +122,6 @@ public class DoctorSearches {
         }
         searchFromMessage(params);
         params.put("pigCode", params.get("q"));
-        createSearchWord(searchType.getValue(), params);
         params.put("pigType", pigType.getKey().toString());
         Map<String, Object> objectMap = transMapType(params);
 
@@ -150,46 +143,6 @@ public class DoctorSearches {
             }
         });
         return paging;
-    }
-
-    /**
-     * 获取母猪聚合后的状态 数据
-     *
-     * @param pageNo   起始页
-     * @param pageSize 页大小
-     * @param params   搜索参数
-     *                 搜索参数可以参照:
-     * @return
-     * @see `DefaultPigQueryBuilder#buildTerm`
-     */
-    @RequestMapping(value = "/sowpigs/status", method = RequestMethod.GET)
-    public SearchedPigDto searchSowStatus(@RequestParam(required = false) Integer pageNo,
-                                          @RequestParam(required = false) Integer pageSize,
-                                          @RequestParam Map<String, String> params) {
-        List<String> barnIdList = getUserAccessBarnIds(params);
-        if (farmIdNotExist(params) || barnIdList == null) {
-            return new SearchedPigDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
-        }
-        params.put("barnIds", barnIdList.get(0));
-        createSearchWord(SearchType.SOW.getValue(), params);
-        params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
-
-        // 获取分页后的猪数据
-        Paging<SearchedPig> pigs = RespHelper.or500(
-                pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
-
-        // 因为要聚合猪状态, 所以去除状态属性
-        if (params.containsKey("status")) {
-            params.remove("status");
-        }
-
-        List<SearchedPigDto.SowStatus> sowStatuses = RespHelper.or500(
-                pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getSowStatuses();
-
-        return SearchedPigDto.builder()
-                .pigs(pigs)
-                .sowStatuses(sowStatuses)
-                .build();
     }
 
     /**
@@ -291,7 +244,6 @@ public class DoctorSearches {
             return new GroupPaging<>(0L, Collections.emptyList());
         }
         searchFromMessage(params);
-        createSearchWord(SearchType.GROUP.getValue(), params);
 
         replaceKey(params, "q", "groupCode");
         replaceKey(params, "pigTypes", "pigTypeCommas");
@@ -364,10 +316,8 @@ public class DoctorSearches {
             return new SearchedGroupDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
         }
         params.put("barnIds", barnIdList.get(0));
-        createSearchWord(SearchType.GROUP.getValue(), params);
 
         // 获取分页后的猪群数据
-        createSearchWord(SearchType.GROUP.getValue(), params);
         Paging<SearchedGroup> groups = RespHelper.or500(
                 groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
 
@@ -404,7 +354,6 @@ public class DoctorSearches {
             return new SearchedBarnDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
         }
         params.put("barnIds", barnIdList.get(0));
-        createSearchWord(SearchType.BARN.getValue(), params);
         Paging<SearchedBarn> barns =
                 RespHelper.orServEx(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getBarns();
 
@@ -442,7 +391,6 @@ public class DoctorSearches {
             return new Paging<>(0L, Collections.emptyList());
         }
         params.put("barnIds", barnIdList.get(0));
-        createSearchWord(SearchType.BARN.getValue(), params);
         return RespHelper.orServEx(barnSearchReadService.searchTypeWithAggs(pageNo, pageSize, "search/search.mustache", params));
     }
 
@@ -478,21 +426,6 @@ public class DoctorSearches {
         return searchBarns.getData();
     }
 
-    /**
-     * 创建搜索词
-     *
-     * @param searchType 搜索类型
-     * @param params     搜索参数
-     * @see io.terminus.doctor.basic.enums.SearchType
-     */
-    private void createSearchWord(int searchType, Map<String, String> params) {
-        // 获取搜索词
-        String q = params.get("q");
-        if (StringUtils.isNotBlank(q)) {
-            doctorSearchHistoryService.createSearchHistory(UserUtil.getUserId(), searchType, q);
-        }
-    }
-
     private boolean farmIdNotExist(Map<String, String> params) {
         return isEmpty(params.get("farmId"));
     }
@@ -508,7 +441,6 @@ public class DoctorSearches {
                 return Collections.emptyList();
             }
             params.put("barnIds", barnIdList.get(0));
-            createSearchWord(searchType, params);
 
             // 母猪状态由前台传
             if (searchType.equals(SearchType.GROUP.getValue())) {
@@ -604,20 +536,6 @@ public class DoctorSearches {
             List<Long> idList = RespHelper.or500(doctorMessageUserReadService.findBusinessListByCriteria(doctorMessageUserDto));
             String ids = idList.toString().trim().substring(1, idList.toString().toCharArray().length - 1);
             params.put("ids", ids);
-        }
-    }
-
-    /**
-     * 初始化ES索引
-     * @param type 0.所有 1.猪 2.猪群 3.猪舍
-     * @return
-     */
-    @RequestMapping(value = "/initIndex", method = RequestMethod.GET)
-    public Boolean initIndex(Integer type) {
-        if (pigSearchReadService.initIndex(type).isSuccess()) {
-            return Boolean.TRUE;
-        }else {
-            return Boolean.FALSE;
         }
     }
 
