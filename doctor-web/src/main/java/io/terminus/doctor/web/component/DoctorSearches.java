@@ -26,7 +26,6 @@ import io.terminus.doctor.event.search.barn.SearchedBarn;
 import io.terminus.doctor.event.search.barn.SearchedBarnDto;
 import io.terminus.doctor.event.search.group.GroupSearchReadService;
 import io.terminus.doctor.event.search.group.SearchedGroup;
-import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.query.GroupPaging;
@@ -107,16 +106,15 @@ public class DoctorSearches {
      * @param params   搜索参数
      *                 搜索参数可以参照:
      * @return
-     * @see `DefaultPigQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/sowpigs", method = RequestMethod.GET)
     public Paging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
                                              @RequestParam Map<String, String> params) {
-        return pagePigs(pageNo, pageSize, params, SearchType.SOW, DoctorPig.PIG_TYPE.SOW);
+        return pagePigs(pageNo, pageSize, params, DoctorPig.PIG_TYPE.SOW);
     }
 
-    private Paging<SearchedPig> pagePigs(Integer pageNo, Integer pageSize, Map<String, String> params, SearchType searchType, DoctorPig.PIG_TYPE pigType){
+    private Paging<SearchedPig> pagePigs(Integer pageNo, Integer pageSize, Map<String, String> params, DoctorPig.PIG_TYPE pigType){
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
@@ -155,22 +153,7 @@ public class DoctorSearches {
     @RequestMapping(value = "/sowpigs/suggest", method = RequestMethod.GET)
     public List<SearchedPig> searchSowsSuggest(@RequestParam(required = false) Integer size,
                                                @RequestParam Map<String, String> params) {
-        List<String> barnIdList = getUserAccessBarnIds(params);
-        if (farmIdNotExist(params) || barnIdList == null) {
-            return Collections.emptyList();
-        }
-        params.put("barnIds", barnIdList.get(0));
-        params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
-        if (size == null) {
-            size = 8; // 默认获取 8 条
-        }
-
-        Integer pageNo = 1; // 默认取第一页的数据
-        Integer pageSize = size;
-        Paging<SearchedPig> searchBoars =
-                RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
-
-        return searchBoars.getData();
+        return pagePigs(1, size, params, DoctorPig.PIG_TYPE.SOW).getData();
     }
 
 
@@ -182,47 +165,24 @@ public class DoctorSearches {
      * @param params   搜索参数
      *                 搜索参数可以参照:
      * @return
-     * @see `DefaultPigQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/boarpigs", method = RequestMethod.GET)
     public Paging<SearchedPig> searchBoarPigs(@RequestParam(required = false) Integer pageNo,
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
-        return pagePigs(pageNo, pageSize, params, SearchType.BOAR, DoctorPig.PIG_TYPE.BOAR);
+        return pagePigs(pageNo, pageSize, params, DoctorPig.PIG_TYPE.BOAR);
     }
 
     /**
-     * 所有公猪搜索方法
+     * 所有公猪搜索方法(最多2000头公猪)
      *
      * @param params 搜索参数
      *               搜索参数可以参照:
      * @return
-     * @see `DefaultPigQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/boarpigs/all", method = RequestMethod.GET)
     public List<SearchedPig> searchAllBoarPigs(@RequestParam Map<String, String> params) {
-        List<String> barnIdList = getUserAccessBarnIds(params);
-        if (farmIdNotExist(params) || barnIdList == null) {
-            return Collections.emptyList();
-        }
-        params.put("barnIds", barnIdList.get(0));
-        params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
-
-        // 游标法获取数据
-        Integer pageNo = 1;
-        Integer pageSize = 100;
-        Paging<SearchedPig> searchBoars =
-                RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
-        while (!searchBoars.isEmpty()) {
-            pageNo++;
-            Paging<SearchedPig> tempSearchBoars =
-                    RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
-            if (tempSearchBoars.isEmpty()) {
-                break;
-            }
-            searchBoars.getData().addAll(tempSearchBoars.getData());
-        }
-        return searchBoars.getData();
+        return pagePigs(1, 2000, params, DoctorPig.PIG_TYPE.BOAR).getData();
     }
 
     /**
@@ -295,43 +255,6 @@ public class DoctorSearches {
                 })
                 .collect(Collectors.toList());
         return new GroupPaging<>(groupDetailPaging.getTotal(), searchedGroups, count);
-    }
-
-    /**
-     * 获取猪群聚合后的状态 数据
-     *
-     * @param pageNo   起始页
-     * @param pageSize 页大小
-     * @param params   搜索参数
-     *                 搜索参数可以参照:
-     * @return
-     * @see `DefaultGroupQueryBuilder#buildTerm`
-     */
-    @RequestMapping(value = "/groups/status", method = RequestMethod.GET)
-    public SearchedGroupDto searchGroupStatus(@RequestParam(required = false) Integer pageNo,
-                                              @RequestParam(required = false) Integer pageSize,
-                                              @RequestParam Map<String, String> params) {
-        List<String> barnIdList = getUserAccessBarnIds(params);
-        if (farmIdNotExist(params) || barnIdList == null) {
-            return new SearchedGroupDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
-        }
-        params.put("barnIds", barnIdList.get(0));
-
-        // 获取分页后的猪群数据
-        Paging<SearchedGroup> groups = RespHelper.or500(
-                groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
-
-        // 查询已存在的猪类型, 因为聚合猪类型, 所以去除
-        if (params.containsKey("pigType")) {
-            params.remove("pigType");
-        }
-        List<SearchedBarnDto.PigType> aggPigTypes = RespHelper.or500(
-                groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getAggPigTypes();
-
-        return SearchedGroupDto.builder()
-                .groups(groups)
-                .aggPigTypes(aggPigTypes)
-                .build();
     }
 
     /**
