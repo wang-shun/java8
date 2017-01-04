@@ -14,21 +14,24 @@ import io.terminus.doctor.basic.enums.SearchType;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.search.barn.BarnSearchReadService;
 import io.terminus.doctor.event.search.barn.SearchedBarn;
 import io.terminus.doctor.event.search.barn.SearchedBarnDto;
-import io.terminus.doctor.event.search.group.GroupSearchReadService;
 import io.terminus.doctor.event.search.group.SearchedGroup;
-import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.query.GroupPaging;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.msg.dto.DoctorMessageUserDto;
@@ -64,9 +67,7 @@ import static io.terminus.common.utils.Arguments.isEmpty;
 @RequestMapping("/api/doctor/search")
 public class DoctorSearches {
 
-    private final PigSearchReadService pigSearchReadService;
-
-    private final GroupSearchReadService groupSearchReadService;
+    private final DoctorBarnReadService doctorBarnReadService;
 
     private final BarnSearchReadService barnSearchReadService;
 
@@ -80,17 +81,20 @@ public class DoctorSearches {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
+    //保育，育肥，后备
+    private static final List<PigType> JUST_GROUPS = Lists.newArrayList(PigType.NURSERY_PIGLET, PigType.FATTEN_PIG, PigType.RESERVE);
+
+    //配种，妊娠，种公猪
+    private static final List<PigType> JUST_PIGS = Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW, PigType.BOAR);
 
     @Autowired
-    public DoctorSearches(PigSearchReadService pigSearchReadService,
-                          GroupSearchReadService groupSearchReadService,
+    public DoctorSearches(DoctorBarnReadService doctorBarnReadService,
                           BarnSearchReadService barnSearchReadService,
                           DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                           DoctorGroupReadService doctorGroupReadService,
                           DoctorMessageUserReadService doctorMessageUserReadService,
                           DoctorPigReadService doctorPigReadService) {
-        this.pigSearchReadService = pigSearchReadService;
-        this.groupSearchReadService = groupSearchReadService;
+        this.doctorBarnReadService = doctorBarnReadService;
         this.barnSearchReadService = barnSearchReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorGroupReadService = doctorGroupReadService;
@@ -268,29 +272,10 @@ public class DoctorSearches {
      * @see `DefaultBarnQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/barns", method = RequestMethod.GET)
-    public SearchedBarnDto searchBarns(@RequestParam(required = false) Integer pageNo,
-                                       @RequestParam(required = false) Integer pageSize,
-                                       @RequestParam Map<String, String> params) {
-        List<String> barnIdList = getUserAccessBarnIds(params);
-        // 查询出分页后的猪舍
-        if (farmIdNotExist(params) || barnIdList == null) {
-            return new SearchedBarnDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
-        }
-        params.put("barnIds", barnIdList.get(0));
-        Paging<SearchedBarn> barns =
-                RespHelper.orServEx(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getBarns();
-
-        // 查询已存在的猪类型, 因为聚合猪类型, 所以去除
-        if (params.containsKey("pigType")) {
-            params.remove("pigType");
-        }
-        List<SearchedBarnDto.PigType> aggPigTypes =
-                RespHelper.orServEx(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getAggPigTypes();
-
-        return SearchedBarnDto.builder()
-                .barns(barns)
-                .aggPigTypes(aggPigTypes)
-                .build();
+    public SearchedBarnDto searchBarn(@RequestParam(required = false) Integer pageNo,
+                                      @RequestParam(required = false) Integer pageSize,
+                                      @RequestParam Map<String, String> params) {
+        return SearchedBarnDto.builder().barns(this.searchBarnsPC(pageNo, pageSize, params)).build();
     }
 
     /**
@@ -307,14 +292,92 @@ public class DoctorSearches {
     public Paging<SearchedBarn> searchBarnsPC(@RequestParam(required = false) Integer pageNo,
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
-        List<String> barnIdList = getUserAccessBarnIds(params);
-
-        // 查询出分页后的猪舍
-        if (farmIdNotExist(params) || barnIdList == null) {
+        DoctorBarnDto barnDto = getBarnSearchMap(params);
+        if (barnDto.getFarmId() == null || isEmpty(barnDto.getBarnIds())) {
             return new Paging<>(0L, Collections.emptyList());
         }
-        params.put("barnIds", barnIdList.get(0));
-        return RespHelper.orServEx(barnSearchReadService.searchTypeWithAggs(pageNo, pageSize, "search/search.mustache", params));
+
+        Paging<DoctorBarn> barns = RespHelper.or500(doctorBarnReadService.pagingBarn(barnDto, pageNo, pageSize));
+        return new Paging<>(barns.getTotal(), getSearchedBarn(barns.getData()));
+    }
+
+    //拼接下猪舍需要的字段
+    private List<SearchedBarn> getSearchedBarn(List<DoctorBarn> barns) {
+        return BeanMapper.mapList(barns, SearchedBarn.class).stream()
+                .map(barn -> {
+                    PigType pigType = PigType.from(barn.getPigType());
+                    barn.setPigTypeName(pigType == null ? "" : pigType.getDesc());
+
+                    int pigCount = 0;
+                    int groupCount = 0;
+                    List<SearchedBarn.BarnStatus> barnStatus = Lists.newArrayList();
+
+                    //猪舍里每种猪的聚合
+                    if (Objects.equals(pigType, PigType.DELIVER_SOW)) {
+                        List<DoctorPigTrack> pigTracks = RespHelper.or500(doctorPigReadService.findActivePigTrackByCurrentBarnId(barn.getId()));
+                        pigCount = pigTracks.size();
+                        groupCount = getGroupCount(barn);
+
+                        barnStatus = Lists.newArrayList(SearchedBarn.createFarrowStatus(groupCount));
+                        barnStatus = addPigBarnStatus(barnStatus, pigTracks);
+                    }
+                    else if (JUST_GROUPS.contains(pigType)) {
+                        groupCount = getGroupCount(barn);
+                        barnStatus = Lists.newArrayList(SearchedBarn.createGroupStatus(pigType, groupCount));
+                    }
+                    else if (JUST_PIGS.contains(pigType)) {
+                        List<DoctorPigTrack> pigTracks = RespHelper.or500(doctorPigReadService.findActivePigTrackByCurrentBarnId(barn.getId()));
+                        pigCount = pigTracks.size();
+                        barnStatus = addPigBarnStatus(barnStatus, pigTracks);
+                    }
+
+                    barn.setPigCount(pigCount);
+                    barn.setPigGroupCount(groupCount);
+                    barn.setBarnStatuses(barnStatus);
+                    return barn;
+                })
+                .collect(Collectors.toList());
+    }
+
+    //获取猪群数量
+    private int getGroupCount(SearchedBarn barn) {
+        DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+        searchDto.setFarmId(barn.getFarmId());
+        searchDto.setCurrentBarnId(barn.getId());
+        searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
+        return RespHelper.or500(doctorGroupReadService.getGroupCount(searchDto)).intValue();
+    }
+
+    //获取猪舍中猪的状态聚合
+    private List<SearchedBarn.BarnStatus> addPigBarnStatus(List<SearchedBarn.BarnStatus> barnStatus, List<DoctorPigTrack> pigTracks) {
+        for (Map.Entry<Integer, List<DoctorPigTrack>> m : pigTracks.stream().collect(Collectors.groupingBy(DoctorPigTrack::getStatus)).entrySet()) {
+            barnStatus.add(SearchedBarn.createPigStatus(PigStatus.from(m.getKey()), m.getValue().size()));
+        }
+        return barnStatus;
+    }
+
+    //转换猪舍搜索条件
+    private DoctorBarnDto getBarnSearchMap(Map<String, String> params) {
+        DoctorBarnDto barnDto = new DoctorBarnDto();
+
+        //主账号不用校验，直接拥有全部猪舍权限
+        BaseUser user = UserUtil.getCurrentUser();
+        if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+            barnDto.setBarnIds(RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId())).getBarnIdsList());
+        }
+        if (Params.containsNotEmpty(params, "q")) {
+            barnDto.setName(params.get("q"));
+        }
+        if (Params.containsNotEmpty(params, "pigType")) {
+            barnDto.setPigType(Integer.valueOf(params.get("pigType")));
+        }
+        if (Params.containsNotEmpty(params, "pigTypes")) {
+            barnDto.setPigTypes(Splitters.splitToInteger(params.get("pigTypes"), Splitters.COMMA));
+        }
+        if (Params.containsNotEmpty(params, "status")) {
+            barnDto.setStatus(Integer.valueOf(params.get("status")));
+        }
+        return barnDto;
     }
 
     /**
@@ -327,26 +390,7 @@ public class DoctorSearches {
      */
     @RequestMapping(value = "/barns/all", method = RequestMethod.GET)
     public List<SearchedBarn> searchAllBarns(@RequestParam Map<String, String> params) {
-        List<String> barnIdList = getUserAccessBarnIds(params);
-        if (farmIdNotExist(params) || barnIdList == null) {
-            return Collections.emptyList();
-        }
-        params.put("barnIds", barnIdList.get(0));
-        // 游标法获取数据
-        Integer pageNo = 1;
-        Integer pageSize = 100;
-        Paging<SearchedBarn> searchBarns =
-                RespHelper.or500(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getBarns();
-        while (!searchBarns.isEmpty()) {
-            pageNo++;
-            Paging<SearchedBarn> tempSearchBarns =
-                    RespHelper.or500(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getBarns();
-            if (tempSearchBarns.isEmpty()) {
-                break;
-            }
-            searchBarns.getData().addAll(tempSearchBarns.getData());
-        }
-        return searchBarns.getData();
+        return this.searchBarnsPC(1, Integer.MAX_VALUE, params).getData();
     }
 
     private boolean farmIdNotExist(Map<String, String> params) {
