@@ -199,41 +199,11 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     @Override
     public Response<DoctorBarnCountForPigTypeDto> countForTypes(Map<String, Object> criteria) {
         try {
-            DoctorBarnCountForPigTypeDto barnCountForPigTypeDto = new DoctorBarnCountForPigTypeDto();
-            List<Map<String, Object>> list = doctorBarnDao.countForTypes(criteria);
-            list.forEach(map -> {
-                switch ((int) map.get("pigType")) {
-                    case 2:
-                        barnCountForPigTypeDto.setNurseryPigletCount(((long) map.get("quantity")));
-                        break;
-                    case 3:
-                        barnCountForPigTypeDto.setFattenPigCount(((long) map.get("quantity")));
-                        break;
-                    case 4:
-                        barnCountForPigTypeDto.setReserveCount(((long) map.get("quantity")));
-                        break;
-                    case 5:
-                        barnCountForPigTypeDto.setMateSowCount(((long) map.get("quantity")));
-                        break;
-                    case 6:
-                        barnCountForPigTypeDto.setPregSowCount(((long) map.get("quantity")));
-                        break;
-                    case 7:
-                        barnCountForPigTypeDto.setDeliverSowCount(((long) map.get("quantity")));
-                        break;
-                    case 9:
-                        barnCountForPigTypeDto.setBoarCount(((long) map.get("quantity")));
-                        break;
-                    default:
-                        break;
-                }
-            });
-            Long allCount = barnCountForPigTypeDto.getNurseryPigletCount() + barnCountForPigTypeDto.getFattenPigCount()
-                    + barnCountForPigTypeDto.getReserveCount() + barnCountForPigTypeDto.getMateSowCount()
-                    + barnCountForPigTypeDto.getPregSowCount() + barnCountForPigTypeDto.getDeliverSowCount()
-                    + barnCountForPigTypeDto.getBoarCount();
-            barnCountForPigTypeDto.setAllCount(allCount);
-            return Response.ok(barnCountForPigTypeDto);
+            DoctorBarnCountForPigTypeDto dto = doctorBarnDao.countForTypes(criteria);
+            Long allCount = dto.getReserveCount() + dto.getBoarCount() + dto.getPregSowCount()
+                    + dto.getDeliverSowCount() + dto.getMateSowCount() + dto.getFattenPigCount() + dto.getNurseryPigletCount();
+            dto.setAllCount(allCount);
+            return Response.ok(dto);
         } catch (Exception e) {
             log.error("count.for.types.failed, cause by :{}", Throwables.getStackTraceAsString(e));
             return Response.fail("count for types failed");

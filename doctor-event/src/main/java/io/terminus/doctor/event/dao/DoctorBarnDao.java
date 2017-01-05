@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
 import io.terminus.doctor.event.model.DoctorBarn;
 import org.springframework.stereotype.Repository;
 
@@ -76,7 +77,7 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
      * @param criteria 查询条件
      * @return
      */
-    public List<Map<String, Object>> countForTypes(Map<String, Object> criteria){
-        return getSqlSession().selectList("countForTypes", criteria);
+    public DoctorBarnCountForPigTypeDto countForTypes(Map<String, Object> criteria){
+        return getSqlSession().selectOne("countForTypes", criteria);
     }
 }

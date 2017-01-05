@@ -44,4 +44,5 @@ public class DoctorBarnCountForPigTypeDto implements Serializable{
      * 公猪舍数量
      */
     private long boarCount;
+
 }
