@@ -335,6 +335,7 @@ public class DoctorSearches {
 
                     barn.setPigCount(pigCount);
                     barn.setPigGroupCount(groupCount);
+                    barn.setStorage(barn.getPigCount() + barn.getPigGroupCount());
                     barn.setBarnStatuses(barnStatus);
                     return barn;
                 })
