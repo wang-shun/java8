@@ -4,7 +4,9 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 
 import javax.validation.Valid;
 
@@ -34,4 +36,12 @@ public interface DoctorGroupBatchSummaryReadService {
      */
     Response<Paging<DoctorGroupBatchSummary>> pagingGroupBatchSummary(@Valid DoctorGroupSearchDto searchDto, Integer pageNo, Integer pageSize);
 
+    /**
+     * 拼接批次总结数据
+     * @param group       猪群
+     * @param groupTrack  猪群跟踪
+     * @param fcrFeed     饲料
+     * @return            批次总结
+     */
+    Response<DoctorGroupBatchSummary> getGroupBatchSummary(DoctorGroup group, DoctorGroupTrack groupTrack, Double fcrFeed);
 }

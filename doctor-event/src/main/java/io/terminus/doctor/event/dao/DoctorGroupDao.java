@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -44,5 +45,20 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
      */
     public DoctorGroup findByFarmIdAndGroupCode(Long farmId, String groupCode) {
         return getSqlSession().selectOne(sqlId("findByFarmIdAndGroupCode"), ImmutableMap.of("farmId", farmId, "groupCode", groupCode));
+    }
+
+    /**
+     * 根据时间倒推出当时的猪群（通常只适用于产房群，因为产房只有一个猪群）
+     * @param farmId    猪场id
+     * @param barnId    猪舍id
+     * @param date      日期
+     * @return  猪群
+     */
+    public DoctorGroup findByFarmIdAndBarnIdAndDate(Long farmId, Long barnId, Date date) {
+        if (farmId == null || barnId == null || date == null) {
+            return null;
+        }
+        return getSqlSession().selectOne(sqlId("findByFarmIdAndBarnIdAndDate"), ImmutableMap.of("farmId", farmId, "barnId", barnId, "date", date));
+
     }
 }

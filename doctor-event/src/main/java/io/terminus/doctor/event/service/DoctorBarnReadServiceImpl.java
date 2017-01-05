@@ -4,11 +4,14 @@ import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -188,6 +191,17 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             log.error("fail to find available barns,current group id:{},farm id:{},cause:{}",
                     groupId, farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("find.available.barns.failed");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorBarn>> pagingBarn(DoctorBarnDto barnDto, Integer pageNo, Integer size) {
+        try {
+            PageInfo page = PageInfo.of(pageNo, size);
+            return Response.ok(doctorBarnDao.paging(page.getOffset(), page.getLimit(), barnDto));
+        } catch (Exception e) {
+            log.error("paging barn failed, barnDto:{}, pageNo:{}, size:{}, cause:{}", barnDto, pageNo, size, Throwables.getStackTraceAsString(e));
+            return Response.fail("barn.find.fail");
         }
     }
 }

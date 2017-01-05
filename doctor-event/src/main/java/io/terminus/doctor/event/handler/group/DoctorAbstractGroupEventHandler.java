@@ -19,9 +19,7 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.event.DoctorBarnEventListener;
 import io.terminus.doctor.event.event.DoctorGroupEventListener;
-import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -79,9 +77,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     @Autowired
     private DoctorGroupEventListener doctorGroupEventListener;
-
-    @Autowired
-    private DoctorBarnEventListener doctorBarnEventListener;
 
     @Autowired
     public DoctorAbstractGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -247,7 +242,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 .farmId(farmId)
                 .groupId(groupId)
                 .build());
-        doctorBarnEventListener.doctorBarnEventListener(ListenedBarnEvent.builder().barnId(barnId).build());
     }
 
     //品种校验, 如果猪群的品种已经确定, 那么录入的品种必须和猪群的品种一致

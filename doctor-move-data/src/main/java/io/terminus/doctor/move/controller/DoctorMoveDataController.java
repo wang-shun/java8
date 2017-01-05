@@ -7,15 +7,12 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.search.barn.BarnSearchDumpService;
-import io.terminus.doctor.event.search.group.GroupDumpService;
-import io.terminus.doctor.event.search.pig.PigDumpService;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
-import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
+import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
-import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
+import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
@@ -64,14 +61,11 @@ public class DoctorMoveDataController {
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
-    private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorDailyReportWriteService doctorDailyReportWriteService;
     private final DoctorCommonReportWriteService doctorCommonReportWriteService;
     private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
     private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
-    private final BarnSearchDumpService barnSearchDumpService;
-    private final GroupDumpService groupDumpService;
-    private final PigDumpService pigDumpService;
+    private final DoctorImportDataService doctorImportDataService;
 
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
@@ -83,11 +77,11 @@ public class DoctorMoveDataController {
                                     DoctorUserDataPermissionDao doctorUserDataPermissionDao,
                                     DoctorUserReadService doctorUserReadService,
                                     DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
-                                    DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
                                     DoctorDailyReportWriteService doctorDailyReportWriteService,
                                     DoctorCommonReportWriteService doctorCommonReportWriteService,
                                     DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
-                                    DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService, BarnSearchDumpService barnSearchDumpService, GroupDumpService groupDumpService, PigDumpService pigDumpService) {
+                                    DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService,
+                                    DoctorImportDataService doctorImportDataService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -97,14 +91,11 @@ public class DoctorMoveDataController {
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
         this.doctorUserReadService = doctorUserReadService;
         this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
-        this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorDailyReportWriteService = doctorDailyReportWriteService;
         this.doctorCommonReportWriteService = doctorCommonReportWriteService;
         this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
         this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
-        this.barnSearchDumpService = barnSearchDumpService;
-        this.groupDumpService = groupDumpService;
-        this.pigDumpService = pigDumpService;
+        this.doctorImportDataService = doctorImportDataService;
     }
 
 
@@ -148,11 +139,7 @@ public class DoctorMoveDataController {
 
             //把所有猪舍添加到所有用户的权限里去
             userInitService.updatePermissionBarn(mobile);
-
-            log.warn("ElasticSearch full dump barn start !");
-            barnSearchDumpService.fullDump(null);
             log.warn("all data moved successfully, CONGRATULATIONS!!!");
-
             return true;
         } catch (Exception e) {
             log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
@@ -184,7 +171,6 @@ public class DoctorMoveDataController {
             watch.stop();
             int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
             log.warn("move pig end, cost {} minutes, now dump ES", minute);
-            pigDumpService.deltaDump(minute);
         } catch (Exception e) {
             doctorMoveDataService.deleteAllPigs(farm.getId());
             log.error("move pig failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
@@ -202,8 +188,7 @@ public class DoctorMoveDataController {
         doctorMoveDataService.moveGroup(moveId, farm);
         watch.stop();
         int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
-        log.warn("move group end, cost {} minutes, now dump ES", minute);
-        groupDumpService.deltaDump(minute);
+        log.warn("move group end, cost {} minutes", minute);
 
         log.warn("move farrow sow start, moveId:{}", moveId);
         doctorMoveDataService.updateFarrowSow(farm);
@@ -241,6 +226,11 @@ public class DoctorMoveDataController {
         log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
         wareHouseInitService.init(mobile, moveId, farm);
         log.warn("move warehouse end");
+
+        //迁移仓库/物料
+        log.warn("move farmBasic start, mobile:{}, moveId:{}", mobile, moveId);
+        doctorImportDataService.importFarmBasics(farm.getId());
+        log.warn("move farmBasic end");
     }
 
     //统计下首页数据

@@ -4,9 +4,9 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.user.dao.DoctorAddressDao;
 import io.terminus.doctor.user.dto.DoctorAddressDto;
 import io.terminus.parana.user.address.model.Address;
-import io.terminus.parana.user.impl.address.dao.AddressDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,14 +27,14 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @RpcProvider
 public class DoctorAddressReadServiceImpl implements DoctorAddressReadService {
 
-    private final AddressDao addressDao;
+    private final DoctorAddressDao addressDao;
 
     private List<DoctorAddressDto> addressTree;
 
     private static final int MAX_DEPTH = 3;     //递归寻址最大深度(目前取值为最大level)
 
     @Autowired
-    public DoctorAddressReadServiceImpl(AddressDao addressDao) {
+    public DoctorAddressReadServiceImpl(DoctorAddressDao addressDao) {
         this.addressDao = addressDao;
     }
 
@@ -73,5 +73,15 @@ public class DoctorAddressReadServiceImpl implements DoctorAddressReadService {
             }
         });
         return trees;
+    }
+
+    @Override
+    public Response<Address> findByNameAndPid(String name, Integer pid){
+        try {
+            return Response.ok(addressDao.findByNameAndPid(name, pid));
+        } catch (Exception e) {
+            log.error("find address failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("address.find.fail");
+        }
     }
 }

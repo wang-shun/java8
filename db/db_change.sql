@@ -514,6 +514,19 @@ CREATE INDEX   idx_userid_farmid_templateid ON doctor_message_user(user_id, farm
 -- 2016-11-16 在message_id 字段添加索引
 CREATE INDEX   idx_messageid ON doctor_message_user(message_id);
 
+-- 2016-11-21 增加猪场id与基础数据关联表
+CREATE TABLE `doctor_farm_basics` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` BIGINT(20) DEFAULT NULL COMMENT '猪场id',
+  `basic_ids` TEXT COMMENT '基础数据ids, 逗号分隔',
+  `reason_ids` TEXT COMMENT '变动原因ids, 逗号分隔',
+  `extra` TEXT COMMENT '附加字段',
+  `created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_doctor_farm_basics_farm_id` (`farm_id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COMMENT='猪场基础数据关联表';
+
 -- 2016-11-18 新建周报表
 CREATE TABLE `doctor_weekly_reports` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
@@ -548,3 +561,8 @@ ALTER TABLE doctor_group_tracks ADD COLUMN wean_qty INT(11) DEFAULT NULL COMMENT
 -- 2016-12-15 增加org_ids 字段
 ALTER TABLE doctor_user_data_permissions ADD COLUMN org_ids text DEFAULT NULL COMMENT '公司id,逗号分隔';
 ALTER TABLE doctor_messages ADD COLUMN business_type INT(11) DEFAULT NULL COMMENT '消息目标类型,1、猪 2、猪群 3、仓库' AFTER business_id;
+
+-- 2016-12-28
+ALTER TABLE doctor_pig_events ADD COLUMN group_id BIGINT(20) DEFAULT NULL COMMENT '哺乳状态的母猪关联的猪群id' AFTER npd;
+CREATE INDEX idx_doctor_pig_events_group_id ON doctor_pig_events(group_id);
+

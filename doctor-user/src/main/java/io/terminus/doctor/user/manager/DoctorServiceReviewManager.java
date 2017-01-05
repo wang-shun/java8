@@ -222,7 +222,7 @@ public class DoctorServiceReviewManager {
         //查询并保存permission
         DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
         if(permission != null){
-            permission.getFarmIdsList().stream().forEach(oldFarmId -> {
+            permission.getFarmIdsList().forEach(oldFarmId -> {
                 if (!newFarmIds.contains(oldFarmId)) {
                     doctorFarmDao.delete(oldFarmId);
                 }

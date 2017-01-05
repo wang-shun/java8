@@ -262,7 +262,7 @@ public class DoctorWareHouseEvents {
                 || Objects.equals(material.getType(), WareHouseType.MEDICINE.getKey())
                 || Objects.equals(material.getType(), WareHouseType.VACCINATION.getKey())){
             if(unitId != null){
-                DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(unitId));
+                DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicByIdFilterByFarmId(wareHouse.getFarmId(), unitId));
                 if(doctorBasic == null || !Objects.equals(doctorBasic.getType(), DoctorBasic.Type.UNIT.getValue())){
                     throw new JsonResponseException("unit.miss");
                 }
@@ -327,7 +327,7 @@ public class DoctorWareHouseEvents {
                     || Objects.equals(doctorBasicMaterial.getType(), WareHouseType.MEDICINE.getKey())
                     || Objects.equals(doctorBasicMaterial.getType(), WareHouseType.VACCINATION.getKey())){
                 if(dto.getUnitId() != null){
-                    DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(dto.getUnitId()));
+                    DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicByIdFilterByFarmId(dto.getFarmId(), dto.getUnitId()));
                     doctorMaterialConsumeProviderDto.setUnitName(doctorBasic.getName());
                     doctorMaterialConsumeProviderDto.setUnitId(doctorBasic.getId());
                 }else{

@@ -233,4 +233,13 @@
             )
         </foreach>
     </insert>
+
+    <select id="findByFarmIdAndBarnIdAndDate" parameterType="map" resultMap="DoctorGroupMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+          AND current_barn_id = #{currentBarnId}
+          AND open_at &lt;= #{date}
+          AND (close_at &gt;= DATE(#{date}) OR close_at IS NULL)
+        limit 1
+    </select>
 </mapper>

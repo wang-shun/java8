@@ -94,6 +94,17 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         }
     }
 
+    @Override
+    public Response<DoctorGroupBatchSummary> getGroupBatchSummary(DoctorGroup group, DoctorGroupTrack groupTrack, Double fcrFeed) {
+        try {
+            return Response.ok(getSummary(group, groupTrack, fcrFeed));
+        } catch (Exception e) {
+            log.error("get group batch summary failed, group:{}, groupTrack:{}, fcrFeed:{}, cause:{}",
+                    group, groupTrack, fcrFeed, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.batch.summary.find.fail");
+        }
+    }
+
     //根据猪群与猪群跟踪实时计算批次总结
     private DoctorGroupBatchSummary getSummary(DoctorGroup group, DoctorGroupTrack groupTrack, Double fcrFeed) {
         List<DoctorGroupEvent> events = doctorGroupEventDao.findByGroupId(group.getId());
@@ -137,7 +148,8 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         } else {
             summary.setFcr(fcrFeed / fcrWeight);
         }
-        summary.setDailyWeightGain(EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, groupTrack.getAvgDayAge() - getFirstMoveInEvent(events))));//日增重(kg)
+        Double gain = EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, groupTrack.getAvgDayAge() - getFirstMoveInEvent(events)));
+        summary.setDailyWeightGain(gain < 0 ? 0 : gain);//日增重(kg)
         setToNurseryOrFatten(summary, events);                                       //阶段转
 
         // TODO: 16/9/13 上线后再弄

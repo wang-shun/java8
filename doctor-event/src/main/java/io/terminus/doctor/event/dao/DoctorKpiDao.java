@@ -390,6 +390,16 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 某一猪群即将关闭之前的存栏
+     *
+     * @param groupId 猪群id
+     * @return 存栏数量
+     */
+    public int farrowGroupQuantityWhenClose(Long groupId) {
+        return sqlSession.selectOne(sqlId("farrowGroupQuantityWhenClose"), ImmutableMap.of("groupId", groupId));
+    }
+
+    /**
      * 实时存栏: 获取某天的产房仔猪存栏
      *
      * @param farmId 猪场id

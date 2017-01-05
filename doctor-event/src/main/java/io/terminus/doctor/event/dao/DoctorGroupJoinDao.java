@@ -2,7 +2,7 @@ package io.terminus.doctor.event.dao;
 
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
-import io.terminus.doctor.event.search.group.SearchedGroup;
+import io.terminus.doctor.event.dto.search.SearchedGroup;
 import org.springframework.stereotype.Repository;
 
 /**

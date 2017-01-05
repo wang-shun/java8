@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.Constants;
-import io.terminus.doctor.event.search.pig.SearchedPig;
+import io.terminus.doctor.event.dto.search.SearchedPig;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;

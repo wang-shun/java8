@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dao;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
@@ -236,7 +237,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @return
      */
     public List<DoctorPigEvent> findOperators(Map<String, Object> criteria){
-        return getSqlSession().selectList(sqlId("findOperator"), criteria);
+        return getSqlSession().selectList(sqlId("findOperators"), criteria);
     }
 
     public List<DoctorPigEvent> findByPigId(Long pigId) {
@@ -288,5 +289,24 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      */
     public Map<String, Object> querySowParityAvg(Long pigId) {
         return sqlSession.selectOne("querySowParityAvg", pigId);
+    }
+
+    /**
+     * 查询最新的几个事件
+     * @param pigId 猪id
+     * @param limit 查询几条
+     * @return 猪事件列表
+     */
+    public List<DoctorPigEvent> limitPigEventOrderByEventAt(Long pigId, Integer limit) {
+        return getSqlSession().selectList(sqlId("limitPigEventOrderByEventAt"), ImmutableMap.of("pigId", pigId, "limit", MoreObjects.firstNonNull(limit, 1)));
+    }
+
+    /**
+     * 查询和猪群相关联的猪事件
+     * @param groupId 猪群id
+     * @return 猪事件
+     */
+    public List<DoctorPigEvent> findByGroupId(Long groupId) {
+        return getSqlSession().selectList(sqlId("findByGroupId"), ImmutableMap.of("groupId", groupId));
     }
 }

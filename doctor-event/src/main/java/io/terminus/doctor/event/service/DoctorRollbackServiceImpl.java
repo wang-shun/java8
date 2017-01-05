@@ -25,9 +25,6 @@ import io.terminus.doctor.event.manager.DoctorRollbackManager;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.search.barn.BarnSearchWriteService;
-import io.terminus.doctor.event.search.group.GroupSearchWriteService;
-import io.terminus.doctor.event.search.pig.PigSearchWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +46,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
 
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorPigEventDao doctorPigEventDao;
-    private final PigSearchWriteService pigSearchWriteService;
-    private final GroupSearchWriteService groupSearchWriteService;
-    private final BarnSearchWriteService barnSearchWriteService;
     private final DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
     private final DoctorKpiDao doctorKpiDao;
     private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
@@ -61,9 +55,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     @Autowired
     public DoctorRollbackServiceImpl(DoctorGroupEventDao doctorGroupEventDao,
                                      DoctorPigEventDao doctorPigEventDao,
-                                     PigSearchWriteService pigSearchWriteService,
-                                     GroupSearchWriteService groupSearchWriteService,
-                                     BarnSearchWriteService barnSearchWriteService,
                                      DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao,
                                      DoctorKpiDao doctorKpiDao,
                                      DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
@@ -71,9 +62,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                                      DoctorDailyReportCache doctorDailyReportCache) {
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorPigEventDao = doctorPigEventDao;
-        this.pigSearchWriteService = pigSearchWriteService;
-        this.groupSearchWriteService = groupSearchWriteService;
-        this.barnSearchWriteService = barnSearchWriteService;
         this.doctorGroupBatchSummaryDao = doctorGroupBatchSummaryDao;
         this.doctorKpiDao = doctorKpiDao;
         this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
@@ -152,34 +140,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         }
         for (RollbackType type : dto.getRollbackTypes()) {
             switch (type) {
-                //搜索实时更新
-                case SEARCH_BARN:
-                    if (dto.getEsBarnId() != null) {
-                        barnSearchWriteService.update(dto.getEsBarnId());
-                    }
-                    break;
-                case SEARCH_GROUP:
-                    if (dto.getEsGroupId() != null) {
-                        groupSearchWriteService.update(dto.getEsGroupId());
-                    }
-                    break;
-                case SEARCH_PIG:
-                    log.info("test es pig update:{}", dto);
-                    if (dto.getEsPigId() != null) {
-                        pigSearchWriteService.update(dto.getEsPigId());
-                    }
-                    break;
-                case SEARCH_GROUP_DELETE:
-                    if (dto.getEsGroupId() != null) {
-                        groupSearchWriteService.delete(dto.getEsGroupId());
-                    }
-                    break;
-                case SEARCH_PIG_DELETE:
-                    if (dto.getEsPigId() != null) {
-                        pigSearchWriteService.delete(dto.getEsPigId());
-                    }
-                    break;
-
                 //日报实时更新
                 case DAILY_DEAD:
                     report.setDead(getDeadDailyReport(farmId, startAt, endAt));
@@ -222,6 +182,11 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         Date endAt = Dates.startOfDay(new Date());
         Long farmId = dto.getFarmId();
 
+        //更新 PigTypeStatistic
+        doctorPigTypeStatisticWriteService.statisticGroup(dto.getOrgId(), dto.getFarmId());
+        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.BOAR.getKey());
+        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey());
+
         while (!startAt.after(endAt)) {
             //猪群存栏
             DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
@@ -245,11 +210,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, everyRedis);
             startAt = new DateTime(startAt).plusDays(1).toDate();
         }
-
-        //更新 PigTypeStatistic
-        doctorPigTypeStatisticWriteService.statisticGroup(dto.getOrgId(), dto.getFarmId());
-        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.BOAR.getKey());
-        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey());
     }
 
     private DoctorCheckPregDailyReport getCheckPregDailyReport(Long farmId, Date startAt, Date endAt) {

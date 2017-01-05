@@ -30,7 +30,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.search.pig.SearchedPig;
+import io.terminus.doctor.event.dto.search.SearchedPig;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;

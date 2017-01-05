@@ -8,11 +8,9 @@ import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.search.barn.BarnSearchDumpService;
-import io.terminus.doctor.event.search.group.GroupDumpService;
-import io.terminus.doctor.event.search.pig.PigDumpService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
+import io.terminus.doctor.move.service.DoctorGroupBatchFlushService;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -52,12 +50,6 @@ public class DoctorImportDataController {
     @Autowired
     private DoctorImportDataService doctorImportDataService;
     @Autowired
-    private BarnSearchDumpService barnSearchDumpService;
-    @Autowired
-    private GroupDumpService groupDumpService;
-    @Autowired
-    private PigDumpService pigDumpService;
-    @Autowired
     private Subscriber subscriber;
     @Autowired
     private DoctorDailyReportWriteService doctorDailyReportWriteService;
@@ -67,6 +59,8 @@ public class DoctorImportDataController {
     private JedisTemplate jedisTemplate;
     @Autowired
     private DoctorFarmReadService doctorFarmReadService;
+    @Autowired
+    private DoctorGroupBatchFlushService doctorGroupBatchFlushService;
 
     @PostConstruct
     public void init () throws Exception{
@@ -159,11 +153,7 @@ public class DoctorImportDataController {
         this.generateReport(doctorImportDataService.importAll(sheet).getId());
         watch.stop();
         int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
-        log.warn("database data inserted successfully, elapsed {} minutes, now dumping ElasticSearch", minute);
-
-        barnSearchDumpService.deltaDump(minute);
-        groupDumpService.deltaDump(minute);
-        pigDumpService.deltaDump(minute);
+        log.warn("database data inserted successfully, elapsed {} minutes", minute);
         log.warn("all data moved successfully, CONGRATULATIONS!!!");
     }
 
@@ -202,7 +192,7 @@ public class DoctorImportDataController {
         } catch (Exception e) {
             log.error(Throwables.getStackTraceAsString(e));
             jedisTemplate.execute(jedis -> {
-                jedis.set(redisKey, Throwables.getStackTraceAsString(e));
+                jedis.set(redisKey, e.getMessage());
             });
         } finally {
             if(inputStream != null){
@@ -214,7 +204,9 @@ public class DoctorImportDataController {
         }
     }
 
-
+    /**
+     * 修复配种率的各种统计
+     */
     @RequestMapping(value = "/updateMateEvent", method = RequestMethod.GET)
     public boolean updateMateEvent(@RequestParam(value = "farmId", required = false) Long farmId) {
         try {
@@ -226,6 +218,47 @@ public class DoctorImportDataController {
             return true;
         } catch (Exception e) {
             log.error("update mate event failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 修复分娩后的母猪事件，增加group_id 方便以后统计
+     */
+    @RequestMapping(value = "/flushFarrowGroupId", method = RequestMethod.GET)
+    public boolean flushFarrowGroupId(@RequestParam(value = "farmId", required = false) Long farmId) {
+        try {
+            log.info("******* flushFarrowGroupId start, farmId:{}", farmId);
+            if (farmId != null) {
+                doctorImportDataService.flushFarrowGroupId(farmId);
+            } else {
+                RespHelper.or500(doctorFarmReadService.findAllFarms()).forEach(farm -> doctorImportDataService.flushFarrowGroupId(farm.getId()));
+            }
+            log.info("******* flushFarrowGroupId end");
+            return true;
+        } catch (Exception e) {
+            log.error("flush farrow groupId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 刷批次总结
+     */
+    @RequestMapping(value = "/flushGroupBatch", method = RequestMethod.GET)
+    public boolean flushGroupBatch(@RequestParam(value = "farmId", required = false) Long farmId,
+                                   @RequestParam(value = "all", defaultValue = "false") boolean all) {
+        try {
+            log.info("******* flushGroupBatch start, farmId:{}, all:{}", farmId, all);
+            if (farmId != null) {
+                doctorGroupBatchFlushService.flushGroupBatch(farmId, all);
+            } else {
+                doctorGroupBatchFlushService.flushGroupBatches(all);
+            }
+            log.info("******* flushGroupBatch end");
+            return true;
+        } catch (Exception e) {
+            log.error("flush group batch failed, farmId:{}, all:{}, cause:{}", farmId, all, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

@@ -15,7 +15,7 @@
     <!-- 某一猪群死淘率 -->
     <select id="getDeadRateByGroupId" parameterType="map" resultType="double">
         SELECT
-        (
+        ifnull((
           SELECT
             ifnull(sum(quantity),0) AS dead_count
           FROM doctor_group_events
@@ -31,7 +31,7 @@
           WHERE
             type = 2 AND -- 转入猪群事件
             group_id = #{groupId}
-        )
+        ), 0)
         FROM DUAL
     </select>
 
@@ -746,6 +746,26 @@
         <include refid="criteria"/>
         )
         FROM dual
+    </select>
+
+    <!-- 某一猪群即将关闭之前的存栏 -->
+    <select id="farrowGroupQuantityWhenClose" parameterType="map" resultType="int">
+        SELECT
+          ifnull(sum(ifnull(delta.inCount, 0)) - sum(ifnull(delta.outCount, 0)) - sum(ifnull(delta.turnCount, 0)), 0) AS deltaCount  -- 算出这段时间的增量
+        FROM (
+            SELECT
+                CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
+                CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END AS outCount,
+                CASE WHEN TYPE = 5 THEN 1 ELSE 0 END AS turnCount
+            FROM doctor_group_events
+            WHERE group_id = #{groupId}
+                AND  TYPE IN (2, 3, 4, 5, 9)
+                AND event_at &lt;= (
+                    SELECT event_at  FROM  doctor_group_events  WHERE group_id = #{groupId} AND TYPE = 2
+                    ORDER BY event_at DESC, id DESC
+                    LIMIT 1
+                )
+        ) AS delta
     </select>
 
     <!-- 实时存栏: 产房仔猪 -->

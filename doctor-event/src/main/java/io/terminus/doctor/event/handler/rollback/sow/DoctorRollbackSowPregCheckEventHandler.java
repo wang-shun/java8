@@ -22,6 +22,7 @@ public class DoctorRollbackSowPregCheckEventHandler extends DoctorAbstractRollba
                 .esPigId(pigEvent.getPigId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_PIG, RollbackType.DAILY_PREG_CHECK))
                 .farmId(pigEvent.getFarmId())
+                .orgId(pigEvent.getOrgId())
                 .eventAt(pigEvent.getEventAt())
                 .build();
         return Lists.newArrayList(doctorRollbackDto);
