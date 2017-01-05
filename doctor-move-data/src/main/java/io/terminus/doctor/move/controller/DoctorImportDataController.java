@@ -8,9 +8,6 @@ import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.search.barn.BarnSearchDumpService;
-import io.terminus.doctor.event.search.group.GroupDumpService;
-import io.terminus.doctor.event.search.pig.PigDumpService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.service.DoctorGroupBatchFlushService;
@@ -52,12 +49,6 @@ public class DoctorImportDataController {
 
     @Autowired
     private DoctorImportDataService doctorImportDataService;
-    @Autowired
-    private BarnSearchDumpService barnSearchDumpService;
-    @Autowired
-    private GroupDumpService groupDumpService;
-    @Autowired
-    private PigDumpService pigDumpService;
     @Autowired
     private Subscriber subscriber;
     @Autowired
@@ -162,11 +153,7 @@ public class DoctorImportDataController {
         this.generateReport(doctorImportDataService.importAll(sheet).getId());
         watch.stop();
         int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
-        log.warn("database data inserted successfully, elapsed {} minutes, now dumping ElasticSearch", minute);
-
-        barnSearchDumpService.deltaDump(minute);
-        groupDumpService.deltaDump(minute);
-        pigDumpService.deltaDump(minute);
+        log.warn("database data inserted successfully, elapsed {} minutes", minute);
         log.warn("all data moved successfully, CONGRATULATIONS!!!");
     }
 

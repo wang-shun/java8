@@ -12,6 +12,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.enums.SearchType;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.Params;
@@ -312,21 +313,29 @@ public class DoctorSearches {
                         pigCount = pigTracks.size();
                         groupCount = getGroupCount(barn);
 
-                        barnStatus = Lists.newArrayList(SearchedBarn.createFarrowStatus(groupCount));
+                        if (groupCount > 0) {
+                            barnStatus.add(SearchedBarn.createFarrowStatus(groupCount));
+                        }
                         barnStatus = addPigBarnStatus(barnStatus, pigTracks);
+                        barn.setType(PigSearchType.SOW_GROUP.getValue());
                     }
                     else if (JUST_GROUPS.contains(pigType)) {
                         groupCount = getGroupCount(barn);
-                        barnStatus = Lists.newArrayList(SearchedBarn.createGroupStatus(pigType, groupCount));
+                        if (groupCount > 0) {
+                            barnStatus.add(SearchedBarn.createFarrowStatus(groupCount));
+                        }
+                        barn.setType(PigSearchType.GROUP.getValue());
                     }
                     else if (JUST_PIGS.contains(pigType)) {
                         List<DoctorPigTrack> pigTracks = RespHelper.or500(doctorPigReadService.findActivePigTrackByCurrentBarnId(barn.getId()));
                         pigCount = pigTracks.size();
                         barnStatus = addPigBarnStatus(barnStatus, pigTracks);
+                        barn.setType(Objects.equals(pigType, PigType.BOAR) ? PigSearchType.BOAR.getValue() : PigSearchType.SOW.getValue());
                     }
 
                     barn.setPigCount(pigCount);
                     barn.setPigGroupCount(groupCount);
+                    barn.setStorage(barn.getPigCount() + barn.getPigGroupCount());
                     barn.setBarnStatuses(barnStatus);
                     return barn;
                 })
@@ -345,7 +354,9 @@ public class DoctorSearches {
     //获取猪舍中猪的状态聚合
     private List<SearchedBarn.BarnStatus> addPigBarnStatus(List<SearchedBarn.BarnStatus> barnStatus, List<DoctorPigTrack> pigTracks) {
         for (Map.Entry<Integer, List<DoctorPigTrack>> m : pigTracks.stream().collect(Collectors.groupingBy(DoctorPigTrack::getStatus)).entrySet()) {
-            barnStatus.add(SearchedBarn.createPigStatus(PigStatus.from(m.getKey()), m.getValue().size()));
+            if (m.getValue().size() > 0) {
+                barnStatus.add(SearchedBarn.createPigStatus(PigStatus.from(m.getKey()), m.getValue().size()));
+            }
         }
         return barnStatus;
     }
@@ -359,8 +370,12 @@ public class DoctorSearches {
         if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
             barnDto.setBarnIds(RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId())).getBarnIdsList());
         }
+
         if (Params.containsNotEmpty(params, "q")) {
             barnDto.setName(params.get("q"));
+        }
+        if (Params.containsNotEmpty(params, "farmId")) {
+            barnDto.setFarmId(Long.valueOf(params.get("farmId")));
         }
         if (Params.containsNotEmpty(params, "pigType")) {
             barnDto.setPigType(Integer.valueOf(params.get("pigType")));

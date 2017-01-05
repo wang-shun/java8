@@ -237,7 +237,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @return
      */
     public List<DoctorPigEvent> findOperators(Map<String, Object> criteria){
-        return getSqlSession().selectList(sqlId("findOperator"), criteria);
+        return getSqlSession().selectList(sqlId("findOperators"), criteria);
     }
 
     public List<DoctorPigEvent> findByPigId(Long pigId) {
