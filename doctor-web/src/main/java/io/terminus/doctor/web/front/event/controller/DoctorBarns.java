@@ -12,6 +12,7 @@ import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -475,6 +476,16 @@ public class DoctorBarns {
         }else{
             throw new JsonResponseException("barn.has.event.forbid.update.name");
         }
+    }
+
+    /**
+     * 统计每种猪舍类型猪舍数量
+     * @param params 查询条件
+     * @return
+     */
+    @RequestMapping(value = "/countForTypes", method = RequestMethod.GET)
+    public DoctorBarnCountForPigTypeDto countForTypes(@RequestParam Map<String, Object> params) {
+        return RespHelper.or500(doctorBarnReadService.countForTypes(params));
     }
 
 }

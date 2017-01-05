@@ -11,6 +11,7 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
 import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 猪舍表读服务实现类
@@ -194,6 +196,19 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         }
     }
 
+    @Override
+    public Response<DoctorBarnCountForPigTypeDto> countForTypes(Map<String, Object> criteria) {
+        try {
+            DoctorBarnCountForPigTypeDto dto = doctorBarnDao.countForTypes(criteria);
+            Long allCount = dto.getReserveCount() + dto.getBoarCount() + dto.getPregSowCount()
+                    + dto.getDeliverSowCount() + dto.getMateSowCount() + dto.getFattenPigCount() + dto.getNurseryPigletCount();
+            dto.setAllCount(allCount);
+            return Response.ok(dto);
+        } catch (Exception e) {
+            log.error("count.for.types.failed, cause by :{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("count for types failed");
+        }
+    }
     @Override
     public Response<Paging<DoctorBarn>> pagingBarn(DoctorBarnDto barnDto, Integer pageNo, Integer size) {
         try {
