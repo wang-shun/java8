@@ -172,4 +172,17 @@
         <include refid="tb"/>
         where org_id = #{orgId}
     </select>
+
+
+    <select id="countForTypes" parameterType="map" resultType="map" >
+        SELECT pig_type AS  pigType, ifnull(COUNT(1), 0) AS quantity
+        FROM
+        <include refid="tb"/>
+        WHERE
+        pig_type != 9
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="status != null">AND status = #{status}</if>
+        <if test="status == null">AND status = 1</if>
+        GROUP BY pig_type
+    </select>
 </mapper>

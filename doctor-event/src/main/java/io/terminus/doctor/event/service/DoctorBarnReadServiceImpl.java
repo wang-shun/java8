@@ -9,6 +9,7 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 猪舍表读服务实现类
@@ -188,6 +190,46 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             log.error("fail to find available barns,current group id:{},farm id:{},cause:{}",
                     groupId, farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("find.available.barns.failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorBarnCountForPigTypeDto> countForTypes(Map<String, Object> criteria) {
+        try {
+            DoctorBarnCountForPigTypeDto barnCountForPigTypeDto = new DoctorBarnCountForPigTypeDto();
+            List<Map<String, Object>> list = doctorBarnDao.countForTypes(criteria);
+            list.forEach(map -> {
+                switch ((int) map.get("pigType")) {
+                    case 2:
+                        barnCountForPigTypeDto.setNurseryPigletCount(((Long) map.get("quantity")));
+                        break;
+                    case 3:
+                        barnCountForPigTypeDto.setFattenPigCount(((Long) map.get("quantity")));
+                        break;
+                    case 4:
+                        barnCountForPigTypeDto.setReserveCount(((Long) map.get("quantity")));
+                        break;
+                    case 5:
+                        barnCountForPigTypeDto.setMateSowCount(((Long) map.get("quantity")));
+                        break;
+                    case 6:
+                        barnCountForPigTypeDto.setPregSowCount(((Long) map.get("quantity")));
+                        break;
+                    case 7:
+                        barnCountForPigTypeDto.setDeliverSowCount(((Long) map.get("quantity")));
+                        break;
+                    default:
+                        break;
+                }
+            });
+            Long allCount = barnCountForPigTypeDto.getNurseryPigletCount() + barnCountForPigTypeDto.getFattenPigCount()
+                    + barnCountForPigTypeDto.getReserveCount() + barnCountForPigTypeDto.getMateSowCount()
+                    + barnCountForPigTypeDto.getPregSowCount() + barnCountForPigTypeDto.getDeliverSowCount();
+            barnCountForPigTypeDto.setAllCount(allCount);
+            return Response.ok(barnCountForPigTypeDto);
+        } catch (Exception e) {
+            log.error("count.for.types.failed, cause by :{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("count for types failed");
         }
     }
 }
