@@ -41,6 +41,31 @@
         #{name}, #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{pigType}, #{canOpenGroup}, #{status}, #{capacity}, #{staffId}, #{staffName}, #{outId}, #{extra}, now(), now()
     </sql>
 
+    <sql id="criteria">
+        <if test="id != null">AND id = #{id}</if>
+        <if test="name != null"> AND name LIKE CONCAT('%', #{name}, '%')</if>
+        <if test="orgId != null">AND org_id = #{orgId}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="pigType != null">AND pig_type = #{pigType}</if>
+
+        <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND pig_type IN
+            <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
+                #{type}
+            </foreach>
+        </if>
+
+        <if test="barnIds != null  &amp;&amp; barnIds.size() > 0">AND id IN
+            <foreach collection="barnIds" item="bid" open="(" separator="," close=")">
+                #{bid}
+            </foreach>
+        </if>
+
+        <if test="canOpenGroup != null">AND can_open_group = #{canOpenGroup}</if>
+        <if test="status != null">AND status = #{status}</if>
+        <if test="capacity != null">AND capacity = #{capacity}</if>
+        <if test="staffId != null">AND staff_id = #{staffId}</if>
+    </sql>
+
     <insert id="create" parameterType="DoctorBarn" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb" />
@@ -97,9 +122,6 @@
             <if test="staffName != null">staff_name = #{staffName},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -174,6 +196,7 @@
     </select>
 
 
+<<<<<<< HEAD
     <select id="countForTypes" parameterType="map" resultType="map" >
         SELECT pig_type AS  pigType, ifnull(COUNT(1), 0) AS quantity
         FROM
@@ -184,4 +207,40 @@
         <if test="status == null">AND status = 1</if>
         GROUP BY pig_type
     </select>
+=======
+    <select id="list" parameterType="map" resultMap="DoctorBarnMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(1) FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorBarnMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        <!--分页排序规则：后备4、配种5、妊娠6、产房 1,7、保育2、育肥3 、公猪9-->
+        ORDER BY
+          CASE
+            WHEN pig_type = 4 THEN 10
+            WHEN pig_type = 5 THEN 9
+            WHEN pig_type = 6 THEN 8
+            WHEN pig_type = 1 THEN 7
+            WHEN pig_type = 7 THEN 7
+            WHEN pig_type = 2 THEN 6
+            WHEN pig_type = 3 THEN 5
+            WHEN pig_type = 9 THEN 4
+          END DESC, `name`
+        LIMIT #{offset}, #{limit}
+    </select>
+
+>>>>>>> develop
 </mapper>

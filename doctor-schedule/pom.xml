@@ -40,11 +40,6 @@
 
         <dependency>
             <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-workflow-job</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-msg-api</artifactId>
         </dependency>
 

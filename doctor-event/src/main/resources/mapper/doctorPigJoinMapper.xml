@@ -46,7 +46,7 @@
         </where>
     </select>
 
-    <select id="paging" parameterType="map" resultType="io.terminus.doctor.event.search.pig.SearchedPig" >
+    <select id="paging" parameterType="map" resultType="io.terminus.doctor.event.dto.search.SearchedPig" >
         SELECT
             a.id AS id,
             a.pig_code AS pigCode,
