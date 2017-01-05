@@ -195,8 +195,6 @@
         where org_id = #{orgId}
     </select>
 
-
-<<<<<<< HEAD
     <select id="countForTypes" parameterType="map" resultType="map" >
         SELECT pig_type AS  pigType, ifnull(COUNT(1), 0) AS quantity
         FROM
@@ -207,7 +205,7 @@
         <if test="status == null">AND status = 1</if>
         GROUP BY pig_type
     </select>
-=======
+
     <select id="list" parameterType="map" resultMap="DoctorBarnMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         <where>
@@ -242,5 +240,4 @@
         LIMIT #{offset}, #{limit}
     </select>
 
->>>>>>> develop
 </mapper>
