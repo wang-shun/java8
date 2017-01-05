@@ -363,7 +363,7 @@ public class DoctorSearches {
 
     //转换猪舍搜索条件
     private DoctorBarnDto getBarnSearchMap(Map<String, String> params) {
-        DoctorBarnDto barnDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().convertValue(params, DoctorBarnDto.class);
+        DoctorBarnDto barnDto = new DoctorBarnDto();
 
         //主账号不用校验，直接拥有全部猪舍权限
         BaseUser user = UserUtil.getCurrentUser();
