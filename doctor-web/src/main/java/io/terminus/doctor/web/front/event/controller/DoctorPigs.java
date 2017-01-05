@@ -22,7 +22,6 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.search.pig.PigDumpService;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -82,8 +81,6 @@ public class DoctorPigs {
     private DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService;
     @RpcConsumer
     private DoctorBarnReadService doctorBarnReadService;
-    @RpcConsumer
-    private PigDumpService pigDumpService;
 
     @Autowired
     public DoctorPigs(DoctorPigReadService doctorPigReadService,
@@ -385,10 +382,6 @@ public class DoctorPigs {
         }
 
         RespHelper.or500(doctorPigWriteService.updatePigCode(pigId, code));
-
-        // 更新下 elastic search
-        pigDumpService.dump(pigId);
-
         return true;
     }
 }

@@ -13,7 +13,6 @@ import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.search.group.GroupSearchWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -37,9 +36,6 @@ public class DoctorGroupEventListener implements EventListener {
     private DoctorKpiDao doctorKpiDao;
 
     @Autowired
-    private GroupSearchWriteService groupSearchWriteService;
-
-    @Autowired
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
 
     @Autowired
@@ -52,9 +48,6 @@ public class DoctorGroupEventListener implements EventListener {
     @Subscribe
     public void handleGroupEvent(ListenedGroupEvent groupEvent) {
         log.info("[DoctorGroupEventListener]-> handle.group.event, groupEvent -> {}", groupEvent);
-
-        //更新猪群搜索
-        groupSearchWriteService.update(groupEvent.getGroupId());
 
         DoctorGroupEvent event = doctorGroupEventDao.findById(groupEvent.getDoctorGroupEventId());
         if (event == null) {

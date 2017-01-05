@@ -19,7 +19,6 @@ import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.search.pig.PigSearchWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -47,9 +46,6 @@ public class DoctorPigEventListener implements EventListener {
     private DoctorPigEventDao doctorPigEventDao;
 
     @Autowired
-    private PigSearchWriteService pigSearchWriteService;
-
-    @Autowired
     private DoctorKpiDao doctorKpiDao;
 
     @Autowired
@@ -68,9 +64,6 @@ public class DoctorPigEventListener implements EventListener {
     @Subscribe
     public void handlePigEvent(ListenedPigEvent listenedPigEvent) {
         log.info("[DoctorPigEventListener]-> handle.pig.event, listenedPigEvent:{}", listenedPigEvent);
-
-        //更新猪的es搜索
-        pigSearchWriteService.update(listenedPigEvent.getPigId());
 
         DoctorPigEvent event = doctorPigEventDao.findById(listenedPigEvent.getPigEventId());
         if (event == null) {

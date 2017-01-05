@@ -19,24 +19,22 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.dto.GroupPaging;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.search.barn.BarnSearchReadService;
-import io.terminus.doctor.event.search.barn.SearchedBarn;
-import io.terminus.doctor.event.search.barn.SearchedBarnDto;
-import io.terminus.doctor.event.search.group.SearchedGroup;
-import io.terminus.doctor.event.search.pig.SearchedPig;
-import io.terminus.doctor.event.search.query.GroupPaging;
+import io.terminus.doctor.event.dto.search.SearchedBarn;
+import io.terminus.doctor.event.dto.search.SearchedBarnDto;
+import io.terminus.doctor.event.dto.search.SearchedGroup;
+import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.msg.dto.DoctorMessageUserDto;
 import io.terminus.doctor.msg.service.DoctorMessageUserReadService;
-import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -69,8 +67,6 @@ public class DoctorSearches {
 
     private final DoctorBarnReadService doctorBarnReadService;
 
-    private final BarnSearchReadService barnSearchReadService;
-
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
     private final DoctorGroupReadService doctorGroupReadService;
@@ -89,13 +85,11 @@ public class DoctorSearches {
 
     @Autowired
     public DoctorSearches(DoctorBarnReadService doctorBarnReadService,
-                          BarnSearchReadService barnSearchReadService,
                           DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                           DoctorGroupReadService doctorGroupReadService,
                           DoctorMessageUserReadService doctorMessageUserReadService,
                           DoctorPigReadService doctorPigReadService) {
         this.doctorBarnReadService = doctorBarnReadService;
-        this.barnSearchReadService = barnSearchReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorMessageUserReadService = doctorMessageUserReadService;
@@ -439,36 +433,6 @@ public class DoctorSearches {
         } catch (Exception e) {
             throw new JsonResponseException(500, e.getMessage());
         }
-    }
-
-    /**
-     * 获取当前用户所拥有猪舍权限的猪舍IDS
-     *
-     * @return 猪舍IDS
-     */
-    public List<String> getUserAccessBarnIds(Map<String, String> params) {
-        List<String> list = Lists.newArrayList();
-        BaseUser user = UserUtil.getCurrentUser();
-        DoctorUserDataPermission doctorUserDataPermission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId()));
-        if (doctorUserDataPermission == null) {
-            return null;
-        }
-        //获取猪舍ids
-        String barnIds = doctorUserDataPermission.getBarnIds();
-        if (StringUtils.isBlank(barnIds)) {
-            return null;
-        }
-        String barnId = params.get("barnId");
-        if (StringUtils.isNotBlank(barnId)) {
-            List<String> barnIdList = Splitters.COMMA.splitToList(barnIds);
-            if (!barnIdList.contains(barnId)) {
-                return null;
-            }
-            barnIds = barnId;
-            params.remove("barnId");
-        }
-        list.add(barnIds);
-        return list;
     }
 
     public void searchFromMessage(Map<String, String> params) {

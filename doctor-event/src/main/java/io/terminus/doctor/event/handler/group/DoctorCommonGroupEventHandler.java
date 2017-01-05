@@ -24,7 +24,6 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.search.pig.PigSearchWriteService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -56,7 +55,6 @@ public class DoctorCommonGroupEventHandler {
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorGroupManager doctorGroupManager;
     private final DoctorPigEventWriteService doctorPigEventWriteService;
-    private final PigSearchWriteService pigSearchWriteService;
     private final DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
     private final DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService;
 
@@ -66,7 +64,6 @@ public class DoctorCommonGroupEventHandler {
                                          DoctorGroupReadService doctorGroupReadService,
                                          DoctorGroupManager doctorGroupManager,
                                          DoctorPigEventWriteService doctorPigEventWriteService,
-                                         PigSearchWriteService pigSearchWriteService,
                                          DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService,
                                          DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService) {
         this.doctorCloseGroupEventHandler = doctorCloseGroupEventHandler;
@@ -74,7 +71,6 @@ public class DoctorCommonGroupEventHandler {
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorGroupManager = doctorGroupManager;
         this.doctorPigEventWriteService = doctorPigEventWriteService;
-        this.pigSearchWriteService = pigSearchWriteService;
         this.doctorGroupBatchSummaryReadService = doctorGroupBatchSummaryReadService;
         this.doctorGroupBatchSummaryWriteService = doctorGroupBatchSummaryWriteService;
     }
@@ -213,10 +209,7 @@ public class DoctorCommonGroupEventHandler {
         farmEntryDto.setEarCode(input.getEarCode());
         farmEntryDto.setWeight(input.getWeight());
 
-        Long pigId = orServEx(doctorPigEventWriteService.pigEntryEvent(basicDto, farmEntryDto));
-
-        //解决在事务里发事件 异步取不到的问题, 以后绝对不能这么干了
-        pigSearchWriteService.update(pigId);
+        orServEx(doctorPigEventWriteService.pigEntryEvent(basicDto, farmEntryDto));
     }
 
     /**
