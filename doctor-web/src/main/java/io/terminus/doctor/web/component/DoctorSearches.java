@@ -12,6 +12,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.enums.SearchType;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.Params;
@@ -316,16 +317,20 @@ public class DoctorSearches {
                             barnStatus.add(SearchedBarn.createFarrowStatus(groupCount));
                         }
                         barnStatus = addPigBarnStatus(barnStatus, pigTracks);
+                        barn.setType(PigSearchType.SOW_GROUP.getValue());
                     }
                     else if (JUST_GROUPS.contains(pigType)) {
                         groupCount = getGroupCount(barn);
                         if (groupCount > 0) {
                             barnStatus.add(SearchedBarn.createFarrowStatus(groupCount));
-                        }                    }
+                        }
+                        barn.setType(PigSearchType.GROUP.getValue());
+                    }
                     else if (JUST_PIGS.contains(pigType)) {
                         List<DoctorPigTrack> pigTracks = RespHelper.or500(doctorPigReadService.findActivePigTrackByCurrentBarnId(barn.getId()));
                         pigCount = pigTracks.size();
                         barnStatus = addPigBarnStatus(barnStatus, pigTracks);
+                        barn.setType(Objects.equals(pigType, PigType.BOAR) ? PigSearchType.BOAR.getValue() : PigSearchType.SOW.getValue());
                     }
 
                     barn.setPigCount(pigCount);
