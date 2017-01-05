@@ -287,7 +287,7 @@ public class DoctorSearches {
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
         DoctorBarnDto barnDto = getBarnSearchMap(params);
-        if (barnDto.getFarmId() == null || isEmpty(barnDto.getBarnIds())) {
+        if (barnDto.getFarmId() == null) {
             return new Paging<>(0L, Collections.emptyList());
         }
 
@@ -312,13 +312,16 @@ public class DoctorSearches {
                         pigCount = pigTracks.size();
                         groupCount = getGroupCount(barn);
 
-                        barnStatus = Lists.newArrayList(SearchedBarn.createFarrowStatus(groupCount));
+                        if (groupCount > 0) {
+                            barnStatus.add(SearchedBarn.createFarrowStatus(groupCount));
+                        }
                         barnStatus = addPigBarnStatus(barnStatus, pigTracks);
                     }
                     else if (JUST_GROUPS.contains(pigType)) {
                         groupCount = getGroupCount(barn);
-                        barnStatus = Lists.newArrayList(SearchedBarn.createGroupStatus(pigType, groupCount));
-                    }
+                        if (groupCount > 0) {
+                            barnStatus.add(SearchedBarn.createFarrowStatus(groupCount));
+                        }                    }
                     else if (JUST_PIGS.contains(pigType)) {
                         List<DoctorPigTrack> pigTracks = RespHelper.or500(doctorPigReadService.findActivePigTrackByCurrentBarnId(barn.getId()));
                         pigCount = pigTracks.size();
@@ -345,7 +348,9 @@ public class DoctorSearches {
     //获取猪舍中猪的状态聚合
     private List<SearchedBarn.BarnStatus> addPigBarnStatus(List<SearchedBarn.BarnStatus> barnStatus, List<DoctorPigTrack> pigTracks) {
         for (Map.Entry<Integer, List<DoctorPigTrack>> m : pigTracks.stream().collect(Collectors.groupingBy(DoctorPigTrack::getStatus)).entrySet()) {
-            barnStatus.add(SearchedBarn.createPigStatus(PigStatus.from(m.getKey()), m.getValue().size()));
+            if (m.getValue().size() > 0) {
+                barnStatus.add(SearchedBarn.createPigStatus(PigStatus.from(m.getKey()), m.getValue().size()));
+            }
         }
         return barnStatus;
     }
@@ -359,8 +364,12 @@ public class DoctorSearches {
         if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
             barnDto.setBarnIds(RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId())).getBarnIdsList());
         }
+
         if (Params.containsNotEmpty(params, "q")) {
             barnDto.setName(params.get("q"));
+        }
+        if (Params.containsNotEmpty(params, "farmId")) {
+            barnDto.setFarmId(Long.valueOf(params.get("farmId")));
         }
         if (Params.containsNotEmpty(params, "pigType")) {
             barnDto.setPigType(Integer.valueOf(params.get("pigType")));
