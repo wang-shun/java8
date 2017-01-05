@@ -179,8 +179,7 @@
         FROM
         <include refid="tb"/>
         WHERE
-        pig_type != 9
-        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="farmId != null">farm_id = #{farmId}</if>
         <if test="status != null">AND status = #{status}</if>
         <if test="status == null">AND status = 1</if>
         GROUP BY pig_type

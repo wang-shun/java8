@@ -14,29 +14,34 @@ public class DoctorBarnCountForPigTypeDto implements Serializable{
     /**
      * 全部数量
      */
-    private Long allCount;
+    private long allCount;
     /**
      * 保育舍数量
      */
-    private Long nurseryPigletCount;
+    private long nurseryPigletCount;
     /**
      * 育肥舍数量
      */
-    private Long fattenPigCount;
+    private long fattenPigCount;
     /**
      *后备舍数量
      */
-    private Long reserveCount;
+    private long reserveCount;
     /**
      * 配种舍数量
      */
-    private Long mateSowCount;
+    private long mateSowCount;
     /**
      * 妊娠舍数量
      */
-    private Long pregSowCount;
+    private long pregSowCount;
     /**
      * 分娩舍数量
      */
-    private Long deliverSowCount;
+    private long deliverSowCount;
+
+    /**
+     * 公猪舍数量
+     */
+    private long boarCount;
 }

@@ -201,22 +201,25 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             list.forEach(map -> {
                 switch ((int) map.get("pigType")) {
                     case 2:
-                        barnCountForPigTypeDto.setNurseryPigletCount(((Long) map.get("quantity")));
+                        barnCountForPigTypeDto.setNurseryPigletCount(((long) map.get("quantity")));
                         break;
                     case 3:
-                        barnCountForPigTypeDto.setFattenPigCount(((Long) map.get("quantity")));
+                        barnCountForPigTypeDto.setFattenPigCount(((long) map.get("quantity")));
                         break;
                     case 4:
-                        barnCountForPigTypeDto.setReserveCount(((Long) map.get("quantity")));
+                        barnCountForPigTypeDto.setReserveCount(((long) map.get("quantity")));
                         break;
                     case 5:
-                        barnCountForPigTypeDto.setMateSowCount(((Long) map.get("quantity")));
+                        barnCountForPigTypeDto.setMateSowCount(((long) map.get("quantity")));
                         break;
                     case 6:
-                        barnCountForPigTypeDto.setPregSowCount(((Long) map.get("quantity")));
+                        barnCountForPigTypeDto.setPregSowCount(((long) map.get("quantity")));
                         break;
                     case 7:
-                        barnCountForPigTypeDto.setDeliverSowCount(((Long) map.get("quantity")));
+                        barnCountForPigTypeDto.setDeliverSowCount(((long) map.get("quantity")));
+                        break;
+                    case 9:
+                        barnCountForPigTypeDto.setBoarCount(((long) map.get("quantity")));
                         break;
                     default:
                         break;
@@ -224,7 +227,8 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             });
             Long allCount = barnCountForPigTypeDto.getNurseryPigletCount() + barnCountForPigTypeDto.getFattenPigCount()
                     + barnCountForPigTypeDto.getReserveCount() + barnCountForPigTypeDto.getMateSowCount()
-                    + barnCountForPigTypeDto.getPregSowCount() + barnCountForPigTypeDto.getDeliverSowCount();
+                    + barnCountForPigTypeDto.getPregSowCount() + barnCountForPigTypeDto.getDeliverSowCount()
+                    + barnCountForPigTypeDto.getBoarCount();
             barnCountForPigTypeDto.setAllCount(allCount);
             return Response.ok(barnCountForPigTypeDto);
         } catch (Exception e) {
