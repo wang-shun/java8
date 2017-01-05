@@ -160,13 +160,7 @@ public class DoctorBarns {
             Map<String, Object> extra = RespHelper.or500(subRoleReadService.findById(roleId)).getExtra();
             if(extra != null && extra.get("defaultBarnType") != null){
                 List<Integer> barnType = (List<Integer>) extra.get("defaultBarnType");
-                barnSelects.forEach(select -> {
-                    if(barnType.contains(select.getPigType())){
-                        select.setSelect(true);
-                    }else{
-                        select.setSelect(false);
-                    }
-                });
+                barnSelects.forEach(select -> select.setSelect(barnType.contains(select.getPigType())));
             }
         }
 

@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.model.DoctorBarn;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -88,4 +90,12 @@ public interface DoctorBarnReadService {
     Response<List<DoctorBarn>> findAvailableBarns(@NotNull(message = "farmId.can.not.be.null") Long farmId,
                                                   @NotNull(message = "groupId.can.not.be.null") Long groupId);
 
+    /**
+     * 分页查询猪舍表
+     * @param barnDto   查询条件
+     * @param pageNo    当前页码
+     * @param size      分页大小
+     * @return 猪舍表分页查询结果
+     */
+    Response<Paging<DoctorBarn>> pagingBarn(DoctorBarnDto barnDto, Integer pageNo, Integer size);
 }

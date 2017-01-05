@@ -35,7 +35,7 @@
     </sql>
 
     <select id="getPigCount" parameterType="map" resultType="long">
-        SELECT sum(b.quantity) from doctor_groups a
+        SELECT ifnull(sum(b.quantity), 0) from doctor_groups a
         left join doctor_group_tracks b on a.id = b.group_id
         <where>
             <include refid="criteria"/>

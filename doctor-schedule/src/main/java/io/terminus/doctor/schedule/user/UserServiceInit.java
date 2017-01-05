@@ -28,7 +28,6 @@ public class UserServiceInit {
     private final DoctorServiceReviewReadService doctorServiceReviewReadService;
     private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
-    private final DoctorServiceStatusWriteService doctorServiceStatusWriteService;
     private final ServiceBetaStatusHandler serviceBetaStatusHandler;
 
     @Autowired
@@ -36,13 +35,11 @@ public class UserServiceInit {
                            DoctorServiceReviewReadService doctorServiceReviewReadService,
                            DoctorServiceReviewWriteService doctorServiceReviewWriteService,
                            DoctorServiceStatusReadService doctorServiceStatusReadService,
-                           DoctorServiceStatusWriteService doctorServiceStatusWriteService,
                            ServiceBetaStatusHandler serviceBetaStatusHandler){
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
-        this.doctorServiceStatusWriteService = doctorServiceStatusWriteService;
         this.serviceBetaStatusHandler = serviceBetaStatusHandler;
     }
 
