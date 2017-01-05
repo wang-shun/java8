@@ -115,7 +115,7 @@ public class SearchedBarn implements Serializable {
 
     //公猪母猪状态
     public static BarnStatus createPigStatus(PigStatus pigStatus, Integer count) {
-        if (pigStatus == null) {
+        if (pigStatus == null || pigStatus.getKey().equals(2) || pigStatus.getKey().equals(12)) {
             return null;
         }
         return BarnStatus.builder()

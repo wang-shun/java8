@@ -20,16 +20,16 @@ import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.GroupPaging;
+import io.terminus.doctor.event.dto.search.SearchedBarn;
+import io.terminus.doctor.event.dto.search.SearchedBarnDto;
+import io.terminus.doctor.event.dto.search.SearchedGroup;
+import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.dto.search.SearchedBarn;
-import io.terminus.doctor.event.dto.search.SearchedBarnDto;
-import io.terminus.doctor.event.dto.search.SearchedGroup;
-import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -287,7 +287,7 @@ public class DoctorSearches {
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
         DoctorBarnDto barnDto = getBarnSearchMap(params);
-        if (barnDto.getFarmId() == null || isEmpty(barnDto.getBarnIds())) {
+        if (barnDto.getFarmId() == null) {
             return new Paging<>(0L, Collections.emptyList());
         }
 
@@ -352,7 +352,7 @@ public class DoctorSearches {
 
     //转换猪舍搜索条件
     private DoctorBarnDto getBarnSearchMap(Map<String, String> params) {
-        DoctorBarnDto barnDto = new DoctorBarnDto();
+        DoctorBarnDto barnDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().convertValue(params, DoctorBarnDto.class);
 
         //主账号不用校验，直接拥有全部猪舍权限
         BaseUser user = UserUtil.getCurrentUser();
