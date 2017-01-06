@@ -131,10 +131,6 @@ public class DoctorImportDataService {
     @Value("${xrnm.auth.user.id: 0}")
     private Long xrnmId;
 
-    public DoctorImportDataService() {
-        System.out.println();
-    }
-
     @Autowired
     private DoctorBarnDao doctorBarnDao;
     @Autowired
