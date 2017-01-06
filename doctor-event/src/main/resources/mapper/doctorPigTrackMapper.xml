@@ -312,7 +312,7 @@
         WHERE group_id = #{groupId} AND `status` = #{status}
     </select>
 
-    <select id="countByPigTypes" parameterType="list" resultType="long">
+    <select id="countByPigTypes" parameterType="map" resultType="long">
         SELECT count(1)
         FROM <include refid="tb"/>
         WHERE `current_barn_id` IN

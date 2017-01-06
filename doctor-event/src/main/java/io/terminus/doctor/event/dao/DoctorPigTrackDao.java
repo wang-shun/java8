@@ -126,7 +126,7 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
      * @return 猪的数量
      */
     public Long countByBarnIds(List<Long> barnIds) {
-        return this.getSqlSession().selectOne(sqlId("countByPigTypes"), barnIds);
+        return this.getSqlSession().selectOne(sqlId("countByPigTypes"), ImmutableMap.of(barnIds, barnIds));
     }
 
     /**
