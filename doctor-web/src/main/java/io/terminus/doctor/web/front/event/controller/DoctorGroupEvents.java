@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -162,15 +163,17 @@ public class DoctorGroupEvents {
      * 查询猪群详情
      *
      * @param groupId 猪群id
+     * @param eventSize 事件大小
      * @return 猪群详情
      */
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
-    public DoctorGroupDetailEventsDto findGroupDetailByGroupId(@RequestParam("groupId") Long groupId) {
+    public DoctorGroupDetailEventsDto findGroupDetailByGroupId(@RequestParam("groupId") Long groupId,
+                                                               @RequestParam(value = "eventSize", required = false) Integer eventSize) {
         DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
 
         //查询猪群的事件, 默认3条
         List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(
-                groupDetail.getGroup().getFarmId(), groupId, null, null, 3)).getData();
+                groupDetail.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3))).getData();
 
         transFromUtil.transFromGroupEvents(groupEvents);
         DoctorGroupEvent rollbackEvent = RespHelper.or500(doctorGroupReadService.canRollbackEvent(groupId));
@@ -323,7 +326,7 @@ public class DoctorGroupEvents {
     @RequestMapping(value = "/groupEvents")
     @ResponseBody
     public List<String> queryGroupEvents() {
-        return Arrays.asList(GroupEventType.values()).stream().map(groupEventType -> groupEventType.getDesc()).collect(Collectors.toList());
+        return Arrays.stream(GroupEventType.values()).map(GroupEventType::getDesc).collect(Collectors.toList());
     }
 
     /**

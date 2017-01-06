@@ -48,11 +48,6 @@
             <artifactId>doctor-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.terminus.search</groupId>
-            <artifactId>search-api</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>io.terminus.boot.rpc</groupId>
             <artifactId>rpc-dubbo</artifactId>
         </dependency>
