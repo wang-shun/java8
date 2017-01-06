@@ -21,6 +21,7 @@ import io.terminus.doctor.event.dao.DoctorPigJoinDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -30,7 +31,6 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.dto.search.SearchedPig;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -48,6 +48,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notEmpty;
 import static java.util.Objects.isNull;
 
 /**
@@ -434,6 +435,20 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             return Response.ok(matingDate.plusDays(114).toDate());
         } else {
             return Response.ok(null);
+        }
+    }
+
+    @Override
+    public Response<Long> getPigCountByBarnPigTypes(Long farmId, List<Integer> pigTypes) {
+        try {
+            List<DoctorBarn> barns = doctorBarnDao.findByEnums(farmId, pigTypes, null, null);
+            if (!notEmpty(barns)) {
+                return Response.ok(0L);
+            }
+            return Response.ok(doctorPigTrackDao.countByBarnIds(barns.stream().map(DoctorBarn::getId).collect(Collectors.toList())));
+        } catch (Exception e) {
+            log.error("getPigCountByBarnPigTypes failed, farmId:{}, pigTypes:{}, cause:{}", farmId, pigTypes, Throwables.getStackTraceAsString(e));
+            return Response.ok(0L);
         }
     }
 }
