@@ -185,6 +185,15 @@ public class DoctorSearches {
     }
 
     /**
+     * 所有猪群搜索方法
+     */
+    @RequestMapping(value = "/groups/all", method = RequestMethod.GET)
+    public List<SearchedGroup> searchGroupsAll(@RequestParam Map<String, String> params) {
+        return searchGroups(1, Integer.MAX_VALUE, params).getData();
+    }
+
+
+    /**
      * 猪群搜索方法
      *
      * @param pageNo   起始页
