@@ -140,7 +140,8 @@ public class DoctorBarns {
     public List<DoctorBarn> findBarnsByfarmId(@RequestParam("farmId") Long farmId,
                                               @RequestParam(value = "status", required = false) Integer barnStatus,
                                               @RequestParam(value = "pigIds", required = false) String pigIds) {
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null, null, barnStatus)), pigIds);
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null,
+                null, barnStatus, doctorFarmAuthCenter.getAuthBarnIds())), pigIds);
     }
 
     /**
@@ -154,7 +155,8 @@ public class DoctorBarns {
     @RequestMapping(value = "/groups", method = RequestMethod.GET)
     public List<DoctorBarn> findGroupBarnsByfarmId(@RequestParam("farmId") Long farmId,
                                                    @RequestParam(value = "status", required = false) Integer barnStatus) {
-        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, PigType.GROUP_TYPES, null, barnStatus));
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, PigType.GROUP_TYPES,
+                null, barnStatus, doctorFarmAuthCenter.getAuthBarnIds()));
     }
 
     /**
@@ -196,7 +198,8 @@ public class DoctorBarns {
                                                      @RequestParam("pigType") Integer pigType,
                                                      @RequestParam(value = "status", required = false) Integer status,
                                                      @RequestParam(value = "pigIds", required = false) String pigIds) {
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, Lists.newArrayList(pigType), null, status)), pigIds);
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, Lists.newArrayList(pigType),
+                null, status, doctorFarmAuthCenter.getAuthBarnIds())), pigIds);
     }
 
     //根据猪id过滤猪舍: 取出猪的猪舍type, 过滤一把
@@ -229,7 +232,8 @@ public class DoctorBarns {
         if (notEmpty(pigTypes)) {
             types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
         }
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, types, null, status)), pigIds);
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, types,
+                null, status, doctorFarmAuthCenter.getAuthBarnIds())), pigIds);
     }
 
 
@@ -249,16 +253,12 @@ public class DoctorBarns {
         List<Integer> barnTypes;
         if (Objects.equals(eventType, PigEvent.CHG_LOCATION.getKey())) {
             barnTypes = getTransBarnTypes(pigIds);
-//        } else if (Objects.equals(eventType, PigEvent.TO_MATING.getKey())) {
-//            barnTypes = PigType.MATING_TYPES;
-//        } else if (Objects.equals(eventType, PigEvent.TO_FARROWING.getKey())) {
-//            barnTypes = PigType.FARROW_TYPES;
         } else {
             //转舍类型: 普通转舍, 去配种, 去分娩, 其他报错
             throw new JsonResponseException("not.trans.barn.type");
         }
-        return notEmpty(barnTypes) ? RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, barnTypes, null, status))
-                : Collections.emptyList();
+        return notEmpty(barnTypes) ? RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, barnTypes,
+                null, status, doctorFarmAuthCenter.getAuthBarnIds())) : Collections.emptyList();
     }
 
     //普通转舍 转入猪舍类型

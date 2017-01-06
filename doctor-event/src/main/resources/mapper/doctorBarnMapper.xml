@@ -163,6 +163,13 @@
                     #{type}
                 </foreach>
             </if>
+
+            <if test="barnIds != null  &amp;&amp; barnIds.size() > 0">AND id IN
+                <foreach collection="barnIds" item="bid" open="(" separator="," close=")">
+                    #{bid}
+                </foreach>
+            </if>
+
             <if test="canOpenGroup != null">AND can_open_group = #{canOpenGroup}</if>
             <if test="status != null">AND status = #{status}</if>
             <if test="status == null">AND status = 1</if>

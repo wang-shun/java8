@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -84,12 +83,12 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     }
 
     @Override
-    public Response<List<DoctorBarn>> findBarnsByEnums(Long farmId, List<Integer> pigTypes, Integer canOpenGroup, Integer status) {
+    public Response<List<DoctorBarn>> findBarnsByEnums(Long farmId, List<Integer> pigTypes, Integer canOpenGroup, Integer status, List<Long> barnIds) {
         try {
-            return Response.ok(doctorBarnDao.findByEnums(farmId, pigTypes, canOpenGroup, status));
+            return Response.ok(doctorBarnDao.findByEnums(farmId, pigTypes, canOpenGroup, status, barnIds));
         } catch (Exception e) {
-            log.error("find barn by enums fail, farmId:{}, pigTypes:{}, canOpenGroup:{}, status:{}, cause:{}",
-                    farmId, pigTypes, canOpenGroup, status, Throwables.getStackTraceAsString(e));
+            log.error("find barn by enums fail, farmId:{}, pigTypes:{}, canOpenGroup:{}, status:{}, barnIds:{}, cause:{}",
+                    farmId, pigTypes, canOpenGroup, status, barnIds, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.find.fail");
         }
     }
@@ -113,46 +112,6 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         } catch (Exception e) {
             log.error("count pig by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("count.pig.fail");
-        }
-    }
-
-    @Override
-    public Response<Integer> pigGroupCountByBarnId(@NotNull(message = "barnId.not.null") Long barnId) {
-        try{
-            DoctorBarn barn = doctorBarnDao.findById(barnId);
-
-            //统计猪群数量
-            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
-            searchDto.setFarmId(barn.getFarmId());
-            searchDto.setCurrentBarnId(barnId);
-            searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
-            List<DoctorGroupDetail> groupDetails = RespHelper.orServEx(doctorGroupReadService.findGroupDetail(searchDto));
-            Integer groupCount = groupDetails.stream().mapToInt(g -> g.getGroupTrack().getQuantity()).sum();
-            return Response.ok(groupCount);
-        }catch (Exception e){
-            log.error("pig group count by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
-            return Response.fail("pig.group.count.fail");
-        }
-    }
-
-    @Override
-    public Response<Integer> pigCountByBarnId(@NotNull(message = "barnId.not.null") Long barnId) {
-        try{
-            List<DoctorPigTrack> pigTracks = RespHelper.orServEx(doctorPigReadService.findActivePigTrackByCurrentBarnId(barnId));
-            return Response.ok(pigTracks.size());
-        }catch (Exception e){
-            log.error("pig count by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
-            return Response.fail("pig.count.fail");
-        }
-    }
-
-    @Override
-    public Response<DoctorBarn> findBarnByOutId(String outId) {
-        try {
-            return Response.ok(doctorBarnDao.findByOutId(outId));
-        } catch (Exception e) {
-            log.error("find barn by out id failed, outId:{}, cause:{}", outId, Throwables.getStackTraceAsString(e));
-            return Response.fail("barn.find.fail");
         }
     }
 

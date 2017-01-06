@@ -441,7 +441,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     @Override
     public Response<Long> getPigCountByBarnPigTypes(Long farmId, List<Integer> pigTypes) {
         try {
-            List<DoctorBarn> barns = doctorBarnDao.findByEnums(farmId, pigTypes, null, null);
+            List<DoctorBarn> barns = doctorBarnDao.findByEnums(farmId, pigTypes, null, null, null);
             if (!notEmpty(barns)) {
                 return Response.ok(0L);
             }

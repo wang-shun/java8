@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.auth;
 import com.google.common.base.MoreObjects;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Desc: 猪群权限中心
@@ -71,5 +73,23 @@ public class DoctorFarmAuthCenter {
             throw new ServiceException("user.not.auth.barn");
         }
         return UserUtil.getCurrentUser();
+    }
+
+    /**
+     * 查询登录用户的猪舍权限 null/empty: 说明不校验权限
+     */
+    public List<Long> getAuthBarnIds() {
+        BaseUser user = UserUtil.getCurrentUser();
+        if (user == null) {
+            throw new ServiceException("user.not.login");
+        }
+        if (!Objects.equals(user.getType(), UserType.FARM_SUB.value())) {
+            return null;
+        }
+        DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId()));
+        if (permission == null) {
+            throw new ServiceException("user.not.auth.barn");
+        }
+        return permission.getBarnIdsList();
     }
 }
