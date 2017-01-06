@@ -144,6 +144,20 @@ public class DoctorBarns {
     }
 
     /**
+     * 查询猪群的猪舍表
+     *
+     * @param farmId 猪场id
+     * @param barnStatus 筛选猪舍状态
+     *                   @see DoctorBarn.Status
+     * @return 猪舍表列表
+     */
+    @RequestMapping(value = "/groups", method = RequestMethod.GET)
+    public List<DoctorBarn> findGroupBarnsByfarmId(@RequestParam("farmId") Long farmId,
+                                                   @RequestParam(value = "status", required = false) Integer barnStatus) {
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, PigType.GROUP_TYPES, null, barnStatus));
+    }
+
+    /**
      * 根据farmIds查询猪舍表, 根据pigIds过滤
      *
      * @param farmIds 猪场id
