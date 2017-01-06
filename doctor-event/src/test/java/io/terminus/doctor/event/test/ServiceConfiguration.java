@@ -5,7 +5,6 @@ import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
-import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.handler.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
@@ -70,7 +69,7 @@ import java.util.concurrent.Executors;
  * Date: 16/4/25
  */
 @Configuration
-@EnableAutoConfiguration(exclude = {DubboBaseAutoConfiguration.class, ESSearchAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {DubboBaseAutoConfiguration.class})
 @Import({DoctorCommonConfiguration.class})
 @ComponentScan({"io.terminus.doctor.event.*","io.terminus.doctor.workflow.*"})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
