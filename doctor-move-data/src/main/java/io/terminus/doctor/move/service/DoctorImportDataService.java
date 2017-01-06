@@ -101,6 +101,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -125,6 +126,14 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @Service
 public class DoctorImportDataService {
     private static final JsonMapper MAPPER = JsonMapper.nonEmptyMapper();
+
+    //拥有所有权限的用户id
+    @Value("${xrnm.auth.user.id: 0}")
+    private Long xrnmId;
+
+    public DoctorImportDataService() {
+        System.out.println();
+    }
 
     @Autowired
     private DoctorBarnDao doctorBarnDao;
@@ -474,22 +483,25 @@ public class DoctorImportDataService {
 
     //admin的数据权限
     private void createOrUpdateAdminPermission() {
-        userDaoExt.findByType(UserType.ADMIN.value()).forEach(user -> {
-            String orgIds = Joiners.COMMA.join(doctorOrgDao.findAll().stream().map(DoctorOrg::getId).collect(Collectors.toList()));
-            String farmIds = Joiners.COMMA.join(doctorFarmDao.findAll().stream().map(DoctorFarm::getId).collect(Collectors.toList()));
-            DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(user.getId());
-            if (permission == null) {
-                permission = new DoctorUserDataPermission();
-                permission.setUserId(user.getId());
-                permission.setOrgIds(orgIds);
-                permission.setFarmIds(farmIds);
-                doctorUserDataPermissionDao.create(permission);
-            } else {
-                permission.setOrgIds(orgIds);
-                permission.setFarmIds(farmIds);
-                doctorUserDataPermissionDao.update(permission);
-            }
-        });
+        User user = userDaoExt.findById(xrnmId);
+        if (user == null) {
+            return;
+        }
+
+        String orgIds = Joiners.COMMA.join(doctorOrgDao.findAll().stream().map(DoctorOrg::getId).collect(Collectors.toList()));
+        String farmIds = Joiners.COMMA.join(doctorFarmDao.findAll().stream().map(DoctorFarm::getId).collect(Collectors.toList()));
+        DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(user.getId());
+        if (permission == null) {
+            permission = new DoctorUserDataPermission();
+            permission.setUserId(user.getId());
+            permission.setOrgIds(orgIds);
+            permission.setFarmIds(farmIds);
+            doctorUserDataPermissionDao.create(permission);
+        } else {
+            permission.setOrgIds(orgIds);
+            permission.setFarmIds(farmIds);
+            doctorUserDataPermissionDao.update(permission);
+        }
     }
 
 
