@@ -382,18 +382,11 @@ public class DoctorSearches {
                         List<DoctorPigTrack> pigTracks = RespHelper.or500(doctorPigReadService.findActivePigTrackByCurrentBarnId(barn.getId()));
                         pigCount = pigTracks.size();
                         groupCount = getGroupCount(barn);
-
-                        if (groupCount > 0) {
-                            barnStatus.add(SearchedBarn.createFarrowStatus(groupCount));
-                        }
                         barnStatus = addPigBarnStatus(barnStatus, pigTracks);
                         barn.setType(PigSearchType.SOW_GROUP.getValue());
                     }
                     else if (JUST_GROUPS.contains(pigType)) {
                         groupCount = getGroupCount(barn);
-                        if (groupCount > 0) {
-                            barnStatus.add(SearchedBarn.createFarrowStatus(groupCount));
-                        }
                         barn.setType(PigSearchType.GROUP.getValue());
                     }
                     else if (JUST_PIGS.contains(pigType)) {
