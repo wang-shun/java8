@@ -169,10 +169,10 @@ public class  DoctorEventConfiguration {
             DoctorSemenHandler doctorSemenHandler, DoctorSowFarrowingHandler doctorSowFarrowingHandler,
             DoctorSowFostersByHandler doctorSowFostersByHandler, DoctorSowFostersHandler doctorSowFostersHandler,
             DoctorSowMatingHandler doctorSowMatingHandler, DoctorSowPigletsChgHandler doctorSowPigletsChgHandler,
-            DoctorSowPregCheckHandler doctorSowPregCheckHandler, DoctorSowWeanHandler doctorSowWeanHandler,
+            DoctorSowPregCheckHandler doctorSowPregCheckHandler,
             DoctorChgFarmHandler doctorChgFarmHandler, DoctorChgLocationHandler doctorChgLocationHandler,
             DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
-            DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler
+            DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler, DoctorSowWeanHandler doctorSowWeanHandler
     ) {
         Map<Integer, DoctorPigEventHandler> eventHandlerMap = Maps.newHashMap();
         eventHandlerMap.put(PigEvent.ENTRY.getKey(), doctorEntryHandler);
