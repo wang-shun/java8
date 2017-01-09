@@ -141,7 +141,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
 
 
     //找出 maxDate(此事件配种日期) 之前的第一个妊娠检查事件, 根据妊检结果判定此次配种类型
-    private static DoctorMatingType getPigMateType(List<DoctorPigEvent> events, Date maxDate) {
+    public static DoctorMatingType getPigMateType(List<DoctorPigEvent> events, Date maxDate) {
         events = events.stream()
                 .filter(e -> Objects.equals(e.getType(), PigEvent.PREG_CHECK.getKey()) && !e.getEventAt().after(maxDate))
                 .sorted((a, b) -> b.getEventAt().compareTo(a.getEventAt()))
