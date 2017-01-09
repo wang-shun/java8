@@ -44,7 +44,7 @@ import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
@@ -880,7 +880,7 @@ public class DoctorMoveDataService {
                 sowEvent.setExtra(JSON_MAPPER.toJson(farrowing));
                 break;
             case WEAN:          //断奶
-                DoctorPartWeanDto wean = getSowWeanExtra(event);
+                DoctorWeanDto wean = getSowWeanExtra(event);
                 sowEvent.setWeanCount(wean.getPartWeanPigletsCount());  //断奶数
                 sowEvent.setWeanAvgWeight(wean.getPartWeanAvgWeight()); //断奶均重
                 sowEvent.setPartweanDate(event.getEventAt());           //断奶时间
@@ -1045,8 +1045,8 @@ public class DoctorMoveDataService {
     }
 
     //拼接断奶事件extra
-    private DoctorPartWeanDto getSowWeanExtra(View_EventListSow event) {
-        DoctorPartWeanDto wean = new DoctorPartWeanDto();
+    private DoctorWeanDto getSowWeanExtra(View_EventListSow event) {
+        DoctorWeanDto wean = new DoctorWeanDto();
         wean.setPartWeanDate(event.getEventAt()); //断奶日期
         wean.setPartWeanRemark(event.getRemark());
         wean.setPartWeanPigletsCount(event.getWeanCount()); //断奶数量

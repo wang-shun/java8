@@ -23,7 +23,7 @@ import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
@@ -845,8 +845,8 @@ public class DoctorPigCreateEvents {
                                     descMap = doctorFarmEntryDto.descMap();
                                 }
                                 if (Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey())) {
-                                    DoctorPartWeanDto doctorPartWeanDto = jsonMapper.fromJson(doctorPigEvent.getExtra(), DoctorPartWeanDto.class);
-                                    descMap = doctorPartWeanDto.descMap();
+                                    DoctorWeanDto doctorWeanDto = jsonMapper.fromJson(doctorPigEvent.getExtra(), DoctorWeanDto.class);
+                                    descMap = doctorWeanDto.descMap();
                                 }
                                 if (Objects.equals(doctorPigEvent.getType(), PigEvent.FARROWING.getKey())) {
                                     DoctorFarrowingDto doctorFarrowingDto = jsonMapper.fromJson(doctorPigEvent.getExtra(), DoctorFarrowingDto.class);
@@ -904,7 +904,7 @@ public class DoctorPigCreateEvents {
                 case FARROWING:
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorFarrowingDto.class);
                 case WEAN:
-                    return jsonMapper.fromJson(eventInfoDtoJson, DoctorPartWeanDto.class);
+                    return jsonMapper.fromJson(eventInfoDtoJson, DoctorWeanDto.class);
                 case FOSTERS:
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorFostersDto.class);
                 case PIGLETS_CHG:

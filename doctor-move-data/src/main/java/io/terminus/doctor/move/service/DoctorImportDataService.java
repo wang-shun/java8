@@ -35,7 +35,7 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
@@ -95,7 +95,6 @@ import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserWriteService;
-import jdk.nashorn.internal.scripts.JO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -1259,7 +1258,7 @@ public class DoctorImportDataService {
         event.setBoarCode(info.getBoarCode());
 
         //断奶extra
-        DoctorPartWeanDto wean = new DoctorPartWeanDto();
+        DoctorWeanDto wean = new DoctorWeanDto();
         wean.setPartWeanDate(event.getEventAt());
         wean.setPartWeanPigletsCount(event.getWeanCount());
         wean.setPartWeanAvgWeight(event.getWeanAvgWeight());

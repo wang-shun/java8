@@ -11,7 +11,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSex;
@@ -172,7 +172,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     public void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
         if (Objects.equals(farrowingDto.getFarrowingLiveCount(), 0)) {
-            DoctorPartWeanDto partWeanDto = DoctorPartWeanDto.builder()
+            DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
                     .partWeanDate(farrowingDto.eventAt())
                     .partWeanPigletsCount(farrowingDto.getDeadCount())
                     .partWeanAvgWeight(0d)
