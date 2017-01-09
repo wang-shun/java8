@@ -12,9 +12,6 @@
         http://code.alibabatech.com/schema/dubbo
         http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
-    <!--config-->
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.config.service.ConfigReadService" id="configReadService" check="false"/>
-
     <!-- user services -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserReadService" id="userReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserWriteService" id="userWriteService" check="false"/>
@@ -127,8 +124,4 @@
     <!--statistic-->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService" id="doctorPigTypeStatisticWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserRoleLoader" id="doctorUserRoleLoader" check="false"/>
-
-    <!--work-flow-->
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.workflow.access.JdbcAccess" id="jdbcAccess" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.workflow.core.WorkFlowService" id="workFlowService" check="false"/>
 </beans>

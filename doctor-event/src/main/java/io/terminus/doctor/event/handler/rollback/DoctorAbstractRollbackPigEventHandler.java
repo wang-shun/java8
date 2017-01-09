@@ -21,13 +21,10 @@ import io.terminus.doctor.event.model.DoctorRevertLog;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
-import io.terminus.doctor.workflow.service.FlowProcessService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
-import java.util.Objects;
 
 /**
  * Desc: 猪事件回滚handler
@@ -42,8 +39,6 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
 
     @Autowired
     private DoctorRevertLogWriteService doctorRevertLogWriteService;
-    @Autowired
-    protected FlowProcessService flowProcessService;
     @Autowired
     protected DoctorGroupReadService doctorGroupReadService;
     @Autowired
@@ -126,18 +121,6 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
      */
     protected void handleRollbackWithStatus(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
-        workFlowRollback(pigEvent);
-    }
-
-    /**
-     * 回滚工作流
-     *
-     * @param pigEvent 事件
-     */
-    protected void workFlowRollback(DoctorPigEvent pigEvent) {
-        if (Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())) {
-            flowProcessService.rollBack(sowFlowKey, pigEvent.getPigId());
-        }
     }
 
     /**

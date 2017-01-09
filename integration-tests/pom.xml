@@ -61,8 +61,8 @@
         </dependency>
 
         <dependency>
-            <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-config</artifactId>
+            <groupId>io.terminus.parana</groupId>
+            <artifactId>parana-config</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>mysql</groupId>
@@ -154,8 +154,8 @@
         </dependency>
 
         <dependency>
-            <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-config</artifactId>
+            <groupId>io.terminus.parana</groupId>
+            <artifactId>parana-config</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>mysql</groupId>

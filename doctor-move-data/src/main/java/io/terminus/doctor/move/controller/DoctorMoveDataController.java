@@ -177,11 +177,6 @@ public class DoctorMoveDataController {
             throw new ServiceException("move.pig.error");
         }
 
-        // 工作流
-        log.warn("move workflow start");
-        doctorMoveDataService.moveWorkflow(farm);
-        log.warn("move workflow end");
-
         //5.迁移猪群
         Stopwatch watch = Stopwatch.createStarted();
         log.warn("move group start, moveId:{}", moveId);
@@ -342,20 +337,6 @@ public class DoctorMoveDataController {
         } catch (Exception e) {
             log.error("move group failed, moveId:{}, farmId:{}, cause:{}",
                     moveId, farmId, Throwables.getStackTraceAsString(e));
-            return false;
-        }
-    }
-
-    @RequestMapping(value = "/workflow", method = RequestMethod.GET)
-    public Boolean moveWorkflow(@RequestParam("farmId") Long farmId) {
-        try {
-            DoctorFarm farm = doctorFarmDao.findById(farmId);
-            log.warn("move workflow start, farmId:{}", farmId);
-            doctorMoveDataService.moveWorkflow(farm);
-            log.warn("move workflow end");
-            return true;
-        } catch (Exception e) {
-            log.error("move workflow failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

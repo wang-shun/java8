@@ -55,7 +55,6 @@ import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
 import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
 import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
 import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
-import io.terminus.doctor.workflow.DoctorWorkflowConfiguration;
 import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
@@ -78,7 +77,7 @@ import java.util.Map;
 @ComponentScan(basePackages = {
         "io.terminus.doctor.event",
 })
-@Import({DoctorWorkflowConfiguration.class, DoctorCommonConfiguration.class})
+@Import({DoctorCommonConfiguration.class})
 @AutoConfigureAfter({MybatisAutoConfiguration.class})
 public class  DoctorEventConfiguration {
 
