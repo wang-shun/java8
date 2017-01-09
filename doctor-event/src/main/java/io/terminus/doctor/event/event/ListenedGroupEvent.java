@@ -24,5 +24,11 @@ public class ListenedGroupEvent implements Serializable{
 
     private Long farmId;
 
+    /**
+     * 猪群事件类型
+     * @see io.terminus.doctor.event.enums.GroupEventType
+     */
+    private Integer eventType;
+
     private List<DoctorGroupPublishDto> groups;
 }

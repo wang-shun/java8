@@ -25,5 +25,11 @@ public class ListenedPigEvent implements Serializable {
 
     private Long farmId;
 
+    /**
+     * 猪事件类型
+     * @see io.terminus.doctor.event.enums.PigEvent
+     */
+    private Integer eventType;
+
     private List<DoctorPigPublishDto> pigs;
 }

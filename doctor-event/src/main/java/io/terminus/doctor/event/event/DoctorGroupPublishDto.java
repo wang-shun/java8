@@ -21,5 +21,9 @@ public class DoctorGroupPublishDto implements Serializable {
 
     private Date eventAt;
 
-    private Integer eventType;
+    /**
+     * 猪舍类型
+     * @see io.terminus.doctor.common.enums.PigType
+     */
+    private Integer pigType;
 }

@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.event;
 
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import io.terminus.common.utils.Dates;
@@ -7,7 +8,6 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -16,8 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -37,40 +40,75 @@ public class DoctorGroupEventListener implements EventListener {
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
 
     @Autowired
-    private DoctorGroupEventDao doctorGroupEventDao;
-
-    @Autowired
     private DoctorDailyReportCache doctorDailyReportCache;
+
+    private static final List<Integer> NEED_TYPES = Lists.newArrayList(
+            GroupEventType.MOVE_IN.getValue(),
+            GroupEventType.CHANGE.getValue(),
+            GroupEventType.TRANS_GROUP.getValue(),
+            GroupEventType.TURN_SEED.getValue(),
+            GroupEventType.TRANS_FARM.getValue()
+    );
 
     @AllowConcurrentEvents
     @Subscribe
     public void handleGroupEvent(ListenedGroupEvent groupEvent) {
-        // TODO: 2017/1/9
-    }
+        log.info("handle group event, event info:{}", groupEvent);
 
-    private void handle(Long orgId, Long farmId, Integer pigType, Date eventAt) {
-        GroupEventType eventType = GroupEventType.from(pigType);
-        if (eventType == null) {
-            log.error("handle group event type not find, farmId:{}, pigType:{}, eventAt:{}", farmId, pigType, eventAt);
+        //不需要统计的事件直接返回
+        if (!NEED_TYPES.contains(groupEvent.getEventType())) {
+            log.info("this eventType({}) no need to handle", groupEvent.getEventType());
             return;
         }
 
-        switch (eventType) {
+        //所有的变动事件
+        if (Objects.equals(groupEvent.getEventType(), GroupEventType.CHANGE.getValue())) {
+            List<DoctorGroupPublishDto> changes = flatByEventAtAndPigType(groupEvent.getGroups());
+            changes.forEach(change -> handle(groupEvent.getOrgId(), groupEvent.getFarmId(), groupEvent.getEventType(), change));
+        } else {
+            List<DoctorGroupPublishDto> liveStocks = flatByEventAtAndPigType(groupEvent.getGroups());
+            liveStocks.forEach(liveStock -> handle(groupEvent.getOrgId(), groupEvent.getFarmId(), groupEvent.getEventType(), liveStock));
+        }
+    }
+
+    /**
+     * 日期和猪类相同的，只取一个
+     */
+    private static List<DoctorGroupPublishDto> flatByEventAtAndPigType(List<DoctorGroupPublishDto> groups) {
+        if (CollectionUtils.isEmpty(groups)) {
+            return Collections.emptyList();
+        }
+        List<DoctorGroupPublishDto> results = Lists.newArrayList();
+
+        // TODO: 2017/1/9 过滤掉
+
+        return results;
+    }
+
+    private void handle(Long orgId, Long farmId, Integer eventType, DoctorGroupPublishDto publishDto) {
+        GroupEventType type = GroupEventType.from(eventType);
+        if (type == null) {
+            log.error("handle group event type not find, farmId:{}, eventType:{}, pigType:{}, eventAt:{}", 
+                    farmId, eventType, publishDto.getPigType(), publishDto.getEventAt());
+            return;
+        }
+
+        switch (type) {
             case MOVE_IN:
-                handleGroupLiveStock(orgId, farmId, pigType, eventAt);
+                handleGroupLiveStock(orgId, farmId, publishDto.getPigType(), publishDto.getEventAt());
                 break;
             case CHANGE:
-                handleGroupLiveStock(orgId, farmId, pigType, eventAt);
-                handleChange(orgId, pigType, eventAt);
+                handleGroupLiveStock(orgId, farmId, publishDto.getPigType(), publishDto.getEventAt());
+                handleChange(orgId, publishDto.getPigType(), publishDto.getEventAt());
                 break;
             case TRANS_GROUP:
-                handleGroupLiveStock(orgId, farmId, pigType, eventAt);
+                handleGroupLiveStock(orgId, farmId, publishDto.getPigType(), publishDto.getEventAt());
                 break;
             case TURN_SEED:
-                handleGroupLiveStock(orgId, farmId, pigType, eventAt);
+                handleGroupLiveStock(orgId, farmId, publishDto.getPigType(), publishDto.getEventAt());
                 break;
             case TRANS_FARM:
-                handleGroupLiveStock(orgId, farmId, pigType, eventAt);
+                handleGroupLiveStock(orgId, farmId, publishDto.getPigType(), publishDto.getEventAt());
                 break;
             default:
                 break;

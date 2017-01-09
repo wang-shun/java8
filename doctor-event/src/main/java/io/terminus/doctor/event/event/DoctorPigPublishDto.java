@@ -27,8 +27,6 @@ public class DoctorPigPublishDto implements Serializable {
 
     private Date eventAt;
 
-    private Integer eventType;
-
     /**
      * 配种类型(如果是配种事件)
      * @see io.terminus.doctor.event.enums.DoctorMatingType

@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.event;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import io.terminus.common.utils.Dates;
@@ -22,7 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -55,17 +58,51 @@ public class DoctorPigEventListener implements EventListener {
     @Autowired
     private DoctorDailyReportDao doctorDailyReportDao;
 
-    public void handlePigEvent() {
-        // TODO: 2017/1/9  
-    }
-    
+    private static final List<Integer> NEED_TYPES = Lists.newArrayList(
+            PigEvent.CHG_FARM.getKey(),
+            PigEvent.REMOVAL.getKey(),
+            PigEvent.ENTRY.getKey(),
+            PigEvent.MATING.getKey(),
+            PigEvent.PREG_CHECK.getKey(),
+            PigEvent.FARROWING.getKey(),
+            PigEvent.WEAN.getKey()
+    );
+
     /**
      * 监听猪相关事件，处理下日报统计
      */
     @AllowConcurrentEvents
     @Subscribe
-    public void handle(Long orgId, Long farmId, DoctorPigPublishDto event) {
-        PigEvent type = PigEvent.from(event.getEventType());
+    public void handlePigEvent(ListenedPigEvent pigEvent) {
+        log.info("handle pig event, event info:{}", pigEvent);
+
+        //不需要统计的事件直接返回
+        if (!NEED_TYPES.contains(pigEvent.getEventType())) {
+            log.info("this eventType({}) no need to handle", pigEvent.getEventType());
+            return;
+        }
+
+        List<DoctorPigPublishDto> needs = flat(pigEvent.getPigs());
+        needs.forEach(need -> handle(pigEvent.getOrgId(), pigEvent.getFarmId(), pigEvent.getEventType(), need));
+    }
+
+    /**
+     * 过滤掉相同的事件
+     */
+    private static List<DoctorPigPublishDto> flat(List<DoctorPigPublishDto> pigs) {
+        if (CollectionUtils.isEmpty(pigs)) {
+            return Collections.emptyList();
+        }
+        List<DoctorPigPublishDto> results = Lists.newArrayList();
+
+        // TODO: 2017/1/9 过滤掉
+
+        return results;
+    }
+
+    //具体的处理逻辑
+    private void handle(Long orgId, Long farmId, Integer eventType, DoctorPigPublishDto event) {
+        PigEvent type = PigEvent.from(eventType);
         if (type == null) {
             log.error("handle pig event type not find, farmId:{}, event info:{}", farmId, event);
             return;
