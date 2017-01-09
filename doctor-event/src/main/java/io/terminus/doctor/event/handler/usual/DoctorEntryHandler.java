@@ -13,6 +13,7 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -47,7 +48,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler {
 
 
     @Override
-    public void handle(List<DoctorEventInfo> eventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
+    public void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
 //        try {
         DoctorFarmEntryDto farmEntryDto = (DoctorFarmEntryDto) inputDto;
 
@@ -55,7 +56,44 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler {
         farmEntryDto.setPigId(doctorPig.getId());
         doctorPigDao.create(doctorPig);
         inputDto.setPigId(doctorPig.getId());
-        super.handle(eventInfoList, inputDto, basic);
+
+
+        //2.创建事件
+        DoctorPigEvent doctorPigEvent = buildPigEvent(basic, inputDto);
+        doctorPigEventDao.create(doctorPigEvent);
+
+        //3.创建或更新track
+        DoctorPigTrack doctorPigTrack = createOrUpdatePigTrack(basic, inputDto);
+
+        doctorPigTrackDao.create(doctorPigTrack);
+
+        //1.创建镜像
+        DoctorPigTrack pigSnapshotTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        DoctorPigEvent pigSnapshotEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
+        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(pigSnapshotTrack, pigSnapshotEvent, doctorPigEvent.getId());
+        doctorPigSnapshotDao.create(doctorPigSnapshot);
+        //4.特殊处理
+        specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
+
+        //5.记录发生的事件信息
+        DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
+                .orgId(doctorPigEvent.getOrgId())
+                .farmId(doctorPigEvent.getFarmId())
+                .eventId(doctorPigEvent.getId())
+                .eventAt(doctorPigEvent.getEventAt())
+                .kind(doctorPigEvent.getKind())
+                .mateType(doctorPigEvent.getDoctorMateType())
+                .pregCheckResult(doctorPigEvent.getPregCheckResult())
+                .businessId(doctorPigEvent.getPigId())
+                .code(doctorPigEvent.getPigCode())
+                .status(doctorPigTrack.getStatus())
+                .businessType(DoctorEventInfo.Business_Type.PIG.getValue())
+                .eventType(basic.getEventType())
+                .build();
+        doctorEventInfoList.add(doctorEventInfo);
+
+        //6.触发事件
+        triggerEvent(doctorEventInfoList, doctorPigEvent, doctorPigTrack, inputDto, basic);
             // event create
 //                doctorPigEvent.setRelGroupEventId(basic.getRelGroupEventId());
 //                doctorPigEvent.setPigId(doctorPig.getId());

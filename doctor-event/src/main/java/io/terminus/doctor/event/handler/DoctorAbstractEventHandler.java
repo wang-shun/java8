@@ -27,7 +27,6 @@ import org.springframework.context.ApplicationContext;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 /**
  * Created by xjn.
@@ -69,22 +68,17 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         //1.创建镜像
         DoctorPigTrack pigSnapshotTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         DoctorPigEvent pigSnapshotEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
-        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(pigSnapshotTrack, pigSnapshotEvent);
-        doctorPigSnapshotDao.create(doctorPigSnapshot);
 
         //2.创建事件
         DoctorPigEvent doctorPigEvent = buildPigEvent(basic, inputDto);
         doctorPigEventDao.create(doctorPigEvent);
 
+        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(pigSnapshotTrack, pigSnapshotEvent,  doctorPigEvent.getId());
+        doctorPigSnapshotDao.create(doctorPigSnapshot);
+
         //3.创建或更新track
         DoctorPigTrack doctorPigTrack = createOrUpdatePigTrack(basic, inputDto);
-        if (Objects.equals(basic.getEventType(), PigEvent.ENTRY.getKey())) {
-            doctorPigTrackDao.create(doctorPigTrack);
-        } else {
-            doctorPigTrackDao.update(doctorPigTrack);
-        }
-
-
+        doctorPigTrackDao.update(doctorPigTrack);
 
         //4.特殊处理
         specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
@@ -164,7 +158,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     }
 
     //创建猪跟踪和镜像表
-    protected DoctorPigSnapshot createPigSnapshot(DoctorPigTrack doctorPigTrack, DoctorPigEvent doctorPigEvent) {
+    protected DoctorPigSnapshot createPigSnapshot(DoctorPigTrack doctorPigTrack, DoctorPigEvent doctorPigEvent, Long currentEventId) {
         DoctorPig snapshotPig = doctorPigDao.findById(doctorPigEvent.getPigId());
 
         //创建猪镜像
@@ -172,7 +166,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .pigId(snapshotPig.getId())
                 .farmId(snapshotPig.getFarmId())
                 .orgId(snapshotPig.getOrgId())
-                .eventId(doctorPigEvent.getId())
+                .eventId(currentEventId)
                 .pigInfo(JsonMapper.nonEmptyMapper().toJson(
                         DoctorPigSnapShotInfo.builder().pig(snapshotPig).pigTrack(doctorPigTrack).pigEvent(doctorPigEvent).build()))
                 .build();
