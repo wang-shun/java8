@@ -9,11 +9,9 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
-import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.event.ListenedPigEvent;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,21 +31,15 @@ import java.util.Map;
 public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteService {
 
     private final DoctorPigEventManager doctorPigEventManager;
-    private final DoctorPigReadService doctorPigReadService;
     private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorPigEventDao doctorPigEventDao;
-
-    @Autowired(required = false)
-    private Publisher publisher;
 
     @Autowired
     public DoctorPigEventWriteServiceImpl(DoctorPigEventManager doctorPigEventManager,
                                           CoreEventDispatcher coreEventDispatcher,
-                                          DoctorPigReadService doctorPigReadService,
                                           DoctorPigEventDao doctorPigEventDao) {
         this.doctorPigEventManager = doctorPigEventManager;
         this.coreEventDispatcher = coreEventDispatcher;
-        this.doctorPigReadService = doctorPigReadService;
         this.doctorPigEventDao = doctorPigEventDao;
     }
 
@@ -558,14 +550,5 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         } catch (Exception e) {
             log.error(Throwables.getStackTraceAsString(e));
         }
-    }
-
-    /**
-     * 推送猪舍事件信息
-     *
-     * @param barnId 猪舍id
-     */
-    private void publishBarnEvent(Long barnId) {
-        coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barnId).build());
     }
 }

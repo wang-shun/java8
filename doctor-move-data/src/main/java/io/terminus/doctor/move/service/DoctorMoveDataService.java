@@ -64,6 +64,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
 import io.terminus.doctor.event.manager.DoctorGroupReportManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -306,39 +307,13 @@ public class DoctorMoveDataService {
                 .filter(e -> isNull(e.getDoctorMateType()) && e.getCurrentMatingCount() == 1)  //只改初配
                 .forEach(event -> {
                     List<DoctorPigEvent> pigEvents = doctorPigEventDao.queryAllEventsByPigId(event.getPigId());
-                    DoctorMatingType mateType = getPigMateType(pigEvents, event.getEventAt());
+                    DoctorMatingType mateType = DoctorSowMatingHandler.getPigMateType(pigEvents, event.getEventAt());
 
                     DoctorPigEvent updateEvent = new DoctorPigEvent();
                     updateEvent.setId(event.getId());
                     updateEvent.setDoctorMateType(mateType.getKey());
                     doctorPigEventDao.update(updateEvent);
                 });
-    }
-
-    //找出 maxDate(此事件配种日期) 之前的第一个妊娠检查事件, 根据妊检结果判定此次配种类型
-    private static DoctorMatingType getPigMateType(List<DoctorPigEvent> events, Date maxDate) {
-        events = events.stream()
-                .filter(e -> Objects.equals(e.getType(), PigEvent.PREG_CHECK.getKey()) && !e.getEventAt().after(maxDate))
-                .sorted((a, b) -> b.getEventAt().compareTo(a.getEventAt()))
-                .collect(Collectors.toList());
-
-        //如果前面没有妊检, 说明是第一次配种, 配后备
-        if (!notEmpty(events)) {
-            return DoctorMatingType.HP;
-        }
-
-        //阳性或者其他 => 配断奶
-        DoctorPigEvent event = events.get(0);
-        if (Objects.equals(event.getPregCheckResult(), PregCheckResult.FANQING.getKey())) {
-            return DoctorMatingType.FP;
-        }
-        if (Objects.equals(event.getPregCheckResult(), PregCheckResult.YING.getKey())) {
-            return DoctorMatingType.YP;
-        }
-        if (Objects.equals(event.getPregCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
-            return DoctorMatingType.LPC;
-        }
-        return DoctorMatingType.DP;
     }
 
     /**
