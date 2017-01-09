@@ -52,6 +52,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -623,7 +624,7 @@ public class DoctorPigCreateEvents {
 //    }
 
     @RequestMapping(value = "/batchCreateEvnet", method = RequestMethod.POST)
-    public Boolean batchCreatePigEvent(@RequestParam DoctorBatchPigEventDto batchPigEventDto){
+    public Boolean batchCreatePigEvent(@RequestBody DoctorBatchPigEventDto batchPigEventDto){
         if (Arguments.isNullOrEmpty(batchPigEventDto.getInputJsonList())) {
             return true;
         }
