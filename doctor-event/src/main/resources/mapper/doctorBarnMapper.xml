@@ -163,6 +163,13 @@
                     #{type}
                 </foreach>
             </if>
+
+            <if test="barnIds != null  &amp;&amp; barnIds.size() > 0">AND id IN
+                <foreach collection="barnIds" item="bid" open="(" separator="," close=")">
+                    #{bid}
+                </foreach>
+            </if>
+
             <if test="canOpenGroup != null">AND can_open_group = #{canOpenGroup}</if>
             <if test="status != null">AND status = #{status}</if>
             <if test="status == null">AND status = 1</if>
@@ -195,6 +202,26 @@
         where org_id = #{orgId}
     </select>
 
+    <select id="countForTypes" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto" >
+        SELECT
+        max(CASE WHEN pig_type = 2 THEN temp.quantity ELSE 0 END ) AS nurseryPigletCount,
+        max(CASE WHEN pig_type = 3 THEN temp.quantity ELSE 0 END ) AS fattenPigCount,
+        max(CASE WHEN pig_type = 4 THEN temp.quantity ELSE 0 END ) AS reserveCount,
+        max(CASE WHEN pig_type = 5 THEN temp.quantity ELSE 0 END ) AS mateSowCount,
+        max(CASE WHEN pig_type = 6 THEN temp.quantity ELSE 0 END ) AS pregSowCount,
+        max(CASE WHEN pig_type = 7 THEN temp.quantity ELSE 0 END ) AS deliverSowCount,
+        max(CASE WHEN pig_type = 9 THEN temp.quantity ELSE 0 END ) AS boarCount
+        FROM (
+        SELECT pig_type, ifnull(COUNT(1), 0) AS quantity
+        FROM
+        <include refid="tb"/>
+        WHERE
+        <if test="farmId != null">farm_id = #{farmId}</if>
+        <if test="status != null">AND status = #{status}</if>
+        <if test="status == null">AND status = 1</if>
+        GROUP BY pig_type
+        ) AS temp
+    </select>
 
     <select id="list" parameterType="map" resultMap="DoctorBarnMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>

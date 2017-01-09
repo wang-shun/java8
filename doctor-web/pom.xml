@@ -56,12 +56,6 @@
             <artifactId>parana-article-api</artifactId>
         </dependency>
 
-        <!-- search -->
-        <dependency>
-            <groupId>io.terminus.search</groupId>
-            <artifactId>search-api</artifactId>
-        </dependency>
-
         <!-- pamas -->
         <dependency>
             <groupId>io.terminus.pampas</groupId>

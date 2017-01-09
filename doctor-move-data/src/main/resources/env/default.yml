@@ -78,3 +78,6 @@ esearch:
 
 # 用户中心的 zk topic，每个子系统保持一致
 user.center.topic: user-center-topic
+
+# 拥有所有权限的用户id
+xrnm.auth.user.id: 10

@@ -68,6 +68,7 @@ import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.SubRoleDao;
+import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.interfaces.event.DoctorSystemCode;
 import io.terminus.doctor.user.interfaces.event.EventType;
 import io.terminus.doctor.user.interfaces.model.UserDto;
@@ -100,6 +101,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,6 +126,10 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @Service
 public class DoctorImportDataService {
     private static final JsonMapper MAPPER = JsonMapper.nonEmptyMapper();
+
+    //拥有所有权限的用户id
+    @Value("${xrnm.auth.user.id: 0}")
+    private Long xrnmId;
 
     @Autowired
     private DoctorBarnDao doctorBarnDao;
@@ -191,6 +197,8 @@ public class DoctorImportDataService {
     private DoctorGroupEventDao doctorGroupEventDao;
     @Autowired
     private DoctorAddressDao addressDao;
+    @Autowired
+    private UserDaoExt userDaoExt;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -440,6 +448,9 @@ public class DoctorImportDataService {
             doctorUserDataPermissionDao.update(permission);
         }
 
+        //admin的数据权限
+        createOrUpdateAdminPermission();
+
         if(doctorStaffDao.findByUserId(userId) == null){
             // 主账号的staff
             this.createStaff(user, org, DoctorStaff.Sex.MALE);
@@ -465,6 +476,30 @@ public class DoctorImportDataService {
 
         return new Object[]{user, farm};
     }
+
+    //admin的数据权限
+    private void createOrUpdateAdminPermission() {
+        User user = userDaoExt.findById(xrnmId);
+        if (user == null) {
+            return;
+        }
+
+        String orgIds = Joiners.COMMA.join(doctorOrgDao.findAll().stream().map(DoctorOrg::getId).collect(Collectors.toList()));
+        String farmIds = Joiners.COMMA.join(doctorFarmDao.findAll().stream().map(DoctorFarm::getId).collect(Collectors.toList()));
+        DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(user.getId());
+        if (permission == null) {
+            permission = new DoctorUserDataPermission();
+            permission.setUserId(user.getId());
+            permission.setOrgIds(orgIds);
+            permission.setFarmIds(farmIds);
+            doctorUserDataPermissionDao.create(permission);
+        } else {
+            permission.setOrgIds(orgIds);
+            permission.setFarmIds(farmIds);
+            doctorUserDataPermissionDao.update(permission);
+        }
+    }
+
 
     private void createStaff(User user, DoctorOrg org, DoctorStaff.Sex sex){
         DoctorStaff staff = new DoctorStaff();

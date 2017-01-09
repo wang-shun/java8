@@ -42,7 +42,6 @@
         <hikari.version>2.4.3</hikari.version>
         <terminus-common.version>2.0.1.RELEASE</terminus-common.version>
         <terminus.session.version>1.5.RELEASE</terminus.session.version>
-        <terminus.search.version>3.0.RELEASE</terminus.search.version>
         <pampas.version>2.8.RELEASE</pampas.version>
         <parana.core.version>4.2.7-SNAPSHOT</parana.core.version>
         <parana.extra.version>4.2.7-SNAPSHOT</parana.extra.version>
@@ -187,17 +186,7 @@
                 <artifactId>terminus-session</artifactId>
                 <version>${terminus.session.version}</version>
             </dependency>
-            <!-- Terminus Search -->
-            <dependency>
-                <groupId>io.terminus.search</groupId>
-                <artifactId>search-api</artifactId>
-                <version>${terminus.search.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.terminus.search</groupId>
-                <artifactId>spring-boot-starter-search</artifactId>
-                <version>${terminus.search.version}</version>
-            </dependency>
+
             <!-- Pampas -->
             <dependency>
                 <groupId>io.terminus.pampas</groupId>
