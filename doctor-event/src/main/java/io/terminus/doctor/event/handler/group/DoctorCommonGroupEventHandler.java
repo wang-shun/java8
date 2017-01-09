@@ -49,30 +49,26 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @Component
 public class DoctorCommonGroupEventHandler {
 
-    private final DoctorCloseGroupEventHandler doctorCloseGroupEventHandler;
-    private final DoctorMoveInGroupEventHandler doctorMoveInGroupEventHandler;
-    private final DoctorGroupReadService doctorGroupReadService;
-    private final DoctorGroupManager doctorGroupManager;
-    private final DoctorEntryHandler doctorEntryHandler;
-    private final DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
-    private final DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService;
+    @Autowired
+    private DoctorCloseGroupEventHandler doctorCloseGroupEventHandler;
 
     @Autowired
-    public DoctorCommonGroupEventHandler(DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
-                                         DoctorMoveInGroupEventHandler doctorMoveInGroupEventHandler,
-                                         DoctorGroupReadService doctorGroupReadService,
-                                         DoctorGroupManager doctorGroupManager,
-                                         DoctorEntryHandler doctorEntryHandler,
-                                         DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService,
-                                         DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService) {
-        this.doctorCloseGroupEventHandler = doctorCloseGroupEventHandler;
-        this.doctorMoveInGroupEventHandler = doctorMoveInGroupEventHandler;
-        this.doctorGroupReadService = doctorGroupReadService;
-        this.doctorGroupManager = doctorGroupManager;
-        this.doctorEntryHandler = doctorEntryHandler;
-        this.doctorGroupBatchSummaryReadService = doctorGroupBatchSummaryReadService;
-        this.doctorGroupBatchSummaryWriteService = doctorGroupBatchSummaryWriteService;
-    }
+    private DoctorMoveInGroupEventHandler doctorMoveInGroupEventHandler;
+
+    @Autowired
+    private DoctorGroupReadService doctorGroupReadService;
+
+    @Autowired
+    private DoctorGroupManager doctorGroupManager;
+
+    @Autowired
+    private DoctorEntryHandler doctorEntryHandler;
+
+    @Autowired
+    private DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
+
+    @Autowired
+    private DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService;
 
     /**
      * 系统触发的自动关闭猪群事件(先生成一发批次总结)

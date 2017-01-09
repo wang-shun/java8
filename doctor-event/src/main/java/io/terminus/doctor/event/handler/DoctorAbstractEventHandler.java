@@ -22,11 +22,9 @@ import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by xjn.
@@ -47,13 +45,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     protected  DoctorRevertLogDao doctorRevertLogDao;
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
-
-    @Autowired
-    private ApplicationContext context;
-
-    protected String getErrorMessage(String error, Object[] params) {
-        return context.getMessage(error, params, Locale.CHINA);
-    }
 
     protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 

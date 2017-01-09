@@ -3,7 +3,6 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -27,18 +26,11 @@ import java.util.List;
 @RpcProvider
 public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteService {
 
-    private final DoctorPigEventManager doctorPigEventManager;
-    private final CoreEventDispatcher coreEventDispatcher;
-    private final DoctorPigEventDao doctorPigEventDao;
+    @Autowired
+    private DoctorPigEventManager doctorPigEventManager;
 
     @Autowired
-    public DoctorPigEventWriteServiceImpl(DoctorPigEventManager doctorPigEventManager,
-                                          CoreEventDispatcher coreEventDispatcher,
-                                          DoctorPigEventDao doctorPigEventDao) {
-        this.doctorPigEventManager = doctorPigEventManager;
-        this.coreEventDispatcher = coreEventDispatcher;
-        this.doctorPigEventDao = doctorPigEventDao;
-    }
+    private DoctorPigEventDao doctorPigEventDao;
 
 //    @Override
 //    public Response<Long> pigEntryEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto, DoctorFarmEntryDto doctorFarmEntryDto) {

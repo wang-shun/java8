@@ -166,13 +166,20 @@ public class  DoctorEventConfiguration {
     @Bean
     public DoctorPigEventHandlers doctorPigEventHandlers(
             DoctorEntryHandler doctorEntryHandler,
-            DoctorSemenHandler doctorSemenHandler, DoctorSowFarrowingHandler doctorSowFarrowingHandler,
-            DoctorSowFostersByHandler doctorSowFostersByHandler, DoctorSowFostersHandler doctorSowFostersHandler,
-            DoctorSowMatingHandler doctorSowMatingHandler, DoctorSowPigletsChgHandler doctorSowPigletsChgHandler,
-            DoctorSowPregCheckHandler doctorSowPregCheckHandler, DoctorSowWeanHandler doctorSowWeanHandler,
-            DoctorChgFarmHandler doctorChgFarmHandler, DoctorChgLocationHandler doctorChgLocationHandler,
-            DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
-            DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler
+            DoctorSemenHandler doctorSemenHandler,
+            DoctorSowFostersByHandler doctorSowFostersByHandler,
+            DoctorSowMatingHandler doctorSowMatingHandler,
+            DoctorSowPregCheckHandler doctorSowPregCheckHandler,
+            DoctorChgFarmHandler doctorChgFarmHandler,
+            DoctorChgLocationHandler doctorChgLocationHandler,
+            DoctorConditionHandler doctorConditionHandler,
+            DoctorDiseaseHandler doctorDiseaseHandler,
+            DoctorRemovalHandler doctorRemovalHandler,
+            DoctorVaccinationHandler doctorVaccinationHandler,
+            DoctorSowWeanHandler doctorSowWeanHandler,
+            DoctorSowFostersHandler doctorSowFostersHandler,
+            DoctorSowFarrowingHandler doctorSowFarrowingHandler,
+            DoctorSowPigletsChgHandler doctorSowPigletsChgHandler
     ) {
         Map<Integer, DoctorPigEventHandler> eventHandlerMap = Maps.newHashMap();
         eventHandlerMap.put(PigEvent.ENTRY.getKey(), doctorEntryHandler);
