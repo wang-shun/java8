@@ -40,6 +40,13 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
     private DoctorSowFostersByHandler doctorSowFostersByHandler;
 
     @Override
+    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+        DoctorFostersDto fostersDto = (DoctorFostersDto) eventDto;
+        checkState(Objects.equals(fostersDto.getPigId(), fostersDto.getFosterSowId()), "not.foster.userself");
+
+    }
+
+    @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;

@@ -26,6 +26,8 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.text.SimpleDateFormat;
+
 /**
  * Desc: 猪事件回滚handler
  * Mail: yangzl@terminus.io
@@ -106,6 +108,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
         DoctorPig doctorPig = doctorPigDao.findById(pigEvent.getPigId());
         DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
+        JSON_MAPPER.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
         DoctorPigSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
         doctorPigEventDao.delete(pigEvent.getId());
         doctorPigTrackDao.update(info.getPigTrack());

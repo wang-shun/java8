@@ -91,8 +91,10 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     @Override
     protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        DoctorMatingDto matingDto = (DoctorMatingDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
-
+        doctorPigEvent.setBoarCode(matingDto.getMatingBoarPigCode());
+        doctorPigEvent.setMattingDate(generateEventAt(matingDto.getMatingDate()));
         //  校验断奶后, 第一次配种, 增加胎次
         Map<String, Object> trackExtraMap = doctorPigTrack.getExtraMap();
         if (!isNull(trackExtraMap) &&
