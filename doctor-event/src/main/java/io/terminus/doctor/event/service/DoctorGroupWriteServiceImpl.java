@@ -60,30 +60,20 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @RpcProvider
 public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
 
-    private final DoctorGroupDao doctorGroupDao;
-    private final DoctorGroupTrackDao doctorGroupTrackDao;
-    private final DoctorGroupManager doctorGroupManager;
-    private final DoctorGroupEventManager doctorGroupEventManager;
-    private final DoctorGroupEventDao doctorGroupEventDao;
-    private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
-    private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
-
     @Autowired
-    public DoctorGroupWriteServiceImpl(DoctorGroupDao doctorGroupDao,
-                                       DoctorGroupTrackDao doctorGroupTrackDao,
-                                       DoctorGroupManager doctorGroupManager,
-                                       DoctorGroupEventManager doctorGroupEventManager,
-                                       DoctorGroupEventDao doctorGroupEventDao,
-                                       DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                       DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
-        this.doctorGroupDao = doctorGroupDao;
-        this.doctorGroupTrackDao = doctorGroupTrackDao;
-        this.doctorGroupManager = doctorGroupManager;
-        this.doctorGroupEventManager = doctorGroupEventManager;
-        this.doctorGroupEventDao = doctorGroupEventDao;
-        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
-        this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
-    }
+    private DoctorGroupDao doctorGroupDao;
+    @Autowired
+    private DoctorGroupTrackDao doctorGroupTrackDao;
+    @Autowired
+    private DoctorGroupManager doctorGroupManager;
+    @Autowired
+    private DoctorGroupEventManager doctorGroupEventManager;
+    @Autowired
+    private DoctorGroupEventDao doctorGroupEventDao;
+    @Autowired
+    private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    @Autowired
+    private DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
     @Override
     public Response<Long> createNewGroup(DoctorGroup group, @Valid DoctorNewGroupInput newGroupInput) {
