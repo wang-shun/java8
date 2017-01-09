@@ -163,7 +163,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         DoctorPig snapshotPig = doctorPigDao.findById(doctorPigEvent.getPigId());
 
         //创建猪镜像
-        DoctorPigSnapshot snapshot = DoctorPigSnapshot.builder()
+        return DoctorPigSnapshot.builder()
                 .pigId(snapshotPig.getId())
                 .farmId(snapshotPig.getFarmId())
                 .orgId(snapshotPig.getOrgId())
@@ -171,7 +171,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .pigInfo(JsonMapper.nonEmptyMapper().toJson(
                         DoctorPigSnapShotInfo.builder().pig(snapshotPig).pigTrack(doctorPigTrack).pigEvent(doctorPigEvent).build()))
                 .build();
-        return snapshot;
     }
 
     /**

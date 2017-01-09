@@ -6,7 +6,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
-import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -95,7 +95,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
     protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         if (Objects.equals(doctorPigTrack.getUnweanQty(), 0)) {
             DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) inputDto;
-            DoctorPartWeanDto partWeanDto = DoctorPartWeanDto.builder()
+            DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
                     .partWeanDate(doctorPigEvent.getEventAt())
                     .partWeanPigletsCount(pigletsChgDto.getPigletsCount())
                     .partWeanAvgWeight(0d)

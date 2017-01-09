@@ -7,7 +7,7 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.sow.DoctorFosterByDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -115,7 +115,7 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
         //断奶事件
         DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
         if (doctorPigTrack.getUnweanQty() == 0) {
-            DoctorPartWeanDto partWeanDto = DoctorPartWeanDto.builder()
+            DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
                     .partWeanDate(DateUtil.toDate(fostersDto.getFostersDate()))
                     .partWeanPigletsCount(0)
                     .partWeanAvgWeight(0d)
