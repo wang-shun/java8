@@ -19,8 +19,6 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.event.DoctorGroupEventListener;
-import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -74,8 +72,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     @Autowired
     private DoctorGroupDao doctorGroupDao;
 
-    @Autowired(required = false)
-    private DoctorGroupEventListener doctorGroupEventListener;
+//    @Autowired(required = false)
+//    private DoctorGroupEventListener doctorGroupEventListener;
 
     @Autowired
     public DoctorAbstractGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -235,12 +233,12 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //发布猪群猪舍事件(不发统计事件了，事务里套事务，事件区分不开，改成同步统计)
     protected void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
-        doctorGroupEventListener.handleGroupEvent(ListenedGroupEvent.builder()
-                //.doctorGroupEventId(eventId)
-                .orgId(orgId)
-                .farmId(farmId)
-                //.groupId(groupId)
-                .build());
+//        doctorGroupEventListener.handleGroupEvent(ListenedGroupEvent.builder()
+//                //.doctorGroupEventId(eventId)
+//                .orgId(orgId)
+//                .farmId(farmId)
+//                //.groupId(groupId)
+//                .build());
     }
 
     //品种校验, 如果猪群的品种已经确定, 那么录入的品种必须和猪群的品种一致
