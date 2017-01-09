@@ -79,17 +79,16 @@ public class DoctorPigEventWriteServiceTest extends BaseServiceTest{
         return DoctorBasicInputInfoDto.builder()
                 .farmId(1l).farmName("farmName").orgId(1l).orgName("orgName")
                 .staffId(1l).staffName("staffName")
-                .relEventId(66666l)
+                //.relEventId(66666l)
                 .build();
     }
 
     public DoctorBasicInputInfoDto buildBasicInputInfo(){
 
         return DoctorBasicInputInfoDto.builder()
-                .pigId(1l).pigCode("pigCode").barnId(1l).barnName("barnName")
                 .farmId(1l).farmName("farmName").orgId(1l).orgName("orgName")
                 .staffId(1l).staffName("staffName").eventType(1).eventName("eventName").eventDesc("eventDesc")
-                .relEventId(66666l)
+                //.relEventId(66666l)
                 .build();
     }
 

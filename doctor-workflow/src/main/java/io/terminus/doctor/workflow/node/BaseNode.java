@@ -66,9 +66,9 @@ public abstract class BaseNode implements Node {
         // 1. 执行节点
         try{
             if (handler != null) {
-                handler.preHandle(execution);
-                handler.handle(execution);
-                handler.afterHandle(execution);
+//                handler.preHandle(execution);
+//                handler.handle(execution);
+//                handler.afterHandle(execution);
             }
         } catch (IllegalStateException | ServiceException | IllegalArgumentException e){
             throw e;

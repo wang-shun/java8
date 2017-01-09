@@ -1,21 +1,15 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.collect.Maps;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
+import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.workflow.core.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,28 +26,19 @@ import static java.util.Objects.isNull;
  * Descirbe: 对应的母猪状态信息流转(转舍)
  */
 @Component
-public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler {
-
-    private final DoctorBarnReadService doctorBarnReadService;
+public class DoctorSowChgLocationHandler extends DoctorAbstractEventHandler {
 
     @Autowired
-    public DoctorSowChgLocationHandler(DoctorPigDao doctorPigDao,
-                                       DoctorPigEventDao doctorPigEventDao,
-                                       DoctorPigTrackDao doctorPigTrackDao,
-                                       DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                       DoctorRevertLogDao doctorRevertLogDao,
-                                       DoctorBarnReadService doctorBarnReadService,
-                                       DoctorBarnDao doctorBarnDao) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
-        this.doctorBarnReadService = doctorBarnReadService;
-    }
+    private DoctorBarnDao doctorBarnDao;
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        doctorPigTrack.addAllExtraMap(extra);
+    public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) inputDto;
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(chgLocationDto.getPigId());
+        //doctorPigTrack.setExtraMap(chgLocationDto.toMap());
 
-        Long toBarnId = Long.valueOf(extra.get("chgLocationToBarnId").toString());
-        DoctorBarn toBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(toBarnId));
+        Long toBarnId = chgLocationDto.getChgLocationToBarnId();
+        DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
         checkState(!isNull(toBarnId), "input.toBarnId.fail");
 
         doctorPigTrack.setCurrentBarnId(toBarnId);
@@ -77,7 +62,7 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
         } else if (Objects.equals(basic.getEventType(), PigEvent.TO_FARROWING.getKey())) {
             doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
         }
-        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 }

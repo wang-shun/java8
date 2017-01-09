@@ -2,26 +2,20 @@ package io.terminus.doctor.event.handler.sow;
 
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Dates;
-import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
-import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
-import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
+import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.workflow.core.Execution;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -44,58 +38,48 @@ import static io.terminus.common.utils.Arguments.notNull;
  */
 @Slf4j
 @Component
-public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
-
-    private final DailyReport2UpdateDao dailyReport2UpdateDao;
-    private final DoctorDailyReportDao doctorDailyReportDao;
+public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
 
     @Autowired
-    public DoctorSowPregCheckHandler(DoctorPigDao doctorPigDao,
-                                     DoctorPigEventDao doctorPigEventDao,
-                                     DoctorPigTrackDao doctorPigTrackDao,
-                                     DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                     DoctorRevertLogDao doctorRevertLogDao,
-                                     DoctorBarnDao doctorBarnDao,
-                                     DailyReport2UpdateDao dailyReport2UpdateDao,
-                                     DoctorDailyReportDao doctorDailyReportDao) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
-        this.dailyReport2UpdateDao = dailyReport2UpdateDao;
-        this.doctorDailyReportDao = doctorDailyReportDao;
+    private DailyReport2UpdateDao dailyReport2UpdateDao;
+    @Autowired
+    private DoctorDailyReportDao doctorDailyReportDao;
+
+    @Override
+    public void preHandle(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
     }
 
     @Override
-    protected IsOrNot eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
-        Integer pregCheckResult = (Integer) extra.get("checkResult");
+    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) inputDto;
+        DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pregChkResultDto.getPigId());
         //妊娠检查结果，从extra中拆出来
+        Integer pregCheckResult = pregChkResultDto.getCheckResult();
         doctorPigEvent.setPregCheckResult(pregCheckResult);
 
-        //校验能否妊娠检查与检查结果是否正确
-        checkCanPregCheckResult(doctorPigTrack.getStatus(), pregCheckResult);
-
         //妊娠检查事件时间
-        DateTime checkDate = new DateTime(Long.valueOf(extra.get("checkDate").toString()));
+        DateTime checkDate = new DateTime(pregChkResultDto.eventAt());
         doctorPigEvent.setCheckDate(checkDate.toDate());
 
         //查找最近一次配种事件
         DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
         if (notNull(lastMate) && !Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
             DateTime mattingDate = new DateTime(lastMate.getEventAt());
-            if (notNull(mattingDate)) {
-                int npd = Math.abs(Days.daysBetween(checkDate, mattingDate).getDays());
+            int npd = Math.abs(Days.daysBetween(checkDate, mattingDate).getDays());
 
-                if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
-                    //返情对应的pfNPD
-                    doctorPigEvent.setPfnpd(doctorPigEvent.getPfnpd() + npd);
-                    doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
-                } else if (Objects.equals(pregCheckResult, PregCheckResult.YING.getKey())) {
-                    //阴性对应的pyNPD
-                    doctorPigEvent.setPynpd(doctorPigEvent.getPynpd() + npd);
-                    doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
-                } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
-                    //流产对应的plNPD
-                    doctorPigEvent.setPlnpd(doctorPigEvent.getPlnpd() + npd);
-                    doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
-                }
+            if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
+                //返情对应的pfNPD
+                doctorPigEvent.setPfnpd(doctorPigEvent.getPfnpd() + npd);
+                doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
+            } else if (Objects.equals(pregCheckResult, PregCheckResult.YING.getKey())) {
+                //阴性对应的pyNPD
+                doctorPigEvent.setPynpd(doctorPigEvent.getPynpd() + npd);
+                doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
+            } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
+                //流产对应的plNPD
+                doctorPigEvent.setPlnpd(doctorPigEvent.getPlnpd() + npd);
+                doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
             }
 
         }
@@ -115,21 +99,36 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
             doctorPigSnapshotDao.deleteByEventId(lastPregEvent.getId());
 
             updateDailyReport(lastPregEvent.getEventAt(), lastPregEvent.getPregCheckResult(), doctorPigTrack);
-            return IsOrNot.YES;
         }
 
-        return IsOrNot.NO;
+        return doctorPigEvent;
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        Integer pregCheckResult = (Integer) extra.get("checkResult");
+    protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
+        super.specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
+        if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Pregnancy.getKey())) {
+            //对应的最近一次的 周期配种的初陪 的 isImpregnation 字段变成true
+            DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+            if (notNull(firstMate)) {
+                firstMate.setIsImpregnation(1);
+                doctorPigEventDao.update(firstMate);
+            }
+        }
+    }
+
+    @Override
+    public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) inputDto;
+        Integer pregCheckResult = pregChkResultDto.getCheckResult();
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pregChkResultDto.getPigId());
 
         //如果妊娠检查非阳性, 置当前配种数为0
-        if (!Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
+        //if (!Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
             doctorPigTrack.setCurrentMatingCount(0);
-        }
+        //}
 
+        Map<String, Object> extra = doctorPigTrack.getExtraMap();
         //往extra增加一些特殊标志位用来表明配种类型
         if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
             extra.put("fanqingToMate", true);
@@ -144,7 +143,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
             extra.put("pregCheckResult", PigStatus.Pregnancy.getKey());
         }
 
-        doctorPigTrack.addAllExtraMap(extra);
+        doctorPigTrack.setExtraMap(extra);
 
         if (Objects.equals(pregCheckResult, PregCheckResult.UNSURE.getKey())) {
             // 不修改状态
@@ -155,24 +154,8 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
             // 其余默认 没有怀孕
             doctorPigTrack.setStatus(PigStatus.KongHuai.getKey());
         }
-        Map<String, Object> express = execution.getExpression();
-        express.put("pregCheckResult", pregCheckResult);
-        express.put("currentBarnType", getBarnById(doctorPigTrack.getCurrentBarnId()).getPigType());
-        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
-    }
-
-    @Override
-    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, Long farrowGroupId, Long farrowBarnId) {
-        //如果是阳性
-        if (Objects.equals(PigStatus.Pregnancy.getKey(), doctorPigTrack.getStatus())) {
-            //对应的最近一次的 周期配种的初陪 的 isImpregnation 字段变成true
-            DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-            if (notNull(firstMate)) {
-                firstMate.setIsImpregnation(1);
-                doctorPigEventDao.update(firstMate);
-            }
-        }
     }
 
     //校验能否置成此妊娠检查状态

@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.dto.event.sow;
 
-import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,7 +23,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorPigletsChgDto extends AbstractPigEventInputDto implements Serializable{
+public class DoctorPigletsChgDto extends BasePigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 2032098840987088160L;
 
@@ -54,6 +54,12 @@ public class DoctorPigletsChgDto extends AbstractPigEventInputDto implements Ser
     private String pigletsCustomerName;    //客户姓名 （非必填）
 
     private String pigletsMark;  //标识(非必填)
+
+//    private String pigCode;
+//
+//    private Long barnId;
+//
+//    private String barnName;
 
     @Override
     public Map<String, String> descMap(){

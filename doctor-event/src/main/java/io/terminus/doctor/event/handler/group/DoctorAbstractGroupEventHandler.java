@@ -8,7 +8,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -27,7 +27,6 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -70,7 +69,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorGroupEventDao doctorGroupEventDao;
-    private final DoctorBarnReadService doctorBarnReadService;
+    private final DoctorBarnDao doctorBarnDao;
 
     @Autowired
     private DoctorGroupDao doctorGroupDao;
@@ -83,12 +82,12 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                                            DoctorGroupTrackDao doctorGroupTrackDao,
                                            CoreEventDispatcher coreEventDispatcher,
                                            DoctorGroupEventDao doctorGroupEventDao,
-                                           DoctorBarnReadService doctorBarnReadService) {
+                                           DoctorBarnDao doctorBarnDao) {
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.coreEventDispatcher = coreEventDispatcher;
         this.doctorGroupEventDao = doctorGroupEventDao;
-        this.doctorBarnReadService = doctorBarnReadService;
+        this.doctorBarnDao = doctorBarnDao;
     }
 
     @Override
@@ -266,7 +265,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     //产房(分娩母猪舍)只允许有一个猪群
     protected void  checkFarrowGroupUnique(Integer isCreateGroup, Long barnId) {
         if (isCreateGroup.equals(IsOrNot.YES.getValue())) {
-            Integer barnType = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId)).getPigType();
+            Integer barnType = doctorBarnDao.findById(barnId).getPigType();
             //如果是分娩舍或者产房
             if (barnType.equals(PigType.DELIVER_SOW.getValue())) {
                 List<DoctorGroup> groups = doctorGroupDao.findByCurrentBarnId(barnId);
@@ -279,7 +278,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //校验能否转入此舍(产房 => 产房(分娩母猪舍)/保育舍，保育舍 => 保育舍/育肥舍/育种舍，同类型可以互转)
     protected void checkCanTransBarn(Integer pigType, Long barnId) {
-        Integer barnType = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId)).getPigType();
+        Integer barnType = doctorBarnDao.findById(barnId).getPigType();
 
         //产房 => 产房(分娩母猪舍)/保育舍
         if (Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) {
@@ -346,7 +345,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     protected DoctorBarn getBarnById(Long barnId) {
-        return RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId));
+        return doctorBarnDao.findById(barnId);
     }
 
     //校验产房0仔猪未断奶数量，如果还有未断奶的仔猪，转群/变动数量要限制

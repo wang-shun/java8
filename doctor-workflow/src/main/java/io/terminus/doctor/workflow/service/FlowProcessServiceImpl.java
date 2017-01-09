@@ -238,9 +238,9 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                                     operatorId,
                                     operatorName
                             );
-                            iHandler.preHandle(execution);
-                            iHandler.handle(execution);
-                            iHandler.afterHandle(execution);
+//                            iHandler.preHandle(execution);
+//                            iHandler.handle(execution);
+//                            iHandler.afterHandle(execution);
                             flag = true;
                         }
                     }

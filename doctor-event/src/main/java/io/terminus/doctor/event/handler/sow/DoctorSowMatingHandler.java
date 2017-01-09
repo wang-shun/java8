@@ -3,26 +3,19 @@ package io.terminus.doctor.event.handler.sow;
 import com.google.common.base.MoreObjects;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
-import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.enums.DoctorMatingType;
-import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
-import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
+import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.workflow.core.Execution;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
@@ -34,7 +27,6 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
 import static java.util.Objects.isNull;
 
 /**
@@ -45,45 +37,66 @@ import static java.util.Objects.isNull;
  */
 @Component
 @Slf4j
-public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
+public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
 
     // 默认114 天 预产日期
     public static final Integer MATING_PREG_DAYS = 114;
 
-
-    @Autowired
-    public DoctorSowMatingHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao, DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao, DoctorRevertLogDao doctorRevertLogDao, DoctorBarnDao doctorBarnDao) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
+    @Override
+    public void preHandle(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
     }
 
-    @Override
-    protected IsOrNot eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
-        DateTime mattingDate = new DateTime(Long.valueOf(extra.get("matingDate").toString()));
-
-        doctorPigEvent.setMattingDate(mattingDate.toDate());
-        return IsOrNot.NO;
-    }
 
     @Override
-    public void specialFlowHandler(Execution execution, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        Long boarId = Long.valueOf(extra.get("matingBoarPigId").toString());
-        DoctorPigTrack doctorPigTrack = this.doctorPigTrackDao.findByPigId(boarId);
-        checkState(!isNull(doctorPigTrack), "createMating.boarPigId.fail");
-        Integer currentBoarParity = MoreObjects.firstNonNull(doctorPigTrack.getCurrentParity(), 0) + 1;
-        doctorPigTrack.setCurrentParity(currentBoarParity);
-        doctorPigTrackDao.update(doctorPigTrack);
-    }
-
-    @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        //重复配种就加次数
-        doctorPigTrack.setCurrentMatingCount(doctorPigTrack.getCurrentMatingCount() + 1);
+    public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
 
         // validate extra 配种日期信息
-        DateTime matingDate = new DateTime(Long.valueOf(extra.get("matingDate").toString()));
+        DateTime matingDate = new DateTime(inputDto.eventAt());
+        Map<String, Object> extra = doctorPigTrack.getExtraMap();
         if (doctorPigTrack.getCurrentMatingCount() == 0) {
             extra.put("judgePregDate", matingDate.plusDays(MATING_PREG_DAYS).toDate());
         }
+        if (!isNull(extra) &&
+                extra.containsKey("hasWeanToMating")
+                && Boolean.valueOf(extra.get("hasWeanToMating").toString())) {
+            extra.put("hasWeanToMating", false);
+            doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
+        }
+        if (!isNull(extra) &&
+                extra.containsKey("enterToMate")
+                && Boolean.valueOf(extra.get("enterToMate").toString())) {
+            extra.put("enterToMate", false);
+        }
+        //重复配种就加次数
+        doctorPigTrack.setCurrentMatingCount(doctorPigTrack.getCurrentMatingCount() + 1);
+        // 构建母猪配种信息
+        doctorPigTrack.setExtraMap(extra);
+        doctorPigTrack.setStatus(PigStatus.Mate.getKey());
+        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        return doctorPigTrack;
+    }
+
+    @Override
+    public void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
+        doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
+        doctorPigEvent.setCurrentMatingCount(doctorPigTrack.getCurrentMatingCount());
+        super.specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
+
+        DoctorMatingDto matingDto = (DoctorMatingDto) inputDto;
+        Long boarId = matingDto.getMatingBoarPigId();
+        DoctorPigTrack boarPigTrack = this.doctorPigTrackDao.findByPigId(boarId);
+        checkState(!isNull(doctorPigTrack), "createMating.boarPigId.fail");
+        Integer currentBoarParity = MoreObjects.firstNonNull(boarPigTrack.getCurrentParity(), 0) + 1;
+        boarPigTrack.setCurrentParity(currentBoarParity);
+        doctorPigTrackDao.update(boarPigTrack);
+
+    }
+
+    @Override
+    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
 
         //  校验断奶后, 第一次配种, 增加胎次
         Map<String, Object> trackExtraMap = doctorPigTrack.getExtraMap();
@@ -91,19 +104,15 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
                 trackExtraMap.containsKey("hasWeanToMating")
                 && Boolean.valueOf(trackExtraMap.get("hasWeanToMating").toString())) {
 
-            extra.put("hasWeanToMating", false);
-            doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
-
-
             //这里说明是断奶后的第一次配种,这个地方统计 dpNPD （断奶到配种的非生产天数）
             //查询最近一次导致断奶的事件
             DoctorPigEvent lastWean = getLeadToWeanEvent(doctorPigTrack.getPigId());
             //断奶时间
             DateTime partWeanDate = new DateTime(lastWean.getEventAt());
 
-            Integer dpNPD = Math.abs(Days.daysBetween(partWeanDate, matingDate).getDays());
-
-            context.put("dpNPD", dpNPD);
+            Integer dpNPD = Math.abs(Days.daysBetween(partWeanDate, new DateTime(doctorPigEvent.getEventAt())).getDays());
+            doctorPigEvent.setDpnpd(doctorPigEvent.getDpnpd() + dpNPD);
+            doctorPigEvent.setNpd(doctorPigEvent.getNpd() + dpNPD);
 
         }
 
@@ -112,38 +121,13 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
                 trackExtraMap.containsKey("enterToMate")
                 && Boolean.valueOf(trackExtraMap.get("enterToMate").toString())) {
 
-            extra.put("enterToMate", false);
             //这里说明是进场后的第一次配种,这个地方统计 jpNPD （进场到配种非生产天数）
             //查询最近一次进场事件
             DoctorPigEvent lastEnter = doctorPigEventDao.queryLastEnter(doctorPigTrack.getPigId());
             //进场时间
             DateTime lastEnterTime = new DateTime(lastEnter.getEventAt());
 
-            Integer jpNPD = Math.abs(Days.daysBetween(lastEnterTime, matingDate).getDays());
-
-            context.put("jpNPD", jpNPD);
-        }
-
-        // 构建母猪配种信息
-        doctorPigTrack.addAllExtraMap(extra);
-        doctorPigTrack.setStatus(PigStatus.Mate.getKey());
-        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
-        return doctorPigTrack;
-    }
-
-    @Override
-    protected void eventCreateAfterHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
-        //更新配种事件当中的配种次数
-        doctorPigEvent.setCurrentMatingCount(doctorPigTrack.getCurrentMatingCount());
-
-        if (notNull(context.get("dpNPD"))) {
-            Integer dpNPD = (Integer) context.get("dpNPD");
-            doctorPigEvent.setDpnpd(doctorPigEvent.getDpnpd() + dpNPD);
-            doctorPigEvent.setNpd(doctorPigEvent.getNpd() + dpNPD);
-        }
-
-        if (notNull(context.get("jpNPD"))) {
-            Integer jpNPD = (Integer) context.get("jpNPD");
+            Integer jpNPD = Math.abs(Days.daysBetween(lastEnterTime, new DateTime(doctorPigEvent.getEventAt())).getDays());
             doctorPigEvent.setDpnpd(doctorPigEvent.getJpnpd() + jpNPD);
             doctorPigEvent.setNpd(doctorPigEvent.getNpd() + jpNPD);
         }
@@ -152,6 +136,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
         List<DoctorPigEvent> events = doctorPigEventDao.queryAllEventsByPigId(doctorPigTrack.getPigId());
         DoctorMatingType mateType = getPigMateType(events, doctorPigEvent.getEventAt());
         doctorPigEvent.setDoctorMateType(mateType.getKey());
+        return doctorPigEvent;
     }
 
 

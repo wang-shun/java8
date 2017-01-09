@@ -8,8 +8,8 @@ import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
 import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.handler.DoctorEntryHandler;
-import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
-import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
+import io.terminus.doctor.event.handler.DoctorPigEventHandler;
+import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgFarmEventHandler;
@@ -152,21 +152,21 @@ public class ServiceConfiguration {
      * 对应handler chain
      * @return
      */
-    @Bean
-    public DoctorEventHandlerChain doctorEventHandlerChain(
-            DoctorSemenHandler doctorSemenHandler,DoctorEntryHandler doctorEntryHandler,
-            DoctorChgFarmHandler doctorChgFarmHandler, DoctorChgLocationHandler doctorChgLocationHandler,
-            DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
-            DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
-        DoctorEventHandlerChain chain = new DoctorEventHandlerChain();
-        List<DoctorEventCreateHandler> list = Lists.newArrayList(
-                doctorSemenHandler,doctorEntryHandler,
-                doctorChgFarmHandler, doctorChgLocationHandler,
-                doctorConditionHandler, doctorDiseaseHandler,
-                doctorRemovalHandler, doctorVaccinationHandler);
-        chain.setDoctorEventCreateHandlers(Lists.newArrayList(list));
-        return chain;
-    }
+//    @Bean
+//    public DoctorPigEventHandlers doctorEventHandlerChain(
+//            DoctorSemenHandler doctorSemenHandler,DoctorEntryHandler doctorEntryHandler,
+//            DoctorChgFarmHandler doctorChgFarmHandler, DoctorChgLocationHandler doctorChgLocationHandler,
+//            DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
+//            DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
+//        DoctorPigEventHandlers chain = new DoctorPigEventHandlers();
+//        List<DoctorPigEventHandler> list = Lists.newArrayList(
+//                doctorSemenHandler,doctorEntryHandler,
+//                doctorChgFarmHandler, doctorChgLocationHandler,
+//                doctorConditionHandler, doctorDiseaseHandler,
+//                doctorRemovalHandler, doctorVaccinationHandler);
+//        chain.setEventHandlerMap(Lists.newArrayList(list));
+//        return chain;
+//    }
 
     @Bean
     public EventBus eventBus(){

@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.dto.event.sow;
 
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.enums.MatingType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,7 +25,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorMatingDto extends AbstractPigEventInputDto implements Serializable {
+public class DoctorMatingDto extends BasePigEventInputDto implements Serializable {
 
     private static final long serialVersionUID = 2732269011148894160L;
 
@@ -43,6 +43,12 @@ public class DoctorMatingDto extends AbstractPigEventInputDto implements Seriali
     private Integer matingType; // 配种类型
 
     private String mattingMark; // 配种mark
+
+//    private String pigCode;
+//
+//    private Long barnId;
+//
+//    private String barnName;
 
     @Override
     public Map<String, String> descMap(){

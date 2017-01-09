@@ -20,11 +20,7 @@ import java.util.List;
  */
 public class DoctorEventSelector {
 
-    private static final Table<PigStatus, PigType, List<PigEvent>> pigTable = HashBasedTable.create();
-
-    public DoctorEventSelector() {
-        configuration();
-    }
+    private static final Table<PigStatus, PigType, List<PigEvent>> pigTable = configuration();
 
     /**
      * 根据猪当前状态和所在猪舍，判断可以执行的事件(状态转换事件)
@@ -43,7 +39,8 @@ public class DoctorEventSelector {
     }
 
     //配置可以执行的事件
-    private static void configuration() {
+    private static Table<PigStatus, PigType, List<PigEvent>> configuration() {
+        Table<PigStatus, PigType, List<PigEvent>> pigTable = HashBasedTable.create();
         // (已进场，配怀舍) => 配种
         pigTable.put(PigStatus.Entry, PigType.MATE_SOW, Lists.newArrayList(PigEvent.MATING));
         pigTable.put(PigStatus.Entry, PigType.PREG_SOW, Lists.newArrayList(PigEvent.MATING));
@@ -61,7 +58,7 @@ public class DoctorEventSelector {
         pigTable.put(PigStatus.KongHuai, PigType.PREG_SOW, Lists.newArrayList(PigEvent.MATING, PigEvent.PREG_CHECK));
 
         // (待分娩，配怀舍) => 分娩
-        pigTable.put(PigStatus.Farrow, PigType.DELIVER_SOW, Lists.newArrayList(PigEvent.FARROWING));
+        pigTable.put(PigStatus.Pregnancy, PigType.DELIVER_SOW, Lists.newArrayList(PigEvent.FARROWING));
 
         // (哺乳，配怀舍) => 拼窝，断奶，仔猪变动
         pigTable.put(PigStatus.FEED, PigType.DELIVER_SOW, Lists.newArrayList(PigEvent.FOSTERS, PigEvent.WEAN, PigEvent.PIGLETS_CHG));
@@ -73,5 +70,6 @@ public class DoctorEventSelector {
         // (返情，配怀舍) => 配种，妊检  这种情况已经作废，只是为了兼容历史数据
         pigTable.put(PigStatus.FanQing, PigType.MATE_SOW, Lists.newArrayList(PigEvent.MATING, PigEvent.PREG_CHECK));
         pigTable.put(PigStatus.FanQing, PigType.PREG_SOW, Lists.newArrayList(PigEvent.MATING, PigEvent.PREG_CHECK));
+        return pigTable;
     }
 }

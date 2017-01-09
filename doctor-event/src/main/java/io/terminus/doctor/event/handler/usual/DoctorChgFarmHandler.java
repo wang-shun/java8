@@ -1,21 +1,16 @@
 package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.collect.Maps;
-import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorRevertLogDao;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,57 +30,46 @@ import static com.google.common.base.Preconditions.checkState;
 @Slf4j
 public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
 
-    private final DoctorBarnReadService doctorBarnReadService;
-
     @Autowired
-    public DoctorChgFarmHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
-                                DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                DoctorRevertLogDao doctorRevertLogDao,
-                                DoctorBarnReadService doctorBarnReadService) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
-        this.doctorBarnReadService = doctorBarnReadService;
-    }
+    private DoctorBarnDao doctorBarnDao;
 
     @Override
-    public Boolean preHandler(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) throws RuntimeException {
-        return Objects.equals(basic.getEventType(), PigEvent.CHG_FARM.getKey());
-    }
-
-    @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
+    protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorChgFarmDto chgFarmDto = (DoctorChgFarmDto) inputDto;
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(chgFarmDto.getPigId());
 
         // 当前状态为哺乳状态的母猪不允许转
         checkState(!Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "feedStatus.sowChangFarm.error");
 
         // 校验转相同的猪舍
-        DoctorBarn doctorCurrentBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(doctorPigTrack.getCurrentBarnId()));
-        DoctorBarn doctorToBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(Long.valueOf(extra.get("toBarnId").toString())));
+        DoctorBarn doctorCurrentBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
+        DoctorBarn doctorToBarn = doctorBarnDao.findById(chgFarmDto.getToBarnId());
         checkState(Objects.equals(doctorCurrentBarn.getPigType(), doctorToBarn.getPigType()), "sowChgFarm.diffBarn.error");
 
         // update barn info
-        doctorPigTrack.setFarmId(Long.valueOf(extra.get("toFarmId").toString()));
+        doctorPigTrack.setFarmId(chgFarmDto.getToFarmId());
         doctorPigTrack.setCurrentBarnId(doctorToBarn.getId());
         doctorPigTrack.setCurrentBarnName(doctorToBarn.getName());
 
-        doctorPigTrack.addAllExtraMap(extra);
-        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        //doctorPigTrack.addAllExtraMap(chgFarmDto.toMap());
+        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 
     @Override
-    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, Map<String, Object> extra) {
-
+    protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
+        DoctorChgFarmDto chgFarmDto = (DoctorChgFarmDto) inputDto;
         // doctor pig update farm info
         DoctorPig doctorPig = doctorPigDao.findById(doctorPigTrack.getPigId());
-        doctorPig.setFarmId(Long.valueOf(extra.get("toFarmId").toString()));
-        doctorPig.setFarmName(extra.get("toFarmName").toString());
+        doctorPig.setFarmId(chgFarmDto.getToFarmId());
+        doctorPig.setFarmName(chgFarmDto.getToFarmName());
         doctorPigDao.update(doctorPig);
 
         // 修改对应的 pig event 对应的事件信息转入对应的猪场
         Map<String,Object> params = Maps.newHashMap();
         params.put("pigId", doctorPig.getId());
-        params.put("farmId",Long.valueOf(extra.get("toFarmId").toString()));
-        params.put("farmName", extra.get("toFarmName").toString());
+        params.put("farmId", chgFarmDto.getToFarmId());
+        params.put("farmName", chgFarmDto.getToFarmName());
         checkState(doctorPigEventDao.updatePigEventFarmIdByPigId(params), "chgFarm.updateEventInfo.fail");
     }
 }

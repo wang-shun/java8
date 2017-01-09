@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.dto.event.sow;
 
-import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,7 +23,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorLitterWeightDto extends AbstractPigEventInputDto implements Serializable {
+public class DoctorLitterWeightDto extends BasePigEventInputDto implements Serializable {
 
     private static final long serialVersionUID = -3360271781401622417L;
 
@@ -36,6 +36,12 @@ public class DoctorLitterWeightDto extends AbstractPigEventInputDto implements S
     private Double nestWeight;
 
     private String remark;
+
+    private String pigCode;
+
+    private Long barnId;
+
+    private String barnName;
 
     @Override
     public Map<String, String> descMap() {

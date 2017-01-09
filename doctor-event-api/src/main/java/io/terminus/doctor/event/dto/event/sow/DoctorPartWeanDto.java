@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.dto.event.sow;
 
-import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,7 +24,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorPartWeanDto extends AbstractPigEventInputDto implements Serializable{
+public class DoctorPartWeanDto extends BasePigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 252972605944533095L;
 

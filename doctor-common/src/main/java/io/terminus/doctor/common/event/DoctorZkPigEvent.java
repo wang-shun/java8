@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.Map;
 
 /**
  * Desc:
@@ -19,5 +18,8 @@ import java.util.Map;
 public class DoctorZkPigEvent implements Serializable {
 
     private static final long serialVersionUID = 1366282286841197089L;
-    private Map<String, Object> context;
+    //private Map<String, Object> context;
+    private Long pigId;
+    private Long eventId;
+    private Integer eventType;
 }

@@ -1,30 +1,26 @@
 package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.ServiceException;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.common.enums.PigType.MATING_FARROW_TYPES;
 import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
 
 /**
@@ -48,80 +46,80 @@ import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
 @Component
 public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
-    private final DoctorBarnDao doctorBarnDao;
+    @Autowired
+    private DoctorBarnDao doctorBarnDao;
 
-    private final DoctorGroupDao doctorGroupDao;
+    @Autowired
+    private DoctorGroupDao doctorGroupDao;
 
     @Autowired
     private DoctorGroupReadService doctorGroupReadService;
     @Autowired
     private DoctorGroupEventManager doctorGroupEventManager;
 
-    @Autowired
-    public DoctorChgLocationHandler(DoctorPigDao doctorPigDao,
-                                    DoctorPigEventDao doctorPigEventDao,
-                                    DoctorPigTrackDao doctorPigTrackDao,
-                                    DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                    DoctorRevertLogDao doctorRevertLogDao,
-                                    DoctorBarnDao doctorBarnDao,
-                                    DoctorGroupDao doctorGroupDao) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
-        this.doctorBarnDao = doctorBarnDao;
-        this.doctorGroupDao = doctorGroupDao;
-    }
-
     @Override
-    public Boolean preHandler(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) throws RuntimeException {
-        return Objects.equals(basic.getEventType(), PigEvent.CHG_LOCATION.getKey());
-    }
+    protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) inputDto;
+        Long toBarnId = chgLocationDto.getChgLocationToBarnId();
 
-    @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        Long toBarnId = Params.getWithConvert(extra,"chgLocationToBarnId",a->Long.valueOf(a.toString()));
-
-        Map<String, Object> extraMap = JsonMapper.nonEmptyMapper().fromJson(doctorPigTrack.getExtra(),
-                JsonMapper.nonEmptyMapper().createCollectionType(Map.class, String.class, Object.class));
+//        Map<String, Object> extraMap = JsonMapper.nonEmptyMapper().fromJson(doctorPigTrack.getExtra(),
+//                JsonMapper.nonEmptyMapper().createCollectionType(Map.class, String.class, Object.class));
 
         //校验猪舍类型是否相同, 只有同类型才可以普通转舍
         DoctorBarn fromBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
-        checkBarnTypeEqual(fromBarn, toBarn);
+        checkState(checkBarnTypeEqual(fromBarn, toBarn, doctorPigTrack.getStatus()), "barn.type.not.equal");
 
-        Long pigEventId = (Long) context.get("doctorPigEventId");
+        //Long pigEventId = (Long) context.get("doctorPigEventId");
 
+        // 来源和前往都是 1 和 7 时, 仔猪也要跟着转群
+//        if(PigType.FARROW_TYPES.contains(fromBarn.getPigType()) && PigType.FARROW_TYPES.contains(toBarn.getPigType())
+//                && doctorPigTrack.getGroupId() != null){
+//            log.info("this is a buru sow trans barn event!");
+//            Long groupId = pigletTrans(doctorPigTrack, basic, extra, toBarn, pigEventId);
+//            extraMap.put("farrowingPigletGroupId", groupId);
+//            doctorPigTrack.setExtraMap(extraMap);
+//            doctorPigTrack.setGroupId(groupId);  //更新猪群id
+//        }
+
+        doctorPigTrack.setCurrentBarnId(toBarnId);
+        doctorPigTrack.setCurrentBarnName(toBarn.getName());
+        //doctorPigTrack.addAllExtraMap(chgLocationDto.toMap());
+        //doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
+        return doctorPigTrack;
+    }
+
+    private Boolean checkBarnTypeEqual(DoctorBarn fromBarn, DoctorBarn toBarn, Integer pigStatus) {
+        if (fromBarn == null || toBarn == null) {
+            return false;
+        }
+        return (Objects.equals(fromBarn.getPigType(), toBarn.getPigType())
+                || (MATING_TYPES.contains(fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType()))
+                || (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_FARROW_TYPES.contains(toBarn.getPigType())))
+                || Objects.equals(pigStatus, PigStatus.Pregnancy.getKey()) && MATING_FARROW_TYPES.contains(toBarn.getPigType());
+    }
+
+    @Override
+    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
+        DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) inputDto;
+        DoctorBarn fromBarn = doctorBarnDao.findById(chgLocationDto.getChgLocationFromBarnId());
+        DoctorBarn toBarn = doctorBarnDao.findById(chgLocationDto.getChgLocationToBarnId());
+        Map<String, Object> extraMap = doctorPigTrack.getExtraMap();
         // 来源和前往都是 1 和 7 时, 仔猪也要跟着转群
         if(PigType.FARROW_TYPES.contains(fromBarn.getPigType()) && PigType.FARROW_TYPES.contains(toBarn.getPigType())
                 && doctorPigTrack.getGroupId() != null){
             log.info("this is a buru sow trans barn event!");
-            Long groupId = pigletTrans(doctorPigTrack, basic, extra, toBarn, pigEventId);
+            Long groupId = pigletTrans(doctorPigTrack, basic, chgLocationDto, toBarn, doctorPigEvent.getId());
             extraMap.put("farrowingPigletGroupId", groupId);
             doctorPigTrack.setExtraMap(extraMap);
             doctorPigTrack.setGroupId(groupId);  //更新猪群id
-        }
-
-        doctorPigTrack.setCurrentBarnId(toBarnId);
-        doctorPigTrack.setCurrentBarnName(toBarn.getName());
-        doctorPigTrack.addAllExtraMap(extra);
-        doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
-        return doctorPigTrack;
-    }
-
-    private void checkBarnTypeEqual(DoctorBarn fromBarn, DoctorBarn toBarn) {
-        if (fromBarn == null || toBarn == null) {
-            throw new ServiceException("barn.type.not.equal");
-        }
-
-        //配种舍 <=> 妊娠舍
-        if (MATING_TYPES.contains(fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType())) {
-            return;
-        }
-        if (!Objects.equals(fromBarn.getPigType(), toBarn.getPigType())) {
-            throw new ServiceException("barn.type.not.equal");
+            doctorPigTrackDao.update(doctorPigTrack);
         }
     }
 
     //未断奶仔猪转群
-    private Long pigletTrans(DoctorPigTrack pigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, DoctorBarn doctorToBarn, Long pigEventId) {
+    private Long pigletTrans(DoctorPigTrack pigTrack, DoctorBasicInputInfoDto basic, DoctorChgLocationDto chgLocationDto, DoctorBarn doctorToBarn, Long pigEventId) {
         //未断奶仔猪id
         DoctorTransGroupInput input = new DoctorTransGroupInput();
         input.setToBarnId(doctorToBarn.getId());
@@ -137,7 +135,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         }
 
         DoctorGroupDetail fromGroup = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(pigTrack.getGroupId()));
-        input.setEventAt(DateUtil.toDateString(basic.generateEventAtFromExtra(extra)));
+        input.setEventAt(DateUtil.toDateString(chgLocationDto.eventAt()));
         input.setIsAuto(IsOrNot.YES.getValue());
         input.setCreatorId(basic.getStaffId());
         input.setCreatorName(basic.getStaffName());

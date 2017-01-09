@@ -69,10 +69,14 @@ public class DoctorMessageEventListener implements EventListener{
         log.info("data event data:{}", dataEvent);
         // 1. 如果是猪创建事件信息
         if (DataEventType.PigEventCreate.getKey() == dataEvent.getEventType()) {
-            DoctorZkPigEvent pigCreateEvent = DataEvent.analyseContent(dataEvent, DoctorZkPigEvent.class);
-            if (pigCreateEvent != null && pigCreateEvent.getContext() != null) {
-                Map<String, Object> context = pigCreateEvent.getContext();
-                handlePigEvent(context);
+//            DoctorZkPigEvent pigCreateEvent = DataEvent.analyseContent(dataEvent, DoctorZkPigEvent.class);
+//            if (pigCreateEvent != null && pigCreateEvent.getContext() != null) {
+//                Map<String, Object> context = pigCreateEvent.getContext();
+//                handlePigEvent(context);
+//            }
+            DoctorZkPigEvent zkPigEvent = DataEvent.analyseContent(dataEvent, DoctorZkPigEvent.class);
+            if (zkPigEvent != null) {
+                updateMessage(zkPigEvent.getPigId(), zkPigEvent.getEventType(), DoctorMessage.BUSINESS_TYPE.PIG.getValue());
             }
         }
 
