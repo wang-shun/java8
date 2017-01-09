@@ -61,14 +61,8 @@ public class DoctorGroupEventListener implements EventListener {
             return;
         }
 
-        //所有的变动事件
-        if (Objects.equals(groupEvent.getEventType(), GroupEventType.CHANGE.getValue())) {
-            List<DoctorGroupPublishDto> changes = flatByEventAtAndPigType(groupEvent.getGroups());
-            changes.forEach(change -> handle(groupEvent.getOrgId(), groupEvent.getFarmId(), groupEvent.getEventType(), change));
-        } else {
-            List<DoctorGroupPublishDto> liveStocks = flatByEventAtAndPigType(groupEvent.getGroups());
-            liveStocks.forEach(liveStock -> handle(groupEvent.getOrgId(), groupEvent.getFarmId(), groupEvent.getEventType(), liveStock));
-        }
+        flatByEventAtAndPigType(groupEvent.getGroups())
+                .forEach(change -> handle(groupEvent.getOrgId(), groupEvent.getFarmId(), groupEvent.getEventType(), change));
     }
 
     /**
