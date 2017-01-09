@@ -4,9 +4,7 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +22,10 @@ import org.springframework.stereotype.Service;
 public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
 
     private final DoctorBarnDao doctorBarnDao;
-    private final CoreEventDispatcher coreEventDispatcher;
 
     @Autowired
-    public DoctorBarnWriteServiceImpl(DoctorBarnDao doctorBarnDao,
-                                      CoreEventDispatcher coreEventDispatcher) {
+    public DoctorBarnWriteServiceImpl(DoctorBarnDao doctorBarnDao) {
         this.doctorBarnDao = doctorBarnDao;
-        this.coreEventDispatcher = coreEventDispatcher;
     }
 
     @Override
@@ -39,7 +34,6 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
             //校验猪舍名称是否重复
             checkBarnNameRepeat(barn.getFarmId(), barn.getName());
             doctorBarnDao.create(barn);
-            coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barn.getId()).build());
             return Response.ok(barn.getId());
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -53,7 +47,6 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
     public Response<Boolean> updateBarn(DoctorBarn barn) {
         try {
             doctorBarnDao.update(barn);
-            coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barn.getId()).build());
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("update barn failed, barn:{}, cause:{}", barn, Throwables.getStackTraceAsString(e));
@@ -70,7 +63,6 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
             barn.setId(barnId);
             barn.setStatus(status);
             doctorBarnDao.update(barn);
-            coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barn.getId()).build());
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("update barn status failed, barnId:{}, status:{}, cause:{}",
