@@ -46,10 +46,6 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
     private DoctorDailyReportDao doctorDailyReportDao;
 
     @Override
-    public void preHandle(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-    }
-
-    @Override
     protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) inputDto;
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);

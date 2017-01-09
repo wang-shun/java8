@@ -129,7 +129,7 @@ public class DoctorGroupManager {
         doctorGroupSnapshotDao.create(groupSnapshot);
 
         //发布统计事件
-        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), groupEvent.getId());
+        publistGroupAndBarn(groupEvent);
         return groupId;
     }
 

@@ -43,11 +43,6 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     public static final Integer MATING_PREG_DAYS = 114;
 
     @Override
-    public void preHandle(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-    }
-
-
-    @Override
     public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
 
