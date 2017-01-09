@@ -13,12 +13,12 @@ import java.util.List;
 public interface DoctorPigEventHandler {
 
     /**
-     * 校验Handler 的处理方式
+     * 校验输入数据
      */
-    void preHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic);
+    void handleCheck(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic);
 
     /**
-     * 事件信息处理handler
+     * 事件信息处理
      */
     void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic);
 

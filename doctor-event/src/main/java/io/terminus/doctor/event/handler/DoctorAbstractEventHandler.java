@@ -18,11 +18,12 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -45,13 +46,17 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
 
-    @Autowired(required = false)
-    protected Publisher publisher;
+    @Autowired
+    private ApplicationContext context;
+
+    protected String getErrorMessage(String error, Object[] params) {
+        return context.getMessage(error, params, Locale.CHINA);
+    }
 
     protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     @Override
-    public void preHandle(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
 
     }
 
@@ -82,6 +87,9 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .farmId(doctorPigEvent.getFarmId())
                 .eventId(doctorPigEvent.getId())
                 .eventAt(doctorPigEvent.getEventAt())
+                .kind(doctorPigEvent.getKind())
+                .mateType(doctorPigEvent.getDoctorMateType())
+                .pregCheckResult(doctorPigEvent.getPregCheckResult())
                 .businessId(doctorPigEvent.getPigId())
                 .code(doctorPigEvent.getPigCode())
                 .status(doctorPigTrack.getStatus())
@@ -120,7 +128,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .eventAt(inputDto.eventAt()).type(basic.getEventType())
                 .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName())
                 .kind(inputDto.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))//.relEventId(basic.getRelEventId())
-                .operatorId(inputDto.getOperatorId()).operatorName(inputDto.getOperatorName())
+                .operatorId(MoreObjects.firstNonNull(inputDto.getOperatorId(), basic.getStaffId())).operatorName(MoreObjects.firstNonNull(inputDto.getOperatorName(), basic.getStaffName()))
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .isAuto(MoreObjects.firstNonNull(inputDto.getIsAuto(), IsOrNot.NO.getValue()))
                 .npd(0)
