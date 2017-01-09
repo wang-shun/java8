@@ -50,6 +50,7 @@
         <if test="unitName != null">AND unit_name = #{unitName}</if>
         <if test="defaultConsumeCount != null">AND default_consume_count = #{defaultConsumeCount}</if>
         <if test="price != null">AND price = #{price}</if>
+        <if test="isValid != null">AND is_valid = #{isValid}</if>
     </sql>
 
     <insert id="create" parameterType="DoctorBasicMaterial" keyProperty="id" useGeneratedKeys="true">
@@ -137,4 +138,24 @@
         ORDER BY id DESC LIMIT #{limit}
     </select>
     <!-- search api end -->
+
+    <select id="list" parameterType="map" resultMap="DoctorBasicMaterialMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="findByIdsAndType" parameterType="map" resultMap="DoctorBasicMaterialMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <if test="type != null">AND `type` = #{type}</if>
+            <if test="ids != null">
+                AND id in
+                <foreach collection="ids" open="(" separator="," close=")" item="id">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
 </mapper>

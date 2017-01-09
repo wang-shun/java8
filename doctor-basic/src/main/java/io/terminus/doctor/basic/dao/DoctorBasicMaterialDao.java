@@ -48,4 +48,8 @@ public class DoctorBasicMaterialDao extends MyBatisDao<DoctorBasicMaterial> {
     public DoctorBasicMaterial findByTypeAndName(WareHouseType type, String name){
         return sqlSession.selectOne(sqlId("findByTypeAndName"), ImmutableMap.of("type", type.getKey(), "name", name));
     }
+
+    public List<DoctorBasicMaterial> findByIdsAndType(Long type, List idList){
+        return sqlSession.selectList(sqlId("findByIdsAndType"), ImmutableMap.of("type", type, "ids", idList));
+    }
 }

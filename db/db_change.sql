@@ -566,3 +566,5 @@ ALTER TABLE doctor_messages ADD COLUMN business_type INT(11) DEFAULT NULL COMMEN
 ALTER TABLE doctor_pig_events ADD COLUMN group_id BIGINT(20) DEFAULT NULL COMMENT '哺乳状态的母猪关联的猪群id' AFTER npd;
 CREATE INDEX idx_doctor_pig_events_group_id ON doctor_pig_events(group_id);
 
+-- 2017-01-09
+alter table doctor_farm_basics add column material_ids TEXT default null comment '物料基础数据ids' after reason_ids;

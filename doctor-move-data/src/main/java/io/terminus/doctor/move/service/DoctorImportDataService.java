@@ -95,6 +95,7 @@ import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserWriteService;
+import jdk.nashorn.internal.scripts.JO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -199,6 +200,8 @@ public class DoctorImportDataService {
     private DoctorAddressDao addressDao;
     @Autowired
     private UserDaoExt userDaoExt;
+    @Autowired
+    private DoctorBasicMaterialDao doctorBasicMaterialDao;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -246,11 +249,12 @@ public class DoctorImportDataService {
     public void importFarmBasics(Long farmId) {
         List<Long> basicIds = doctorBasicDao.list(Maps.newHashMap()).stream().map(DoctorBasic::getId).collect(Collectors.toList());
         List<Long> reasonIds = doctorChangeReasonDao.list(Maps.newHashMap()).stream().map(DoctorChangeReason::getId).collect(Collectors.toList());
-
+        List<Long> materialIds = doctorBasicMaterialDao.list(MapBuilder.<String, Integer>of().put("isValid", 1).map()).stream().map(DoctorBasicMaterial::getId).collect(Collectors.toList());
         DoctorFarmBasic farmBasic = new DoctorFarmBasic();
         farmBasic.setFarmId(farmId);
         farmBasic.setBasicIds(Joiners.COMMA.join(basicIds));
         farmBasic.setReasonIds(Joiners.COMMA.join(reasonIds));
+        farmBasic.setMaterialIds(Joiners.COMMA.join(materialIds));
         doctorFarmBasicDao.create(farmBasic);
     }
 
