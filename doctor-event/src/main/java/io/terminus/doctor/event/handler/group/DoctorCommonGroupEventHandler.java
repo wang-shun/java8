@@ -61,7 +61,7 @@ public class DoctorCommonGroupEventHandler {
     @Autowired
     private DoctorGroupManager doctorGroupManager;
 
-    @Autowired
+    @Autowired(required = false)
     private DoctorEntryHandler doctorEntryHandler;
 
     @Autowired

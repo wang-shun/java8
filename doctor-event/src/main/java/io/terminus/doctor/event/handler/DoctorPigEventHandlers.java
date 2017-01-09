@@ -12,15 +12,5 @@ import java.util.Map;
  */
 @Data
 public class DoctorPigEventHandlers {
-
     private Map<Integer, DoctorPigEventHandler> eventHandlerMap;
-
-
-//    public void setDoctorEventCreateHandlers(List<DoctorPigEventHandler> doctorEventCreateHandlers){
-//        this.doctorEventCreateHandlers = doctorEventCreateHandlers;
-//    }
-//
-//    public List<DoctorPigEventHandler> getDoctorEventCreateHandlers(){
-//        return doctorEventCreateHandlers;
-//    }
 }
