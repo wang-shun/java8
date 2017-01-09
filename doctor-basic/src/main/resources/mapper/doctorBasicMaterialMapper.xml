@@ -50,6 +50,7 @@
         <if test="unitName != null">AND unit_name = #{unitName}</if>
         <if test="defaultConsumeCount != null">AND default_consume_count = #{defaultConsumeCount}</if>
         <if test="price != null">AND price = #{price}</if>
+        <if test="isValid != null">AND is_valid = #{isValid}</if>
     </sql>
 
     <insert id="create" parameterType="DoctorBasicMaterial" keyProperty="id" useGeneratedKeys="true">
