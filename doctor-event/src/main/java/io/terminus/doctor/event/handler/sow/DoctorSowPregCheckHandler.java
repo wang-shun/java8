@@ -1,19 +1,15 @@
 package io.terminus.doctor.event.handler.sow;
 
 import io.terminus.common.exception.ServiceException;
-import io.terminus.common.utils.Dates;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
-import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
-import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
@@ -22,12 +18,9 @@ import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -39,11 +32,6 @@ import static io.terminus.common.utils.Arguments.notNull;
 @Slf4j
 @Component
 public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
-
-    @Autowired
-    private DailyReport2UpdateDao dailyReport2UpdateDao;
-    @Autowired
-    private DoctorDailyReportDao doctorDailyReportDao;
 
     @Override
     protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
@@ -93,8 +81,6 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
 
             //删掉镜像里的数据
             doctorPigSnapshotDao.deleteByEventId(lastPregEvent.getId());
-
-            updateDailyReport(lastPregEvent.getEventAt(), lastPregEvent.getPregCheckResult(), doctorPigTrack);
         }
 
         return doctorPigEvent;
@@ -187,38 +173,5 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
 
         //如果不是 已配种, 妊娠检查结果状态, 不允许妊娠检查
         throw new ServiceException("preg.check.not.allow");
-    }
-
-    //更新日报妊检统计
-    private void updateDailyReport(Date updateAt, Integer checkResult, DoctorPigTrack pigTrack) {
-        Date updateStartAt = Dates.startOfDay(updateAt);
-
-        //存一下覆盖掉的日期
-        dailyReport2UpdateDao.saveDailyReport2Update(updateStartAt, pigTrack.getFarmId());
-
-        DoctorDailyReport report = doctorDailyReportDao.findByFarmIdAndSumAt(pigTrack.getFarmId(), updateStartAt);
-        if (report != null && notEmpty(report.getData())) {
-            DoctorDailyReportDto dto = report.getReportData();
-            DoctorCheckPregDailyReport preg = dto.getCheckPreg();
-
-            PregCheckResult result = PregCheckResult.from(checkResult);
-            checkNotNull(result, "preg.check.result.error");
-            switch (result) {
-                case YING:
-                    preg.setNegative(preg.getNegative() < 0 ? 0 : preg.getNegative() - 1);
-                    break;
-                case LIUCHAN:
-                    preg.setLiuchan(preg.getLiuchan() < 0 ? 0 : preg.getLiuchan() - 1);
-                    break;
-                case FANQING:
-                    preg.setFanqing(preg.getFanqing() < 0 ? 0 : preg.getFanqing() - 1);
-                    break;
-                default:
-                    break;
-            }
-            dto.setCheckPreg(preg);
-            report.setReportData(dto);
-            doctorDailyReportDao.update(report);
-        }
     }
 }
