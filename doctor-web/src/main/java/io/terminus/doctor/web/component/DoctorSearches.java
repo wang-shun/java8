@@ -417,7 +417,8 @@ public class DoctorSearches {
     //获取猪舍中猪的状态聚合
     private List<SearchedBarn.BarnStatus> addPigBarnStatus(List<SearchedBarn.BarnStatus> barnStatus, List<DoctorPigTrack> pigTracks) {
         for (Map.Entry<Integer, List<DoctorPigTrack>> m : pigTracks.stream().collect(Collectors.groupingBy(DoctorPigTrack::getStatus)).entrySet()) {
-            if (m.getValue().size() > 0) {
+            //公猪进场的只显示总数就可以，所以不加进去了
+            if (!Objects.equals(PigStatus.BOAR_ENTRY.getKey(), m.getKey()) && m.getValue().size() > 0) {
                 barnStatus.add(SearchedBarn.createPigStatus(PigStatus.from(m.getKey()), m.getValue().size()));
             }
         }

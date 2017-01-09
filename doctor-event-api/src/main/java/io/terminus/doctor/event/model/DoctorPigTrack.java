@@ -48,6 +48,9 @@ public class DoctorPigTrack implements Serializable {
      */
     private Integer pigType;
 
+    /**
+     * @see io.terminus.doctor.event.enums.PigStatus
+     */
     private Integer status;
 
     /**
