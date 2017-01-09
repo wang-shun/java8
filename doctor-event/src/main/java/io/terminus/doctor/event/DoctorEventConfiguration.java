@@ -167,19 +167,19 @@ public class  DoctorEventConfiguration {
     public DoctorPigEventHandlers doctorPigEventHandlers(
             DoctorEntryHandler doctorEntryHandler,
             DoctorSemenHandler doctorSemenHandler,
-            DoctorSowFostersByHandler doctorSowFostersByHandler
-//            DoctorSowMatingHandler doctorSowMatingHandler,
-//            DoctorSowPregCheckHandler doctorSowPregCheckHandler
-//            DoctorChgFarmHandler doctorChgFarmHandler,
-//            DoctorChgLocationHandler doctorChgLocationHandler
-//            DoctorConditionHandler doctorConditionHandler,
-//            DoctorDiseaseHandler doctorDiseaseHandler,
-//            DoctorRemovalHandler doctorRemovalHandler,
-//            DoctorVaccinationHandler doctorVaccinationHandler,
-//            DoctorSowWeanHandler doctorSowWeanHandler,
+//            DoctorSowFostersByHandler doctorSowFostersByHandler,
+            DoctorSowMatingHandler doctorSowMatingHandler,
+            DoctorSowPregCheckHandler doctorSowPregCheckHandler,
+            DoctorChgFarmHandler doctorChgFarmHandler,
+            DoctorChgLocationHandler doctorChgLocationHandler,
+            DoctorConditionHandler doctorConditionHandler,
+            DoctorDiseaseHandler doctorDiseaseHandler,
+            DoctorRemovalHandler doctorRemovalHandler,
+            DoctorVaccinationHandler doctorVaccinationHandler,
+            DoctorSowWeanHandler doctorSowWeanHandler,
 //            DoctorSowFostersHandler doctorSowFostersHandler,
-//            DoctorSowFarrowingHandler doctorSowFarrowingHandler,
-//            DoctorSowPigletsChgHandler doctorSowPigletsChgHandler
+            DoctorSowFarrowingHandler doctorSowFarrowingHandler,
+            DoctorSowPigletsChgHandler doctorSowPigletsChgHandler
     ) {
         Map<Integer, DoctorPigEventHandler> eventHandlerMap = Maps.newHashMap();
 //        eventHandlerMap.put(PigEvent.ENTRY.getKey(), doctorEntryHandler);
