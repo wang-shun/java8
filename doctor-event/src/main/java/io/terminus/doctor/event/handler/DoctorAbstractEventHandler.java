@@ -65,11 +65,18 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        //1.创建事件
+
+        //1.创建镜像
+        DoctorPigTrack pigSnapshotTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        DoctorPigEvent pigSnapshotEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
+        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(pigSnapshotTrack, pigSnapshotEvent);
+        doctorPigSnapshotDao.create(doctorPigSnapshot);
+
+        //2.创建事件
         DoctorPigEvent doctorPigEvent = buildPigEvent(basic, inputDto);
         doctorPigEventDao.create(doctorPigEvent);
 
-        //2.创建或更新track
+        //3.创建或更新track
         DoctorPigTrack doctorPigTrack = createOrUpdatePigTrack(basic, inputDto);
         if (Objects.equals(basic.getEventType(), PigEvent.ENTRY.getKey())) {
             doctorPigTrackDao.create(doctorPigTrack);
@@ -77,9 +84,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
             doctorPigTrackDao.update(doctorPigTrack);
         }
 
-        //3.创建镜像
-        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(doctorPigTrack, doctorPigEvent);
-        doctorPigSnapshotDao.create(doctorPigSnapshot);
+
 
         //4.特殊处理
         specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
