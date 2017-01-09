@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.manager;
 
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
@@ -15,6 +16,8 @@ import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.event.DoctorGroupPublishDto;
+import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -194,8 +197,18 @@ public class DoctorGroupManager {
         }
     }
 
-    //发布猪群猪舍事件
-    private void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
-        //coreEventDispatcher.publish(ListenedGroupEvent.builder().doctorGroupEventId(eventId).farmId(farmId).orgId(orgId).groupId(groupId).build());
+    //发布猪群事件
+    private void publistGroupAndBarn(DoctorGroupEvent event) {
+        DoctorGroupPublishDto publish = new DoctorGroupPublishDto();
+        publish.setEventAt(event.getEventAt());
+        publish.setEventId(event.getId());
+        publish.setGroupId(event.getGroupId());
+        publish.setPigType(event.getPigType());
+        coreEventDispatcher.publish(ListenedGroupEvent.builder()
+                .farmId(event.getFarmId())
+                .orgId(event.getOrgId())
+                .eventType(event.getType())
+                .groups(Lists.newArrayList(publish))
+                .build());
     }
 }
