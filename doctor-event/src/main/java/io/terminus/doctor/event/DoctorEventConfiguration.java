@@ -171,32 +171,32 @@ public class  DoctorEventConfiguration {
             DoctorSowMatingHandler doctorSowMatingHandler,
             DoctorSowPregCheckHandler doctorSowPregCheckHandler,
             DoctorChgFarmHandler doctorChgFarmHandler,
-            DoctorChgLocationHandler doctorChgLocationHandler,
-            DoctorConditionHandler doctorConditionHandler,
-            DoctorDiseaseHandler doctorDiseaseHandler,
-            DoctorRemovalHandler doctorRemovalHandler,
-            DoctorVaccinationHandler doctorVaccinationHandler,
-            DoctorSowWeanHandler doctorSowWeanHandler,
-            DoctorSowFostersHandler doctorSowFostersHandler,
-            DoctorSowFarrowingHandler doctorSowFarrowingHandler,
-            DoctorSowPigletsChgHandler doctorSowPigletsChgHandler
+            DoctorChgLocationHandler doctorChgLocationHandler
+//            DoctorConditionHandler doctorConditionHandler,
+//            DoctorDiseaseHandler doctorDiseaseHandler,
+//            DoctorRemovalHandler doctorRemovalHandler,
+//            DoctorVaccinationHandler doctorVaccinationHandler,
+//            DoctorSowWeanHandler doctorSowWeanHandler,
+//            DoctorSowFostersHandler doctorSowFostersHandler,
+//            DoctorSowFarrowingHandler doctorSowFarrowingHandler,
+//            DoctorSowPigletsChgHandler doctorSowPigletsChgHandler
     ) {
         Map<Integer, DoctorPigEventHandler> eventHandlerMap = Maps.newHashMap();
-        eventHandlerMap.put(PigEvent.ENTRY.getKey(), doctorEntryHandler);
-        eventHandlerMap.put(PigEvent.SEMEN.getKey(), doctorSemenHandler);
-        eventHandlerMap.put(PigEvent.FARROWING.getKey(), doctorSowFarrowingHandler);
-        eventHandlerMap.put(PigEvent.FOSTERS_BY.getKey(), doctorSowFostersByHandler);
-        eventHandlerMap.put(PigEvent.FOSTERS.getKey(), doctorSowFostersHandler);
-        eventHandlerMap.put(PigEvent.MATING.getKey(), doctorSowMatingHandler);
-        eventHandlerMap.put(PigEvent.PIGLETS_CHG.getKey(), doctorSowPigletsChgHandler);
-        eventHandlerMap.put(PigEvent.PREG_CHECK.getKey(), doctorSowPregCheckHandler);
-        eventHandlerMap.put(PigEvent.WEAN.getKey(), doctorSowWeanHandler);
-        eventHandlerMap.put(PigEvent.CHG_FARM.getKey(), doctorChgFarmHandler);
-        eventHandlerMap.put(PigEvent.CHG_LOCATION.getKey(), doctorChgLocationHandler);
-        eventHandlerMap.put(PigEvent.CONDITION.getKey(), doctorConditionHandler);
-        eventHandlerMap.put(PigEvent.DISEASE.getKey(), doctorDiseaseHandler);
-        eventHandlerMap.put(PigEvent.REMOVAL.getKey(), doctorRemovalHandler);
-        eventHandlerMap.put(PigEvent.VACCINATION.getKey(), doctorVaccinationHandler);
+//        eventHandlerMap.put(PigEvent.ENTRY.getKey(), doctorEntryHandler);
+//        eventHandlerMap.put(PigEvent.SEMEN.getKey(), doctorSemenHandler);
+//        eventHandlerMap.put(PigEvent.FARROWING.getKey(), doctorSowFarrowingHandler);
+//        eventHandlerMap.put(PigEvent.FOSTERS_BY.getKey(), doctorSowFostersByHandler);
+//        eventHandlerMap.put(PigEvent.FOSTERS.getKey(), doctorSowFostersHandler);
+//        eventHandlerMap.put(PigEvent.MATING.getKey(), doctorSowMatingHandler);
+//        eventHandlerMap.put(PigEvent.PIGLETS_CHG.getKey(), doctorSowPigletsChgHandler);
+//        eventHandlerMap.put(PigEvent.PREG_CHECK.getKey(), doctorSowPregCheckHandler);
+//        eventHandlerMap.put(PigEvent.WEAN.getKey(), doctorSowWeanHandler);
+//        eventHandlerMap.put(PigEvent.CHG_FARM.getKey(), doctorChgFarmHandler);
+//        eventHandlerMap.put(PigEvent.CHG_LOCATION.getKey(), doctorChgLocationHandler);
+//        eventHandlerMap.put(PigEvent.CONDITION.getKey(), doctorConditionHandler);
+//        eventHandlerMap.put(PigEvent.DISEASE.getKey(), doctorDiseaseHandler);
+//        eventHandlerMap.put(PigEvent.REMOVAL.getKey(), doctorRemovalHandler);
+//        eventHandlerMap.put(PigEvent.VACCINATION.getKey(), doctorVaccinationHandler);
 
         DoctorPigEventHandlers doctorEventHandlers = new DoctorPigEventHandlers();
         doctorEventHandlers.setEventHandlerMap(eventHandlerMap);
