@@ -82,7 +82,7 @@ public class DoctorGroupEventListener implements EventListener {
 
         // TODO: 2017/1/9 过滤掉
 
-        return results;
+        return groups;
     }
 
     private void handle(Long orgId, Long farmId, Integer eventType, DoctorGroupPublishDto publishDto) {
