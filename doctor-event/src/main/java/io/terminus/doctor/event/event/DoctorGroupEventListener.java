@@ -7,12 +7,10 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
-import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -47,77 +45,66 @@ public class DoctorGroupEventListener implements EventListener {
     @AllowConcurrentEvents
     @Subscribe
     public void handleGroupEvent(ListenedGroupEvent groupEvent) {
-        log.info("[DoctorGroupEventListener]-> handle.group.event, groupEvent -> {}", groupEvent);
+        // TODO: 2017/1/9
+    }
 
-        DoctorGroupEvent event = doctorGroupEventDao.findById(groupEvent.getDoctorGroupEventId());
-        if (event == null) {
-            log.error("handle group event({}), but event not found!", groupEvent);
-            return;
-        }
-
-        GroupEventType eventType = GroupEventType.from(event.getType());
+    private void handle(Long orgId, Long farmId, Integer pigType, Date eventAt) {
+        GroupEventType eventType = GroupEventType.from(pigType);
         if (eventType == null) {
-            log.error("handle group event type not find, groupEvent:{}, event:{}", groupEvent, event);
+            log.error("handle group event type not find, farmId:{}, pigType:{}, eventAt:{}", farmId, pigType, eventAt);
             return;
         }
 
         switch (eventType) {
             case MOVE_IN:
-                handleGroupLiveStock(event);
+                handleGroupLiveStock(orgId, farmId, pigType, eventAt);
                 break;
             case CHANGE:
-                handleGroupLiveStock(event);
-                handleChange(event);
+                handleGroupLiveStock(orgId, farmId, pigType, eventAt);
+                handleChange(orgId, pigType, eventAt);
                 break;
             case TRANS_GROUP:
-                handleGroupLiveStock(event);
+                handleGroupLiveStock(orgId, farmId, pigType, eventAt);
                 break;
             case TURN_SEED:
-                handleGroupLiveStock(event);
+                handleGroupLiveStock(orgId, farmId, pigType, eventAt);
                 break;
             case TRANS_FARM:
-                handleGroupLiveStock(event);
+                handleGroupLiveStock(orgId, farmId, pigType, eventAt);
                 break;
             default:
                 break;
         }
     }
 
-    //处理变动事件
-    private void handleChange(DoctorGroupEvent event) {
-        Date startAt = Dates.startOfDay(event.getEventAt());
-        Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
-
-        if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.DEAD.getId())
-                || Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
-            getDead(PigType.from(event.getPigType()), event.getFarmId(), startAt, endAt);
-            return;
-        }
-        if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.SALE.getId())) {
-            getSale(PigType.from(event.getPigType()), event.getFarmId(), startAt, endAt);
-        }
+    //处理变动事件(暂时不区分死淘和销售了，全部算更方便些)
+    private void handleChange(Long farmId, Integer pigType, Date eventAt) {
+        Date startAt = Dates.startOfDay(eventAt);
+        Date endAt = DateUtil.getDateEnd(new DateTime(eventAt)).toDate();
+        
+        getDead(PigType.from(pigType), farmId, startAt, endAt);
+        getSale(PigType.from(pigType), farmId, startAt, endAt);
     }
 
     //更新存栏相关的统计
-    private void handleGroupLiveStock(DoctorGroupEvent event) {
-        Date startAt = Dates.startOfDay(event.getEventAt());
+    private void handleGroupLiveStock(Long orgId, Long farmId, Integer pigType, Date eventAt) {
+        Date startAt = Dates.startOfDay(eventAt);
         Date endAt = Dates.startOfDay(new Date());
-        Long farmId = event.getFarmId();
 
         //更新数据库的存栏统计
-        doctorPigTypeStatisticWriteService.statisticGroup(event.getOrgId(), event.getFarmId());
+        doctorPigTypeStatisticWriteService.statisticGroup(orgId, farmId);
 
-        PigType pigType = PigType.from(event.getPigType());
-        if (pigType == null) {
-            log.error("group event pigType({}) not support! eventId:{}", event.getPigType(), event.getId());
+        PigType type = PigType.from(pigType);
+        if (type == null) {
+            log.error("group event pigType({}) not support!", pigType);
             return;
         }
 
         //更新到今天的存栏
         while (!startAt.after(endAt)) {
             //查询startAt 这条的日报是否存在，如果已经初始化过了，则不做处理
-            if (!doctorDailyReportCache.reportIsFullInit(event.getFarmId(), startAt)) {
-                getLiveStock(pigType, farmId, startAt);
+            if (!doctorDailyReportCache.reportIsFullInit(farmId, startAt)) {
+                getLiveStock(type, farmId, startAt);
             }
             startAt = new DateTime(startAt).plusDays(1).toDate();
         }

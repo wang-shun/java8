@@ -17,9 +17,27 @@ public class DoctorPigPublishDto implements Serializable {
 
     private Long pigId;
 
+    /**
+     * 猪的类型(性别)
+     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     */
+    private Integer kind;
+
     private Long eventId;
 
     private Date eventAt;
 
     private Integer eventType;
+
+    /**
+     * 配种类型(如果是配种事件)
+     * @see io.terminus.doctor.event.enums.DoctorMatingType
+     */
+    private Integer mateType;
+
+    /**
+     * 妊检结果(如果是妊检事件)
+     * @see io.terminus.doctor.event.enums.PregCheckResult
+     */
+    private Integer pregCheckResult;
 }
