@@ -42,4 +42,17 @@ public interface DoctorBasicMaterialReadService {
      */
     Response<List<DoctorBasicMaterial>> findBasicMaterialByTypeFilterBySrm(Integer type, String srm, String exIds);
 
+    /**
+     * 查询所有的物料数据
+     * @return
+     */
+    Response<List<DoctorBasicMaterial>> findAllBasicMaterials();
+
+    /**
+     * 查询猪场有权限的物料数据
+     * @param farmId
+     * @param type
+     * @return
+     */
+    Response<List<DoctorBasicMaterial>> findBasicMaterialsOwned(Long farmId, Long type, String srm);
 }

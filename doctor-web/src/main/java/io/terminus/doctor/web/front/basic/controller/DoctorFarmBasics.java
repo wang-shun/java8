@@ -101,4 +101,27 @@ public class DoctorFarmBasics {
         }
         return Boolean.TRUE;
     }
+
+    /**
+     * 创建或更新materialIds
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/farmBasic/materialIds", method = RequestMethod.POST)
+    public Boolean createOrUpdateMaterialIds(@RequestParam("farmId") Long farmId,
+                                           @RequestParam("ids") String ids) {
+        if (isEmpty(ids)) {
+            return Boolean.TRUE;
+        }
+        DoctorFarmBasic farmBasic = RespHelper.or500(doctorFarmBasicReadService.findFarmBasicByFarmId(farmId));
+        if (farmBasic == null) {
+            farmBasic = new DoctorFarmBasic();
+            farmBasic.setFarmId(farmId);
+            farmBasic.setMaterialIds(ids);
+            RespHelper.or500(doctorFarmBasicWriteService.createFarmBasic(farmBasic));
+        } else {
+            farmBasic.setMaterialIds(ids);
+            RespHelper.or500(doctorFarmBasicWriteService.updateFarmBasic(farmBasic));
+        }
+        return Boolean.TRUE;
+    }
 }
