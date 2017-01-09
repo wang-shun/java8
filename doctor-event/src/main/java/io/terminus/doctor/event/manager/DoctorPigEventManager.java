@@ -5,14 +5,11 @@ import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
@@ -33,7 +30,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.doctor.event.enums.PigEvent.NOTICE_MESSAGE_PIG_EVENT;
 
 /**
  * Created by yaoqijun.
@@ -224,12 +220,12 @@ public class DoctorPigEventManager {
     public List<DoctorEventInfo> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
         try {
             DoctorPigEventHandler doctorEventCreateHandler = pigEventHandlers.getEventHandlerMap().get(basic.getEventType());
-            doctorEventCreateHandler.preHandle(inputDto, basic);
+            doctorEventCreateHandler.handleCheck(inputDto, basic);
             List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
             doctorEventCreateHandler.handle(doctorEventInfoList, inputDto, basic);
             return doctorEventInfoList;
         } catch (Exception e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e.getMessage());
         }
 
     }
@@ -246,12 +242,12 @@ public class DoctorPigEventManager {
             DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(basic.getEventType());
             List<DoctorEventInfo> eventInfos = Lists.newArrayList();
             eventInputs.forEach(inputDto -> {
-                handler.preHandle(inputDto, basic);
+                handler.handleCheck(inputDto, basic);
                 handler.handle(eventInfos, inputDto, basic);
             });
             return eventInfos;
         } catch (Exception e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -270,42 +266,48 @@ public class DoctorPigEventManager {
         if (Arguments.isNullOrEmpty(eventInfoList)) {
             return;
         }
-
-        Map<Integer, List<DoctorEventInfo>> eventInfoMap = eventInfoList.stream().collect(Collectors.groupingBy(DoctorEventInfo::getBusinessType));
-        List<DoctorPigPublishDto> pigPublishDtoList = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue()).stream().map(doctorEventInfo -> {
-            DoctorPigPublishDto pigPublishDto = new DoctorPigPublishDto();
-            pigPublishDto.setPigId(doctorEventInfo.getBusinessId());
-            pigPublishDto.setEventId(doctorEventInfo.getEventId());
-            pigPublishDto.setEventType(doctorEventInfo.getEventType());
-            pigPublishDto.setEventAt(doctorEventInfo.getEventAt());
-            return pigPublishDto;
-        }).collect(Collectors.toList());
-
-        List<DoctorGroupPublishDto> groupPublishDtoList = eventInfoMap.get(DoctorEventInfo.Business_Type.GROUP.getValue()).stream().map(doctorEventInfo -> {
-            DoctorGroupPublishDto groupPublishDto = new DoctorGroupPublishDto();
-            groupPublishDto.setGroupId(doctorEventInfo.getBusinessId());
-            groupPublishDto.setEventId(doctorEventInfo.getEventId());
-            groupPublishDto.setEventType(doctorEventInfo.getEventType());
-            groupPublishDto.setEventAt(doctorEventInfo.getEventAt());
-            return groupPublishDto;
-        }).collect(Collectors.toList());
-
         Long orgId = eventInfoList.get(0).getOrgId();
         Long farmId = eventInfoList.get(0).getFarmId();
 
-        coreEventDispatcher.publish(new ListenedPigEvent(orgId, farmId, pigPublishDtoList));
-        coreEventDispatcher.publish(new ListenedGroupEvent(orgId, farmId, groupPublishDtoList));
+        Map<Integer, List<DoctorEventInfo>> eventInfoMap = eventInfoList.stream().collect(Collectors.groupingBy(DoctorEventInfo::getBusinessType));
+        Map<Integer, List<DoctorEventInfo>> pigEvnetInfoMap = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue()).stream()
+                .collect(Collectors.groupingBy(DoctorEventInfo::getEventType));
+        pigEvnetInfoMap.keySet().forEach(eventType -> {
+            List<DoctorPigPublishDto> pigPublishDtoList = pigEvnetInfoMap.get(eventType).stream().map(doctorEventInfo -> {
+                DoctorPigPublishDto pigPublishDto = new DoctorPigPublishDto();
+                pigPublishDto.setPigId(doctorEventInfo.getBusinessId());
+                pigPublishDto.setEventId(doctorEventInfo.getEventId());
+                pigPublishDto.setEventAt(doctorEventInfo.getEventAt());
+                pigPublishDto.setKind(doctorEventInfo.getKind());
+                pigPublishDto.setMateType(doctorEventInfo.getMateType());
+                pigPublishDto.setPregCheckResult(doctorEventInfo.getPregCheckResult());
+                return pigPublishDto;
+            }).collect(Collectors.toList());
+            coreEventDispatcher.publish(new ListenedPigEvent(orgId, farmId, eventType, pigPublishDtoList));
+        });
+
+        Map<Integer, List<DoctorEventInfo>> groupEventInfoMap = eventInfoMap.get(DoctorEventInfo.Business_Type.GROUP.getValue()).stream()
+                .collect(Collectors.groupingBy(DoctorEventInfo::getEventType));
+        groupEventInfoMap.keySet().forEach(eventType -> {
+            List<DoctorGroupPublishDto> groupPublishDtoList = groupEventInfoMap.get(eventType).stream().map(doctorEventInfo -> {
+                DoctorGroupPublishDto groupPublishDto = new DoctorGroupPublishDto();
+                groupPublishDto.setGroupId(doctorEventInfo.getBusinessId());
+                groupPublishDto.setEventId(doctorEventInfo.getEventId());
+                groupPublishDto.setEventAt(doctorEventInfo.getEventAt());
+                return groupPublishDto;
+            }).collect(Collectors.toList());
+            coreEventDispatcher.publish(new ListenedGroupEvent(orgId, farmId, eventType, groupPublishDtoList));
+        });
 
         try {
-            List<DoctorPigPublishDto> pigMessagePublishList = pigPublishDtoList.stream()
-                    .filter(pigPublishDto -> NOTICE_MESSAGE_PIG_EVENT.contains(pigPublishDto.getEventType()))
-                    .collect(Collectors.toList());
-            publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new ListenedPigEvent(orgId, farmId, pigMessagePublishList)));
-
-            List<DoctorGroupPublishDto> groupMessagePublishList = groupPublishDtoList.stream()
-                    .filter(doctorGroupPublishDto -> GroupEventType.NOTICE_MESSAGE_GROUP_EVENT.contains(doctorGroupPublishDto.getEventType()))
-                    .collect(Collectors.toList());
-            publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new ListenedGroupEvent(orgId, farmId, groupMessagePublishList)));
+//            List<DoctorPigPublishDto> pigMessagePublishList = pigPublishDtoList.stream()
+//                    .filter(pigPublishDto -> NOTICE_MESSAGE_PIG_EVENT.contains(pigPublishDto.getEventType()))
+//                    .collect(Collectors.toList());
+//            publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new ListenedPigEvent(orgId, farmId, pigMessagePublishList)));
+//            List<DoctorGroupPublishDto> groupMessagePublishList = groupPublishDtoList.stream()
+//                    .filter(doctorGroupPublishDto -> GroupEventType.NOTICE_MESSAGE_GROUP_EVENT.contains(doctorGroupPublishDto.getEventType()))
+//                    .collect(Collectors.toList());
+//            publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new ListenedGroupEvent(orgId, farmId, groupMessagePublishList)));
 
         } catch (Exception e) {
             log.error("publish.info.error");

@@ -24,6 +24,24 @@ public class DoctorEventInfo {
     private Integer eventType;
     private Integer businessType;
 
+    /**
+     * 如果是猪事件,猪的类型(性别)
+     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     */
+
+    private Integer kind;
+    /**
+     * 配种类型(如果是配种事件)
+     * @see io.terminus.doctor.event.enums.DoctorMatingType
+     */
+    private Integer mateType;
+
+    /**
+     * 妊检结果(如果是妊检事件)
+     * @see io.terminus.doctor.event.enums.PregCheckResult
+     */
+    private Integer pregCheckResult;
+
     public enum Business_Type {
         PIG(1, "猪"),
         GROUP(2, "猪群");

@@ -4,12 +4,10 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
-import io.terminus.doctor.event.event.ListenedPigEvent;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -472,24 +469,29 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Boolean> pigEventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         try {
-            List<DoctorRollbackDto> rollbackDtos = doctorPigEventManager.eventHandle(inputDto, basic);
-            doctorPigEventManager.checkAndPublishEvent(rollbackDtos);
+            List<DoctorEventInfo> eventInfoList = doctorPigEventManager.eventHandle(inputDto, basic);
+            doctorPigEventManager.checkAndPublishEvent(eventInfoList);
             return Response.ok(Boolean.TRUE);
+
+        } catch (RuntimeException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("pig.event.handle.failed, cause by :{}", Throwables.getStackTraceAsString(e));
-            return Response.fail(e.getMessage());
+            return Response.fail("pig.event.handle.failed");
         }
     }
 
     @Override
     public Response<Boolean> batchPigEventHandle(List<BasePigEventInputDto> inputDtos, DoctorBasicInputInfoDto basic) {
         try {
-            List<DoctorRollbackDto> rollbackDtos = doctorPigEventManager.batchEventsHandle(inputDtos, basic);
-            doctorPigEventManager.checkAndPublishEvent(rollbackDtos);
+            List<DoctorEventInfo> eventInfoList = doctorPigEventManager.batchEventsHandle(inputDtos, basic);
+            doctorPigEventManager.checkAndPublishEvent(eventInfoList);
             return Response.ok(Boolean.TRUE);
+        } catch (RuntimeException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("batch.pig.event.handle.failed, cause by :{}", Throwables.getStackTraceAsString(e));
-            return Response.fail(e.getMessage());
+            return Response.fail("batch.pig.event.handle.failed");
         }
     }
 
@@ -517,38 +519,38 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         }
     }
 
-    /**
-     * 推送对应的事件信息
-     *
-     * @param results
-     */
-    private void publishEvent(Map<String, Object> results) {
-        try {
-            if ("single".equals(results.get("contextType"))) {
-                ListenedPigEvent listenedPigEvent = new ListenedPigEvent();
-                listenedPigEvent.setPigId(Long.parseLong(results.get("doctorPigId").toString()));
-                listenedPigEvent.setPigEventId(Params.getWithConvert(results, "doctorEventId", a -> Long.valueOf(a.toString())));
-                listenedPigEvent.setEventType((Integer) results.get("type"));
-                coreEventDispatcher.publish(listenedPigEvent);
-            } else {
-                results.keySet().forEach(pigId -> {
-                    Map<String, Object> map = (Map<String, Object>) results.get(pigId);
-                    ListenedPigEvent listenedPigEvent = new ListenedPigEvent();
-                    listenedPigEvent.setPigId((Long.parseLong(pigId)));
-                    listenedPigEvent.setPigEventId(Params.getWithConvert(map, "doctorEventId", a -> Long.valueOf(a.toString())));
-                    listenedPigEvent.setEventType((Integer) map.get("type"));
-                    coreEventDispatcher.publish(listenedPigEvent);
-                });
-            }
-        } catch (Exception e) {
-            log.error("failed to publish pig event, cause:{}", Throwables.getStackTraceAsString(e));
-        }
-
-        try {
-            // 向zk发送刷新消息的事件
-            //publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new DoctorZkPigEvent(results)));
-        } catch (Exception e) {
-            log.error(Throwables.getStackTraceAsString(e));
-        }
-    }
+//    /**
+//     * 推送对应的事件信息
+//     *
+//     * @param results
+//     */
+//    private void publishEvent(Map<String, Object> results) {
+//        try {
+//            if ("single".equals(results.get("contextType"))) {
+//                ListenedPigEvent listenedPigEvent = new ListenedPigEvent();
+//                listenedPigEvent.setPigId(Long.parseLong(results.get("doctorPigId").toString()));
+//                listenedPigEvent.setPigEventId(Params.getWithConvert(results, "doctorEventId", a -> Long.valueOf(a.toString())));
+//                listenedPigEvent.setEventType((Integer) results.get("type"));
+//                coreEventDispatcher.publish(listenedPigEvent);
+//            } else {
+//                results.keySet().forEach(pigId -> {
+//                    Map<String, Object> map = (Map<String, Object>) results.get(pigId);
+//                    ListenedPigEvent listenedPigEvent = new ListenedPigEvent();
+//                    listenedPigEvent.setPigId((Long.parseLong(pigId)));
+//                    listenedPigEvent.setPigEventId(Params.getWithConvert(map, "doctorEventId", a -> Long.valueOf(a.toString())));
+//                    listenedPigEvent.setEventType((Integer) map.get("type"));
+//                    coreEventDispatcher.publish(listenedPigEvent);
+//                });
+//            }
+//        } catch (Exception e) {
+//            log.error("failed to publish pig event, cause:{}", Throwables.getStackTraceAsString(e));
+//        }
+//
+//        try {
+//            // 向zk发送刷新消息的事件
+//            //publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new DoctorZkPigEvent(results)));
+//        } catch (Exception e) {
+//            log.error(Throwables.getStackTraceAsString(e));
+//        }
+//    }
 }

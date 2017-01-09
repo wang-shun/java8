@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.handler;
+package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.MapBuilder;
@@ -10,6 +10,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -40,21 +41,21 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler {
     private  DoctorPigInfoCache doctorPigInfoCache;
 
     @Override
-    public void preHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-
+    public void handleCheck(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
+        checkState(doctorPigDao.findPigByFarmIdAndPigCode(basic.getFarmId(), inputDto.getPigCode()) == null, getErrorMessage("pigCode.have.existed", new Object[]{inputDto.getPigCode()}));
     }
+
 
     @Override
     public void handle(List<DoctorEventInfo> eventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
 //        try {
-            DoctorFarmEntryDto farmEntryDto = (DoctorFarmEntryDto) inputDto;
+        DoctorFarmEntryDto farmEntryDto = (DoctorFarmEntryDto) inputDto;
 
-            DoctorPig doctorPig = buildDoctorPig(farmEntryDto, basic);
-            farmEntryDto.setPigId(doctorPig.getId());
-            checkState(doctorPigDao.findPigByFarmIdAndPigCode(doctorPig.getFarmId(), doctorPig.getPigCode()) == null, "猪号:" + doctorPig.getPigCode() + " 已存在");
-            doctorPigDao.create(doctorPig);
+        DoctorPig doctorPig = buildDoctorPig(farmEntryDto, basic);
+        farmEntryDto.setPigId(doctorPig.getId());
+        doctorPigDao.create(doctorPig);
         inputDto.setPigId(doctorPig.getId());
-            super.handle(eventInfoList, inputDto, basic);
+        super.handle(eventInfoList, inputDto, basic);
             // event create
 //                doctorPigEvent.setRelGroupEventId(basic.getRelGroupEventId());
 //                doctorPigEvent.setPigId(doctorPig.getId());
