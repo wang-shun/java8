@@ -20,11 +20,6 @@ public interface DoctorPigWriteService {
     Response<Long> createPigEvent(DoctorPigEvent pigEvent);
     Response<Long> createPigSnapShot(DoctorPigSnapshot pigSnapshot);
 
-    /**
-     * 部署流程定义
-     * @return
-     */
-    Response<Boolean> deploy();
 
     /**
      * 修改猪的耳号

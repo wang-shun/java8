@@ -27,7 +27,6 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.workflow.service.FlowQueryService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -61,9 +60,6 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
     private final DoctorPigTrackDao doctorPigTrackDao;
 
-
-    private final FlowQueryService flowQueryService;
-
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     @Autowired
@@ -77,10 +73,8 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
     @Autowired
     public DoctorPigEventReadServiceImpl(DoctorPigEventDao doctorPigEventDao,
-                                         FlowQueryService flowQueryService,
                                          DoctorPigTrackDao doctorPigTrackDao){
         this.doctorPigEventDao = doctorPigEventDao;
-        this.flowQueryService = flowQueryService;
         this.doctorPigTrackDao = doctorPigTrackDao;
     }
 

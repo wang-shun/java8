@@ -215,7 +215,8 @@ public class DoctorPigEventManager {
             List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
             doctorEventCreateHandler.handle(doctorEventInfoList, inputDto, basic);
            // transactionalEventHandle(doctorEventCreateHandler, doctorEventInfoList, inputDto, basic);
-            return doctorEventCreateHandler.publishEvent(doctorEventInfoList);
+            //return doctorEventCreateHandler.publishEvent(doctorEventInfoList);
+            return null;
         } catch (Exception e) {
             throw new RuntimeException();
         }
@@ -237,7 +238,8 @@ public class DoctorPigEventManager {
                 handler.preHandle(inputDto, basic);
                 handler.handle(eventInfos, inputDto, basic);
             });
-            return handler.publishEvent(eventInfos);
+            //return handler.publishEvent(eventInfos);
+            return null;
         } catch (Exception e) {
             throw new RuntimeException();
         }

@@ -39,7 +39,6 @@ public class DoctorRollbackSowEntryEventHandler extends DoctorAbstractRollbackPi
         doctorPigTrackDao.delete(info.getPigTrack().getId());
         doctorPigSnapshotDao.delete(snapshot.getId());
         createDoctorRevertLog(pigEvent, doctorPigTrack, doctorPig, operatorId, operatorName);
-        workFlowRollback(pigEvent);
     }
 
     @Override

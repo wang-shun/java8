@@ -226,9 +226,6 @@ public class DoctorImportDataService {
             importGroup(farm, barnMap, shit.getGroup());
             importSow(farm, barnMap, breedMap, shit.getSow());
 
-            // 工作流
-            doctorMoveDataService.moveWorkflow(farm);
-
             //首页统计数据
             movePigTypeStatistic(farm);
 

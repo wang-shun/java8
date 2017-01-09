@@ -33,7 +33,6 @@ import io.terminus.doctor.web.front.event.dto.DoctorGroupEventExportData;
 import io.terminus.doctor.web.front.event.dto.DoctorPigEventExportData;
 import io.terminus.doctor.web.front.event.dto.DoctorPigEventPagingDto;
 import io.terminus.doctor.web.util.TransFromUtil;
-import io.terminus.doctor.workflow.core.WorkFlowService;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -76,9 +75,8 @@ public class DoctorPigEvents {
     private final DoctorPigEventWriteService doctorPigEventWriteService;
 
     private final UserReadService userReadService;
-    private final DoctorGroupReadService doctorGroupReadService;
 
-    private final WorkFlowService workFlowService;
+    private final DoctorGroupReadService doctorGroupReadService;
 
     private final TransFromUtil transFromUtil;
 
@@ -94,13 +92,12 @@ public class DoctorPigEvents {
                            DoctorPigEventReadService doctorPigEventReadService,
                            DoctorPigEventWriteService doctorPigEventWriteService,
                            UserReadService userReadService,
-                           DoctorGroupReadService doctorGroupReadService, WorkFlowService workFlowService, TransFromUtil transFromUtil) {
+                           DoctorGroupReadService doctorGroupReadService, TransFromUtil transFromUtil) {
         this.doctorPigReadService = doctorPigReadService;
         this.doctorPigEventReadService = doctorPigEventReadService;
         this.doctorPigEventWriteService = doctorPigEventWriteService;
         this.userReadService = userReadService;
         this.doctorGroupReadService = doctorGroupReadService;
-        this.workFlowService = workFlowService;
         this.transFromUtil = transFromUtil;
     }
 
@@ -202,19 +199,6 @@ public class DoctorPigEvents {
     @ResponseBody
     public DoctorSowParityAvgDto querySowParityAvg(Long pigId) {
         return RespHelper.or500(doctorPigEventReadService.querySowParityAvg(pigId));
-    }
-
-    /**
-     * 同步流程数据
-     *
-     * @param key
-     * @param businessId
-     * @return
-     */
-    @RequestMapping(value = "/updateData", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Boolean updateData(@RequestParam("key") String key, @RequestParam(value = "businessId", required = false) Long businessId) {
-        return RespHelper.or500(workFlowService.updateData(key, businessId));
     }
 
     /**

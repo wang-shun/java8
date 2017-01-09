@@ -77,7 +77,6 @@ import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
-import io.terminus.doctor.move.handler.DoctorMoveWorkflowHandler;
 import io.terminus.doctor.move.model.DoctorSowFarrowWeight;
 import io.terminus.doctor.move.model.Proc_InventoryGain;
 import io.terminus.doctor.move.model.SowOutFarmSoon;
@@ -129,7 +128,6 @@ public class DoctorMoveDataService {
     private final DoctorPigEventDao doctorPigEventDao;
     private final DoctorMoveBasicService doctorMoveBasicService;
     private final DoctorPigReadService doctorPigReadService;
-    private final DoctorMoveWorkflowHandler doctorMoveWorkflowHandler;
     private final DoctorGroupReportManager doctorGroupReportManager;
     private final DoctorBarnDao doctorBarnDao;
     private final DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
@@ -146,7 +144,6 @@ public class DoctorMoveDataService {
                                  DoctorPigEventDao doctorPigEventDao,
                                  DoctorMoveBasicService doctorMoveBasicService,
                                  DoctorPigReadService doctorPigReadService,
-                                 DoctorMoveWorkflowHandler doctorMoveWorkflowHandler,
                                  DoctorGroupReportManager doctorGroupReportManager,
                                  DoctorBarnDao doctorBarnDao,
                                  DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService,
@@ -161,7 +158,6 @@ public class DoctorMoveDataService {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorMoveBasicService = doctorMoveBasicService;
         this.doctorPigReadService = doctorPigReadService;
-        this.doctorMoveWorkflowHandler = doctorMoveWorkflowHandler;
         this.doctorGroupReportManager = doctorGroupReportManager;
         this.doctorBarnDao = doctorBarnDao;
         this.doctorGroupBatchSummaryReadService = doctorGroupBatchSummaryReadService;
@@ -433,19 +429,6 @@ public class DoctorMoveDataService {
                 doctorPigEventDao.update(updateEvent);
             });
         }
-    }
-
-    /**
-     * 迁移母猪工作流
-     */
-    @Transactional
-    public void moveWorkflow(DoctorFarm farm) {
-        DoctorPig search = new DoctorPig();
-        search.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
-        search.setIsRemoval(IsOrNot.NO.getValue());
-        search.setFarmId(farm.getId());
-        doctorMoveWorkflowHandler.handle(RespHelper.orServEx(
-                doctorPigReadService.pagingDoctorInfoDtoByPig(search, 1, Integer.MAX_VALUE)).getData());
     }
 
     /**
