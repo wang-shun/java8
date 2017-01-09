@@ -6,10 +6,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
-import io.terminus.doctor.common.event.DoctorZkGroupEvent;
-import io.terminus.doctor.common.event.DoctorZkPigEvent;
 import io.terminus.doctor.common.event.EventListener;
-import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
 import io.terminus.doctor.msg.model.DoctorMessage;
@@ -23,7 +20,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -69,49 +65,41 @@ public class DoctorMessageEventListener implements EventListener{
         log.info("data event data:{}", dataEvent);
         // 1. 如果是猪创建事件信息
         if (DataEventType.PigEventCreate.getKey() == dataEvent.getEventType()) {
-//            DoctorZkPigEvent pigCreateEvent = DataEvent.analyseContent(dataEvent, DoctorZkPigEvent.class);
-//            if (pigCreateEvent != null && pigCreateEvent.getContext() != null) {
-//                Map<String, Object> context = pigCreateEvent.getContext();
-//                handlePigEvent(context);
-//            }
-            DoctorZkPigEvent zkPigEvent = DataEvent.analyseContent(dataEvent, DoctorZkPigEvent.class);
-            if (zkPigEvent != null) {
-                updateMessage(zkPigEvent.getPigId(), zkPigEvent.getEventType(), DoctorMessage.BUSINESS_TYPE.PIG.getValue());
+            ListenedPigEvent pigEvent = DataEvent.analyseContent(dataEvent, ListenedPigEvent.class);
+            if (pigEvent != null && !Arguments.isNullOrEmpty(pigEvent.getPigs())) {
+                pigEvent.getPigs().forEach(pigPublishDto ->updateMessage(pigPublishDto.getPigId(), pigPublishDto.getEventType(), DoctorMessage.BUSINESS_TYPE.PIG.getValue()));
             }
         }
 
         // 2. 如果是猪群信息修改
         if (DataEventType.GroupEventClose.getKey() == dataEvent.getEventType()) {
-            DoctorZkGroupEvent zkGroupEvent = DataEvent.analyseContent(dataEvent, DoctorZkGroupEvent.class);
-            if (zkGroupEvent != null && zkGroupEvent.getContext() != null) {
-                Map<String, Object> context = zkGroupEvent.getContext();
-                Long groupId = Params.getWithConvert(context, "doctorGroupId", d -> Long.valueOf(d.toString()));
-                Integer eventType = Params.getWithConvert(context, "eventType", d -> Integer.valueOf(d.toString()));
-                updateMessage(groupId, eventType, DoctorMessage.BUSINESS_TYPE.GROUP.getValue());
+            ListenedGroupEvent groupEvent = DataEvent.analyseContent(dataEvent, ListenedGroupEvent.class);
+            if (groupEvent != null && !Arguments.isNullOrEmpty(groupEvent.getGroups())) {
+                groupEvent.getGroups().forEach(groupPublishDto -> updateMessage(groupPublishDto.getGroupId(), groupPublishDto.getEventType(), DoctorMessage.BUSINESS_TYPE.GROUP.getValue()));
             }
         }
     }
 
-    private void handlePigEvent(Map<String, Object> context){
-        if("single".equals(context.get("contextType"))) {
-            Long pigId = Params.getWithConvert(context, "doctorPigId", d -> Long.valueOf(d.toString()));
-            Integer eventType = Params.getWithConvert(context, "type", d -> Integer.valueOf(d.toString()));
-            updateMessage(pigId, eventType, DoctorMessage.BUSINESS_TYPE.PIG.getValue());
-        }else {
-            context.remove("contextType");
-            context.values().forEach(inContext -> {
-                if (inContext != null) {
-                    Map inContextMap = (Map) inContext;
-                    Long pigId = Params.getWithConvert(inContextMap, "doctorPigId", d -> Long.valueOf(d.toString()));
-                    Integer eventType = Params.getWithConvert(inContextMap, "type", d -> Integer.valueOf(d.toString()));
-                    updateMessage(pigId, eventType, DoctorMessage.BUSINESS_TYPE.PIG.getValue());
-                }
-            });
-        }
-    }
+//    private void handlePigEvent(Map<String, Object> context){
+//        if("single".equals(context.get("contextType"))) {
+//            Long pigId = Params.getWithConvert(context, "doctorPigId", d -> Long.valueOf(d.toString()));
+//            Integer eventType = Params.getWithConvert(context, "type", d -> Integer.valueOf(d.toString()));
+//            updateMessage(pigId, eventType, DoctorMessage.BUSINESS_TYPE.PIG.getValue());
+//        }else {
+//            context.remove("contextType");
+//            context.values().forEach(inContext -> {
+//                if (inContext != null) {
+//                    Map inContextMap = (Map) inContext;
+//                    Long pigId = Params.getWithConvert(inContextMap, "doctorPigId", d -> Long.valueOf(d.toString()));
+//                    Integer eventType = Params.getWithConvert(inContextMap, "type", d -> Integer.valueOf(d.toString()));
+//                    updateMessage(pigId, eventType, DoctorMessage.BUSINESS_TYPE.PIG.getValue());
+//                }
+//            });
+//        }
+//    }
 
     /**
-     * 当猪触发事件之后, 清除event类型的消息数据.
+     * 当触发事件之后, 清除event类型的消息数据.
      * @param businessId
      * @param eventType
      */

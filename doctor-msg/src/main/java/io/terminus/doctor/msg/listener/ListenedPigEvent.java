@@ -1,9 +1,6 @@
-package io.terminus.doctor.event.event;
+package io.terminus.doctor.msg.listener;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.List;
@@ -15,9 +12,6 @@ import java.util.List;
  * Date: 2017/01/09
  */
 @Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class ListenedPigEvent implements Serializable {
     private static final long serialVersionUID = 2404642249938824738L;
 

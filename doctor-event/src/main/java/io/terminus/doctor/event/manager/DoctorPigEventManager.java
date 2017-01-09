@@ -3,27 +3,37 @@ package io.terminus.doctor.event.manager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.event.ListenedRollbackEvent;
+import io.terminus.doctor.event.event.DoctorGroupPublishDto;
+import io.terminus.doctor.event.event.DoctorPigPublishDto;
+import io.terminus.doctor.event.event.ListenedGroupEvent;
+import io.terminus.doctor.event.event.ListenedPigEvent;
 import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.event.enums.PigEvent.NOTICE_MESSAGE_PIG_EVENT;
 
 /**
  * Created by yaoqijun.
@@ -202,21 +212,22 @@ public class DoctorPigEventManager {
     @Autowired
     private CoreEventDispatcher coreEventDispatcher;
 
+    @Autowired
+    private Publisher publisher;
+
     /**
      * 事件处理
      * @param inputDto 事件信息数据
      * @param basic 基础数据
      */
-    @Transactional(rollbackFor = RuntimeException.class)
-    public List<DoctorRollbackDto> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
+    @Transactional
+    public List<DoctorEventInfo> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
         try {
             DoctorPigEventHandler doctorEventCreateHandler = pigEventHandlers.getEventHandlerMap().get(basic.getEventType());
             doctorEventCreateHandler.preHandle(inputDto, basic);
             List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
             doctorEventCreateHandler.handle(doctorEventInfoList, inputDto, basic);
-           // transactionalEventHandle(doctorEventCreateHandler, doctorEventInfoList, inputDto, basic);
-            //return doctorEventCreateHandler.publishEvent(doctorEventInfoList);
-            return null;
+            return doctorEventInfoList;
         } catch (Exception e) {
             throw new RuntimeException();
         }
@@ -230,7 +241,7 @@ public class DoctorPigEventManager {
      * @return
      */
     @Transactional
-    public List<DoctorRollbackDto> batchEventsHandle(List<BasePigEventInputDto> eventInputs, DoctorBasicInputInfoDto basic) {
+    public List<DoctorEventInfo> batchEventsHandle(List<BasePigEventInputDto> eventInputs, DoctorBasicInputInfoDto basic) {
         try {
             DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(basic.getEventType());
             List<DoctorEventInfo> eventInfos = Lists.newArrayList();
@@ -238,8 +249,7 @@ public class DoctorPigEventManager {
                 handler.preHandle(inputDto, basic);
                 handler.handle(eventInfos, inputDto, basic);
             });
-            //return handler.publishEvent(eventInfos);
-            return null;
+            return eventInfos;
         } catch (Exception e) {
             throw new RuntimeException();
         }
@@ -248,19 +258,61 @@ public class DoctorPigEventManager {
     /**
      * 校验携带数据正确性，发布事件
      */
-    public void  checkAndPublishEvent(List<DoctorRollbackDto> dtos) {
+    public void  checkAndPublishEvent(List<DoctorEventInfo> dtos) {
         if (notEmpty(dtos)) {
             checkFarmIdAndEventAt(dtos);
-            publishRollbackEvent(dtos);
+            publishPigEvent(dtos);
         }
     }
 
     //发布事件, 用于更新回滚后操作
-    private void publishRollbackEvent(List<DoctorRollbackDto> dtos) {
-        coreEventDispatcher.publish(ListenedRollbackEvent.builder().doctorRollbackDtos(dtos).build());
+    private void publishPigEvent(List<DoctorEventInfo> eventInfoList) {
+        if (Arguments.isNullOrEmpty(eventInfoList)) {
+            return;
+        }
+
+        Map<Integer, List<DoctorEventInfo>> eventInfoMap = eventInfoList.stream().collect(Collectors.groupingBy(DoctorEventInfo::getBusinessType));
+        List<DoctorPigPublishDto> pigPublishDtoList = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue()).stream().map(doctorEventInfo -> {
+            DoctorPigPublishDto pigPublishDto = new DoctorPigPublishDto();
+            pigPublishDto.setPigId(doctorEventInfo.getBusinessId());
+            pigPublishDto.setEventId(doctorEventInfo.getEventId());
+            pigPublishDto.setEventType(doctorEventInfo.getEventType());
+            pigPublishDto.setEventAt(doctorEventInfo.getEventAt());
+            return pigPublishDto;
+        }).collect(Collectors.toList());
+
+        List<DoctorGroupPublishDto> groupPublishDtoList = eventInfoMap.get(DoctorEventInfo.Business_Type.GROUP.getValue()).stream().map(doctorEventInfo -> {
+            DoctorGroupPublishDto groupPublishDto = new DoctorGroupPublishDto();
+            groupPublishDto.setGroupId(doctorEventInfo.getBusinessId());
+            groupPublishDto.setEventId(doctorEventInfo.getEventId());
+            groupPublishDto.setEventType(doctorEventInfo.getEventType());
+            groupPublishDto.setEventAt(doctorEventInfo.getEventAt());
+            return groupPublishDto;
+        }).collect(Collectors.toList());
+
+        Long orgId = eventInfoList.get(0).getOrgId();
+        Long farmId = eventInfoList.get(0).getFarmId();
+
+        coreEventDispatcher.publish(new ListenedPigEvent(orgId, farmId, pigPublishDtoList));
+        coreEventDispatcher.publish(new ListenedGroupEvent(orgId, farmId, groupPublishDtoList));
+
+        try {
+            List<DoctorPigPublishDto> pigMessagePublishList = pigPublishDtoList.stream()
+                    .filter(pigPublishDto -> NOTICE_MESSAGE_PIG_EVENT.contains(pigPublishDto.getEventType()))
+                    .collect(Collectors.toList());
+            publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new ListenedPigEvent(orgId, farmId, pigMessagePublishList)));
+
+            List<DoctorGroupPublishDto> groupMessagePublishList = groupPublishDtoList.stream()
+                    .filter(doctorGroupPublishDto -> GroupEventType.NOTICE_MESSAGE_GROUP_EVENT.contains(doctorGroupPublishDto.getEventType()))
+                    .collect(Collectors.toList());
+            publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new ListenedGroupEvent(orgId, farmId, groupMessagePublishList)));
+
+        } catch (Exception e) {
+            log.error("publish.info.error");
+        }
     }
 
-    private void checkFarmIdAndEventAt(List<DoctorRollbackDto> dtos) {
+    private void checkFarmIdAndEventAt(List<DoctorEventInfo> dtos) {
         dtos.forEach(dto -> {
             if (dto.getFarmId() == null || dto.getEventAt() == null) {
                 throw new ServiceException("publish.rollback.not.null");

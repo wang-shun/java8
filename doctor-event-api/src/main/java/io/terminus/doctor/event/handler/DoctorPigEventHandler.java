@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler;
 
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.DoctorPublishEventDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 
@@ -23,8 +22,8 @@ public interface DoctorPigEventHandler {
      */
     void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic);
 
-    /**
-     * after handler
-     */
-    List<DoctorPublishEventDto> publishEvent(List<DoctorEventInfo> doctorEventInfoList);
+//    /**
+//     * after handler
+//     */
+//    List<DoctorPublishEventDto> publishEvent(List<DoctorEventInfo> doctorEventInfoList);
 }

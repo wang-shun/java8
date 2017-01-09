@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -11,7 +10,6 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
-import io.terminus.doctor.event.dto.DoctorPublishEventDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -59,9 +57,11 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
+        //1.创建事件
         DoctorPigEvent doctorPigEvent = buildPigEvent(basic, inputDto);
         doctorPigEventDao.create(doctorPigEvent);
 
+        //2.创建或更新track
         DoctorPigTrack doctorPigTrack = createOrUpdatePigTrack(basic, inputDto);
         if (Objects.equals(basic.getEventType(), PigEvent.ENTRY.getKey())) {
             doctorPigTrackDao.create(doctorPigTrack);
@@ -69,11 +69,14 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
             doctorPigTrackDao.update(doctorPigTrack);
         }
 
+        //3.创建镜像
         DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(doctorPigTrack, doctorPigEvent);
         doctorPigSnapshotDao.create(doctorPigSnapshot);
 
+        //4.特殊处理
         specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
 
+        //5.记录发生的事件信息
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(doctorPigEvent.getOrgId())
                 .farmId(doctorPigEvent.getFarmId())
@@ -86,8 +89,11 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .eventType(basic.getEventType())
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
+
+        //6.触发事件
         triggerEvent(doctorEventInfoList, doctorPigEvent, doctorPigTrack, inputDto, basic);
     }
+
 
     protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
         doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
@@ -96,11 +102,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
 
-    }
-
-    @Override
-    public List<DoctorPublishEventDto> publishEvent(List<DoctorEventInfo> doctorEventInfoList) {
-        return Lists.newArrayList();
     }
 
     /**

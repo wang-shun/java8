@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.event;
+package io.terminus.doctor.msg.listener;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,21 +9,20 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Desc: 猪事件EventBus携带信息
+ * Desc: 猪群事件EventBus携带信息
  * Mail: yangzl@terminus.io
  * author: DreamYoung
- * Date: 2017/01/09
+ * Date: 2016/11/30
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ListenedPigEvent implements Serializable {
-    private static final long serialVersionUID = 2404642249938824738L;
-
+public class ListenedGroupEvent implements Serializable{
+    private static final long serialVersionUID = 4293105794097951698L;
     private Long orgId;
 
     private Long farmId;
 
-    private List<DoctorPigPublishDto> pigs;
+    private List<DoctorGroupPublishDto> groups;
 }

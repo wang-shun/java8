@@ -87,7 +87,6 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
             buildAutoEventCommonInfo(partWeanDto, chgLocationDto, basic, PigEvent.CHG_LOCATION, doctorPigEvent.getId());
             chgLocationHandler.handle(doctorEventInfoList, chgLocationDto, basic);
         }
-        int i = 1/0;
         updateGroupInfo(doctorPigEvent, doctorPigTrack, doctorPigTrack.getGroupId(), doctorPigTrack.getCurrentBarnId());
     }
 
