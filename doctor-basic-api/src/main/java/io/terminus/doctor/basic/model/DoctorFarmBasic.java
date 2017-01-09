@@ -48,6 +48,12 @@ public class DoctorFarmBasic implements Serializable {
     @Setter(AccessLevel.NONE)
     private List<Long> reasonIdList;
 
+    private String materialIds;
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private List<Long> materialIdList;
+
     /**
      * 附加字段
      */
@@ -73,5 +79,11 @@ public class DoctorFarmBasic implements Serializable {
     public List<Long> getReasonIdList() {
         return Strings.isNullOrEmpty(reasonIds) ?
                 Lists.newArrayList() : Splitters.splitToLong(reasonIds, Splitters.COMMA);
+    }
+
+    @SneakyThrows
+    public List<Long> getMaterialIdList() {
+        return Strings.isNullOrEmpty(materialIds) ?
+                Lists.newArrayList() : Splitters.splitToLong(materialIds, Splitters.COMMA);
     }
 }

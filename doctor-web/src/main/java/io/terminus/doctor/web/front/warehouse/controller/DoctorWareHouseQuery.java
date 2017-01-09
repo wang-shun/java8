@@ -228,6 +228,14 @@ public class DoctorWareHouseQuery {
                 .collect(Collectors.toList());
     }
 
+    @RequestMapping(value = "/materials", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DoctorBasicMaterial> getDoctorBasicMaterials(@RequestParam Long farmId,
+                                                             @RequestParam Long type,
+                                                             @RequestParam(value = "srm", required = false) String srm){
+        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialsOwned(farmId, type, srm));
+    }
+
     /**
      * 分页查询仓库历史出入记录
      * @param farmId 猪场id , 必传

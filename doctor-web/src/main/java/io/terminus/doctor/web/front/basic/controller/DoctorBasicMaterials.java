@@ -63,4 +63,13 @@ public class DoctorBasicMaterials {
                                                                         @RequestParam(value = "exIds", required = false) String exIds) {
         return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialByTypeFilterBySrm(type, srm, exIds));
     }
+
+    /**
+     * 查询全部物料数据表
+     * @return 物料数据信息
+     */
+    @RequestMapping(value = "/all", method = RequestMethod.GET)
+    public List<DoctorBasicMaterial> findAllBasicMaterials() {
+        return RespHelper.or500(doctorBasicMaterialReadService.findAllBasicMaterials());
+    }
 }

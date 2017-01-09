@@ -6,11 +6,14 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.common.utils.Params;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
+import io.terminus.doctor.basic.dao.DoctorFarmBasicDao;
 import io.terminus.doctor.basic.dto.DoctorBasicMaterialSearchDto;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
+import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,9 +36,13 @@ public class DoctorBasicMaterialReadServiceImpl implements DoctorBasicMaterialRe
 
     private final DoctorBasicMaterialDao doctorBasicMaterialDao;
 
+    private final DoctorFarmBasicDao doctorFarmBasicDao;
+
     @Autowired
-    public DoctorBasicMaterialReadServiceImpl(DoctorBasicMaterialDao doctorBasicMaterialDao) {
+    public DoctorBasicMaterialReadServiceImpl(DoctorBasicMaterialDao doctorBasicMaterialDao,
+                                              DoctorFarmBasicDao doctorFarmBasicDao) {
         this.doctorBasicMaterialDao = doctorBasicMaterialDao;
+        this.doctorFarmBasicDao = doctorFarmBasicDao;
     }
 
     @Override
@@ -77,6 +84,35 @@ public class DoctorBasicMaterialReadServiceImpl implements DoctorBasicMaterialRe
             return Response.ok(basicMaterials);
         } catch (Exception e) {
             log.error("find basicMaterial filter by srm failed, type:{}, srm:{}, exIds:{}, cause:{}", type, srm, exIds, Throwables.getStackTraceAsString(e));
+            return Response.fail("basicMaterial.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorBasicMaterial>> findAllBasicMaterials() {
+        try{
+            List<DoctorBasicMaterial> basicMaterials = doctorBasicMaterialDao.list( MapBuilder.<String, Integer>of().put("isValid", 1).map());
+            return Response.ok(basicMaterials);
+        }catch (Exception e){
+            log.error("find basicMaterial all failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("basicMaterial.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorBasicMaterial>> findBasicMaterialsOwned(Long farmId, Long type, String srm) {
+        try{
+            DoctorFarmBasic doctorFarmBasic = doctorFarmBasicDao.findByFarmId(farmId);
+            List idList = doctorFarmBasic.getMaterialIdList();
+            List<DoctorBasicMaterial> doctorBasicMaterialList = doctorBasicMaterialDao.findByIdsAndType(type, idList);
+            if (notEmpty(srm)) {
+                doctorBasicMaterialList = doctorBasicMaterialList.stream()
+                        .filter(basic -> notEmpty(basic.getSrm()) && basic.getSrm().toLowerCase().contains(srm.toLowerCase()))
+                        .collect(Collectors.toList());
+            }
+            return Response.ok(doctorBasicMaterialList);
+        }catch (Exception e){
+            log.error("find basicMaterials failed, farmId:{}, type:{}, cause:{}", farmId, type, Throwables.getStackTraceAsString(e));
             return Response.fail("basicMaterial.find.fail");
         }
     }

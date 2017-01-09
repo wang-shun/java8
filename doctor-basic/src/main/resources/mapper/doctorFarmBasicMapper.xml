@@ -10,6 +10,7 @@
         <result column="farm_id" property="farmId"/>
         <result column="basic_ids" property="basicIds"/>
         <result column="reason_ids" property="reasonIds"/>
+        <result column="material_ids" property="materialIds"/>
         <result column="extra" property="extra"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
@@ -28,7 +29,8 @@
         farm_id, 
         basic_ids, 
         reason_ids, 
-        extra, 
+        material_ids,
+        extra,
         created_at, 
         updated_at
         
@@ -38,7 +40,8 @@
         #{farmId}, 
         #{basicIds}, 
         #{reasonIds}, 
-        #{extra}, 
+        #{materialIds},
+        #{extra},
         now(), 
         now()
         
@@ -49,6 +52,7 @@
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="basicIds != null">AND basic_ids = #{basicIds}</if>
         <if test="reasonIds != null">AND reason_ids = #{reasonIds}</if>
+        <if test="materialIds != null">AND material_ids = #{materialIds}</if>
         <if test="extra != null">AND extra = #{extra}</if>
         
         
@@ -70,7 +74,8 @@
             (
             #{item.farmId}, 
             #{item.basicIds}, 
-            #{item.reasonIds}, 
+            #{item.reasonIds},
+            #{item.materialIds},
             #{item.extra}, 
             now(), 
             now()
@@ -90,6 +95,7 @@
             <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="basicIds != null">basic_ids = #{basicIds},</if>
             <if test="reasonIds != null">reason_ids = #{reasonIds},</if>
+            <if test="materialIds != null">material_ids = #{materialIds},</if>
             <if test="extra != null">extra = #{extra},</if>
             
             
