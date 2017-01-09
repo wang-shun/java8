@@ -128,7 +128,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName())
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
                 .pigId(inputDto.getPigId()).pigCode(inputDto.getPigCode())
-                .eventAt(generateEventAt(inputDto)).type(basic.getEventType())
+                .eventAt(generateEventAt(inputDto.eventAt())).type(basic.getEventType())
                 .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName())
                 .kind(inputDto.getPigType()).relPigEventId(inputDto.getRelPigEventId()).relGroupEventId(inputDto.getRelGroupEventId())
                 .name(basic.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))//.relEventId(basic.getRelEventId())
@@ -194,8 +194,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         basic.setEventDesc(pigEvent.getDesc());
     }
 
-    private Date generateEventAt(BasePigEventInputDto inputDto){
-        Date eventAt = inputDto.eventAt();
+    protected Date generateEventAt(Date eventAt){
         if(eventAt != null){
             Date now = new Date();
             if(DateUtil.inSameDate(eventAt, now)){

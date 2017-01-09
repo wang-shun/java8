@@ -183,7 +183,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler {
                 .pigCode(dto.getPigCode()).pigType(dto.getPigType())
                 .isRemoval(IsOrNot.NO.getValue())
                 .pigFatherCode(dto.getFatherCode()).pigMotherCode(dto.getMotherCode())
-                .source(dto.getSource()).birthDate(dto.getBirthday()).inFarmDate(dto.getInFarmDate()).inFarmDayAge(Years.yearsBetween(new DateTime(dto.getBirthday()), DateTime.now()).getYears())
+                .source(dto.getSource()).birthDate(generateEventAt(dto.getBirthday())).inFarmDate(generateEventAt(dto.getInFarmDate())).inFarmDayAge(Years.yearsBetween(new DateTime(dto.getBirthday()), DateTime.now()).getYears())
                 .initBarnId(dto.getBarnId()).initBarnName(dto.getBarnName()).breedId(dto.getBreed()).breedName(dto.getBreedName()).geneticId(dto.getBreedType()).geneticName(dto.getBreedTypeName())
                 .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();

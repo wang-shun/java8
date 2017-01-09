@@ -58,6 +58,12 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     private DoctorGroupEventManager doctorGroupEventManager;
 
     @Override
+    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+        DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) eventDto;
+        checkState(Objects.equals(chgLocationDto.getChgLocationFromBarnId(), chgLocationDto.getChgLocationToBarnId()), "same.barn.not.chg.location");
+    }
+
+    @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) inputDto;
