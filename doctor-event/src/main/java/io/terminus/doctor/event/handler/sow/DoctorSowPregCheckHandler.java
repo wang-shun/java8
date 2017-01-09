@@ -1,8 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
 import io.terminus.common.exception.ServiceException;
-import io.terminus.doctor.event.dao.DoctorDailyReportDao;
-import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
@@ -15,7 +13,6 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
