@@ -20,7 +20,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
-import io.terminus.doctor.event.dto.GroupPaging;
+import io.terminus.doctor.event.dto.GroupPigPaging;
 import io.terminus.doctor.event.dto.search.SearchedBarn;
 import io.terminus.doctor.event.dto.search.SearchedBarnDto;
 import io.terminus.doctor.event.dto.search.SearchedGroup;
@@ -54,6 +54,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc: 猪场软件主搜
@@ -107,12 +108,33 @@ public class DoctorSearches {
      * @return
      */
     @RequestMapping(value = "/sowpigs", method = RequestMethod.GET)
-    public Paging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
+    public GroupPigPaging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
                                              @RequestParam Map<String, String> params) {
-        return pagePigs(pageNo, pageSize, params, DoctorPig.PIG_TYPE.SOW);
+        Paging<SearchedPig> paging = pagePigs(pageNo, pageSize, params, DoctorPig.PIG_TYPE.SOW);
+        Long groupCount = getGroupCountWhenFarrow(params);
+        return new GroupPigPaging<>(paging, groupCount, paging.getTotal());
     }
 
+    //获取猪群里猪的数量
+    private Long getGroupCountWhenFarrow(Map<String, String> params) {
+        //如果没传barnId，直接返回0
+        if (!params.containsKey("barnId") || isEmpty(params.get("barnId"))) {
+            return 0L;
+        }
+
+        DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+        searchDto.setFarmId(Long.valueOf(params.get("farmId")));
+        searchDto.setCurrentBarnId(Long.valueOf(params.get("barnId")));
+
+        BaseUser user = UserUtil.getCurrentUser();
+        if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+            searchDto.setBarnIdList(RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId())).getBarnIdsList());
+        }
+        return RespHelper.or(doctorGroupReadService.getGroupCount(searchDto), 0L);
+    }
+
+    //猪分页
     private Paging<SearchedPig> pagePigs(Integer pageNo, Integer pageSize, Map<String, String> params, DoctorPig.PIG_TYPE pigType){
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
@@ -185,6 +207,19 @@ public class DoctorSearches {
     }
 
     /**
+     * 所有猪群搜索方法
+     */
+    @RequestMapping(value = "/groups/all", method = RequestMethod.GET)
+    public List<SearchedGroup> searchGroupsAll(@RequestParam Map<String, String> params) {
+        DoctorGroupSearchDto searchDto = getGroupSearchDto(params);
+        if (searchDto == null) {
+            return Collections.emptyList();
+        }
+        return pagingGroup(1, Integer.MAX_VALUE, searchDto).getData();
+    }
+
+
+    /**
      * 猪群搜索方法
      *
      * @param pageNo   起始页
@@ -195,13 +230,44 @@ public class DoctorSearches {
      * @see `DefaultGroupQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/groups", method = RequestMethod.GET)
-    public GroupPaging<SearchedGroup> searchGroups(@RequestParam(required = false) Integer pageNo,
-                                                   @RequestParam(required = false) Integer pageSize,
-                                                   @RequestParam Map<String, String> params) {
-        params = filterNullOrEmpty(params);
-        if (farmIdNotExist(params)) {
-            return new GroupPaging<>(0L, Collections.emptyList());
+    public GroupPigPaging<SearchedGroup> searchGroups(@RequestParam(required = false) Integer pageNo,
+                                                      @RequestParam(required = false) Integer pageSize,
+                                                      @RequestParam Map<String, String> params) {
+
+        DoctorGroupSearchDto searchDto = getGroupSearchDto(params);
+        if (searchDto == null) {
+            return new GroupPigPaging<>(0L, Collections.emptyList());
         }
+
+        Paging<SearchedGroup> paging = pagingGroup(pageNo, pageSize, searchDto);
+        Long groupCount = RespHelper.orServEx(doctorGroupReadService.getGroupCount(searchDto));
+        Long sowCount = getSowCountWhenFarrow(searchDto);
+        return new GroupPigPaging<>(paging, groupCount, sowCount);
+    }
+
+    //猪群分页
+    private Paging<SearchedGroup> pagingGroup(Integer pageNo, Integer pageSize, DoctorGroupSearchDto searchDto) {
+        if (searchDto == null || searchDto.getFarmId() == null) {
+            return new GroupPigPaging<>(0L, Collections.emptyList());
+        }
+        Paging<DoctorGroupDetail> groupDetailPaging = RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, pageSize));
+        List<SearchedGroup> searchedGroups = groupDetailPaging.getData().stream()
+                .map(gd -> {
+                    SearchedGroup group = BeanMapper.map(gd.getGroup(), SearchedGroup.class);
+                    PigType pigType = PigType.from(group.getPigType());
+                    group.setPigTypeName(pigType == null ? "" : pigType.getDesc());
+                    group.setSex(gd.getGroupTrack().getSex());
+                    group.setQuantity(gd.getGroupTrack().getQuantity());
+                    group.setAvgDayAge(gd.getGroupTrack().getAvgDayAge());
+                    return group;
+                })
+                .collect(Collectors.toList());
+        return new Paging<>(groupDetailPaging.getTotal(), searchedGroups);
+    }
+
+    //猪群查询条件转换
+    private DoctorGroupSearchDto getGroupSearchDto(Map<String, String> params) {
+        params = filterNullOrEmpty(params);
         searchFromMessage(params);
 
         replaceKey(params, "q", "groupCode");
@@ -224,15 +290,12 @@ public class DoctorSearches {
         }else{
             Long barnId = Long.valueOf(params.get("barnId"));
             if(Objects.equals(user.getType(), UserType.FARM_SUB.value()) && !permission.contains(barnId)){
-                return new GroupPaging<>(0L, Collections.emptyList());
+                return null;
             }else{
                 searchDto.setBarnIdList(Lists.newArrayList(barnId));
             }
         }
-
-        Paging<DoctorGroupDetail> groupDetailPaging = RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, pageSize));
-        Long groupCount = RespHelper.orServEx(doctorGroupReadService.getGroupCount(searchDto));
-        return transGroupPaging(groupDetailPaging, groupCount);
+        return searchDto;
     }
 
     private static void replaceKey(Map<String, String> params, String oldKey, String newKey) {
@@ -241,19 +304,27 @@ public class DoctorSearches {
         }
     }
 
-    private GroupPaging<SearchedGroup> transGroupPaging(Paging<DoctorGroupDetail> groupDetailPaging, Long count) {
-        List<SearchedGroup> searchedGroups = groupDetailPaging.getData().stream()
-                .map(gd -> {
-                    SearchedGroup group = BeanMapper.map(gd.getGroup(), SearchedGroup.class);
-                    PigType pigType = PigType.from(group.getPigType());
-                    group.setPigTypeName(pigType == null ? "" : pigType.getDesc());
-                    group.setSex(gd.getGroupTrack().getSex());
-                    group.setQuantity(gd.getGroupTrack().getQuantity());
-                    group.setAvgDayAge(gd.getGroupTrack().getAvgDayAge());
-                    return group;
-                })
-                .collect(Collectors.toList());
-        return new GroupPaging<>(groupDetailPaging.getTotal(), searchedGroups, count);
+    //如果是产房，获取一下产房里的母猪数
+    private Long getSowCountWhenFarrow(DoctorGroupSearchDto searchDto) {
+        Long sowCount = 0L;
+        if (notEmpty(searchDto.getBarnIdList())) {
+            for (Long barnId : searchDto.getBarnIdList()) {
+                DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
+                if (Objects.equals(barn.getPigType(), PigType.DELIVER_SOW.getValue())) {
+                    List<DoctorPigTrack> pigTracks = RespHelper.or(doctorPigReadService
+                            .findActivePigTrackByCurrentBarnId(barnId), Collections.emptyList());
+                    sowCount += pigTracks.size();
+                }
+            }
+            return sowCount;
+        }
+
+        //如果查产房类型，直接返回所有产房里的母猪数
+        if (notEmpty(searchDto.getPigTypes()) && searchDto.getPigTypes().contains(PigType.DELIVER_SOW.getValue())) {
+            return RespHelper.or(doctorPigReadService.getPigCountByBarnPigTypes(searchDto.getFarmId(),
+                            Lists.newArrayList(PigType.DELIVER_SOW.getValue())), 0L);
+        }
+        return sowCount;
     }
 
     /**
@@ -264,7 +335,6 @@ public class DoctorSearches {
      * @param params   搜索参数
      *                 搜索参数可以参照:
      * @return
-     * @see `DefaultBarnQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/barns", method = RequestMethod.GET)
     public SearchedBarnDto searchBarn(@RequestParam(required = false) Integer pageNo,
@@ -312,18 +382,11 @@ public class DoctorSearches {
                         List<DoctorPigTrack> pigTracks = RespHelper.or500(doctorPigReadService.findActivePigTrackByCurrentBarnId(barn.getId()));
                         pigCount = pigTracks.size();
                         groupCount = getGroupCount(barn);
-
-                        if (groupCount > 0) {
-                            barnStatus.add(SearchedBarn.createFarrowStatus(groupCount));
-                        }
                         barnStatus = addPigBarnStatus(barnStatus, pigTracks);
                         barn.setType(PigSearchType.SOW_GROUP.getValue());
                     }
                     else if (JUST_GROUPS.contains(pigType)) {
                         groupCount = getGroupCount(barn);
-                        if (groupCount > 0) {
-                            barnStatus.add(SearchedBarn.createFarrowStatus(groupCount));
-                        }
                         barn.setType(PigSearchType.GROUP.getValue());
                     }
                     else if (JUST_PIGS.contains(pigType)) {
@@ -354,7 +417,8 @@ public class DoctorSearches {
     //获取猪舍中猪的状态聚合
     private List<SearchedBarn.BarnStatus> addPigBarnStatus(List<SearchedBarn.BarnStatus> barnStatus, List<DoctorPigTrack> pigTracks) {
         for (Map.Entry<Integer, List<DoctorPigTrack>> m : pigTracks.stream().collect(Collectors.groupingBy(DoctorPigTrack::getStatus)).entrySet()) {
-            if (m.getValue().size() > 0) {
+            //公猪进场的只显示总数就可以，所以不加进去了
+            if (!Objects.equals(PigStatus.BOAR_ENTRY.getKey(), m.getKey()) && m.getValue().size() > 0) {
                 barnStatus.add(SearchedBarn.createPigStatus(PigStatus.from(m.getKey()), m.getValue().size()));
             }
         }

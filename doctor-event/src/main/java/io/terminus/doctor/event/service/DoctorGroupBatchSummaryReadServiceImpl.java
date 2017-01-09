@@ -111,7 +111,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
 
         //转入 // TODO: 2016/12/8 目前是全部转入事件
         int inCount = CountUtil.intStream(events, DoctorGroupEvent::getQuantity, event -> Objects.equals(GroupEventType.MOVE_IN.getValue(), event.getType())).sum();
-        double inAvgWeight = CountUtil.doubleStream(events, DoctorGroupEvent::getAvgWeight, event -> Objects.equals(GroupEventType.MOVE_IN.getValue(), event.getType())).average().orElse(0D);
+        double inAvgWeight = CountUtil.doubleStream(events, w -> MoreObjects.firstNonNull(w.getAvgWeight(), 0D), event -> Objects.equals(GroupEventType.MOVE_IN.getValue(), event.getType())).average().orElse(0D);
 
         DoctorGroupBatchSummary summary = new DoctorGroupBatchSummary();
         summary.setFarmId(group.getFarmId());                                        //猪场id

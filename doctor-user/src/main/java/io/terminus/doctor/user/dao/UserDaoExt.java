@@ -38,6 +38,10 @@ public class UserDaoExt extends UserDao {
         return sqlSession.selectList(NAMESPACE + "list", user);
     }
 
+    public List<User> findByType(Integer type){
+        return sqlSession.selectList(NAMESPACE + "findByType", type);
+    }
+
     /**
      * 查询对象列表
      * @param criteria Map查询条件

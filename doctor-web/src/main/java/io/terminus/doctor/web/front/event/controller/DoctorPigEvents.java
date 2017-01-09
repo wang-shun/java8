@@ -343,7 +343,7 @@ public class DoctorPigEvents {
     public List<DoctorPigEvent> queryOperatorForEvent(@RequestParam Map<String, Object> params) {
         params = Params.filterNullOrEmpty(params);
         if (params.get("eventTypes") != null) {
-            params.put("type", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
         return RespHelper.or500(doctorPigEventReadService.queryOperators(params));

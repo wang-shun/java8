@@ -152,4 +152,10 @@
             where <![CDATA[ instr(roles_json, #{role}) > 0 ]]>
         </if>
     </select>
+
+    <select id="findByType" parameterType="int" resultMap="UserMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE `type` = #{type}
+    </select>
 </mapper>

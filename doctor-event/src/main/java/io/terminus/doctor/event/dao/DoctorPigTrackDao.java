@@ -121,6 +121,15 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
     }
 
     /**
+     * 根据猪舍ids统计猪的数量
+     * @param barnIds 猪舍ids
+     * @return 猪的数量
+     */
+    public Long countByBarnIds(List<Long> barnIds) {
+        return this.getSqlSession().selectOne(sqlId("countByPigTypes"), ImmutableMap.of(barnIds, barnIds));
+    }
+
+    /**
      * 根据猪群id查询哺乳母猪的跟踪
      * @param groupId 猪群id
      * @return 母猪跟踪

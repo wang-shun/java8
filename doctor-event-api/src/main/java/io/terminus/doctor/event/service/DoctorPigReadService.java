@@ -4,10 +4,11 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.dto.search.SearchedPig;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
@@ -152,4 +153,13 @@ public interface DoctorPigReadService {
      * @return 第一次配种的时间
      */
     Response<Date> getFirstMatingTime(@NotNull(message = "pigId.not.null")Long pigId, @NotNull(message = "farmId.not.null") Long farmId);
+
+    /**
+     * 查询某一类或几类猪舍里的猪的数量
+     * @param farmId   猪场id
+     * @param pigTypes 猪类
+     * @return 猪的数量
+     */
+    Response<Long> getPigCountByBarnPigTypes(@NotNull(message = "farmId.not.null") Long farmId,
+                                             @NotEmpty(message = "pigTypes.not.empty") List<Integer> pigTypes);
 }
