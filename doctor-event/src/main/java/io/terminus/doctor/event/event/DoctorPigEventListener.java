@@ -8,7 +8,6 @@ import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
-import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -16,7 +15,6 @@ import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PregCheckResult;
-import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
@@ -57,48 +55,44 @@ public class DoctorPigEventListener implements EventListener {
     @Autowired
     private DoctorDailyReportDao doctorDailyReportDao;
 
+    public void handlePigEvent() {
+        // TODO: 2017/1/9  
+    }
+    
     /**
      * 监听猪相关事件，处理下日报统计
      */
     @AllowConcurrentEvents
     @Subscribe
-    public void handlePigEvent(ListenedPigEvent listenedPigEvent) {
-        log.info("[DoctorPigEventListener]-> handle.pig.event, listenedPigEvent:{}", listenedPigEvent);
-
-        DoctorPigEvent event = doctorPigEventDao.findById(listenedPigEvent.getPigEventId());
-        if (event == null) {
-            log.error("handle pig event({}), but event not found!", listenedPigEvent);
+    public void handle(Long orgId, Long farmId, DoctorPigPublishDto event) {
+        PigEvent type = PigEvent.from(event.getEventType());
+        if (type == null) {
+            log.error("handle pig event type not find, farmId:{}, event info:{}", farmId, event);
             return;
         }
 
-        PigEvent eventType = PigEvent.from(event.getType());
-        if (eventType == null) {
-            log.error("handle pig event type not find, listenPigEvent:{}, event:{}", listenedPigEvent, event);
-            return;
-        }
-
-        switch (eventType) {
+        switch (type) {
             case CHG_FARM:
-                handleLiveStockReport(event);
+                handleLiveStockReport(orgId, farmId, event.getEventAt(), event.getKind());
                 break;
             case REMOVAL:
-                handleLiveStockReport(event);
-                handleSaleAndDead(event);
+                handleLiveStockReport(orgId, farmId, event.getEventAt(), event.getKind());
+                handleSaleAndDead(farmId, event.getEventAt());
                 break;
             case ENTRY:
-                handleLiveStockReport(event);
+                handleLiveStockReport(orgId, farmId, event.getEventAt(), event.getKind());
                 break;
             case MATING:
-                handleMate(event);
+                handleMate(farmId, event.getEventAt(), event.getMateType());
                 break;
             case PREG_CHECK:
-                handlePregCheck(event);
+                handlePregCheck(farmId, event.getEventAt(), event.getPregCheckResult());
                 break;
             case FARROWING:
-                handleFarrow(event);
+                handleFarrow(farmId, event.getEventAt());
                 break;
             case WEAN:
-                handleWean(event);
+                handleWean(farmId, event.getEventAt());
                 break;
             default:
                 break;
@@ -106,21 +100,20 @@ public class DoctorPigEventListener implements EventListener {
     }
 
     //处理配种
-    private void handleMate(DoctorPigEvent event) {
-        log.info("handle handleMate, event:{}", event);
+    private void handleMate(Long farmId, Date eventAt, Integer mateType) {
+        log.info("handle handleMate, farmId:{}, eventAt:{}, mateType:{}", farmId, eventAt, mateType);
 
-        if (doctorDailyReportCache.reportIsFullInit(event.getFarmId(), event.getEventAt())) {
+        if (doctorDailyReportCache.reportIsFullInit(farmId, eventAt)) {
             return;
         }
 
-        Date startAt = Dates.startOfDay(event.getEventAt());
-        Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
-        Long farmId = event.getFarmId();
+        Date startAt = Dates.startOfDay(eventAt);
+        Date endAt = DateUtil.getDateEnd(new DateTime(eventAt)).toDate();
 
         //不同的配种来源
-        DoctorMatingType matingType = DoctorMatingType.from(event.getDoctorMateType());
+        DoctorMatingType matingType = DoctorMatingType.from(mateType);
         if (matingType == null) {
-            log.error("handle pig mate event, but matetype unsupport! event:{}", event);
+            log.error("handle pig mate event, but matetype unsupport! farmId:{}", farmId);
             return;
         }
         switch (matingType) {
@@ -158,20 +151,19 @@ public class DoctorPigEventListener implements EventListener {
     }
 
     //处理妊检
-    private void handlePregCheck(DoctorPigEvent event) {
-        log.info("handle handlePregCheck, event:{}", event);
+    private void handlePregCheck(Long farmId, Date eventAt, Integer checkResult) {
+        log.info("handle handlePregCheck, farmId:{}, eventAt:{}, mateType:{}", farmId, eventAt, checkResult);
 
-        if (doctorDailyReportCache.reportIsFullInit(event.getFarmId(), event.getEventAt())) {
+        if (doctorDailyReportCache.reportIsFullInit(farmId, eventAt)) {
             return;
         }
 
-        Date startAt = Dates.startOfDay(event.getEventAt());
-        Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
-        Long farmId = event.getFarmId();
+        Date startAt = Dates.startOfDay(eventAt);
+        Date endAt = DateUtil.getDateEnd(new DateTime(eventAt)).toDate();
 
-        PregCheckResult result = PregCheckResult.from(event.getPregCheckResult());
+        PregCheckResult result = PregCheckResult.from(checkResult);
         if (result == null) {
-            log.error("handle pig pregcheck event, but checkResult unsupport! event:{}", event);
+            log.error("handle pig pregcheck event, but checkResult unsupport! farmId:{}", farmId);
             return;
         }
         switch (result) {
@@ -205,21 +197,20 @@ public class DoctorPigEventListener implements EventListener {
     }
 
     //处理分娩
-    private void handleFarrow(DoctorPigEvent event) {
-        log.info("handle handleFarrow, event:{}", event);
+    private void handleFarrow(Long farmId, Date eventAt) {
+        log.info("handle handleFarrow, farmId:{}, eventAt:{}", farmId, eventAt);
 
-        if (doctorDailyReportCache.reportIsFullInit(event.getFarmId(), event.getEventAt())) {
+        if (doctorDailyReportCache.reportIsFullInit(farmId, eventAt)) {
             return;
         }
 
-        Date startAt = Dates.startOfDay(event.getEventAt());
-        Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
-        Long farmId = event.getFarmId();
+        Date startAt = Dates.startOfDay(eventAt);
+        Date endAt = DateUtil.getDateEnd(new DateTime(eventAt)).toDate();
 
         //取出当天的所有分娩事件，计算一发就好了
         List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndTypeAndDate(farmId, PigEvent.FARROWING.getKey(), startAt, endAt);
         if (!notEmpty(events)) {
-            log.error("handle farrow event, but farrow event not found! event:{}", event);
+            log.error("handle farrow event, but farrow event not found! farmId:{}", farmId);
             return;
         }
         DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
@@ -242,15 +233,14 @@ public class DoctorPigEventListener implements EventListener {
     }
 
     //处理断奶
-    private void handleWean(DoctorPigEvent event) {
-        log.info("handle handleWean, event:{}", event);
-        if (doctorDailyReportCache.reportIsFullInit(event.getFarmId(), event.getEventAt())) {
+    private void handleWean(Long farmId, Date eventAt) {
+        log.info("handle handleWean, farmId:{}, eventAt:{}, mateType:{}", farmId, eventAt);
+        if (doctorDailyReportCache.reportIsFullInit(farmId, eventAt)) {
             return;
         }
 
-        Date startAt = Dates.startOfDay(event.getEventAt());
-        Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
-        Long farmId = event.getFarmId();
+        Date startAt = Dates.startOfDay(eventAt);
+        Date endAt = DateUtil.getDateEnd(new DateTime(eventAt)).toDate();
 
         int count = doctorKpiDao.getWeanPiglet(farmId, startAt, endAt);
         double weight = doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt);
@@ -265,19 +255,19 @@ public class DoctorPigEventListener implements EventListener {
         doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
     }
 
-    //跟猪存栏相关的更新
-    private void handleLiveStockReport(DoctorPigEvent event) {
-        Date startAt = Dates.startOfDay(event.getEventAt());
+    //跟猪存栏相关的更新 eventAt是最早的一天
+    private void handleLiveStockReport(Long orgId, Long farmId, Date eventAt, Integer kind) {
+        Date startAt = Dates.startOfDay(eventAt);
         Date endAt = Dates.startOfDay(new Date());
 
         //更新今天的首页存栏
-        doctorPigTypeStatisticWriteService.statisticPig(event.getOrgId(), event.getFarmId(), event.getKind());
+        doctorPigTypeStatisticWriteService.statisticPig(orgId, farmId, kind);
 
         //更新到今天的存栏
         while (!startAt.after(endAt)) {
             //查询startAt 这条的日报是否存在，如果已经初始化过了，则不做处理
-            if (!doctorDailyReportCache.reportIsFullInit(event.getFarmId(), startAt)) {
-                getLiveStock(event.getKind(), event.getFarmId(), startAt);
+            if (!doctorDailyReportCache.reportIsFullInit(farmId, startAt)) {
+                getLiveStock(kind, farmId, startAt);
             }
             startAt = new DateTime(startAt).plusDays(1).toDate();
         }
@@ -304,47 +294,23 @@ public class DoctorPigEventListener implements EventListener {
         }
     }
 
-    //处理离场类型：死淘或销售
-    private void handleSaleAndDead(DoctorPigEvent event) {
-        log.info("handle handleSaleAndDead, event:{}", event);
+    //处理离场类型：死淘或销售，这里就不区分了
+    private void handleSaleAndDead(Long farmId, Date eventAt) {
+        log.info("handle handleSaleAndDead, farmId:{}, eventAt:{}", farmId, eventAt);
 
-        Date startAt = Dates.startOfDay(event.getEventAt());
-        Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
-        Long farmId = event.getFarmId();
+        Date startAt = Dates.startOfDay(eventAt);
+        Date endAt = DateUtil.getDateEnd(new DateTime(eventAt)).toDate();
 
-        //死淘
-        if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.DEAD.getId())
-                || Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
-            if (Objects.equals(event.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())) {
-                int deadSow = doctorKpiDao.getDeadSow(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDto.getDead().setSow(deadSow);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
+        int deadSow = doctorKpiDao.getDeadSow(farmId, startAt, endAt);
+        int deadBoar = doctorKpiDao.getDeadBoar(farmId, startAt, endAt);
+        int saleSow = doctorKpiDao.getSaleSow(farmId, startAt, endAt);
+        int saleBoar = doctorKpiDao.getSaleBoar(farmId, startAt, endAt);
 
-            } else {
-                int deadBoar = doctorKpiDao.getDeadBoar(farmId, startAt, endAt);
-                DoctorDailyReport report = doctorDailyReportCache.getDailyReport(farmId, startAt);
-                DoctorDailyReportDto reportDto = report.getReportData();
-                reportDto.getDead().setBoar(deadBoar);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
-            }
-            return;
-        }
-
-        //销售
-        if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.SALE.getId())) {
-            if (Objects.equals(event.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())) {
-                int saleSow = doctorKpiDao.getSaleSow(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDto.getSale().setSow(saleSow);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
-
-            } else {
-                int saleBoar = doctorKpiDao.getSaleBoar(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDto.getSale().setBoar(saleBoar);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
-            }
-        }
+        DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+        reportDto.getDead().setSow(deadSow);
+        reportDto.getDead().setBoar(deadBoar);
+        reportDto.getSale().setSow(saleSow);
+        reportDto.getSale().setBoar(saleBoar);
+        doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
     }
 }
