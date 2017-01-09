@@ -167,9 +167,9 @@ public class  DoctorEventConfiguration {
     public DoctorPigEventHandlers doctorPigEventHandlers(
             DoctorEntryHandler doctorEntryHandler,
             DoctorSemenHandler doctorSemenHandler,
-            DoctorSowFostersByHandler doctorSowFostersByHandler,
-            DoctorSowMatingHandler doctorSowMatingHandler,
-            DoctorSowPregCheckHandler doctorSowPregCheckHandler
+            DoctorSowFostersByHandler doctorSowFostersByHandler
+//            DoctorSowMatingHandler doctorSowMatingHandler,
+//            DoctorSowPregCheckHandler doctorSowPregCheckHandler
 //            DoctorChgFarmHandler doctorChgFarmHandler,
 //            DoctorChgLocationHandler doctorChgLocationHandler
 //            DoctorConditionHandler doctorConditionHandler,
