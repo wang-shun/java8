@@ -93,28 +93,6 @@ public class DoctorBasicInputInfoDto implements Serializable{
         }
         return Joiner.on("#").withKeyValueSeparator("：").join(fieldMap);
     }
-
-//    public Date generateEventAtFromExtra(Map<String, Object> extra){
-//        if(eventType == null){
-//            return null;
-//        }
-//        PigEvent pigEvent = PigEvent.from(eventType);
-//        if(pigEvent == null){
-//            return null;
-//        }
-//        Date eventAt = transFromPigEventAndExtra(pigEvent, extra).eventAt();
-//        if(eventAt != null){
-//            Date now = new Date();
-//            if(DateUtil.inSameDate(eventAt, now)){
-//                // 如果处在今天, 则使用此刻瞬间
-//                return now;
-//            } else {
-//                // 如果不在今天, 则将时间置为0, 只保留日期
-//                return Dates.startOfDay(eventAt);
-//            }
-//        }
-//        return null;
-//    }
     
 //    public static BasePigEventInputDto transFromPigEventAndExtra(PigEvent pigEvent, BasePigEventInputDto inputDto){
 //        if(pigEvent == null){

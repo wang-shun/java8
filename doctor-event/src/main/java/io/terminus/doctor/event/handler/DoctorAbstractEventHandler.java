@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.handler;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -22,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -125,9 +128,10 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName())
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
                 .pigId(inputDto.getPigId()).pigCode(inputDto.getPigCode())
-                .eventAt(inputDto.eventAt()).type(basic.getEventType())
+                .eventAt(generateEventAt(inputDto)).type(basic.getEventType())
                 .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName())
-                .kind(inputDto.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))//.relEventId(basic.getRelEventId())
+                .kind(inputDto.getPigType()).relPigEventId(inputDto.getRelPigEventId()).relGroupEventId(inputDto.getRelGroupEventId())
+                .name(basic.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))//.relEventId(basic.getRelEventId())
                 .operatorId(MoreObjects.firstNonNull(inputDto.getOperatorId(), basic.getStaffId())).operatorName(MoreObjects.firstNonNull(inputDto.getOperatorName(), basic.getStaffName()))
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .isAuto(MoreObjects.firstNonNull(inputDto.getIsAuto(), IsOrNot.NO.getValue()))
@@ -188,5 +192,20 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         basic.setEventName(pigEvent.getName());
         basic.setEventType(pigEvent.getKey());
         basic.setEventDesc(pigEvent.getDesc());
+    }
+
+    private Date generateEventAt(BasePigEventInputDto inputDto){
+        Date eventAt = inputDto.eventAt();
+        if(eventAt != null){
+            Date now = new Date();
+            if(DateUtil.inSameDate(eventAt, now)){
+                // 如果处在今天, 则使用此刻瞬间
+                return now;
+            } else {
+                // 如果不在今天, 则将时间置为0, 只保留日期
+                return Dates.startOfDay(eventAt);
+            }
+        }
+        return null;
     }
 }

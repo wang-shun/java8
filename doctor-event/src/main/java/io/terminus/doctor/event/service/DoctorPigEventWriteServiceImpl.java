@@ -472,9 +472,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             List<DoctorEventInfo> eventInfoList = doctorPigEventManager.eventHandle(inputDto, basic);
             doctorPigEventManager.checkAndPublishEvent(eventInfoList);
             return Response.ok(Boolean.TRUE);
-
-        } catch (RuntimeException e) {
-            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("pig.event.handle.failed, cause by :{}", Throwables.getStackTraceAsString(e));
             return Response.fail("pig.event.handle.failed");
@@ -487,8 +484,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             List<DoctorEventInfo> eventInfoList = doctorPigEventManager.batchEventsHandle(inputDtos, basic);
             doctorPigEventManager.checkAndPublishEvent(eventInfoList);
             return Response.ok(Boolean.TRUE);
-        } catch (RuntimeException e) {
-            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("batch.pig.event.handle.failed, cause by :{}", Throwables.getStackTraceAsString(e));
             return Response.fail("batch.pig.event.handle.failed");

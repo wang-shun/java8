@@ -42,7 +42,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler {
 
     @Override
     public void handleCheck(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        checkState(doctorPigDao.findPigByFarmIdAndPigCode(basic.getFarmId(), inputDto.getPigCode()) == null, getErrorMessage("pigCode.have.existed", new Object[]{inputDto.getPigCode()}));
+        checkState(doctorPigDao.findPigByFarmIdAndPigCode(basic.getFarmId(), inputDto.getPigCode()) == null, "猪号" + inputDto.getPigCode() + "已存在");
     }
 
 
