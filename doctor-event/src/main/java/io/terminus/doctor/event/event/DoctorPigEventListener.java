@@ -97,7 +97,7 @@ public class DoctorPigEventListener implements EventListener {
 
         // TODO: 2017/1/9 过滤掉
 
-        return results;
+        return pigs;
     }
 
     //具体的处理逻辑
