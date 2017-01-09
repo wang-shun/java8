@@ -166,10 +166,10 @@ public class  DoctorEventConfiguration {
     @Bean
     public DoctorPigEventHandlers doctorPigEventHandlers(
             DoctorEntryHandler doctorEntryHandler,
-            DoctorSemenHandler doctorSemenHandler
-//            DoctorSowFostersByHandler doctorSowFostersByHandler,
-//            DoctorSowMatingHandler doctorSowMatingHandler,
-//            DoctorSowPregCheckHandler doctorSowPregCheckHandler,
+            DoctorSemenHandler doctorSemenHandler,
+            DoctorSowFostersByHandler doctorSowFostersByHandler,
+            DoctorSowMatingHandler doctorSowMatingHandler,
+            DoctorSowPregCheckHandler doctorSowPregCheckHandler
 //            DoctorChgFarmHandler doctorChgFarmHandler,
 //            DoctorChgLocationHandler doctorChgLocationHandler
 //            DoctorConditionHandler doctorConditionHandler,
