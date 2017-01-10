@@ -48,7 +48,10 @@ public class DoctorBasicInputInfoDto implements Serializable{
 
     private String eventDesc;
 
-    //private Long relEventId;
+    /**
+     * 断奶事件时，母猪关联的猪群id
+     */
+    private Long weanGroupId;
 
     /**
      * @see io.terminus.doctor.event.enums.IsOrNot
