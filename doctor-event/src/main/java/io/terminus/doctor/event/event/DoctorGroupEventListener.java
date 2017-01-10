@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.event;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import io.terminus.common.utils.Dates;
@@ -31,6 +32,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unused")
 public class DoctorGroupEventListener implements EventListener {
 
     @Autowired
@@ -72,11 +74,8 @@ public class DoctorGroupEventListener implements EventListener {
         if (CollectionUtils.isEmpty(groups)) {
             return Collections.emptyList();
         }
-        List<DoctorGroupPublishDto> results = Lists.newArrayList();
-
-        // TODO: 2017/1/9 过滤掉
-
-        return groups;
+        // 复写了equals方法，过滤掉重复的eventAt和pigType
+        return Lists.newArrayList(Sets.newHashSet(groups));
     }
 
     private void handle(Long orgId, Long farmId, Integer eventType, DoctorGroupPublishDto publishDto) {

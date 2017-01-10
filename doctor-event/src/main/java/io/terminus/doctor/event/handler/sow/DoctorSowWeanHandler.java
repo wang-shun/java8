@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -76,6 +77,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     @Override
     protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         DoctorWeanDto partWeanDto = (DoctorWeanDto) inputDto;
+
         if (Objects.equals(partWeanDto.getPartWeanPigletsCount(), partWeanDto.getFarrowingLiveCount()) && partWeanDto.getChgLocationToBarnId() != null) {
             DoctorBarn doctorBarn = doctorBarnDao.findById(partWeanDto.getChgLocationToBarnId());
             DoctorChgLocationDto chgLocationDto = DoctorChgLocationDto.builder()
@@ -88,7 +90,8 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
             buildAutoEventCommonInfo(partWeanDto, chgLocationDto, basic, PigEvent.CHG_LOCATION, doctorPigEvent.getId());
             chgLocationHandler.handle(doctorEventInfoList, chgLocationDto, basic);
         }
-        updateGroupInfo(doctorPigEvent, doctorPigTrack.getGroupId());
+
+        updateGroupInfo(doctorPigEvent, basic.getWeanGroupId());
     }
 
     @Override
@@ -111,6 +114,16 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         checkState(toWeanAvgWeight != null, "weight.not.null");
         Double weanAvgWeight = ((MoreObjects.firstNonNull(doctorPigTrack.getWeanAvgWeight(), 0D) * weanCount) + toWeanAvgWeight * toWeanCount ) / (weanCount + toWeanCount);
         doctorPigTrack.setWeanAvgWeight(weanAvgWeight);
+
+        Map<String, Object> extra = doctorPigTrack.getExtraMap();
+
+        //更新extra字段
+        extra.put("hasWeanToMating", true);
+
+        doctorPigTrack.setExtraMap(extra);
+
+        //设置下此时的猪群id，下面肯能会把它刷掉
+        basic.setWeanGroupId(doctorPigTrack.getGroupId());
 
         //全部断奶后, 初始化所有本次哺乳的信息
         if (doctorPigTrack.getUnweanQty() == 0) {
