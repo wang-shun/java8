@@ -43,12 +43,12 @@ public class DoctorPigPublishDto implements Serializable {
 
     //可指定的equals方法
     @SafeVarargs
-    public final <T> boolean equalsByFunc(DoctorPigPublishDto that, Function<DoctorPigPublishDto, T>... funcs) {
+    public final boolean equalsByFunc(DoctorPigPublishDto that, Function<DoctorPigPublishDto, ?>... funcs) {
         if (this == that) return true;
         if (that == null) return false;
 
         boolean isEqual = true;
-        for (Function<DoctorPigPublishDto, T> func : funcs) {
+        for (Function<DoctorPigPublishDto, ?> func : funcs) {
             if (!Objects.equals(func.apply(this), func.apply(that))) {
                 isEqual = false;
                 break;
