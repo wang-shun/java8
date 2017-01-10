@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.DateUtil.stringToDate;
 
 /**
  * Created by yaoqijun.
@@ -64,7 +65,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
         //查找最近一次初配种事件
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-        DateTime pregJudgeDate = new DateTime(Long.parseLong(firstMate.getExtraMap().get("judgePregDate").toString()));
+        DateTime pregJudgeDate = new DateTime(stringToDate(firstMate.getExtraMap().get("judgePregDate").toString()));
         DateTime mattingDate = new DateTime(firstMate.getEventAt());
 
         //计算孕期
