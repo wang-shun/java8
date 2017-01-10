@@ -91,7 +91,6 @@ public class DoctorPigCreateEvents {
     private final DoctorFarmReadService doctorFarmReadService;
     private final DoctorPigReadService doctorPigReadService;
     private final UserReadService userReadService;
-    //private final DoctorSowEventCreateService doctorSowEventCreateService;
     private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorPigEventReadService doctorPigEventReadService;
     private final DoctorGroupWebService doctorGroupWebService;
@@ -105,7 +104,6 @@ public class DoctorPigCreateEvents {
                                  DoctorFarmReadService doctorFarmReadService,
                                  DoctorPigReadService doctorPigReadService,
                                  UserReadService userReadService,
-                                // DoctorSowEventCreateService doctorSowEventCreateService,
                                  DoctorBarnReadService doctorBarnReadService,
                                  DoctorPigEventReadService doctorPigEventReadService,
                                  DoctorGroupWebService doctorGroupWebService) {
@@ -113,7 +111,6 @@ public class DoctorPigCreateEvents {
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorPigReadService = doctorPigReadService;
         this.userReadService = userReadService;
-     //   this.doctorSowEventCreateService = doctorSowEventCreateService;
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorPigEventReadService = doctorPigEventReadService;
         this.doctorGroupWebService = doctorGroupWebService;
@@ -170,9 +167,7 @@ public class DoctorPigCreateEvents {
             doctorChgLocationDto.setChgLocationFromBarnName(doctorPigTrack.getCurrentBarnName());
             return buildEventInput(doctorChgLocationDto, Long.parseLong(idStr));
         }).collect(Collectors.toList());
-        return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtos,
-
-    buildBasicInputInfoDto(farmId, PigEvent.CHG_LOCATION)));
+        return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtos, buildBasicInputInfoDto(farmId, PigEvent.CHG_LOCATION)));
 }
 
     /**
