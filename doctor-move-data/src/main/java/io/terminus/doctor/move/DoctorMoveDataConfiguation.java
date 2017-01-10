@@ -5,7 +5,6 @@ import io.terminus.doctor.event.DoctorEventConfiguration;
 import io.terminus.doctor.move.sql.DoctorSqlFactory;
 import io.terminus.doctor.msg.DoctorMsgConfig;
 import io.terminus.doctor.user.DoctorUserConfiguration;
-import io.terminus.doctor.warehouse.DoctorWarehouseConfiguration;
 import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
@@ -34,7 +33,6 @@ import java.io.IOException;
 @EnableAutoConfiguration
 @Import({DoctorBasicConfiguration.class,
         DoctorEventConfiguration.class,
-        DoctorWarehouseConfiguration.class,
         DoctorUserConfiguration.class,
         DoctorMsgConfig.class
 })

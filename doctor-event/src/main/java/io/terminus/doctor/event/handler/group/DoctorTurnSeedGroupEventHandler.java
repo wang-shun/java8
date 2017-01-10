@@ -106,7 +106,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
 
         //发布统计事件
-        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
+        publistGroupAndBarn(event);
     }
 
     //后备舍又他妈不分公母了, 艹

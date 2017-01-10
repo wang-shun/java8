@@ -14,8 +14,6 @@
         <module>doctor-event-api</module>
         <module>doctor-basic</module>
         <module>doctor-basic-api</module>
-        <module>doctor-warehouse</module>
-        <module>doctor-warehouse-api</module>
         <module>doctor-user-api</module>
         <module>doctor-user-interface</module>
         <module>doctor-user</module>
@@ -353,18 +351,6 @@
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-basic-api</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-warehouse-api</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-warehouse</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
 

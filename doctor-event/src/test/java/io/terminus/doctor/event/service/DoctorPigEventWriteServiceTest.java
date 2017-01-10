@@ -49,7 +49,7 @@ public class DoctorPigEventWriteServiceTest extends BaseServiceTest{
     @Test
     public void testPigEntryEvent(){
 
-//        Response<Long> response = doctorPigEventWriteService.pigEntryEvent(buildEntryInputInfo(),buildFarmEntryDto(),DoctorPig.PIG_TYPE.SOW.getKey());
+//        Response<Long> response = doctorPigEventWriteService.pigEntryEvent(buildEntryInputInfo(),buildFarmEntryDto(),DoctorPig.PigSex.SOW.getKey());
 //
 ////        printInfo(doctorPigDao.findById(6l));
 //

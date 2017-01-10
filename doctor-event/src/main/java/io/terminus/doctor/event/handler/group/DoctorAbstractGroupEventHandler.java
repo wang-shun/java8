@@ -20,6 +20,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.event.DoctorGroupEventListener;
+import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -243,12 +244,21 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     //发布猪群猪舍事件(不发统计事件了，事务里套事务，事件区分不开，改成同步统计)
-    protected void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
+    protected void publistGroupAndBarn(DoctorGroupEvent event) {
         doctorGroupEventListener.handleGroupEvent(ListenedGroupEvent.builder()
-                .orgId(orgId)
-                .farmId(farmId)
-                //.groupId(groupId)
+                .orgId(event.getOrgId())
+                .farmId(event.getFarmId())
+                .groups(Lists.newArrayList(getPublishGroup(event)))
                 .build());
+    }
+
+    private static DoctorGroupPublishDto getPublishGroup(DoctorGroupEvent event) {
+        DoctorGroupPublishDto dto = new DoctorGroupPublishDto();
+        dto.setGroupId(event.getGroupId());
+        dto.setEventId(event.getId());
+        dto.setEventAt(event.getEventAt());
+        dto.setPigType(event.getPigType());
+        return dto;
     }
 
     //品种校验, 如果猪群的品种已经确定, 那么录入的品种必须和猪群的品种一致

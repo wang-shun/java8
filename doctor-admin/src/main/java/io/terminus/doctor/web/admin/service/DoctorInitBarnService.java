@@ -7,13 +7,11 @@ import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorBarnWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
+import io.terminus.doctor.basic.service.DoctorWareHouseTypeWriteService;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import static io.terminus.doctor.common.utils.RespHelper.or500;
 
 /**
  * Desc:

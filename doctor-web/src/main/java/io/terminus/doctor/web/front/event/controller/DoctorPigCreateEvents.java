@@ -346,7 +346,7 @@ public class DoctorPigCreateEvents {
                                      @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId) {
         DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(pigId));
         BasePigEventInputDto inputDto;
-        if (Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())) {
+        if (Objects.equals(doctorPig.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
             inputDto = jsonMapper.fromJson(doctorConditionDtoJson, DoctorConditionDto.class);
         } else {
             inputDto = jsonMapper.fromJson(doctorConditionDtoJson, DoctorBoarConditionDto.class);
@@ -374,7 +374,7 @@ public class DoctorPigCreateEvents {
         List<Long> pigIdList = Splitters.COMMA.splitToList(pigIds).stream().map(Long::parseLong).collect(Collectors.toList());
         DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(pigIdList.get(0)));
         BasePigEventInputDto doctorConditionDto;
-        if (Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())) {
+        if (Objects.equals(doctorPig.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
             doctorConditionDto = jsonMapper.fromJson(doctorConditionDtoJson, DoctorConditionDto.class);
         } else {
             doctorConditionDto = jsonMapper.fromJson(doctorConditionDtoJson, DoctorBoarConditionDto.class);
@@ -416,7 +416,7 @@ public class DoctorPigCreateEvents {
                                    @RequestParam("pigId") Long pigId, @RequestParam("eventType") Integer eventType,
                                    @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
         try {
-            BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PIG_TYPE.SOW.getKey());
+            BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PigSex.SOW.getKey());
             return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(inputDto, pigId), buildBasicInputInfoDto(farmId, PigEvent.from(eventType))));
         } catch (Exception e) {
             log.error("pig.event.create.failed, cause:{}", Throwables.getStackTraceAsString(e));
@@ -428,7 +428,7 @@ public class DoctorPigCreateEvents {
     public Boolean createSowEventInfo(@RequestParam("farmId") Long farmId,
                                       @RequestParam("pigIds") String pigIds, @RequestParam("eventType") Integer eventType,
                                       @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
-        BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PIG_TYPE.SOW.getKey());
+        BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PigSex.SOW.getKey());
         checkPigIds(pigIds);
         List<BasePigEventInputDto> inputDtos = Splitters.COMMA.splitToList(pigIds).stream().filter(idStr -> !Strings.isNullOrEmpty(idStr))
                 .map(idStr -> buildEventInput(inputDto, Long.parseLong(idStr)))
@@ -583,7 +583,7 @@ public class DoctorPigCreateEvents {
                 case CHG_LOCATION:
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorChgLocationDto.class);
                 case CONDITION:
-                    if (Objects.equals(pigType, DoctorPig.PIG_TYPE.SOW.getKey())){
+                    if (Objects.equals(pigType, DoctorPig.PigSex.SOW.getKey())){
                         return jsonMapper.fromJson(eventInfoDtoJson, DoctorConditionDto.class);
                     } else {
                         return jsonMapper.fromJson(eventInfoDtoJson, DoctorBoarConditionDto.class);
