@@ -28,7 +28,7 @@ import java.util.List;
 
 /**
  * Created by xjn.
- * Date:2017-1-3
+ * Date:2017/1/3
  */
 @Slf4j
 public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandler {
@@ -56,14 +56,15 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
 
-        //1.创建镜像
+        //获取镜像有关event和track
         DoctorPigTrack pigSnapshotTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         DoctorPigEvent pigSnapshotEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
 
-        //2.创建事件
+        //1.创建事件
         DoctorPigEvent doctorPigEvent = buildPigEvent(basic, inputDto);
         doctorPigEventDao.create(doctorPigEvent);
 
+        //2.创建镜像
         DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(pigSnapshotTrack, pigSnapshotEvent,  doctorPigEvent.getId());
         doctorPigSnapshotDao.create(doctorPigSnapshot);
 
@@ -95,24 +96,12 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         triggerEvent(doctorEventInfoList, doctorPigEvent, doctorPigTrack, inputDto, basic);
     }
 
-
-    protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
-        doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
-        doctorPigEventDao.update(doctorPigEvent);
-    }
-
-    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
-
-    }
-
     /**
-     * 事件对母猪的状态信息的影响
-     *
-     * @param basic          录入基础信息内容
+     * 构建基础事件信息
+     * @param basic
+     * @param inputDto
      * @return
      */
-    protected abstract DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto);
-
     protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName())
@@ -156,6 +145,38 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .pigInfo(JsonMapper.nonEmptyMapper().toJson(
                         DoctorPigSnapShotInfo.builder().pig(snapshotPig).pigTrack(doctorPigTrack).pigEvent(doctorPigEvent).build()))
                 .build();
+    }
+
+    /**
+     * 构建需要更新的track信息
+     * @param basic
+     * @param inputDto
+     * @return
+     */
+    protected abstract DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto);
+
+    /**
+     * 事件的创建后的补充和特殊处理
+     * @param doctorPigEvent
+     * @param doctorPigTrack
+     * @param inputDto
+     * @param basic
+     */
+    protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
+        doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
+        doctorPigEventDao.update(doctorPigEvent);
+    }
+
+    /**
+     * 触发事件, 触发其他事件时需要事件此方法
+     * @param doctorEventInfoList
+     * @param doctorPigEvent
+     * @param doctorPigTrack
+     * @param inputDto
+     * @param basic
+     */
+    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
+
     }
 
     /**
