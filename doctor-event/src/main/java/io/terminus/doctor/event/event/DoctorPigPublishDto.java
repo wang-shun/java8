@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.event;
 
+import io.terminus.doctor.event.model.DoctorPig;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -21,7 +22,7 @@ public class DoctorPigPublishDto implements Serializable {
 
     /**
      * 猪的类型(性别)
-     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     * @see DoctorPig.PigSex
      */
     private Integer kind;
 

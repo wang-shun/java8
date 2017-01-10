@@ -158,7 +158,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             // 获取母猪Track 信息
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
             checkState(!isNull(doctorPigTrack), "input.pigIdCode.error");
-            checkState(Objects.equals(doctorPigTrack.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()), "count.pigType.error");
+            checkState(Objects.equals(doctorPigTrack.getPigType(), DoctorPig.PigSex.SOW.getKey()), "count.pigType.error");
 
             // 获取Pig 所有的 EventId
             Map<Integer, List<DoctorPigEvent>> map = doctorPigEventDao.queryAllEventsByPigId(pigId).stream()

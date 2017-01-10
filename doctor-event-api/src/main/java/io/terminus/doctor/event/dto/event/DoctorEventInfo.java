@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.event;
 
+import io.terminus.doctor.event.model.DoctorPig;
 import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Builder;
@@ -26,7 +27,7 @@ public class DoctorEventInfo {
 
     /**
      * 如果是猪事件,猪的类型(性别)
-     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     * @see DoctorPig.PigSex
      */
 
     private Integer kind;

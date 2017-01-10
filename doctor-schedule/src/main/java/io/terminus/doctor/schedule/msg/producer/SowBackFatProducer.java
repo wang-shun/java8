@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -46,11 +45,10 @@ public class SowBackFatProducer extends AbstractJobProducer {
         }
         DoctorPig pig = DoctorPig.builder()
                 .farmId(ruleRole.getFarmId())
-                .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
+                .pigType(DoctorPig.PigSex.SOW.getKey())
                 .build();
         // 批量获取母猪信息
-        Long total = RespHelper.orServEx(doctorPigReadService.queryPigCount(
-                DataRange.FARM.getKey(), ruleRole.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey()));
+        Long total = RespHelper.orServEx(doctorPigReadService.getPigCount(ruleRole.getFarmId(), DoctorPig.PigSex.SOW));
         // 计算size, 分批处理
         Long page = getPageSize(total, 100L);
         for (int i = 1; i <= page; i++) {

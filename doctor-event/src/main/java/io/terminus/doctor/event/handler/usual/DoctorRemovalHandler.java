@@ -38,9 +38,9 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
        doctorPigTrack.setGroupId(-1L);
         doctorPigTrack.addAllExtraMap(removalDto.toMap());
         //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
-        if (Objects.equals(DoctorPig.PIG_TYPE.BOAR.getKey(), removalDto.getPigType())) {
+        if (Objects.equals(DoctorPig.PigSex.BOAR.getKey(), removalDto.getPigType())) {
             doctorPigTrack.setStatus(PigStatus.BOAR_LEAVE.getKey());
-        } else if (Objects.equals(DoctorPig.PIG_TYPE.SOW.getKey(), removalDto.getPigType())) {
+        } else if (Objects.equals(DoctorPig.PigSex.SOW.getKey(), removalDto.getPigType())) {
             doctorPigTrack.setStatus(PigStatus.Removal.getKey());
         } else {
             throw new IllegalStateException("basic.pigTypeValue.error");

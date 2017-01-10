@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.service;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -11,15 +10,12 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
-import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupJoinDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupCount;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
@@ -194,40 +190,6 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("find eventType by groupIds failed, groupIds:{}, cause:{}", groupIds, Throwables.getStackTraceAsString(e));
             return Response.fail("eventType.find.fail");
-        }
-    }
-
-    @Override
-    public Response<DoctorGroupCount> countFarmGroups(Long orgId, Long farmId) {
-        try {
-            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
-            searchDto.setFarmId(farmId);
-            searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
-
-            //过滤猪群类型, 然后按照类型分组
-            Map<Integer, List<DoctorGroupDetail>> groupMap = RespHelper.orServEx(findGroupDetail(searchDto)).stream()
-                    .filter(pt -> pt.getGroup().getPigType() != null)
-                    .collect(Collectors.groupingBy(gd -> gd.getGroup().getPigType()));
-
-            List<DoctorGroupDetail> farrows = MoreObjects.firstNonNull(groupMap.get(PigType.DELIVER_SOW.getValue()), Lists.<DoctorGroupDetail>newArrayList());
-
-            List<DoctorGroupDetail> nurseries = MoreObjects.firstNonNull(groupMap.get(PigType.NURSERY_PIGLET.getValue()), Lists.<DoctorGroupDetail>newArrayList());
-            List<DoctorGroupDetail> fattens = MoreObjects.firstNonNull(groupMap.get(PigType.FATTEN_PIG.getValue()), Lists.<DoctorGroupDetail>newArrayList());
-            List<DoctorGroupDetail> houbei = MoreObjects.firstNonNull(groupMap.get(PigType.RESERVE.getValue()), Lists.<DoctorGroupDetail>newArrayList());
-
-
-            //根据猪类统计
-            DoctorGroupCount count = new DoctorGroupCount();
-            count.setOrgId(orgId);
-            count.setFarmId(farmId);
-            count.setFarrowCount(CountUtil.sumInt(farrows, g -> g.getGroupTrack().getQuantity()));
-            count.setNurseryCount(CountUtil.sumInt(nurseries, g -> g.getGroupTrack().getQuantity()));
-            count.setFattenCount(CountUtil.sumInt(fattens, g -> g.getGroupTrack().getQuantity()));
-            count.setHoubeiCount(CountUtil.sumInt(houbei, g -> g.getGroupTrack().getQuantity()));
-            return Response.ok(count);
-        } catch (Exception e) {
-            log.error("count farm group failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
-            return Response.fail("count.farm.group.fail");
         }
     }
 

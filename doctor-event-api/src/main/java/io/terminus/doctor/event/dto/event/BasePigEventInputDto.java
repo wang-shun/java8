@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dto.event;
 
 
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.event.model.DoctorPig;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -37,7 +38,7 @@ public abstract class BasePigEventInputDto implements Serializable{
 
     /**
      * 对应的母猪类型（公猪，母猪）
-     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     * @see DoctorPig.PigSex
      */
     private Integer pigType;
 

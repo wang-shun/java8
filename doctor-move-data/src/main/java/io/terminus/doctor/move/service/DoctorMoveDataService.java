@@ -303,7 +303,7 @@ public class DoctorMoveDataService {
     @Transactional
     public void updateMateType(DoctorFarm farm) {
         //找到所有没有设置 mate_type 的配种事件
-        doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(PigEvent.MATING.getKey())).stream()
+        doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(), DoctorPig.PigSex.SOW.getKey(), Lists.newArrayList(PigEvent.MATING.getKey())).stream()
                 .filter(e -> isNull(e.getDoctorMateType()) && e.getCurrentMatingCount() == 1)  //只改初配
                 .forEach(event -> {
                     List<DoctorPigEvent> pigEvents = doctorPigEventDao.queryAllEventsByPigId(event.getPigId());
@@ -353,7 +353,7 @@ public class DoctorMoveDataService {
     @Transactional
     public void updateSowAbortion(DoctorFarm farm) {
         List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(),
-                DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(13));
+                DoctorPig.PigSex.SOW.getKey(), Lists.newArrayList(13));
         if (notEmpty(events)) {
             events.forEach(event -> {
                 DoctorPigEvent updateEvent = new DoctorPigEvent();
@@ -395,7 +395,7 @@ public class DoctorMoveDataService {
                 .collect(Collectors.toMap(DoctorSowFarrowWeight::getGroupOutId, DoctorSowFarrowWeight::getFarrowWeight));
 
         List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(),
-                DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(PigEvent.FARROWING.getKey()));
+                DoctorPig.PigSex.SOW.getKey(), Lists.newArrayList(PigEvent.FARROWING.getKey()));
         if (notEmpty(events)) {
             events.forEach(event -> {
                 DoctorPigEvent updateEvent = new DoctorPigEvent();
@@ -421,7 +421,7 @@ public class DoctorMoveDataService {
                 PigEvent.TO_FARROWING.getKey()
         );
 
-        doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey(), tarnsBarnTypes)
+        doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(), DoctorPig.PigSex.SOW.getKey(), tarnsBarnTypes)
                 .forEach(event -> {
                     DoctorChgLocationDto dto = JSON_MAPPER.fromJson(event.getExtra(), DoctorChgLocationDto.class);
                     if (dto != null) {
@@ -468,7 +468,7 @@ public class DoctorMoveDataService {
         //只更新未离场的吧
         doctorPigTrackDao.list(DoctorPigTrack.builder()
                 .farmId(farm.getId())
-                .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
+                .pigType(DoctorPig.PigSex.SOW.getKey())
                 .isRemoval(IsOrNot.NO.getValue()).build())
                 .forEach(track -> {
                     Map<String, Object> extraMap = JSON_MAPPER.fromJson(track.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
@@ -493,7 +493,7 @@ public class DoctorMoveDataService {
         //只更新未离场的吧
         doctorPigTrackDao.list(DoctorPigTrack.builder()
                 .farmId(farm.getId())
-                .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
+                .pigType(DoctorPig.PigSex.SOW.getKey())
                 .isRemoval(IsOrNot.NO.getValue()).build())
                 .forEach(track -> {
                     List<DoctorPigEvent> events = doctorPigEventDao.queryAllEventsByPigId(track.getPigId()).stream()
@@ -582,7 +582,7 @@ public class DoctorMoveDataService {
 
         //查出boar, 转换成map
         Map<String, DoctorPig> boarMap = Maps.newHashMap();
-        doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey()).forEach(boar -> boarMap.put(boar.getPigCode(), boar));
+        doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PigSex.BOAR.getKey()).forEach(boar -> boarMap.put(boar.getPigCode(), boar));
 
         //2. 迁移sow
         moveSow(moveId, farm, basicMap, barnMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap);
@@ -603,7 +603,7 @@ public class DoctorMoveDataService {
         }
 
         //查出母猪, 转换成map
-        Map<String, DoctorPig> sowMap = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey()).stream()
+        Map<String, DoctorPig> sowMap = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PigSex.SOW.getKey()).stream()
                 .collect(Collectors.toMap(DoctorPig::getOutId, v -> v));
 
         //数据量太大, 分成5页获取母猪事件
@@ -630,7 +630,7 @@ public class DoctorMoveDataService {
         }
 
         //查出母猪事件, 按照母猪分组
-        Map<Long, List<DoctorPigEvent>> sowEventMap = doctorPigEventDao.findByFarmIdAndKind(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey())
+        Map<Long, List<DoctorPigEvent>> sowEventMap = doctorPigEventDao.findByFarmIdAndKind(farm.getId(), DoctorPig.PigSex.SOW.getKey())
                 .stream().collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
 
         //更新relEventId
@@ -661,7 +661,7 @@ public class DoctorMoveDataService {
     //如果是哺乳状态, 设置一下哺乳猪群的信息
     private void updateBuruSowTrack(DoctorFarm farm) {
         doctorPigTrackDao.findByFarmIdAndStatus(farm.getId(), PigStatus.FEED.getKey()).stream()
-                .filter(t -> Objects.equals(t.getIsRemoval(), IsOrNot.NO.getValue()) && Objects.equals(t.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()))
+                .filter(t -> Objects.equals(t.getIsRemoval(), IsOrNot.NO.getValue()) && Objects.equals(t.getPigType(), DoctorPig.PigSex.SOW.getKey()))
                 .forEach(track -> {
                     track.setExtra(track.getExtra());
                     Map<String, Object> extraMap = track.getExtraMap();
@@ -709,7 +709,7 @@ public class DoctorMoveDataService {
         sow.setFarmName(farm.getName());
         sow.setOutId(card.getPigOutId());           //外部OID
         sow.setPigCode(card.getPigCode());
-        sow.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());  //猪类是母猪
+        sow.setPigType(DoctorPig.PigSex.SOW.getKey());  //猪类是母猪
         sow.setIsRemoval("已离场".equals(card.getStatus()) ? IsOrNot.YES.getValue() : IsOrNot.NO.getValue());
         sow.setPigFatherCode(card.getPigFatherCode());
         sow.setPigMotherCode(card.getPigMotherCode());
@@ -954,7 +954,7 @@ public class DoctorMoveDataService {
         entry.setParity(event.getParity()); //当前事件胎次
         entry.setLeft(event.getLeftCount());
         entry.setRight(event.getRightCount());
-        entry.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());  //类型: 母猪
+        entry.setPigType(DoctorPig.PigSex.SOW.getKey());  //类型: 母猪
         entry.setPigCode(event.getPigCode());       // pig code 猪 编号
         entry.setBirthday(event.getBirthDate());      // 猪生日
         entry.setInFarmDate(event.getInFarmDate());    // 进厂时间
@@ -1485,7 +1485,7 @@ public class DoctorMoveDataService {
         }
 
         //查出公猪, 转换成map
-        Map<String, DoctorPig> boarMap = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey()).stream()
+        Map<String, DoctorPig> boarMap = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PigSex.BOAR.getKey()).stream()
                 .collect(Collectors.toMap(DoctorPig::getOutId, v -> v));
 
         //2. 迁移DoctorPigEvent
@@ -1498,7 +1498,7 @@ public class DoctorMoveDataService {
         }
 
         //查出公猪事件, 按照公猪分组
-        Map<Long, List<DoctorPigEvent>> boarEventMap = doctorPigEventDao.findByFarmIdAndKind(farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey())
+        Map<Long, List<DoctorPigEvent>> boarEventMap = doctorPigEventDao.findByFarmIdAndKind(farm.getId(), DoctorPig.PigSex.BOAR.getKey())
                 .stream().collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
 
         //更新relEventId
@@ -1542,7 +1542,7 @@ public class DoctorMoveDataService {
         boar.setFarmName(farm.getName());
         boar.setOutId(card.getPigOutId());           //外部OID
         boar.setPigCode(card.getPigCode());
-        boar.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());  //猪类是公猪猪
+        boar.setPigType(DoctorPig.PigSex.BOAR.getKey());  //猪类是公猪猪
         boar.setIsRemoval("已离场".equals(card.getStatus()) ? IsOrNot.YES.getValue() : IsOrNot.NO.getValue());
         boar.setPigFatherCode(card.getPigFatherCode());
         boar.setPigMotherCode(card.getPigMotherCode());
@@ -1735,7 +1735,7 @@ public class DoctorMoveDataService {
         BoarEntryType type = BoarEntryType.from(event.getBoarType());
         entry.setBoarTypeId(type == null ? null : type.getKey());
         entry.setBoarTypeName(event.getBoarType());
-        entry.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());  //类型: 公猪
+        entry.setPigType(DoctorPig.PigSex.BOAR.getKey());  //类型: 公猪
         entry.setPigCode(event.getPigCode());       // pig code 猪 编号
         entry.setBirthday(event.getBirthDate());      // 猪生日
         entry.setInFarmDate(event.getInFarmDate());    // 进厂时间
