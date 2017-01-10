@@ -7,6 +7,8 @@ import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.event.EventListener;
+import io.terminus.doctor.common.event.ZkListenedGroupEvent;
+import io.terminus.doctor.common.event.ZkListenedPigEvent;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
 import io.terminus.doctor.msg.model.DoctorMessage;
@@ -65,7 +67,7 @@ public class DoctorMessageEventListener implements EventListener{
         log.info("data event data:{}", dataEvent);
         // 1. 如果是猪创建事件信息
         if (DataEventType.PigEventCreate.getKey() == dataEvent.getEventType()) {
-            ListenedPigEvent pigEvent = DataEvent.analyseContent(dataEvent, ListenedPigEvent.class);
+            ZkListenedPigEvent pigEvent = DataEvent.analyseContent(dataEvent, ZkListenedPigEvent.class);
             if (pigEvent != null && !Arguments.isNullOrEmpty(pigEvent.getPigs())) {
                 pigEvent.getPigs().forEach(pigPublishDto ->updateMessage(pigPublishDto.getPigId(), pigPublishDto.getEventType(), DoctorMessage.BUSINESS_TYPE.PIG.getValue()));
             }
@@ -73,7 +75,7 @@ public class DoctorMessageEventListener implements EventListener{
 
         // 2. 如果是猪群信息修改
         if (DataEventType.GroupEventClose.getKey() == dataEvent.getEventType()) {
-            ListenedGroupEvent groupEvent = DataEvent.analyseContent(dataEvent, ListenedGroupEvent.class);
+            ZkListenedGroupEvent groupEvent = DataEvent.analyseContent(dataEvent, ZkListenedGroupEvent.class);
             if (groupEvent != null && !Arguments.isNullOrEmpty(groupEvent.getGroups())) {
                 groupEvent.getGroups().forEach(groupPublishDto -> updateMessage(groupPublishDto.getGroupId(), groupPublishDto.getEventType(), DoctorMessage.BUSINESS_TYPE.GROUP.getValue()));
             }

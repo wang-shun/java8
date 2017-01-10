@@ -6,8 +6,14 @@ import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.event.DataEvent;
+import io.terminus.doctor.common.event.ZkGroupPublishDto;
+import io.terminus.doctor.common.event.ZkListenedGroupEvent;
+import io.terminus.doctor.common.event.ZkListenedPigEvent;
+import io.terminus.doctor.common.event.ZkPigPublishDto;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -299,6 +305,25 @@ public class DoctorPigEventManager {
             }
             coreEventDispatcher.publish(new ListenedPigEvent(orgId, farmId, eventType, pigPublishDtoList));
         });
+
+        try {
+            List<ZkPigPublishDto> zkPigPublishDtoList = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue()).stream()
+                    .filter(doctorEventInfo -> GroupEventType.NOTICE_MESSAGE_GROUP_EVENT.contains(doctorEventInfo.getEventType()))
+                    .map(doctorEventInfo -> {
+                        return ZkPigPublishDto.builder()
+                                .pigId(doctorEventInfo.getBusinessId())
+                                .eventAt(doctorEventInfo.getEventAt())
+                                .eventId(doctorEventInfo.getEventId())
+                                .eventType(doctorEventInfo.getEventType())
+                                .build();
+                    }).collect(Collectors.toList());
+            if (!Arguments.isNullOrEmpty(zkPigPublishDtoList)) {
+                publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new ZkListenedPigEvent(orgId, farmId, zkPigPublishDtoList)));
+            }
+        } catch (Exception e) {
+            log.error("publish.pig.event.fail");
+        }
+
         if (!eventInfoMap.containsKey(DoctorEventInfo.Business_Type.GROUP.getValue())) {
             return;
         }
@@ -317,13 +342,24 @@ public class DoctorPigEventManager {
             }
             coreEventDispatcher.publish(new ListenedGroupEvent(orgId, farmId, eventType, groupPublishDtoList));
         });
-//        try {
-//            publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new ListenedPigEvent(orgId, farmId, pigMessagePublishList)));
-//            publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new ListenedGroupEvent(orgId, farmId, groupMessagePublishList)));
-//
-//        } catch (Exception e) {
-//            log.error("publish.info.error");
-//        }
+        try {
+            List<ZkGroupPublishDto> zkGroupPublishDtoList = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue()).stream()
+                    .filter(doctorEventInfo -> GroupEventType.NOTICE_MESSAGE_GROUP_EVENT.contains(doctorEventInfo.getEventType()))
+                    .map(doctorEventInfo -> {
+                        return ZkGroupPublishDto.builder()
+                                .groupId(doctorEventInfo.getBusinessId())
+                                .eventAt(doctorEventInfo.getEventAt())
+                                .eventId(doctorEventInfo.getEventId())
+                                .eventType(doctorEventInfo.getEventType())
+                                .build();
+                    }).collect(Collectors.toList());
+            if (!Arguments.isNullOrEmpty(zkGroupPublishDtoList)) {
+                publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new ZkListenedGroupEvent(orgId, farmId, zkGroupPublishDtoList)));
+            }
+        } catch (Exception e) {
+            log.error("publish.pig.event.fail");
+        }
+
     }
 
     private void checkFarmIdAndEventAt(List<DoctorEventInfo> dtos) {
