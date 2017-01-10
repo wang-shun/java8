@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -21,10 +22,13 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by xjn.
@@ -50,7 +54,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     @Override
     public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-
+        checkEventAt(eventDto);
     }
 
     @Override
@@ -211,5 +215,31 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
             }
         }
         return null;
+    }
+
+    /**
+     * 事件日期校验
+     * @param inputDto
+     */
+    private void checkEventAt(BasePigEventInputDto inputDto) {
+        if (Objects.equals(inputDto.getPigType(), PigEvent.ENTRY.getKey())) {
+            return;
+        }
+        try {
+            Date eventAt = inputDto.eventAt();
+            if(eventAt == null){
+                throw new ServiceException("event.at.illegal");
+            }
+            DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
+            if (lastEvent != null) {
+                if (new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime()) && eventAt.before(DateUtil.toDate(DateTime.now().plusDays(1).toString(DateTimeFormat.forPattern("yyyy-MM-dd"))))) {
+                    return;
+                } else {
+                    throw new ServiceException("event.at.illegal");
+                }
+            }
+        } catch (Exception e) {
+            throw new ServiceException("event.at.illegal");
+        }
     }
 }
