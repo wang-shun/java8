@@ -141,7 +141,7 @@ public class DoctorBarns {
                                               @RequestParam(value = "status", required = false) Integer barnStatus,
                                               @RequestParam(value = "pigIds", required = false) String pigIds) {
         return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null,
-                null, barnStatus, doctorFarmAuthCenter.getAuthBarnIds())), pigIds);
+                null, barnStatus, null)), pigIds);
     }
 
     /**
