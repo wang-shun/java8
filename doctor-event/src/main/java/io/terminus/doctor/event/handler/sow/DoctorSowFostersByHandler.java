@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -15,9 +16,6 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,8 +40,6 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
 
     @Autowired
     private DoctorGroupReadService doctorGroupReadService;
-
-    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
@@ -121,7 +117,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
         doctorTransGroupInput.setSowQty(doctorTransGroupInput.getQuantity() - doctorTransGroupInput.getBoarQty());
         doctorTransGroupInput.setWeight(fostersDto.getFosterTotalWeight());
         doctorTransGroupInput.setAvgWeight(doctorTransGroupInput.getWeight() / doctorTransGroupInput.getQuantity());    //均重
-        doctorTransGroupInput.setEventAt(DateTime.now().toString(DTF));
+        doctorTransGroupInput.setEventAt(DateUtil.toDateString(fostersDto.eventAt()));
         doctorTransGroupInput.setIsAuto(1);
         doctorTransGroupInput.setCreatorId(basicInputInfoDto.getStaffId());
         doctorTransGroupInput.setCreatorName(basicInputInfoDto.getStaffName());
