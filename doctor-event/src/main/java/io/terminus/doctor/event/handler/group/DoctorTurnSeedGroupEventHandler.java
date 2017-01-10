@@ -10,6 +10,7 @@ import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -44,15 +46,14 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
                                            DoctorGroupEventDao doctorGroupEventDao,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
                                            DoctorBarnDao doctorBarnDao,
-                                           CoreEventDispatcher coreEventDispatcher,
                                            DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnDao);
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
     
     @Override
-    protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTurnSeedGroupInput turnSeed = (DoctorTurnSeedGroupInput) input;
         DoctorBarn toBarn = getBarnById(turnSeed.getToBarnId());
@@ -94,14 +95,14 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
         //5.判断猪群数量, 如果=0 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(groupTrack.getQuantity(), 0)) {
-            doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, turnSeed, event.getEventAt(), turnSeed.getFcrFeed());
+            doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, turnSeed, event.getEventAt(), turnSeed.getFcrFeed());
 
             DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
             turnSeed.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
 
         //6.判断公母猪, 触发进场事件
-        doctorCommonGroupEventHandler.autoPigEntryEvent(sex, turnSeed, group, toBarn);
+        doctorCommonGroupEventHandler.autoPigEntryEvent(eventInfoList, sex, turnSeed, group, toBarn);
 
 
         //发布统计事件

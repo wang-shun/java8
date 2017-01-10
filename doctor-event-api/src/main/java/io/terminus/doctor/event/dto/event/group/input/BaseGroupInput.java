@@ -29,6 +29,11 @@ public abstract class BaseGroupInput implements Serializable {
     private String eventAt;
 
     /**
+     * 事件类型
+     */
+    private Integer eventType;
+
+    /**
      * 备注
      */
     private String remark;

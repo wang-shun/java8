@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.doctor.event.enums.PigEvent.NOTICE_MESSAGE_PIG_EVENT;
 
 /**
  * Created by yaoqijun.
@@ -65,7 +64,7 @@ public class DoctorPigEventManager {
     public List<DoctorEventInfo> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
         DoctorPigEventHandler doctorEventCreateHandler = pigEventHandlers.getEventHandlerMap().get(basic.getEventType());
         doctorEventCreateHandler.handleCheck(inputDto, basic);
-        List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
+        final List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
         doctorEventCreateHandler.handle(doctorEventInfoList, inputDto, basic);
         return doctorEventInfoList;
     }
@@ -79,7 +78,7 @@ public class DoctorPigEventManager {
     @Transactional
     public List<DoctorEventInfo> batchEventsHandle(List<BasePigEventInputDto> eventInputs, DoctorBasicInputInfoDto basic) {
         DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(basic.getEventType());
-        List<DoctorEventInfo> eventInfos = Lists.newArrayList();
+        final List<DoctorEventInfo> eventInfos = Lists.newArrayList();
         eventInputs.forEach(inputDto -> {
             handler.handleCheck(inputDto, basic);
             handler.handle(eventInfos, inputDto, basic);
@@ -97,7 +96,7 @@ public class DoctorPigEventManager {
         }
     }
 
-    //发布事件, 用于更新回滚后操作
+    //发布事件, 用于更新创建操作
     private void publishPigEvent(List<DoctorEventInfo> eventInfoList) {
 
         if (Arguments.isNullOrEmpty(eventInfoList)) {
@@ -105,14 +104,33 @@ public class DoctorPigEventManager {
         }
         Long orgId = eventInfoList.get(0).getOrgId();
         Long farmId = eventInfoList.get(0).getFarmId();
-        List<DoctorPigPublishDto> pigMessagePublishList = Lists.newArrayList();
-        List<DoctorGroupPublishDto> groupMessagePublishList = Lists.newArrayList();
 
-        Map<Integer, List<DoctorEventInfo>> eventInfoMap = eventInfoList.stream().collect(Collectors.groupingBy(DoctorEventInfo::getBusinessType));
-        if (!eventInfoMap.containsKey(DoctorEventInfo.Business_Type.PIG.getValue())) {
-            return;
+        Map<Integer, List<DoctorEventInfo>> eventInfoMap = eventInfoList.stream()
+                .collect(Collectors.groupingBy(DoctorEventInfo::getBusinessType));
+
+        //1.发布猪事件
+        List<DoctorEventInfo> pigEventList = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue());
+        if (!Arguments.isNullOrEmpty(pigEventList)) {
+           publishPigEvent(pigEventList, orgId, farmId);
         }
-        Map<Integer, List<DoctorEventInfo>> pigEventInfoMap = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue()).stream()
+
+        //2.发布猪群事件
+        List<DoctorEventInfo> groupEventList = eventInfoMap.get(DoctorEventInfo.Business_Type.GROUP.getValue());
+        if (!Arguments.isNullOrEmpty(groupEventList)) {
+            publishGroupEvent(groupEventList, orgId, farmId);
+        }
+
+    }
+
+    /**
+     * 发布猪事件
+     * @param eventInfoList 猪事件列表
+     * @param orgId 公司id
+     * @param farmId 猪场id
+     */
+    private void publishPigEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId){
+        //猪事件触发报表更新(eventBus)
+        Map<Integer, List<DoctorEventInfo>> pigEventInfoMap = eventInfoList.stream()
                 .collect(Collectors.groupingBy(DoctorEventInfo::getEventType));
         pigEventInfoMap.keySet().forEach(eventType -> {
             List<DoctorPigPublishDto> pigPublishDtoList = pigEventInfoMap.get(eventType).stream().map(doctorEventInfo -> {
@@ -125,15 +143,12 @@ public class DoctorPigEventManager {
                 pigPublishDto.setPregCheckResult(doctorEventInfo.getPregCheckResult());
                 return pigPublishDto;
             }).collect(Collectors.toList());
-            if (NOTICE_MESSAGE_PIG_EVENT.contains(eventType)) {
-                pigMessagePublishList.addAll(pigPublishDtoList);
-            }
             coreEventDispatcher.publish(new ListenedPigEvent(orgId, farmId, eventType, pigPublishDtoList));
         });
-
+        //猪事件触发更新消息(zk)
         try {
-            List<ZkPigPublishDto> zkPigPublishDtoList = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue()).stream()
-                    .filter(doctorEventInfo -> GroupEventType.NOTICE_MESSAGE_GROUP_EVENT.contains(doctorEventInfo.getEventType()))
+            List<ZkPigPublishDto> zkPigPublishDtoList = eventInfoList.stream()
+                    .filter(doctorEventInfo -> PigEvent.NOTICE_MESSAGE_PIG_EVENT.contains(doctorEventInfo.getEventType()))
                     .map(doctorEventInfo -> {
                         return ZkPigPublishDto.builder()
                                 .pigId(doctorEventInfo.getBusinessId())
@@ -148,11 +163,17 @@ public class DoctorPigEventManager {
         } catch (Exception e) {
             log.error("publish.pig.event.fail");
         }
+    }
 
-        if (!eventInfoMap.containsKey(DoctorEventInfo.Business_Type.GROUP.getValue())) {
-            return;
-        }
-        Map<Integer, List<DoctorEventInfo>> groupEventInfoMap = eventInfoMap.get(DoctorEventInfo.Business_Type.GROUP.getValue()).stream()
+    /**
+     * 发布猪群事件
+     * @param eventInfoList 猪群事件列表
+     * @param orgId 公司id
+     * @param farmId 猪场id
+     */
+    private void publishGroupEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId) {
+        //猪群事件触发报表更新(eventBus)
+        Map<Integer, List<DoctorEventInfo>> groupEventInfoMap = eventInfoList.stream()
                 .collect(Collectors.groupingBy(DoctorEventInfo::getEventType));
         groupEventInfoMap.keySet().forEach(eventType -> {
             List<DoctorGroupPublishDto> groupPublishDtoList = groupEventInfoMap.get(eventType).stream().map(doctorEventInfo -> {
@@ -162,13 +183,11 @@ public class DoctorPigEventManager {
                 groupPublishDto.setEventAt(doctorEventInfo.getEventAt());
                 return groupPublishDto;
             }).collect(Collectors.toList());
-            if (GroupEventType.NOTICE_MESSAGE_GROUP_EVENT.contains(eventType)) {
-                groupMessagePublishList.addAll(groupPublishDtoList);
-            }
             coreEventDispatcher.publish(new ListenedGroupEvent(orgId, farmId, eventType, groupPublishDtoList));
         });
+        //猪群事件触发的消息更新(zk)
         try {
-            List<ZkGroupPublishDto> zkGroupPublishDtoList = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue()).stream()
+            List<ZkGroupPublishDto> zkGroupPublishDtoList = eventInfoList.stream()
                     .filter(doctorEventInfo -> GroupEventType.NOTICE_MESSAGE_GROUP_EVENT.contains(doctorEventInfo.getEventType()))
                     .map(doctorEventInfo -> {
                         return ZkGroupPublishDto.builder()
@@ -184,7 +203,6 @@ public class DoctorPigEventManager {
         } catch (Exception e) {
             log.error("publish.pig.event.fail");
         }
-
     }
 
     private void checkFarmIdAndEventAt(List<DoctorEventInfo> dtos) {

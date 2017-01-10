@@ -1,8 +1,10 @@
 package io.terminus.doctor.event.manager;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -10,7 +12,9 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
@@ -18,6 +22,7 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorRevertLog;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -25,6 +30,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -50,6 +56,10 @@ public class DoctorGroupEventManager {
     private DoctorRevertLogDao doctorRevertLogDao;
     @Autowired
     private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    @Autowired
+    private CoreEventDispatcher coreEventDispatcher;
+    @Autowired(required = false)
+    private Publisher publisher;
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
@@ -77,8 +87,18 @@ public class DoctorGroupEventManager {
      */
     @Transactional
     public <I extends BaseGroupInput>
-    void handleEvent(DoctorGroupDetail groupDetail, I input, Class<? extends DoctorGroupEventHandler> handlerClass) {
-        getHandler(handlerClass).handle(groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
+    List<DoctorEventInfo> handleEvent(DoctorGroupDetail groupDetail, I input, Class<? extends DoctorGroupEventHandler> handlerClass) {
+        final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
+        getHandler(handlerClass).handle(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
+        return eventInfoList;
+    }
+
+    @Transactional
+    public <I extends BaseGroupInput>
+    List<DoctorEventInfo> batchHandleEvent(List<DoctorGroupInputInfo> inputInfoList, Class<? extends DoctorGroupEventHandler> handleClass) {
+        final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
+        inputInfoList.forEach(inputInfo -> getHandler(handleClass).handle(eventInfoList, inputInfo.getGroupDetail().getGroup(), inputInfo.getGroupDetail().getGroupTrack(), inputInfo.getInput()));
+        return eventInfoList;
     }
 
     /**

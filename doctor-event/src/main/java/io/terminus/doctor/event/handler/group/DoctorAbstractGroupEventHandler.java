@@ -6,7 +6,6 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -14,6 +13,7 @@ import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
@@ -67,7 +67,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     protected final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
-    private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorBarnDao doctorBarnDao;
 
@@ -80,29 +79,39 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     @Autowired
     public DoctorAbstractGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
-                                           CoreEventDispatcher coreEventDispatcher,
                                            DoctorGroupEventDao doctorGroupEventDao,
                                            DoctorBarnDao doctorBarnDao) {
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
-        this.coreEventDispatcher = coreEventDispatcher;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorBarnDao = doctorBarnDao;
     }
 
     @Override
-    public <I extends BaseGroupInput> void handle(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
-        handleEvent(group, groupTrack, input);
+    public <I extends BaseGroupInput> void handle(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        handleEvent(eventInfoList, group, groupTrack, input);
+        DoctorEventInfo eventInfo = DoctorEventInfo.builder()
+                .businessId(group.getId())
+                .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
+                .eventAt(DateUtil.toDate(input.getEventAt()))
+                .eventType(input.getEventType())
+                .code(group.getGroupCode())
+                .farmId(group.getFarmId())
+                .orgId(group.getOrgId())
+                .build();
+        eventInfoList.add(eventInfo);
+
     }
 
     /**
      * 处理事件的抽象方法, 由继承的子类去实现
+     * @param eventInfoList 事件信息列表 每发生一个事件记录下来
      * @param group       猪群
      * @param groupTrack  猪群跟踪
      * @param input       猪群录入
      * @param <I>         规定输入上界
      */
-    protected abstract <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input);
+    protected abstract <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input);
 
     //转换下猪群基本数据
     protected DoctorGroupEvent dozerGroupEvent(DoctorGroup group, GroupEventType eventType, BaseGroupInput baseInput) {

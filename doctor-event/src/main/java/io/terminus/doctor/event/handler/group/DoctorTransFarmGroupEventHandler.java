@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -47,12 +49,11 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
     @Autowired
     public DoctorTransFarmGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                             DoctorGroupTrackDao doctorGroupTrackDao,
-                                            CoreEventDispatcher coreEventDispatcher,
                                             DoctorGroupEventDao doctorGroupEventDao,
                                             DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
                                             DoctorGroupManager doctorGroupManager,
                                             DoctorBarnDao doctorBarnDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnDao);
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorGroupManager = doctorGroupManager;
@@ -60,7 +61,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
     }
 
     @Override
-    protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTransFarmGroupInput transFarm = (DoctorTransFarmGroupInput) input;
 
@@ -116,7 +117,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
 
         //5.判断转场数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, transFarm.getQuantity())) {
-            doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, transFarm, event.getEventAt(), transFarm.getFcrFeed());
+            doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, transFarm, event.getEventAt(), transFarm.getFcrFeed());
 
             DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
             transFarm.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
@@ -136,9 +137,9 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
             transFarm.setRelGroupEventId(newGroupEvent.getId());
 
             //转入猪群
-            doctorCommonGroupEventHandler.autoTransEventMoveIn(group, groupTrack, transFarm);
+            doctorCommonGroupEventHandler.autoTransEventMoveIn(eventInfoList, group, groupTrack, transFarm);
         } else {
-            doctorCommonGroupEventHandler.autoTransEventMoveIn(group, groupTrack, transFarm);
+            doctorCommonGroupEventHandler.autoTransEventMoveIn(eventInfoList, group, groupTrack, transFarm);
         }
 
         //发布统计事件

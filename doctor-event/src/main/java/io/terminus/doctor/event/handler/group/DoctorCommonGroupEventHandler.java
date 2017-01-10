@@ -5,6 +5,7 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -73,20 +75,20 @@ public class DoctorCommonGroupEventHandler {
     /**
      * 系统触发的自动关闭猪群事件(先生成一发批次总结)
      */
-    public void autoGroupEventClose(DoctorGroup group, DoctorGroupTrack groupTrack, BaseGroupInput baseInput, Date eventAt, Double fcrFeed) {
+    public void autoGroupEventClose(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, BaseGroupInput baseInput, Date eventAt, Double fcrFeed) {
         createGroupBatchSummaryWhenClosed(group, groupTrack, eventAt, fcrFeed);
 
         DoctorCloseGroupInput closeInput = new DoctorCloseGroupInput();
         closeInput.setIsAuto(IsOrNot.YES.getValue());   //系统触发事件, 属于自动生成
         closeInput.setEventAt(baseInput.getEventAt());
         closeInput.setRelGroupEventId(baseInput.getRelGroupEventId());
-        doctorCloseGroupEventHandler.handle(group, groupTrack, closeInput);
+        doctorCloseGroupEventHandler.handle(eventInfoList, group, groupTrack, closeInput);
     }
 
     /**
      * 系统触发的自动转入转入猪群事件(群间转移, 转群/转场触发)
      */
-    public void autoTransEventMoveIn(DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup) {
+    public void autoTransEventMoveIn(List<DoctorEventInfo> eventInfoList, DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup) {
         DoctorMoveInGroupInput moveIn = new DoctorMoveInGroupInput();
         moveIn.setEventAt(transGroup.getEventAt());
         moveIn.setIsAuto(IsOrNot.YES.getValue());
@@ -113,7 +115,7 @@ public class DoctorCommonGroupEventHandler {
 
         //调用转入猪群事件
         DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(transGroup.getToGroupId()));
-        doctorMoveInGroupEventHandler.handleEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
+        doctorMoveInGroupEventHandler.handleEvent(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
     }
 
     /**
@@ -122,7 +124,7 @@ public class DoctorCommonGroupEventHandler {
      * @return 创建的猪群id
      */
     @Transactional
-    public Long sowGroupEventMoveIn(DoctorSowMoveInGroupInput input) {
+    public Long sowGroupEventMoveIn(List<DoctorEventInfo> eventInfoList, DoctorSowMoveInGroupInput input) {
         input.setIsAuto(IsOrNot.YES.getValue());    //设置为自动事件
         input.setRemark(notEmpty(input.getRemark()) ? input.getRemark() : "系统自动生成的从母猪舍转入猪群的仔猪转入事件");
 
@@ -146,7 +148,7 @@ public class DoctorCommonGroupEventHandler {
         input.setRelPigEventId(null); //转入猪群事件 relPigEventId 置成空
         input.setRelGroupEventId(groupDetail.getGroupTrack().getRelEventId());      //记录新建猪群事件的id(新建猪群时，track.relEventId = 新建猪群事件id)
         input.setSowEvent(true);
-        doctorMoveInGroupEventHandler.handleEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
+        doctorMoveInGroupEventHandler.handleEvent(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
         return groupId;
     }
 
@@ -157,7 +159,7 @@ public class DoctorCommonGroupEventHandler {
      * @param group
      * @param barn
      */
-    public void autoPigEntryEvent(DoctorPig.PigSex sex, DoctorTurnSeedGroupInput input, DoctorGroup group, DoctorBarn barn) {
+    public void autoPigEntryEvent(List<DoctorEventInfo> eventInfoList, DoctorPig.PigSex sex, DoctorTurnSeedGroupInput input, DoctorGroup group, DoctorBarn barn) {
         DoctorBasicInputInfoDto basicDto = new DoctorBasicInputInfoDto();
         DoctorFarmEntryDto farmEntryDto = new DoctorFarmEntryDto();
 
@@ -204,7 +206,7 @@ public class DoctorCommonGroupEventHandler {
         farmEntryDto.setEarCode(input.getEarCode());
         farmEntryDto.setWeight(input.getWeight());
 
-        doctorEntryHandler.handle(null, farmEntryDto, basicDto);
+        doctorEntryHandler.handle(eventInfoList, farmEntryDto, basicDto);
     }
 
     /**
