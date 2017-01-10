@@ -43,7 +43,6 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
     public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
         DoctorFostersDto fostersDto = (DoctorFostersDto) eventDto;
         checkState(Objects.equals(fostersDto.getPigId(), fostersDto.getFosterSowId()), "not.foster.userself");
-
     }
 
     @Override
@@ -62,51 +61,7 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
         Map<String, Object> extra = doctorPigTrack.getExtraMap();
         extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         doctorPigTrack.setExtraMap(extra);
-
-
-//        //全部断奶后, 初始化所有本次哺乳的信息
-//        //Long pigEventId = (Long) context.get("doctorPigEventId");
-//
-//        if (doctorPigTrack.getUnweanQty() == 0) {
-//            doctorPigTrack.setStatus(PigStatus.Wean.getKey());
-//            doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
-//            doctorPigTrack.setFarrowAvgWeight(0D); //分娩均重(kg)
-//            doctorPigTrack.setFarrowQty(0);  //分娩数 0
-//            doctorPigTrack.setWeanAvgWeight(0D);
-//            DoctorPig doctorPig = doctorPigDao.findById(doctorPigTrack.getPigId());
-//            DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
-//                    .type(PigEvent.WEAN.getKey())
-//                    .pigId(doctorPigTrack.getPigId())
-//                    .pigStatusBefore(PigStatus.FEED.getKey())
-//                    .pigStatusAfter(PigStatus.Wean.getKey())
-//                    .isAuto(IsOrNot.YES.getValue())
-//                    .barnId(doctorPigTrack.getCurrentBarnId())
-//                    .barnName(doctorPigTrack.getCurrentBarnName())
-//                    .relPigEventId(pigEventId)
-//                    .partweanDate(new Date())
-//                    .farmId(doctorPigTrack.getFarmId())
-//                    .weanCount(fosterCount)
-//                    .weanAvgWeight(0D)
-//                    .pigCode(doctorPig.getPigCode())
-//                    .name(PigEvent.WEAN.getName())
-//                    .eventAt(basic.generateEventAtFromExtra(extra))
-//                    .kind(DoctorPig.PIG_TYPE.SOW.getKey())
-//                    .orgId(basic.getOrgId()).orgName(basic.getOrgName())
-//                    .npd(0)
-//                    .dpnpd(0)
-//                    .pfnpd(0)
-//                    .plnpd(0)
-//                    .psnpd(0)
-//                    .pynpd(0)
-//                    .ptnpd(0)
-//                    .jpnpd(0)
-//                    .farmName(basic.getFarmName())
-//                    .build();
-//            doctorPigEventDao.create(doctorPigEvent);
-//        } else {
-            doctorPigTrack.setStatus(PigStatus.FEED.getKey());
-        //}
-        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        doctorPigTrack.setStatus(PigStatus.FEED.getKey());
         return doctorPigTrack;
     }
 

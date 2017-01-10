@@ -53,14 +53,8 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
         checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) ||
                 Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()), "foster.currentSowStatus.error");
 
-       // Long pigEventId = (Long) context.get("doctorPigEventId");
 
         Long groupId = doctorPigTrack.getGroupId();
-
-//        //如果不是一个猪舍的拼窝，需要转群操作
-//        if (basic.getNeed()) {
-//            groupId = groupSowEventCreate(doctorPigTrack, basic, extra, pigEventId);
-//        }
 
         //被拼窝数量
         Integer fosterCount = fosterByDto.getFosterByCount();

@@ -21,9 +21,4 @@ public interface DoctorPigEventHandler {
      * 事件信息处理
      */
     void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic);
-
-//    /**
-//     * after handler
-//     */
-//    List<DoctorPublishEventDto> publishEvent(List<DoctorEventInfo> doctorEventInfoList);
 }

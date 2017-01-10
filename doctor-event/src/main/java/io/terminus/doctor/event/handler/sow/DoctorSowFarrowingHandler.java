@@ -92,44 +92,6 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         return doctorPigEvent;
     }
 
-//    @Override
-//    protected IsOrNot eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
-//        // 助产 信息
-//        extra.put("isHelp", 1);
-//
-//        // 校验 是否早产信息
-//        DateTime pregJudgeDate = new DateTime(Long.valueOf(doctorPigTrack.getExtraMap().get("judgePregDate").toString()));
-//        //分娩时间
-//        DateTime farrowingDate = new DateTime(Long.valueOf(extra.get("farrowingDate").toString()));
-//        doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
-//        //查找最近一次初配种事件
-//        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-//        if (notNull(firstMate)) {
-//            DateTime mattingDate = new DateTime(firstMate.getEventAt());
-//
-//            //计算孕期
-//            doctorPigEvent.setPregDays(Math.abs(Days.daysBetween(farrowingDate, mattingDate).getDays()));
-//        }
-//
-//        //分娩窝重
-//        doctorPigEvent.setFarrowWeight(Doubles.tryParse(Objects.toString(extra.get("birthNestAvg"))));
-//        //分娩仔猪只数信息
-//        doctorPigEvent.setLiveCount(CountUtil.getIntegerDefault0(extra.get("farrowingLiveCount")));
-//        doctorPigEvent.setHealthCount(CountUtil.getIntegerDefault0(extra.get("healthCount")));
-//        doctorPigEvent.setWeakCount(CountUtil.getIntegerDefault0(extra.get("weakCount")));
-//        doctorPigEvent.setMnyCount(CountUtil.getIntegerDefault0(extra.get("mnyCount")));
-//        doctorPigEvent.setJxCount(CountUtil.getIntegerDefault0(extra.get("jxCount")));
-//        doctorPigEvent.setDeadCount(CountUtil.getIntegerDefault0(extra.get("deadCount")));
-//        doctorPigEvent.setBlackCount(CountUtil.getIntegerDefault0(extra.get("blackCount")));
-//
-//        if (farrowingDate.isBefore(pregJudgeDate)) {
-//            extra.put("farrowingType", FarrowingType.EARLY.getKey());
-//        } else {
-//            extra.put("farrowingType", FarrowingType.USUAL.getKey());
-//        }
-//        return IsOrNot.NO;
-//    }
-
     @Override
     public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
@@ -150,7 +112,6 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         doctorPigTrack.setExtraMap(extra);
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
 
-        //doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
         return doctorPigTrack;
     }
 

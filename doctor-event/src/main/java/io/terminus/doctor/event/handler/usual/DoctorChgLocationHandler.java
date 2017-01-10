@@ -69,30 +69,13 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) inputDto;
         Long toBarnId = chgLocationDto.getChgLocationToBarnId();
 
-//        Map<String, Object> extraMap = JsonMapper.nonEmptyMapper().fromJson(doctorPigTrack.getExtra(),
-//                JsonMapper.nonEmptyMapper().createCollectionType(Map.class, String.class, Object.class));
-
         //校验猪舍类型是否相同, 只有同类型才可以普通转舍
         DoctorBarn fromBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
         checkState(checkBarnTypeEqual(fromBarn, toBarn, doctorPigTrack.getStatus()), "barn.type.not.equal");
 
-        //Long pigEventId = (Long) context.get("doctorPigEventId");
-
-        // 来源和前往都是 1 和 7 时, 仔猪也要跟着转群
-//        if(PigType.FARROW_TYPES.contains(fromBarn.getPigType()) && PigType.FARROW_TYPES.contains(toBarn.getPigType())
-//                && doctorPigTrack.getGroupId() != null){
-//            log.info("this is a buru sow trans barn event!");
-//            Long groupId = pigletTrans(doctorPigTrack, basic, extra, toBarn, pigEventId);
-//            extraMap.put("farrowingPigletGroupId", groupId);
-//            doctorPigTrack.setExtraMap(extraMap);
-//            doctorPigTrack.setGroupId(groupId);  //更新猪群id
-//        }
-
         doctorPigTrack.setCurrentBarnId(toBarnId);
         doctorPigTrack.setCurrentBarnName(toBarn.getName());
-        //doctorPigTrack.addAllExtraMap(chgLocationDto.toMap());
-        //doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
         return doctorPigTrack;
     }
 
@@ -112,12 +95,14 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         DoctorBarn fromBarn = doctorBarnDao.findById(chgLocationDto.getChgLocationFromBarnId());
         DoctorBarn toBarn = doctorBarnDao.findById(chgLocationDto.getChgLocationToBarnId());
         Map<String, Object> extraMap = doctorPigTrack.getExtraMap();
+
         // 来源和前往都是 1 和 7 时, 仔猪也要跟着转群
-        if(PigType.FARROW_TYPES.contains(fromBarn.getPigType()) && PigType.FARROW_TYPES.contains(toBarn.getPigType())
+        if(PigType.FARROW_TYPES.contains(fromBarn.getPigType())
+                && PigType.FARROW_TYPES.contains(toBarn.getPigType())
                 && doctorPigTrack.getGroupId() != null){
             log.info("this is a buru sow trans barn event!");
             Long groupId = pigletTrans(doctorPigTrack, basic, chgLocationDto, toBarn, doctorPigEvent.getId());
-            extraMap.put("farrowingPigletGroupId", groupId);
+
             doctorPigTrack.setExtraMap(extraMap);
             doctorPigTrack.setGroupId(groupId);  //更新猪群id
             doctorPigTrackDao.update(doctorPigTrack);
