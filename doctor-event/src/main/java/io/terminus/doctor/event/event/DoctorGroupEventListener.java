@@ -32,6 +32,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unused")
 public class DoctorGroupEventListener implements EventListener {
 
     @Autowired
