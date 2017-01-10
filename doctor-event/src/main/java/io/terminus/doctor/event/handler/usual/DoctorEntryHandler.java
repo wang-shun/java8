@@ -124,9 +124,9 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
                 .weight(dto.getWeight())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
-        if (Objects.equals(inputDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())) {
+        if (Objects.equals(inputDto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
             doctorPigTrack.setStatus(PigStatus.Entry.getKey());
-        } else if (Objects.equals(inputDto.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())) {
+        } else if (Objects.equals(inputDto.getPigType(), DoctorPig.PigSex.BOAR.getKey())) {
             doctorPigTrack.setStatus(PigStatus.BOAR_ENTRY.getKey());
         } else {
             throw new IllegalStateException("input.pigType.error");
@@ -158,7 +158,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
                 .initBarnId(dto.getBarnId()).initBarnName(dto.getBarnName()).breedId(dto.getBreed()).breedName(dto.getBreedName()).geneticId(dto.getBreedType()).geneticName(dto.getBreedTypeName())
                 .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
-        if (Objects.equals(dto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())) {
+        if (Objects.equals(dto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
             // add sow pig info
             Map<String, Object> extraMapInfo = Maps.newHashMap();
             extraMapInfo.put(DoctorFarmEntryConstants.EAR_CODE, dto.getEarCode());
@@ -166,7 +166,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
             extraMapInfo.put(DoctorFarmEntryConstants.LEFT_COUNT, dto.getLeft());
             extraMapInfo.put(DoctorFarmEntryConstants.RIGHT_COUNT, dto.getRight());
             doctorPig.setExtraMap(extraMapInfo);
-        } else if (Objects.equals(dto.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())) {
+        } else if (Objects.equals(dto.getPigType(), DoctorPig.PigSex.BOAR.getKey())) {
             Map<String, Object> extraMap = Maps.newHashMap();
             extraMap.put(DoctorFarmEntryConstants.BOAR_TYPE_ID, dto.getBoarTypeId());
             extraMap.put(DoctorFarmEntryConstants.BOAR_TYPE_NAME, dto.getBoarTypeName());

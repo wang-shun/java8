@@ -26,15 +26,12 @@ import java.util.Set;
 public interface DoctorPigReadService {
 
     /**
-     * 获取母猪数量
-     * @param range
-     * @see io.terminus.doctor.event.enums.DataRange
-     * @param id
-     * @return
+     * 获取猪场里猪的数量
+     * @param farmId 猪场id
+     * @param pigSex 性别
+     * @return 猪数量
      */
-    Response<Long> queryPigCount(@NotNull(message = "input.range.empty")Integer range,
-                                 @NotNull(message = "input.id.empty") Long id,
-                                 @NotNull(message = "input.pigType.empty") Integer pigType);
+    Response<Long> getPigCount(@NotNull(message = "farmId.not.null") Long farmId, @NotNull(message = "pigSex.not.null") DoctorPig.PigSex pigSex);
 
     /**
      * 通过pigId 获取对应的详细信息

@@ -317,7 +317,7 @@ public class DoctorPigEventListener implements EventListener {
 
     private void getLiveStock(Integer sex, Long farmId, Date startAt) {
         log.info("handle getLiveStock, farmId:{}, startAt:{}", farmId, startAt);
-        if (Objects.equals(sex, DoctorPig.PIG_TYPE.BOAR.getKey())) {
+        if (Objects.equals(sex, DoctorPig.PigSex.BOAR.getKey())) {
             int boar = doctorKpiDao.realTimeLiveStockBoar(farmId, startAt);
 
             DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);

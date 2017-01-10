@@ -355,7 +355,7 @@ public class DoctorPigs {
         if(pig == null){
             throw new JsonResponseException("pig.not.found");
         }
-        if(Objects.equals(pig.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())){
+        if(Objects.equals(pig.getPigType(), DoctorPig.PigSex.BOAR.getKey())){
             throw new JsonResponseException("boar.code.forbid.update");
         }
 

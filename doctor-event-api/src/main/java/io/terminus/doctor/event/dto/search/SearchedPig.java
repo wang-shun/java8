@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.dto.search;
 
 import com.google.common.collect.Maps;
+import io.terminus.doctor.event.model.DoctorPig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,7 +35,7 @@ public class SearchedPig implements Serializable {
 
     /**
      * 猪类型
-     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     * @see DoctorPig.PigSex
      */
     private Integer pigType;
     private String pigTypeName;

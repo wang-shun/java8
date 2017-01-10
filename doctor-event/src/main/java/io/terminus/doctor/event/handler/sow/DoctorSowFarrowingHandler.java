@@ -14,10 +14,10 @@ import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigSex;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
@@ -177,7 +177,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         Integer boarCount = MoreObjects.firstNonNull(farrowingDto.getLiveBoarCount(), 0);
         if (sowCount == 0 && boarCount == 0) sowCount = farrowingLiveCount;
 
-        input.setSex(judgePigSex(sowCount, boarCount).getKey());
+        input.setSex(judgePigSex(sowCount, boarCount).getValue());
         input.setQuantity(farrowingLiveCount);
         input.setSowQty(sowCount);
         input.setBoarQty(boarCount);
@@ -201,19 +201,19 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         }
     }
 
-    private PigSex judgePigSex(Integer sowCount, Integer boarCount) {
+    private DoctorGroupTrack.Sex judgePigSex(Integer sowCount, Integer boarCount) {
         if (sowCount == 0 && boarCount == 0) {
-            return PigSex.MIX;
+            return DoctorGroupTrack.Sex.MIX;
         }
 
         if (sowCount == 0) {
-            return PigSex.BOAR;
+            return DoctorGroupTrack.Sex.MALE;
         }
 
         if (boarCount == 0) {
-            return PigSex.SOW;
+            return DoctorGroupTrack.Sex.FEMALE;
         }
-        return PigSex.MIX;
+        return DoctorGroupTrack.Sex.MIX;
     }
 
 }

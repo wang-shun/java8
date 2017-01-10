@@ -20,7 +20,7 @@ public class DoctorRollbackBoarRemovalEventHandler extends DoctorAbstractRollbac
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
         return Objects.equals(pigEvent.getType(), PigEvent.REMOVAL.getKey()) &&
-                Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.BOAR.getKey());
+                Objects.equals(pigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey());
     }
 
     @Override

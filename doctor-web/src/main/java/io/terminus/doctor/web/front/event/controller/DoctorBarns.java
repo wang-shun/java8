@@ -402,7 +402,7 @@ public class DoctorBarns {
         Paging<DoctorPigInfoDto> pigPaging = RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(DoctorPigTrack.builder()
                 .status(status)
                 .currentBarnId(barnId)
-                .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
+                .pigType(DoctorPig.PigSex.SOW.getKey())
                 .farmId(barn.getFarmId()).build(), pageNo, size));
 
         //如果母猪和猪群都存在, 全部返回, 由前台选择取哪里的数据
@@ -434,7 +434,7 @@ public class DoctorBarns {
             barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(DoctorPigTrack.builder()
                     .status(status)
                     .currentBarnId(barnId)
-                    .pigType(DoctorPig.PIG_TYPE.BOAR.getKey())
+                    .pigType(DoctorPig.PigSex.BOAR.getKey())
                     .farmId(barn.getFarmId()).build(), pageNo, size)));
             barnDetail.setStatuses(RespHelper.or500(doctorPigReadService.findPigStatusByBarnId(barnId)));
             return barnDetail;

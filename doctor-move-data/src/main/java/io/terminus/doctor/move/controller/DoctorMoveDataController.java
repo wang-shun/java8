@@ -231,8 +231,8 @@ public class DoctorMoveDataController {
     //统计下首页数据
     private void movePigTypeStatistic(DoctorFarm farm) {
         doctorPigTypeStatisticWriteService.statisticGroup(farm.getOrgId(), farm.getId());
-        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey());
-        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey());
+        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PigSex.BOAR.getKey());
+        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PigSex.SOW.getKey());
     }
 
     /**

@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.dto.event.usual;
 
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.model.DoctorPig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -29,7 +30,7 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
 
     /**
      * 公猪 & 母猪
-     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     * @see DoctorPig.PigSex
      */
 //    private Integer pigType;
 //

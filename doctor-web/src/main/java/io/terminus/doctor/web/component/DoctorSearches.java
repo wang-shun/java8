@@ -111,7 +111,7 @@ public class DoctorSearches {
     public GroupPigPaging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
                                              @RequestParam Map<String, String> params) {
-        Paging<SearchedPig> paging = pagePigs(pageNo, pageSize, params, DoctorPig.PIG_TYPE.SOW);
+        Paging<SearchedPig> paging = pagePigs(pageNo, pageSize, params, DoctorPig.PigSex.SOW);
         Long groupCount = getGroupCountWhenFarrow(params);
         return new GroupPigPaging<>(paging, groupCount, paging.getTotal());
     }
@@ -135,7 +135,7 @@ public class DoctorSearches {
     }
 
     //猪分页
-    private Paging<SearchedPig> pagePigs(Integer pageNo, Integer pageSize, Map<String, String> params, DoctorPig.PIG_TYPE pigType){
+    private Paging<SearchedPig> pagePigs(Integer pageNo, Integer pageSize, Map<String, String> params, DoctorPig.PigSex pigType){
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
@@ -155,9 +155,9 @@ public class DoctorSearches {
         Paging<SearchedPig> paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
         paging.getData().forEach(searchedPig -> {
             if(searchedPig.getPigType() != null){
-                DoctorPig.PIG_TYPE pig_type = DoctorPig.PIG_TYPE.from(searchedPig.getPigType());
-                if(pig_type != null){
-                    searchedPig.setPigTypeName(pig_type.getDesc());
+                DoctorPig.PigSex pigSex = DoctorPig.PigSex.from(searchedPig.getPigType());
+                if(pigSex != null){
+                    searchedPig.setPigTypeName(pigSex.getDesc());
                 }
             }
         });
@@ -174,7 +174,7 @@ public class DoctorSearches {
     @RequestMapping(value = "/sowpigs/suggest", method = RequestMethod.GET)
     public List<SearchedPig> searchSowsSuggest(@RequestParam(required = false) Integer size,
                                                @RequestParam Map<String, String> params) {
-        return pagePigs(1, size, params, DoctorPig.PIG_TYPE.SOW).getData();
+        return pagePigs(1, size, params, DoctorPig.PigSex.SOW).getData();
     }
 
 
@@ -191,7 +191,7 @@ public class DoctorSearches {
     public Paging<SearchedPig> searchBoarPigs(@RequestParam(required = false) Integer pageNo,
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
-        return pagePigs(pageNo, pageSize, params, DoctorPig.PIG_TYPE.BOAR);
+        return pagePigs(pageNo, pageSize, params, DoctorPig.PigSex.BOAR);
     }
 
     /**
@@ -203,7 +203,7 @@ public class DoctorSearches {
      */
     @RequestMapping(value = "/boarpigs/all", method = RequestMethod.GET)
     public List<SearchedPig> searchAllBoarPigs(@RequestParam Map<String, String> params) {
-        return pagePigs(1, 2000, params, DoctorPig.PIG_TYPE.BOAR).getData();
+        return pagePigs(1, 2000, params, DoctorPig.PigSex.BOAR).getData();
     }
 
     /**
@@ -480,10 +480,10 @@ public class DoctorSearches {
             if (searchType.equals(SearchType.GROUP.getValue())) {
                 params.put("status", String.valueOf(DoctorGroup.Status.CREATED.getValue()));
             } else if (searchType.equals(SearchType.BOAR.getValue())) {
-                params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
+                params.put("pigType", DoctorPig.PigSex.BOAR.getKey().toString());
                 params.put("statuses", PigStatus.BOAR_ENTRY.toString());
             } else if (searchType.equals(SearchType.SOW.getValue())) {
-                params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
+                params.put("pigType", DoctorPig.PigSex.SOW.getKey().toString());
                 params.put("isRemoval", String.valueOf(IsOrNot.NO.getValue())); //只查询未离场的猪
             }
             params.remove("ids");
@@ -497,7 +497,7 @@ public class DoctorSearches {
                 Paging<SearchedGroup> searchGroupPaging = this.searchGroups(pageNo, pageSize, params);
                 allPigOrGroupIds = searchGroupPaging.getData().stream().map(SearchedGroup::getId).collect(Collectors.toList());
             } else {
-                DoctorPig.PIG_TYPE pigType = searchType.equals(SearchType.SOW.getValue()) ? DoctorPig.PIG_TYPE.SOW : DoctorPig.PIG_TYPE.BOAR;
+                DoctorPig.PigSex pigType = searchType.equals(SearchType.SOW.getValue()) ? DoctorPig.PigSex.SOW : DoctorPig.PigSex.BOAR;
 
                 Paging<SearchedPig> searchPigPaging = pagePigs(pageNo, pageSize, params, pigType);
                 allPigOrGroupIds = searchPigPaging.getData().stream().map(SearchedPig::getId).collect(Collectors.toList());

@@ -68,7 +68,7 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
     private void rollbackEntry(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         //先回滚猪的进场事件(判断公猪还是母猪进场)
         DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(groupEvent.getId());
-        if (Objects.equals(toPigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())) {
+        if (Objects.equals(toPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             doctorRollbackSowEntryEventHandler.rollback(toPigEvent, operatorId, operatorName);
         } else {
             doctorRollbackBoarEntryEventHandler.rollback(toPigEvent, operatorId, operatorName);

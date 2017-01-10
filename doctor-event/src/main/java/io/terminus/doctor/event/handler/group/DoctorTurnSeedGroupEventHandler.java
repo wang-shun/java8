@@ -80,7 +80,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         turnSeed.setRelGroupEventId(event.getId());
 
         //获取本次转种猪的性别
-        DoctorPig.PIG_TYPE sex = getSex(toBarn.getPigType());
+        DoctorPig.PigSex sex = getSex(toBarn.getPigType());
 
         //3.更新猪群跟踪
         //数量 - 1
@@ -127,19 +127,19 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
     }
 
     //获取转种猪性别
-    private static DoctorPig.PIG_TYPE getSex(Integer toBarnType) {
+    private static DoctorPig.PigSex getSex(Integer toBarnType) {
         if (PigType.MATING_TYPES.contains(toBarnType)) {
-            return DoctorPig.PIG_TYPE.SOW;
+            return DoctorPig.PigSex.SOW;
         }
-        return DoctorPig.PIG_TYPE.BOAR;
+        return DoctorPig.PigSex.BOAR;
     }
 
     //如果是公猪并且数量大于0 就 -1
-    private static int getBoarQty(DoctorPig.PIG_TYPE sex, Integer oldQty) {
+    private static int getBoarQty(DoctorPig.PigSex sex, Integer oldQty) {
         if (oldQty <= 0) {
             return 0;
         }
-        if (sex.equals(DoctorPig.PIG_TYPE.BOAR)) {
+        if (sex.equals(DoctorPig.PigSex.BOAR)) {
             return oldQty - 1;
         }
         return oldQty;

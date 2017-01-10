@@ -184,8 +184,8 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
 
         //更新 PigTypeStatistic
         doctorPigTypeStatisticWriteService.statisticGroup(dto.getOrgId(), dto.getFarmId());
-        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.BOAR.getKey());
-        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey());
+        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PigSex.BOAR.getKey());
+        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PigSex.SOW.getKey());
 
         while (!startAt.after(endAt)) {
             //猪群存栏

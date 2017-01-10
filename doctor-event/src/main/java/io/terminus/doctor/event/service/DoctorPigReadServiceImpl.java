@@ -22,7 +22,6 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.search.SearchedPig;
-import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -93,21 +92,12 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
-    public Response<Long> queryPigCount(Integer range, Long id, Integer pigType) {
-        try{
-            Map<String,Object> criteria = Maps.newHashMap();
-            if(Objects.equals(range, DataRange.FARM.getKey())){
-                criteria.put("farmId",id);
-            }else if(Objects.equals(DataRange.ORG.getKey(), range)){
-                criteria.put("orgId",id);
-            }else {
-                return Response.fail("range.input.error");
-            }
-            criteria.put("pigType",pigType);
-            return Response.ok(doctorPigDao.count(criteria));
-        }catch (Exception e){
-            log.error(" query pig sow count fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("query.pigSowCount.fail");
+    public Response<Long> getPigCount(Long farmId, DoctorPig.PigSex pigSex) {
+        try {
+            return Response.ok(doctorPigDao.getPigCount(farmId, pigSex));
+        } catch (Exception e) {
+            log.error("get pig count failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("get.pig.count.fail");
         }
     }
 
@@ -429,7 +419,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         }
 
         if (doctorPigTrack.getCurrentMatingCount() > 0) {
-            Map<String, Object> criteria = ImmutableMap.of("pigId", pigId, "farmId", farmId, "count", doctorPigTrack.getCurrentMatingCount()-1, "type", PigEvent.MATING.getKey(), "kind", DoctorPig.PIG_TYPE.SOW.getKey());
+            Map<String, Object> criteria = ImmutableMap.of("pigId", pigId, "farmId", farmId, "count", doctorPigTrack.getCurrentMatingCount()-1, "type", PigEvent.MATING.getKey(), "kind", DoctorPig.PigSex.SOW.getKey());
             DoctorPigEvent doctorPigEvent = doctorPigEventDao.getFirstMatingTime(criteria);
             matingDate = new DateTime(doctorPigEvent.getEventAt());
             return Response.ok(matingDate.plusDays(114).toDate());

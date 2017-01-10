@@ -157,17 +157,17 @@ public class DoctorCommonGroupEventHandler {
      * @param group
      * @param barn
      */
-    public void autoPigEntryEvent(DoctorPig.PIG_TYPE sex, DoctorTurnSeedGroupInput input, DoctorGroup group, DoctorBarn barn) {
+    public void autoPigEntryEvent(DoctorPig.PigSex sex, DoctorTurnSeedGroupInput input, DoctorGroup group, DoctorBarn barn) {
         DoctorBasicInputInfoDto basicDto = new DoctorBasicInputInfoDto();
         DoctorFarmEntryDto farmEntryDto = new DoctorFarmEntryDto();
 
         ///恭母猪进场字段
-        if (Objects.equals(sex, DoctorPig.PIG_TYPE.BOAR)) {
-            farmEntryDto.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());
+        if (Objects.equals(sex, DoctorPig.PigSex.BOAR)) {
+            farmEntryDto.setPigType(DoctorPig.PigSex.BOAR.getKey());
             farmEntryDto.setBoarTypeId(BoarEntryType.HGZ.getKey());
             farmEntryDto.setBoarTypeName(BoarEntryType.HGZ.getCode());
         } else {
-            farmEntryDto.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
+            farmEntryDto.setPigType(DoctorPig.PigSex.SOW.getKey());
             farmEntryDto.setParity(1);
             farmEntryDto.setEarCode(input.getEarCode());
         }
