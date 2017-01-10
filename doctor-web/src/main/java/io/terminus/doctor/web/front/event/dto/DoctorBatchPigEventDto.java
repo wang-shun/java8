@@ -17,6 +17,8 @@ public class DoctorBatchPigEventDto implements Serializable{
 
     private Integer eventType;
 
+    private Integer pigType;
+
     private List<String> inputJsonList;
 
 }

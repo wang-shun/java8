@@ -19,6 +19,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
@@ -35,6 +36,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
@@ -351,11 +353,17 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/createConditionEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean createConditionEvent(@RequestParam("doctorConditionDtoJson") String doctorConditionDtoJson,
                                      @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId) {
-        checkEventAt(pigId, PigEvent.CONDITION, doctorConditionDtoJson);
-        DoctorConditionDto doctorConditionDto = jsonMapper.fromJson(doctorConditionDtoJson, DoctorConditionDto.class);
-        if (isNull(doctorConditionDto))
+        //checkEventAt(pigId, PigEvent.CONDITION, doctorConditionDtoJson);
+        DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(pigId));
+        BasePigEventInputDto inputDto;
+        if (Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())) {
+            inputDto = jsonMapper.fromJson(doctorConditionDtoJson, DoctorConditionDto.class);
+        } else {
+            inputDto = jsonMapper.fromJson(doctorConditionDtoJson, DoctorBoarConditionDto.class);
+        }
+        if (isNull(inputDto))
             throw new JsonResponseException("create.conditionEvent.fail");
-        return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(doctorConditionDto, pigId), buildBasicInputInfoDto(farmId, PigEvent.CONDITION)));
+        return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(inputDto, pigId), buildBasicInputInfoDto(farmId, PigEvent.CONDITION)));
     }
 
     /**
@@ -369,14 +377,21 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/createConditionEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean createConditionEvent(@RequestParam("doctorConditionDtoJson") String doctorConditionDtoJson,
                                         @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId) {
-        checkEventAt(pigIds, PigEvent.CONDITION, doctorConditionDtoJson);
-        DoctorConditionDto doctorConditionDto = jsonMapper.fromJson(doctorConditionDtoJson, DoctorConditionDto.class);
-        if (isNull(doctorConditionDto))
-            throw new JsonResponseException("create.conditionEvent.fail");
+        //checkEventAt(pigIds, PigEvent.CONDITION, doctorConditionDtoJson);
         //检查猪ids是否合格
         checkPigIds(pigIds);
+        List<Long> pigIdList = Splitters.COMMA.splitToList(pigIds).stream().map(Long::parseLong).collect(Collectors.toList());
+        DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(pigIdList.get(0)));
+        BasePigEventInputDto doctorConditionDto;
+        if (Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())) {
+            doctorConditionDto = jsonMapper.fromJson(doctorConditionDtoJson, DoctorConditionDto.class);
+        } else {
+            doctorConditionDto = jsonMapper.fromJson(doctorConditionDtoJson, DoctorBoarConditionDto.class);
+        }
+        if (isNull(doctorConditionDto))
+            throw new JsonResponseException("create.conditionEvent.fail");
 
-        List<BasePigEventInputDto> inputDtos = Splitters.COMMA.splitToList(pigIds).stream().map(idStr -> buildEventInput(doctorConditionDto, Long.parseLong(idStr))).collect(Collectors.toList());
+        List<BasePigEventInputDto> inputDtos = pigIdList.stream().map(id -> buildEventInput(doctorConditionDto, id)).collect(Collectors.toList());
         return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtos, buildBasicInputInfoDto(farmId, PigEvent.CONDITION)));
     }
 
@@ -437,7 +452,7 @@ public class DoctorPigCreateEvents {
 //            RespHelper.or500(doctorSowEventCreateService.sowEventsCreate(basics, sowInfoDtoJson));
 //            // 猪批量事件操作， 返回PigId
 //        } else {
-            return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId), pigId), buildBasicInputInfoDto(farmId, PigEvent.from(eventType))));
+            return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PIG_TYPE.SOW.getKey()), pigId), buildBasicInputInfoDto(farmId, PigEvent.from(eventType))));
 //            //1.断奶后触发转舍事件
 //            if (Objects.equals(eventType, PigEvent.WEAN.getKey())) {
 //                DoctorPartWeanDto doctorPartWeanDto = jsonMapper.fromJson(sowInfoDtoJson, DoctorPartWeanDto.class);
@@ -503,7 +518,7 @@ public class DoctorPigCreateEvents {
         checkEventAt(pigIds, PigEvent.from(eventType), sowInfoDtoJson);
         checkPigIds(pigIds);
         List<BasePigEventInputDto> inputDtos = Splitters.COMMA.splitToList(pigIds).stream().filter(idStr -> !Strings.isNullOrEmpty(idStr))
-                .map(idStr -> buildEventInput(eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId), Long.parseLong(idStr)))
+                .map(idStr -> buildEventInput(eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PIG_TYPE.SOW.getKey()), Long.parseLong(idStr)))
                 .collect(Collectors.toList());
         return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtos, buildBasicInputInfoDto(farmId, PigEvent.from(eventType))));
     }
@@ -626,7 +641,7 @@ public class DoctorPigCreateEvents {
         PigEvent pigEvent = PigEvent.from(batchPigEventDto.getEventType());
         List<BasePigEventInputDto> inputDtoList = batchPigEventDto.getInputJsonList()
                 .stream().map(inputJson -> {
-                    BasePigEventInputDto inputDto = eventInput(pigEvent, inputJson, batchPigEventDto.getFarmId());
+                    BasePigEventInputDto inputDto = eventInput(pigEvent, inputJson, batchPigEventDto.getFarmId(), batchPigEventDto.getPigType());
                     return buildEventInput(inputDto, inputDto.getPigId());
                 }).collect(Collectors.toList());
         return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtoList, buildBasicInputInfoDto(batchPigEventDto.getFarmId(), pigEvent)));
@@ -869,7 +884,7 @@ public class DoctorPigCreateEvents {
 
     }
 
-    private BasePigEventInputDto eventInput(PigEvent pigEvent, String eventInfoDtoJson, Long farmId) {
+    private BasePigEventInputDto eventInput(PigEvent pigEvent, String eventInfoDtoJson, Long farmId, Integer pigType) {
             switch (pigEvent) {
                 case ENTRY:
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorFarmEntryDto.class);
@@ -878,7 +893,11 @@ public class DoctorPigCreateEvents {
                 case CHG_LOCATION:
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorChgLocationDto.class);
                 case CONDITION:
-                    return jsonMapper.fromJson(eventInfoDtoJson, DoctorConditionDto.class);
+                    if (Objects.equals(pigType, DoctorPig.PIG_TYPE.SOW.getKey())){
+                        return jsonMapper.fromJson(eventInfoDtoJson, DoctorConditionDto.class);
+                    } else {
+                        return jsonMapper.fromJson(eventInfoDtoJson, DoctorBoarConditionDto.class);
+                    }
                 case DISEASE:
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorDiseaseDto.class);
                 case VACCINATION:
