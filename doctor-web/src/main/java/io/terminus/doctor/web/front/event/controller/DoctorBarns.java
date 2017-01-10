@@ -141,7 +141,7 @@ public class DoctorBarns {
                                               @RequestParam(value = "status", required = false) Integer barnStatus,
                                               @RequestParam(value = "pigIds", required = false) String pigIds) {
         return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null,
-                null, barnStatus, null)), pigIds);
+                null, barnStatus, doctorFarmAuthCenter.getAuthBarnIds())), pigIds);
     }
 
     /**
@@ -233,7 +233,7 @@ public class DoctorBarns {
             types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
         }
         return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, types,
-                null, status, doctorFarmAuthCenter.getAuthBarnIds())), pigIds);
+                null, status, null)), pigIds);
     }
 
 
