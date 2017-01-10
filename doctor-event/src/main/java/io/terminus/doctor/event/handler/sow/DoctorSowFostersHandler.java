@@ -41,6 +41,7 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
 
     @Override
     public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+        super.handleCheck(eventDto, basic);
         DoctorFostersDto fostersDto = (DoctorFostersDto) eventDto;
         checkState(!Objects.equals(fostersDto.getPigId(), fostersDto.getFosterSowId()), "not.foster.userself");
     }

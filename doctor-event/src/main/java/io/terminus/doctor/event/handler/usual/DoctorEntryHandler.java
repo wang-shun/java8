@@ -37,7 +37,7 @@ import static java.util.Objects.isNull;
  */
 @Component
 @Slf4j
-public class DoctorEntryHandler extends DoctorAbstractEventHandler {
+public class DoctorEntryHandler extends DoctorAbstractEventHandler{
 
     @Autowired
     private  DoctorPigInfoCache doctorPigInfoCache;
@@ -52,11 +52,11 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler {
     public void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         DoctorFarmEntryDto farmEntryDto = (DoctorFarmEntryDto) inputDto;
 
+        //1.创建猪
         DoctorPig doctorPig = buildDoctorPig(farmEntryDto, basic);
         farmEntryDto.setPigId(doctorPig.getId());
         doctorPigDao.create(doctorPig);
         inputDto.setPigId(doctorPig.getId());
-
 
         //2.创建事件
         DoctorPigEvent doctorPigEvent = buildPigEvent(basic, inputDto);
@@ -64,18 +64,18 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler {
 
         //3.创建或更新track
         DoctorPigTrack doctorPigTrack = createOrUpdatePigTrack(basic, inputDto);
-
         doctorPigTrackDao.create(doctorPigTrack);
 
-        //1.创建镜像
+        //4.创建镜像
         DoctorPigTrack pigSnapshotTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         DoctorPigEvent pigSnapshotEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
         DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(pigSnapshotTrack, pigSnapshotEvent, doctorPigEvent.getId());
         doctorPigSnapshotDao.create(doctorPigSnapshot);
-        //4.特殊处理
+
+        //5.特殊处理
         specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
 
-        //5.记录发生的事件信息
+        //6.记录发生的事件信息
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(doctorPigEvent.getOrgId())
                 .farmId(doctorPigEvent.getFarmId())
@@ -91,9 +91,6 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler {
                 .eventType(basic.getEventType())
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
-
-        //6.触发事件
-        triggerEvent(doctorEventInfoList, doctorPigEvent, doctorPigTrack, inputDto, basic);
     }
 
     @Override
