@@ -25,7 +25,7 @@ public class DoctorConditionHandler extends DoctorAbstractEventHandler{
     @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-        if (Objects.equals(inputDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())) {
+        if (Objects.equals(inputDto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
             DoctorConditionDto conditionDto = (DoctorConditionDto) inputDto;
             if (conditionDto.getConditionWeight() != null) {
                 doctorPigTrack.setWeight(conditionDto.getConditionWeight());

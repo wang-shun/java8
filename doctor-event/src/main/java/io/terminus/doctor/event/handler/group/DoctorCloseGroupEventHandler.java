@@ -92,7 +92,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.CLOSE);
 
         //发布统计事件
-        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
+        publistGroupAndBarn(event);
 
         //发布zk事件
         try{

@@ -120,7 +120,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
 
         //发布统计事件
-        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
+        publistGroupAndBarn(event);
     }
 
     //校验金额不能为空, 基础重量不能为空

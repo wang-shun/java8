@@ -88,7 +88,7 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
     public Map<String, String> descMap() {
         Map<String, String> map = new LinkedHashMap<>();
 //        if(pigType != null){
-//            DoctorPig.PIG_TYPE pig = DoctorPig.PIG_TYPE.from(pigType);
+//            DoctorPig.PigSex pig = DoctorPig.PigSex.from(pigType);
 //            if(pig != null){
 //                map.put("猪类型", pig.getDesc());
 //            }

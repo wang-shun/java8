@@ -1,7 +1,7 @@
 package io.terminus.doctor.schedule.msg.producer.factory;
 
 import com.google.api.client.util.Maps;
-import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeAvgDto;
+import io.terminus.doctor.basic.dto.DoctorMaterialConsumeAvgDto;
 import io.terminus.doctor.common.enums.WareHouseType;
 
 import java.util.Map;
