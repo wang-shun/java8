@@ -58,7 +58,7 @@ public class DoctorEventSelector {
         pigTable.put(PigStatus.KongHuai, PigType.PREG_SOW, Lists.newArrayList(PigEvent.MATING, PigEvent.PREG_CHECK));
 
         // (待分娩，配怀舍) => 分娩
-        pigTable.put(PigStatus.Pregnancy, PigType.DELIVER_SOW, Lists.newArrayList(PigEvent.FARROWING));
+        pigTable.put(PigStatus.Farrow, PigType.DELIVER_SOW, Lists.newArrayList(PigEvent.FARROWING));
 
         // (哺乳，配怀舍) => 拼窝，断奶，仔猪变动
         pigTable.put(PigStatus.FEED, PigType.DELIVER_SOW, Lists.newArrayList(PigEvent.FOSTERS, PigEvent.WEAN, PigEvent.PIGLETS_CHG));

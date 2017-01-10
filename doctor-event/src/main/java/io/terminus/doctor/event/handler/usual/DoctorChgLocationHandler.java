@@ -73,15 +73,17 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         DoctorBarn fromBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
         checkState(checkBarnTypeEqual(fromBarn, toBarn, doctorPigTrack.getStatus()), "barn.type.not.equal");
-        if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(toBarn.getPigType(), PigType.FATTEN_PIG.getValue())) {
+        if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
             doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
         }
-        if (Objects.equals(fromBarn.getPigType(), PigType.FATTEN_PIG.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
+        if (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
             // 设置断奶到配置舍标志
             Map<String, Object> newExtraMap = Maps.newHashMap();
             newExtraMap.put("hasWeanToMating", true);
             //清空对应的Map 信息内容 （有一次生产过程）
             doctorPigTrack.setExtraMap(newExtraMap);
+            //设置当前配种次数为零
+            doctorPigTrack.setCurrentMatingCount(0);
         }
         doctorPigTrack.setCurrentBarnId(toBarnId);
         doctorPigTrack.setCurrentBarnName(toBarn.getName());
