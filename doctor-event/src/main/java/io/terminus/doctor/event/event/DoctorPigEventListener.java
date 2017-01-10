@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -82,14 +83,49 @@ public class DoctorPigEventListener implements EventListener {
             return;
         }
 
-        List<DoctorPigPublishDto> needs = flat(pigEvent.getPigs());
-        needs.forEach(need -> handle(pigEvent.getOrgId(), pigEvent.getFarmId(), pigEvent.getEventType(), need));
+        PigEvent type = PigEvent.from(pigEvent.getEventType());
+        if (type == null) {
+            log.error("handle pig event type not find!");
+            return;
+        }
+
+        List<DoctorPigPublishDto> dtos = pigEvent.getPigs();
+        Function<DoctorPigPublishDto, Date> eventAtFunc = e -> Dates.startOfDay(e.getEventAt());
+        switch (type) {
+            case CHG_FARM: case ENTRY:
+                flatByFunc(dtos, eventAtFunc) // TODO: 2017/1/10  kind
+                        .forEach(event -> handleLiveStockReport(pigEvent.getOrgId(), pigEvent.getFarmId(), event.getEventAt(), event.getKind()));
+                break;
+            case REMOVAL:
+                flatByFunc(dtos, eventAtFunc) // todo kind
+                        .forEach(event -> {
+                            handleLiveStockReport(pigEvent.getOrgId(), pigEvent.getFarmId(), event.getEventAt(), event.getKind());
+                            handleSaleAndDead(pigEvent.getFarmId(), event.getEventAt());
+                        });
+                break;
+            case MATING:
+                flatByFunc(dtos, eventAtFunc) // TODO: 2017/1/10 matetype
+                        .forEach(event -> handleMate(pigEvent.getFarmId(), event.getEventAt(), event.getMateType()));
+                break;
+            case PREG_CHECK:
+                flatByFunc(dtos, eventAtFunc) // TODO: 2017/1/10 result
+                        .forEach(event -> handlePregCheck(pigEvent.getFarmId(), event.getEventAt(), event.getPregCheckResult()));
+                break;
+            case FARROWING:
+                flatByFunc(dtos, eventAtFunc).forEach(event -> handleFarrow(pigEvent.getFarmId(), event.getEventAt()));
+                break;
+            case WEAN:
+                flatByFunc(dtos, eventAtFunc).forEach(event -> handleWean(pigEvent.getFarmId(), event.getEventAt()));
+                break;
+            default:
+                break;
+        }
     }
 
     /**
      * 过滤掉相同的事件
      */
-    private static List<DoctorPigPublishDto> flat(List<DoctorPigPublishDto> pigs) {
+    private static List<DoctorPigPublishDto> flatByFunc(List<DoctorPigPublishDto> pigs, Function<DoctorPigPublishDto, ?> func) {
         if (CollectionUtils.isEmpty(pigs)) {
             return Collections.emptyList();
         }
@@ -98,42 +134,6 @@ public class DoctorPigEventListener implements EventListener {
         // TODO: 2017/1/9 过滤掉
 
         return pigs;
-    }
-
-    //具体的处理逻辑
-    private void handle(Long orgId, Long farmId, Integer eventType, DoctorPigPublishDto event) {
-        PigEvent type = PigEvent.from(eventType);
-        if (type == null) {
-            log.error("handle pig event type not find, farmId:{}, event info:{}", farmId, event);
-            return;
-        }
-
-        switch (type) {
-            case CHG_FARM:
-                handleLiveStockReport(orgId, farmId, event.getEventAt(), event.getKind());
-                break;
-            case REMOVAL:
-                handleLiveStockReport(orgId, farmId, event.getEventAt(), event.getKind());
-                handleSaleAndDead(farmId, event.getEventAt());
-                break;
-            case ENTRY:
-                handleLiveStockReport(orgId, farmId, event.getEventAt(), event.getKind());
-                break;
-            case MATING:
-                handleMate(farmId, event.getEventAt(), event.getMateType());
-                break;
-            case PREG_CHECK:
-                handlePregCheck(farmId, event.getEventAt(), event.getPregCheckResult());
-                break;
-            case FARROWING:
-                handleFarrow(farmId, event.getEventAt());
-                break;
-            case WEAN:
-                handleWean(farmId, event.getEventAt());
-                break;
-            default:
-                break;
-        }
     }
 
     //处理配种
