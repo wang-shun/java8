@@ -43,7 +43,7 @@ public class DoctorPigPublishDto implements Serializable {
 
     //可指定的equals方法
     @SafeVarargs
-    public final boolean equalsByFunc(DoctorPigPublishDto that, Function<DoctorPigPublishDto, ?>... funcs) {
+    final boolean equalsByFunc(DoctorPigPublishDto that, Function<DoctorPigPublishDto, ?>... funcs) {
         if (this == that) return true;
         if (that == null) return false;
 

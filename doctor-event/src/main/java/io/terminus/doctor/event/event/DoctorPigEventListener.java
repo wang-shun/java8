@@ -93,22 +93,22 @@ public class DoctorPigEventListener implements EventListener {
         Function<DoctorPigPublishDto, Date> eventAtFunc = e -> Dates.startOfDay(e.getEventAt());
         switch (type) {
             case CHG_FARM: case ENTRY:
-                flatByFunc(dtos, eventAtFunc) // TODO: 2017/1/10  kind
+                flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
                         .forEach(event -> handleLiveStockReport(pigEvent.getOrgId(), pigEvent.getFarmId(), event.getEventAt(), event.getKind()));
                 break;
             case REMOVAL:
-                flatByFunc(dtos, eventAtFunc) // todo kind
+                flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
                         .forEach(event -> {
                             handleLiveStockReport(pigEvent.getOrgId(), pigEvent.getFarmId(), event.getEventAt(), event.getKind());
                             handleSaleAndDead(pigEvent.getFarmId(), event.getEventAt());
                         });
                 break;
             case MATING:
-                flatByFunc(dtos, eventAtFunc) // TODO: 2017/1/10 matetype
+                flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getMateType)
                         .forEach(event -> handleMate(pigEvent.getFarmId(), event.getEventAt(), event.getMateType()));
                 break;
             case PREG_CHECK:
-                flatByFunc(dtos, eventAtFunc) // TODO: 2017/1/10 result
+                flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getPregCheckResult)
                         .forEach(event -> handlePregCheck(pigEvent.getFarmId(), event.getEventAt(), event.getPregCheckResult()));
                 break;
             case FARROWING:
@@ -125,15 +125,20 @@ public class DoctorPigEventListener implements EventListener {
     /**
      * 过滤掉相同的事件
      */
-    private static List<DoctorPigPublishDto> flatByFunc(List<DoctorPigPublishDto> pigs, Function<DoctorPigPublishDto, ?> func) {
+    @SafeVarargs
+    private static List<DoctorPigPublishDto> flatByFunc(List<DoctorPigPublishDto> pigs, Function<DoctorPigPublishDto, ?>... func) {
         if (CollectionUtils.isEmpty(pigs)) {
             return Collections.emptyList();
         }
-        List<DoctorPigPublishDto> results = Lists.newArrayList();
 
-        // TODO: 2017/1/9 过滤掉
-
-        return pigs;
+        //先放入一个，之后挨个儿比较，如果不相同，再放进去
+        List<DoctorPigPublishDto> results = Lists.newArrayList(pigs.get(0));
+        pigs.forEach(pig -> results.forEach(result -> {
+            if (!pig.equalsByFunc(result, func)) {
+                results.add(pig);
+            }
+        }));
+        return results;
     }
 
     //处理配种
