@@ -35,8 +35,6 @@ public class DoctorConditionHandler extends DoctorAbstractEventHandler{
             checkState(boarConditionDto.getWeight() != null, "boar.condition.weight.not.null");
             doctorPigTrack.setWeight(boarConditionDto.getWeight());
         }
-        //doctorPigTrack.addAllExtraMap(conditionDto.toMap());
-        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
 
         return doctorPigTrack;
     }

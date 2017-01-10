@@ -16,9 +16,6 @@ import org.springframework.stereotype.Component;
 public class DoctorVaccinationHandler extends DoctorAbstractEventHandler{
     @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-        //doctorPigTrack.addAllExtraMap(inputDto.toMap());
-        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
-        return doctorPigTrack;
+        return doctorPigTrackDao.findByPigId(inputDto.getPigId());
     }
 }

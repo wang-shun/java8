@@ -50,9 +50,6 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
         doctorPigTrack.setFarmId(chgFarmDto.getToFarmId());
         doctorPigTrack.setCurrentBarnId(doctorToBarn.getId());
         doctorPigTrack.setCurrentBarnName(doctorToBarn.getName());
-
-        //doctorPigTrack.addAllExtraMap(chgFarmDto.toMap());
-        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 
