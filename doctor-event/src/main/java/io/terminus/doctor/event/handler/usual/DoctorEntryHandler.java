@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.collect.Maps;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
@@ -49,7 +50,6 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler {
 
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-//        try {
         DoctorFarmEntryDto farmEntryDto = (DoctorFarmEntryDto) inputDto;
 
         DoctorPig doctorPig = buildDoctorPig(farmEntryDto, basic);
@@ -94,43 +94,6 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler {
 
         //6.触发事件
         triggerEvent(doctorEventInfoList, doctorPigEvent, doctorPigTrack, inputDto, basic);
-            // event create
-//                doctorPigEvent.setRelGroupEventId(basic.getRelGroupEventId());
-//                doctorPigEvent.setPigId(doctorPig.getId());
-//                doctorPigEventDao.create(doctorPigEvent);
-
-//                // track create
-//                doctorPigTrack.setPigId(doctorPig.getId());
-//                doctorPigTrack.setPigType(doctorPig.getPigType());
-//                doctorPigTrack.addPigEvent(doctorPig.getPigType(), doctorPigEvent.getId());
-//                doctorPigTrackDao.create(doctorPigTrack);
-
-//                doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
-//                //添加时间发生之前母猪的胎次
-//                doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
-//                doctorPigEventDao.update(doctorPigEvent);
-
-//                // snapshot create
-//                DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
-//                        .pigId(doctorPig.getId()).farmId(doctorPig.getFarmId()).orgId(doctorPig.getOrgId()).eventId(doctorPigEvent.getId())
-//                        .build();
-//
-//                DoctorPigSnapShotInfo snapShotInfo = DoctorPigSnapShotInfo.builder()
-//                        .pig(doctorPig)
-//                        .pigTrack(doctorPigTrack)
-//                        .pigEvent(doctorPigEvent)
-//                        .build();
-//
-//                doctorPigSnapshot.setPigInfo(JSON_MAPPER.toJson(snapShotInfo));
-//                doctorPigSnapshotDao.create(doctorPigSnapshot);
-//
-//                doctorPigInfoCache.addPigCodeToFarm(doctorPig.getFarmId(), doctorPig.getPigCode());
-//        }catch(RuntimeException e){
-//            throw new ServiceException(e.getMessage());
-//        }catch (Exception e){
-//            log.error("doctor abstract entry flow handle fail, cause:{}", Throwables.getStackTraceAsString(e));
-//            throw new IllegalStateException("entry.handler.exception");
-//        }
     }
 
     @Override
@@ -176,33 +139,6 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler {
         return doctorPigTrack;
     }
 
-//    /**
-//     * build pig event 构建进厂事件信息
-//     *
-//     * @param basic
-//     * @param dto
-//     * @return
-//     */
-//    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, DoctorFarmEntryDto dto) {
-//        super.buildPigEvent(basic, dto);
-//        return DoctorPigEvent.builder()
-//                .orgId(basic.getOrgId()).orgName(basic.getOrgName()).farmId(basic.getFarmId()).farmName(basic.getFarmName())
-//                .pigCode(dto.getPigCode()).eventAt(dto.eventAt())
-//                .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(dto))
-//                .barnId(dto.getBarnId()).barnName(dto.getBarnName()).relEventId(basic.getRelEventId())
-//                .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
-//                .isAuto(MoreObjects.firstNonNull(basic.getIsAuto(), IsOrNot.NO.getValue()))
-//                .npd(0)
-//                .dpnpd(0)
-//                .pfnpd(0)
-//                .plnpd(0)
-//                .psnpd(0)
-//                .pynpd(0)
-//                .ptnpd(0)
-//                .jpnpd(0)
-//                .build();
-//    }
-
     /**
      * 构建DoctorPig
      *
@@ -213,7 +149,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler {
     private DoctorPig buildDoctorPig(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic) {
 
         if (isNull(basic.getFarmId()) || isNull(dto.getPigCode())) {
-            throw new IllegalArgumentException("input.farmIdPigCode.empty");
+            throw new ServiceException("input.farmIdPigCode.empty");
         }
 
         DoctorPig doctorPig = DoctorPig.builder()

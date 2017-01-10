@@ -140,11 +140,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
             doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
         }
         doctorPigEvent.setExtraMap(inputDto.toMap());
-        //查询上次的事件
-//        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventInWorkflow(basic.getPigId(), null);
-//        if (notNull(lastEvent)) {
-//            doctorPigEvent.setRelEventId(lastEvent.getId());
-//        }
         return doctorPigEvent;
     }
 

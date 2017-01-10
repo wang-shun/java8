@@ -103,9 +103,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pregChkResultDto.getPigId());
 
         //如果妊娠检查非阳性, 置当前配种数为0
-        //if (!Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
-            doctorPigTrack.setCurrentMatingCount(0);
-        //}
+        doctorPigTrack.setCurrentMatingCount(0);
 
         Map<String, Object> extra = doctorPigTrack.getExtraMap();
         //往extra增加一些特殊标志位用来表明配种类型

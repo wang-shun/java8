@@ -21,8 +21,6 @@ public class DoctorSemenHandler extends DoctorAbstractEventHandler{
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         DoctorSemenDto semenDto = (DoctorSemenDto) inputDto;
         doctorPigTrack.setWeight(semenDto.getSemenWeight());
-        //doctorPigTrack.addAllExtraMap(semenDto.toMap());
-        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) content.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 }

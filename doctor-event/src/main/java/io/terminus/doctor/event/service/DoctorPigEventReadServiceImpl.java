@@ -12,7 +12,6 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
-import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -27,7 +26,6 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,26 +129,6 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     @Override
     public Response<List<Integer>> queryPigEvents(List<Long> pigIds) {
         try{
-//            checkState(!isNull(pigIds) && !Iterables.isEmpty(pigIds), "input.pigIds.empty");
-//            FlowDefinitionNodeEventQuery definitionNodeDao = flowQueryService.getFlowDefinitionNodeEventQuery();
-//
-//            Set<Integer> collectExecute = Sets.newHashSet();
-//
-//            collectExecute.addAll(
-//                    definitionNodeDao.getNextTaskNodeEvents(sowFlowKey, pigIds.get(0)).stream()
-//                    .map(s->Integer.valueOf(s.getValue()))
-//                    .collect(Collectors.toList()));
-//
-//            for(int i = 1; i<pigIds.size(); i++){
-//                Long pigId = pigIds.get(i);
-//
-//                collectExecute.retainAll(definitionNodeDao.getNextTaskNodeEvents(sowFlowKey, pigId).stream()
-//                        .map(s->Integer.valueOf(s.getValue()))
-//                        .collect(Collectors.toList()));
-//            }
-//
-//            // remove FOSTERS_BY
-//            collectExecute.remove(PigEvent.FOSTERS_BY.getKey());
             List<PigEvent> pigEvents = Lists.newArrayList(PigEvent.values());
             pigIds.forEach(pigId -> {
                 DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
@@ -185,7 +163,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             // 获取Pig 所有的 EventId
             Map<Integer, List<DoctorPigEvent>> map = doctorPigEventDao.queryAllEventsByPigId(pigId).stream()
                     .sorted(Comparator.comparing(DoctorPigEvent::getParity))
-                    .collect(Collectors.groupingBy(k -> k.getParity(), Collectors.toList()));
+                    .collect(Collectors.groupingBy(DoctorPigEvent::getParity, Collectors.toList()));
             List<DoctorSowParityCount> doctorSowParityCounts = Lists.newArrayList();
             map.keySet().forEach(parity ->
                     doctorSowParityCounts.add(DoctorSowParityCount.doctorSowParityCountConvert(parity, map.get(parity)))
@@ -219,21 +197,6 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }
     }
 
-    /**
-     * 通过PigRel EventId
-     * @param pigRelEventId
-     * @return
-     */
-    @SneakyThrows
-    private static Map<Integer, List<Long>> convertPigRelEventId(String pigRelEventId){
-        Map<String, String> parityEventIds = OBJECT_MAPPER.readValue(pigRelEventId, JacksonType.MAP_OF_STRING);
-        return parityEventIds.entrySet().stream()
-                .collect(Collectors.toMap(
-                        k -> Integer.valueOf(k.getKey()),
-                        v -> Splitters.COMMA.splitToList(v.getValue())
-                                .stream().map(s->Long.valueOf(s)).collect(Collectors.toList())));
-    }
-
     @Override
     public Response<Paging<DoctorPigEvent>> queryPigEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
         try {
@@ -255,6 +218,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }
     }
 
+    @Override
     public Response<Boolean> isLastEvent(Long pigId, Long eventId) {
         try {
             DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(pigId);
@@ -268,6 +232,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }
     }
 
+    @Override
     public Response<Boolean> isLastManualEvent(Long pigId, Long eventId) {
         try {
             DoctorPigEvent lastEvent = doctorPigEventDao.queryLastManualPigEventById(pigId);
@@ -285,7 +250,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     public Response<DoctorPigEvent> canRollbackEvent(@NotNull(message = "input.pigId.empty") Long pigId) {
         try {
             return Response.ok(doctorPigEventDao.canRollbackEvent(ImmutableMap.of("pigId", pigId, "isAuto", IsOrNot.NO.getValue(), "beginDate", DateTime.now().minusMonths(3).toDate())));
-            } catch (Exception e) {
+        } catch (Exception e) {
             log.error("can.rollback.event.failed, cause {}", Throwables.getStackTraceAsString(e));
             return Response.fail("can.rollback.event.failed");
         }

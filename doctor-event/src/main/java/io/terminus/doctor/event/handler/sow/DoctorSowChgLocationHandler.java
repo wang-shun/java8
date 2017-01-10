@@ -35,7 +35,6 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventHandler {
     public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(chgLocationDto.getPigId());
-        //doctorPigTrack.setExtraMap(chgLocationDto.toMap());
 
         Long toBarnId = chgLocationDto.getChgLocationToBarnId();
         DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
@@ -62,7 +61,6 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventHandler {
         } else if (Objects.equals(basic.getEventType(), PigEvent.TO_FARROWING.getKey())) {
             doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
         }
-        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 }
