@@ -463,7 +463,14 @@ public class DoctorSearches {
      */
     @RequestMapping(value = "/barns/all", method = RequestMethod.GET)
     public List<SearchedBarn> searchAllBarns(@RequestParam Map<String, String> params) {
-        return this.searchBarnsPC(1, Integer.MAX_VALUE, params).getData();
+
+        DoctorBarnDto barnDto = getBarnSearchMap(params);
+        if (barnDto.getFarmId() == null) {
+            return Collections.emptyList();
+        }
+        barnDto.setBarnIds(null);
+        Paging<DoctorBarn> barns = RespHelper.or500(doctorBarnReadService.pagingBarn(barnDto, 1, Integer.MAX_VALUE));
+        return getSearchedBarn(barns.getData());
     }
 
     private boolean farmIdNotExist(Map<String, String> params) {
