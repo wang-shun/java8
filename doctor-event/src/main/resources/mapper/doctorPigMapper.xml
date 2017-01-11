@@ -234,7 +234,7 @@
     </select>
 
     <select id="getPigCount" parameterType="map" resultType="long" >
-        SELECT <include refid="cols_all" />
+        SELECT COUNT (1)
         FROM <include refid="tb" />
         WHERE farm_id = #{farmId}
           AND is_removal = 0

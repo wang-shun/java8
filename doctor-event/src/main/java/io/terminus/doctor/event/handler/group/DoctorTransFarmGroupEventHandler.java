@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -129,7 +128,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         //6.判断是否新建群,触发目标群的转入仔猪事件
         if (Objects.equals(transFarm.getIsCreateGroup(), IsOrNot.YES.getValue())) {
             //新建猪群
-            Long toGroupId = autoTransFarmEventNew(group, groupTrack, transFarm, toBarn);
+            Long toGroupId = autoTransFarmEventNew(eventInfoList, group, groupTrack, transFarm, toBarn);
             transFarm.setToGroupId(toGroupId);
 
             //刷新最新事件id
@@ -149,7 +148,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
     /**
      * 系统触发的自动新建猪群事件(转场触发)
      */
-    private Long autoTransFarmEventNew(DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransFarmGroupInput transFarm, DoctorBarn toBarn) {
+    private Long autoTransFarmEventNew(List<DoctorEventInfo> eventInfoList, DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransFarmGroupInput transFarm, DoctorBarn toBarn) {
         DoctorNewGroupInput newGroupInput = new DoctorNewGroupInput();
         newGroupInput.setFarmId(transFarm.getToFarmId());
         newGroupInput.setGroupCode(transFarm.getToGroupCode());    //录入猪群号
@@ -172,7 +171,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         toGroup.setOrgId(fromGroup.getOrgId());       //转入公司
         toGroup.setOrgName(fromGroup.getOrgName());
         toGroup.setCreatorId(0L);    //创建人id = 0, 标识系统自动创建
-        return doctorGroupManager.createNewGroup(toGroup, newGroupInput);
+        return doctorGroupManager.createNewGroup(eventInfoList, toGroup, newGroupInput);
     }
 
     private DoctorBarn getBarn(Long barnId) {

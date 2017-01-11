@@ -49,12 +49,6 @@ public class DoctorPigEventManager {
     @Autowired
     private DoctorPigEventHandlers pigEventHandlers;
 
-    @Autowired
-    private CoreEventDispatcher coreEventDispatcher;
-
-    @Autowired
-    private Publisher publisher;
-
     /**
      * 事件处理
      * @param inputDto 事件信息数据
@@ -89,15 +83,15 @@ public class DoctorPigEventManager {
     /**
      * 校验携带数据正确性，发布事件
      */
-    public void  checkAndPublishEvent(List<DoctorEventInfo> dtos) {
+    public static void  checkAndPublishEvent(List<DoctorEventInfo> dtos, CoreEventDispatcher coreEventDispatcher, Publisher publisher) {
         if (notEmpty(dtos)) {
-            checkFarmIdAndEventAt(dtos);
-            publishPigEvent(dtos);
+            //checkFarmIdAndEventAt(dtos);
+            publishPigEvent(dtos, coreEventDispatcher, publisher);
         }
     }
 
     //发布事件, 用于更新创建操作
-    private void publishPigEvent(List<DoctorEventInfo> eventInfoList) {
+    private static void publishPigEvent(List<DoctorEventInfo> eventInfoList, CoreEventDispatcher coreEventDispatcher, Publisher publisher) {
 
         if (Arguments.isNullOrEmpty(eventInfoList)) {
             return;
@@ -111,13 +105,13 @@ public class DoctorPigEventManager {
         //1.发布猪事件
         List<DoctorEventInfo> pigEventList = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue());
         if (!Arguments.isNullOrEmpty(pigEventList)) {
-           publishPigEvent(pigEventList, orgId, farmId);
+           publishPigEvent(pigEventList, orgId, farmId, coreEventDispatcher, publisher);
         }
 
         //2.发布猪群事件
         List<DoctorEventInfo> groupEventList = eventInfoMap.get(DoctorEventInfo.Business_Type.GROUP.getValue());
         if (!Arguments.isNullOrEmpty(groupEventList)) {
-            publishGroupEvent(groupEventList, orgId, farmId);
+            publishGroupEvent(groupEventList, orgId, farmId, coreEventDispatcher, publisher);
         }
 
     }
@@ -128,7 +122,7 @@ public class DoctorPigEventManager {
      * @param orgId 公司id
      * @param farmId 猪场id
      */
-    private void publishPigEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId){
+    private static void publishPigEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId, CoreEventDispatcher coreEventDispatcher, Publisher publisher){
         //猪事件触发报表更新(eventBus)
         Map<Integer, List<DoctorEventInfo>> pigEventInfoMap = eventInfoList.stream()
                 .collect(Collectors.groupingBy(DoctorEventInfo::getEventType));
@@ -171,7 +165,7 @@ public class DoctorPigEventManager {
      * @param orgId 公司id
      * @param farmId 猪场id
      */
-    private void publishGroupEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId) {
+    private static void publishGroupEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId, CoreEventDispatcher coreEventDispatcher, Publisher publisher) {
         //猪群事件触发报表更新(eventBus)
         Map<Integer, List<DoctorEventInfo>> groupEventInfoMap = eventInfoList.stream()
                 .collect(Collectors.groupingBy(DoctorEventInfo::getEventType));
@@ -205,7 +199,7 @@ public class DoctorPigEventManager {
         }
     }
 
-    private void checkFarmIdAndEventAt(List<DoctorEventInfo> dtos) {
+    private static void checkFarmIdAndEventAt(List<DoctorEventInfo> dtos) {
         dtos.forEach(dto -> {
             if (dto.getFarmId() == null || dto.getEventAt() == null) {
                 throw new ServiceException("publish.create.event.not.null");

@@ -17,6 +17,10 @@ public class DoctorBatchPigEventDto implements Serializable{
 
     private Integer eventType;
 
+    /**
+     * 猪类型
+     * @see io.terminus.doctor.event.model.DoctorPig.PigSex
+     */
     private Integer pigType;
 
     private List<String> inputJsonList;

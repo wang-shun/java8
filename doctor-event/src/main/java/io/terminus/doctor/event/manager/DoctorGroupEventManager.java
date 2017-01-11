@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -18,11 +17,20 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorAbstractGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorCloseGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorCommonGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorDiseaseGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorLiveStockGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorMoveInGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorRevertLog;
-import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -57,13 +65,13 @@ public class DoctorGroupEventManager {
     @Autowired
     private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     @Autowired
-    private CoreEventDispatcher coreEventDispatcher;
-    @Autowired(required = false)
-    private Publisher publisher;
+    private DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     private Map<Class<? extends DoctorGroupEventHandler>, DoctorGroupEventHandler> handlerMapping;
+
+    private Map<Integer, DoctorGroupEventHandler> handlerMap;
 
     /**
      * 初始化所有实现的
@@ -71,10 +79,20 @@ public class DoctorGroupEventManager {
     @PostConstruct
     public void initHandlers() {
         handlerMapping = Maps.newHashMap();
+        handlerMap = Maps.newHashMap();
         Map<String, DoctorGroupEventHandler> handlers = applicationContext.getBeansOfType(DoctorGroupEventHandler.class);
         log.info("Doctor group event handlers :{}", handlers);
         if (!handlers.isEmpty()) {
             handlers.values().forEach(handler -> handlerMapping.put(handler.getClass(), handler));
+            handlerMap.put(GroupEventType.MOVE_IN.getValue(), handlerMapping.get(DoctorMoveInGroupEventHandler.class));
+            handlerMap.put(GroupEventType.CHANGE.getValue(), handlerMapping.get(DoctorChangeGroupEventHandler.class));
+            handlerMap.put(GroupEventType.TRANS_GROUP.getValue(), handlerMapping.get(DoctorTransGroupEventHandler.class));
+            handlerMap.put(GroupEventType.TURN_SEED.getValue(), handlerMapping.get(DoctorTurnSeedGroupEventHandler.class));
+            handlerMap.put(GroupEventType.LIVE_STOCK.getValue(), handlerMapping.get(DoctorLiveStockGroupEventHandler.class));
+            handlerMap.put(GroupEventType.DISEASE.getValue(), handlerMapping.get(DoctorDiseaseGroupEventHandler.class));
+            handlerMap.put(GroupEventType.ANTIEPIDEMIC.getValue(), handlerMapping.get(DoctorAbstractGroupEventHandler.class));
+            handlerMap.put(GroupEventType.TRANS_FARM.getValue(), handlerMapping.get(DoctorTransFarmGroupEventHandler.class));
+            handlerMap.put(GroupEventType.CLOSE.getValue(), handlerMapping.get(DoctorCloseGroupEventHandler.class));
         }
     }
 
@@ -93,11 +111,16 @@ public class DoctorGroupEventManager {
         return eventInfoList;
     }
 
+    /**
+     * 批量猪群事件
+     * @param inputInfoList
+     * @param eventType
+     * @return
+     */
     @Transactional
-    public <I extends BaseGroupInput>
-    List<DoctorEventInfo> batchHandleEvent(List<DoctorGroupInputInfo> inputInfoList, Class<? extends DoctorGroupEventHandler> handleClass) {
+    public List<DoctorEventInfo> batchHandleEvent(List<DoctorGroupInputInfo> inputInfoList, Integer eventType) {
         final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
-        inputInfoList.forEach(inputInfo -> getHandler(handleClass).handle(eventInfoList, inputInfo.getGroupDetail().getGroup(), inputInfo.getGroupDetail().getGroupTrack(), inputInfo.getInput()));
+        inputInfoList.forEach(inputInfo -> getHandler(eventType).handle(eventInfoList, inputInfo.getGroupDetail().getGroup(), inputInfo.getGroupDetail().getGroupTrack(), inputInfo.getInput()));
         return eventInfoList;
     }
 
@@ -168,5 +191,18 @@ public class DoctorGroupEventManager {
             throw new ServiceException("handler.not.found");
         }
         return handlerMapping.get(interfaceClass);
+    }
+
+    /**
+     * 获取事件处理器
+     * @param eventType 实现类型
+     * @return 事件处理器
+     */
+    private DoctorGroupEventHandler getHandler(Integer eventType) {
+        if (!handlerMap.containsKey(eventType) || handlerMap.get(eventType) == null) {
+            log.error("Not any event handler found for illegal eventType:{}", eventType);
+            throw new ServiceException("handler.not.found");
+        }
+        return handlerMap.get(eventType);
     }
 }

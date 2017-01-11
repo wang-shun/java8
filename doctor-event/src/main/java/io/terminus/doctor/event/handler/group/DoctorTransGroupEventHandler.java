@@ -4,7 +4,6 @@ import com.google.common.base.MoreObjects;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -149,7 +148,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         //6.判断是否新建群,触发目标群的转入仔猪事件
         if (Objects.equals(transGroup.getIsCreateGroup(), IsOrNot.YES.getValue())) {
             //新建猪群
-            Long toGroupId = autoTransGroupEventNew(group, groupTrack, transGroup, toBarn);
+            Long toGroupId = autoTransGroupEventNew(eventInfoList, group, groupTrack, transGroup, toBarn);
             transGroup.setToGroupId(toGroupId);
 
             //更新事件
@@ -180,7 +179,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     /**
      * 系统触发的自动新建猪群事件(转群触发)
      */
-    private Long autoTransGroupEventNew(DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup, DoctorBarn toBarn) {
+    private Long autoTransGroupEventNew(List<DoctorEventInfo> eventInfoList, DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup, DoctorBarn toBarn) {
         DoctorNewGroupInput newGroupInput = new DoctorNewGroupInput();
         newGroupInput.setFarmId(fromGroup.getFarmId());
         newGroupInput.setGroupCode(transGroup.getToGroupCode());    //录入猪群号
@@ -204,7 +203,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         toGroup.setOrgName(fromGroup.getOrgName());
         toGroup.setCreatorId(transGroup.getCreatorId());    //创建人取录入转群事件的人
         toGroup.setCreatorName(transGroup.getCreatorName());
-        return doctorGroupManager.createNewGroup(toGroup, newGroupInput);
+        return doctorGroupManager.createNewGroup(eventInfoList, toGroup, newGroupInput);
     }
 
     private DoctorBarn getBarn(Long barnId) {
