@@ -105,4 +105,8 @@ msg:
       appKey: 574cecdce0f55a85f00028fe
       appSecret: ws685rsevimn8fgx6mmxzzgx7bs1y9pn
 
-
+# File size limit
+# Total request size for a multipart/form-data
+multipart:
+  max-file-size: 10Mb
+  max-request-size: 10Mb
