@@ -41,6 +41,8 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -119,6 +121,7 @@ public class DoctorGroupEventManager {
      */
     @Transactional
     public List<DoctorEventInfo> batchHandleEvent(List<DoctorGroupInputInfo> inputInfoList, Integer eventType) {
+        eventRepeatCheck(inputInfoList);
         final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
         inputInfoList.forEach(inputInfo -> getHandler(eventType).handle(eventInfoList, inputInfo.getGroupDetail().getGroup(), inputInfo.getGroupDetail().getGroupTrack(), inputInfo.getInput()));
         return eventInfoList;
@@ -204,5 +207,16 @@ public class DoctorGroupEventManager {
             throw new ServiceException("handler.not.found");
         }
         return handlerMap.get(eventType);
+    }
+
+    /**
+     * 批量事件的重复性校验
+     * @param inputList 批量事件输入
+     */
+    private void eventRepeatCheck(List<DoctorGroupInputInfo> inputList) {
+        Set<String> inputSet = inputList.stream().map(groupInputInfo -> groupInputInfo.getGroupDetail().getGroup().getGroupCode()).collect(Collectors.toSet());
+        if (inputList.size() != inputSet.size()) {
+            throw new ServiceException("batch.event.groupCode.not.repeat");
+        }
     }
 }

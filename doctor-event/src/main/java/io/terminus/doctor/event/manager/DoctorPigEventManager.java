@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -71,6 +72,9 @@ public class DoctorPigEventManager {
      */
     @Transactional
     public List<DoctorEventInfo> batchEventsHandle(List<BasePigEventInputDto> eventInputs, DoctorBasicInputInfoDto basic) {
+        //校验输入数据的重复性
+        eventRepeatCheck(eventInputs);
+
         DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(basic.getEventType());
         final List<DoctorEventInfo> eventInfos = Lists.newArrayList();
         eventInputs.forEach(inputDto -> {
@@ -217,4 +221,14 @@ public class DoctorPigEventManager {
         return DoctorEventSelector.selectPigEvent(pigStatus, pigType);
     }
 
+    /**
+     * 批量事件的重复性校验
+     * @param inputList 批量事件输入
+     */
+    private void eventRepeatCheck(List<BasePigEventInputDto> inputList) {
+        Set<String> inputSet = inputList.stream().map(BasePigEventInputDto::getPigCode).collect(Collectors.toSet());
+        if (inputList.size() != inputSet.size()) {
+            throw new ServiceException("batch.event.pigCode.not.repeat");
+        }
+    }
 }
