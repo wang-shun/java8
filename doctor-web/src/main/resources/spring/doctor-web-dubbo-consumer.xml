@@ -12,9 +12,6 @@
         http://code.alibabatech.com/schema/dubbo
         http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
-    <!--config-->
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.config.service.ConfigReadService" id="configReadService" check="false"/>
-
     <!-- user services -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserReadService" id="userReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserWriteService" id="userWriteService" check="false"/>
@@ -108,13 +105,13 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicMaterialReadService" id="doctorBasicMaterialReadService" check="false"/>
 
     <!-- doctor ware house  -->
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService" id="doctorWareHouseTypeWriteService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorWareHouseReadService" id="doctorWareHouseReadService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService" id="doctorWareHouseWriteService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService" id="doctorMaterialInWareHouseWriteService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.FeedFormulaWriteService" id="feedFormulaWriteService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.FeedFormulaReadService" id="feedFormulaReadService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService" id="doctorMaterialInWareHouseReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorWareHouseTypeWriteService" id="doctorWareHouseTypeWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorWareHouseReadService" id="doctorWareHouseReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorWareHouseWriteService" id="doctorWareHouseWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorMaterialInWareHouseWriteService" id="doctorMaterialInWareHouseWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.FeedFormulaWriteService" id="feedFormulaWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.FeedFormulaReadService" id="feedFormulaReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorMaterialInWareHouseReadService" id="doctorMaterialInWareHouseReadService" check="false"/>
 
     <!-- group service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupReadService" id="doctorGroupReadService" check="false"/>
@@ -127,8 +124,4 @@
     <!--statistic-->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService" id="doctorPigTypeStatisticWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserRoleLoader" id="doctorUserRoleLoader" check="false"/>
-
-    <!--work-flow-->
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.workflow.access.JdbcAccess" id="jdbcAccess" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.workflow.core.WorkFlowService" id="workFlowService" check="false"/>
 </beans>

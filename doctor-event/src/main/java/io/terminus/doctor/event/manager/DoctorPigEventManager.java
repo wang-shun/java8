@@ -1,34 +1,41 @@
 package io.terminus.doctor.event.manager;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.constants.JacksonType;
-import io.terminus.doctor.common.utils.Params;
+import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.event.DataEvent;
+import io.terminus.doctor.common.event.ZkGroupPublishDto;
+import io.terminus.doctor.common.event.ZkListenedGroupEvent;
+import io.terminus.doctor.common.event.ZkListenedPigEvent;
+import io.terminus.doctor.common.event.ZkPigPublishDto;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.DoctorPigEntryEventDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.handler.DoctorEventHandlerChainInvocation;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.workflow.core.Executor;
-import io.terminus.doctor.workflow.service.FlowProcessService;
-import io.terminus.doctor.workflow.service.FlowQueryService;
-import lombok.SneakyThrows;
+import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.event.DoctorGroupPublishDto;
+import io.terminus.doctor.event.event.DoctorPigPublishDto;
+import io.terminus.doctor.event.event.ListenedGroupEvent;
+import io.terminus.doctor.event.event.ListenedPigEvent;
+import io.terminus.doctor.event.handler.DoctorEventSelector;
+import io.terminus.doctor.event.handler.DoctorPigEventHandler;
+import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.stream.Collectors;
 
-import static io.terminus.doctor.event.constants.DoctorPigExtraConstants.EVENT_PIG_ID;
+import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.event.enums.PigEvent.NOTICE_MESSAGE_PIG_EVENT;
 
 /**
  * Created by yaoqijun.
@@ -40,163 +47,162 @@ import static io.terminus.doctor.event.constants.DoctorPigExtraConstants.EVENT_P
 @Slf4j
 public class DoctorPigEventManager {
 
-    private final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
-
-    private final DoctorEventHandlerChainInvocation doctorEventHandlerChainInvocation;
-
-    private final FlowProcessService flowProcessService;
-
-    private final String sowFlowDefinitionKey;
-
-    private final FlowQueryService flowQueryService;
+    @Autowired
+    private DoctorPigEventHandlers pigEventHandlers;
 
     @Autowired
-    public DoctorPigEventManager(DoctorEventHandlerChainInvocation doctorEventHandlerChainInvocation,
-                                 FlowProcessService flowProcessService,
-                                 @Value("${flow.definition.key.sow:sow}") String sowFlowDefinitionKey,
-                                 FlowQueryService flowQueryService){
-        this.doctorEventHandlerChainInvocation = doctorEventHandlerChainInvocation;
-        this.flowProcessService = flowProcessService;
-        this.sowFlowDefinitionKey = sowFlowDefinitionKey;
-        this.flowQueryService = flowQueryService;
-    }
+    private CoreEventDispatcher coreEventDispatcher;
+
+    @Autowired
+    private Publisher publisher;
 
     /**
-     * 本地管理 Boar Casual 事件信息管理
-     * @param doctorBasicInputInfoDto
-     * @param extra
-     * @return
+     * 事件处理
+     * @param inputDto 事件信息数据
+     * @param basic 基础数据
      */
     @Transactional
-    public Map<String, Object> createCasualPigEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto,
-                                                    Map<String, Object> extra) throws Exception{
-        Map<String,Object> context = Maps.newHashMap();
-        doctorEventHandlerChainInvocation.invoke(doctorBasicInputInfoDto, extra, context);
-
-        /**
-         * 母猪创建对应的事件流信息
-         */
-        Map<String, Object> ids = OBJECT_MAPPER.readValue(context.get("createEventResult").toString(), JacksonType.MAP_OF_OBJECT);
-        ids.put("contextType","single");
-        ids.put("type", doctorBasicInputInfoDto.getEventType());
-        if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
-            Long pigId = Params.getWithConvert(ids, "doctorPigId", a->Long.valueOf(a.toString()));
-
-            if(Objects.equals(doctorBasicInputInfoDto.getEventType(), PigEvent.ENTRY.getKey())){
-                flowProcessService.startFlowInstance(sowFlowDefinitionKey, pigId);
-            }else if(Objects.equals(doctorBasicInputInfoDto.getEventType(), PigEvent.REMOVAL.getKey())){
-                flowProcessService.endFlowInstance(sowFlowDefinitionKey, pigId, true, null);
-            }
-        }
-        return ids;
-    }
-    /**
-     * 批量本地管理 Boar Casual 事件信息管理
-     * @param doctorPigEntryEventDtoList
-     * @return
-     */
-    @Transactional
-    public List<Map<String, Object>> createCasualPigEvent(List<DoctorPigEntryEventDto> doctorPigEntryEventDtoList) throws Exception{
-        List<Map<String,Object>> result= Lists.newArrayList();
-        for (DoctorPigEntryEventDto doctorPigEntryEventDto:doctorPigEntryEventDtoList ){
-            DoctorFarmEntryDto doctorFarmEntryDto=doctorPigEntryEventDto.getDoctorFarmEntryDto();
-            DoctorBasicInputInfoDto doctorBasicInputInfoDto=doctorPigEntryEventDto.getDoctorBasicInputInfoDto();
-            Map<String,Object> context = Maps.newHashMap();
-            Map<String,Object> extra=Maps.newHashMap();
-            BeanMapper.copy(doctorFarmEntryDto,extra);
-            doctorEventHandlerChainInvocation.invoke(doctorPigEntryEventDto.getDoctorBasicInputInfoDto(), extra, context);
-            /**
-             * 母猪创建对应的事件流信息
-             */
-            Map<String, Object> ids = OBJECT_MAPPER.readValue(context.get("createEventResult").toString(), JacksonType.MAP_OF_OBJECT);
-            ids.put("barnId",doctorFarmEntryDto.getBarnId());
-            ids.put("contextType","single");
-            ids.put("type", doctorBasicInputInfoDto.getEventType());
-            if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
-                Long pigId = Params.getWithConvert(ids, "doctorPigId", a->Long.valueOf(a.toString()));
-                if(Objects.equals(doctorBasicInputInfoDto.getEventType(), PigEvent.ENTRY.getKey())){
-                    flowProcessService.startFlowInstance(sowFlowDefinitionKey, pigId);
-                }else if(Objects.equals(doctorBasicInputInfoDto.getEventType(), PigEvent.REMOVAL.getKey())){
-                    flowProcessService.endFlowInstance(sowFlowDefinitionKey, pigId, true, null);
-                }
-            }
-            result.add(ids);
-        }
-        return result;
-    }
-    /**
-     * 批量创建普通事件信息内容
-     * @param basicList
-     * @param extra
-     * @return 通过PigId 获取对应的返回结果信息
-     */
-    @Transactional
-    public Map<String, Object> createCasualPigEvents(List<DoctorBasicInputInfoDto> basicList, Map<String,Object> extra){
-        Map<String,Object> result = Maps.newHashMap();
-        basicList.forEach(basic->{
-            Map<String,Object> currentContext = Maps.newHashMap();
-            doctorEventHandlerChainInvocation.invoke(basic, extra, currentContext);
-            result.put(basic.getPigId().toString(), JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(currentContext));
-        });
-        result.put("contextType", "mult");
-        return result;
+    public List<DoctorEventInfo> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
+        DoctorPigEventHandler doctorEventCreateHandler = pigEventHandlers.getEventHandlerMap().get(basic.getEventType());
+        doctorEventCreateHandler.handleCheck(inputDto, basic);
+        List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
+        doctorEventCreateHandler.handle(doctorEventInfoList, inputDto, basic);
+        return doctorEventInfoList;
     }
 
     /**
-     * 录入母猪信息管理
+     * 批量事件处理
+     * @param eventInputs
      * @param basic
-     * @param extra
      * @return
      */
     @Transactional
-    @SneakyThrows
-    public Map<String,Object> createSowPigEvent(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
-        return createSingleSowEvents(basic, extra);
+    public List<DoctorEventInfo> batchEventsHandle(List<BasePigEventInputDto> eventInputs, DoctorBasicInputInfoDto basic) {
+        DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(basic.getEventType());
+        List<DoctorEventInfo> eventInfos = Lists.newArrayList();
+        eventInputs.forEach(inputDto -> {
+            handler.handleCheck(inputDto, basic);
+            handler.handle(eventInfos, inputDto, basic);
+        });
+        return eventInfos;
     }
 
     /**
-     * 批量创建Pig事件信息
-     * @param basicInputInfoDtos
-     * @param extra
-     * @return
+     * 校验携带数据正确性，发布事件
      */
-    @Transactional
-    @SneakyThrows
-    public Map<String,Object> createSowEvents(List<DoctorBasicInputInfoDto> basicInputInfoDtos, Map<String, Object> extra){
-        Map<String,Object> results = Maps.newHashMap();
-        basicInputInfoDtos.forEach(dto-> results.put(dto.getPigId().toString(),
-                createSingleSowEvents(dto, extra)));
-        results.put("contextType", "mult");
-        return results;
+    public void  checkAndPublishEvent(List<DoctorEventInfo> dtos) {
+        if (notEmpty(dtos)) {
+            checkFarmIdAndEventAt(dtos);
+            publishPigEvent(dtos);
+        }
     }
 
-    @SneakyThrows
-    private Map<String, Object> createSingleSowEvents(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
-        //发送此事件的母猪id
-        extra.put(EVENT_PIG_ID, basic.getPigId());
+    //发布事件, 用于更新回滚后操作
+    private void publishPigEvent(List<DoctorEventInfo> eventInfoList) {
 
-        // build data
-        String flowData = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(ImmutableMap.of(
-                "basic",JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(basic),
-                "extra",JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(extra)));
+        if (Arguments.isNullOrEmpty(eventInfoList)) {
+            return;
+        }
+        Long orgId = eventInfoList.get(0).getOrgId();
+        Long farmId = eventInfoList.get(0).getFarmId();
+        List<DoctorPigPublishDto> pigMessagePublishList = Lists.newArrayList();
+        List<DoctorGroupPublishDto> groupMessagePublishList = Lists.newArrayList();
 
-        // execute
-        Executor executor = flowProcessService.getExecutor(sowFlowDefinitionKey, basic.getPigId());
+        Map<Integer, List<DoctorEventInfo>> eventInfoMap = eventInfoList.stream().collect(Collectors.groupingBy(DoctorEventInfo::getBusinessType));
+        if (!eventInfoMap.containsKey(DoctorEventInfo.Business_Type.PIG.getValue())) {
+            return;
+        }
+        Map<Integer, List<DoctorEventInfo>> pigEventInfoMap = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue()).stream()
+                .collect(Collectors.groupingBy(DoctorEventInfo::getEventType));
+        pigEventInfoMap.keySet().forEach(eventType -> {
+            List<DoctorPigPublishDto> pigPublishDtoList = pigEventInfoMap.get(eventType).stream().map(doctorEventInfo -> {
+                DoctorPigPublishDto pigPublishDto = new DoctorPigPublishDto();
+                pigPublishDto.setPigId(doctorEventInfo.getBusinessId());
+                pigPublishDto.setEventId(doctorEventInfo.getEventId());
+                pigPublishDto.setEventAt(doctorEventInfo.getEventAt());
+                pigPublishDto.setKind(doctorEventInfo.getKind());
+                pigPublishDto.setMateType(doctorEventInfo.getMateType());
+                pigPublishDto.setPregCheckResult(doctorEventInfo.getPregCheckResult());
+                return pigPublishDto;
+            }).collect(Collectors.toList());
+            if (NOTICE_MESSAGE_PIG_EVENT.contains(eventType)) {
+                pigMessagePublishList.addAll(pigPublishDtoList);
+            }
+            coreEventDispatcher.publish(new ListenedPigEvent(orgId, farmId, eventType, pigPublishDtoList));
+        });
 
-        //  添加参数信息
-        Map<String, Object> express = Maps.newHashMap();
-        express.put("eventType", basic.getEventType());
-        if(Objects.equals(basic.getEventType(), PigEvent.PREG_CHECK.getKey())){
-            express.put("checkResult", extra.get("checkResult"));
+        try {
+            List<ZkPigPublishDto> zkPigPublishDtoList = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue()).stream()
+                    .filter(doctorEventInfo -> GroupEventType.NOTICE_MESSAGE_GROUP_EVENT.contains(doctorEventInfo.getEventType()))
+                    .map(doctorEventInfo -> {
+                        return ZkPigPublishDto.builder()
+                                .pigId(doctorEventInfo.getBusinessId())
+                                .eventAt(doctorEventInfo.getEventAt())
+                                .eventId(doctorEventInfo.getEventId())
+                                .eventType(doctorEventInfo.getEventType())
+                                .build();
+                    }).collect(Collectors.toList());
+            if (!Arguments.isNullOrEmpty(zkPigPublishDtoList)) {
+                publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new ZkListenedPigEvent(orgId, farmId, zkPigPublishDtoList)));
+            }
+        } catch (Exception e) {
+            log.error("publish.pig.event.fail");
         }
 
-        // 添加对应的操作方式
-        executor.execute(express, flowData);
-        String flowDataContent = flowQueryService.getFlowProcessQuery().getCurrentProcesses(sowFlowDefinitionKey, basic.getPigId()).get(0).getFlowData();
-        Map<String,String> flowDataMap = OBJECT_MAPPER.readValue(flowDataContent, JacksonType.MAP_OF_STRING);
-        Map<String, Object> results = OBJECT_MAPPER.readValue(flowDataMap.get("createEventResult"), JacksonType.MAP_OF_OBJECT);
-        results.put("contextType", "single");
-        results.put("type", basic.getEventType());
-        return results;
+        if (!eventInfoMap.containsKey(DoctorEventInfo.Business_Type.GROUP.getValue())) {
+            return;
+        }
+        Map<Integer, List<DoctorEventInfo>> groupEventInfoMap = eventInfoMap.get(DoctorEventInfo.Business_Type.GROUP.getValue()).stream()
+                .collect(Collectors.groupingBy(DoctorEventInfo::getEventType));
+        groupEventInfoMap.keySet().forEach(eventType -> {
+            List<DoctorGroupPublishDto> groupPublishDtoList = groupEventInfoMap.get(eventType).stream().map(doctorEventInfo -> {
+                DoctorGroupPublishDto groupPublishDto = new DoctorGroupPublishDto();
+                groupPublishDto.setGroupId(doctorEventInfo.getBusinessId());
+                groupPublishDto.setEventId(doctorEventInfo.getEventId());
+                groupPublishDto.setEventAt(doctorEventInfo.getEventAt());
+                return groupPublishDto;
+            }).collect(Collectors.toList());
+            if (GroupEventType.NOTICE_MESSAGE_GROUP_EVENT.contains(eventType)) {
+                groupMessagePublishList.addAll(groupPublishDtoList);
+            }
+            coreEventDispatcher.publish(new ListenedGroupEvent(orgId, farmId, eventType, groupPublishDtoList));
+        });
+        try {
+            List<ZkGroupPublishDto> zkGroupPublishDtoList = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue()).stream()
+                    .filter(doctorEventInfo -> GroupEventType.NOTICE_MESSAGE_GROUP_EVENT.contains(doctorEventInfo.getEventType()))
+                    .map(doctorEventInfo -> {
+                        return ZkGroupPublishDto.builder()
+                                .groupId(doctorEventInfo.getBusinessId())
+                                .eventAt(doctorEventInfo.getEventAt())
+                                .eventId(doctorEventInfo.getEventId())
+                                .eventType(doctorEventInfo.getEventType())
+                                .build();
+                    }).collect(Collectors.toList());
+            if (!Arguments.isNullOrEmpty(zkGroupPublishDtoList)) {
+                publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new ZkListenedGroupEvent(orgId, farmId, zkGroupPublishDtoList)));
+            }
+        } catch (Exception e) {
+            log.error("publish.pig.event.fail");
+        }
+
     }
+
+    private void checkFarmIdAndEventAt(List<DoctorEventInfo> dtos) {
+        dtos.forEach(dto -> {
+            if (dto.getFarmId() == null || dto.getEventAt() == null) {
+                throw new ServiceException("publish.create.event.not.null");
+            }
+        });
+    }
+
+    /**
+     * 猪当前可执行事件
+     * @param pigStatus 猪状态
+     * @param pigType 猪舍类型
+     * @return 可执行事件
+     */
+    public List<PigEvent> selectEvents(PigStatus pigStatus, PigType pigType) {
+        return DoctorEventSelector.selectPigEvent(pigStatus, pigType);
+    }
+
 }

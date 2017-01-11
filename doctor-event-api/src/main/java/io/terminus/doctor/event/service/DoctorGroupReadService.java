@@ -2,7 +2,6 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.event.dto.DoctorGroupCount;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
@@ -95,14 +94,6 @@ public interface DoctorGroupReadService {
      * @return 事件类型s
      */
     Response<List<Integer>> findEventTypesByGroupIds(@NotEmpty(message = "groupIds.not.empty") List<Long> groupIds);
-
-    /**
-     * 统计猪群不同种类的猪群数量
-     * @param farmId 猪场id
-     * @return 统计结果
-     */
-    Response<DoctorGroupCount> countFarmGroups(@NotNull(message = "orgId.not.null") Long orgId,
-                                               @NotNull(message = "farmId.not.null") Long farmId);
 
     /**
      * 分页查询猪群历史事件

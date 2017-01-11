@@ -10,7 +10,6 @@ import io.terminus.doctor.event.DoctorEventConfiguration;
 import io.terminus.doctor.interceptor.MockLoginInterceptor;
 import io.terminus.doctor.msg.DoctorMsgConfig;
 import io.terminus.doctor.user.DoctorUserConfiguration;
-import io.terminus.doctor.warehouse.DoctorWarehouseConfiguration;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.component.DoctorHbsHelpers;
 import io.terminus.doctor.web.core.component.ParanaHbsHelpers;
@@ -54,7 +53,6 @@ import java.util.List;
         DoctorBasicConfiguration.class,
         DoctorMsgConfig.class,
         DoctorUserConfiguration.class,
-        DoctorWarehouseConfiguration.class,
         DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,
         AuthenticationConfiguration.class,

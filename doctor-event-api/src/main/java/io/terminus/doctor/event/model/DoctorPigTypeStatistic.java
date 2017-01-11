@@ -77,13 +77,13 @@ public class DoctorPigTypeStatistic implements Serializable {
     /**
      * 设置 猪数量
      * @param pigType
-     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     * @see DoctorPig.PigSex
      * @param pigCount
      */
     public void putPigTypeCount(Integer pigType, Integer pigCount){
-        if(Objects.equals(pigType, DoctorPig.PIG_TYPE.BOAR.getKey())){
+        if(Objects.equals(pigType, DoctorPig.PigSex.BOAR.getKey())){
             this.boar = pigCount;
-        }else if(Objects.equals(pigType, DoctorPig.PIG_TYPE.SOW.getKey())){
+        }else if(Objects.equals(pigType, DoctorPig.PigSex.SOW.getKey())){
             this.sow = pigCount;
         }else {
             throw new IllegalArgumentException("input.pigType.error");

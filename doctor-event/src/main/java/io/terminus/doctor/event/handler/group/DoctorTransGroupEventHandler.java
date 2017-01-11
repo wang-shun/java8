@@ -6,7 +6,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -24,7 +24,6 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +46,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
     private final DoctorGroupManager doctorGroupManager;
-    private final DoctorBarnReadService doctorBarnReadService;
+    private final DoctorBarnDao doctorBarnDao;
 
     @Autowired
     public DoctorTransGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -56,12 +55,12 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
                                         DoctorGroupEventDao doctorGroupEventDao,
                                         DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
                                         DoctorGroupManager doctorGroupManager,
-                                        DoctorBarnReadService doctorBarnReadService) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
+                                        DoctorBarnDao doctorBarnDao) {
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorGroupManager = doctorGroupManager;
-        this.doctorBarnReadService = doctorBarnReadService;
+        this.doctorBarnDao = doctorBarnDao;
     }
 
     @Override
@@ -174,7 +173,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         }
 
         //发布统计事件
-        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
+        publistGroupAndBarn(event);
     }
 
     /**
@@ -208,6 +207,6 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     }
 
     private DoctorBarn getBarn(Long barnId) {
-        return RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId));
+        return doctorBarnDao.findById(barnId);
     }
 }

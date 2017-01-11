@@ -1,0 +1,70 @@
+package io.terminus.doctor.event.dto.event;
+
+import io.terminus.doctor.event.model.DoctorPig;
+import lombok.Data;
+import lombok.Getter;
+import lombok.experimental.Builder;
+
+import java.util.Date;
+import java.util.Objects;
+
+/**
+ * Created by xjn on 17/1/4.
+ * 事件信息
+ */
+@Data
+@Builder
+public class DoctorEventInfo {
+    private Long orgId;
+    private Long farmId;
+    private Long eventId;
+    private String code;
+    private Long businessId;
+    private Integer status;
+    private Date eventAt;
+    private Integer eventType;
+    private Integer businessType;
+
+    /**
+     * 如果是猪事件,猪的类型(性别)
+     * @see DoctorPig.PigSex
+     */
+
+    private Integer kind;
+    /**
+     * 配种类型(如果是配种事件)
+     * @see io.terminus.doctor.event.enums.DoctorMatingType
+     */
+    private Integer mateType;
+
+    /**
+     * 妊检结果(如果是妊检事件)
+     * @see io.terminus.doctor.event.enums.PregCheckResult
+     */
+    private Integer pregCheckResult;
+
+    public enum Business_Type {
+        PIG(1, "猪"),
+        GROUP(2, "猪群");
+
+        Business_Type(Integer value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        @Getter
+        private Integer value;
+
+        @Getter
+        private String desc;
+
+        public Business_Type from (Integer value){
+            for(Business_Type businessType : Business_Type.values()) {
+                if (Objects.equals(value, businessType.getValue())) {
+                    return businessType;
+                }
+            }
+            return null;
+        }
+    }
+}

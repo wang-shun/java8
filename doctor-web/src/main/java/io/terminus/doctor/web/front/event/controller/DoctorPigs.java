@@ -284,16 +284,6 @@ public class DoctorPigs {
         return doctorMatingDetail;
     }
 
-    /* 部署母猪流程
-     * @return
-        @ResponseBody
- */
-    @RequestMapping(value = "/sow/flow/deploy", method = RequestMethod.GET)
-    @ResponseBody
-    public Boolean deploy() {
-        return RespHelper.or500(doctorPigWriteService.deploy());
-    }
-
     @RequestMapping(value = "/getFosterDetail", method = RequestMethod.GET)
     @ResponseBody
     public DoctorFosterDetail getFosterDetailByPigId (@RequestParam("pigId") Long pigId) {
@@ -365,7 +355,7 @@ public class DoctorPigs {
         if(pig == null){
             throw new JsonResponseException("pig.not.found");
         }
-        if(Objects.equals(pig.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())){
+        if(Objects.equals(pig.getPigType(), DoctorPig.PigSex.BOAR.getKey())){
             throw new JsonResponseException("boar.code.forbid.update");
         }
 

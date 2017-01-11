@@ -5,10 +5,10 @@ server:
 mybatis:
   mapperLocations: classpath*:mapper/*Mapper.xml
   typeAliasesPackage: >
-    io.terminus.doctor.warehouse.model,
+    io.terminus.doctor.basic.model,
     io.terminus.parana.(user|file|article|user.address).model,io.terminus.doctor.user.model,
     io.terminus.parana.msg.model,
-    io.terminus.doctor.event.model,io.terminus.doctor.workflow.model,
+    io.terminus.doctor.event.model,
     io.terminus.parana.config.model,
     io.terminus.doctor.basic.model,
     io.terminus.parana.msg.model,

@@ -1,20 +1,17 @@
 package io.terminus.doctor.event.handler.usual;
 
-import io.terminus.doctor.common.utils.Params;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.Objects;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Created by yaoqijun.
@@ -25,25 +22,20 @@ import java.util.Objects;
 @Component
 public class DoctorConditionHandler extends DoctorAbstractEventHandler{
 
-    @Autowired
-    public DoctorConditionHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao, DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao, DoctorRevertLogDao doctorRevertLogDao) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
-    }
-
     @Override
-    public Boolean preHandler(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) throws RuntimeException {
-        return Objects.equals(basic.getEventType(), PigEvent.CONDITION.getKey());
-    }
-
-    @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
-        if(extra.get("conditionWeight") != null){
-            doctorPigTrack.setWeight(Params.getWithConvert(extra, "conditionWeight", a->Double.valueOf(a.toString())));
-        }else if(extra.get("weight") != null){
-            doctorPigTrack.setWeight(Params.getWithConvert(extra, "weight", a->Double.valueOf(a.toString())));
+    protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        if (Objects.equals(inputDto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
+            DoctorConditionDto conditionDto = (DoctorConditionDto) inputDto;
+            if (conditionDto.getConditionWeight() != null) {
+                doctorPigTrack.setWeight(conditionDto.getConditionWeight());
+            }
+        } else {
+            DoctorBoarConditionDto boarConditionDto = (DoctorBoarConditionDto) inputDto;
+            checkState(boarConditionDto.getWeight() != null, "boar.condition.weight.not.null");
+            doctorPigTrack.setWeight(boarConditionDto.getWeight());
         }
-        doctorPigTrack.addAllExtraMap(extra);
-        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+
         return doctorPigTrack;
     }
 }

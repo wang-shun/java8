@@ -1,7 +1,6 @@
 package configuration.open;
 
 import io.terminus.doctor.basic.DoctorBasicConfiguration;
-import io.terminus.doctor.config.DoctorConfigConfiguration;
 import io.terminus.doctor.event.DoctorEventConfiguration;
 import io.terminus.doctor.msg.DoctorMsgConfig;
 import io.terminus.doctor.open.DoctorOPConfiguration;
@@ -19,9 +18,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  */
 @Configuration
 @EnableWebMvc
-@EnableAutoConfiguration(excludeName = {})
+@EnableAutoConfiguration
 @Import({
-        DoctorConfigConfiguration.class,
         DoctorEventConfiguration.class,
         DoctorBasicConfiguration.class,
         DoctorMsgConfig.class,

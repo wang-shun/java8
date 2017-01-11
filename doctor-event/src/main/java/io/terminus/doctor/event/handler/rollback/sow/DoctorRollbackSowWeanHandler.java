@@ -3,7 +3,7 @@ package io.terminus.doctor.event.handler.rollback.sow;
 import com.google.common.collect.Lists;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.RollbackType;
@@ -41,7 +41,7 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
         }
 
         //断奶后如果转舍，判断转舍是否是最新事件
-        DoctorPartWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorPartWeanDto.class);
+        DoctorWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorWeanDto.class);
         if (weanDto.getChgLocationToBarnId() != null) {
             DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
             if (toPigEvent == null) {
@@ -60,7 +60,7 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //如果断奶后转舍， 先回滚转舍
-        DoctorPartWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorPartWeanDto.class);
+        DoctorWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorWeanDto.class);
         if (weanDto.getChgLocationToBarnId() != null) {
             DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
             DoctorBarn doctorBarn = doctorBarnDao.findById(weanDto.getChgLocationToBarnId());

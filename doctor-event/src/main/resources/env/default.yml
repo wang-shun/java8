@@ -5,7 +5,7 @@ spring:
 # MyBatis
 mybatis:
   mapper-locations: classpath*:mapper/*Mapper.xml
-  type-aliases-package: io.terminus.doctor.event.model,io.terminus.doctor.workflow.model
+  type-aliases-package: io.terminus.doctor.event.model
 
 # Datasource
 datasource:
@@ -43,9 +43,3 @@ redis:
 search:
   host: 127.0.0.1
   port: 9200
-
-flow:
-  definition:
-    key:
-      sow: sow
-      boar: boar

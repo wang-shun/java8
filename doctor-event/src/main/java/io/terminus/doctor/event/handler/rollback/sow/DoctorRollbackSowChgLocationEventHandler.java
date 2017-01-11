@@ -30,7 +30,7 @@ public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRoll
     @Autowired private DoctorRollbackGroupTransHandler doctorRollbackGroupTransHandler;
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        return Objects.equals(pigEvent.getType(), PigEvent.CHG_LOCATION.getKey()) && Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey());
+        return Objects.equals(pigEvent.getType(), PigEvent.CHG_LOCATION.getKey()) && Objects.equals(pigEvent.getKind(), DoctorPig.PigSex.SOW.getKey());
     }
 
     @Override

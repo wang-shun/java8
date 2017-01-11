@@ -25,7 +25,7 @@ public class DoctorRollbackSowEntryEventHandler extends DoctorAbstractRollbackPi
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
 
         return Objects.equals(pigEvent.getType(), PigEvent.ENTRY.getKey()) &&
-                Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey());
+                Objects.equals(pigEvent.getKind(), DoctorPig.PigSex.SOW.getKey());
     }
 
     @Override
@@ -39,7 +39,6 @@ public class DoctorRollbackSowEntryEventHandler extends DoctorAbstractRollbackPi
         doctorPigTrackDao.delete(info.getPigTrack().getId());
         doctorPigSnapshotDao.delete(snapshot.getId());
         createDoctorRevertLog(pigEvent, doctorPigTrack, doctorPig, operatorId, operatorName);
-        workFlowRollback(pigEvent);
     }
 
     @Override

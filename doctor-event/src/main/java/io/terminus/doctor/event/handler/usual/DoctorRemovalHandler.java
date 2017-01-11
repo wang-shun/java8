@@ -1,17 +1,11 @@
 package io.terminus.doctor.event.handler.usual;
 
 import io.terminus.common.exception.ServiceException;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -20,10 +14,8 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -39,24 +31,16 @@ import static java.util.Objects.isNull;
 @Slf4j
 public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
 
-    @Autowired
-    public DoctorRemovalHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao, DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao, DoctorRevertLogDao doctorRevertLogDao) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
-    }
-
     @Override
-    public Boolean preHandler(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) throws RuntimeException {
-        return Objects.equals(basic.getEventType(), PigEvent.REMOVAL.getKey());
-    }
-
-    @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        doctorPigTrack.setGroupId(-1L);
-        doctorPigTrack.addAllExtraMap(extra);
-        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
-        if (Objects.equals(DoctorPig.PIG_TYPE.BOAR.getKey(), basic.getPigType())) {
+    protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        DoctorRemovalDto removalDto = (DoctorRemovalDto) inputDto;
+       doctorPigTrack.setGroupId(-1L);
+        doctorPigTrack.addAllExtraMap(removalDto.toMap());
+        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        if (Objects.equals(DoctorPig.PigSex.BOAR.getKey(), removalDto.getPigType())) {
             doctorPigTrack.setStatus(PigStatus.BOAR_LEAVE.getKey());
-        } else if (Objects.equals(DoctorPig.PIG_TYPE.SOW.getKey(), basic.getPigType())) {
+        } else if (Objects.equals(DoctorPig.PigSex.SOW.getKey(), removalDto.getPigType())) {
             doctorPigTrack.setStatus(PigStatus.Removal.getKey());
         } else {
             throw new IllegalStateException("basic.pigTypeValue.error");
@@ -66,16 +50,19 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    public void afterHandler(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) throws RuntimeException {
-        // 离场 事件 修改Pig 状态信息
-        DoctorPig doctorPig = doctorPigDao.findById(basic.getPigId());
+    protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
+        super.specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
+       // 离场 事件 修改Pig 状态信息
+        DoctorPig doctorPig = doctorPigDao.findById(inputDto.getPigId());
         checkState(!isNull(doctorPig), "input.doctorPigId.error");
         checkState(doctorPigDao.removalPig(doctorPig.getId()), "update.pigRemoval.fail");
     }
 
     @Override
-    protected void eventCreatePreHandler(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
-        DoctorRemovalDto removel = BeanMapper.map(extra, DoctorRemovalDto.class);
+    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        DoctorRemovalDto removel = (DoctorRemovalDto) inputDto;
         if (removel == null) {
             throw new ServiceException("removel.not.empty");
         }
@@ -88,11 +75,7 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
             //查找最近一次配种事件
             DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
 
-            if (lastMate == null || !lastMate.getExtraMap().containsKey("matingDate")) {
-                return;
-            }
-
-            DateTime mattingDate = new DateTime(Long.valueOf(lastMate.getExtraMap().get("matingDate").toString()));
+            DateTime mattingDate = new DateTime(lastMate.getEventAt());
             DateTime eventTime = new DateTime(doctorPigEvent.getEventAt());
 
             int npd = Math.abs(Days.daysBetween(eventTime, mattingDate).getDays());
@@ -108,5 +91,6 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
                 doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
             }
         }
+        return doctorPigEvent;
     }
 }

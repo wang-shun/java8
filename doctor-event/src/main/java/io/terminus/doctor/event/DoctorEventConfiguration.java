@@ -1,10 +1,13 @@
 package io.terminus.doctor.event;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
-import io.terminus.doctor.event.handler.DoctorEntryHandler;
-import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
+import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
+import io.terminus.doctor.event.handler.DoctorPigEventHandler;
+import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgFarmEventHandler;
@@ -39,13 +42,19 @@ import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowRemovalEve
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowToChgLocationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowVaccinationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowWeanHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowFarrowingHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowFostersByHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowFostersHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowPigletsChgHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowPregCheckHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowWeanHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
 import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
 import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
 import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
 import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
-import io.terminus.doctor.workflow.DoctorWorkflowConfiguration;
 import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
@@ -55,6 +64,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -66,7 +77,7 @@ import org.springframework.context.annotation.Import;
 @ComponentScan(basePackages = {
         "io.terminus.doctor.event",
 })
-@Import({DoctorWorkflowConfiguration.class, DoctorCommonConfiguration.class})
+@Import({DoctorCommonConfiguration.class})
 @AutoConfigureAfter({MybatisAutoConfiguration.class})
 public class  DoctorEventConfiguration {
 
@@ -150,21 +161,46 @@ public class  DoctorEventConfiguration {
 
 
     /**
-     * 对应handler chain
+     * 对应event handler
      */
     @Bean
-    public DoctorEventHandlerChain doctorEventHandlerChain(
-            DoctorSemenHandler doctorSemenHandler,DoctorEntryHandler doctorEntryHandler,
-            DoctorChgFarmHandler doctorChgFarmHandler, DoctorChgLocationHandler doctorChgLocationHandler,
-            DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
-            DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
-        DoctorEventHandlerChain chain = new DoctorEventHandlerChain();
-        chain.setDoctorEventCreateHandlers(Lists.newArrayList(
-                doctorSemenHandler,doctorEntryHandler,
-                doctorChgFarmHandler, doctorChgLocationHandler,
-                doctorConditionHandler, doctorDiseaseHandler,
-                doctorRemovalHandler, doctorVaccinationHandler));
-        return chain;
+    public DoctorPigEventHandlers doctorPigEventHandlers(
+            DoctorEntryHandler doctorEntryHandler,
+            DoctorSemenHandler doctorSemenHandler,
+           DoctorSowFostersByHandler doctorSowFostersByHandler,
+            DoctorSowMatingHandler doctorSowMatingHandler,
+            DoctorSowPregCheckHandler doctorSowPregCheckHandler,
+            DoctorChgFarmHandler doctorChgFarmHandler,
+            DoctorChgLocationHandler doctorChgLocationHandler,
+            DoctorConditionHandler doctorConditionHandler,
+            DoctorDiseaseHandler doctorDiseaseHandler,
+            DoctorRemovalHandler doctorRemovalHandler,
+            DoctorVaccinationHandler doctorVaccinationHandler,
+            DoctorSowWeanHandler doctorSowWeanHandler,
+            DoctorSowFostersHandler doctorSowFostersHandler,
+            DoctorSowFarrowingHandler doctorSowFarrowingHandler,
+            DoctorSowPigletsChgHandler doctorSowPigletsChgHandler
+    ) {
+        Map<Integer, DoctorPigEventHandler> eventHandlerMap = Maps.newHashMap();
+        eventHandlerMap.put(PigEvent.ENTRY.getKey(), doctorEntryHandler);
+        eventHandlerMap.put(PigEvent.SEMEN.getKey(), doctorSemenHandler);
+        eventHandlerMap.put(PigEvent.FARROWING.getKey(), doctorSowFarrowingHandler);
+        eventHandlerMap.put(PigEvent.FOSTERS_BY.getKey(), doctorSowFostersByHandler);
+        eventHandlerMap.put(PigEvent.FOSTERS.getKey(), doctorSowFostersHandler);
+        eventHandlerMap.put(PigEvent.MATING.getKey(), doctorSowMatingHandler);
+        eventHandlerMap.put(PigEvent.PIGLETS_CHG.getKey(), doctorSowPigletsChgHandler);
+        eventHandlerMap.put(PigEvent.PREG_CHECK.getKey(), doctorSowPregCheckHandler);
+        eventHandlerMap.put(PigEvent.WEAN.getKey(), doctorSowWeanHandler);
+        eventHandlerMap.put(PigEvent.CHG_FARM.getKey(), doctorChgFarmHandler);
+        eventHandlerMap.put(PigEvent.CHG_LOCATION.getKey(), doctorChgLocationHandler);
+        eventHandlerMap.put(PigEvent.CONDITION.getKey(), doctorConditionHandler);
+        eventHandlerMap.put(PigEvent.DISEASE.getKey(), doctorDiseaseHandler);
+        eventHandlerMap.put(PigEvent.REMOVAL.getKey(), doctorRemovalHandler);
+        eventHandlerMap.put(PigEvent.VACCINATION.getKey(), doctorVaccinationHandler);
+
+        DoctorPigEventHandlers doctorEventHandlers = new DoctorPigEventHandlers();
+        doctorEventHandlers.setEventHandlerMap(eventHandlerMap);
+        return doctorEventHandlers;
     }
 
     @Configuration

@@ -64,4 +64,6 @@ public enum GroupEventType {
             GroupEventType.ANTIEPIDEMIC.getValue(),
             GroupEventType.TRANS_FARM.getValue()
     );
+
+    public static final List<Integer> NOTICE_MESSAGE_GROUP_EVENT = Lists.newArrayList(CLOSE.getValue());
 }

@@ -1,6 +1,6 @@
 package io.terminus.doctor.web.front.warehouse.dto;
 
-import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
+import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

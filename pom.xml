@@ -7,8 +7,6 @@
     <artifactId>doctor</artifactId>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>doctor-workflow</module>
-        <module>doctor-workflow-api</module>
         <module>doctor-web-core</module>
         <module>doctor-web</module>
         <module>doctor-admin</module>
@@ -16,14 +14,11 @@
         <module>doctor-event-api</module>
         <module>doctor-basic</module>
         <module>doctor-basic-api</module>
-        <module>doctor-warehouse</module>
-        <module>doctor-warehouse-api</module>
         <module>doctor-user-api</module>
         <module>doctor-user-interface</module>
         <module>doctor-user</module>
         <module>doctor-msg-api</module>
         <module>doctor-msg</module>
-        <module>doctor-config</module>
         <module>doctor-open</module>
         <module>doctor-schedule</module>
         <module>doctor-common</module>
@@ -361,30 +356,6 @@
 
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-warehouse-api</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-warehouse</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-workflow-api</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-workflow</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-user-api</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
@@ -454,11 +425,6 @@
                 <version>${terminus.file.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-config</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
             <!-- utils -->
             <dependency>
                 <groupId>org.jodd</groupId>

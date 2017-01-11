@@ -35,7 +35,7 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
@@ -83,19 +83,18 @@ import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
-import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
-import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
-import io.terminus.doctor.warehouse.model.DoctorWareHouse;
-import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
-import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
-import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
+import io.terminus.doctor.basic.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.service.DoctorMaterialInWareHouseWriteService;
+import io.terminus.doctor.basic.service.DoctorWareHouseTypeWriteService;
+import io.terminus.doctor.basic.service.DoctorWareHouseWriteService;
 import io.terminus.parana.user.address.model.Address;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserWriteService;
-import jdk.nashorn.internal.scripts.JO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -229,9 +228,6 @@ public class DoctorImportDataService {
             importGroup(farm, barnMap, shit.getGroup());
             importSow(farm, barnMap, breedMap, shit.getSow());
 
-            // 工作流
-            doctorMoveDataService.moveWorkflow(farm);
-
             //首页统计数据
             movePigTypeStatistic(farm);
 
@@ -264,8 +260,8 @@ public class DoctorImportDataService {
     //统计下首页数据
     private void movePigTypeStatistic(DoctorFarm farm) {
         doctorPigTypeStatisticWriteService.statisticGroup(farm.getOrgId(), farm.getId());
-        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey());
-        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey());
+        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PigSex.BOAR.getKey());
+        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PigSex.SOW.getKey());
     }
 
     private void deleteUser(DoctorFarm farm){
@@ -594,7 +590,7 @@ public class DoctorImportDataService {
             boar.setFarmId(farm.getId());
             boar.setFarmName(farm.getName());
             boar.setPigCode(ImportExcelUtils.getString(row, 1));
-            boar.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());
+            boar.setPigType(DoctorPig.PigSex.BOAR.getKey());
             boar.setIsRemoval(IsOrNot.NO.getValue());
             boar.setPigFatherCode(ImportExcelUtils.getString(row, 4));
             boar.setPigMotherCode(ImportExcelUtils.getString(row, 5));
@@ -960,7 +956,7 @@ public class DoctorImportDataService {
         sow.setBirthWeight(0D);
         sow.setInFarmDate(new DateTime(first.getMateDate()).plusDays(-1).toDate()); //进场时间取第一次配种时间减一天
         sow.setInitBarnName(last.getBarnName());
-        sow.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());   //猪类
+        sow.setPigType(DoctorPig.PigSex.SOW.getKey());   //猪类
         if(last.getBirthDate() != null){
             sow.setBirthDate(last.getBirthDate());
             sow.setInFarmDayAge(DateUtil.getDeltaDaysAbs(sow.getInFarmDate(), sow.getBirthDate()));
@@ -1047,7 +1043,7 @@ public class DoctorImportDataService {
         event.setPigId(sow.getId());
         event.setPigCode(sow.getPigCode());
         event.setIsAuto(IsOrNot.NO.getValue());
-        event.setKind(DoctorPig.PIG_TYPE.SOW.getKey());
+        event.setKind(DoctorPig.PigSex.SOW.getKey());
         event.setBarnId(sow.getInitBarnId());
         event.setBarnName(sow.getInitBarnName());
         event.setRemark(info.getRemark());
@@ -1262,7 +1258,7 @@ public class DoctorImportDataService {
         event.setBoarCode(info.getBoarCode());
 
         //断奶extra
-        DoctorPartWeanDto wean = new DoctorPartWeanDto();
+        DoctorWeanDto wean = new DoctorWeanDto();
         wean.setPartWeanDate(event.getEventAt());
         wean.setPartWeanPigletsCount(event.getWeanCount());
         wean.setPartWeanAvgWeight(event.getWeanAvgWeight());
@@ -1477,7 +1473,7 @@ public class DoctorImportDataService {
     @Transactional
     public void updateMateRate(Long farmId) {
         //取出所有的配种，妊检，分娩事件
-        List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farmId, DoctorPig.PIG_TYPE.SOW.getKey(),
+        List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farmId, DoctorPig.PigSex.SOW.getKey(),
                 Lists.newArrayList(PigEvent.MATING.getKey(), PigEvent.PREG_CHECK.getKey(), PigEvent.FARROWING.getKey()));
         events.stream()
                 .filter(event -> {
@@ -1535,7 +1531,7 @@ public class DoctorImportDataService {
     @Transactional
     public void flushFarrowGroupId(Long farmId) {
         //取出所有的分娩, 断奶事件(过滤掉已经有group_id的)
-        List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farmId, DoctorPig.PIG_TYPE.SOW.getKey(),
+        List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farmId, DoctorPig.PigSex.SOW.getKey(),
                 Lists.newArrayList(PigEvent.WEAN.getKey(), PigEvent.FARROWING.getKey()))
                 .stream()
                 .filter(e -> e.getGroupId() == null)

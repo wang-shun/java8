@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.dto.event.usual;
 
-import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.model.DoctorPig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,25 +24,25 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorFarmEntryDto extends AbstractPigEventInputDto implements Serializable{
+public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = -3221757737932679045L;
 
     /**
      * 公猪 & 母猪
-     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     * @see DoctorPig.PigSex
      */
-    private Integer pigType;
-
-    private String pigCode; // pig code 猪 编号
+//    private Integer pigType;
+//
+//    private String pigCode; // pig code 猪 编号
 
     private Date birthday; // 猪生日
 
     private Date inFarmDate; // 进厂时间
 
-    private Long barnId;    // 进仓猪舍Id
-
-    private String barnName;    // 进仓猪舍名称
+//    private Long barnId;    // 进仓猪舍Id
+//
+//    private String barnName;    // 进仓猪舍名称
 
     /**
      * 不同的数据源方式
@@ -87,7 +88,7 @@ public class DoctorFarmEntryDto extends AbstractPigEventInputDto implements Seri
     public Map<String, String> descMap() {
         Map<String, String> map = new LinkedHashMap<>();
 //        if(pigType != null){
-//            DoctorPig.PIG_TYPE pig = DoctorPig.PIG_TYPE.from(pigType);
+//            DoctorPig.PigSex pig = DoctorPig.PigSex.from(pigType);
 //            if(pig != null){
 //                map.put("猪类型", pig.getDesc());
 //            }

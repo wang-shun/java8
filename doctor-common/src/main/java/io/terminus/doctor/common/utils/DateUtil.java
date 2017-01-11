@@ -237,4 +237,17 @@ public class DateUtil {
     public static boolean inSameYearMonth(Date date1, Date date2){
         return new DateTime(date1).toString(YYYYMM).equals(new DateTime(date2).toString(YYYYMM));
     }
+
+    /**
+     *
+     * @param dateStr
+     * @return
+     */
+    public static Date stringToDate(String dateStr){
+        try {
+            return new Date(Long.parseLong(dateStr));
+        } catch (NumberFormatException e) {
+            return toDateTime(dateStr);
+        }
+    }
 }

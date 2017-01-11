@@ -1,34 +1,29 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.dto.event.sow.DoctorFosterByDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
+import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
-import io.terminus.doctor.workflow.core.Execution;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.terminus.doctor.event.constants.DoctorPigExtraConstants.EVENT_PIG_ID;
 
 /**
  * Created by yaoqijun.
@@ -38,70 +33,65 @@ import static io.terminus.doctor.event.constants.DoctorPigExtraConstants.EVENT_P
  */
 @Component
 @Slf4j
-public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
-
-    private final DoctorGroupWriteService doctorGroupWriteService;
-
-    private final DoctorGroupReadService doctorGroupReadService;
-
-    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
-
-    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
 
     @Autowired
-    public DoctorSowFostersByHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
-                                     DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                     DoctorRevertLogDao doctorRevertLogDao,
-                                     DoctorGroupWriteService doctorGroupWriteService,
-                                     DoctorGroupReadService doctorGroupReadService,
-                                     DoctorBarnDao doctorBarnDao) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
-        this.doctorGroupWriteService = doctorGroupWriteService;
-        this.doctorGroupReadService = doctorGroupReadService;
-    }
+    private DoctorGroupWriteService doctorGroupWriteService;
+
+    @Autowired
+    private DoctorGroupReadService doctorGroupReadService;
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack,
-                                                   DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
+    protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorFosterByDto fosterByDto = (DoctorFosterByDto) inputDto;
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(fosterByDto.getPigId());
+
         checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) ||
                 Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()), "foster.currentSowStatus.error");
 
-        Long pigEventId = (Long) context.get("doctorPigEventId");
 
         Long groupId = doctorPigTrack.getGroupId();
 
-        //如果不是一个猪舍的拼窝，需要转群操作
-        if (basic.getNeed()) {
-            groupId = groupSowEventCreate(doctorPigTrack, basic, extra, pigEventId);
-        }
-
         //被拼窝数量
-        Integer fosterCount = (Integer) extra.get("fostersCount");
+        Integer fosterCount = fosterByDto.getFosterByCount();
 
         doctorPigTrack.setGroupId(groupId);  //groupId = -1 置成 NULL
         doctorPigTrack.setUnweanQty(MoreObjects.firstNonNull(doctorPigTrack.getUnweanQty(), 0) + fosterCount);  //未断奶数
         doctorPigTrack.setWeanQty(MoreObjects.firstNonNull(doctorPigTrack.getWeanQty(), 0));    //断奶数不变
 
+        Map<String, Object> extra = doctorPigTrack.getExtraMap();
         extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         extra.put("farrowingPigletGroupId", groupId);
-        doctorPigTrack.addAllExtraMap(extra);
+        doctorPigTrack.setExtraMap(extra);
 
         // 修改当前的母猪状态信息
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());
-        doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
+        //doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
         return doctorPigTrack;
+    }
+
+    @Override
+    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
+        DoctorFosterByDto fosterByDto = (DoctorFosterByDto) inputDto;
+        DoctorPigTrack fromPigTrack = doctorPigTrackDao.findByPigId(fosterByDto.getFromSowId());
+        //如果不是一个猪舍的拼窝，需要转群操作
+        if (!Objects.equals(doctorPigTrack.getCurrentBarnId(), fromPigTrack.getCurrentBarnId())) {
+            Long groupId = groupSowEventCreate(doctorPigTrack, basic, inputDto, doctorPigEvent.getId());
+            doctorPigTrack.setGroupId(groupId);
+            doctorPigTrackDao.update(doctorPigTrack);
+        }
+
     }
 
     /**
      * 对应的仔猪转群操作
      *
      * @param basicInputInfoDto
-     * @param extra
      */
-    private Long groupSowEventCreate(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Long pigEventId) {
-
+    private Long groupSowEventCreate(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, BasePigEventInputDto inputDto, Long pigEventId) {
+        DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
         //拼窝的数据extra
-        Long fromSowId = Long.valueOf(extra.get(EVENT_PIG_ID).toString());
+        Long fromSowId = fostersDto.getPigId();
         DoctorPigTrack fromSowTrack = doctorPigTrackDao.findByPigId(fromSowId);
         Long fromGroupId = fromSowTrack.getGroupId();
 
@@ -122,12 +112,12 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
             doctorTransGroupInput.setIsCreateGroup(1);
         }
 
-        doctorTransGroupInput.setQuantity(Integer.valueOf(extra.get("fostersCount").toString()));
-        doctorTransGroupInput.setBoarQty(Integer.valueOf(extra.get("boarFostersCount").toString()));
+        doctorTransGroupInput.setQuantity(fostersDto.getFostersCount());
+        doctorTransGroupInput.setBoarQty(fostersDto.getBoarFostersCount());
         doctorTransGroupInput.setSowQty(doctorTransGroupInput.getQuantity() - doctorTransGroupInput.getBoarQty());
-        doctorTransGroupInput.setWeight(Double.valueOf(extra.get("fosterTotalWeight").toString()));
+        doctorTransGroupInput.setWeight(fostersDto.getFosterTotalWeight());
         doctorTransGroupInput.setAvgWeight(doctorTransGroupInput.getWeight() / doctorTransGroupInput.getQuantity());    //均重
-        doctorTransGroupInput.setEventAt(DateTime.now().toString(DTF));
+        doctorTransGroupInput.setEventAt(DateUtil.toDateString(fostersDto.eventAt()));
         doctorTransGroupInput.setIsAuto(1);
         doctorTransGroupInput.setCreatorId(basicInputInfoDto.getStaffId());
         doctorTransGroupInput.setCreatorName(basicInputInfoDto.getStaffName());

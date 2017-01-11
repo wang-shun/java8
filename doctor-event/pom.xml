@@ -22,11 +22,6 @@
             <artifactId>doctor-common</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-workflow</artifactId>
-        </dependency>
-
         <!-- terminus lib -->
         <dependency>
             <groupId>io.terminus.boot.rpc</groupId>
