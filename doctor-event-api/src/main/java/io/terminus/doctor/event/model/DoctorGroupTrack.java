@@ -14,6 +14,7 @@ import lombok.SneakyThrows;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static java.util.Objects.isNull;
@@ -202,6 +203,7 @@ public class DoctorGroupTrack implements Serializable {
         if (Strings.isNullOrEmpty(extra)) {
             this.extraEntity = new Extra();
         } else {
+            JsonMapper.nonEmptyMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
             this.extraEntity = JsonMapper.nonEmptyMapper().fromJson(extra, Extra.class);
         }
     }
@@ -212,6 +214,7 @@ public class DoctorGroupTrack implements Serializable {
         if (isNull(extraEntity)) {
             this.extra = "";
         } else {
+            JsonMapper.nonEmptyMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
             this.extra = JsonMapper.nonEmptyMapper().toJson(extraEntity);
         }
     }

@@ -274,10 +274,10 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             log.error("batch.group.event.handle.failed, inputInfoList:{}, eventType:{}, cause:{}", inputInfoList, eventType, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
         } catch (IllegalStateException e) {
-            log.error("batch.group.event.handle.failed, inputInfoList:{}, class:{}, cause:{}", inputInfoList, eventType, Throwables.getStackTraceAsString(e));
+            log.error("batch.group.event.handle.failed, inputInfoList:{}, eventType:{}, cause:{}", inputInfoList, eventType, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
         } catch (Exception e) {
-            log.error("batch.group.event.handle.failed, inputInfoList:{}, class:{}, cause:{}", inputInfoList, eventType, Throwables.getStackTraceAsString(e));
+            log.error("batch.group.event.handle.failed, inputInfoList:{}, eventType:{}, cause:{}", inputInfoList, eventType, Throwables.getStackTraceAsString(e));
             return Response.fail("batch.group.event.handle");
         }
     }

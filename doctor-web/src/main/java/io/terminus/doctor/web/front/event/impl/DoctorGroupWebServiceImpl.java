@@ -293,8 +293,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     .stream().map(inputInfo -> buildGroupEventInputInfo(inputInfo.getGroupId(), batchGroupEventDto.getEventType(), inputInfo.getInputJson()))
                     .collect(Collectors.toList());
             return doctorGroupWriteService.batchGroupEventHandle(groupInputInfoList, batchGroupEventDto.getEventType());
-        } catch (ServiceException e) {
-            log.error("batch group event failed, batchGroupEventDto:{}", batchGroupEventDto, Throwables.getStackTraceAsString(e));
+        } catch (Exception e) {
+            log.error("batch group event failed, batchGroupEventDto:{}, cause:{}", batchGroupEventDto, Throwables.getStackTraceAsString(e));
             return Response.fail("group.event.create.fail");
         }
     }
@@ -492,7 +492,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         params.put("isAuto", IsOrNot.NO.getValue());
         params.put("creatorId", UserUtil.getUserId());
         params.put("creatorName", UserUtil.getCurrentUser().getName());
-        
+
         //id关联字段
         params.put("barnName", getBarnName(getLong(params, "barnId")));
         params.put("breedName", getBasicName(getLong(params, "breedId")));
