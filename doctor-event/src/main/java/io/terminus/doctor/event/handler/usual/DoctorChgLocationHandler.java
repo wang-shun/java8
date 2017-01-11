@@ -13,6 +13,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
@@ -71,6 +72,9 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         checkState(checkBarnTypeEqual(fromBarn, toBarn, doctorPigTrack.getStatus()), "barn.type.not.equal");
         if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
             doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
+            basic.setEventType(PigEvent.TO_FARROWING.getKey());
+            basic.setEventName(PigEvent.TO_FARROWING.getName());
+            basic.setEventDesc(PigEvent.TO_FARROWING.getDesc());
         }
         if (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
             // 设置断奶到配置舍标志
@@ -83,19 +87,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         }
         doctorPigTrack.setCurrentBarnId(toBarnId);
         doctorPigTrack.setCurrentBarnName(toBarn.getName());
-
-
         return doctorPigTrack;
-    }
-
-    private Boolean checkBarnTypeEqual(DoctorBarn fromBarn, DoctorBarn toBarn, Integer pigStatus) {
-        if (fromBarn == null || toBarn == null) {
-            return false;
-        }
-        return (Objects.equals(fromBarn.getPigType(), toBarn.getPigType())
-                || (MATING_TYPES.contains(fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType()))
-                || (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_FARROW_TYPES.contains(toBarn.getPigType())))
-                || Objects.equals(pigStatus, PigStatus.Pregnancy.getKey()) && MATING_FARROW_TYPES.contains(toBarn.getPigType());
     }
 
     @Override
@@ -161,5 +153,22 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
             return toGroup.getId();
         }
         return input.getToGroupId();
+    }
+
+    /**
+     * 校验是否可以转舍
+     * @param fromBarn 源舍
+     * @param toBarn 转入舍
+     * @param pigStatus 状态
+     * @return 是否准许转舍
+     */
+    private Boolean checkBarnTypeEqual(DoctorBarn fromBarn, DoctorBarn toBarn, Integer pigStatus) {
+        if (fromBarn == null || toBarn == null) {
+            return false;
+        }
+        return (Objects.equals(fromBarn.getPigType(), toBarn.getPigType())
+                || (MATING_TYPES.contains(fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType()))
+                || (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_FARROW_TYPES.contains(toBarn.getPigType())))
+                || Objects.equals(pigStatus, PigStatus.Pregnancy.getKey()) && MATING_FARROW_TYPES.contains(toBarn.getPigType());
     }
 }
