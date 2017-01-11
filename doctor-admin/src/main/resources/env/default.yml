@@ -109,4 +109,5 @@ msg:
 # Total request size for a multipart/form-data
 multipart:
   max-file-size: 10Mb
-  max-request-size: 10Mb
+  max-request-size: 20Mb
+  enabled: true
