@@ -17,6 +17,7 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -80,6 +81,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
 
         //5.记录发生的事件信息
+        DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(doctorPigEvent.getOrgId())
                 .farmId(doctorPigEvent.getFarmId())
@@ -93,6 +95,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .status(doctorPigTrack.getStatus())
                 .businessType(DoctorEventInfo.Business_Type.PIG.getValue())
                 .eventType(basic.getEventType())
+                .pigType(doctorBarn.getPigType())
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
 

@@ -99,6 +99,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 .code(group.getGroupCode())
                 .farmId(group.getFarmId())
                 .orgId(group.getOrgId())
+                .pigType(group.getPigType())
                 .build();
         eventInfoList.add(eventInfo);
 

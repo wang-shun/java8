@@ -179,6 +179,7 @@ public class DoctorPigEventManager {
                 groupPublishDto.setGroupId(doctorEventInfo.getBusinessId());
                 groupPublishDto.setEventId(doctorEventInfo.getEventId());
                 groupPublishDto.setEventAt(doctorEventInfo.getEventAt());
+                groupPublishDto.setPigType(doctorEventInfo.getPigType());
                 return groupPublishDto;
             }).collect(Collectors.toList());
             coreEventDispatcher.publish(new ListenedGroupEvent(orgId, farmId, eventType, groupPublishDtoList));
