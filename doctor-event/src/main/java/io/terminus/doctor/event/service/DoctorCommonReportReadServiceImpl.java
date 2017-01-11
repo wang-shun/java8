@@ -111,9 +111,9 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
 
         try {
             //如果查询未来的数据, 返回失败查询
-//            if (weekDateTime.isAfter(DateUtil.getDateEnd(DateTime.now()))) {
-//                return Response.ok(failReportTrend(weekStr));
-//            }
+            if (weekDateTime.isAfter(DateUtil.getDateEnd(DateTime.now()))) {
+                return Response.ok(failReportTrend(weekStr));
+            }
 
             DoctorCommonReportDto reportDto;
 

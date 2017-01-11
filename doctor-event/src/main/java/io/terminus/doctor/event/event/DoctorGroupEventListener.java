@@ -12,6 +12,7 @@ import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -43,6 +44,9 @@ public class DoctorGroupEventListener implements EventListener {
 
     @Autowired
     private DoctorDailyReportCache doctorDailyReportCache;
+
+    @Autowired
+    private DoctorCommonReportWriteService doctorCommonReportWriteService;
 
     private static final List<Integer> NEED_TYPES = Lists.newArrayList(
             GroupEventType.MOVE_IN.getValue(),
@@ -86,25 +90,11 @@ public class DoctorGroupEventListener implements EventListener {
             return;
         }
 
-        switch (type) {
-            case MOVE_IN:
-                handleGroupLiveStock(orgId, farmId, publishDto.getPigType(), publishDto.getEventAt());
-                break;
-            case CHANGE:
-                handleGroupLiveStock(orgId, farmId, publishDto.getPigType(), publishDto.getEventAt());
-                handleChange(orgId, publishDto.getPigType(), publishDto.getEventAt());
-                break;
-            case TRANS_GROUP:
-                handleGroupLiveStock(orgId, farmId, publishDto.getPigType(), publishDto.getEventAt());
-                break;
-            case TURN_SEED:
-                handleGroupLiveStock(orgId, farmId, publishDto.getPigType(), publishDto.getEventAt());
-                break;
-            case TRANS_FARM:
-                handleGroupLiveStock(orgId, farmId, publishDto.getPigType(), publishDto.getEventAt());
-                break;
-            default:
-                break;
+        handleGroupLiveStock(orgId, farmId, publishDto.getPigType(), publishDto.getEventAt());
+
+        //如果是变动事件，处理下变动
+        if (Objects.equals(type, GroupEventType.CHANGE)) {
+            handleChange(orgId, publishDto.getPigType(), publishDto.getEventAt());
         }
     }
 
@@ -139,6 +129,8 @@ public class DoctorGroupEventListener implements EventListener {
             }
             startAt = new DateTime(startAt).plusDays(1).toDate();
         }
+
+        // TODO: 2017/1/11 commreport
     }
 
     //根据每个类型更新相应的存栏
