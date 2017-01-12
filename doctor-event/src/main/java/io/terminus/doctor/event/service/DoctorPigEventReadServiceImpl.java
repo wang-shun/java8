@@ -134,6 +134,9 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
                 DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
                 DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
                 pigEvents.retainAll(pigEventManager.selectEvents(PigStatus.from(doctorPigTrack.getStatus()), PigType.from(doctorBarn.getPigType())));
+                if (pigEvents.contains(PigEvent.MATING) && Objects.equals(doctorPigTrack.getCurrentMatingCount(), 3)) {
+                    pigEvents.remove(PigEvent.MATING);
+                }
             });
             return Response.ok(pigEvents.stream().map(PigEvent::getKey).collect(Collectors.toList()));
         }catch (Exception e){
