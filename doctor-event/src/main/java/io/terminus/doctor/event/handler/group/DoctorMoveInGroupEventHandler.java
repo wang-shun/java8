@@ -2,7 +2,6 @@ package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -112,6 +111,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.MOVE_IN);
 
         //发布统计事件
-        publistGroupAndBarn(event);
+        //publistGroupAndBarn(event);
     }
 }

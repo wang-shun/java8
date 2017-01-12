@@ -173,7 +173,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         }
 
         //发布统计事件
-        publistGroupAndBarn(event);
+        //publistGroupAndBarn(event);
     }
 
     /**

@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.DataEventType;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.event.ZkGroupPublishDto;
 import io.terminus.doctor.common.event.ZkListenedGroupEvent;
@@ -93,7 +92,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.CLOSE);
 
         //发布统计事件
-        publistGroupAndBarn(event);
+        //publistGroupAndBarn(event);
 
         //发布zk事件
         try{
