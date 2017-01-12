@@ -6,22 +6,22 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.dao.DoctorFarmWareHouseTypeDao;
-import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
-import io.terminus.doctor.basic.dao.DoctorWareHouseTrackDao;
+import io.terminus.doctor.basic.dao.*;
 import io.terminus.doctor.basic.dto.DoctorWareHouseDto;
+import io.terminus.doctor.basic.dto.WarehouseEventReport;
 import io.terminus.doctor.basic.model.DoctorFarmWareHouseType;
+import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.DoctorWareHouseTrack;
+import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.common.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -44,13 +44,21 @@ public class DoctorWareHouseReadServiceImpl implements DoctorWareHouseReadServic
 
     private final DoctorWareHouseTrackDao doctorWareHouseTrackDao;
 
+    private final DoctorMaterialPriceInWareHouseDao doctorMaterialPriceInWareHouseDao;
+
+    private final DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao;
+
     @Autowired
     public DoctorWareHouseReadServiceImpl(DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao,
                                           DoctorWareHouseDao doctorWareHouseDao,
-                                          DoctorWareHouseTrackDao doctorWareHouseTrackDao){
+                                          DoctorWareHouseTrackDao doctorWareHouseTrackDao,
+                                          DoctorMaterialPriceInWareHouseDao doctorMaterialPriceInWareHouseDao,
+                                          DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao){
         this.doctorFarmWareHouseTypeDao = doctorFarmWareHouseTypeDao;
         this.doctorWareHouseDao = doctorWareHouseDao;
         this.doctorWareHouseTrackDao = doctorWareHouseTrackDao;
+        this.doctorMaterialPriceInWareHouseDao = doctorMaterialPriceInWareHouseDao;
+        this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
     }
 
     @Override
@@ -83,14 +91,95 @@ public class DoctorWareHouseReadServiceImpl implements DoctorWareHouseReadServic
             //convert result
             Map<Long,DoctorWareHouseTrack> trackMap = doctorWareHouseTracks.stream().collect(Collectors.toMap(k->k.getWareHouseId(), v->v));
 
-            return Response.ok(new Paging<>(
-                    doctorWareHousePaging.getTotal(),
-                    wareHouses.stream().map(s->DoctorWareHouseDto.buildWareHouseDto(s, trackMap.get(s.getId()))).collect(Collectors.toList()))
-            );
+            List<DoctorWareHouseDto> doctorWareHouseDtoList = wareHouses.stream().map(s->DoctorWareHouseDto.buildWareHouseDto(s, trackMap.get(s.getId()))).collect(Collectors.toList());
+            if(!doctorWareHouseDtoList.isEmpty()){
+                getWareHouseMonthInfo(doctorWareHouseDtoList);
+            }
+            return Response.ok(new Paging<>( doctorWareHousePaging.getTotal(),doctorWareHouseDtoList));
         }catch (Exception e){
             log.error("query warehouse dto error, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.wwarehouse.error");
         }
+    }
+
+    /**
+     * 获取仓库每个月的出入库,调拨信息
+     * @param doctorWareHouseDtoList
+     */
+    private void getWareHouseMonthInfo(List<DoctorWareHouseDto> doctorWareHouseDtoList) {
+        doctorWareHouseDtoList.stream().forEach(
+                doctorWareHouseDto ->{
+                    Map<String, Object> stockMap = doctorMaterialPriceInWareHouseDao.currentStockInfo(doctorWareHouseDto.getFarmId(), doctorWareHouseDto.getWarehouseId(), doctorWareHouseDto.getType());
+                    if(stockMap != null && !stockMap.isEmpty()){
+                        doctorWareHouseDto.setStockCount(Double.valueOf(Objects.toString(stockMap.get("count"))));
+                        doctorWareHouseDto.setStockAmount(Double.valueOf(Objects.toString(stockMap.get("amount"))));
+                    }else{
+                        doctorWareHouseDto.setStockCount(0D);
+                        doctorWareHouseDto.setStockAmount(0D);
+                    }
+                    Map<String, Object> param = new HashMap<String, Object>();
+                    param.put("farmId", doctorWareHouseDto.getFarmId());
+                    param.put("wareHouseId", doctorWareHouseDto.getWarehouseId());
+                    param.put("startAt", DateTime.now().withDayOfMonth(1).toString(DateUtil.DATE));
+                    param.put("endAt", DateTime.now().withDayOfMonth(1).plusMonths(1).toString(DateUtil.DATE));
+                    List<WarehouseEventReport> warehouseEventReportList = doctorMaterialConsumeProviderDao.warehouseEventReport(param);
+                    //预先将出入库数量,金额置为0
+                    doctorWareHouseDto.setMonthInCount(0D);
+                    doctorWareHouseDto.setMonthInAmount(0D);
+                    doctorWareHouseDto.setMonthOutCount(0D);
+                    doctorWareHouseDto.setMonthOutAmount(0D);
+                    doctorWareHouseDto.setMonthTransferInCount(0D);
+                    doctorWareHouseDto.setMonthTransferInAmount(0D);
+                    doctorWareHouseDto.setMonthTransferOutCount(0D);
+                    doctorWareHouseDto.setMonthTransferOutAmount(0D);
+                    if( warehouseEventReportList != null && !warehouseEventReportList.isEmpty()) {
+
+                        warehouseEventReportList.stream().forEach(warehouseEventReport -> {
+                            switch (DoctorMaterialConsumeProvider.EVENT_TYPE.from(warehouseEventReport.getEventType())) {
+
+                                case PROVIDER:
+                                    doctorWareHouseDto.setMonthInCount( doctorWareHouseDto.getMonthInCount() + warehouseEventReport.getCount());
+                                    doctorWareHouseDto.setMonthInAmount(doctorWareHouseDto.getMonthInAmount() + warehouseEventReport.getAmount());
+                                    break;
+                                case CONSUMER:
+                                    doctorWareHouseDto.setMonthOutCount( doctorWareHouseDto.getMonthOutCount() + warehouseEventReport.getCount());
+                                    doctorWareHouseDto.setMonthOutAmount(doctorWareHouseDto.getMonthOutAmount() + warehouseEventReport.getAmount());
+                                    break;
+                                case PANKUI:
+                                    break;
+                                case PANYING:
+                                    break;
+                                case DIAOCHU:
+                                    doctorWareHouseDto.setMonthTransferOutCount( doctorWareHouseDto.getMonthTransferOutCount() + warehouseEventReport.getCount());
+                                    doctorWareHouseDto.setMonthTransferOutAmount(doctorWareHouseDto.getMonthTransferOutAmount() + warehouseEventReport.getAmount());
+                                    break;
+                                case DIAORU:
+                                    doctorWareHouseDto.setMonthTransferInCount( doctorWareHouseDto.getMonthTransferInCount() + warehouseEventReport.getCount());
+                                    doctorWareHouseDto.setMonthTransferInAmount(doctorWareHouseDto.getMonthTransferInAmount() + warehouseEventReport.getAmount());
+                                    break;
+                                case FORMULA_RAW_MATERIAL:
+                                    doctorWareHouseDto.setMonthOutCount( doctorWareHouseDto.getMonthOutCount() + warehouseEventReport.getCount());
+                                    doctorWareHouseDto.setMonthOutAmount(doctorWareHouseDto.getMonthOutAmount() + warehouseEventReport.getAmount());
+                                    break;
+                                case FORMULA_FEED:
+                                    doctorWareHouseDto.setMonthInCount( doctorWareHouseDto.getMonthInCount() + warehouseEventReport.getCount());
+                                    doctorWareHouseDto.setMonthInAmount(doctorWareHouseDto.getMonthInAmount() + warehouseEventReport.getAmount());
+                                    break;
+                            }
+                        });
+
+                    }
+                    //不是饲料和原料的仓库无法统计数量
+                    if(!doctorWareHouseDto.getType().equals(WareHouseType.FEED.getKey()) && !doctorWareHouseDto.getType().equals(WareHouseType.MATERIAL.getKey())){
+                        doctorWareHouseDto.setStockCount(null);
+                        doctorWareHouseDto.setMonthInCount(null);
+                        doctorWareHouseDto.setMonthOutCount(null);
+                        doctorWareHouseDto.setMonthTransferInCount(null);
+                        doctorWareHouseDto.setMonthTransferOutCount(null);
+                    }
+
+                }
+        );
     }
 
     @Override

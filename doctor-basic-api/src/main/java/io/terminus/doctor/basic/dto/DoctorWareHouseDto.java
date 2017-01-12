@@ -31,6 +31,10 @@ public class DoctorWareHouseDto implements Serializable{
 
     private static final String REST_CONSUME_DATE = "restConsumeDate";
 
+    private Long farmId;
+
+    private String farmName;
+
     private Long warehouseId;
 
     private String warehouseName;
@@ -45,12 +49,34 @@ public class DoctorWareHouseDto implements Serializable{
 
     private Integer type; //仓库类型
 
+    private Double stockCount;   //库存数量(只有饲料、原料类型仓库用到,单位统一是kg,其他仓库单位不统一)
+
+    private Double stockAmount;  //库存金额
+
+    private Double monthInCount; //本月入库数量(同库存,只有饲料、原料类型仓库用到)
+
+    private Double monthInAmount; //本月入库金额
+
+    private Double monthOutCount; //本月出库数量(同库存,只有饲料、原料类型仓库用到)
+
+    private Double monthOutAmount; //本月出库金额
+
+    private Double monthTransferInCount; //本月调入数量(同库存,只有饲料、原料类型仓库用到)
+
+    private Double monthTransferInAmount; //本月调入金额
+
+    private Double monthTransferOutCount; //本月调出数量(同库存,只有饲料、原料类型仓库用到)
+
+    private Double monthTransferOutAmount; //本月调出金额
+
     public static DoctorWareHouseDto buildWareHouseDto(DoctorWareHouse doctorWareHouse, DoctorWareHouseTrack doctorWareHouseTrack){
         if(isNull(doctorWareHouse)){
             return null;
         }
 
         DoctorWareHouseDtoBuilder builder = DoctorWareHouseDto.builder()
+                .farmId(doctorWareHouse.getFarmId())
+                .farmName(doctorWareHouse.getFarmName())
                 .warehouseId(doctorWareHouse.getId())
                 .warehouseName(doctorWareHouse.getWareHouseName())
                 .manager(doctorWareHouse.getManagerName())

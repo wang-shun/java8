@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.dao;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ObjectArrays;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -12,6 +13,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 陈增辉
@@ -55,17 +57,31 @@ public class DoctorMaterialPriceInWareHouseDao extends MyBatisDao<DoctorMaterial
         if(type != null){
             param.put("type", type.getKey());
         }
-        Map<BigInteger, Map<String, Object>> query = sqlSession.selectMap(
-                sqlId("stockAmount"), ImmutableMap.copyOf(Params.filterNullOrEmpty(param)), "ware_house_id"
-        );
+
+        List<Map<String, Object>> query = sqlSession.selectList(sqlId("stockAmount"), param);
 
         Map<Long, Double> result = new HashMap<>();
-        for(Map.Entry<BigInteger, Map<String, Object>> entry : query.entrySet()){
-            Long houseId = entry.getKey().longValue();
-            Double amount = Double.valueOf(entry.getValue().get("amount").toString());
+        query.stream().forEach( map -> {
+            Long houseId = Long.parseLong(Objects.toString(map.get("ware_house_id")));
+            Double amount = Double.valueOf(Objects.toString(map.get("amount")));
             result.put(houseId, amount);
-        }
+        });
         return result;
+    }
+
+    /**
+     * 仓库当前库存信息
+     * @param farmId
+     * @param warehouseId
+     * @param type
+     * @return
+     */
+    public Map<String, Object> currentStockInfo(Long farmId, Long warehouseId, Integer type){
+        Map map = new HashMap();
+
+        map = sqlSession.selectOne(sqlId("stockAmount"), ImmutableMap.of("farmId", farmId, "warehouseId", warehouseId, "type", type));
+
+        return map;
     }
 
 }
