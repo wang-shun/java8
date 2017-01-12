@@ -20,8 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * Desc:
@@ -170,12 +168,8 @@ public class DoctorCommonReportManager {
         return report;
     }
 
-    public void updateCommonReport(Long farmId, Date eventAt, Function<FarmIdAndEventAt, Void>... functions) {
-        Stream.of(functions).forEach(function -> function.apply(new FarmIdAndEventAt(farmId, eventAt)));
-    }
-
     //更新存栏变动
-    public void updateCommonLiveStockChange(FarmIdAndEventAt fe) {
+    public Boolean updateLiveStockChange(FarmIdAndEventAt fe) {
         try {
             DoctorLiveStockChangeCommonReport monthLiveStock = getLiveStockChangeReport(fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             DoctorMonthlyReport month = getMonthlyReport(fe);
@@ -189,10 +183,11 @@ public class DoctorCommonReportManager {
         } catch (Exception e) {
             log.error("updateCommonLiveStockChange failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
         }
+        return true;
     }
 
     //更新销售死淘
-    public void updateCommonSaleDead(FarmIdAndEventAt fe) {
+    public Boolean updateSaleDead(FarmIdAndEventAt fe) {
         try {
             DoctorMonthlyReport month = getMonthlyReport(fe);
             setSaleDead(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
@@ -204,10 +199,11 @@ public class DoctorCommonReportManager {
         } catch (Exception e) {
             log.error("updateCommonSaleDead failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
         }
+        return true;
     }
 
     //更新胎次分布，品类分布
-    public void updateCommonParityBreed(FarmIdAndEventAt fe) {
+    public Boolean updateParityBreed(FarmIdAndEventAt fe) {
         try {
             DoctorMonthlyReport month = getMonthlyReport(fe);
             month.getReportDto().setParityStockList(doctorKpiDao.getMonthlyParityStock(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
@@ -221,10 +217,11 @@ public class DoctorCommonReportManager {
         } catch (Exception e) {
             log.error("updateCommonParityBreed failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
         }
+        return true;
     }
 
     //更新npd psy
-    public void updateCommonNpdPsy(FarmIdAndEventAt fe) {
+    public Boolean updateNpdPsy(FarmIdAndEventAt fe) {
         try {
             DoctorMonthlyReport month = getMonthlyReport(fe);
             month.getReportDto().setNpd(doctorKpiDao.npd(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
@@ -238,10 +235,11 @@ public class DoctorCommonReportManager {
         } catch (Exception e) {
             log.error("updateCommonNpdPsy failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
         }
+        return true;
     }
 
     //更新断奶7天配种率
-    public void updateCommonWean7Mate(FarmIdAndEventAt fe) {
+    public Boolean updateWean7Mate(FarmIdAndEventAt fe) {
         try {
             DoctorMonthlyReport month = getMonthlyReport(fe);
             month.getReportDto().setMateInSeven(doctorKpiDao.getMateInSeven(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
@@ -253,10 +251,11 @@ public class DoctorCommonReportManager {
         } catch (Exception e) {
             log.error("updateCommonWean7Mate failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
         }
+        return true;
     }
 
     //更新公猪生产成绩
-    public void updateCommonBoarScore(FarmIdAndEventAt fe) {
+    public Boolean updateBoarScore(FarmIdAndEventAt fe) {
         try {
             DoctorMonthlyReport month = getMonthlyReport(fe);
             setBoarScore(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
@@ -268,10 +267,11 @@ public class DoctorCommonReportManager {
         } catch (Exception e) {
             log.error("updateCommonBoarScore failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
         }
+        return true;
     }
 
     //更新4个月的率统计数据
-    public void updateCommon4MonthRate(FarmIdAndEventAt fe) {
+    public Boolean update4MonthRate(FarmIdAndEventAt fe) {
         try {
             DateUtil.getBeforeMonthEnds(fe.getEventAt(), 4).forEach(date -> {
                 DoctorMonthlyReport month = getMonthlyReport(new FarmIdAndEventAt(fe.getFarmId(), date));
@@ -287,10 +287,11 @@ public class DoctorCommonReportManager {
         } catch (Exception e) {
             log.error("updateCommon4MonthRate failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
         }
+        return true;
     }
 
     //更新配种情况
-    public void updateCommonMate(FarmIdAndEventAt fe) {
+    public Boolean updateMate(FarmIdAndEventAt fe) {
         try {
             DoctorMonthlyReport month = getMonthlyReport(fe);
             setMate(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
@@ -302,10 +303,11 @@ public class DoctorCommonReportManager {
         } catch (Exception e) {
             log.error("updateCommonMate failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
         }
+        return true;
     }
 
     //更新妊检情况
-    public void updateCommonPregCheck(FarmIdAndEventAt fe) {
+    public Boolean updatePregCheck(FarmIdAndEventAt fe) {
         try {
             DoctorMonthlyReport month = getMonthlyReport(fe);
             setPregCheck(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
@@ -317,10 +319,11 @@ public class DoctorCommonReportManager {
         } catch (Exception e) {
             log.error("updateCommonPregCheck failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
         }
+        return true;
     }
 
     //更新分娩情况
-    public void updateCommonFarrow(FarmIdAndEventAt fe) {
+    public Boolean updateFarrow(FarmIdAndEventAt fe) {
         try {
             DoctorMonthlyReport month = getMonthlyReport(fe);
             setFarrow(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
@@ -332,10 +335,11 @@ public class DoctorCommonReportManager {
         } catch (Exception e) {
             log.error("updateCommonFarrow failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
         }
+        return true;
     }
 
     //更新断奶情况
-    public void updateCommonWean(FarmIdAndEventAt fe) {
+    public Boolean updateWean(FarmIdAndEventAt fe) {
         try {
             DoctorMonthlyReport month = getMonthlyReport(fe);
             setWean(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
@@ -347,6 +351,7 @@ public class DoctorCommonReportManager {
         } catch (Exception e) {
             log.error("updateCommonWean failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
         }
+        return true;
     }
 
     //死亡销售
@@ -466,19 +471,19 @@ public class DoctorCommonReportManager {
         private Long farmId;
         private Date eventAt;
 
-        public Date monthStart() {
+        Date monthStart() {
             return DateUtil.monthStart(eventAt);
         }
 
-        public Date monthEnd() {
+        Date monthEnd() {
             return DateUtil.monthEnd(eventAt);
         }
 
-        public Date weekStart() {
+        Date weekStart() {
             return DateUtil.weekStart(eventAt);
         }
 
-        public Date weekEnd() {
+        Date weekEnd() {
             return DateUtil.weekEnd(eventAt);
         }
     }

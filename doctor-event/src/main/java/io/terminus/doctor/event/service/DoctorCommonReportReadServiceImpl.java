@@ -268,9 +268,4 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         }
         return DateTime.now().plusDays(-1).withTimeAtStartOfDay();
     }
-
-    public static void main(String[] args) {
-        System.out.println(withWeekOfYear(2017, 2));
-        System.out.println(withWeekOfYear(2017, 2).dayOfWeek().get());
-    }
 }
