@@ -4,6 +4,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
+import io.terminus.doctor.event.dto.DoctorSuggestPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
 import javax.validation.constraints.NotNull;
@@ -60,6 +61,14 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<List<Integer>> queryPigEvents(@NotNull(message = "input.pigIds.empty") List<Long> pigIds);
+
+    /**
+     * 查询某一猪场可执行此事件的猪
+     * @param eventType 事件类型
+     * @param farmId 猪场id
+     * @return
+     */
+    Response<List<DoctorSuggestPig>> suggestPigsByEvent(Integer eventType, Long farmId, String pigCode, Integer sex);
 
     /**
      * 通过 id 获取 PigEvent

@@ -61,6 +61,22 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     }
 
     @Override
+    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigEvent doctorPigEvent =  super.buildPigEvent(basic, inputDto);
+        DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) inputDto;
+        DoctorBarn fromBarn = doctorBarnDao.findById(chgLocationDto.getChgLocationFromBarnId());
+        DoctorBarn toBarn = doctorBarnDao.findById(chgLocationDto.getChgLocationToBarnId());
+        if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
+            doctorPigEvent.setType(PigEvent.TO_FARROWING.getKey());
+            doctorPigEvent.setName(PigEvent.TO_FARROWING.getName());
+        } else if (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
+            doctorPigEvent.setType(PigEvent.TO_MATING.getKey());
+            doctorPigEvent.setName(PigEvent.TO_MATING.getName());
+        }
+        return doctorPigEvent;
+    }
+
+    @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) inputDto;
@@ -75,8 +91,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
             basic.setEventType(PigEvent.TO_FARROWING.getKey());
             basic.setEventName(PigEvent.TO_FARROWING.getName());
             basic.setEventDesc(PigEvent.TO_FARROWING.getDesc());
-        }
-        if (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
+        } else if (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
             // 设置断奶到配置舍标志
             Map<String, Object> newExtraMap = Maps.newHashMap();
             newExtraMap.put("hasWeanToMating", true);

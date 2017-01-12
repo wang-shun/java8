@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.collect.Maps;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -19,6 +20,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.doctor.common.enums.PigType.MATING_FARROW_TYPES;
+import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
 
 /**
  * Created by yaoqijun.
@@ -44,7 +47,7 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
         // 校验转相同的猪舍
         DoctorBarn doctorCurrentBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         DoctorBarn doctorToBarn = doctorBarnDao.findById(chgFarmDto.getToBarnId());
-        checkState(Objects.equals(doctorCurrentBarn.getPigType(), doctorToBarn.getPigType()), "sowChgFarm.diffBarn.error");
+        checkState(checkBarnTypeEqual(doctorCurrentBarn, doctorToBarn, doctorPigTrack.getStatus()), "sowChgFarm.diffBarn.error");
 
         // update barn info
         doctorPigTrack.setFarmId(chgFarmDto.getToFarmId());
@@ -68,5 +71,22 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
         params.put("farmId", chgFarmDto.getToFarmId());
         params.put("farmName", chgFarmDto.getToFarmName());
         checkState(doctorPigEventDao.updatePigEventFarmIdByPigId(params), "chgFarm.updateEventInfo.fail");
+    }
+
+    /**
+     * 校验是否可以转舍
+     * @param fromBarn 源舍
+     * @param toBarn 转入舍
+     * @param pigStatus 状态
+     * @return 是否准许转舍
+     */
+    private Boolean checkBarnTypeEqual(DoctorBarn fromBarn, DoctorBarn toBarn, Integer pigStatus) {
+        if (fromBarn == null || toBarn == null) {
+            return false;
+        }
+        return (Objects.equals(fromBarn.getPigType(), toBarn.getPigType())
+                || (MATING_TYPES.contains(fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType()))
+                || (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_FARROW_TYPES.contains(toBarn.getPigType())))
+                || Objects.equals(pigStatus, PigStatus.Pregnancy.getKey()) && MATING_FARROW_TYPES.contains(toBarn.getPigType());
     }
 }

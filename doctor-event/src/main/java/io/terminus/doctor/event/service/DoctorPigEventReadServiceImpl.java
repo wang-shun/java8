@@ -18,6 +18,8 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
+import io.terminus.doctor.event.dto.DoctorSuggestPig;
+import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -142,6 +144,20 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }catch (Exception e){
             log.error("query pig events fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.pigEvents.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorSuggestPig>> suggestPigsByEvent(Integer eventType, Long farmId, String pigCode, Integer sex) {
+        try {
+            DoctorSuggestPigSearch suggestPigSearch = pigEventManager.selectPigs(eventType);
+            suggestPigSearch.setFarmId(farmId);
+            suggestPigSearch.setPigCode(pigCode);
+            suggestPigSearch.setSex(sex);
+            return Response.ok(doctorPigTrackDao.suggestPigs(suggestPigSearch));
+        } catch (Exception e) {
+            log.error("suggest.pigs.by.event.failed, eventType:{}, farmId:{}, cause:{}", eventType, farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("suggest.pigs.by.event.failed");
         }
     }
 

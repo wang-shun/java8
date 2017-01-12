@@ -4,6 +4,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.event.dto.DoctorSuggestPig;
+import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPigStatusCount;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -136,5 +138,14 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
      */
     public List<DoctorPigTrack> findFeedSowTrackByGroupId(Long groupId) {
         return getSqlSession().selectList(sqlId("findFeedSowTrackByGroupId"), ImmutableMap.of("groupId", groupId, "status", PigStatus.FEED.getKey()));
+    }
+
+    /**
+     * 根据事件suggestpig
+     * @param suggestPigSearch 查询条件
+     * @return
+     */
+    public List<DoctorSuggestPig> suggestPigs(DoctorSuggestPigSearch suggestPigSearch) {
+        return getSqlSession().selectList(sqlId("suggestPigs"), suggestPigSearch);
     }
 }

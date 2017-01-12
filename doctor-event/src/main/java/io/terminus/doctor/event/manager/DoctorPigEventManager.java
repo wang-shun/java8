@@ -13,6 +13,7 @@ import io.terminus.doctor.common.event.ZkListenedGroupEvent;
 import io.terminus.doctor.common.event.ZkListenedPigEvent;
 import io.terminus.doctor.common.event.ZkPigPublishDto;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -25,6 +26,7 @@ import io.terminus.doctor.event.event.ListenedPigEvent;
 import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
+import io.terminus.doctor.event.handler.DoctorPigsByEventSelector;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -225,6 +227,15 @@ public class DoctorPigEventManager {
      */
     public List<PigEvent> selectEvents(PigStatus pigStatus, PigType pigType) {
         return DoctorEventSelector.selectPigEvent(pigStatus, pigType);
+    }
+
+    /**
+     * 可执行此事件的猪查询条件
+     * @param eventType 事件类型
+     * @return 查询track的条件
+     */
+    public DoctorSuggestPigSearch selectPigs(Integer eventType) {
+        return DoctorPigsByEventSelector.select(eventType);
     }
 
     /**
