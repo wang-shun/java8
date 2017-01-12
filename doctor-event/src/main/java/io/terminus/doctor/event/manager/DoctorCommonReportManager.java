@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.manager;
 
+import com.google.common.base.Throwables;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorMonthlyReportDao;
@@ -11,6 +12,7 @@ import io.terminus.doctor.event.model.DoctorWeeklyReport;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,6 +29,7 @@ import java.util.stream.Stream;
  * author: DreamYoung
  * Date: 16/8/12
  */
+@Slf4j
 @Component
 public class DoctorCommonReportManager {
 
@@ -173,84 +176,177 @@ public class DoctorCommonReportManager {
 
     //更新存栏变动
     public void updateCommonLiveStockChange(FarmIdAndEventAt fe) {
-        DoctorLiveStockChangeCommonReport report = getLiveStockChangeReport(fe.getFarmId(), fe.monthStart(), fe.monthEnd());
-        DoctorMonthlyReport month = getMonthlyReport(fe);
-        month.getReportDto().setLiveStockChange(report);
-        doctorMonthlyReportDao.update(month);
+        try {
+            DoctorLiveStockChangeCommonReport monthLiveStock = getLiveStockChangeReport(fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+            DoctorMonthlyReport month = getMonthlyReport(fe);
+            month.getReportDto().setLiveStockChange(monthLiveStock);
+            doctorMonthlyReportDao.update(month);
+
+            DoctorLiveStockChangeCommonReport weekLiveStock = getLiveStockChangeReport(fe.getFarmId(), fe.weekStart(), fe.weekEnd());
+            DoctorWeeklyReport week = getWeeklyReport(fe);
+            week.getReportDto().setLiveStockChange(weekLiveStock);
+            doctorWeeklyReportDao.update(week);
+        } catch (Exception e) {
+            log.error("updateCommonLiveStockChange failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
+        }
     }
 
     //更新销售死淘
     public void updateCommonSaleDead(FarmIdAndEventAt fe) {
-        DoctorMonthlyReport month = getMonthlyReport(fe);
-        setSaleDead(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
-        doctorMonthlyReportDao.update(month);
+        try {
+            DoctorMonthlyReport month = getMonthlyReport(fe);
+            setSaleDead(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+            doctorMonthlyReportDao.update(month);
+
+            DoctorWeeklyReport week = getWeeklyReport(fe);
+            setSaleDead(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
+            doctorWeeklyReportDao.update(week);
+        } catch (Exception e) {
+            log.error("updateCommonSaleDead failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
+        }
     }
 
     //更新胎次分布，品类分布
     public void updateCommonParityBreed(FarmIdAndEventAt fe) {
-        DoctorMonthlyReport month = getMonthlyReport(fe);
-        month.getReportDto().setParityStockList(doctorKpiDao.getMonthlyParityStock(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
-        month.getReportDto().setBreedStockList(doctorKpiDao.getMonthlyBreedStock(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
-        doctorMonthlyReportDao.update(month);
+        try {
+            DoctorMonthlyReport month = getMonthlyReport(fe);
+            month.getReportDto().setParityStockList(doctorKpiDao.getMonthlyParityStock(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
+            month.getReportDto().setBreedStockList(doctorKpiDao.getMonthlyBreedStock(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
+            doctorMonthlyReportDao.update(month);
+
+            DoctorWeeklyReport week = getWeeklyReport(fe);
+            week.getReportDto().setParityStockList(doctorKpiDao.getMonthlyParityStock(fe.getFarmId(), fe.weekStart(), fe.weekEnd()));
+            week.getReportDto().setBreedStockList(doctorKpiDao.getMonthlyBreedStock(fe.getFarmId(), fe.weekStart(), fe.weekEnd()));
+            doctorWeeklyReportDao.update(week);
+        } catch (Exception e) {
+            log.error("updateCommonParityBreed failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
+        }
     }
 
     //更新npd psy
     public void updateCommonNpdPsy(FarmIdAndEventAt fe) {
-        DoctorMonthlyReport month = getMonthlyReport(fe);
-        month.getReportDto().setNpd(doctorKpiDao.npd(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
-        month.getReportDto().setPsy(doctorKpiDao.psy(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
-        doctorMonthlyReportDao.update(month);
+        try {
+            DoctorMonthlyReport month = getMonthlyReport(fe);
+            month.getReportDto().setNpd(doctorKpiDao.npd(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
+            month.getReportDto().setPsy(doctorKpiDao.psy(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
+            doctorMonthlyReportDao.update(month);
+
+            DoctorWeeklyReport week = getWeeklyReport(fe);
+            week.getReportDto().setNpd(doctorKpiDao.npd(fe.getFarmId(), fe.weekStart(), fe.weekEnd()));
+            week.getReportDto().setPsy(doctorKpiDao.psy(fe.getFarmId(), fe.weekStart(), fe.weekEnd()));
+            doctorWeeklyReportDao.update(week);
+        } catch (Exception e) {
+            log.error("updateCommonNpdPsy failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
+        }
     }
 
     //更新断奶7天配种率
     public void updateCommonWean7Mate(FarmIdAndEventAt fe) {
-        DoctorMonthlyReport month = getMonthlyReport(fe);
-        month.getReportDto().setMateInSeven(doctorKpiDao.getMateInSeven(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
-        doctorMonthlyReportDao.update(month);
+        try {
+            DoctorMonthlyReport month = getMonthlyReport(fe);
+            month.getReportDto().setMateInSeven(doctorKpiDao.getMateInSeven(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
+            doctorMonthlyReportDao.update(month);
+
+            DoctorWeeklyReport week = getWeeklyReport(fe);
+            week.getReportDto().setMateInSeven(doctorKpiDao.getMateInSeven(fe.getFarmId(), fe.weekStart(), fe.weekEnd()));
+            doctorWeeklyReportDao.update(week);
+        } catch (Exception e) {
+            log.error("updateCommonWean7Mate failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
+        }
     }
 
     //更新公猪生产成绩
     public void updateCommonBoarScore(FarmIdAndEventAt fe) {
-        DoctorMonthlyReport month = getMonthlyReport(fe);
-        setBoarScore(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
-        doctorMonthlyReportDao.update(month);
+        try {
+            DoctorMonthlyReport month = getMonthlyReport(fe);
+            setBoarScore(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+            doctorMonthlyReportDao.update(month);
+
+            DoctorWeeklyReport week = getWeeklyReport(fe);
+            setBoarScore(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
+            doctorWeeklyReportDao.update(week);
+        } catch (Exception e) {
+            log.error("updateCommonBoarScore failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
+        }
     }
 
     //更新4个月的率统计数据
     public void updateCommon4MonthRate(FarmIdAndEventAt fe) {
-        DateUtil.getBeforeMonthEnds(fe.getEventAt(), 4).forEach(date -> {
-            DoctorMonthlyReport month = getMonthlyReport(new FarmIdAndEventAt(fe.getFarmId(), date));
-            set4MonthRate(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
-            doctorMonthlyReportDao.update(month);
-        });
+        try {
+            DateUtil.getBeforeMonthEnds(fe.getEventAt(), 4).forEach(date -> {
+                DoctorMonthlyReport month = getMonthlyReport(new FarmIdAndEventAt(fe.getFarmId(), date));
+                set4MonthRate(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+                doctorMonthlyReportDao.update(month);
+            });
+
+            DateUtil.getBeforeWeekEnds(fe.getEventAt(), 4).forEach(date -> {
+                DoctorWeeklyReport week = getWeeklyReport(new FarmIdAndEventAt(fe.getFarmId(), date));
+                set4MonthRate(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
+                doctorWeeklyReportDao.update(week);
+            });
+        } catch (Exception e) {
+            log.error("updateCommon4MonthRate failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
+        }
     }
 
     //更新配种情况
     public void updateCommonMate(FarmIdAndEventAt fe) {
-        DoctorMonthlyReport month = getMonthlyReport(fe);
-        setMate(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
-        doctorMonthlyReportDao.update(month);
+        try {
+            DoctorMonthlyReport month = getMonthlyReport(fe);
+            setMate(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+            doctorMonthlyReportDao.update(month);
+
+            DoctorWeeklyReport week = getWeeklyReport(fe);
+            setMate(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
+            doctorWeeklyReportDao.update(week);
+        } catch (Exception e) {
+            log.error("updateCommonMate failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
+        }
     }
 
     //更新妊检情况
     public void updateCommonPregCheck(FarmIdAndEventAt fe) {
-        DoctorMonthlyReport month = getMonthlyReport(fe);
-        setPregCheck(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
-        doctorMonthlyReportDao.update(month);
+        try {
+            DoctorMonthlyReport month = getMonthlyReport(fe);
+            setPregCheck(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+            doctorMonthlyReportDao.update(month);
+
+            DoctorWeeklyReport week = getWeeklyReport(fe);
+            setPregCheck(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
+            doctorWeeklyReportDao.update(week);
+        } catch (Exception e) {
+            log.error("updateCommonPregCheck failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
+        }
     }
 
     //更新分娩情况
     public void updateCommonFarrow(FarmIdAndEventAt fe) {
-        DoctorMonthlyReport month = getMonthlyReport(fe);
-        setFarrow(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
-        doctorMonthlyReportDao.update(month);
+        try {
+            DoctorMonthlyReport month = getMonthlyReport(fe);
+            setFarrow(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+            doctorMonthlyReportDao.update(month);
+
+            DoctorWeeklyReport week = getWeeklyReport(fe);
+            setFarrow(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
+            doctorWeeklyReportDao.update(week);
+        } catch (Exception e) {
+            log.error("updateCommonFarrow failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
+        }
     }
 
     //更新断奶情况
     public void updateCommonWean(FarmIdAndEventAt fe) {
-        DoctorMonthlyReport month = getMonthlyReport(fe);
-        setWean(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
-        doctorMonthlyReportDao.update(month);
+        try {
+            DoctorMonthlyReport month = getMonthlyReport(fe);
+            setWean(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+            doctorMonthlyReportDao.update(month);
+
+            DoctorWeeklyReport week = getWeeklyReport(fe);
+            setWean(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
+            doctorWeeklyReportDao.update(week);
+        } catch (Exception e) {
+            log.error("updateCommonWean failed, farmIdAndEventAt:{}, cause:{}", fe, Throwables.getStackTraceAsString(e));
+        }
     }
 
     //死亡销售
