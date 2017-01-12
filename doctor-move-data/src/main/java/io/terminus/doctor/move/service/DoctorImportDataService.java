@@ -202,6 +202,8 @@ public class DoctorImportDataService {
     private UserDaoExt userDaoExt;
     @Autowired
     private DoctorBasicMaterialDao doctorBasicMaterialDao;
+    @Autowired
+    private DoctorMoveDataService doctorMoveDataService;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -229,6 +231,9 @@ public class DoctorImportDataService {
             importGroup(farm, barnMap, shit.getGroup());
             importSow(farm, barnMap, breedMap, shit.getSow());
 
+            //刷新npd
+            doctorMoveDataService.flushNpd(farm.getId());
+            
             // 工作流
             doctorMoveDataService.moveWorkflow(farm);
 
