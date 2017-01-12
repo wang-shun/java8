@@ -202,8 +202,6 @@ public class DoctorImportDataService {
     private UserDaoExt userDaoExt;
     @Autowired
     private DoctorBasicMaterialDao doctorBasicMaterialDao;
-    @Autowired
-    private DoctorMoveDataService doctorMoveDataService;
 
     /**
      * 根据shit导入所有的猪场数据
