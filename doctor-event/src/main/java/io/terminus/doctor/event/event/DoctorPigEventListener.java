@@ -73,7 +73,10 @@ public class DoctorPigEventListener implements EventListener {
             PigEvent.FARROWING.getKey(),
             PigEvent.WEAN.getKey(),
             PigEvent.PIGLETS_CHG.getKey(),
-            PigEvent.FOSTERS.getKey()
+            PigEvent.FOSTERS.getKey(),
+            PigEvent.CHG_LOCATION.getKey(),
+            PigEvent.TO_MATING.getKey(),
+            PigEvent.TO_FARROWING.getKey()
     );
 
     /**
@@ -202,6 +205,11 @@ public class DoctorPigEventListener implements EventListener {
                     FarmIdAndEventAt fe = new FarmIdAndEventAt(pigEvent.getFarmId(), event.getEventAt());
                     doctorCommonReportManager.updateWean7Mate(fe);
                 });
+            case CHG_LOCATION:
+            case TO_FARROWING:
+            case TO_MATING:
+                flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
+                        .forEach(event -> handleLiveStockReport(pigEvent.getOrgId(), pigEvent.getFarmId(), event.getEventAt(), event.getKind()));
             default:
                 break;
         }
