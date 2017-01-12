@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.manager.DoctorCommonReportManager;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
@@ -32,6 +33,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.event.manager.DoctorCommonReportManager.FarmIdAndEventAt;
 
 /**
  * Desc: 猪事件监听器
@@ -59,6 +61,9 @@ public class DoctorPigEventListener implements EventListener {
     @Autowired
     private DoctorDailyReportDao doctorDailyReportDao;
 
+    @Autowired
+    private DoctorCommonReportManager doctorCommonReportManager;
+
     private static final List<Integer> NEED_TYPES = Lists.newArrayList(
             PigEvent.CHG_FARM.getKey(),
             PigEvent.REMOVAL.getKey(),
@@ -66,7 +71,9 @@ public class DoctorPigEventListener implements EventListener {
             PigEvent.MATING.getKey(),
             PigEvent.PREG_CHECK.getKey(),
             PigEvent.FARROWING.getKey(),
-            PigEvent.WEAN.getKey()
+            PigEvent.WEAN.getKey(),
+            PigEvent.PIGLETS_CHG.getKey(),
+            PigEvent.FOSTERS.getKey()
     );
 
     /**
@@ -91,10 +98,32 @@ public class DoctorPigEventListener implements EventListener {
 
         List<DoctorPigPublishDto> dtos = pigEvent.getPigs();
         Function<DoctorPigPublishDto, Date> eventAtFunc = e -> Dates.startOfDay(e.getEventAt());
+        Function<DoctorPigPublishDto, Date> monthFunc = e -> DateUtil.monthEnd(e.getEventAt());
+        List<DoctorPigPublishDto> monthEvents = flatByFunc(dtos, monthFunc);
+
         switch (type) {
-            case CHG_FARM: case ENTRY:
+            case CHG_FARM:
                 flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
                         .forEach(event -> handleLiveStockReport(pigEvent.getOrgId(), pigEvent.getFarmId(), event.getEventAt(), event.getKind()));
+
+                //转场更新月报：存栏变动，胎次分布，品类分布，npd，psy
+                monthEvents.forEach(event -> {
+                    FarmIdAndEventAt fe = new FarmIdAndEventAt(pigEvent.getFarmId(), event.getEventAt());
+                    doctorCommonReportManager.updateLiveStockChange(fe);
+                    doctorCommonReportManager.updateParityBreed(fe);
+                    doctorCommonReportManager.updateNpdPsy(fe);
+                });
+                break;
+            case ENTRY:
+                flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
+                        .forEach(event -> handleLiveStockReport(pigEvent.getOrgId(), pigEvent.getFarmId(), event.getEventAt(), event.getKind()));
+
+                //进场更新月报：存栏变动，胎次分布，品类分布
+                monthEvents.forEach(event -> {
+                    FarmIdAndEventAt fe = new FarmIdAndEventAt(pigEvent.getFarmId(), event.getEventAt());
+                    doctorCommonReportManager.updateLiveStockChange(fe);
+                    doctorCommonReportManager.updateParityBreed(fe);
+                });
                 break;
             case REMOVAL:
                 flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
@@ -102,21 +131,77 @@ public class DoctorPigEventListener implements EventListener {
                             handleLiveStockReport(pigEvent.getOrgId(), pigEvent.getFarmId(), event.getEventAt(), event.getKind());
                             handleSaleAndDead(pigEvent.getFarmId(), event.getEventAt());
                         });
+
+                //离场更新月报：存栏变动，胎次分布，品类分布，销售/死淘情况,npd，psy
+                monthEvents.forEach(event -> {
+                    FarmIdAndEventAt fe = new FarmIdAndEventAt(pigEvent.getFarmId(), event.getEventAt());
+                    doctorCommonReportManager.updateLiveStockChange(fe);
+                    doctorCommonReportManager.updateParityBreed(fe);
+                    doctorCommonReportManager.updateSaleDead(fe);
+                    doctorCommonReportManager.updateNpdPsy(fe);
+                });
                 break;
             case MATING:
                 flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getMateType)
                         .forEach(event -> handleMate(pigEvent.getFarmId(), event.getEventAt(), event.getMateType()));
+
+                //配种更新月报：配种情况，公猪生产成绩,断奶7天配种率, npd，psy
+                monthEvents.forEach(event -> {
+                    FarmIdAndEventAt fe = new FarmIdAndEventAt(pigEvent.getFarmId(), event.getEventAt());
+                    doctorCommonReportManager.updateMate(fe);
+                    doctorCommonReportManager.updateBoarScore(fe);
+                    doctorCommonReportManager.updateNpdPsy(fe);
+                    doctorCommonReportManager.updateWean7Mate(fe);
+                });
                 break;
             case PREG_CHECK:
                 flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getPregCheckResult)
                         .forEach(event -> handlePregCheck(pigEvent.getFarmId(), event.getEventAt(), event.getPregCheckResult()));
+
+                //妊检更新月报：配种情况，公猪生产成绩, 4个月率, npd，psy
+                monthEvents.forEach(event -> {
+                    FarmIdAndEventAt fe = new FarmIdAndEventAt(pigEvent.getFarmId(), event.getEventAt());
+                    doctorCommonReportManager.updatePregCheck(fe);
+                    doctorCommonReportManager.updateBoarScore(fe);
+                    doctorCommonReportManager.update4MonthRate(fe);
+                    doctorCommonReportManager.updateNpdPsy(fe);
+                });
                 break;
             case FARROWING:
                 flatByFunc(dtos, eventAtFunc).forEach(event -> handleFarrow(pigEvent.getFarmId(), event.getEventAt()));
+
+                //分娩更新月报：分娩情况，公猪生产成绩, 4个月率, psy
+                monthEvents.forEach(event -> {
+                    FarmIdAndEventAt fe = new FarmIdAndEventAt(pigEvent.getFarmId(), event.getEventAt());
+                    doctorCommonReportManager.updateFarrow(fe);
+                    doctorCommonReportManager.updateBoarScore(fe);
+                    doctorCommonReportManager.update4MonthRate(fe);
+                    doctorCommonReportManager.updateNpdPsy(fe);
+                });
                 break;
             case WEAN:
                 flatByFunc(dtos, eventAtFunc).forEach(event -> handleWean(pigEvent.getFarmId(), event.getEventAt()));
+
+                //断奶更新月报：断奶情况,断奶7天配种率, psy
+                monthEvents.forEach(event -> {
+                    FarmIdAndEventAt fe = new FarmIdAndEventAt(pigEvent.getFarmId(), event.getEventAt());
+                    doctorCommonReportManager.updateWean(fe);
+                    doctorCommonReportManager.updateWean7Mate(fe);
+                    doctorCommonReportManager.updateNpdPsy(fe);
+                });
                 break;
+            case PIGLETS_CHG:
+                //仔猪变动更新月报：断奶7天配种率
+                monthEvents.forEach(event -> {
+                    FarmIdAndEventAt fe = new FarmIdAndEventAt(pigEvent.getFarmId(), event.getEventAt());
+                    doctorCommonReportManager.updateWean7Mate(fe);
+                });
+            case FOSTERS:
+                //拼窝更新月报：断奶7天配种率
+                monthEvents.forEach(event -> {
+                    FarmIdAndEventAt fe = new FarmIdAndEventAt(pigEvent.getFarmId(), event.getEventAt());
+                    doctorCommonReportManager.updateWean7Mate(fe);
+                });
             default:
                 break;
         }
