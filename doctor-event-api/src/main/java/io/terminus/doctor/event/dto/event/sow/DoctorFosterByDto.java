@@ -31,6 +31,12 @@ public class DoctorFosterByDto extends BasePigEventInputDto implements Serializa
      */
     private Integer fosterByCount;
 
+    private Integer sowFostersByCount;    // 拼窝母猪数量
+
+    private Integer boarFostersByCount;   // 拼窝公猪数量
+
+    private Double fosterByTotalWeight;   //拼窝总重量
+
     /**
      * 原母猪id
      */

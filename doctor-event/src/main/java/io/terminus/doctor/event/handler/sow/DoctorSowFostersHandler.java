@@ -84,6 +84,9 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
                 .fromSowId(fostersDto.getPigId())
                 .fosterByDate(DateUtil.toDate(fostersDto.getFostersDate()))
                 .fosterByCount(fostersDto.getFostersCount())
+                .boarFostersByCount(fostersDto.getBoarFostersCount())
+                .sowFostersByCount(fostersDto.getSowFostersCount())
+                .fosterByTotalWeight(fostersDto.getFosterTotalWeight())
                 .build();
         DoctorPigTrack fosterByTrack = doctorPigTrackDao.findByPigId(fostersDto.getFosterSowId());
         DoctorPig fosterByPig = doctorPigDao.findById(fostersDto.getFosterSowId());

@@ -12,6 +12,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -116,11 +117,12 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
     @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorFarmEntryDto dto = (DoctorFarmEntryDto) inputDto;
+        DoctorBarn doctorBarn = doctorBarnDao.findById(dto.getBarnId());
         DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId()).pigType(inputDto.getPigType())
                 .isRemoval(IsOrNot.NO.getValue()).currentMatingCount(0)
                 .pigId(inputDto.getPigId()).pigType(inputDto.getPigType())
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
-                .currentParity(dto.getParity())
+                .currentBarnType(doctorBarn.getPigType()).currentParity(dto.getParity())
                 .weight(dto.getWeight())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();

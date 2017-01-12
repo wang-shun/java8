@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.manager;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.JsonMapper;
@@ -10,10 +11,22 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorAntiepidemicGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorCloseGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorCommonGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorDiseaseGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorLiveStockGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorMoveInGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -25,8 +38,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -50,10 +66,14 @@ public class DoctorGroupEventManager {
     private DoctorRevertLogDao doctorRevertLogDao;
     @Autowired
     private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    @Autowired
+    private DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     private Map<Class<? extends DoctorGroupEventHandler>, DoctorGroupEventHandler> handlerMapping;
+
+    private Map<Integer, DoctorGroupEventHandler> handlerMap;
 
     /**
      * 初始化所有实现的
@@ -61,10 +81,20 @@ public class DoctorGroupEventManager {
     @PostConstruct
     public void initHandlers() {
         handlerMapping = Maps.newHashMap();
+        handlerMap = Maps.newHashMap();
         Map<String, DoctorGroupEventHandler> handlers = applicationContext.getBeansOfType(DoctorGroupEventHandler.class);
         log.info("Doctor group event handlers :{}", handlers);
         if (!handlers.isEmpty()) {
             handlers.values().forEach(handler -> handlerMapping.put(handler.getClass(), handler));
+            handlerMap.put(GroupEventType.MOVE_IN.getValue(), handlerMapping.get(DoctorMoveInGroupEventHandler.class));
+            handlerMap.put(GroupEventType.CHANGE.getValue(), handlerMapping.get(DoctorChangeGroupEventHandler.class));
+            handlerMap.put(GroupEventType.TRANS_GROUP.getValue(), handlerMapping.get(DoctorTransGroupEventHandler.class));
+            handlerMap.put(GroupEventType.TURN_SEED.getValue(), handlerMapping.get(DoctorTurnSeedGroupEventHandler.class));
+            handlerMap.put(GroupEventType.LIVE_STOCK.getValue(), handlerMapping.get(DoctorLiveStockGroupEventHandler.class));
+            handlerMap.put(GroupEventType.DISEASE.getValue(), handlerMapping.get(DoctorDiseaseGroupEventHandler.class));
+            handlerMap.put(GroupEventType.ANTIEPIDEMIC.getValue(), handlerMapping.get(DoctorAntiepidemicGroupEventHandler.class));
+            handlerMap.put(GroupEventType.TRANS_FARM.getValue(), handlerMapping.get(DoctorTransFarmGroupEventHandler.class));
+            handlerMap.put(GroupEventType.CLOSE.getValue(), handlerMapping.get(DoctorCloseGroupEventHandler.class));
         }
     }
 
@@ -77,8 +107,24 @@ public class DoctorGroupEventManager {
      */
     @Transactional
     public <I extends BaseGroupInput>
-    void handleEvent(DoctorGroupDetail groupDetail, I input, Class<? extends DoctorGroupEventHandler> handlerClass) {
-        getHandler(handlerClass).handle(groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
+    List<DoctorEventInfo> handleEvent(DoctorGroupDetail groupDetail, I input, Class<? extends DoctorGroupEventHandler> handlerClass) {
+        final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
+        getHandler(handlerClass).handle(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
+        return eventInfoList;
+    }
+
+    /**
+     * 批量猪群事件
+     * @param inputInfoList
+     * @param eventType
+     * @return
+     */
+    @Transactional
+    public List<DoctorEventInfo> batchHandleEvent(List<DoctorGroupInputInfo> inputInfoList, Integer eventType) {
+        eventRepeatCheck(inputInfoList);
+        final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
+        inputInfoList.forEach(inputInfo -> getHandler(eventType).handle(eventInfoList, inputInfo.getGroupDetail().getGroup(), inputInfo.getGroupDetail().getGroupTrack(), inputInfo.getInput()));
+        return eventInfoList;
     }
 
     /**
@@ -148,5 +194,29 @@ public class DoctorGroupEventManager {
             throw new ServiceException("handler.not.found");
         }
         return handlerMapping.get(interfaceClass);
+    }
+
+    /**
+     * 获取事件处理器
+     * @param eventType 实现类型
+     * @return 事件处理器
+     */
+    private DoctorGroupEventHandler getHandler(Integer eventType) {
+        if (!handlerMap.containsKey(eventType) || handlerMap.get(eventType) == null) {
+            log.error("Not any event handler found for illegal eventType:{}", eventType);
+            throw new ServiceException("handler.not.found");
+        }
+        return handlerMap.get(eventType);
+    }
+
+    /**
+     * 批量事件的重复性校验
+     * @param inputList 批量事件输入
+     */
+    private void eventRepeatCheck(List<DoctorGroupInputInfo> inputList) {
+        Set<String> inputSet = inputList.stream().map(groupInputInfo -> groupInputInfo.getGroupDetail().getGroup().getGroupCode()).collect(Collectors.toSet());
+        if (inputList.size() != inputSet.size()) {
+            throw new ServiceException("batch.event.groupCode.not.repeat");
+        }
     }
 }

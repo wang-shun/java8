@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -17,10 +16,10 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorCommonGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -45,7 +44,7 @@ import static io.terminus.doctor.common.utils.DateUtil.stringToDate;
 public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
     @Autowired
-    private  DoctorGroupWriteService doctorGroupWriteService;
+    private DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
     @Autowired
     private DoctorSowWeanHandler doctorSowWeanHandler;
@@ -104,7 +103,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         //分娩时记录下 分娩数量
         doctorPigTrack.setFarrowQty(farrowingDto.getFarrowingLiveCount());
-        doctorPigTrack.setUnweanQty(doctorPigTrack.getFarrowQty());
+        doctorPigTrack.setUnweanQty(farrowingDto.getFarrowingLiveCount());
         doctorPigTrack.setWeanQty(0);  //分娩时 断奶数为0
         doctorPigTrack.setFarrowAvgWeight(farrowingDto.getBirthNestAvg());
         doctorPigTrack.setWeanAvgWeight(0D); //分娩时, 断奶均重置成0
@@ -136,14 +135,14 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         if (Objects.equals(farrowingDto.getFarrowingLiveCount(), 0)) {
             DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
                     .partWeanDate(farrowingDto.eventAt())
-                    .partWeanPigletsCount(farrowingDto.getDeadCount())
+                    .partWeanPigletsCount(0)
                     .partWeanAvgWeight(0d)
                     .build();
             buildAutoEventCommonInfo(farrowingDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
             doctorSowWeanHandler.handle(doctorEventInfoList, partWeanDto, basic);
         }
 
-        Long groupId = buildPigGroupCountInfo(doctorPigTrack, doctorPigEvent, farrowingDto, basic);
+        Long groupId = buildPigGroupCountInfo(doctorEventInfoList, doctorPigTrack, doctorPigEvent, farrowingDto, basic);
         doctorPigTrack.setGroupId(groupId);
         doctorPigTrackDao.update(doctorPigTrack);
 
@@ -153,7 +152,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
      * 创建对应的猪群
      *
      */
-    protected Long buildPigGroupCountInfo(DoctorPigTrack doctorPigTrack, DoctorPigEvent doctorPigEvent, DoctorFarrowingDto farrowingDto, DoctorBasicInputInfoDto basic) {
+    protected Long buildPigGroupCountInfo(List<DoctorEventInfo> eventInfoList, DoctorPigTrack doctorPigTrack, DoctorPigEvent doctorPigEvent, DoctorFarrowingDto farrowingDto, DoctorBasicInputInfoDto basic) {
 
         // Build 新建猪群操作方式
         DoctorSowMoveInGroupInput input = new DoctorSowMoveInGroupInput();
@@ -193,12 +192,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         input.setHealthyQty(CountUtil.getIntegerDefault0(farrowingDto.getHealthCount()));
 
         input.setRelPigEventId(doctorPigEvent.getId());
-        Response<Long> response = doctorGroupWriteService.sowGroupEventMoveIn(input);
-        if (response.isSuccess()) {
-            return response.getResult();
-        } else {
-            throw new IllegalStateException(response.getError());
-        }
+        return doctorCommonGroupEventHandler.sowGroupEventMoveIn(eventInfoList, input);
     }
 
     private DoctorGroupTrack.Sex judgePigSex(Integer sowCount, Integer boarCount) {

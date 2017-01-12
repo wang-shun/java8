@@ -17,6 +17,7 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -80,6 +81,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
 
         //5.记录发生的事件信息
+        DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(doctorPigEvent.getOrgId())
                 .farmId(doctorPigEvent.getFarmId())
@@ -92,7 +94,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .code(doctorPigEvent.getPigCode())
                 .status(doctorPigTrack.getStatus())
                 .businessType(DoctorEventInfo.Business_Type.PIG.getValue())
-                .eventType(basic.getEventType())
+                .eventType(doctorPigEvent.getType())
+                .pigType(doctorBarn.getPigType())
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
 
@@ -172,12 +175,12 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     }
 
     /**
-     * 触发事件, 触发其他事件时需要事件此方法
+     * 触发事件, 触发其他事件时需要实现此方法
      * @param doctorEventInfoList
      * @param doctorPigEvent
      * @param doctorPigTrack
-     * @param inputDto
-     * @param basic
+     * @param inputDto 事件输入信息
+     * @param basic 基础信息
      */
     protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
 

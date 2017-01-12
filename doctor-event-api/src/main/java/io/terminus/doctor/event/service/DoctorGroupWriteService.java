@@ -6,10 +6,11 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInp
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorDiseaseGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorLiveStockGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
-import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInputInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
@@ -20,6 +21,7 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Desc: 猪群卡片表写服务
@@ -120,13 +122,6 @@ public interface DoctorGroupWriteService {
                                          String reveterName);
 
     /**
-     * 母猪事件触发的仔猪转入猪群事件(注意:分娩舍只允许一个猪群, 所以以后分娩的都要并到第一个猪群里)
-     * @param input 录入信息
-     * @return 创建的猪群id
-     */
-    Response<Long> sowGroupEventMoveIn(@Valid DoctorSowMoveInGroupInput input);
-
-    /**
      * job调用, 用于每日更新日龄
      * @return 是否成功
      */
@@ -139,9 +134,23 @@ public interface DoctorGroupWriteService {
     Response<Long> createGroupSnapShot(DoctorGroupSnapshot groupSnapshot);
 
     /**
-     * 更新猪事件(暂时)
+     * 更新猪群事件(暂时)
      * @param event
      * @return
      */
     Response<Boolean> updateGroupEvent(DoctorGroupEvent event);
+
+    /**
+     * 批量新建猪群事件
+     * @param inputInfoList 批量信息
+     * @return
+     */
+    Response<Boolean> batchNewGroupEventHandle(List<DoctorNewGroupInputInfo> inputInfoList);
+    /**
+     * 批量某一类型事件
+     * @param inputInfoList 批量信息
+     * @param eventType 事件类型
+     * @return
+     */
+    Response<Boolean> batchGroupEventHandle(List<DoctorGroupInputInfo> inputInfoList, Integer eventType);
 }

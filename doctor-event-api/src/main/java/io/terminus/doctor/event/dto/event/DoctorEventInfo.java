@@ -24,6 +24,11 @@ public class DoctorEventInfo {
     private Date eventAt;
     private Integer eventType;
     private Integer businessType;
+    /**
+     * 猪舍类型
+     * @see io.terminus.doctor.common.enums.PigType
+     */
+    private Integer pigType;
 
     /**
      * 如果是猪事件,猪的类型(性别)

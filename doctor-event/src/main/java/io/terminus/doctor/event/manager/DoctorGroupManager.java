@@ -3,7 +3,9 @@ package io.terminus.doctor.event.manager;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -13,8 +15,10 @@ import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInputInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
@@ -31,7 +35,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc:
@@ -77,7 +84,9 @@ public class DoctorGroupManager {
      * @return 猪群id
      */
     @Transactional
-    public Long createNewGroup(DoctorGroup group, DoctorNewGroupInput newGroupInput) {
+    public Long createNewGroup(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorNewGroupInput newGroupInput) {
+        checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId());
+
         //0.校验猪群号是否重复
         checkGroupCodeExist(newGroupInput.getFarmId(), newGroupInput.getGroupCode());
 
@@ -128,9 +137,42 @@ public class DoctorGroupManager {
                 .build()));
         doctorGroupSnapshotDao.create(groupSnapshot);
 
+        DoctorEventInfo eventInfo = DoctorEventInfo.builder()
+                .orgId(group.getOrgId())
+                .farmId(group.getFarmId())
+                .eventId(groupEvent.getId())
+                .eventType(groupEvent.getType())
+                .businessId(group.getId())
+                .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
+                .code(group.getGroupCode())
+                .build();
+        eventInfoList.add(eventInfo);
         //发布统计事件
-        publistGroupAndBarn(groupEvent);
+        //publistGroupAndBarn(groupEvent);
         return groupId;
+    }
+
+    /**
+     * 批量新建猪群
+     * @param inputInfoList 批量事件信息
+     * @return
+     */
+    @Transactional
+    public List<DoctorEventInfo> batchNewGroupEventHandle(List<DoctorNewGroupInputInfo> inputInfoList) {
+        List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
+        inputInfoList.forEach(newGroupInputInfo -> createNewGroup(eventInfoList, newGroupInputInfo.getGroup(), newGroupInputInfo.getNewGroupInput()));
+        return eventInfoList;
+    }
+
+    //产房只能有1个猪群
+    private void checkFarrowGroupUnique(Integer pigType, Long barnId) {
+        if (!Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) {
+            return;
+        }
+        List<DoctorGroup> groups = RespHelper.orServEx(doctorGroupReadService.findGroupByCurrentBarnId(barnId));
+        if (notEmpty(groups)) {
+            throw new ServiceException("farrow.group.exist");
+        }
     }
 
     private DoctorGroup getNewGroup(DoctorGroup group, DoctorNewGroupInput newGroupInput) {
@@ -149,7 +191,7 @@ public class DoctorGroupManager {
         group.setStaffName(barn.getStaffName());
 
         //建群时间与状态
-        group.setOpenAt(DateUtil.toDate(newGroupInput.getEventAt()));
+        group.setOpenAt(generateEventAt(DateUtil.toDate(newGroupInput.getEventAt())));
         group.setStatus(DoctorGroup.Status.CREATED.getValue());
         return group;
     }
@@ -210,5 +252,19 @@ public class DoctorGroupManager {
                 .eventType(event.getType())
                 .groups(Lists.newArrayList(publish))
                 .build());
+    }
+
+    protected Date generateEventAt(Date eventAt){
+        if(eventAt != null){
+            Date now = new Date();
+            if(DateUtil.inSameDate(eventAt, now)){
+                // 如果处在今天, 则使用此刻瞬间
+                return now;
+            } else {
+                // 如果不在今天, 则将时间置为0, 只保留日期
+                return Dates.startOfDay(eventAt);
+            }
+        }
+        return null;
     }
 }

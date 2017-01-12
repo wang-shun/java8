@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
@@ -20,6 +21,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.dto.DoctorSuggestPig;
 import io.terminus.doctor.event.dto.GroupPigPaging;
 import io.terminus.doctor.event.dto.search.SearchedBarn;
 import io.terminus.doctor.event.dto.search.SearchedBarnDto;
@@ -33,6 +35,7 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.msg.dto.DoctorMessageUserDto;
 import io.terminus.doctor.msg.service.DoctorMessageUserReadService;
@@ -77,6 +80,9 @@ public class DoctorSearches {
 
     private final DoctorPigReadService doctorPigReadService;
 
+    @RpcConsumer
+    private DoctorPigEventReadService doctorPigEventReadService;
+
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     //保育，育肥，后备
@@ -98,6 +104,10 @@ public class DoctorSearches {
         this.doctorPigReadService = doctorPigReadService;
     }
 
+    @RequestMapping(value = "/suggest/event", method = RequestMethod.GET)
+    public List<DoctorSuggestPig> suggestPigsByEvent(@RequestParam Long farmId, @RequestParam Integer eventType, @RequestParam(required = false) String pigCode, @RequestParam Integer sex) {
+        return RespHelper.or500(doctorPigEventReadService.suggestPigsByEvent(eventType, farmId, pigCode, sex));
+    }
     /**
      * 母猪搜索方法
      *

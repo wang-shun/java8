@@ -1,6 +1,8 @@
 package io.terminus.doctor.common.event;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
@@ -13,6 +15,8 @@ import java.util.Date;
  */
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ZkPigPublishDto implements Serializable {
     private static final long serialVersionUID = -3312764468271438715L;
 

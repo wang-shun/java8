@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -114,13 +113,6 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         checkState(toWeanAvgWeight != null, "weight.not.null");
         Double weanAvgWeight = ((MoreObjects.firstNonNull(doctorPigTrack.getWeanAvgWeight(), 0D) * weanCount) + toWeanAvgWeight * toWeanCount ) / (weanCount + toWeanCount);
         doctorPigTrack.setWeanAvgWeight(weanAvgWeight);
-
-        Map<String, Object> extra = doctorPigTrack.getExtraMap();
-
-        //更新extra字段
-        extra.put("hasWeanToMating", true);
-
-        doctorPigTrack.setExtraMap(extra);
 
         //设置下此时的猪群id，下面肯能会把它刷掉
         basic.setWeanGroupId(doctorPigTrack.getGroupId());

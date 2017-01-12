@@ -25,6 +25,8 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
+import io.terminus.doctor.web.front.event.dto.DoctorBatchGroupEventDto;
+import io.terminus.doctor.web.front.event.dto.DoctorBatchNewGroupEventDto;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupDetailEventsDto;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupEventPagingDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
@@ -105,6 +107,16 @@ public class DoctorGroupEvents {
     }
 
     /**
+     * 批量新建猪群
+     * @param batchNewGroupEventDto 批量新建信息
+     * @return
+     */
+    @RequestMapping(value = "/batchNew", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Boolean batchCreateNewGroup(@RequestBody DoctorBatchNewGroupEventDto batchNewGroupEventDto) {
+        return RespHelper.or500(doctorGroupWebService.batchNewGroupEvent(batchNewGroupEventDto));
+    }
+
+    /**
      * 录入猪群事件
      *
      * @param groupId   猪群id
@@ -121,6 +133,15 @@ public class DoctorGroupEvents {
         return RespHelper.or500(doctorGroupWebService.createGroupEvent(groupId, eventType, data));
     }
 
+    /**
+     * 批量猪群事件
+     * @param batchGroupEventDto 批量事件输入封装
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/batchOther", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Boolean batchCreateGroupEvent(@RequestBody DoctorBatchGroupEventDto batchGroupEventDto) {
+        return RespHelper.or500(doctorGroupWebService.batchGroupEvent(batchGroupEventDto));
+    }
     /**
      * 根据猪群id查询可以操作的事件类型
      *
