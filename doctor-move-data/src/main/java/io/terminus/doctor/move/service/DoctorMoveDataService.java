@@ -96,6 +96,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -1163,7 +1164,7 @@ public class DoctorMoveDataService {
 
         if (notEmpty(events)) {
             //按照时间 asc 排序
-            events = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
+            events = events.stream().sorted(Comparator.comparing(DoctorPigEvent::getEventAt)).collect(Collectors.toList());
             track.setExtra(JSON_MAPPER.toJson(getSowExtraMap(events)));   //extra字段保存当前胎次所有所有事件的extra
 
             //关联事件ids, Map<Parity, EventIds>, 按照胎次分组
@@ -2492,5 +2493,33 @@ public class DoctorMoveDataService {
             log.error("refresh.pig.status.failed, cause{}", Throwables.getStackTraceAsString(e));
             return Response.fail("refresh.pig.status.failed");
         }
+    }
+
+    /**
+     * 刷新npd
+     */
+    @Transactional
+    public void flushNpd(Long farmId) {
+        log.info("flush npd farmId:{}", farmId);
+        Map<Long, List<DoctorPigEvent>> eventMap = doctorPigEventDao.findByFarmIdAndKind(farmId, 1).stream()
+                .collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
+        eventMap.values().forEach(events -> {
+            events = events.stream()
+                    .sorted(Comparator.comparing(DoctorPigEvent::getEventAt).thenComparing(DoctorPigEvent::getId))
+                    .collect(Collectors.toList());
+
+            //更新事件的非生产天数
+            updateNPD(events);
+
+            //更新初配事件的是否已经分娩 和是否已经怀孕 的标志位
+            updateFlag(events);
+
+            //统计孕期 和 哺乳期
+            updateDuring(events);
+
+            //更新event
+            events.forEach(doctorPigEventDao::update);
+        });
+        log.info("flush npd ok! farmId:{}", farmId);
     }
 }
