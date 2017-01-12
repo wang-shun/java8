@@ -3,6 +3,7 @@ package io.terminus.doctor.event.manager;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
@@ -190,7 +191,7 @@ public class DoctorGroupManager {
         group.setStaffName(barn.getStaffName());
 
         //建群时间与状态
-        group.setOpenAt(DateUtil.toDateTime(newGroupInput.getEventAt()));
+        group.setOpenAt(generateEventAt(DateUtil.toDate(newGroupInput.getEventAt())));
         group.setStatus(DoctorGroup.Status.CREATED.getValue());
         return group;
     }
@@ -251,5 +252,19 @@ public class DoctorGroupManager {
                 .eventType(event.getType())
                 .groups(Lists.newArrayList(publish))
                 .build());
+    }
+
+    protected Date generateEventAt(Date eventAt){
+        if(eventAt != null){
+            Date now = new Date();
+            if(DateUtil.inSameDate(eventAt, now)){
+                // 如果处在今天, 则使用此刻瞬间
+                return now;
+            } else {
+                // 如果不在今天, 则将时间置为0, 只保留日期
+                return Dates.startOfDay(eventAt);
+            }
+        }
+        return null;
     }
 }
