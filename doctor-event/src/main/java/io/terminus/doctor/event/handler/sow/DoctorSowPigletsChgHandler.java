@@ -97,7 +97,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
             DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) inputDto;
             DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
                     .partWeanDate(doctorPigEvent.getEventAt())
-                    .partWeanPigletsCount(pigletsChgDto.getPigletsCount())
+                    .partWeanPigletsCount(0)
                     .partWeanAvgWeight(0d)
                     .build();
             buildAutoEventCommonInfo(pigletsChgDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());

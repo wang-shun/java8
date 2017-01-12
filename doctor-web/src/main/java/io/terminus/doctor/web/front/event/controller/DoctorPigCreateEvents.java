@@ -11,6 +11,8 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -92,6 +94,8 @@ public class DoctorPigCreateEvents {
     private final DoctorGroupWebService doctorGroupWebService;
     @RpcConsumer
     private DoctorBasicWriteService doctorBasicWriteService;
+    @RpcConsumer
+    private DoctorBasicReadService doctorBasicReadService;
 
     private static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
 
@@ -618,7 +622,8 @@ public class DoctorPigCreateEvents {
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorFostersDto.class);
                 case PIGLETS_CHG:
                     DoctorPigletsChgDto pigletsChg = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(eventInfoDtoJson, DoctorPigletsChgDto.class);
-
+                    DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(pigletsChg.getPigletsChangeType()));
+                    pigletsChg.setPigletsChangeTypeName(doctorBasic.getName());
                     //新录入的客户要创建一把
                     DoctorFarm doctorFarm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
                     Long customerId = RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorFarm.getId(),

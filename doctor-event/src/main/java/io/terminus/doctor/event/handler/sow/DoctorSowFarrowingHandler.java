@@ -103,7 +103,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         //分娩时记录下 分娩数量
         doctorPigTrack.setFarrowQty(farrowingDto.getFarrowingLiveCount());
-        doctorPigTrack.setUnweanQty(doctorPigTrack.getFarrowQty());
+        doctorPigTrack.setUnweanQty(farrowingDto.getFarrowingLiveCount());
         doctorPigTrack.setWeanQty(0);  //分娩时 断奶数为0
         doctorPigTrack.setFarrowAvgWeight(farrowingDto.getBirthNestAvg());
         doctorPigTrack.setWeanAvgWeight(0D); //分娩时, 断奶均重置成0
@@ -135,7 +135,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         if (Objects.equals(farrowingDto.getFarrowingLiveCount(), 0)) {
             DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
                     .partWeanDate(farrowingDto.eventAt())
-                    .partWeanPigletsCount(farrowingDto.getDeadCount())
+                    .partWeanPigletsCount(0)
                     .partWeanAvgWeight(0d)
                     .build();
             buildAutoEventCommonInfo(farrowingDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
