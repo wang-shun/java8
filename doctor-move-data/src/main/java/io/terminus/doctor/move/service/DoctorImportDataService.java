@@ -172,8 +172,6 @@ public class DoctorImportDataService {
     @Autowired
     private SubDao subDao;
     @Autowired
-    private DoctorMoveDataService doctorMoveDataService;
-    @Autowired
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     @Autowired
     private DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
@@ -201,6 +199,8 @@ public class DoctorImportDataService {
     private UserDaoExt userDaoExt;
     @Autowired
     private DoctorBasicMaterialDao doctorBasicMaterialDao;
+    @Autowired
+    private DoctorMoveDataService doctorMoveDataService;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -227,6 +227,9 @@ public class DoctorImportDataService {
             importBoar(farm, barnMap, breedMap, shit.getBoar());
             importGroup(farm, barnMap, shit.getGroup());
             importSow(farm, barnMap, breedMap, shit.getSow());
+
+            //刷新npd
+            doctorMoveDataService.flushNpd(farm.getId());
 
             //首页统计数据
             movePigTypeStatistic(farm);

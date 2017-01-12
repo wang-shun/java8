@@ -270,10 +270,14 @@ public class DoctorImportDataController {
      * 刷npd
      */
     @RequestMapping(value = "/flushNpd", method = RequestMethod.GET)
-    public boolean flushNpd(@RequestParam("farmId") Long farmId) {
+    public boolean flushNpd(@RequestParam(value = "farmId", required = false) Long farmId) {
         try {
             log.info("******* flushNpd start, farmId:{}", farmId);
-            doctorMoveDataService.flushNpd(farmId);
+            if (farmId != null) {
+                doctorMoveDataService.flushNpd(farmId);
+            } else {
+                RespHelper.or500(doctorFarmReadService.findAllFarms()).forEach(farm -> doctorMoveDataService.flushNpd(farm.getId()));
+            }
             log.info("******* flushNpd end");
             return true;
         } catch (Exception e) {
