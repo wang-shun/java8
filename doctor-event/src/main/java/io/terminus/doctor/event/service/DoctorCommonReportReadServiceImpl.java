@@ -250,7 +250,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
      * @param week 周
      * @return 日期
      */
-    private DateTime withWeekOfYear(Integer year, Integer week) {
+    private static DateTime withWeekOfYear(Integer year, Integer week) {
         DateTime yearDate = year == null ? new DateTime() : new DateTime(year, 1, 1, 0, 0);
         week = week == null ? DateTime.now().getWeekOfWeekyear() : week;
         while (true) {
@@ -267,5 +267,10 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             return DateTime.now().withTimeAtStartOfDay();
         }
         return DateTime.now().plusDays(-1).withTimeAtStartOfDay();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(withWeekOfYear(2017, 2));
+        System.out.println(withWeekOfYear(2017, 2).dayOfWeek().get());
     }
 }

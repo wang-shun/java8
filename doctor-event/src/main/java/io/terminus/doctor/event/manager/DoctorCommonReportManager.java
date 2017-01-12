@@ -8,6 +8,9 @@ import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport;
 import io.terminus.doctor.event.model.DoctorMonthlyReport;
 import io.terminus.doctor.event.model.DoctorWeeklyReport;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * Desc:
@@ -162,101 +167,90 @@ public class DoctorCommonReportManager {
         return report;
     }
 
-    private static Date weekStart(Date date) {
-        return new DateTime(date).withDayOfWeek(1).withTimeAtStartOfDay().toDate();
-    }
-
-    private static Date monthStart(Date date) {
-        return new DateTime(date).withDayOfMonth(1).withTimeAtStartOfDay().toDate();
-    }
-
-    private static Date monthEnd(Date date) {
-        return date; // TODO: 2017/1/11
-    }
-
-    private DoctorMonthlyReport getMonthlyReport(Long farmId, Date eventAt) {
-        return doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, DateUtil.getMonthEnd(new DateTime(eventAt)).toDate());
-    }
-
-    private DoctorWeeklyReport getWeeklyReport(Long farmId, Date eventAt) {
-        //return doctorWeeklyReportDao.findByFarmIdAndSumAt(farmId, DateUtil.getwee(new DateTime(eventAt)).toDate());
-        // TODO: 2017/1/11
-        return new DoctorWeeklyReport();
+    public void updateCommonReport(Long farmId, Date eventAt, Function<FarmIdAndEventAt, Void>... functions) {
+        Stream.of(functions).forEach(function -> function.apply(new FarmIdAndEventAt(farmId, eventAt)));
     }
 
     //更新存栏变动
-    public void updateMonthlyLiveStockChange(Long farmId, Date eventAt) {
-        DoctorLiveStockChangeCommonReport report = getLiveStockChangeReport(farmId, monthStart(eventAt), monthEnd(eventAt));
-
-        DoctorMonthlyReport month = getMonthlyReport(farmId, eventAt);
+    public void updateCommonLiveStockChange(FarmIdAndEventAt fe) {
+        DoctorLiveStockChangeCommonReport report = getLiveStockChangeReport(fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+        DoctorMonthlyReport month = getMonthlyReport(fe);
         month.getReportDto().setLiveStockChange(report);
         doctorMonthlyReportDao.update(month);
     }
 
     //更新销售死淘
-    public void updateMonthlySaleDead(Long farmId, Date eventAt) {
-        DoctorMonthlyReport month = getMonthlyReport(farmId, eventAt);
-        setSaleDead(month.getReportDto(), farmId, monthStart(eventAt), eventAt);
+    public void updateCommonSaleDead(FarmIdAndEventAt fe) {
+        DoctorMonthlyReport month = getMonthlyReport(fe);
+        setSaleDead(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
         doctorMonthlyReportDao.update(month);
     }
 
     //更新胎次分布，品类分布
-    public void updateMonthlyParityBreed(Long farmId, Date eventAt) {
-        DoctorMonthlyReport month = getMonthlyReport(farmId, eventAt);
-        month.getReportDto().setParityStockList(doctorKpiDao.getMonthlyParityStock(farmId, monthStart(eventAt), eventAt));
-        month.getReportDto().setBreedStockList(doctorKpiDao.getMonthlyBreedStock(farmId, monthStart(eventAt), eventAt));
+    public void updateCommonParityBreed(FarmIdAndEventAt fe) {
+        DoctorMonthlyReport month = getMonthlyReport(fe);
+        month.getReportDto().setParityStockList(doctorKpiDao.getMonthlyParityStock(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
+        month.getReportDto().setBreedStockList(doctorKpiDao.getMonthlyBreedStock(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
         doctorMonthlyReportDao.update(month);
     }
 
     //更新npd psy
-    public void updateMonthlyNpdPsy(Long farmId, Date eventAt) {
-        DoctorMonthlyReport month = getMonthlyReport(farmId, eventAt);
-        month.getReportDto().setNpd(doctorKpiDao.npd(farmId, monthStart(eventAt), eventAt));
-        month.getReportDto().setPsy(doctorKpiDao.psy(farmId, monthStart(eventAt), eventAt));
+    public void updateCommonNpdPsy(FarmIdAndEventAt fe) {
+        DoctorMonthlyReport month = getMonthlyReport(fe);
+        month.getReportDto().setNpd(doctorKpiDao.npd(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
+        month.getReportDto().setPsy(doctorKpiDao.psy(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
         doctorMonthlyReportDao.update(month);
     }
 
     //更新断奶7天配种率
-    public void updateMonthlyWean7Mate(Long farmId, Date eventAt) {
-        DoctorMonthlyReport month = getMonthlyReport(farmId, eventAt);
-        month.getReportDto().setMateInSeven(doctorKpiDao.getMateInSeven(farmId, monthStart(eventAt), eventAt));
+    public void updateCommonWean7Mate(FarmIdAndEventAt fe) {
+        DoctorMonthlyReport month = getMonthlyReport(fe);
+        month.getReportDto().setMateInSeven(doctorKpiDao.getMateInSeven(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
         doctorMonthlyReportDao.update(month);
     }
 
     //更新公猪生产成绩
-    public void updateMonthlyBoarScore(Long farmId, Date eventAt) {
-        DoctorMonthlyReport month = getMonthlyReport(farmId, eventAt);
-        setBoarScore(month.getReportDto(), farmId, monthStart(eventAt), eventAt);
+    public void updateCommonBoarScore(FarmIdAndEventAt fe) {
+        DoctorMonthlyReport month = getMonthlyReport(fe);
+        setBoarScore(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
         doctorMonthlyReportDao.update(month);
     }
 
     //更新4个月的率统计数据
-    public void updateMonthly4MonthRate(Long farmId, Date eventAt) {
-        DateUtil.getBeforeMonthEnds(eventAt, 4).forEach(date -> {
-            DoctorMonthlyReport month = getMonthlyReport(farmId, date);
-            set4MonthRate(month.getReportDto(), farmId, monthStart(date), monthEnd(date));
+    public void updateCommon4MonthRate(FarmIdAndEventAt fe) {
+        DateUtil.getBeforeMonthEnds(fe.getEventAt(), 4).forEach(date -> {
+            DoctorMonthlyReport month = getMonthlyReport(new FarmIdAndEventAt(fe.getFarmId(), date));
+            set4MonthRate(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);
         });
     }
 
     //更新配种情况
-    public void updateMonthlyMate(Long farmId, Date eventAt) {
-
+    public void updateCommonMate(FarmIdAndEventAt fe) {
+        DoctorMonthlyReport month = getMonthlyReport(fe);
+        setMate(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+        doctorMonthlyReportDao.update(month);
     }
 
     //更新妊检情况
-    public void updateMonthlyPregCheck(Long farmId, Date eventAt) {
-
+    public void updateCommonPregCheck(FarmIdAndEventAt fe) {
+        DoctorMonthlyReport month = getMonthlyReport(fe);
+        setPregCheck(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+        doctorMonthlyReportDao.update(month);
     }
 
     //更新分娩情况
-    public void updateMonthlyFarrow(Long farmId, Date eventAt) {
-
+    public void updateCommonFarrow(FarmIdAndEventAt fe) {
+        DoctorMonthlyReport month = getMonthlyReport(fe);
+        setFarrow(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+        doctorMonthlyReportDao.update(month);
     }
 
     //更新断奶情况
-    public void updateMonthlyWean(Long farmId, Date eventAt) {
-
+    public void updateCommonWean(FarmIdAndEventAt fe) {
+        DoctorMonthlyReport month = getMonthlyReport(fe);
+        setWean(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
+        doctorMonthlyReportDao.update(month);
     }
 
     //死亡销售
@@ -354,5 +348,42 @@ public class DoctorCommonReportManager {
         dto.setMateEstimateFarrowingRate(doctorKpiDao.assessFarrowingRate(farmId, startAt, DateUtil.getMonthEnd(new DateTime(endAt)).toDate()));  //估算配种分娩率
         dto.setMateRealFarrowingRate(doctorKpiDao.realFarrowingRate(farmId, startAt, endAt));        //实际配种分娩率
         return dto;
+    }
+
+    //月报存月末
+    private DoctorMonthlyReport getMonthlyReport(FarmIdAndEventAt fe) {
+        return doctorMonthlyReportDao.findByFarmIdAndSumAt(fe.getFarmId(), fe.monthEnd());
+    }
+
+    //周报是周一
+    private DoctorWeeklyReport getWeeklyReport(FarmIdAndEventAt fe) {
+        return doctorWeeklyReportDao.findByFarmIdAndSumAt(fe.getFarmId(), fe.weekEnd());
+    }
+
+    /**
+     * 猪场id和eventAt类，用于传递查询月报需要的参数
+     */
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class FarmIdAndEventAt {
+        private Long farmId;
+        private Date eventAt;
+
+        public Date monthStart() {
+            return DateUtil.monthStart(eventAt);
+        }
+
+        public Date monthEnd() {
+            return DateUtil.monthEnd(eventAt);
+        }
+
+        public Date weekStart() {
+            return DateUtil.weekStart(eventAt);
+        }
+
+        public Date weekEnd() {
+            return DateUtil.weekEnd(eventAt);
+        }
     }
 }

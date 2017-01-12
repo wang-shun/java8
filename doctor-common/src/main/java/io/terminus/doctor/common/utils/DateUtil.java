@@ -7,6 +7,7 @@ package io.terminus.doctor.common.utils;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import io.terminus.common.utils.Dates;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
@@ -179,7 +180,7 @@ public class DateUtil {
      */
     public static DateTime getMonthEnd(DateTime date) {
         if (date == null) return null;
-        return date.plusMonths(1).withDayOfMonth(1).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).minusSeconds(1);
+        return date.plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().minusSeconds(1);
     }
 
     /**
@@ -249,5 +250,30 @@ public class DateUtil {
         } catch (NumberFormatException e) {
             return toDateTime(dateStr);
         }
+    }
+
+    /**
+     * 周初，周末，月初，月末
+     */
+    public static Date weekStart(Date date) {
+        return new DateTime(date).withDayOfWeek(1).withTimeAtStartOfDay().toDate();
+    }
+
+    public static Date weekEnd(Date date) {
+        if (Dates.startOfDay(date).equals(Dates.startOfDay(new Date()))) {
+            return DateUtil.getDateEnd(new DateTime(date)).toDate();
+        }
+        return new DateTime(date).withDayOfWeek(1).plusWeeks(1).withTimeAtStartOfDay().minusSeconds(1).toDate();
+    }
+
+    public static Date monthStart(Date date) {
+        return new DateTime(date).withDayOfMonth(1).withTimeAtStartOfDay().toDate();
+    }
+
+    public static Date monthEnd(Date date) {
+        if (Dates.startOfDay(date).equals(Dates.startOfDay(new Date()))) {
+            return DateUtil.getDateEnd(new DateTime(date)).toDate();
+        }
+        return DateUtil.getMonthEnd(new DateTime(date)).toDate();
     }
 }
