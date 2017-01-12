@@ -581,7 +581,11 @@ public class DoctorPigCreateEvents {
                 case CHG_FARM:
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorChgFarmDto.class);
                 case CHG_LOCATION:
-                    return jsonMapper.fromJson(eventInfoDtoJson, DoctorChgLocationDto.class);
+                    DoctorChgLocationDto doctorChgLocationDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorChgLocationDto.class);
+                    DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(doctorChgLocationDto.getPigId()));
+                    doctorChgLocationDto.setChgLocationFromBarnId(doctorPigTrack.getCurrentBarnId());
+                    doctorChgLocationDto.setChgLocationFromBarnName(doctorPigTrack.getCurrentBarnName());
+                    return doctorChgLocationDto;
                 case CONDITION:
                     if (Objects.equals(pigType, DoctorPig.PigSex.SOW.getKey())){
                         return jsonMapper.fromJson(eventInfoDtoJson, DoctorConditionDto.class);
