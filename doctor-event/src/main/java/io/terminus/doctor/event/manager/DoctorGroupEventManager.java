@@ -17,7 +17,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorAbstractGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorAntiepidemicGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorCloseGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorCommonGroupEventHandler;
@@ -92,7 +92,7 @@ public class DoctorGroupEventManager {
             handlerMap.put(GroupEventType.TURN_SEED.getValue(), handlerMapping.get(DoctorTurnSeedGroupEventHandler.class));
             handlerMap.put(GroupEventType.LIVE_STOCK.getValue(), handlerMapping.get(DoctorLiveStockGroupEventHandler.class));
             handlerMap.put(GroupEventType.DISEASE.getValue(), handlerMapping.get(DoctorDiseaseGroupEventHandler.class));
-            handlerMap.put(GroupEventType.ANTIEPIDEMIC.getValue(), handlerMapping.get(DoctorAbstractGroupEventHandler.class));
+            handlerMap.put(GroupEventType.ANTIEPIDEMIC.getValue(), handlerMapping.get(DoctorAntiepidemicGroupEventHandler.class));
             handlerMap.put(GroupEventType.TRANS_FARM.getValue(), handlerMapping.get(DoctorTransFarmGroupEventHandler.class));
             handlerMap.put(GroupEventType.CLOSE.getValue(), handlerMapping.get(DoctorCloseGroupEventHandler.class));
         }
