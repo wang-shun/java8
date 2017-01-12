@@ -114,10 +114,10 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName())
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
                 .pigId(inputDto.getPigId()).pigCode(inputDto.getPigCode())
-                .eventAt(generateEventAt(inputDto.eventAt())).type(basic.getEventType())
+                .eventAt(generateEventAt(inputDto.eventAt())).type(inputDto.getEventType())
                 .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName())
                 .kind(inputDto.getPigType()).relPigEventId(inputDto.getRelPigEventId()).relGroupEventId(inputDto.getRelGroupEventId())
-                .name(basic.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))//.relEventId(basic.getRelEventId())
+                .name(inputDto.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))//.relEventId(basic.getRelEventId())
                 .operatorId(MoreObjects.firstNonNull(inputDto.getOperatorId(), basic.getStaffId())).operatorName(MoreObjects.firstNonNull(inputDto.getOperatorName(), basic.getStaffName()))
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .isAuto(MoreObjects.firstNonNull(inputDto.getIsAuto(), IsOrNot.NO.getValue()))
@@ -201,9 +201,9 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         toInputDto.setBarnId(fromInputDto.getBarnId());
         toInputDto.setBarnName(fromInputDto.getBarnName());
         toInputDto.setRelPigEventId(fromEventId);
-        basic.setEventName(pigEvent.getName());
-        basic.setEventType(pigEvent.getKey());
-        basic.setEventDesc(pigEvent.getDesc());
+        toInputDto.setEventName(pigEvent.getName());
+        toInputDto.setEventType(pigEvent.getKey());
+        toInputDto.setEventDesc(pigEvent.getDesc());
     }
 
     protected Date generateEventAt(Date eventAt){

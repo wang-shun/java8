@@ -89,7 +89,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
                 .code(doctorPigEvent.getPigCode())
                 .status(doctorPigTrack.getStatus())
                 .businessType(DoctorEventInfo.Business_Type.PIG.getValue())
-                .eventType(basic.getEventType())
+                .eventType(doctorPigEvent.getType())
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
     }

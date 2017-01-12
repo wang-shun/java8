@@ -82,15 +82,15 @@ public class DoctorPigEventWriteServiceTest extends BaseServiceTest{
                 //.relEventId(66666l)
                 .build();
     }
-
-    public DoctorBasicInputInfoDto buildBasicInputInfo(){
-
-        return DoctorBasicInputInfoDto.builder()
-                .farmId(1l).farmName("farmName").orgId(1l).orgName("orgName")
-                .staffId(1l).staffName("staffName").eventType(1).eventName("eventName").eventDesc("eventDesc")
-                //.relEventId(66666l)
-                .build();
-    }
+//
+//    public DoctorBasicInputInfoDto buildBasicInputInfo(){
+//
+//        return DoctorBasicInputInfoDto.builder()
+//                .farmId(1l).farmName("farmName").orgId(1l).orgName("orgName")
+//                .staffId(1l).staffName("staffName").eventType(1).eventName("eventName").eventDesc("eventDesc")
+//                //.relEventId(66666l)
+//                .build();
+//    }
 
     private <T> void printInfo(T t){
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(t));

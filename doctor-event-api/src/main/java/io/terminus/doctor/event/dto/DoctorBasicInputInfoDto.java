@@ -40,15 +40,6 @@ public class DoctorBasicInputInfoDto implements Serializable{
     private String staffName;
 
     /**
-     * @see io.terminus.doctor.event.enums.PigEvent
-     */
-    private Integer eventType;
-
-    private String eventName;
-
-    private String eventDesc;
-
-    /**
      * 断奶事件时，母猪关联的猪群id
      */
     private Long weanGroupId;
@@ -69,17 +60,16 @@ public class DoctorBasicInputInfoDto implements Serializable{
     public DoctorBasicInputInfoDto buildSameBarnPigInfo(Long pigId, Integer pigType, String pigCode){
         return DoctorBasicInputInfoDto.builder()
                 .farmId(this.farmId).farmName(this.farmName).orgId(this.orgId).orgName(this.orgName).staffId(this.staffId).staffName(this.staffName)
-                .eventType(this.eventType).eventName(this.eventName).eventDesc(this.eventDesc)//.relEventId(this.relEventId)
                 .build();
     }
 
     public String generateEventDescFromExtra(BasePigEventInputDto inputDto){
-        if(eventType == null){
-            return this.eventDesc;
+        if(inputDto.getEventType() == null){
+            return inputDto.getEventDesc();
         }
-        PigEvent pigEvent = PigEvent.from(eventType);
+        PigEvent pigEvent = PigEvent.from(inputDto.getEventType());
         if(pigEvent == null){
-            return this.eventDesc;
+            return inputDto.getEventDesc();
         }
 
         //BasePigEventInputDto baseDto = transFromPigEventAndExtra(pigEvent, inputDto);

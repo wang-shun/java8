@@ -221,9 +221,9 @@ public class DoctorCommonGroupEventHandler {
         basicDto.setFarmName(group.getFarmName());
         basicDto.setOrgId(group.getOrgId());
         basicDto.setOrgName(group.getOrgName());
-        basicDto.setEventType(PigEvent.ENTRY.getKey());
-        basicDto.setEventName(PigEvent.ENTRY.getName());
-        basicDto.setEventDesc(PigEvent.ENTRY.getDesc());
+        farmEntryDto.setEventType(PigEvent.ENTRY.getKey());
+        farmEntryDto.setEventName(PigEvent.ENTRY.getName());
+        farmEntryDto.setEventDesc(PigEvent.ENTRY.getDesc());
         basicDto.setStaffId(input.getCreatorId());
         basicDto.setStaffName(input.getCreatorName());
         farmEntryDto.setIsAuto(IsOrNot.YES.getValue());
