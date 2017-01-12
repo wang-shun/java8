@@ -4,7 +4,6 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.manager.DoctorCommonReportManager;
@@ -108,6 +107,17 @@ public class DoctorCommonReportWriteServiceImpl implements DoctorCommonReportWri
             log.error("init monthly report by farmId and date failed, farmId:{}, date:{}, cause:{}",
                     farmId, date, Throwables.getStackTraceAsString(e));
             return Response.fail("init.monthly.report.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> update4MonthReports(Long farmId, Date date) {
+        try {
+            doctorCommonReportManager.update4MonthRate(new DoctorCommonReportManager.FarmIdAndEventAt(farmId, date));
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("update 4month. report rate failed, farmId:{}, date:{}, cause:{}", farmId, date, Throwables.getStackTraceAsString(e));
+            return Response.fail("update.4month.report.rate.fail");
         }
     }
 

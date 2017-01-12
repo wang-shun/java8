@@ -62,4 +62,13 @@ public interface DoctorCommonReportWriteService {
      */
     Response<DoctorMonthlyReport> initMonthlyReportByFarmIdAndDate(@NotNull(message = "farmId.not.null") Long farmId,
                                                                    @NotNull(message = "date.not.null") Date date);
+
+    /**
+     * 更新四个月的各种率
+     * @param farmId 猪场id
+     * @param date   日期
+     * @return 是否成功
+     */
+    Response<Boolean> update4MonthReports(@NotNull(message = "farmId.not.null") Long farmId,
+                                          @NotNull(message = "date.not.null") Date date);
 }

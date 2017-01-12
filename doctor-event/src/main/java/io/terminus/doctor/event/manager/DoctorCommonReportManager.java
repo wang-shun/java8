@@ -88,7 +88,6 @@ public class DoctorCommonReportManager {
 
         //这里的期初应该是每月1号的0点，也就是前一天的天末，所以要减一天
         DoctorLiveStockChangeCommonReport begin = doctorKpiDao.getMonthlyLiveStockChangeBegin(farmId, new DateTime(startAt).plusDays(-1).toDate());
-
         DoctorLiveStockChangeCommonReport in = doctorKpiDao.getMonthlyLiveStockChangeIn(farmId, startAt, endAt);
         DoctorLiveStockChangeCommonReport groupDead = doctorKpiDao.getMonthlyLiveStockChangeGroupDead(farmId, startAt, endAt);
         DoctorLiveStockChangeCommonReport sowDead = doctorKpiDao.getMonthlyLiveStockChangeSowDead(farmId, startAt, endAt);
@@ -171,6 +170,7 @@ public class DoctorCommonReportManager {
     //更新存栏变动
     public Boolean updateLiveStockChange(FarmIdAndEventAt fe) {
         try {
+            log.info("updateLiveStockChange fe:{}", fe);
             DoctorLiveStockChangeCommonReport monthLiveStock = getLiveStockChangeReport(fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             DoctorMonthlyReport month = getMonthlyReport(fe);
             month.getReportDto().setLiveStockChange(monthLiveStock);
@@ -189,6 +189,7 @@ public class DoctorCommonReportManager {
     //更新销售死淘
     public Boolean updateSaleDead(FarmIdAndEventAt fe) {
         try {
+            log.info("updateSaleDead fe:{}", fe);
             DoctorMonthlyReport month = getMonthlyReport(fe);
             setSaleDead(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);
@@ -205,6 +206,7 @@ public class DoctorCommonReportManager {
     //更新胎次分布，品类分布
     public Boolean updateParityBreed(FarmIdAndEventAt fe) {
         try {
+            log.info("updateParityBreed fe:{}", fe);
             DoctorMonthlyReport month = getMonthlyReport(fe);
             month.getReportDto().setParityStockList(doctorKpiDao.getMonthlyParityStock(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
             month.getReportDto().setBreedStockList(doctorKpiDao.getMonthlyBreedStock(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
@@ -223,6 +225,7 @@ public class DoctorCommonReportManager {
     //更新npd psy
     public Boolean updateNpdPsy(FarmIdAndEventAt fe) {
         try {
+            log.info("updateNpdPsy fe:{}", fe);
             DoctorMonthlyReport month = getMonthlyReport(fe);
             month.getReportDto().setNpd(doctorKpiDao.npd(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
             month.getReportDto().setPsy(doctorKpiDao.psy(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
@@ -241,6 +244,7 @@ public class DoctorCommonReportManager {
     //更新断奶7天配种率
     public Boolean updateWean7Mate(FarmIdAndEventAt fe) {
         try {
+            log.info("updateWean7Mate fe:{}", fe);
             DoctorMonthlyReport month = getMonthlyReport(fe);
             month.getReportDto().setMateInSeven(doctorKpiDao.getMateInSeven(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
             doctorMonthlyReportDao.update(month);
@@ -257,6 +261,7 @@ public class DoctorCommonReportManager {
     //更新公猪生产成绩
     public Boolean updateBoarScore(FarmIdAndEventAt fe) {
         try {
+            log.info("updateBoarScore fe:{}", fe);
             DoctorMonthlyReport month = getMonthlyReport(fe);
             setBoarScore(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);
@@ -273,6 +278,7 @@ public class DoctorCommonReportManager {
     //更新4个月的率统计数据
     public Boolean update4MonthRate(FarmIdAndEventAt fe) {
         try {
+            log.info("update4MonthRate fe:{}", fe);
             DateUtil.getBeforeMonthEnds(fe.getEventAt(), 4).forEach(date -> {
                 DoctorMonthlyReport month = getMonthlyReport(new FarmIdAndEventAt(fe.getFarmId(), date));
                 set4MonthRate(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
@@ -293,6 +299,7 @@ public class DoctorCommonReportManager {
     //更新配种情况
     public Boolean updateMate(FarmIdAndEventAt fe) {
         try {
+            log.info("updateMate fe:{}", fe);
             DoctorMonthlyReport month = getMonthlyReport(fe);
             setMate(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);
@@ -309,6 +316,7 @@ public class DoctorCommonReportManager {
     //更新妊检情况
     public Boolean updatePregCheck(FarmIdAndEventAt fe) {
         try {
+            log.info("updatePregCheck fe:{}", fe);
             DoctorMonthlyReport month = getMonthlyReport(fe);
             setPregCheck(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);
@@ -325,6 +333,7 @@ public class DoctorCommonReportManager {
     //更新分娩情况
     public Boolean updateFarrow(FarmIdAndEventAt fe) {
         try {
+            log.info("updateFarrow fe:{}", fe);
             DoctorMonthlyReport month = getMonthlyReport(fe);
             setFarrow(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);
@@ -341,6 +350,7 @@ public class DoctorCommonReportManager {
     //更新断奶情况
     public Boolean updateWean(FarmIdAndEventAt fe) {
         try {
+            log.info("updateWean fe:{}", fe);
             DoctorMonthlyReport month = getMonthlyReport(fe);
             setWean(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);

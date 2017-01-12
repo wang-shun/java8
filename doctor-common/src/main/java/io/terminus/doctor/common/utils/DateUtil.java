@@ -260,8 +260,8 @@ public class DateUtil {
     }
 
     public static Date weekEnd(Date date) {
-        if (Dates.startOfDay(date).equals(Dates.startOfDay(new Date()))) {
-            return DateUtil.getDateEnd(new DateTime(date)).toDate();
+        if (!Dates.startOfDay(date).before(Dates.startOfDay(new Date()))) {
+            return DateUtil.getDateEnd(DateTime.now()).toDate();
         }
         return new DateTime(date).withDayOfWeek(1).plusWeeks(1).withTimeAtStartOfDay().minusSeconds(1).toDate();
     }
