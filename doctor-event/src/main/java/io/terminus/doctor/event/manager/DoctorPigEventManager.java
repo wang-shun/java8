@@ -60,7 +60,7 @@ public class DoctorPigEventManager {
      */
     @Transactional
     public List<DoctorEventInfo> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
-        DoctorPigEventHandler doctorEventCreateHandler = pigEventHandlers.getEventHandlerMap().get(basic.getEventType());
+        DoctorPigEventHandler doctorEventCreateHandler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
         doctorEventCreateHandler.handleCheck(inputDto, basic);
         final List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
         doctorEventCreateHandler.handle(doctorEventInfoList, inputDto, basic);
@@ -78,7 +78,7 @@ public class DoctorPigEventManager {
         //校验输入数据的重复性
         eventRepeatCheck(eventInputs);
 
-        DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(basic.getEventType());
+        DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(eventInputs.get(0).getEventType());
         final List<DoctorEventInfo> eventInfos = Lists.newArrayList();
         eventInputs.forEach(inputDto -> {
             handler.handleCheck(inputDto, basic);
