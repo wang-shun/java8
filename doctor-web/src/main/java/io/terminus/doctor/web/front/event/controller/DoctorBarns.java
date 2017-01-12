@@ -233,7 +233,7 @@ public class DoctorBarns {
             types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
         }
         return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, types,
-                null, status, doctorFarmAuthCenter.getAuthBarnIds())), pigIds);
+                null, status, null)), pigIds);
     }
 
 

@@ -98,8 +98,6 @@ public class DoctorMoveDataController {
         this.doctorImportDataService = doctorImportDataService;
     }
 
-
-
     /**
      * 测试数据源连接是否正常
      * @param moveId 数据源id

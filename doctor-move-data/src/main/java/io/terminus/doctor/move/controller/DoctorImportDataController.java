@@ -12,6 +12,7 @@ import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.service.DoctorGroupBatchFlushService;
 import io.terminus.doctor.move.service.DoctorImportDataService;
+import io.terminus.doctor.move.service.DoctorMoveDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.pubsub.Subscriber;
@@ -61,6 +62,8 @@ public class DoctorImportDataController {
     private DoctorFarmReadService doctorFarmReadService;
     @Autowired
     private DoctorGroupBatchFlushService doctorGroupBatchFlushService;
+    @Autowired
+    private DoctorMoveDataService doctorMoveDataService;
 
     @PostConstruct
     public void init () throws Exception{
@@ -259,6 +262,26 @@ public class DoctorImportDataController {
             return true;
         } catch (Exception e) {
             log.error("flush group batch failed, farmId:{}, all:{}, cause:{}", farmId, all, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 刷npd
+     */
+    @RequestMapping(value = "/flushNpd", method = RequestMethod.GET)
+    public boolean flushNpd(@RequestParam(value = "farmId", required = false) Long farmId) {
+        try {
+            log.info("******* flushNpd start, farmId:{}", farmId);
+            if (farmId != null) {
+                doctorMoveDataService.flushNpd(farmId);
+            } else {
+                RespHelper.or500(doctorFarmReadService.findAllFarms()).forEach(farm -> doctorMoveDataService.flushNpd(farm.getId()));
+            }
+            log.info("******* flushNpd end");
+            return true;
+        } catch (Exception e) {
+            log.error("flushNpd failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

@@ -189,6 +189,7 @@ public class Users {
 
     @RequestMapping(value = "/importExcel", method = RequestMethod.GET)
     public String importExcel(@RequestParam String fileUrl){
+        log.info("import excel fileUrl:{}", fileUrl);
         final int maxWaitTime = 90; // 最长等待时间，秒
         final int sleepTime = 1; //每次沉睡多少秒
         final String redisKey = ImportExcelRedisKey + fileUrl;

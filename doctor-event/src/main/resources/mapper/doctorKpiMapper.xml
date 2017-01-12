@@ -168,7 +168,7 @@
     <!-- 断奶仔猪均重-->
     <select id="weanPigletWeightAvg" parameterType="map" resultType="double">
         select ifnull(sum(wean_count*wean_avg_weight)/sum(wean_count),0) from doctor_pig_events
-        where type = 16
+        where type = 16 AND wean_avg_weight != 0
         <include refid="criteria"/>
     </select>
 

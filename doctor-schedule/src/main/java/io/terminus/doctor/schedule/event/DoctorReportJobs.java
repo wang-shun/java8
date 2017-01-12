@@ -1,6 +1,5 @@
 package io.terminus.doctor.schedule.event;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
@@ -10,9 +9,9 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
-import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -143,9 +142,9 @@ public class DoctorReportJobs {
 
     /**
      * 猪场月报计算job
-     * 没两个小时执行一发
+     * 每两点执行一发
      */
-    @Scheduled(cron = "0 0 */2 * * ?")
+    @Scheduled(cron = "0 0 2 * * ?")
     @RequestMapping(value = "/monthly", method = RequestMethod.GET)
     public void monthlyReport() {
         try {
@@ -165,6 +164,7 @@ public class DoctorReportJobs {
 
             List<Long> farmIds = getAllFarmIds();
             farmIds.forEach(farmId -> doctorCommonReportWriteService.createMonthlyReport(farmId, today));
+            farmIds.forEach(farmId -> doctorCommonReportWriteService.update4MonthReports(farmId, today));
             log.info("monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
 
             farmIds.forEach(farmId -> doctorCommonReportWriteService.createWeeklyReport(farmId, today));
@@ -188,11 +188,8 @@ public class DoctorReportJobs {
             }
             log.info("boar monthly report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            DateUtil.getBeforeMonthEnds(DateTime.now().plusDays(-1).toDate(), MoreObjects.firstNonNull(4, 12))
+            DateUtil.getBeforeMonthEnds(DateTime.now().plusDays(-1).toDate(), 4)
                     .forEach(date -> doctorBoarMonthlyReportWriteService.createMonthlyReports(getAllFarmIds(), date));
-//            //获取昨天的天初
-//            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
-//            RespHelper.or500(doctorBoarMonthlyReportWriteService.createMonthlyReports(getAllFarmIds(), yesterday));
 
             log.info("boar monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
