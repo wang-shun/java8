@@ -411,7 +411,7 @@ public class DoctorPigCreateEvents {
         if (isNull(doctorFarmEntryDto)) {
             throw new JsonResponseException("input.pigEntryJsonConvert.error");
         }
-        return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(doctorFarmEntryDto,
+        return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEntryEventInput(doctorFarmEntryDto, PigEvent.ENTRY),
                 buildBasicInputInfoDto(farmId, PigEvent.ENTRY)));
     }
 
