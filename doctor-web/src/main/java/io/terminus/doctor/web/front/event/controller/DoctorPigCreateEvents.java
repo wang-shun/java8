@@ -450,15 +450,20 @@ public class DoctorPigCreateEvents {
         if (Arguments.isNullOrEmpty(batchPigEventDto.getInputJsonList())) {
             return false;
         }
+
         PigEvent pigEvent = PigEvent.from(batchPigEventDto.getEventType());
         List<BasePigEventInputDto> inputDtoList = batchPigEventDto.getInputJsonList()
                 .stream().map(inputJson -> {
                     BasePigEventInputDto inputDto = eventInput(pigEvent, inputJson, batchPigEventDto.getFarmId(), batchPigEventDto.getPigType());
-
-                    return buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
+                    if (Objects.equals(pigEvent.getKey(), PigEvent.ENTRY.getKey())) {
+                        return buildEntryEventInput(inputDto, pigEvent);
+                    } else {
+                        return buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
+                    }
                 }).collect(Collectors.toList());
         return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtoList, buildBasicInputInfoDto(batchPigEventDto.getFarmId(), pigEvent)));
     }
+
     /**
      *
      * 事件基础信息
@@ -503,6 +508,19 @@ public class DoctorPigCreateEvents {
         return inputDto;
     }
 
+    /**
+     * 构建进场事件信息
+     * @param inputDto
+     * @param pigEvent
+     * @return
+     */
+    private BasePigEventInputDto buildEntryEventInput(BasePigEventInputDto inputDto, PigEvent pigEvent) {
+        inputDto.setEventType(pigEvent.getKey());
+        inputDto.setEventName(pigEvent.getName());
+        inputDto.setEventDesc(pigEvent.getDesc());
+        inputDto.setIsAuto(IsOrNot.NO.getValue());
+        return inputDto;
+    }
     /**
      * 修复事件名称(临时)
      *
