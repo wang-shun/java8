@@ -272,9 +272,9 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
             if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.KongHuai.getKey())) {
-                KongHuaiPregCheckResult result = getPreg((Integer) doctorPigTrack.getExtraMap().get("pregCheckResult"));
+                Integer result = (Integer) doctorPigTrack.getExtraMap().get("pregCheckResult");
                 if (result != null) {
-                    doctorPigTrack.setStatus(result.getKey());
+                    doctorPigTrack.setStatus(result);
                 }
             }
             List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.queryAllEventsByPigId(pigId);
