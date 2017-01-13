@@ -19,6 +19,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
@@ -101,6 +102,7 @@ public class DoctorCommonGroupEventHandler {
     public void autoTransEventMoveIn(List<DoctorEventInfo> eventInfoList, DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup) {
         DoctorMoveInGroupInput moveIn = new DoctorMoveInGroupInput();
         moveIn.setEventAt(transGroup.getEventAt());
+        moveIn.setEventType(GroupEventType.MOVE_IN.getValue());
         moveIn.setIsAuto(IsOrNot.YES.getValue());
         moveIn.setCreatorId(transGroup.getCreatorId());
         moveIn.setCreatorName(transGroup.getCreatorName());
