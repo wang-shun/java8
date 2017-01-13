@@ -61,7 +61,6 @@ public class EventController {
             List<DoctorPigEvent> pigEvents = doctorPigEventDao.findByDateRange(beginDate, new Date());
             pigEvents.forEach(pigEvent -> {
                 if(pigEvent.getExtraMap() != null){
-                    basicPigInput.setEventType(pigEvent.getType());
                     pigEvent.setDesc(basicPigInput.generateEventDescFromExtra(BeanMapper.map(pigEvent.getExtraMap(), BasePigEventInputDto.class)));
                     doctorPigEventDao.update(pigEvent);
                 }
