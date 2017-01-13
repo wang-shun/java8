@@ -226,11 +226,11 @@ public class DoctorPigEventListener implements EventListener {
 
         //先放入一个，之后挨个儿比较，如果不相同，再放进去
         List<DoctorPigPublishDto> results = Lists.newArrayList(pigs.get(0));
-        pigs.forEach(pig -> results.forEach(result -> {
-            if (!pig.equalsByFunc(result, func)) {
+        for (DoctorPigPublishDto pig : pigs) {
+            if (!pig.containsBy(results, func)) {
                 results.add(pig);
             }
-        }));
+        }
         return results;
     }
 

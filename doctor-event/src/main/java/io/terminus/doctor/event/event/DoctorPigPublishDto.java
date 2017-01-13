@@ -1,10 +1,13 @@
 package io.terminus.doctor.event.event;
 
 import io.terminus.doctor.event.model.DoctorPig;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -14,6 +17,8 @@ import java.util.function.Function;
  * author: DreamYoung
  * Date: 2017/1/9
  */
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class DoctorPigPublishDto implements Serializable {
     private static final long serialVersionUID = -3312764468271438715L;
@@ -44,7 +49,7 @@ public class DoctorPigPublishDto implements Serializable {
 
     //可指定的equals方法
     @SafeVarargs
-    final boolean equalsByFunc(DoctorPigPublishDto that, Function<DoctorPigPublishDto, ?>... funcs) {
+    private final boolean equalsByFunc(DoctorPigPublishDto that, Function<DoctorPigPublishDto, ?>... funcs) {
         if (this == that) return true;
         if (that == null) return false;
 
@@ -56,5 +61,15 @@ public class DoctorPigPublishDto implements Serializable {
             }
         }
         return isEqual;
+    }
+
+    @SafeVarargs
+    final boolean containsBy(List<DoctorPigPublishDto> dtos, Function<DoctorPigPublishDto, ?>... funcs) {
+        for (DoctorPigPublishDto element : dtos) {
+            if (this.equalsByFunc(element, funcs)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
