@@ -1,11 +1,14 @@
 package io.terminus.doctor.event.event;
 
+import com.google.common.collect.Lists;
 import io.terminus.doctor.event.model.DoctorPig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -48,8 +51,7 @@ public class DoctorPigPublishDto implements Serializable {
     private Integer pregCheckResult;
 
     //可指定的equals方法
-    @SafeVarargs
-    private final boolean equalsByFunc(DoctorPigPublishDto that, Function<DoctorPigPublishDto, ?>... funcs) {
+    private boolean equalsBy(DoctorPigPublishDto that, List<Function<DoctorPigPublishDto, ?>> funcs) {
         if (this == that) return true;
         if (that == null) return false;
 
@@ -63,13 +65,28 @@ public class DoctorPigPublishDto implements Serializable {
         return isEqual;
     }
 
-    @SafeVarargs
-    final boolean containsBy(List<DoctorPigPublishDto> dtos, Function<DoctorPigPublishDto, ?>... funcs) {
+    //contains
+    private boolean containsBy(List<DoctorPigPublishDto> dtos, List<Function<DoctorPigPublishDto, ?>> funcs) {
         for (DoctorPigPublishDto element : dtos) {
-            if (this.equalsByFunc(element, funcs)) {
+            if (this.equalsBy(element, funcs)) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * 过滤掉相同的事件
+     */
+    @SafeVarargs
+    static List<DoctorPigPublishDto> filterBy(List<DoctorPigPublishDto> pigs, Function<DoctorPigPublishDto, ?>... func) {
+        if (CollectionUtils.isEmpty(pigs)) {
+            return Collections.emptyList();
+        }
+        List<Function<DoctorPigPublishDto, ?>> funcs = Lists.newArrayList(func);
+        List<DoctorPigPublishDto> results = Lists.newArrayList(pigs.get(0));
+
+        pigs.stream().filter(pig -> !pig.containsBy(results, funcs)).forEach(results::add);
+        return results;
     }
 }

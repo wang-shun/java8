@@ -24,15 +24,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.event.event.DoctorPigPublishDto.filterBy;
 import static io.terminus.doctor.event.manager.DoctorCommonReportManager.FarmIdAndEventAt;
 
 /**
@@ -101,12 +100,12 @@ public class DoctorPigEventListener implements EventListener {
 
         List<DoctorPigPublishDto> dtos = pigEvent.getPigs();
         Function<DoctorPigPublishDto, Date> eventAtFunc = e -> Dates.startOfDay(e.getEventAt());
-        Function<DoctorPigPublishDto, Date> monthFunc = e -> DateUtil.monthEnd(e.getEventAt());
-        List<DoctorPigPublishDto> monthEvents = flatByFunc(dtos, monthFunc);
+        Function<DoctorPigPublishDto, Date> monthFunc = e -> DateUtil.monthStart(e.getEventAt());
+        List<DoctorPigPublishDto> monthEvents = filterBy(dtos, monthFunc);
 
         switch (type) {
             case CHG_FARM:
-                flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
+                filterBy(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
                         .forEach(event -> handleLiveStockReport(pigEvent.getOrgId(), pigEvent.getFarmId(), event.getEventAt(), event.getKind()));
 
                 //转场更新月报：存栏变动，胎次分布，品类分布，npd，psy
@@ -118,7 +117,7 @@ public class DoctorPigEventListener implements EventListener {
                 });
                 break;
             case ENTRY:
-                flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
+                filterBy(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
                         .forEach(event -> handleLiveStockReport(pigEvent.getOrgId(), pigEvent.getFarmId(), event.getEventAt(), event.getKind()));
 
                 //进场更新月报：存栏变动，胎次分布，品类分布
@@ -129,7 +128,7 @@ public class DoctorPigEventListener implements EventListener {
                 });
                 break;
             case REMOVAL:
-                flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
+                filterBy(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
                         .forEach(event -> {
                             handleLiveStockReport(pigEvent.getOrgId(), pigEvent.getFarmId(), event.getEventAt(), event.getKind());
                             handleSaleAndDead(pigEvent.getFarmId(), event.getEventAt());
@@ -145,7 +144,7 @@ public class DoctorPigEventListener implements EventListener {
                 });
                 break;
             case MATING:
-                flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getMateType)
+                filterBy(dtos, eventAtFunc, DoctorPigPublishDto::getMateType)
                         .forEach(event -> handleMate(pigEvent.getFarmId(), event.getEventAt(), event.getMateType()));
 
                 //配种更新月报：配种情况，公猪生产成绩,断奶7天配种率, npd，psy
@@ -158,7 +157,7 @@ public class DoctorPigEventListener implements EventListener {
                 });
                 break;
             case PREG_CHECK:
-                flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getPregCheckResult)
+                filterBy(dtos, eventAtFunc, DoctorPigPublishDto::getPregCheckResult)
                         .forEach(event -> handlePregCheck(pigEvent.getFarmId(), event.getEventAt(), event.getPregCheckResult()));
 
                 //妊检更新月报：配种情况，公猪生产成绩, 4个月率, npd，psy
@@ -171,7 +170,7 @@ public class DoctorPigEventListener implements EventListener {
                 });
                 break;
             case FARROWING:
-                flatByFunc(dtos, eventAtFunc).forEach(event -> handleFarrow(pigEvent.getFarmId(), event.getEventAt()));
+                filterBy(dtos, eventAtFunc).forEach(event -> handleFarrow(pigEvent.getFarmId(), event.getEventAt()));
 
                 //分娩更新月报：分娩情况，公猪生产成绩, 4个月率, psy
                 monthEvents.forEach(event -> {
@@ -183,7 +182,7 @@ public class DoctorPigEventListener implements EventListener {
                 });
                 break;
             case WEAN:
-                flatByFunc(dtos, eventAtFunc).forEach(event -> handleWean(pigEvent.getFarmId(), event.getEventAt()));
+                filterBy(dtos, eventAtFunc).forEach(event -> handleWean(pigEvent.getFarmId(), event.getEventAt()));
 
                 //断奶更新月报：断奶情况,断奶7天配种率, psy
                 monthEvents.forEach(event -> {
@@ -208,30 +207,11 @@ public class DoctorPigEventListener implements EventListener {
             case CHG_LOCATION:
             case TO_FARROWING:
             case TO_MATING:
-                flatByFunc(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
+                filterBy(dtos, eventAtFunc, DoctorPigPublishDto::getKind)
                         .forEach(event -> handleLiveStockReport(pigEvent.getOrgId(), pigEvent.getFarmId(), event.getEventAt(), event.getKind()));
             default:
                 break;
         }
-    }
-
-    /**
-     * 过滤掉相同的事件
-     */
-    @SafeVarargs
-    private static List<DoctorPigPublishDto> flatByFunc(List<DoctorPigPublishDto> pigs, Function<DoctorPigPublishDto, ?>... func) {
-        if (CollectionUtils.isEmpty(pigs)) {
-            return Collections.emptyList();
-        }
-
-        //先放入一个，之后挨个儿比较，如果不相同，再放进去
-        List<DoctorPigPublishDto> results = Lists.newArrayList(pigs.get(0));
-        for (DoctorPigPublishDto pig : pigs) {
-            if (!pig.containsBy(results, func)) {
-                results.add(pig);
-            }
-        }
-        return results;
     }
 
     //处理配种
