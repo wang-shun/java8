@@ -18,13 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+
+import static io.terminus.doctor.event.event.DoctorGroupPublishDto.filterBy;
 
 /**
  * Desc:
@@ -75,31 +75,12 @@ public class DoctorGroupEventListener implements EventListener {
         Function<DoctorGroupPublishDto, Date> monthFunc = e -> DateUtil.monthEnd(e.getEventAt());
 
         //更新日报
-        flatByFunc(groupEvent.getGroups(), DoctorGroupPublishDto::getPigType, eventAtFunc)
+        filterBy(groupEvent.getGroups(), DoctorGroupPublishDto::getPigType, eventAtFunc)
                 .forEach(event -> handleDaily(groupEvent.getOrgId(), groupEvent.getFarmId(), groupEvent.getEventType(), event));
 
         //更新月报
-        flatByFunc(groupEvent.getGroups(), monthFunc)
+        filterBy(groupEvent.getGroups(), monthFunc)
                 .forEach(event -> handlyCommon(groupEvent.getFarmId(), groupEvent.getEventType(), event));
-    }
-
-    /**
-     * 过滤掉相同的事件
-     */
-    @SafeVarargs
-    private static List<DoctorGroupPublishDto> flatByFunc(List<DoctorGroupPublishDto> groups, Function<DoctorGroupPublishDto, ?>... func) {
-        if (CollectionUtils.isEmpty(groups)) {
-            return Collections.emptyList();
-        }
-
-        //先放入一个，之后挨个儿比较，如果不相同，再放进去
-        List<DoctorGroupPublishDto> results = Lists.newArrayList(groups.get(0));
-        groups.forEach(group -> results.forEach(result -> {
-            if (!group.equalsByFunc(result, func)) {
-                results.add(group);
-            }
-        }));
-        return results;
     }
 
     //处理月报

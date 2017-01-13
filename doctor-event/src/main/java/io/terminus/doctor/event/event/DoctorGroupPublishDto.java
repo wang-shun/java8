@@ -1,9 +1,13 @@
 package io.terminus.doctor.event.event;
 
+import com.google.common.collect.Lists;
 import lombok.Data;
+import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -30,8 +34,7 @@ public class DoctorGroupPublishDto implements Serializable {
     private Integer pigType;
 
     //可指定的equals方法
-    @SafeVarargs
-    final boolean equalsByFunc(DoctorGroupPublishDto that, Function<DoctorGroupPublishDto, ?>... funcs) {
+    private boolean equalsBy(DoctorGroupPublishDto that, List<Function<DoctorGroupPublishDto, ?>> funcs) {
         if (this == that) return true;
         if (that == null) return false;
 
@@ -43,5 +46,30 @@ public class DoctorGroupPublishDto implements Serializable {
             }
         }
         return isEqual;
+    }
+
+    //contains
+    private boolean containsBy(List<DoctorGroupPublishDto> dtos, List<Function<DoctorGroupPublishDto, ?>> funcs) {
+        for (DoctorGroupPublishDto element : dtos) {
+            if (this.equalsBy(element, funcs)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 过滤掉相同的事件
+     */
+    @SafeVarargs
+    static List<DoctorGroupPublishDto> filterBy(List<DoctorGroupPublishDto> pigs, Function<DoctorGroupPublishDto, ?>... func) {
+        if (CollectionUtils.isEmpty(pigs)) {
+            return Collections.emptyList();
+        }
+        List<Function<DoctorGroupPublishDto, ?>> funcs = Lists.newArrayList(func);
+        List<DoctorGroupPublishDto> results = Lists.newArrayList(pigs.get(0));
+
+        pigs.stream().filter(pig -> !pig.containsBy(results, funcs)).forEach(results::add);
+        return results;
     }
 }
