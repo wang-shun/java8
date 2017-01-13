@@ -72,7 +72,7 @@ public class DoctorGroupEventListener implements EventListener {
         }
 
         Function<DoctorGroupPublishDto, Date> eventAtFunc = e -> Dates.startOfDay(e.getEventAt());
-        Function<DoctorGroupPublishDto, Date> monthFunc = e -> DateUtil.monthEnd(e.getEventAt());
+        Function<DoctorGroupPublishDto, Date> monthFunc = e -> DateUtil.monthStart(e.getEventAt());
 
         //更新日报
         filterBy(groupEvent.getGroups(), DoctorGroupPublishDto::getPigType, eventAtFunc)
