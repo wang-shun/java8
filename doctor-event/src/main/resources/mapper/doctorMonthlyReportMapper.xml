@@ -86,9 +86,7 @@
             <if test="data != null">data = #{data},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="sumAt != null">sum_at = #{sumAt},</if>
-            
-            
-            updated_at=now()
+            created_at=now()
         </set>
         WHERE id = #{id}
     </update>
