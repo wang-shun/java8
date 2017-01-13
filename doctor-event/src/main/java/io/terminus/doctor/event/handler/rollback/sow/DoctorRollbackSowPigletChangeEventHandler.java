@@ -38,7 +38,12 @@ public class DoctorRollbackSowPigletChangeEventHandler extends DoctorAbstractRol
         //母猪仔猪变动会触发猪群变动事件，校验猪群变动事件是否是最新事件
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
         DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
-        return isRelLastGroupEvent(toGroupEvent) & doctorRollbackSowWeanHandler.handleCheck(toPigEvent);
+
+        boolean wean = true;
+        if (toPigEvent != null) {
+            wean = doctorRollbackSowWeanHandler.handleCheck(toPigEvent);
+        }
+        return isRelLastGroupEvent(toGroupEvent) && wean;
     }
 
     @Override
