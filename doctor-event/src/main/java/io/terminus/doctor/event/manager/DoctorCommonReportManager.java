@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.manager;
 
 import com.google.common.base.Throwables;
+import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorMonthlyReportDao;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Desc:
@@ -45,39 +45,57 @@ public class DoctorCommonReportManager {
     }
 
     /**
-     * 删除sumAt数据, 再批量创建
+     * 删除sumAt数据, 再创建
      *
-     * @param monthlyReports 月报
-     * @param sumAt          统计日期
+     * @param farmId 猪场id
+     * @param sumAt  统计日期
      */
     @Transactional
-    public void createMonthlyReports(List<DoctorMonthlyReport> monthlyReports, Date sumAt) {
-        doctorMonthlyReportDao.deleteBySumAt(sumAt);
-        doctorMonthlyReportDao.creates(monthlyReports);
-    }
+    public DoctorMonthlyReport createMonthlyReport(Long farmId, Date sumAt) {
+        Date startAt = new DateTime(sumAt).withDayOfMonth(1).withTimeAtStartOfDay().toDate(); //月初: 2016-08-01 00:00:00
+        Date endAt = new DateTime(Dates.endOfDay(sumAt)).plusSeconds(-1).toDate();            //天末: 2016-08-12 23:59:59
+        sumAt = Dates.startOfDay(sumAt);
 
-    @Transactional
-    public void createMonthlyReport(Long farmId, DoctorMonthlyReport monthlyReport, Date sumAt) {
+        DoctorMonthlyReport monthlyReport = getMonthlyReport(farmId, startAt, endAt, sumAt);
         doctorMonthlyReportDao.deleteByFarmIdAndSumAt(farmId, sumAt);
         doctorMonthlyReportDao.create(monthlyReport);
+        return monthlyReport;
     }
 
     /**
-     * 删除sumAt数据, 再批量创建
+     * 删除sumAt数据, 再创建
      *
-     * @param weeklyReport 周报
-     * @param sumAt        统计日期
+     * @param farmId 猪场id
+     * @param sumAt  统计日期
      */
     @Transactional
-    public void createWeeklyReports(List<DoctorWeeklyReport> weeklyReport, Date sumAt) {
-        doctorWeeklyReportDao.deleteBySumAt(sumAt);
-        doctorWeeklyReportDao.creates(weeklyReport);
-    }
+    public DoctorWeeklyReport createWeeklyReport(Long farmId, Date sumAt) {
+        Date startAt = new DateTime(sumAt).withDayOfWeek(1).withTimeAtStartOfDay().toDate();  //本周周一: 2016-08-01 00:00:00
+        Date endAt = new DateTime(Dates.endOfDay(sumAt)).plusSeconds(-1).toDate();            //天末: 2016-08-12 23:59:59
+        sumAt = Dates.startOfDay(sumAt);
 
-    @Transactional
-    public void createWeeklyReport(Long farmId, DoctorWeeklyReport weeklyReport, Date sumAt) {
+        DoctorWeeklyReport weeklyReport = getWeeklyReport(farmId, startAt, endAt, sumAt);
         doctorWeeklyReportDao.deleteByFarmIdAndSumAt(farmId, sumAt);
         doctorWeeklyReportDao.create(weeklyReport);
+        return weeklyReport;
+    }
+
+    //周报
+    private DoctorWeeklyReport getWeeklyReport(Long farmId, Date startAt, Date endAt, Date sumAt) {
+        DoctorWeeklyReport report = new DoctorWeeklyReport();
+        report.setFarmId(farmId);
+        report.setSumAt(sumAt);
+        report.setReportDto(getCommonReportDto(farmId, startAt, endAt));
+        return report;
+    }
+
+    //月报
+    private DoctorMonthlyReport getMonthlyReport(Long farmId, Date startAt, Date endAt, Date sumAt) {
+        DoctorMonthlyReport report = new DoctorMonthlyReport();
+        report.setFarmId(farmId);
+        report.setSumAt(sumAt);
+        report.setReportDto(getCommonReportDto(farmId, startAt, endAt));
+        return report;
     }
 
     /**
@@ -172,12 +190,12 @@ public class DoctorCommonReportManager {
         try {
             log.info("updateLiveStockChange fe:{}", fe);
             DoctorLiveStockChangeCommonReport monthLiveStock = getLiveStockChangeReport(fe.getFarmId(), fe.monthStart(), fe.monthEnd());
-            DoctorMonthlyReport month = getMonthlyReport(fe);
+            DoctorMonthlyReport month = findMonthlyReportIfNullInit(fe);
             month.getReportDto().setLiveStockChange(monthLiveStock);
             doctorMonthlyReportDao.update(month);
 
             DoctorLiveStockChangeCommonReport weekLiveStock = getLiveStockChangeReport(fe.getFarmId(), fe.weekStart(), fe.weekEnd());
-            DoctorWeeklyReport week = getWeeklyReport(fe);
+            DoctorWeeklyReport week = findWeeklyReportIfNullInit(fe);
             week.getReportDto().setLiveStockChange(weekLiveStock);
             doctorWeeklyReportDao.update(week);
         } catch (Exception e) {
@@ -190,11 +208,11 @@ public class DoctorCommonReportManager {
     public Boolean updateSaleDead(FarmIdAndEventAt fe) {
         try {
             log.info("updateSaleDead fe:{}", fe);
-            DoctorMonthlyReport month = getMonthlyReport(fe);
+            DoctorMonthlyReport month = findMonthlyReportIfNullInit(fe);
             setSaleDead(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);
 
-            DoctorWeeklyReport week = getWeeklyReport(fe);
+            DoctorWeeklyReport week = findWeeklyReportIfNullInit(fe);
             setSaleDead(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
             doctorWeeklyReportDao.update(week);
         } catch (Exception e) {
@@ -207,12 +225,12 @@ public class DoctorCommonReportManager {
     public Boolean updateParityBreed(FarmIdAndEventAt fe) {
         try {
             log.info("updateParityBreed fe:{}", fe);
-            DoctorMonthlyReport month = getMonthlyReport(fe);
+            DoctorMonthlyReport month = findMonthlyReportIfNullInit(fe);
             month.getReportDto().setParityStockList(doctorKpiDao.getMonthlyParityStock(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
             month.getReportDto().setBreedStockList(doctorKpiDao.getMonthlyBreedStock(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
             doctorMonthlyReportDao.update(month);
 
-            DoctorWeeklyReport week = getWeeklyReport(fe);
+            DoctorWeeklyReport week = findWeeklyReportIfNullInit(fe);
             week.getReportDto().setParityStockList(doctorKpiDao.getMonthlyParityStock(fe.getFarmId(), fe.weekStart(), fe.weekEnd()));
             week.getReportDto().setBreedStockList(doctorKpiDao.getMonthlyBreedStock(fe.getFarmId(), fe.weekStart(), fe.weekEnd()));
             doctorWeeklyReportDao.update(week);
@@ -226,12 +244,12 @@ public class DoctorCommonReportManager {
     public Boolean updateNpdPsy(FarmIdAndEventAt fe) {
         try {
             log.info("updateNpdPsy fe:{}", fe);
-            DoctorMonthlyReport month = getMonthlyReport(fe);
+            DoctorMonthlyReport month = findMonthlyReportIfNullInit(fe);
             month.getReportDto().setNpd(doctorKpiDao.npd(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
             month.getReportDto().setPsy(doctorKpiDao.psy(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
             doctorMonthlyReportDao.update(month);
 
-            DoctorWeeklyReport week = getWeeklyReport(fe);
+            DoctorWeeklyReport week = findWeeklyReportIfNullInit(fe);
             week.getReportDto().setNpd(doctorKpiDao.npd(fe.getFarmId(), fe.weekStart(), fe.weekEnd()));
             week.getReportDto().setPsy(doctorKpiDao.psy(fe.getFarmId(), fe.weekStart(), fe.weekEnd()));
             doctorWeeklyReportDao.update(week);
@@ -245,11 +263,11 @@ public class DoctorCommonReportManager {
     public Boolean updateWean7Mate(FarmIdAndEventAt fe) {
         try {
             log.info("updateWean7Mate fe:{}", fe);
-            DoctorMonthlyReport month = getMonthlyReport(fe);
+            DoctorMonthlyReport month = findMonthlyReportIfNullInit(fe);
             month.getReportDto().setMateInSeven(doctorKpiDao.getMateInSeven(fe.getFarmId(), fe.monthStart(), fe.monthEnd()));
             doctorMonthlyReportDao.update(month);
 
-            DoctorWeeklyReport week = getWeeklyReport(fe);
+            DoctorWeeklyReport week = findWeeklyReportIfNullInit(fe);
             week.getReportDto().setMateInSeven(doctorKpiDao.getMateInSeven(fe.getFarmId(), fe.weekStart(), fe.weekEnd()));
             doctorWeeklyReportDao.update(week);
         } catch (Exception e) {
@@ -262,11 +280,11 @@ public class DoctorCommonReportManager {
     public Boolean updateBoarScore(FarmIdAndEventAt fe) {
         try {
             log.info("updateBoarScore fe:{}", fe);
-            DoctorMonthlyReport month = getMonthlyReport(fe);
+            DoctorMonthlyReport month = findMonthlyReportIfNullInit(fe);
             setBoarScore(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);
 
-            DoctorWeeklyReport week = getWeeklyReport(fe);
+            DoctorWeeklyReport week = findWeeklyReportIfNullInit(fe);
             setBoarScore(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
             doctorWeeklyReportDao.update(week);
         } catch (Exception e) {
@@ -280,13 +298,13 @@ public class DoctorCommonReportManager {
         try {
             log.info("update4MonthRate fe:{}", fe);
             DateUtil.getBeforeMonthEnds(fe.getEventAt(), 4).forEach(date -> {
-                DoctorMonthlyReport month = getMonthlyReport(new FarmIdAndEventAt(fe.getFarmId(), date));
+                DoctorMonthlyReport month = findMonthlyReportIfNullInit(new FarmIdAndEventAt(fe.getFarmId(), date));
                 set4MonthRate(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
                 doctorMonthlyReportDao.update(month);
             });
 
             DateUtil.getBeforeWeekEnds(fe.getEventAt(), 4).forEach(date -> {
-                DoctorWeeklyReport week = getWeeklyReport(new FarmIdAndEventAt(fe.getFarmId(), date));
+                DoctorWeeklyReport week = findWeeklyReportIfNullInit(new FarmIdAndEventAt(fe.getFarmId(), date));
                 set4MonthRate(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
                 doctorWeeklyReportDao.update(week);
             });
@@ -300,11 +318,11 @@ public class DoctorCommonReportManager {
     public Boolean updateMate(FarmIdAndEventAt fe) {
         try {
             log.info("updateMate fe:{}", fe);
-            DoctorMonthlyReport month = getMonthlyReport(fe);
+            DoctorMonthlyReport month = findMonthlyReportIfNullInit(fe);
             setMate(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);
 
-            DoctorWeeklyReport week = getWeeklyReport(fe);
+            DoctorWeeklyReport week = findWeeklyReportIfNullInit(fe);
             setMate(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
             doctorWeeklyReportDao.update(week);
         } catch (Exception e) {
@@ -317,11 +335,11 @@ public class DoctorCommonReportManager {
     public Boolean updatePregCheck(FarmIdAndEventAt fe) {
         try {
             log.info("updatePregCheck fe:{}", fe);
-            DoctorMonthlyReport month = getMonthlyReport(fe);
+            DoctorMonthlyReport month = findMonthlyReportIfNullInit(fe);
             setPregCheck(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);
 
-            DoctorWeeklyReport week = getWeeklyReport(fe);
+            DoctorWeeklyReport week = findWeeklyReportIfNullInit(fe);
             setPregCheck(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
             doctorWeeklyReportDao.update(week);
         } catch (Exception e) {
@@ -334,11 +352,11 @@ public class DoctorCommonReportManager {
     public Boolean updateFarrow(FarmIdAndEventAt fe) {
         try {
             log.info("updateFarrow fe:{}", fe);
-            DoctorMonthlyReport month = getMonthlyReport(fe);
+            DoctorMonthlyReport month = findMonthlyReportIfNullInit(fe);
             setFarrow(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);
 
-            DoctorWeeklyReport week = getWeeklyReport(fe);
+            DoctorWeeklyReport week = findWeeklyReportIfNullInit(fe);
             setFarrow(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
             doctorWeeklyReportDao.update(week);
         } catch (Exception e) {
@@ -351,11 +369,11 @@ public class DoctorCommonReportManager {
     public Boolean updateWean(FarmIdAndEventAt fe) {
         try {
             log.info("updateWean fe:{}", fe);
-            DoctorMonthlyReport month = getMonthlyReport(fe);
+            DoctorMonthlyReport month = findMonthlyReportIfNullInit(fe);
             setWean(month.getReportDto(), fe.getFarmId(), fe.monthStart(), fe.monthEnd());
             doctorMonthlyReportDao.update(month);
 
-            DoctorWeeklyReport week = getWeeklyReport(fe);
+            DoctorWeeklyReport week = findWeeklyReportIfNullInit(fe);
             setWean(week.getReportDto(), fe.getFarmId(), fe.weekStart(), fe.weekEnd());
             doctorWeeklyReportDao.update(week);
         } catch (Exception e) {
@@ -462,14 +480,55 @@ public class DoctorCommonReportManager {
     }
 
     //月报存月末
-    private DoctorMonthlyReport getMonthlyReport(FarmIdAndEventAt fe) {
-        return doctorMonthlyReportDao.findByFarmIdAndSumAt(fe.getFarmId(), fe.monthEnd());
+    private DoctorMonthlyReport findMonthlyReportIfNullInit(FarmIdAndEventAt fe) {
+        DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(fe.getFarmId(), fe.monthEnd());
+        if (report == null) {
+            report = createMonthlyReport(fe.getFarmId(), fe.getEventAt());
+        }
+        return report;
     }
 
     //周报是周一
-    private DoctorWeeklyReport getWeeklyReport(FarmIdAndEventAt fe) {
-        return doctorWeeklyReportDao.findByFarmIdAndSumAt(fe.getFarmId(), fe.weekEnd());
+    private DoctorWeeklyReport findWeeklyReportIfNullInit(FarmIdAndEventAt fe) {
+        DoctorWeeklyReport report = doctorWeeklyReportDao.findByFarmIdAndSumAt(fe.getFarmId(), fe.weekEnd());
+        if (report == null) {
+            report = createWeeklyReport(fe.getFarmId(), fe.getEventAt());
+        }
+        return report;
     }
+
+    //月报统计结果
+    private DoctorCommonReportDto getCommonReportDto(Long farmId, Date startAt, Date endAt) {
+        log.info("get monthly report, farmId:{}, startAr:{}, endAt:{}", farmId, startAt, endAt);
+        DoctorCommonReportDto dto = new DoctorCommonReportDto();
+
+        //配种情况
+        setMate(dto, farmId, startAt, endAt);
+
+        //妊娠检查情况
+        setPregCheck(dto, farmId, startAt, endAt);
+
+        //分娩情况
+        setFarrow(dto, farmId, startAt, endAt);
+
+        //断奶情况
+        setWean(dto, farmId, startAt, endAt);
+
+        //销售死淘情况
+        setSaleDead(dto, farmId, startAt, endAt);
+
+        //公猪生产成绩
+        setBoarScore(dto, farmId, startAt, endAt);
+
+        //存栏变动月报
+        dto.setLiveStockChange(getLiveStockChangeReport(farmId, startAt, endAt));
+
+        //存栏结构月报
+        dto.setParityStockList(doctorKpiDao.getMonthlyParityStock(farmId, startAt, endAt));
+        dto.setBreedStockList(doctorKpiDao.getMonthlyBreedStock(farmId, startAt, endAt));
+        return dto;
+    }
+
 
     /**
      * 猪场id和eventAt类，用于传递查询月报需要的参数
