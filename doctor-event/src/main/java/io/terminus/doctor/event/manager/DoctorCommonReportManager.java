@@ -383,7 +383,7 @@ public class DoctorCommonReportManager {
     }
 
     //死亡销售
-    public DoctorCommonReportDto setSaleDead(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
+    private DoctorCommonReportDto setSaleDead(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
         dto.setSaleSow(doctorKpiDao.getSaleSow(farmId, startAt, endAt));                  //母猪
         dto.setSaleBoar(doctorKpiDao.getSaleBoar(farmId, startAt, endAt));                //公猪
         dto.setSaleNursery(doctorKpiDao.getSaleNursery(farmId, startAt, endAt));          //保育猪（产房+保育）
@@ -402,7 +402,7 @@ public class DoctorCommonReportManager {
     }
 
     //公猪生产成绩
-    public DoctorCommonReportDto setBoarScore(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
+    private DoctorCommonReportDto setBoarScore(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
         dto.setBoarMateCount(doctorKpiDao.getBoarMateCount(farmId, startAt, endAt));                       //配种次数
         dto.setBoarFirstMateCount(doctorKpiDao.getBoarSowFirstMateCount(farmId, startAt, endAt));          //首次配种母猪数
         dto.setBoarSowPregCount(doctorKpiDao.getBoarSowPregCount(farmId, startAt, endAt));                 //受胎头数
@@ -415,7 +415,7 @@ public class DoctorCommonReportManager {
     }
 
     //配种情况
-    public DoctorCommonReportDto setMate(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
+    private DoctorCommonReportDto setMate(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
         dto.setMateHoubei(doctorKpiDao.firstMatingCounts(farmId, startAt, endAt));                   //配后备
         dto.setMateWean(doctorKpiDao.weanMatingCounts(farmId, startAt, endAt));                      //配断奶
         dto.setMateFanqing(doctorKpiDao.fanQMatingCounts(farmId, startAt, endAt));                   //配返情
@@ -429,7 +429,7 @@ public class DoctorCommonReportManager {
     }
 
     //妊娠检查情况
-    public DoctorCommonReportDto setPregCheck(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
+    private DoctorCommonReportDto setPregCheck(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
         dto.setCheckPositive(doctorKpiDao.checkYangCounts(farmId, startAt, endAt));                  //妊娠检查阳性
         dto.setCheckFanqing(doctorKpiDao.checkFanQCounts(farmId, startAt, endAt));                   //返情
         dto.setCheckAbort(doctorKpiDao.checkAbortionCounts(farmId, startAt, endAt));                 //流产
@@ -441,7 +441,7 @@ public class DoctorCommonReportManager {
     }
 
     //分娩情况
-    public DoctorCommonReportDto setFarrow(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
+    private DoctorCommonReportDto setFarrow(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
         dto.setFarrowEstimateParity(doctorKpiDao.getPreDelivery(farmId, startAt, endAt));        //预产胎数
         dto.setFarrowNest(doctorKpiDao.getDelivery(farmId, startAt, endAt));                     //分娩窝数
         dto.setFarrowAlive(doctorKpiDao.getDeliveryLive(farmId, startAt, endAt));                //产活仔数
@@ -461,7 +461,7 @@ public class DoctorCommonReportManager {
     }
 
     //断奶情况
-    public DoctorCommonReportDto setWean(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
+    private DoctorCommonReportDto setWean(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
         dto.setWeanSow(doctorKpiDao.getWeanSow(farmId, startAt, endAt));                         //断奶母猪数
         dto.setWeanPiglet(doctorKpiDao.getWeanPiglet(farmId, startAt, endAt));                   //断奶仔猪数
         dto.setWeanAvgWeight(doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt));       //断奶均重
@@ -471,7 +471,7 @@ public class DoctorCommonReportManager {
     }
 
     //4个月的各种率
-    public DoctorCommonReportDto set4MonthRate(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
+    private DoctorCommonReportDto set4MonthRate(DoctorCommonReportDto dto, Long farmId, Date startAt, Date endAt) {
         dto.setMateEstimatePregRate(doctorKpiDao.assessPregnancyRate(farmId, startAt, DateUtil.getMonthEnd(new DateTime(endAt)).toDate()));       //估算受胎率
         dto.setMateRealPregRate(doctorKpiDao.realPregnancyRate(farmId, startAt, endAt));             //实际受胎率
         dto.setMateEstimateFarrowingRate(doctorKpiDao.assessFarrowingRate(farmId, startAt, DateUtil.getMonthEnd(new DateTime(endAt)).toDate()));  //估算配种分娩率
