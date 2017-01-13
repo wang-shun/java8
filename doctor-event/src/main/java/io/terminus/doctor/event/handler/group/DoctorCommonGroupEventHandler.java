@@ -125,7 +125,7 @@ public class DoctorCommonGroupEventHandler {
 
         //调用转入猪群事件
         DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(transGroup.getToGroupId()));
-        doctorMoveInGroupEventHandler.handleEvent(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
+        doctorMoveInGroupEventHandler.handle(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
     }
 
     /**
