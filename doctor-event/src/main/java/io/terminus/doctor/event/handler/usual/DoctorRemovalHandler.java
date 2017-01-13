@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.usual;
 
-import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -62,30 +61,28 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
     protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-        DoctorRemovalDto removel = (DoctorRemovalDto) inputDto;
-        if (removel == null) {
-            throw new ServiceException("removel.not.empty");
-        }
-        doctorPigEvent.setChangeTypeId(removel.getChgTypeId());   //变动类型id
-        doctorPigEvent.setPrice(removel.getPrice());      //销售单价(分)
-        doctorPigEvent.setAmount(removel.getSum());       //销售总额(分)
+        DoctorRemovalDto removalDto = (DoctorRemovalDto) inputDto;
 
-        if (Objects.equals(removel.getChgTypeId(), DoctorBasicEnums.DEAD.getId()) || Objects.equals(removel.getChgTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
-            //如果是死亡 或者淘汰
-            //查找最近一次配种事件
+        doctorPigEvent.setChangeTypeId(removalDto.getChgTypeId());   //变动类型id
+        doctorPigEvent.setPrice(removalDto.getPrice());      //销售单价(分)
+        doctorPigEvent.setAmount(removalDto.getSum());       //销售总额(分)
+
+        if (Objects.equals(removalDto.getChgTypeId(), DoctorBasicEnums.DEAD.getId()) || Objects.equals(removalDto.getChgTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
+            //如果是死亡 或者淘汰,查找最近一次配种事件
             DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-
+            if (lastMate == null) {
+                return doctorPigEvent;
+            }
             DateTime mattingDate = new DateTime(lastMate.getEventAt());
             DateTime eventTime = new DateTime(doctorPigEvent.getEventAt());
 
             int npd = Math.abs(Days.daysBetween(eventTime, mattingDate).getDays());
-            if (Objects.equals(removel.getChgTypeId(), DoctorBasicEnums.DEAD.getId())) {
+            if (Objects.equals(removalDto.getChgTypeId(), DoctorBasicEnums.DEAD.getId())) {
                 //如果是死亡
                 doctorPigEvent.setPsnpd(doctorPigEvent.getPsnpd() + npd);
                 doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
             }
-
-            if (Objects.equals(removel.getChgTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
+            if (Objects.equals(removalDto.getChgTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
                 //如果是淘汰
                 doctorPigEvent.setPtnpd(doctorPigEvent.getPtnpd() + npd);
                 doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
