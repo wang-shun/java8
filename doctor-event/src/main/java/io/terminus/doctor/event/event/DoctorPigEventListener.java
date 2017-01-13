@@ -212,6 +212,7 @@ public class DoctorPigEventListener implements EventListener {
             default:
                 break;
         }
+        log.info("handlePigEvent ok！");
     }
 
     //处理配种

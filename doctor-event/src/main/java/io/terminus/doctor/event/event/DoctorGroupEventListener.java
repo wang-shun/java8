@@ -81,6 +81,7 @@ public class DoctorGroupEventListener implements EventListener {
         //更新月报
         filterBy(groupEvent.getGroups(), monthFunc)
                 .forEach(event -> handlyCommon(groupEvent.getFarmId(), groupEvent.getEventType(), event));
+        log.info("handleGroupEvent ok！");
     }
 
     //处理月报
