@@ -99,6 +99,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         }
         doctorPigTrack.setCurrentBarnId(toBarnId);
         doctorPigTrack.setCurrentBarnName(toBarn.getName());
+        doctorPigTrack.setCurrentBarnType(toBarn.getPigType());
         return doctorPigTrack;
     }
 
