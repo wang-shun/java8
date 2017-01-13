@@ -268,21 +268,21 @@ public class DoctorKpiDao {
      * 死淘情况: 产房死淘率
      */
     public double getDeadFarrowRate(Long farmId, Date startAt, Date endAt) {
-        return EventUtil.get2(sqlSession.selectOne(sqlId("getDeadFarrowRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
+        return EventUtil.get4(sqlSession.selectOne(sqlId("getDeadFarrowRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
     }
 
     /**
      * 死淘情况: 保育死淘率
      */
     public double getDeadNurseryRate(Long farmId, Date startAt, Date endAt) {
-        return EventUtil.get2(sqlSession.selectOne(sqlId("getDeadNurseryRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
+        return EventUtil.get4(sqlSession.selectOne(sqlId("getDeadNurseryRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
     }
 
     /**
      * 死淘情况: 育肥死淘率
      */
     public double getDeadFattenRate(Long farmId, Date startAt, Date endAt) {
-        return EventUtil.get2(sqlSession.selectOne(sqlId("getDeadFattenRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
+        return EventUtil.get4(sqlSession.selectOne(sqlId("getDeadFattenRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
     }
 
     /**
@@ -324,28 +324,28 @@ public class DoctorKpiDao {
      * 配种情况:估算受胎率
      */
     public double assessPregnancyRate(Long farmId, Date startAt, Date endAt) {
-        return EventUtil.get2(sqlSession.selectOne(sqlId("assessPregnancyRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
+        return EventUtil.get4(sqlSession.selectOne(sqlId("assessPregnancyRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
     }
 
     /**
      * 配种情况:实际受胎率
      */
     public double realPregnancyRate(Long farmId, Date startAt, Date endAt) {
-        return EventUtil.get2(sqlSession.selectOne(sqlId("realPregnancyRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
+        return EventUtil.get4(sqlSession.selectOne(sqlId("realPregnancyRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
     }
 
     /**
      * 配种情况:估算分娩率
      */
     public double assessFarrowingRate(Long farmId, Date startAt, Date endAt) {
-        return EventUtil.get2(sqlSession.selectOne(sqlId("assessFarrowingRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
+        return EventUtil.get4(sqlSession.selectOne(sqlId("assessFarrowingRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
     }
 
     /**
      * 配种情况:实际配种分娩率
      */
     public double realFarrowingRate(Long farmId, Date startAt, Date endAt) {
-        return EventUtil.get2(sqlSession.selectOne(sqlId("realFarrowingRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
+        return EventUtil.get4(sqlSession.selectOne(sqlId("realFarrowingRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
     }
 
     /**
@@ -558,14 +558,14 @@ public class DoctorKpiDao {
      * 公猪生产月报: 受胎率
      */
     public double getBoarSowPregRate(Long farmId, Date startAt, Date endAt) {
-        return EventUtil.get2(sqlSession.selectOne(sqlId("getBoarSowPregRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
+        return EventUtil.get4(sqlSession.selectOne(sqlId("getBoarSowPregRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
     }
 
     /**
      * 公猪生产月报: 分娩率
      */
     public double getBoarSowFarrowRate(Long farmId, Date startAt, Date endAt) {
-        return EventUtil.get2(sqlSession.selectOne(sqlId("getBoarSowFarrowRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
+        return EventUtil.get4(sqlSession.selectOne(sqlId("getBoarSowFarrowRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
     }
 
     /**
@@ -695,6 +695,6 @@ public class DoctorKpiDao {
      */
     public double getMateInSeven(Long farmId, Date startAt, Date endAt) {
         Double d = sqlSession.selectOne(sqlId("getMateInSeven"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
-        return d == null ? 0D : EventUtil.get2(d);
+        return d == null ? 0D : EventUtil.get4(d);
     }
 }
