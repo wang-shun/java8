@@ -1,5 +1,7 @@
 package io.terminus.doctor.event.dto;
 
+import com.google.common.collect.Lists;
+import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -88,6 +90,7 @@ public class DoctorPigInfoDto implements Serializable{
 
     public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack, List<DoctorPigEvent> doctorPigEvents) {
         checkState(!isNull(doctorPig), "build.doctorPig.empty");
+        List<Integer> kongHuaiPregCheckResultList = Lists.newArrayList(KongHuaiPregCheckResult.FANQING.getKey(), KongHuaiPregCheckResult.LIUCHAN.getKey(), KongHuaiPregCheckResult.YING.getKey());
         DoctorPigInfoDtoBuilder builder = DoctorPigInfoDto.builder()
                 .id(doctorPig.getId()).pigId(doctorPig.getId()).orgId(doctorPig.getOrgId()).orgName(doctorPig.getOrgName()).farmId(doctorPig.getFarmId()).farmName(doctorPig.getFarmName())
                 .pigType(doctorPig.getPigType()).pigCode(doctorPig.getPigCode()).birthDay(doctorPig.getBirthDate())
@@ -108,6 +111,9 @@ public class DoctorPigInfoDto implements Serializable{
                     .updatedAt(doctorPigTrack.getUpdatedAt())
                     .weanQty(doctorPigTrack.getWeanQty())
                     .unweanQty(doctorPigTrack.getUnweanQty());
+            if (kongHuaiPregCheckResultList.contains(doctorPigTrack.getStatus())) {
+                builder.statusName(KongHuaiPregCheckResult.from(doctorPigTrack.getStatus()).getName());
+            }
         }
         builder.doctorPigEvents(doctorPigEvents);
 

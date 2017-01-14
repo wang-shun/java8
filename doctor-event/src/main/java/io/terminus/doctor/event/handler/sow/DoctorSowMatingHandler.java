@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static java.util.Objects.isNull;
 
@@ -40,6 +41,14 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
 
     // 默认114 天 预产日期
     public static final Integer MATING_PREG_DAYS = 114;
+
+    @Override
+    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+        super.handleCheck(eventDto, basic);
+        DoctorMatingDto matingDto = (DoctorMatingDto) eventDto;
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(matingDto.getPigId());
+        checkState(doctorPigTrack.getCurrentMatingCount() < 3, "连续配种次数超过三次,猪号:" + eventDto.getPigCode());
+    }
 
     @Override
     public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
