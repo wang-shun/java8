@@ -43,6 +43,14 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     public static final Integer MATING_PREG_DAYS = 114;
 
     @Override
+    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+        super.handleCheck(eventDto, basic);
+        DoctorMatingDto matingDto = (DoctorMatingDto) eventDto;
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(matingDto.getPigId());
+        checkState(doctorPigTrack.getCurrentMatingCount() < 3, "连续配种次数超过三次,猪号:" + eventDto.getPigCode());
+    }
+
+    @Override
     public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
 
@@ -81,7 +89,6 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         DoctorMatingDto matingDto = (DoctorMatingDto) inputDto;
         Long boarId = matingDto.getMatingBoarPigId();
         DoctorPigTrack boarPigTrack = this.doctorPigTrackDao.findByPigId(boarId);
-        checkState(!isNull(doctorPigTrack), "createMating.boarPigId.fail");
         Integer currentBoarParity = MoreObjects.firstNonNull(boarPigTrack.getCurrentParity(), 0) + 1;
         boarPigTrack.setCurrentParity(currentBoarParity);
         doctorPigTrackDao.update(boarPigTrack);

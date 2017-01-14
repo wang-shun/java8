@@ -17,9 +17,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.isNull;
-
 /**
  * Created by yaoqijun.
  * Date:2016-05-27
@@ -42,7 +39,7 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
         } else if (Objects.equals(DoctorPig.PigSex.SOW.getKey(), removalDto.getPigType())) {
             doctorPigTrack.setStatus(PigStatus.Removal.getKey());
         } else {
-            throw new IllegalStateException("basic.pigTypeValue.error");
+            throw new IllegalStateException("猪性别错误,猪号:" + removalDto.getPigCode());
         }
         doctorPigTrack.setIsRemoval(IsOrNot.YES.getValue());
         return doctorPigTrack;
@@ -53,8 +50,7 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
         super.specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
        // 离场 事件 修改Pig 状态信息
         DoctorPig doctorPig = doctorPigDao.findById(inputDto.getPigId());
-        checkState(!isNull(doctorPig), "input.doctorPigId.error");
-        checkState(doctorPigDao.removalPig(doctorPig.getId()), "update.pigRemoval.fail");
+        doctorPigDao.removalPig(doctorPig.getId());
     }
 
     @Override

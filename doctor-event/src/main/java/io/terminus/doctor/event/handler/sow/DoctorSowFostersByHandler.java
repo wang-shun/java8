@@ -52,7 +52,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(fosterByDto.getPigId());
         DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) ||
-                (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()) && Objects.equals(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue())), "foster.currentSowStatus.error");
+                (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()) && Objects.equals(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue())), "仔猪变动被拼窝母猪状态错误,被拼窝猪号:" + fosterByDto.getPigCode());
 
         //被拼窝数量
         Integer fosterCount = fosterByDto.getFosterByCount();
@@ -71,9 +71,10 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
         DoctorPigTrack fromPigTrack = doctorPigTrackDao.findByPigId(fosterByDto.getFromSowId());
         //如果不是一个猪舍的拼窝，需要转群操作
         if (!Objects.equals(doctorPigTrack.getCurrentBarnId(), fromPigTrack.getCurrentBarnId())) {
-            Long groupId = groupSowEventCreate(doctorEventInfoList, doctorPigTrack, basic, inputDto, doctorPigEvent.getId());
-            doctorPigTrack.setGroupId(groupId);
-            doctorPigTrackDao.update(doctorPigTrack);
+            throw new ServiceException("不同猪舍不能拼窝,猪号:" + fosterByDto.getPigCode());
+//            Long groupId = groupSowEventCreate(doctorEventInfoList, doctorPigTrack, basic, inputDto, doctorPigEvent.getId());
+//            doctorPigTrack.setGroupId(groupId);
+//            doctorPigTrackDao.update(doctorPigTrack);
         }
 
     }
