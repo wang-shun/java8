@@ -42,12 +42,12 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(chgFarmDto.getPigId());
 
         // 当前状态为哺乳状态的母猪不允许转
-        checkState(!Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "feedStatus.sowChangFarm.error");
+        checkState(!Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "哺乳母猪不能转场,猪号:" + chgFarmDto.getPigCode());
 
         // 校验转相同的猪舍
         DoctorBarn doctorCurrentBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         DoctorBarn doctorToBarn = doctorBarnDao.findById(chgFarmDto.getToBarnId());
-        checkState(checkBarnTypeEqual(doctorCurrentBarn, doctorToBarn, doctorPigTrack.getStatus()), "sowChgFarm.diffBarn.error");
+        checkState(checkBarnTypeEqual(doctorCurrentBarn, doctorToBarn, doctorPigTrack.getStatus()), "转舍类型错误,猪号:" + chgFarmDto.getPigCode());
 
         // update barn info
         doctorPigTrack.setFarmId(chgFarmDto.getToFarmId());
@@ -70,7 +70,7 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
         params.put("pigId", doctorPig.getId());
         params.put("farmId", chgFarmDto.getToFarmId());
         params.put("farmName", chgFarmDto.getToFarmName());
-        checkState(doctorPigEventDao.updatePigEventFarmIdByPigId(params), "chgFarm.updateEventInfo.fail");
+        doctorPigEventDao.updatePigEventFarmIdByPigId(params);
     }
 
     /**

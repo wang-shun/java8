@@ -98,19 +98,19 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         DoctorWeanDto partWeanDto = (DoctorWeanDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(partWeanDto.getPigId());
 
-        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "not.feed.sow");
+        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "不是哺乳母猪,猪号:" + partWeanDto.getPigCode());
 
         //未断奶数
         Integer unweanCount = doctorPigTrack.getUnweanQty();    //未断奶数量
         Integer weanCount = doctorPigTrack.getWeanQty();        //断奶数量
         Integer toWeanCount = partWeanDto.getPartWeanPigletsCount();
-        checkState(toWeanCount <= unweanCount, "wean.countInput.error");
+        checkState(toWeanCount <= unweanCount, "断奶数大于未断奶数,猪号:" + partWeanDto.getPigCode());
         doctorPigTrack.setUnweanQty(unweanCount - toWeanCount); //未断奶数减
         doctorPigTrack.setWeanQty(weanCount + toWeanCount);     //断奶数加
 
         //断奶均重
         Double toWeanAvgWeight = partWeanDto.getPartWeanAvgWeight();
-        checkState(toWeanAvgWeight != null, "weight.not.null");
+        checkState(toWeanAvgWeight != null, "断奶均重不能为空,猪号:" + partWeanDto.getPigCode());
         Double weanAvgWeight = ((MoreObjects.firstNonNull(doctorPigTrack.getWeanAvgWeight(), 0D) * weanCount) + toWeanAvgWeight * toWeanCount ) / (weanCount + toWeanCount);
         doctorPigTrack.setWeanAvgWeight(weanAvgWeight);
 

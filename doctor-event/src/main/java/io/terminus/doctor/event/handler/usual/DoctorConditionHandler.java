@@ -32,7 +32,7 @@ public class DoctorConditionHandler extends DoctorAbstractEventHandler{
             }
         } else {
             DoctorBoarConditionDto boarConditionDto = (DoctorBoarConditionDto) inputDto;
-            checkState(boarConditionDto.getWeight() != null, "boar.condition.weight.not.null");
+            checkState(boarConditionDto.getWeight() != null, "公猪体况重量不可为空,猪号:" + boarConditionDto.getPigCode());
             doctorPigTrack.setWeight(boarConditionDto.getWeight());
         }
 

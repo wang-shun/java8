@@ -57,7 +57,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     @Override
     public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
         DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) eventDto;
-        checkState(!Objects.equals(chgLocationDto.getChgLocationFromBarnId(), chgLocationDto.getChgLocationToBarnId()), "same.barn.not.chg.location");
+        checkState(!Objects.equals(chgLocationDto.getChgLocationFromBarnId(), chgLocationDto.getChgLocationToBarnId()), "同舍不可转,猪号:" + eventDto.getPigCode());
     }
 
     @Override
@@ -85,7 +85,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         //校验猪舍类型是否相同, 只有同类型才可以普通转舍
         DoctorBarn fromBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
-        checkState(checkBarnTypeEqual(fromBarn, toBarn, doctorPigTrack.getStatus()), "barn.type.not.equal");
+        checkState(checkBarnTypeEqual(fromBarn, toBarn, doctorPigTrack.getStatus()), "猪舍类型不可转,猪号:" + chgLocationDto.getPigCode());
         if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
             doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
         } else if (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
@@ -114,7 +114,6 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         if(PigType.FARROW_TYPES.contains(fromBarn.getPigType())
                 && PigType.FARROW_TYPES.contains(toBarn.getPigType())
                 && doctorPigTrack.getGroupId() != null){
-            log.info("this is a buru sow trans barn event!");
             Long groupId = pigletTrans(doctorEventInfoList, doctorPigTrack, basic, chgLocationDto, toBarn, doctorPigEvent.getId());
 
             doctorPigTrack.setExtraMap(extraMap);
@@ -140,9 +139,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         }
 
         DoctorGroup group = doctorGroupDao.findById(pigTrack.getGroupId());
-        checkState(group != null, "group.not.found");
         DoctorGroupTrack groupTrack= doctorGroupTrackDao.findByGroupId(pigTrack.getGroupId());
-        checkState(groupTrack != null, "group.track.not.found");
         input.setEventAt(DateUtil.toDateString(chgLocationDto.eventAt()));
         input.setIsAuto(IsOrNot.YES.getValue());
         input.setCreatorId(basic.getStaffId());
