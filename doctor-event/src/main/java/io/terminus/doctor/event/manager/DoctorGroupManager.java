@@ -85,6 +85,7 @@ public class DoctorGroupManager {
      */
     @Transactional
     public Long createNewGroup(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorNewGroupInput newGroupInput) {
+        newGroupInput.setEventType(GroupEventType.NEW.getValue());
         checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId());
 
         //0.校验猪群号是否重复

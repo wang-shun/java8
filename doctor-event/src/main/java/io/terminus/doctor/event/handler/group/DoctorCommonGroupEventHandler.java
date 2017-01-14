@@ -161,7 +161,7 @@ public class DoctorCommonGroupEventHandler {
         input.setRelPigEventId(null); //转入猪群事件 relPigEventId 置成空
         input.setRelGroupEventId(groupDetail.getGroupTrack().getRelEventId());      //记录新建猪群事件的id(新建猪群时，track.relEventId = 新建猪群事件id)
         input.setSowEvent(true);
-        doctorMoveInGroupEventHandler.handleEvent(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
+        doctorMoveInGroupEventHandler.handle(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
         return groupId;
     }
 
@@ -187,6 +187,7 @@ public class DoctorCommonGroupEventHandler {
         //已有猪群, 转入
         DoctorGroup group = groups.get(0);
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
+        input.setEventType(GroupEventType.MOVE_IN.getValue());
 
         doctorMoveInGroupEventHandler.handle(eventInfoList, group, groupTrack, input);
         return group.getId();

@@ -61,6 +61,8 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.CLOSE.getValue());
+
         //校验能否关闭
         checkCanClose(groupTrack);
 

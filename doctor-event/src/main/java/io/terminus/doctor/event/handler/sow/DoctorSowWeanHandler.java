@@ -104,7 +104,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         Integer unweanCount = doctorPigTrack.getUnweanQty();    //未断奶数量
         Integer weanCount = doctorPigTrack.getWeanQty();        //断奶数量
         Integer toWeanCount = partWeanDto.getPartWeanPigletsCount();
-        checkState(toWeanCount <= unweanCount, "断奶数大于未断奶数,猪号:" + partWeanDto.getPigCode());
+        checkState(Objects.equals(toWeanCount,unweanCount), "必须全部断奶,猪号:" + partWeanDto.getPigCode());
         doctorPigTrack.setUnweanQty(unweanCount - toWeanCount); //未断奶数减
         doctorPigTrack.setWeanQty(weanCount + toWeanCount);     //断奶数加
 
