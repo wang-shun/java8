@@ -222,6 +222,22 @@ public class DateUtil {
     }
 
     /**
+     * 求开始日期与结束日期之间的月份间隔 deltaMonths = 12 * Δyear + Δmonth
+     * @param startAt 开始时间
+     * @param endAt 结束时间
+     * @return 月数
+     */
+    public static int getDeltaMonths(Date startAt, Date endAt) {
+        DateTime start = new DateTime(startAt);
+        DateTime end = new DateTime(endAt);
+        return 12 * (end.getYear() - start.getYear()) + (end.getMonthOfYear() - start.getMonthOfYear());
+    }
+
+    public static int getDeltaMonthsAbs(Date startAt, Date endAt) {
+        return Math.abs(getDeltaMonths(startAt, endAt));
+    }
+
+    /**
      * 判断参数时间是否处在同一天
      * @return
      */
