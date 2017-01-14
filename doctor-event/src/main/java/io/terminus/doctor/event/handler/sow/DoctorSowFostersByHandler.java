@@ -71,9 +71,10 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
         DoctorPigTrack fromPigTrack = doctorPigTrackDao.findByPigId(fosterByDto.getFromSowId());
         //如果不是一个猪舍的拼窝，需要转群操作
         if (!Objects.equals(doctorPigTrack.getCurrentBarnId(), fromPigTrack.getCurrentBarnId())) {
-            Long groupId = groupSowEventCreate(doctorEventInfoList, doctorPigTrack, basic, inputDto, doctorPigEvent.getId());
-            doctorPigTrack.setGroupId(groupId);
-            doctorPigTrackDao.update(doctorPigTrack);
+            throw new ServiceException("不同猪舍不能拼窝,猪号:" + fosterByDto.getPigCode());
+//            Long groupId = groupSowEventCreate(doctorEventInfoList, doctorPigTrack, basic, inputDto, doctorPigEvent.getId());
+//            doctorPigTrack.setGroupId(groupId);
+//            doctorPigTrackDao.update(doctorPigTrack);
         }
 
     }
