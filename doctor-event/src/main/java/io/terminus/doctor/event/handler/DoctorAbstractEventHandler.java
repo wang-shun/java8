@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -118,7 +119,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName())
                 .kind(inputDto.getPigType()).relPigEventId(inputDto.getRelPigEventId()).relGroupEventId(inputDto.getRelGroupEventId())
                 .name(inputDto.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))//.relEventId(basic.getRelEventId())
-                .operatorId(MoreObjects.firstNonNull(inputDto.getOperatorId(), basic.getStaffId())).operatorName(MoreObjects.firstNonNull(inputDto.getOperatorName(), basic.getStaffName()))
+                .operatorId(MoreObjects.firstNonNull(inputDto.getOperatorId(), basic.getStaffId()))
+                .operatorName(StringUtils.hasText(inputDto.getOperatorName()) ? inputDto.getOperatorName() : basic.getStaffName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .isAuto(MoreObjects.firstNonNull(inputDto.getIsAuto(), IsOrNot.NO.getValue()))
                 .npd(0)
