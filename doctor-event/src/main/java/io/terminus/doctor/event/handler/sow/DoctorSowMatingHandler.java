@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static java.util.Objects.isNull;
 
@@ -81,7 +80,6 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         DoctorMatingDto matingDto = (DoctorMatingDto) inputDto;
         Long boarId = matingDto.getMatingBoarPigId();
         DoctorPigTrack boarPigTrack = this.doctorPigTrackDao.findByPigId(boarId);
-        checkState(!isNull(doctorPigTrack), "createMating.boarPigId.fail");
         Integer currentBoarParity = MoreObjects.firstNonNull(boarPigTrack.getCurrentParity(), 0) + 1;
         boarPigTrack.setCurrentParity(currentBoarParity);
         doctorPigTrackDao.update(boarPigTrack);

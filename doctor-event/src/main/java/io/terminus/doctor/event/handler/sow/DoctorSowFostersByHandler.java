@@ -52,7 +52,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(fosterByDto.getPigId());
         DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) ||
-                (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()) && Objects.equals(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue())), "foster.currentSowStatus.error");
+                (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()) && Objects.equals(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue())), "仔猪变动被拼窝母猪状态错误,被拼窝猪号:" + fosterByDto.getPigCode());
 
         //被拼窝数量
         Integer fosterCount = fosterByDto.getFosterByCount();

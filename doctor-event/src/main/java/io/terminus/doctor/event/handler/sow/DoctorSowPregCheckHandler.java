@@ -31,9 +31,18 @@ import static io.terminus.common.utils.Arguments.notNull;
 public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
 
     @Override
+    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+        super.handleCheck(eventDto, basic);
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(eventDto.getPigId());
+        DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) eventDto;
+        checkCanPregCheckResult(doctorPigTrack.getStatus(), pregChkResultDto.getCheckResult(), pregChkResultDto.getPigCode());
+
+    }
+
+    @Override
     protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) inputDto;
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pregChkResultDto.getPigId());
         //妊娠检查结果，从extra中拆出来
         Integer pregCheckResult = pregChkResultDto.getCheckResult();
@@ -69,13 +78,15 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         if ((Objects.equals(doctorPigTrack.getStatus(), PigStatus.KongHuai.getKey()))) {
             DoctorPigEvent lastPregEvent = doctorPigEventDao.queryLastPregCheck(doctorPigTrack.getPigId());
             if (lastPregEvent == null || !PregCheckResult.KONGHUAI_RESULTS.contains(lastPregEvent.getPregCheckResult())) {
-                throw new ServiceException("preg.check.not.allow");
+                throw new ServiceException("不允许妊娠检查,猪号:" + pregChkResultDto.getPigCode());
             }
 
             log.info("remove old preg check event info:{}", lastPregEvent);
             doctorPigEvent.setId(lastPregEvent.getId());    //把id放进去, 用于更新数据
             doctorPigEvent.setRelEventId(lastPregEvent.getRelEventId()); //重新覆盖下relEventId
 
+            //上一次妊娠检查事件
+            doctorPigEventDao.delete(lastPregEvent.getId());
             //删掉镜像里的数据
             doctorPigSnapshotDao.deleteByEventId(lastPregEvent.getId());
         }
@@ -136,7 +147,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
     }
 
     //校验能否置成此妊娠检查状态
-    private static void checkCanPregCheckResult(Integer pigStatus, Integer checkResult) {
+    private static void checkCanPregCheckResult(Integer pigStatus, Integer checkResult, String pigCode) {
         //已配种状态直接返回
         if (Objects.equals(pigStatus, PigStatus.Mate.getKey())) {
             return;
@@ -145,7 +156,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         //阳性只能到空怀状态
         if (Objects.equals(pigStatus, PigStatus.Pregnancy.getKey())) {
             if (!PregCheckResult.KONGHUAI_RESULTS.contains(checkResult)) {
-                throw new ServiceException("preg.check.result.not.allow");
+                throw new ServiceException("妊娠检查结果错误,猪号:" + pigCode);
             }
             return;
         }
@@ -153,7 +164,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         //空怀或流程只能到阳性状态
         if (Objects.equals(pigStatus, PigStatus.KongHuai.getKey())) {
             if (!Objects.equals(checkResult, PregCheckResult.YANG.getKey())) {
-                throw new ServiceException("preg.check.result.not.allow");
+                throw new ServiceException("妊娠检查结果错误,猪号:" + pigCode);
             }
             return;
         }
@@ -161,12 +172,12 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         //返情只能到阳性状态(以后全是空怀了)
         if (Objects.equals(pigStatus, PigStatus.FanQing.getKey())) {
             if (!Objects.equals(checkResult, PregCheckResult.YANG.getKey())) {
-                throw new ServiceException("preg.check.result.not.allow");
+                throw new ServiceException("妊娠检查结果错误,猪号:" + pigCode);
             }
             return;
         }
 
         //如果不是 已配种, 妊娠检查结果状态, 不允许妊娠检查
-        throw new ServiceException("preg.check.not.allow");
+        throw new ServiceException("不允许妊娠检查,猪号:" + pigCode);
     }
 }
