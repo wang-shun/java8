@@ -26,7 +26,6 @@ import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -409,35 +408,85 @@ public class DoctorMoveDataController {
         }
     }
 
+    private List<Long> getAllFarmIds() {
+        return doctorFarmDao.findAll().stream().map(DoctorFarm::getId).collect(Collectors.toList());
+    }
+
     /**
-     * 月报
+     * 迁移从since开始的日报, only = true, 只迁移 since 这一天的数据, 如果farmId=null, 则全部猪场
      */
-    @RequestMapping(value = "/monthly", method = RequestMethod.GET)
-    public Boolean moveMonthlyReport(@RequestParam("farmId") Long farmId,
-                                     @RequestParam(value = "index", required = false) Integer index) {
+    @RequestMapping(value = "/daily/since", method = RequestMethod.GET)
+    public Boolean moveDailyReport(@RequestParam(value = "farmId", required = false) Long farmId,
+                                   @RequestParam("since") String since,
+                                   @RequestParam(value = "only", defaultValue = "false") boolean only) {
         try {
-            log.warn("move monthly report start, farmId:{}, index:{}", farmId, index);
-            doctorMoveReportService.moveMonthlyReport(farmId, index);
-            log.warn("move monthly report end");
+            log.warn("move daily report since start, farmId:{}, since:{}, only:{}", farmId, since, only);
+
+            Date startAt = DateUtil.toDate(since);
+            if (startAt == null || startAt.after(new Date())) {
+                return false;
+            }
+            if (farmId == null) {
+                if (only) {
+                    doctorDailyReportWriteService.createDailyReports(getAllFarmIds(), startAt);
+                } else {
+                    getAllFarmIds().forEach(fid -> doctorDailyReportWriteService.createDailyReports(startAt, new Date(), fid));
+                }
+            } else {
+                if (only) {
+                    doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), startAt);
+                } else {
+                    doctorDailyReportWriteService.createDailyReports(startAt, new Date(), farmId);
+                }
+            }
+            log.warn("move daily report since end");
             return true;
         } catch (Exception e) {
-            log.error("move monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            log.error("move daily report since failed, farmId:{}, since:{}, only:{}, cause:{}",
+                    farmId, since, only, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
 
     /**
-     * 月报
+     * 月报/周报
      */
-    @RequestMapping(value = "/monthly/all", method = RequestMethod.GET)
-    public Boolean moveMonthlyReport(@RequestParam("index") Integer index) {
+    @RequestMapping(value = "/monthly/since", method = RequestMethod.GET)
+    public Boolean moveMonthlyReport(@RequestParam("farmId") Long farmId,
+                                     @RequestParam("since") String since,
+                                     @RequestParam(value = "only", defaultValue = "false") boolean only) {
         try {
-            log.warn("move monthly report all farm start, index:{}", index);
-            doctorMoveReportService.moveMonthlyReport(index);
-            log.warn("move monthly report end");
+            log.warn("move monthly report since start, farmId:{}, since:{}, only:{}", farmId, since, only);
+
+            Date startAt = DateUtil.toDate(since);
+            if (startAt == null || startAt.after(new Date())) {
+                return false;
+            }
+            int index;
+            if (only) {
+                index = 1;
+            } else {
+                index = DateUtil.getDeltaMonthsAbs(startAt, new Date()) + 1;
+            }
+
+            if (farmId == null) {
+                List<Long> farmIds = getAllFarmIds();
+                farmIds.forEach(fid -> {
+                    doctorMoveReportService.moveMonthlyReport(fid, index);
+                    doctorMoveReportService.moveWeeklyReport(fid, index);
+                    doctorMoveReportService.moveParityMonthlyReport(fid, index);
+                    doctorMoveReportService.moveBoarMonthlyReport(fid, index);
+                });
+            } else {
+                doctorMoveReportService.moveMonthlyReport(farmId, index);
+                doctorMoveReportService.moveWeeklyReport(farmId, index);
+                doctorMoveReportService.moveParityMonthlyReport(farmId, index);
+                doctorMoveReportService.moveBoarMonthlyReport(farmId, index);
+            }
+            log.warn("move monthly report since end");
             return true;
         } catch (Exception e) {
-            log.error("move monthly report failed, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("move monthly report since failed, farmId:{}, since:{}, only:{}", farmId, since, only, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
@@ -456,24 +505,6 @@ public class DoctorMoveDataController {
             return true;
         } catch (Exception e) {
             log.error("move monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
-            return false;
-        }
-    }
-
-    /**
-     * 周报
-     */
-    @RequestMapping(value = "/weekly/date", method = RequestMethod.GET)
-    public Boolean moveWeeklyReport(@RequestParam("farmId") Long farmId,
-                                    @RequestParam("date") String date) {
-        try {
-            log.warn("move weekly report date start, farmId:{}, date:{}", farmId, date);
-            doctorCommonReportWriteService.createWeeklyReport(farmId, new DateTime(DateUtil.toDate(date)).withDayOfWeek(1).toDate());
-            log.warn("move weekly report date end");
-
-            return true;
-        } catch (Exception e) {
-            log.error("move weekly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
