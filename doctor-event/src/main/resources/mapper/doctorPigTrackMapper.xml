@@ -350,6 +350,9 @@
                 #{i}
             </foreach>
         </if>
+        <if test="pigCode != null">
+            ORDER BY instr(pig_code, #{pigCode})
+        </if>
         limit 20;
     </select>
 </mapper>
