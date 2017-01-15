@@ -45,7 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -312,7 +311,7 @@ public abstract class AbstractJobProducer {
      */
     protected DoctorPigEvent getMatingPigEvent(DoctorPigInfoDto pigDto) {
         try {
-            List<DoctorPigEvent> eventList = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() != null).sorted(Comparator.comparing(DoctorPigEvent::getEventAt).reversed()).collect(Collectors.toList());
+            List<DoctorPigEvent> eventList = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() != null).sorted(this::pigEventComparte).collect(Collectors.toList());
             DoctorPigEvent doctorPigEvent = null;
             Boolean flag = false;
             for (DoctorPigEvent event : eventList) {
@@ -377,7 +376,7 @@ public abstract class AbstractJobProducer {
             List<DoctorPigEvent> tempList =  events.stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() !=null &&
                     ((!Objects.equals(doctorPigEvent.getPigStatusBefore(), PigStatus.Wean.getKey()) && Objects.equals(doctorPigEvent.getPigStatusAfter(), PigStatus.Wean.getKey())) || Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey()))).collect(Collectors.toList());
             if (!Arguments.isNullOrEmpty(tempList)){
-                return tempList.stream().max(Comparator.comparing(DoctorPigEvent::getEventAt)).get();
+                return tempList.stream().max(this::pigEventComparte).get();
             }
         } catch (Exception e){
             log.error(" get.lead.to.wean.event.failed ");
@@ -423,7 +422,7 @@ public abstract class AbstractJobProducer {
             }
             List<DoctorPigEvent> eventList = events.stream().filter(doctorPigEvent -> (doctorPigEvent.getEventAt() != null) && Objects.equals(doctorPigEvent.getType(), type)).collect(Collectors.toList());
             if (!Arguments.isNullOrEmpty(eventList)) {
-                return eventList.stream().max(Comparator.comparing(DoctorPigEvent::getEventAt)).get();
+                return eventList.stream().max(this::pigEventComparte).get();
             }
         } catch (Exception e) {
             log.error("get.pig.event.by.event.type.failed");
@@ -444,7 +443,7 @@ public abstract class AbstractJobProducer {
             }
             List<DoctorGroupEvent> eventList = events.stream().filter(doctorGroupEvent -> (doctorGroupEvent.getEventAt() != null) && Objects.equals(doctorGroupEvent.getType(), type)).collect(Collectors.toList());
             if (!Arguments.isNullOrEmpty(events)) {
-                return eventList.stream().max(Comparator.comparing(DoctorGroupEvent::getEventAt)).get();
+                return eventList.stream().max(this::groupEventComparte).get();
             }
         } catch (Exception e) {
             log.error("get.last.group.event.by.event.type.failed");
@@ -558,5 +557,33 @@ public abstract class AbstractJobProducer {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 猪事件事件比较
+     * @param event1
+     * @param event2
+     * @return
+     */
+    private int pigEventComparte(DoctorPigEvent event1, DoctorPigEvent event2) {
+        if (Objects.equals(event1.getEventAt(), event2.getEventAt())) {
+            return event2.getId().compareTo(event1.getId());
+        } else {
+            return event2.getEventAt().compareTo(event1.getEventAt());
+        }
+    }
+
+    /**
+     * 猪群事件事件比较
+     * @param event1
+     * @param event2
+     * @return
+     */
+    private int groupEventComparte(DoctorGroupEvent event1, DoctorGroupEvent event2) {
+        if (Objects.equals(event1.getEventAt(), event2.getEventAt())) {
+            return event2.getId().compareTo(event1.getId());
+        } else {
+            return event2.getEventAt().compareTo(event1.getEventAt());
+        }
     }
 }
