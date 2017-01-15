@@ -548,9 +548,9 @@ public abstract class AbstractJobProducer {
      */
     private int pigEventCompare(DoctorPigEvent event1, DoctorPigEvent event2) {
         if (Objects.equals(event1.getEventAt(), event2.getEventAt())) {
-            return event1.getId().compareTo(event2.getId());
+            return event2.getId().compareTo(event1.getId());
         } else {
-            return event1.getEventAt().compareTo(event2.getEventAt());
+            return event2.getEventAt().compareTo(event1.getEventAt());
         }
     }
 
