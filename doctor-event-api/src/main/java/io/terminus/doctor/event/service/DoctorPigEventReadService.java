@@ -152,5 +152,11 @@ public interface DoctorPigEventReadService {
      */
     Response<DoctorSowParityAvgDto> querySowParityAvg(@NotNull(message = "input.pigId.empty") Long pigId);
 
-
+    /**
+     *  获取猪某一类型的最新事件
+     * @param pigId
+     * @param type
+     * @return
+     */
+    Response<DoctorPigEvent> findLastEventByType(@NotNull(message = "input.pigId.empty") Long pigId, Integer type);
 }

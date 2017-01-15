@@ -73,7 +73,7 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                         break;
                     }
                     //取出最近一次的采精事件
-                    DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.SEMEN.getKey());
+                    DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getPigId(), PigEvent.SEMEN.getKey());
                     for (Integer key : ruleValueMap.keySet()) {
                         Boolean isSend = false;
                         RuleValue ruleValue = ruleValueMap.get(key);
