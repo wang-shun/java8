@@ -49,7 +49,7 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
     @Override
     public final boolean canRollback(DoctorGroupEvent groupEvent) {
         return Objects.equals(groupEvent.getIsAuto(), IsOrNot.NO.getValue()) &&
-                groupEvent.getEventAt().after(DateTime.now().plusMonths(-3).toDate()) &&
+                groupEvent.getEventAt().after(DateTime.now().plusMonths(-12).toDate()) &&
                 handleCheck(groupEvent);
     }
 

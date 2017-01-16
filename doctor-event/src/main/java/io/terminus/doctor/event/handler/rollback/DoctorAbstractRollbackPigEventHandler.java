@@ -70,7 +70,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
     @Override
     public final boolean canRollback(DoctorPigEvent pigEvent) {
         return isLastManualEvent(pigEvent) &&
-                pigEvent.getEventAt().after(DateTime.now().plusMonths(-3).toDate()) &&
+                pigEvent.getEventAt().after(DateTime.now().plusMonths(-12).toDate()) &&
                 handleCheck(pigEvent);
     }
 

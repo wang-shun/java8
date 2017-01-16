@@ -313,4 +313,14 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("query sow parity failed");
         }
     }
+
+    @Override
+    public Response<DoctorPigEvent> findLastEventByType(@NotNull(message = "input.pigId.empty") Long pigId, Integer type) {
+        try {
+            return Response.ok(doctorPigEventDao.queryLastEventByType(pigId, type));
+        } catch (Exception e) {
+            log.error("find.last.event.by.type, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find last event by type failed");
+        }
+    }
 }
