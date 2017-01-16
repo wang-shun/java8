@@ -86,6 +86,7 @@ public class DoctorGroupManager {
     @Transactional
     public Long createNewGroup(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorNewGroupInput newGroupInput) {
         newGroupInput.setEventType(GroupEventType.NEW.getValue());
+        newGroupInput.setSex(DoctorGroupTrack.Sex.MIX.getValue());
         checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId());
 
         //0.校验猪群号是否重复
@@ -112,7 +113,7 @@ public class DoctorGroupManager {
         int age = DateUtil.getDeltaDaysAbs(groupTrack.getBirthDate(), new Date());
         groupTrack.setAvgDayAge(age + 1);             //日龄
 
-        groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
+        groupTrack.setSex(newGroupInput.getSex());
         groupTrack.setWeanWeight(0D);
         groupTrack.setBirthWeight(0D);
         groupTrack.setNest(0);
