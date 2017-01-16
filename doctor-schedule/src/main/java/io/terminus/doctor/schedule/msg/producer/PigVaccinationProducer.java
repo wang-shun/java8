@@ -483,7 +483,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private DateTime getVaccinationDate(DoctorPigInfoDto pigDto) {
         try {
-            DoctorPigEvent event = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.VACCINATION.getKey());
+            DoctorPigEvent event = getPigEventByEventType(pigDto.getPigId(), PigEvent.VACCINATION.getKey());
             if (event != null){
                 return new DateTime(event.getEventAt());
             }
@@ -531,7 +531,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private DateTime getCheckWeightDate(DoctorPigInfoDto pigDto) {
         try {
-            DoctorPigEvent event = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.CONDITION.getKey());
+            DoctorPigEvent event = getPigEventByEventType(pigDto.getPigId(), PigEvent.CONDITION.getKey());
             if (event != null){
                 return new DateTime(event.getEventAt());
             }
@@ -546,7 +546,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private DateTime getChangeLocationDate(DoctorPigInfoDto pigDto) {
         try {
-            DoctorPigEvent event = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.CHG_LOCATION.getKey());
+            DoctorPigEvent event = getPigEventByEventType(pigDto.getPigId(), PigEvent.CHG_LOCATION.getKey());
             if (event != null){
                 return new DateTime(event.getEventAt());
             }

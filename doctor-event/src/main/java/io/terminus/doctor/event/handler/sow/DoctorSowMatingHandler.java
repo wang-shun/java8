@@ -1,8 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.ServiceException;
-import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -18,7 +16,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.springframework.stereotype.Component;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -110,7 +107,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
 
             //这里说明是断奶后的第一次配种,这个地方统计 dpNPD （断奶到配种的非生产天数）
             //查询最近一次导致断奶的事件
-            DoctorPigEvent lastWean = getLeadToWeanEvent(doctorPigTrack.getPigId());
+            DoctorPigEvent lastWean = doctorPigEventDao.queryLastWean(doctorPigTrack.getPigId());
             //断奶时间
             DateTime partWeanDate = new DateTime(lastWean.getEventAt());
 
@@ -168,22 +165,5 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
             return DoctorMatingType.LPC;
         }
         return DoctorMatingType.DP;
-    }
-
-    /**
-     * 获取导致断奶的事件
-     * @return
-     */
-    private DoctorPigEvent getLeadToWeanEvent(Long pigId){
-        List<DoctorPigEvent> tempList = doctorPigEventDao.findByPigId(pigId).stream().
-                filter(doctorPigEvent -> (doctorPigEvent.getEventAt() !=null) &&(
-                        (!Objects.equals(doctorPigEvent.getPigStatusBefore(), PigStatus.Wean.getKey()) && Objects.equals(doctorPigEvent.getPigStatusAfter(), PigStatus.Wean.getKey()))
-                                || Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey()))
-                )
-                .collect(Collectors.toList());
-        if (!Arguments.isNullOrEmpty(tempList)){
-            return tempList.stream().max(Comparator.comparing(DoctorPigEvent::getEventAt)).get();
-        }
-        throw new ServiceException("get.lead.to.wean.event.failed");
     }
 }

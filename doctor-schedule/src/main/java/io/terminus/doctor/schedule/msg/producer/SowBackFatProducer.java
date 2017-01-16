@@ -80,7 +80,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
                                 isSend = true;
                             }
                         } else {
-                            DoctorPigEvent pigEvent = getLeadToWeanEvent(pigDto.getDoctorPigEvents());
+                            DoctorPigEvent pigEvent = getPigEventByEventType(pigDto.getPigId(), PigEvent.WEAN.getKey());
                             if (pigEvent != null && filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()), PigEvent.CONDITION)){
                                 if (!filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()), PigEvent.MATING) && checkRuleValue(ruleValueMap.get(1), timeDiff)){
                                     continue;

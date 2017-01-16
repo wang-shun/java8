@@ -74,7 +74,7 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 母猪的updatedAt与当前时间差 (天)
-                    DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.FARROWING.getKey());
+                    DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getPigId(), PigEvent.FARROWING.getKey());
                     Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
                     // 1. 哺乳状态日期判断 -> id:1
 
