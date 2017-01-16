@@ -507,7 +507,7 @@
         FROM
         <include refid="tb"/>
         WHERE pig_id = #{pigId}
-        order by event_at asc, id ASC
+        order by event_at DESC , id DESC
     </select>
 
     <select id="count" parameterType="map" resultType="long">

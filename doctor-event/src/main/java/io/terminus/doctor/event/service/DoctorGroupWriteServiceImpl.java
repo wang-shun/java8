@@ -278,7 +278,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("batch.group.event.handle.failed, inputInfoList:{}, eventType:{}, cause:{}", inputInfoList, eventType, Throwables.getStackTraceAsString(e));
-            return Response.fail("batch.group.event.handle");
+            return Response.fail("batch.group.event.handle.failed");
         }
     }
 
