@@ -176,7 +176,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         Integer boarCount = MoreObjects.firstNonNull(farrowingDto.getLiveBoarCount(), 0);
         if (sowCount == 0 && boarCount == 0) sowCount = farrowingLiveCount;
 
-        input.setSex(judgePigSex(sowCount, boarCount).getValue());
+        input.setSex(DoctorGroupTrack.Sex.MIX.getValue());
         input.setQuantity(farrowingLiveCount);
         input.setSowQty(sowCount);
         input.setBoarQty(boarCount);
