@@ -46,6 +46,13 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     private DoctorBarnDao doctorBarnDao;
 
     @Override
+    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+        super.handleCheck(eventDto, basic);
+        DoctorWeanDto weanDto = (DoctorWeanDto) eventDto;
+        checkState(MoreObjects.firstNonNull(weanDto.getQualifiedCount(), 0) + MoreObjects.firstNonNull(weanDto.getNotQualifiedCount(), 0) <= weanDto.getFarrowingLiveCount(), "不合格数加合格数大于活仔数,猪号:" + weanDto.getPigCode());
+    }
+
+    @Override
     protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorWeanDto weanDto = (DoctorWeanDto) inputDto;
