@@ -4,13 +4,6 @@ import com.google.common.collect.Lists;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
-<<<<<<< HEAD
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.handler.DoctorEntryHandler;
-import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
-import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
-=======
->>>>>>> master
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgFarmEventHandler;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgLocationEventHandler;
@@ -50,23 +43,12 @@ import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-<<<<<<< HEAD
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-=======
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
->>>>>>> master
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-<<<<<<< HEAD
-=======
 import org.springframework.context.annotation.Profile;
-
-import java.util.concurrent.Executors;
->>>>>>> master
 
 /**
  * Desc: 工作基础测试类配置类
@@ -163,22 +145,20 @@ public class ServiceConfiguration {
     /**
      * 对应handler chain
      */
-<<<<<<< HEAD
-    @Bean
-    public DoctorEventHandlerChain doctorEventHandlerChain(
-            DoctorSemenHandler doctorSemenHandler,DoctorEntryHandler doctorEntryHandler,
-            DoctorChgFarmHandler doctorChgFarmHandler, DoctorChgLocationHandler doctorChgLocationHandler,
-            DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
-            DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
-        DoctorEventHandlerChain chain = new DoctorEventHandlerChain();
-        chain.setDoctorEventCreateHandlers(Lists.newArrayList(
-                doctorSemenHandler,doctorEntryHandler,
-                doctorChgFarmHandler, doctorChgLocationHandler,
-                doctorConditionHandler, doctorDiseaseHandler,
-                doctorRemovalHandler, doctorVaccinationHandler));
-        return chain;
-    }
-=======
+//    @Bean
+//    public DoctorEventHandlerChain doctorEventHandlerChain(
+//            DoctorSemenHandler doctorSemenHandler, DoctorEntryHandler doctorEntryHandler,
+//            DoctorChgFarmHandler doctorChgFarmHandler, DoctorChgLocationHandler doctorChgLocationHandler,
+//            DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
+//            DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
+//        DoctorEventHandlerChain chain = new DoctorEventHandlerChain();
+//        chain.setDoctorEventCreateHandlers(Lists.newArrayList(
+//                doctorSemenHandler,doctorEntryHandler,
+//                doctorChgFarmHandler, doctorChgLocationHandler,
+//                doctorConditionHandler, doctorDiseaseHandler,
+//                doctorRemovalHandler, doctorVaccinationHandler));
+//        return chain;
+//    }
 //    @Bean
 //    public DoctorPigEventHandlers doctorEventHandlerChain(
 //            DoctorSemenHandler doctorSemenHandler,DoctorEntryHandler doctorEntryHandler,
@@ -194,31 +174,22 @@ public class ServiceConfiguration {
 //        chain.setEventHandlerMap(Lists.newArrayList(list));
 //        return chain;
 //    }
->>>>>>> master
 
-    @Configuration
-<<<<<<< HEAD
-    public static class ZookeeperConfiguration{
-=======
-    @ConditionalOnBean(ZKClientFactory.class)
-    @Profile("zookeeper")
-    public static class ZookeeperConfiguration {
->>>>>>> master
+        @ConditionalOnBean(ZKClientFactory.class)
+        @Profile("zookeeper")
+        public static class ZookeeperConfiguration {
 
-        @Bean
-        public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception {
-            return new Subscriber(zkClientFactory, zkTopic);
+            @Bean
+            public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
+                                                @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception {
+                return new Subscriber(zkClientFactory, zkTopic);
+            }
+
+            @Bean
+            public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
+                                                @Value("${zookeeper.zkTopic}}") String zkTopic) throws Exception {
+                return new Publisher(zkClientFactory, zkTopic);
+            }
         }
 
-        @Bean
-        public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
-<<<<<<< HEAD
-                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
-=======
-                                            @Value("${zookeeper.zkTopic}}") String zkTopic) throws Exception {
->>>>>>> master
-            return new Publisher(zkClientFactory, zkTopic);
-        }
-    }
 }
