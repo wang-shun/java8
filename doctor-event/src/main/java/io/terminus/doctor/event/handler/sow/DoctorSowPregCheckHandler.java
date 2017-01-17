@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
@@ -138,6 +139,12 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         } else if (Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
             // 阳性
             doctorPigTrack.setStatus(PigStatus.Pregnancy.getKey());
+
+            // 阳性在产房，设置为待分娩
+            if (Objects.equals(doctorPigTrack.getCurrentBarnType(), PigType.DELIVER_SOW.getValue())) {
+                doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
+            }
+
         } else {
             // 其余默认 没有怀孕
             doctorPigTrack.setStatus(PigStatus.KongHuai.getKey());
@@ -153,10 +160,10 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
             return;
         }
 
-        //阳性只能到空怀状态
-        if (Objects.equals(pigStatus, PigStatus.Pregnancy.getKey())) {
+        //阳性(待分娩)只能到空怀状态
+        if (Objects.equals(pigStatus, PigStatus.Pregnancy.getKey()) || Objects.equals(pigStatus, PigStatus.Farrow.getKey())) {
             if (!PregCheckResult.KONGHUAI_RESULTS.contains(checkResult)) {
-                throw new ServiceException("妊娠检查结果错误,猪号:" + pigCode);
+                throw new ServiceException("检查结果阳性只能到空怀，猪号:" + pigCode);
             }
             return;
         }
@@ -164,15 +171,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         //空怀或流程只能到阳性状态
         if (Objects.equals(pigStatus, PigStatus.KongHuai.getKey())) {
             if (!Objects.equals(checkResult, PregCheckResult.YANG.getKey())) {
-                throw new ServiceException("妊娠检查结果错误,猪号:" + pigCode);
-            }
-            return;
-        }
-
-        //返情只能到阳性状态(以后全是空怀了)
-        if (Objects.equals(pigStatus, PigStatus.FanQing.getKey())) {
-            if (!Objects.equals(checkResult, PregCheckResult.YANG.getKey())) {
-                throw new ServiceException("妊娠检查结果错误,猪号:" + pigCode);
+                throw new ServiceException("检查结果空怀只能到阳性, 猪号:" + pigCode);
             }
             return;
         }

@@ -24,8 +24,7 @@ public enum PigStatus {
     KongHuai(5,"空怀","空怀"),
     Farrow(7,"待分娩","待分娩"),
     FEED(8,"哺乳","哺乳"),
-    Wean(9,"断奶","断奶"),
-    FanQing(10,"返情","返情");
+    Wean(9,"断奶","断奶");
 
     @Getter
     private Integer key;
