@@ -124,6 +124,17 @@ public class DoctorPigs {
     }
 
     /**
+     * 生成窝号
+     */
+    @RequestMapping(value = "/generate/nest", method = RequestMethod.GET)
+    @ResponseBody
+    public String generestNest(@RequestParam("farmId") Long farmId,
+                               @RequestParam(value = "eventAt", required = false) String eventAt,
+                               @RequestParam(value = "size", required = false) Integer size) {
+        return RespHelper.or500(doctorPigReadService.genNest(farmId, eventAt, size));
+    }
+
+    /**
      * pig id 获取 pig track 信息内容
      * @param pigId
      * @return

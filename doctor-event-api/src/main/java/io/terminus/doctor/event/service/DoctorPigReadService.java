@@ -87,6 +87,13 @@ public interface DoctorPigReadService {
                                          @NotNull(message = "input.farmId.empty") Long farmId);
 
     /**
+     * 生成对应的窝号 年+月+胎次
+     */
+    Response<String> genNest(@NotNull(message = "farmId.not.null") Long farmId,
+                             @Nullable String eventAt,
+                             @Nullable Integer size);
+
+    /**
      * 获取猪舍pig 信息内容
      * @param barnId
      * @return
