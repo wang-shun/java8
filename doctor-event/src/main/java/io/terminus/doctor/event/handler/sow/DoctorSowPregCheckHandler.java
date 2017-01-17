@@ -160,10 +160,10 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
             return;
         }
 
-        //阳性只能到空怀状态
-        if (Objects.equals(pigStatus, PigStatus.Pregnancy.getKey())) {
+        //阳性(待分娩)只能到空怀状态
+        if (Objects.equals(pigStatus, PigStatus.Pregnancy.getKey()) || Objects.equals(pigStatus, PigStatus.Farrow.getKey())) {
             if (!PregCheckResult.KONGHUAI_RESULTS.contains(checkResult)) {
-                throw new ServiceException("妊娠检查结果错误,猪号:" + pigCode);
+                throw new ServiceException("检查结果阳性只能到空怀，猪号:" + pigCode);
             }
             return;
         }
@@ -171,7 +171,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         //空怀或流程只能到阳性状态
         if (Objects.equals(pigStatus, PigStatus.KongHuai.getKey())) {
             if (!Objects.equals(checkResult, PregCheckResult.YANG.getKey())) {
-                throw new ServiceException("妊娠检查结果错误,猪号:" + pigCode);
+                throw new ServiceException("检查结果空怀只能到阳性, 猪号:" + pigCode);
             }
             return;
         }
