@@ -382,6 +382,7 @@ public class DoctorImportDataService {
         String city = ImportExcelUtils.getStringOrThrow(row1, 6);
         String district = ImportExcelUtils.getStringOrThrow(row1, 7);
         String detail = ImportExcelUtils.getStringOrThrow(row1, 8);
+        String companyMobile = ImportExcelUtils.getString(row1, 9); //集团账号手机号
 
         // 公司
         DoctorOrg org = doctorOrgDao.findByName(orgName);
@@ -456,6 +457,9 @@ public class DoctorImportDataService {
         //admin的数据权限
         createOrUpdateAdminPermission();
 
+        //集团账号的数据权限
+        createOrUpdateMultiPermission(companyMobile, org.getId(), farm.getId());
+
         if(doctorStaffDao.findByUserId(userId) == null){
             // 主账号的staff
             this.createStaff(user, org, DoctorStaff.Sex.MALE);
@@ -503,6 +507,26 @@ public class DoctorImportDataService {
             permission.setFarmIds(farmIds);
             doctorUserDataPermissionDao.update(permission);
         }
+    }
+
+    //集团账号数据权限
+    private void createOrUpdateMultiPermission(String mobile, Long orgId, Long farmId) {
+        if (isEmpty(mobile)) {
+            return;
+        }
+        User user = userDaoExt.findByMobile(mobile);
+        if (user == null) {
+            log.error("createOrUpdateMultiPermission error, mobile({}) not found", mobile);
+            throw new JsonResponseException("集团账号手机号(" + mobile + ")未找到，请检查");
+        }
+        DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(user.getId());
+        if (permission == null) {
+            log.error("createOrUpdateMultiPermission error, data permission not found, user:{}", user);
+            throw new JsonResponseException("集团账号手机号(" + mobile + ")没有关联猪场，请检查");
+        }
+        permission.setOrgIds(permission.getOrgIds() + "," + orgId);
+        permission.setFarmIds(permission.getFarmIds() + "," + farmId);
+        doctorUserDataPermissionDao.update(permission);
     }
 
 
