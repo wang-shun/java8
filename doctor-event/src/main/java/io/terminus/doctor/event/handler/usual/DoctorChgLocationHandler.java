@@ -17,6 +17,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
+import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -30,10 +31,12 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.doctor.common.enums.PigType.*;
+import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
+import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
 
 /**
  * Created by yaoqijun.
@@ -85,7 +88,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         //校验猪舍类型是否相同, 只有同类型才可以普通转舍
         DoctorBarn fromBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
-        checkState(checkBarnTypeEqual(fromBarn, toBarn, doctorPigTrack.getStatus()), "猪舍类型不可转,猪号:" + chgLocationDto.getPigCode());
+        checkState(checkBarnTypeEqual(fromBarn.getPigType(), doctorPigTrack.getStatus(), toBarn.getPigType()), "猪舍类型不可转,猪号:" + chgLocationDto.getPigCode());
         if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
             doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
         } else if (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
@@ -167,18 +170,15 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
     /**
      * 校验是否可以转舍
-     * @param fromBarn 源舍
-     * @param toBarn 转入舍
+     * @param fromPigType 源舍
+     * @param toPigType 转入舍
      * @param pigStatus 状态
      * @return 是否准许转舍
      */
-    private Boolean checkBarnTypeEqual(DoctorBarn fromBarn, DoctorBarn toBarn, Integer pigStatus) {
-        if (fromBarn == null || toBarn == null) {
-            return false;
-        }
-        return (Objects.equals(fromBarn.getPigType(), toBarn.getPigType())
-                || (MATING_TYPES.contains(fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType()))
-                || (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_FARROW_TYPES.contains(toBarn.getPigType())))
-                || Objects.equals(pigStatus, PigStatus.Pregnancy.getKey()) && Objects.equals(fromBarn.getPigType(), PigType.PREG_SOW.getValue()) && MATING_FARROW_TYPES.contains(toBarn.getPigType());
+    private Boolean checkBarnTypeEqual(Integer fromPigType, Integer pigStatus, Integer toPigType) {
+        List<Integer> allows = DoctorEventSelector.selectBarn(PigStatus.from(pigStatus), PigType.from(fromPigType)).stream()
+                .map(PigType::getValue)
+                .collect(Collectors.toList());
+        return allows.contains(toPigType);
     }
 }

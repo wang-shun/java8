@@ -20,7 +20,8 @@ import java.util.List;
  */
 public class DoctorEventSelector {
 
-    private static final Table<PigStatus, PigType, List<PigEvent>> pigTable = configuration();
+    private static final Table<PigStatus, PigType, List<PigEvent>> pigTable = configEventTable();
+    private static final Table<PigStatus, PigType, List<PigType>> barnTable = configBarnTable();
 
     /**
      * 根据猪当前状态和所在猪舍，判断可以执行的事件(状态转换事件)
@@ -29,17 +30,32 @@ public class DoctorEventSelector {
      * @return  猪事件
      */
     public static List<PigEvent> selectPigEvent(PigStatus pigStatus, PigType pigType) {
+        checkStatusAndType(pigStatus, pigType);
+        return MoreObjects.firstNonNull(pigTable.get(pigStatus, pigType), Collections.emptyList());
+    }
+
+    /**
+     * 根据猪当前状态和所在猪舍，判断可以转的猪舍
+     * @param pigStatus   状态
+     * @param pigType     猪类型
+     * @return 猪舍类型
+     */
+    public static List<PigType> selectBarn(PigStatus pigStatus, PigType pigType) {
+        checkStatusAndType(pigStatus, pigType);
+        return MoreObjects.firstNonNull(barnTable.get(pigStatus, pigType), Collections.emptyList());
+    }
+
+    private static void checkStatusAndType(PigStatus pigStatus, PigType pigType) {
         if (pigType == null) {
             throw new ServiceException("pigType.not.null");
         }
         if (pigStatus == null) {
             throw new ServiceException("pigStatus.not.null");
         }
-        return MoreObjects.firstNonNull(pigTable.get(pigStatus, pigType), Collections.emptyList());
     }
 
     //配置可以执行的事件
-    private static Table<PigStatus, PigType, List<PigEvent>> configuration() {
+    private static Table<PigStatus, PigType, List<PigEvent>> configEventTable() {
         Table<PigStatus, PigType, List<PigEvent>> pigTable = HashBasedTable.create();
         // (已进场，配怀舍) => 配种
         pigTable.put(PigStatus.Entry, PigType.MATE_SOW, Lists.newArrayList(PigEvent.MATING));
@@ -74,5 +90,38 @@ public class DoctorEventSelector {
         pigTable.put(PigStatus.Wean, PigType.PREG_SOW, Lists.newArrayList(PigEvent.MATING));
 
         return pigTable;
+    }
+
+    //配置可以转的猪舍
+    private static Table<PigStatus, PigType, List<PigType>> configBarnTable() {
+        Table<PigStatus, PigType, List<PigType>> map = HashBasedTable.create();
+
+        //配种舍母猪可以转配怀舍
+        map.put(PigStatus.Entry, PigType.MATE_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW));
+        map.put(PigStatus.Mate, PigType.MATE_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW));
+        map.put(PigStatus.KongHuai, PigType.MATE_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW));
+        map.put(PigStatus.Pregnancy, PigType.MATE_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW));
+        map.put(PigStatus.Wean, PigType.MATE_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW));
+
+        //妊娠舍可以转配怀舍
+        map.put(PigStatus.Entry, PigType.PREG_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW));
+        map.put(PigStatus.Mate, PigType.PREG_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW));
+        map.put(PigStatus.KongHuai, PigType.PREG_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW));
+        map.put(PigStatus.Wean, PigType.PREG_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW));
+
+        //阳性妊娠母猪可以转配怀产房
+        map.put(PigStatus.Pregnancy, PigType.PREG_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW, PigType.DELIVER_SOW));
+
+        //待分娩和哺乳只能转产房
+        map.put(PigStatus.Farrow, PigType.DELIVER_SOW, Lists.newArrayList(PigType.DELIVER_SOW));
+        map.put(PigStatus.FEED, PigType.DELIVER_SOW, Lists.newArrayList(PigType.DELIVER_SOW));
+
+        //空怀和断奶在产房可已转配怀和产房
+        map.put(PigStatus.KongHuai, PigType.DELIVER_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW, PigType.DELIVER_SOW));
+        map.put(PigStatus.Wean, PigType.DELIVER_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW, PigType.DELIVER_SOW));
+
+        //公猪可以转公猪舍
+        map.put(PigStatus.BOAR_ENTRY, PigType.BOAR, Lists.newArrayList(PigType.BOAR));
+        return map;
     }
 }

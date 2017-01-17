@@ -18,7 +18,7 @@ import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.handler.DoctorBarnSelector;
+import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -510,9 +510,12 @@ public class DoctorBarns {
      */
     @RequestMapping(value = "/selectBarns", method = RequestMethod.GET)
     public List<DoctorBarn> selectChgLocationBarn(@RequestParam Long pigId){
-        DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
-        List<Integer> barnType = DoctorBarnSelector.select(PigStatus.from(doctorPigTrack.getStatus()), PigType.from(doctorPigTrack.getCurrentBarnType()))
+        DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
+        if (pigTrack == null) {
+            return Collections.emptyList();
+        }
+        List<Integer> barnType = DoctorEventSelector.selectBarn(PigStatus.from(pigTrack.getStatus()), PigType.from(pigTrack.getCurrentBarnType()))
                 .stream().map(PigType::getValue).collect(Collectors.toList());
-        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(doctorPigTrack.getFarmId(), barnType, null, null, null));
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(pigTrack.getFarmId(), barnType, null, null, null));
     }
 }
