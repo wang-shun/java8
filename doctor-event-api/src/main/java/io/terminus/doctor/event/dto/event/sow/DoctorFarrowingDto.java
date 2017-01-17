@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.dto.event.sow;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,7 +24,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorFarrowingDto extends AbstractPigEventInputDto implements Serializable{
+public class DoctorFarrowingDto extends BasePigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 7823378636552520021L;
 
@@ -32,9 +32,11 @@ public class DoctorFarrowingDto extends AbstractPigEventInputDto implements Seri
 
     private String nestCode; // 窝号
 
-    private Long barnId;   // 分娩猪舍
-
-    private String barnName;  //分娩猪舍名称
+//    private String pigCode;
+//
+//    private Long barnId;   // 分娩猪舍
+//
+//    private String barnName;  //分娩猪舍名称
 
     private String bedCode; // 床号
 

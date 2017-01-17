@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTypeStatistic;
 
 import javax.validation.constraints.NotNull;
@@ -49,7 +50,7 @@ public interface DoctorPigTypeStatisticWriteService {
      * @param orgId  公司id
      * @param farmId 猪场id
      * @param pigType 猪类
-     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     * @see DoctorPig.PigSex
      * @return 是否成功
      */
     Response<Boolean> statisticPig(@NotNull(message = "org.id.not.null") Long orgId,

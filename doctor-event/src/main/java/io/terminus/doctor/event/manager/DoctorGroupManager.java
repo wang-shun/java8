@@ -1,21 +1,28 @@
 package io.terminus.doctor.event.manager;
 
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInputInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.event.ListenedBarnEvent;
+import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -28,7 +35,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc:
@@ -48,6 +58,7 @@ public class DoctorGroupManager {
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupReadService doctorGroupReadService;
     private final CoreEventDispatcher coreEventDispatcher;
+    private final DoctorBarnDao doctorBarnDao;
 
     @Autowired
     public DoctorGroupManager(DoctorGroupDao doctorGroupDao,
@@ -55,13 +66,15 @@ public class DoctorGroupManager {
                               DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                               DoctorGroupTrackDao doctorGroupTrackDao,
                               DoctorGroupReadService doctorGroupReadService,
-                              CoreEventDispatcher coreEventDispatcher) {
+                              CoreEventDispatcher coreEventDispatcher,
+                              DoctorBarnDao doctorBarnDao) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupReadService = doctorGroupReadService;
         this.coreEventDispatcher = coreEventDispatcher;
+        this.doctorBarnDao = doctorBarnDao;
     }
 
     /**
@@ -71,7 +84,10 @@ public class DoctorGroupManager {
      * @return 猪群id
      */
     @Transactional
-    public Long createNewGroup(DoctorGroup group, DoctorNewGroupInput newGroupInput) {
+    public Long createNewGroup(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorNewGroupInput newGroupInput) {
+        newGroupInput.setEventType(GroupEventType.NEW.getValue());
+        checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId());
+
         //0.校验猪群号是否重复
         checkGroupCodeExist(newGroupInput.getFarmId(), newGroupInput.getGroupCode());
 
@@ -96,7 +112,7 @@ public class DoctorGroupManager {
         int age = DateUtil.getDeltaDaysAbs(groupTrack.getBirthDate(), new Date());
         groupTrack.setAvgDayAge(age + 1);             //日龄
 
-        groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
+        groupTrack.setSex(newGroupInput.getSex());
         groupTrack.setWeanWeight(0D);
         groupTrack.setBirthWeight(0D);
         groupTrack.setNest(0);
@@ -122,9 +138,42 @@ public class DoctorGroupManager {
                 .build()));
         doctorGroupSnapshotDao.create(groupSnapshot);
 
+        DoctorEventInfo eventInfo = DoctorEventInfo.builder()
+                .orgId(group.getOrgId())
+                .farmId(group.getFarmId())
+                .eventId(groupEvent.getId())
+                .eventType(groupEvent.getType())
+                .businessId(group.getId())
+                .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
+                .code(group.getGroupCode())
+                .build();
+        eventInfoList.add(eventInfo);
         //发布统计事件
-        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), groupEvent.getId());
+        //publistGroupAndBarn(groupEvent);
         return groupId;
+    }
+
+    /**
+     * 批量新建猪群
+     * @param inputInfoList 批量事件信息
+     * @return
+     */
+    @Transactional
+    public List<DoctorEventInfo> batchNewGroupEventHandle(List<DoctorNewGroupInputInfo> inputInfoList) {
+        List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
+        inputInfoList.forEach(newGroupInputInfo -> createNewGroup(eventInfoList, newGroupInputInfo.getGroup(), newGroupInputInfo.getNewGroupInput()));
+        return eventInfoList;
+    }
+
+    //产房只能有1个猪群
+    private void checkFarrowGroupUnique(Integer pigType, Long barnId) {
+        if (!Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) {
+            return;
+        }
+        List<DoctorGroup> groups = RespHelper.orServEx(doctorGroupReadService.findGroupByCurrentBarnId(barnId));
+        if (notEmpty(groups)) {
+            throw new ServiceException("farrow.group.exist");
+        }
     }
 
     private DoctorGroup getNewGroup(DoctorGroup group, DoctorNewGroupInput newGroupInput) {
@@ -134,8 +183,16 @@ public class DoctorGroupManager {
         group.setCurrentBarnId(newGroupInput.getBarnId());
         group.setCurrentBarnName(newGroupInput.getBarnName());
 
+        DoctorBarn barn = doctorBarnDao.findById(group.getInitBarnId());
+        if (barn == null) {
+            throw new ServiceException("barn.not.null");
+        }
+        group.setPigType(barn.getPigType());
+        group.setStaffId(barn.getStaffId());
+        group.setStaffName(barn.getStaffName());
+
         //建群时间与状态
-        group.setOpenAt(DateUtil.toDate(newGroupInput.getEventAt()));
+        group.setOpenAt(generateEventAt(DateUtil.toDate(newGroupInput.getEventAt())));
         group.setStatus(DoctorGroup.Status.CREATED.getValue());
         return group;
     }
@@ -183,9 +240,32 @@ public class DoctorGroupManager {
         }
     }
 
-    //发布猪群猪舍事件
-    private void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
-        coreEventDispatcher.publish(ListenedGroupEvent.builder().doctorGroupEventId(eventId).farmId(farmId).orgId(orgId).groupId(groupId).build());
-        coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barnId).build());
+    //发布猪群事件
+    private void publistGroupAndBarn(DoctorGroupEvent event) {
+        DoctorGroupPublishDto publish = new DoctorGroupPublishDto();
+        publish.setEventAt(event.getEventAt());
+        publish.setEventId(event.getId());
+        publish.setGroupId(event.getGroupId());
+        publish.setPigType(event.getPigType());
+        coreEventDispatcher.publish(ListenedGroupEvent.builder()
+                .farmId(event.getFarmId())
+                .orgId(event.getOrgId())
+                .eventType(event.getType())
+                .groups(Lists.newArrayList(publish))
+                .build());
+    }
+
+    protected Date generateEventAt(Date eventAt){
+        if(eventAt != null){
+            Date now = new Date();
+            if(DateUtil.inSameDate(eventAt, now)){
+                // 如果处在今天, 则使用此刻瞬间
+                return now;
+            } else {
+                // 如果不在今天, 则将时间置为0, 只保留日期
+                return Dates.startOfDay(eventAt);
+            }
+        }
+        return null;
     }
 }

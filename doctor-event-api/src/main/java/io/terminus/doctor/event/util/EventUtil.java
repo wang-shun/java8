@@ -84,4 +84,8 @@ public class EventUtil {
     public static double get2(double number) {
         return new BigDecimal(number).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
+
+    public static double get4(double number) {
+        return new BigDecimal(number).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
 }

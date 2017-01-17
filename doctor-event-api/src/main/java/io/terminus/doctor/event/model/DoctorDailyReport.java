@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -90,6 +91,8 @@ public class DoctorDailyReport implements Serializable {
         if (isEmpty(this.data)) {
             return null;
         }
+        // TODO: 2017/1/14 暂时先这样，以后统一掉
+        JSON_MAPPER.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
         return JSON_MAPPER.fromJson(this.data, JSON_MAPPER.createCollectionType(DoctorDailyReportDto.class));
     }
 }

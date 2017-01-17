@@ -10,7 +10,6 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -118,7 +117,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                         break;
                     // 种公猪
                     case BOAR:
-                        checkReservePig(warn, ruleRole, rule, subUsers, DoctorPig.PIG_TYPE.BOAR.getKey(), barnTypeMap);
+                        checkReservePig(warn, ruleRole, rule, subUsers, DoctorPig.PigSex.BOAR.getKey(), barnTypeMap);
                         break;
                     // 保育猪
                     case NURSERY_PIGLET:
@@ -143,7 +142,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      * 固定日龄, 固定日期, 固定体重, 转舍, 配种
      */
     private void checkMateSow(DoctorVaccinationPigWarn warn, DoctorMessageRuleRole ruleRole, Rule rule, List<SubUser> subUsers, Map<Long, Integer> barnTypeMap) {
-        Map<Integer, List<DoctorPigInfoDto>> sowPigInfoDtos = getPigInfoDtos(ruleRole, DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(PigType.MATE_SOW.getValue()), barnTypeMap);
+        Map<Integer, List<DoctorPigInfoDto>> sowPigInfoDtos = getPigInfoDtos(ruleRole, DoctorPig.PigSex.SOW.getKey(), Lists.newArrayList(PigType.MATE_SOW.getValue()), barnTypeMap);
         Iterator<List<DoctorPigInfoDto>> iterator = sowPigInfoDtos.values().iterator();
         while (iterator.hasNext()) {
             iterator.next().forEach(sowPig -> {
@@ -185,7 +184,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      * 固定日龄, 固定日期, 固定体重, 转舍, 妊娠检查
      */
     private void checkPregSow(DoctorVaccinationPigWarn warn, DoctorMessageRuleRole ruleRole, Rule rule, List<SubUser> subUsers, Map<Long, Integer> barnTypeMap) {
-        Map<Integer, List<DoctorPigInfoDto>> sowPigInfoDtos = getPigInfoDtos(ruleRole, DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(PigType.PREG_SOW.getValue()), barnTypeMap);
+        Map<Integer, List<DoctorPigInfoDto>> sowPigInfoDtos = getPigInfoDtos(ruleRole, DoctorPig.PigSex.SOW.getKey(), Lists.newArrayList(PigType.PREG_SOW.getValue()), barnTypeMap);
         Iterator<List<DoctorPigInfoDto>> iterator = sowPigInfoDtos.values().iterator();
         while (iterator.hasNext()) {
             iterator.next().forEach(sowPig -> {
@@ -228,7 +227,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      * 固定日龄, 固定日期, 固定体重, 转舍, 分娩
      */
     private void checkDeliverSow(DoctorVaccinationPigWarn warn, DoctorMessageRuleRole ruleRole, Rule rule, List<SubUser> subUsers, Map<Long, Integer> barnTypeMap) {
-        Map<Integer, List<DoctorPigInfoDto>> sowPigInfoDtos = getPigInfoDtos(ruleRole, DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(PigType.FATTEN_PIG.getValue()), barnTypeMap);
+        Map<Integer, List<DoctorPigInfoDto>> sowPigInfoDtos = getPigInfoDtos(ruleRole, DoctorPig.PigSex.SOW.getKey(), Lists.newArrayList(PigType.FATTEN_PIG.getValue()), barnTypeMap);
         Iterator<List<DoctorPigInfoDto>> iterator = sowPigInfoDtos.values().iterator();
         while (iterator.hasNext()) {
             iterator.next().forEach(sowPig -> {
@@ -437,12 +436,11 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      * @param ruleRole
      * @param pigType  猪性别
      * @param types    猪类型
-     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     * @see DoctorPig.PigSex
      */
     private Map<Integer, List<DoctorPigInfoDto>> getPigInfoDtos(DoctorMessageRuleRole ruleRole, Integer pigType, List<Integer> types, Map<Long, Integer> barnTypeMap) {
         Map<Integer, List<DoctorPigInfoDto>> sowPigInfoDtos = Maps.newHashMap();
-        Long total = RespHelper.orServEx(doctorPigReadService.queryPigCount(
-                DataRange.FARM.getKey(), ruleRole.getFarmId(), pigType));
+        Long total = RespHelper.orServEx(doctorPigReadService.getPigCount(ruleRole.getFarmId(), DoctorPig.PigSex.from(pigType)));
         // 计算size, 和page
         Long page = getPageSize(total, 100L);
         DoctorPig pig = DoctorPig.builder()
@@ -485,7 +483,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private DateTime getVaccinationDate(DoctorPigInfoDto pigDto) {
         try {
-            DoctorPigEvent event = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.VACCINATION.getKey());
+            DoctorPigEvent event = getPigEventByEventType(pigDto.getPigId(), PigEvent.VACCINATION.getKey());
             if (event != null){
                 return new DateTime(event.getEventAt());
             }
@@ -533,7 +531,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private DateTime getCheckWeightDate(DoctorPigInfoDto pigDto) {
         try {
-            DoctorPigEvent event = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.CONDITION.getKey());
+            DoctorPigEvent event = getPigEventByEventType(pigDto.getPigId(), PigEvent.CONDITION.getKey());
             if (event != null){
                 return new DateTime(event.getEventAt());
             }
@@ -548,7 +546,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private DateTime getChangeLocationDate(DoctorPigInfoDto pigDto) {
         try {
-            DoctorPigEvent event = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.CHG_LOCATION.getKey());
+            DoctorPigEvent event = getPigEventByEventType(pigDto.getPigId(), PigEvent.CHG_LOCATION.getKey());
             if (event != null){
                 return new DateTime(event.getEventAt());
             }

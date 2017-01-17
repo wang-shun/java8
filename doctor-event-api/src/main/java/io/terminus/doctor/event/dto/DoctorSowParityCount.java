@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -28,7 +29,7 @@ public class DoctorSowParityCount implements Serializable{
 
     private static final long serialVersionUID = -8894596972819863250L;
 
-    private Integer parity;     // 当前胎次信息
+    private int parity;     // 当前胎次信息
 
     private Date farrowingDate; // 母猪分娩时间
 
@@ -36,21 +37,21 @@ public class DoctorSowParityCount implements Serializable{
 
     private String matingStaff; //配种人员
 
-    private Integer pigLetCount;    //产仔数量
+    private int pigLetCount;    //产仔数量
 
-    private Double avgBirthWeight;  //出生均重
+    private double avgBirthWeight;  //出生均重
 
-    private Integer healthCount;    //健崽数量
+    private int healthCount;    //健崽数量
 
-    private Integer weakCount;  // 弱仔数量
+    private int weakCount;  // 弱仔数量
 
-    private Integer deadCount;  //死亡数量
+    private int deadCount;  //死亡数量
 
-    private Integer mujiCount;  //畸形数量
+    private int mujiCount;  //畸形数量
 
-    private Integer weanCount;  // 断奶数量
+    private int weanCount;  // 断奶数量
 
-    private Double weanAvgWeight; //断奶均重
+    private double weanAvgWeight; //断奶均重
 
     private String boarCode;
 
@@ -75,22 +76,22 @@ public class DoctorSowParityCount implements Serializable{
         if(eventTypeMap.containsKey(PigEvent.FARROWING.getKey())){
             DoctorPigEvent event = eventTypeMap.get(PigEvent.FARROWING.getKey());
             doctorSowParityCount.setFarrowingDate(event.getFarrowingDate());
-            doctorSowParityCount.setPigLetCount(event.getLiveCount());
+            doctorSowParityCount.setPigLetCount(MoreObjects.firstNonNull(event.getLiveCount(), 0));
             if (event.getFarrowWeight() != null && event.getLiveCount() != null && event.getLiveCount() != 0) {
                 doctorSowParityCount.setAvgBirthWeight(Double.valueOf(String.format("%.2f", event.getFarrowWeight() / event.getLiveCount())));
             } else {
                 doctorSowParityCount.setAvgBirthWeight(0d);
             }
-            doctorSowParityCount.setHealthCount(event.getHealthCount());
-            doctorSowParityCount.setWeakCount(event.getWeakCount());
-            doctorSowParityCount.setDeadCount(event.getDeadCount());
-            doctorSowParityCount.setMujiCount((event.getMnyCount() == null ? 0 : event.getMnyCount()) + (event.getJxCount() == null ? 0 : event.getJxCount()));
+            doctorSowParityCount.setHealthCount(MoreObjects.firstNonNull(event.getHealthCount(), 0));
+            doctorSowParityCount.setWeakCount(MoreObjects.firstNonNull(event.getWeakCount(), 0));
+            doctorSowParityCount.setDeadCount(MoreObjects.firstNonNull(event.getDeadCount(), 0));
+            doctorSowParityCount.setMujiCount(MoreObjects.firstNonNull(event.getMnyCount(), 0) + MoreObjects.firstNonNull(event.getJxCount(), 0));
         }
 
         if(eventTypeMap.containsKey(PigEvent.WEAN.getKey())){
             DoctorPigEvent event = eventTypeMap.get(PigEvent.WEAN.getKey());
-            doctorSowParityCount.setWeanCount(event.getWeanCount());
-            doctorSowParityCount.setWeanAvgWeight(event.getWeanAvgWeight());
+            doctorSowParityCount.setWeanCount(MoreObjects.firstNonNull(event.getWeanCount(), 0));
+            doctorSowParityCount.setWeanAvgWeight(MoreObjects.firstNonNull(event.getWeanAvgWeight(), 0D));
         }
 
         Optional<DoctorPigEvent> optional = doctorPigEvents.stream()
@@ -102,5 +103,4 @@ public class DoctorSowParityCount implements Serializable{
         }
         return doctorSowParityCount;
     }
-
 }

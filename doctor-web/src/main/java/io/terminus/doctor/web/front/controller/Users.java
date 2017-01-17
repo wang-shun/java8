@@ -27,6 +27,7 @@ import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.DoctorUserRoleLoader;
 import io.terminus.doctor.web.core.Constants;
+import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.login.DoctorCommonSessionBean;
@@ -296,6 +297,28 @@ public class Users {
         return doctorCommonSessionBean.changePassword(oldPassword, newPassword, sessionId);
     }
 
+    /**
+     * 忘记密码
+     *
+     * @param mobile      手机号
+     * @param code        验证码
+     * @param newPassword 新密码
+     * @param request     请求
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/forgetPassword", method = RequestMethod.POST)
+    public Boolean forgetPassword(@RequestParam("mobile") String mobile,
+                                  @RequestParam("code") String code,
+                                  @RequestParam("newPassword") String newPassword,
+                                  HttpServletRequest request) {
+        Cookie cookie=WebUtil.findCookie(request,"msid");
+        if (cookie==null){
+            throw new JsonResponseException("miss.msid");
+        }
+        Object sessionId = cookie.getValue();
+        return  doctorCommonSessionBean.forgetPassword(mobile, code, newPassword, String.valueOf(sessionId));
+    }
+
     @RequestMapping(value = "changeMobile", method = RequestMethod.POST)
     public Boolean changeMobile(@RequestParam("mobile") String mobile){
         BaseUser baseUser = UserUtil.getCurrentUser();
@@ -319,8 +342,8 @@ public class Users {
     }
 
     private void checkMobileExist(String mobile) {
-        User exist = RespHelper.or500(doctorUserReadService.findBy(mobile, LoginType.MOBILE));
-        if (exist != null) {
+        Response<User> exist = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
+        if (exist.isSuccess()) {
             log.error("change mobile exist, loginerId:{} mobile:{}", UserUtil.getUserId(), mobile);
             throw new JsonResponseException("mobile.already.exist");
         }

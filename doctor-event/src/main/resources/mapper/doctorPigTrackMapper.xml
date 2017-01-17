@@ -16,6 +16,7 @@
         <result column="is_removal" property="isRemoval"/>
         <result column="current_barn_id" property="currentBarnId"/>
         <result column="current_barn_name" property="currentBarnName"/>
+        <result column="current_barn_type" property="currentBarnType"/>
         <result column="weight" property="weight"/>
         <result column="group_id" property="groupId"/>
         <result column="farrow_qty" property="farrowQty"/>
@@ -57,6 +58,7 @@
         is_removal,
         current_barn_id,
         current_barn_name,
+        current_barn_type,
         weight,
         group_id,
         farrow_qty,
@@ -88,6 +90,7 @@
         #{isRemoval},
         #{currentBarnId},
         #{currentBarnName},
+        #{currentBarnType},
         #{weight},
         #{groupId},
         #{farrowQty},
@@ -119,6 +122,7 @@
         <if test="isRemoval == null"> AND `is_removal` = 0 </if>
         <if test="isRemoval != null"> AND `is_removal` = #{isRemoval}</if>
         <if test="currentBarnId != null" > AND `current_barn_id` = #{currentBarnId}</if>
+        <if test="currentBarnType != null" > AND `current_barn_type` = #{currentBarnType}</if>
         <if test="weight != null" > AND `weight` = #{weight}</if>
         <if test="relEventIds != null" > AND `rel_event_ids` = #{relEventIds}</if>
         <if test="currentParity != null" > AND `current_parity` = #{currentParity}</if>
@@ -144,6 +148,7 @@
             #{item.isRemoval},
             #{item.currentBarnId},
             #{item.currentBarnName},
+            #{item.currentBarnType},
             #{item.weight},
             #{item.groupId},
             #{item.farrowQty},
@@ -231,6 +236,7 @@
             <if test="isRemoval != null">is_removal = #{isRemoval},</if>
             <if test="currentBarnId != null">current_barn_id = #{currentBarnId},</if>
             <if test="currentBarnName != null">current_barn_name = #{currentBarnName},</if>
+            <if test="currentBarnType != null">current_barn_Type = #{currentBarnType},</if>
             <if test="weight != null">weight = #{weight},</if>
             <if test="groupId != null &amp;&amp; groupId != -1">group_id = #{groupId},</if>
             <if test="groupId == -1">group_id = NULL,</if>
@@ -310,5 +316,43 @@
     <select id="findFeedSowTrackByGroupId" parameterType="map" resultMap="DoctorPigTrackMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         WHERE group_id = #{groupId} AND `status` = #{status}
+    </select>
+
+    <select id="countByPigTypes" parameterType="map" resultType="long">
+        SELECT count(1)
+        FROM <include refid="tb"/>
+        WHERE `current_barn_id` IN
+        <foreach collection="barnIds" item="i" open="(" close=")" separator=",">
+            #{i}
+        </foreach>
+    </select>
+
+    <select id="suggestPigs" parameterType="io.terminus.doctor.event.dto.DoctorSuggestPigSearch" resultType="io.terminus.doctor.event.dto.DoctorSuggestPig">
+        SELECT p.id, p.pig_code AS pigCode
+        FROM doctor_pigs p, doctor_pig_tracks t
+        WHERE
+        p.id = t.pig_id
+        AND t.is_removal = 0
+        <if test="sex != null"> AND p.pig_type = #{sex}</if>
+        <if test="pigCode != null">AND p.pig_code LIKE concat('%', #{pigCode}, '%')</if>
+        <if test="farmId != null"> AND t.farm_id = #{farmId}</if>
+        <if test="status != null"> AND t.status = #{status}</if>
+        <if test="notStatus != null"> AND t.status != #{notStatus}</if>
+        <if test="notMatingCount != null"> AND t.current_mating_count != #{notMatingCount}</if>
+        <if test="statuses != null"> AND t.status IN
+            <foreach collection="statuses" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
+
+        <if test="barnTypes != null"> AND t.current_barn_type IN
+            <foreach collection="barnTypes" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
+        <if test="pigCode != null">
+            ORDER BY instr(pig_code, #{pigCode}) ASC, length(pig_code) ASC
+        </if>
+        limit 20;
     </select>
 </mapper>

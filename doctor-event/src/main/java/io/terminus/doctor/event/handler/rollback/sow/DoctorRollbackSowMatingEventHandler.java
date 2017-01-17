@@ -20,7 +20,7 @@ import java.util.Objects;
 public class DoctorRollbackSowMatingEventHandler extends DoctorAbstractRollbackPigEventHandler {
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        return Objects.equals(pigEvent.getType(), PigEvent.MATING.getKey()) && isLastEvent(pigEvent);
+        return Objects.equals(pigEvent.getType(), PigEvent.MATING.getKey());
     }
 
     @Override
@@ -40,6 +40,7 @@ public class DoctorRollbackSowMatingEventHandler extends DoctorAbstractRollbackP
                 .esPigId(pigEvent.getPigId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_PIG, RollbackType.DAILY_MATE))
                 .farmId(pigEvent.getFarmId())
+                .orgId(pigEvent.getOrgId())
                 .eventAt(pigEvent.getEventAt())
                 .build();
         return Lists.newArrayList(doctorRollbackDto);

@@ -10,7 +10,6 @@ import io.terminus.doctor.common.utils.Params;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -177,6 +176,11 @@ public class DoctorPigEvent implements Serializable {
      * 非生产天数 前面的总和
      */
     private Integer npd = 0;
+
+    /**
+     * 哺乳状态的母猪关联的猪群id
+     */
+    private Long groupId;
 
     /**
      * 分娩总重(kg)

@@ -4,11 +4,15 @@ import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
+import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -18,8 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 猪舍表读服务实现类
@@ -79,23 +83,12 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     }
 
     @Override
-    public Response<List<DoctorBarn>> findBarnsByEnums(Long farmId, Integer pigType, Integer canOpenGroup, Integer status) {
+    public Response<List<DoctorBarn>> findBarnsByEnums(Long farmId, List<Integer> pigTypes, Integer canOpenGroup, Integer status, List<Long> barnIds) {
         try {
-            return Response.ok(doctorBarnDao.findByEnums(farmId, pigType, canOpenGroup, status));
+            return Response.ok(doctorBarnDao.findByEnums(farmId, pigTypes, canOpenGroup, status, barnIds));
         } catch (Exception e) {
-            log.error("find barn by enums fail, farmId:{}, pigType:{}, canOpenGroup:{}, status:{}, cause:{}",
-                    farmId, pigType, canOpenGroup, status, Throwables.getStackTraceAsString(e));
-            return Response.fail("barn.find.fail");
-        }
-    }
-
-    @Override
-    public Response<List<DoctorBarn>> findBarnsByFarmIdAndPigTypes(Long farmId, List<Integer> pigTypes) {
-        try {
-            return Response.ok(doctorBarnDao.findByPigTypes(farmId, pigTypes));
-        } catch (Exception e) {
-            log.error("find barns by farm id and pig types failed, farmId:{}, pigTypes:{}, cause:{}",
-                    farmId, pigTypes, Throwables.getStackTraceAsString(e));
+            log.error("find barn by enums fail, farmId:{}, pigTypes:{}, canOpenGroup:{}, status:{}, barnIds:{}, cause:{}",
+                    farmId, pigTypes, canOpenGroup, status, barnIds, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.find.fail");
         }
     }
@@ -119,46 +112,6 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         } catch (Exception e) {
             log.error("count pig by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("count.pig.fail");
-        }
-    }
-
-    @Override
-    public Response<Integer> pigGroupCountByBarnId(@NotNull(message = "barnId.not.null") Long barnId) {
-        try{
-            DoctorBarn barn = doctorBarnDao.findById(barnId);
-
-            //统计猪群数量
-            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
-            searchDto.setFarmId(barn.getFarmId());
-            searchDto.setCurrentBarnId(barnId);
-            searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
-            List<DoctorGroupDetail> groupDetails = RespHelper.orServEx(doctorGroupReadService.findGroupDetail(searchDto));
-            Integer groupCount = groupDetails.stream().mapToInt(g -> g.getGroupTrack().getQuantity()).sum();
-            return Response.ok(groupCount);
-        }catch (Exception e){
-            log.error("pig group count by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
-            return Response.fail("pig.group.count.fail");
-        }
-    }
-
-    @Override
-    public Response<Integer> pigCountByBarnId(@NotNull(message = "barnId.not.null") Long barnId) {
-        try{
-            List<DoctorPigTrack> pigTracks = RespHelper.orServEx(doctorPigReadService.findActivePigTrackByCurrentBarnId(barnId));
-            return Response.ok(pigTracks.size());
-        }catch (Exception e){
-            log.error("pig count by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
-            return Response.fail("pig.count.fail");
-        }
-    }
-
-    @Override
-    public Response<DoctorBarn> findBarnByOutId(String outId) {
-        try {
-            return Response.ok(doctorBarnDao.findByOutId(outId));
-        } catch (Exception e) {
-            log.error("find barn by out id failed, outId:{}, cause:{}", outId, Throwables.getStackTraceAsString(e));
-            return Response.fail("barn.find.fail");
         }
     }
 
@@ -199,6 +152,30 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             log.error("fail to find available barns,current group id:{},farm id:{},cause:{}",
                     groupId, farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("find.available.barns.failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorBarnCountForPigTypeDto> countForTypes(Map<String, Object> criteria) {
+        try {
+            DoctorBarnCountForPigTypeDto dto = doctorBarnDao.countForTypes(criteria);
+            Long allCount = dto.getReserveCount() + dto.getBoarCount() + dto.getPregSowCount()
+                    + dto.getDeliverSowCount() + dto.getMateSowCount() + dto.getFattenPigCount() + dto.getNurseryPigletCount();
+            dto.setAllCount(allCount);
+            return Response.ok(dto);
+        } catch (Exception e) {
+            log.error("count.for.types.failed, cause by :{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("count for types failed");
+        }
+    }
+    @Override
+    public Response<Paging<DoctorBarn>> pagingBarn(DoctorBarnDto barnDto, Integer pageNo, Integer size) {
+        try {
+            PageInfo page = PageInfo.of(pageNo, size);
+            return Response.ok(doctorBarnDao.paging(page.getOffset(), page.getLimit(), barnDto));
+        } catch (Exception e) {
+            log.error("paging barn failed, barnDto:{}, pageNo:{}, size:{}, cause:{}", barnDto, pageNo, size, Throwables.getStackTraceAsString(e));
+            return Response.fail("barn.find.fail");
         }
     }
 }

@@ -3,7 +3,6 @@ package io.terminus.doctor.schedule;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
-import io.terminus.doctor.workflow.WorkFlowJobConfiguration;
 import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
 import io.terminus.zookeeper.ZKClientFactory;
@@ -30,8 +29,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableWebMvc
 @EnableAutoConfiguration
 @ComponentScan(value = {"io.terminus.doctor.schedule"})
-@Import({WorkFlowJobConfiguration.class,
-        DoctorCoreWebConfiguration.class,
+@Import({DoctorCoreWebConfiguration.class,
         MsgWebConfig.class,
         LuoSiMaoSmsServiceConfig.class,
         CommonEmailServiceConfig.class

@@ -3,12 +3,13 @@ package io.terminus.doctor.event.handler.group;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
@@ -18,12 +19,12 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -43,16 +44,17 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
     public DoctorTurnSeedGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                            DoctorGroupEventDao doctorGroupEventDao,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
-                                           DoctorBarnReadService doctorBarnReadService,
-                                           CoreEventDispatcher coreEventDispatcher,
+                                           DoctorBarnDao doctorBarnDao,
                                            DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
     
     @Override
-    protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.TURN_SEED.getValue());
+
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTurnSeedGroupInput turnSeed = (DoctorTurnSeedGroupInput) input;
         DoctorBarn toBarn = getBarnById(turnSeed.getToBarnId());
@@ -80,7 +82,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         turnSeed.setRelGroupEventId(event.getId());
 
         //获取本次转种猪的性别
-        DoctorPig.PIG_TYPE sex = getSex(toBarn.getPigType());
+        DoctorPig.PigSex sex = getSex(toBarn.getPigType());
 
         //3.更新猪群跟踪
         //数量 - 1
@@ -94,18 +96,18 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
         //5.判断猪群数量, 如果=0 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(groupTrack.getQuantity(), 0)) {
-            doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, turnSeed, event.getEventAt(), turnSeed.getFcrFeed());
+            doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, turnSeed, event.getEventAt(), turnSeed.getFcrFeed());
 
             DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
             turnSeed.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
 
         //6.判断公母猪, 触发进场事件
-        doctorCommonGroupEventHandler.autoPigEntryEvent(sex, turnSeed, group, toBarn);
+        doctorCommonGroupEventHandler.autoPigEntryEvent(eventInfoList, sex, turnSeed, group, toBarn);
 
 
         //发布统计事件
-        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
+        //publistGroupAndBarn(event);
     }
 
     //后备舍又他妈不分公母了, 艹
@@ -127,19 +129,19 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
     }
 
     //获取转种猪性别
-    private static DoctorPig.PIG_TYPE getSex(Integer toBarnType) {
+    private static DoctorPig.PigSex getSex(Integer toBarnType) {
         if (PigType.MATING_TYPES.contains(toBarnType)) {
-            return DoctorPig.PIG_TYPE.SOW;
+            return DoctorPig.PigSex.SOW;
         }
-        return DoctorPig.PIG_TYPE.BOAR;
+        return DoctorPig.PigSex.BOAR;
     }
 
     //如果是公猪并且数量大于0 就 -1
-    private static int getBoarQty(DoctorPig.PIG_TYPE sex, Integer oldQty) {
+    private static int getBoarQty(DoctorPig.PigSex sex, Integer oldQty) {
         if (oldQty <= 0) {
             return 0;
         }
-        if (sex.equals(DoctorPig.PIG_TYPE.BOAR)) {
+        if (sex.equals(DoctorPig.PigSex.BOAR)) {
             return oldQty - 1;
         }
         return oldQty;

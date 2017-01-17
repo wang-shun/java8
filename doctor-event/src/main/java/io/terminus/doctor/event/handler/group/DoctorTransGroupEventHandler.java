@@ -1,15 +1,16 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
@@ -23,13 +24,13 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,27 +47,33 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
     private final DoctorGroupManager doctorGroupManager;
-    private final DoctorBarnReadService doctorBarnReadService;
+    private final DoctorBarnDao doctorBarnDao;
 
     @Autowired
     public DoctorTransGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                         DoctorGroupTrackDao doctorGroupTrackDao,
-                                        CoreEventDispatcher coreEventDispatcher,
                                         DoctorGroupEventDao doctorGroupEventDao,
                                         DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
                                         DoctorGroupManager doctorGroupManager,
-                                        DoctorBarnReadService doctorBarnReadService) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
+                                        DoctorBarnDao doctorBarnDao) {
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorGroupManager = doctorGroupManager;
-        this.doctorBarnReadService = doctorBarnReadService;
+        this.doctorBarnDao = doctorBarnDao;
     }
 
     @Override
-    protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.TRANS_GROUP.getValue());
+
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTransGroupInput transGroup = (DoctorTransGroupInput) input;
+
+        //同舍不可转群
+        if (Objects.equals(group.getCurrentBarnId(), transGroup.getToBarnId())) {
+            throw new ServiceException("same.barn.can.not.trans");
+        }
 
         //校验能否转群, 数量, 日龄差, 转群总重
         checkCanTransBarn(group.getPigType(), transGroup.getToBarnId());
@@ -131,7 +138,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //5.判断转群数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, transGroup.getQuantity())) {
-            doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, transGroup, event.getEventAt(), transGroup.getFcrFeed());
+            doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, transGroup, event.getEventAt(), transGroup.getFcrFeed());
 
             DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
             transGroup.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
@@ -143,7 +150,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         //6.判断是否新建群,触发目标群的转入仔猪事件
         if (Objects.equals(transGroup.getIsCreateGroup(), IsOrNot.YES.getValue())) {
             //新建猪群
-            Long toGroupId = autoTransGroupEventNew(group, groupTrack, transGroup, toBarn);
+            Long toGroupId = autoTransGroupEventNew(eventInfoList, group, groupTrack, transGroup, toBarn);
             transGroup.setToGroupId(toGroupId);
 
             //更新事件
@@ -162,19 +169,19 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
             transGroup.setRelGroupEventId(newGroupEvent.getId());
 
             //转入猪群
-            doctorCommonGroupEventHandler.autoTransEventMoveIn(group, groupTrack, transGroup);
+            doctorCommonGroupEventHandler.autoTransEventMoveIn(eventInfoList, group, groupTrack, transGroup);
         } else {
-            doctorCommonGroupEventHandler.autoTransEventMoveIn(group, groupTrack, transGroup);
+            doctorCommonGroupEventHandler.autoTransEventMoveIn(eventInfoList, group, groupTrack, transGroup);
         }
 
         //发布统计事件
-        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
+        //publistGroupAndBarn(event);
     }
 
     /**
      * 系统触发的自动新建猪群事件(转群触发)
      */
-    private Long autoTransGroupEventNew(DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup, DoctorBarn toBarn) {
+    private Long autoTransGroupEventNew(List<DoctorEventInfo> eventInfoList, DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup, DoctorBarn toBarn) {
         DoctorNewGroupInput newGroupInput = new DoctorNewGroupInput();
         newGroupInput.setFarmId(fromGroup.getFarmId());
         newGroupInput.setGroupCode(transGroup.getToGroupCode());    //录入猪群号
@@ -198,10 +205,10 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         toGroup.setOrgName(fromGroup.getOrgName());
         toGroup.setCreatorId(transGroup.getCreatorId());    //创建人取录入转群事件的人
         toGroup.setCreatorName(transGroup.getCreatorName());
-        return doctorGroupManager.createNewGroup(toGroup, newGroupInput);
+        return doctorGroupManager.createNewGroup(eventInfoList, toGroup, newGroupInput);
     }
 
     private DoctorBarn getBarn(Long barnId) {
-        return RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId));
+        return doctorBarnDao.findById(barnId);
     }
 }

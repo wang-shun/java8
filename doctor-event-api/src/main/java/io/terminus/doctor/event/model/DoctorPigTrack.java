@@ -44,10 +44,13 @@ public class DoctorPigTrack implements Serializable {
     /**
      * 猪类型信息表数据
      *
-     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     * @see DoctorPig.PigSex
      */
     private Integer pigType;
 
+    /**
+     * @see io.terminus.doctor.event.enums.PigStatus
+     */
     private Integer status;
 
     /**
@@ -197,9 +200,9 @@ public class DoctorPigTrack implements Serializable {
      * @param relEventId
      */
     public void addPigEvent(Integer pigType, Long relEventId) {
-        if (Objects.equals(pigType, DoctorPig.PIG_TYPE.BOAR.getKey())) {
+        if (Objects.equals(pigType, DoctorPig.PigSex.BOAR.getKey())) {
             addBoarPigRelEvent(relEventId);
-        } else if (Objects.equals(pigType, DoctorPig.PIG_TYPE.SOW.getKey())) {
+        } else if (Objects.equals(pigType, DoctorPig.PigSex.SOW.getKey())) {
             addSowPigRelEvent(relEventId);
         } else {
             throw new IllegalStateException("input.pigType.notFund");

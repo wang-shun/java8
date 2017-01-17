@@ -21,8 +21,7 @@ public class DoctorRollbackSowChgFarmEventHandler extends DoctorAbstractRollback
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
         return Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey()) &&
-                Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
-                isLastEvent(pigEvent);
+                Objects.equals(pigEvent.getKind(), DoctorPig.PigSex.SOW.getKey());
     }
 
     @Override
@@ -36,6 +35,7 @@ public class DoctorRollbackSowChgFarmEventHandler extends DoctorAbstractRollback
         DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
                 .esBarnId(dto.getFromBarnId())
                 .farmId(dto.getFromFarmId())
+                .orgId(pigEvent.getOrgId())
                 .esPigId(pigEvent.getPigId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG, RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT))
                 .eventAt(pigEvent.getEventAt())
@@ -43,6 +43,7 @@ public class DoctorRollbackSowChgFarmEventHandler extends DoctorAbstractRollback
         DoctorRollbackDto doctorRollbackDto1 = DoctorRollbackDto.builder()
                 .esBarnId(dto.getToBarnId())
                 .farmId(dto.getToFarmId())
+                .orgId(pigEvent.getOrgId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT))
                 .eventAt(pigEvent.getEventAt())
                 .build();

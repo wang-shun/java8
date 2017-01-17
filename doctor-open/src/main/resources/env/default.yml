@@ -111,7 +111,8 @@ msg:
       appKey: 574cecdce0f55a85f00028fe
       appSecret: ws685rsevimn8fgx6mmxzzgx7bs1y9pn
 
+#navigation=1 ,app隐藏导航栏
 service-domain:
-  pigmall: http://mphoenix.xrnm.com
+  pigmall: http://mphoenix.xrnm.com?navigation=1
   neverest: xxx
   pigtrade: xxx

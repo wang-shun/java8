@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.common.utils.Dates;
 import io.terminus.doctor.event.model.DoctorWeeklyReport;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +23,7 @@ public class DoctorWeeklyReportDao extends MyBatisDao<DoctorWeeklyReport> {
      * @return 猪场周报
      */
     public DoctorWeeklyReport findByFarmIdAndSumAt(Long farmId, Date sumAt) {
-        return getSqlSession().selectOne(sqlId("findByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+        return getSqlSession().selectOne(sqlId("findByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", Dates.startOfDay(sumAt)));
     }
 
     /**
@@ -30,10 +31,10 @@ public class DoctorWeeklyReportDao extends MyBatisDao<DoctorWeeklyReport> {
      * @param sumAt 统计日期
      */
     public void deleteBySumAt(Date sumAt) {
-        getSqlSession().delete(sqlId("deleteBySumAt"), sumAt);
+        getSqlSession().delete(sqlId("deleteBySumAt"), Dates.startOfDay(sumAt));
     }
 
     public void deleteByFarmIdAndSumAt(Long farmId, Date sumAt) {
-        getSqlSession().delete(sqlId("deleteByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+        getSqlSession().delete(sqlId("deleteByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", Dates.startOfDay(sumAt)));
     }
 }

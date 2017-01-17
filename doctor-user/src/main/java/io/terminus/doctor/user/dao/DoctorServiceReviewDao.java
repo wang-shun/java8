@@ -1,11 +1,16 @@
 package io.terminus.doctor.user.dao;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.user.model.DoctorServiceReview;
+import io.terminus.doctor.user.model.DoctorServiceReviewExt;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -54,5 +59,19 @@ public class DoctorServiceReviewDao extends MyBatisDao<DoctorServiceReview> {
 
     public DoctorServiceReview findByUserIdAndType(Long userId, DoctorServiceReview.Type type){
         return sqlSession.selectOne(sqlId("findByUserIdAndType"), ImmutableMap.of("userId", userId, "type", type.getValue()));
+    }
+
+    public Paging<DoctorServiceReviewExt> pagingExt(Map<String, Object> criteria){
+        if (criteria == null) {    //如果查询条件为空
+            criteria = Maps.newHashMap();
+        }
+
+        Long total = sqlSession.selectOne(sqlId(COUNT), criteria);
+        if (total <= 0){
+            return new Paging<>(0L, Collections.<DoctorServiceReviewExt>emptyList());
+        }
+
+        List<DoctorServiceReviewExt> datas = sqlSession.selectList(sqlId(PAGING), criteria);
+        return new Paging<>(total, datas);
     }
 }

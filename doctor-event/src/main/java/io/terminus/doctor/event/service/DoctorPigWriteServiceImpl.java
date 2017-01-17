@@ -13,10 +13,8 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.workflow.core.WorkFlowService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -37,7 +35,6 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
     private final DoctorPigEventDao doctorPigEventDao;
     private final DoctorPigSnapshotDao doctorPigSnapshotDao;
     private final DoctorPigInfoCache doctorPigInfoCache;
-    private final WorkFlowService workFlowService;
     private final DoctorPigManager doctorPigManager;
 
     @Autowired
@@ -46,14 +43,12 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
                                      DoctorPigEventDao doctorPigEventDao,
                                      DoctorPigSnapshotDao doctorPigSnapshotDao,
                                      DoctorPigInfoCache doctorPigInfoCache,
-                                     WorkFlowService workFlowService,
                                      DoctorPigManager doctorPigManager) {
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigSnapshotDao = doctorPigSnapshotDao;
         this.doctorPigInfoCache = doctorPigInfoCache;
-        this.workFlowService=workFlowService;
         this.doctorPigManager = doctorPigManager;
     }
 
@@ -113,17 +108,6 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
         } catch (Exception e) {
             log.error("create pigSnapshot failed, pigSnapshot:{}, cause:{}", pigSnapshot, Throwables.getStackTraceAsString(e));
             return Response.fail("pigSnapshot.create.fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> deploy() {
-        try {
-            workFlowService.getFlowDefinitionService().deploy(new ClassPathResource("flow/sow.xml").getInputStream());
-            return Response.ok(Boolean.TRUE);
-        } catch (Exception e) {
-            log.error("deploy() failed, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("deploy() fail");
         }
     }
 

@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.service;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -12,15 +11,18 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
+<<<<<<< HEAD
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.DateUtil;
+=======
+>>>>>>> master
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupJoinDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupCount;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
@@ -31,10 +33,10 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -60,16 +62,18 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    private final DoctorGroupJoinDao doctorGroupJoinDao;
 
     @Autowired
     public DoctorGroupReadServiceImpl(DoctorGroupDao doctorGroupDao,
                                       DoctorGroupEventDao doctorGroupEventDao,
                                       DoctorGroupTrackDao doctorGroupTrackDao,
-                                      DoctorGroupSnapshotDao doctorGroupSnapshotDao) {
+                                      DoctorGroupSnapshotDao doctorGroupSnapshotDao, DoctorGroupJoinDao doctorGroupJoinDao) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
+        this.doctorGroupJoinDao = doctorGroupJoinDao;
     }
 
     @Override
@@ -156,6 +160,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Response<Long> getGroupCount(@Valid DoctorGroupSearchDto groupSearchDto) {
+        try {
+            return Response.ok(doctorGroupJoinDao.getPigCount(groupSearchDto));
+        } catch (Exception e) {
+            log.error("get group count failed, data:{} cause:{}", groupSearchDto, Throwables.getStackTraceAsString(e));
+            return Response.fail("get.group.count");
+        }
+    }
+
+    @Override
     public Response<List<DoctorGroupDetail>> findGroupDetail(DoctorGroupSearchDto groupSearchDto) {
         try {
             return Response.ok(doctorGroupDao.findBySearchDto(groupSearchDto).stream()
@@ -183,40 +197,6 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("find eventType by groupIds failed, groupIds:{}, cause:{}", groupIds, Throwables.getStackTraceAsString(e));
             return Response.fail("eventType.find.fail");
-        }
-    }
-
-    @Override
-    public Response<DoctorGroupCount> countFarmGroups(Long orgId, Long farmId) {
-        try {
-            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
-            searchDto.setFarmId(farmId);
-            searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
-
-            //过滤猪群类型, 然后按照类型分组
-            Map<Integer, List<DoctorGroupDetail>> groupMap = RespHelper.orServEx(findGroupDetail(searchDto)).stream()
-                    .filter(pt -> pt.getGroup().getPigType() != null)
-                    .collect(Collectors.groupingBy(gd -> gd.getGroup().getPigType()));
-
-            List<DoctorGroupDetail> farrows = MoreObjects.firstNonNull(groupMap.get(PigType.DELIVER_SOW.getValue()), Lists.<DoctorGroupDetail>newArrayList());
-
-            List<DoctorGroupDetail> nurseries = MoreObjects.firstNonNull(groupMap.get(PigType.NURSERY_PIGLET.getValue()), Lists.<DoctorGroupDetail>newArrayList());
-            List<DoctorGroupDetail> fattens = MoreObjects.firstNonNull(groupMap.get(PigType.FATTEN_PIG.getValue()), Lists.<DoctorGroupDetail>newArrayList());
-            List<DoctorGroupDetail> houbei = MoreObjects.firstNonNull(groupMap.get(PigType.RESERVE.getValue()), Lists.<DoctorGroupDetail>newArrayList());
-
-
-            //根据猪类统计
-            DoctorGroupCount count = new DoctorGroupCount();
-            count.setOrgId(orgId);
-            count.setFarmId(farmId);
-            count.setFarrowCount(CountUtil.sumInt(farrows, g -> g.getGroupTrack().getQuantity()));
-            count.setNurseryCount(CountUtil.sumInt(nurseries, g -> g.getGroupTrack().getQuantity()));
-            count.setFattenCount(CountUtil.sumInt(fattens, g -> g.getGroupTrack().getQuantity()));
-            count.setHoubeiCount(CountUtil.sumInt(houbei, g -> g.getGroupTrack().getQuantity()));
-            return Response.ok(count);
-        } catch (Exception e) {
-            log.error("count farm group failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
-            return Response.fail("count.farm.group.fail");
         }
     }
 
@@ -370,7 +350,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     @Override
     public Response<DoctorGroupEvent> canRollbackEvent(@NotNull(message = "input.groupId.empty") Long groupId) {
         try {
-           return Response.ok(doctorGroupEventDao.canRollbackEvent(ImmutableMap.of("groupId", groupId, "isAuto", IsOrNot.NO.getValue(), "beginDate", DateTime.now().minusMonths(3).toDate())));
+           return Response.ok(doctorGroupEventDao.canRollbackEvent(ImmutableMap.of("groupId", groupId, "isAuto", IsOrNot.NO.getValue())));
         } catch (Exception e) {
             log.error("can.rollback.event.failed, cause {}", Throwables.getStackTraceAsString(e));
             return Response.fail("can.rollback.event.failed");

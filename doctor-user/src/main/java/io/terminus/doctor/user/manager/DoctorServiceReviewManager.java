@@ -222,7 +222,7 @@ public class DoctorServiceReviewManager {
         //查询并保存permission
         DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
         if(permission != null){
-            permission.getFarmIdsList().stream().forEach(oldFarmId -> {
+            permission.getFarmIdsList().forEach(oldFarmId -> {
                 if (!newFarmIds.contains(oldFarmId)) {
                     doctorFarmDao.delete(oldFarmId);
                 }
@@ -230,6 +230,7 @@ public class DoctorServiceReviewManager {
             permission.setFarmIds(newFarmIdStr);
             permission.setUpdatorId(user.getId());
             permission.setUpdatorName(user.getName());
+            permission.setOrgIdsList(Lists.newArrayList(org.getId()));
             RespHelper.orServEx(doctorUserDataPermissionWriteService.updateDataPermission(permission));
         }else{
             permission = new DoctorUserDataPermission();
@@ -239,6 +240,7 @@ public class DoctorServiceReviewManager {
             permission.setCreatorId(user.getId());
             permission.setUpdatorId(user.getId());
             permission.setUpdatorName(user.getName());
+            permission.setOrgIdsList(Lists.newArrayList(org.getId()));
             doctorUserDataPermissionWriteService.createDataPermission(permission);
         }
 

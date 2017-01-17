@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.dto.event.boar;
 
-import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -17,7 +17,7 @@ import java.util.Map;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class DoctorBoarConditionDto extends AbstractPigEventInputDto implements Serializable{
+public class DoctorBoarConditionDto extends BasePigEventInputDto implements Serializable{
     private static final long serialVersionUID = -8382360464209200834L;
 
     /**

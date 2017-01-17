@@ -88,21 +88,15 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 return Response.ok(failReportTrend(monthStr));
             }
 
-            DoctorCommonReportDto reportDto;
+            //查询月报结果, 如果没查到, 返回失败的结果
+            DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, date);
+            if (report == null) {
+                return Response.ok(failReportTrend(monthStr));
+            }
 
-            // 如果当前日期是1号, 并且查询的月份是当月, 则返回 0 月报
-            if(DateTime.now().getDayOfMonth() == 1 && DateUtil.inSameYearMonth(date, new Date())){
-                reportDto = new DoctorCommonReportDto();
-            }else{
-                //查询月报结果, 如果没查到, 返回失败的结果
-                DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, date);
-                if (report == null) {
-                    return Response.ok(failReportTrend(monthStr));
-                }
-                reportDto = JSON_MAPPER.fromJson(report.getData(), DoctorCommonReportDto.class);
-                if (reportDto == null) {
-                    return Response.ok(failReportTrend(monthStr));
-                }
+            DoctorCommonReportDto reportDto = JSON_MAPPER.fromJson(report.getData(), DoctorCommonReportDto.class);
+            if (reportDto == null) {
+                return Response.ok(failReportTrend(monthStr));
             }
 
             //拼接趋势图
@@ -121,25 +115,20 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
 
         try {
             //如果查询未来的数据, 返回失败查询
-//            if (weekDateTime.isAfter(DateUtil.getDateEnd(DateTime.now()))) {
-//                return Response.ok(failReportTrend(weekStr));
-//            }
+            if (weekDateTime.isAfter(DateUtil.getDateEnd(DateTime.now()))) {
+                return Response.ok(failReportTrend(weekStr));
+            }
 
             DoctorCommonReportDto reportDto;
 
-            // 如果今天是周一，并且查今天，返回 0 周报
-            if(todayIsMonday(weekDateTime.toDate())) {
-                reportDto = new DoctorCommonReportDto();
-            }else{
-                //查询周报结果, 如果没查到, 返回失败的结果
-                DoctorWeeklyReport report = doctorWeeklyReportDao.findByFarmIdAndSumAt(farmId, weekDateTime.toDate());
-                if (report == null) {
-                    return Response.ok(failReportTrend(weekStr));
-                }
-                reportDto = JSON_MAPPER.fromJson(report.getData(), DoctorCommonReportDto.class);
-                if (reportDto == null) {
-                    return Response.ok(failReportTrend(weekStr));
-                }
+            //查询周报结果, 如果没查到, 返回失败的结果
+            DoctorWeeklyReport report = doctorWeeklyReportDao.findByFarmIdAndSumAt(farmId, weekDateTime.withTimeAtStartOfDay().toDate());
+            if (report == null) {
+                return Response.ok(failReportTrend(weekStr));
+            }
+            reportDto = JSON_MAPPER.fromJson(report.getData(), DoctorCommonReportDto.class);
+            if (reportDto == null) {
+                return Response.ok(failReportTrend(weekStr));
             }
 
             DoctorCommonReportTrendDto reportTrendDto = new DoctorCommonReportTrendDto();
@@ -222,13 +211,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         return DateUtil.getBeforeWeekEnds(date.toDate(), MoreObjects.firstNonNull(index, WEEK_INDEX)).stream()
                 .map(week -> {
                     String weekStr = getWeekStr(new DateTime(week).withDayOfWeek(1));
-                    
-                    if(todayIsMonday(week)) {
-                        DoctorCommonReportDto reportDto = new DoctorCommonReportDto();
-                        reportDto.setDate(weekStr);
-                        return reportDto;
-                    }
-                    
+
                     DoctorWeeklyReport report = doctorWeeklyReportDao.findByFarmIdAndSumAt(farmId, Dates.startOfDay(week));
                     if (report == null || !StringUtils.hasText(report.getData())) {
                         return failReportDto(weekStr);
@@ -275,46 +258,29 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         }
         return datetime.withDayOfMonth(1).plusMonths(1).plusDays(-1).toDate();
     }
-    
-    //本星期非周一: 今天，本星期周一：周一，上星期：周日
-    private static Date getLastWeek(Date date) {
-        if (DateTime.now().withTimeAtStartOfDay().isEqual(new DateTime(date).withTimeAtStartOfDay())) {
-            return new DateTime(date).withTimeAtStartOfDay().toDate();
-        }
-        return new DateTime(date).withDayOfWeek(7).withTimeAtStartOfDay().toDate();
-    }
 
     private static String getWeekStr(DateTime date) {
         return "第" + date.getWeekOfWeekyear() + "周(" + date.toString(DateUtil.DATE) + ")";
     }
 
-    private static boolean todayIsMonday(Date date) {
-        return DateTime.now().withTimeAtStartOfDay().isEqual(new DateTime(date).withTimeAtStartOfDay())
-                && DateTime.now().getDayOfWeek() == 1;
-    }
-
     /**
-     * 获取指定年份和周的日期
+     * 获取指定年份和周的日期, 如果是未来时间，返回今天
      * @param year 年
      * @param week 周
      * @return 日期
      */
-    private DateTime withWeekOfYear(Integer year, Integer week) {
-        DateTime yearDate = year == null ? new DateTime() : new DateTime(year, 1, 1, 0, 0);
-        week = week == null ? DateTime.now().getWeekOfWeekyear() : week;
+    private static DateTime withWeekOfYear(Integer year, Integer week) {
+        if (year == null || week == null) {
+            return DateUtil.getDateEnd(DateTime.now());
+        }
+        DateTime yearDate = new DateTime(year, 1, 1, 0, 0);
+
         while (true) {
             if (yearDate.getDayOfWeek() == 7) {
                 break;
             }
             yearDate = yearDate.plusDays(1);
         }
-        yearDate = yearDate.plusWeeks(week);
-        if (!yearDate.isAfter(DateTime.now())) {
-            return yearDate.withTimeAtStartOfDay();
-        }
-        if (DateTime.now().getDayOfWeek() == 1){
-            return DateTime.now().withTimeAtStartOfDay();
-        }
-        return DateTime.now().plusDays(-1).withTimeAtStartOfDay();
+        return new DateTime(DateUtil.weekEnd(yearDate.plusWeeks(week).toDate()));
     }
 }

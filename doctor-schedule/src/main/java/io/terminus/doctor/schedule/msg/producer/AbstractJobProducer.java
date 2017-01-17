@@ -6,6 +6,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -15,6 +16,7 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
@@ -45,7 +47,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +81,8 @@ public abstract class AbstractJobProducer {
     protected DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
     @Autowired
     protected DoctorPigReadService doctorPigReadService;
+    @RpcConsumer
+    protected DoctorPigEventReadService doctorPigEventReadService;
     @Autowired
     protected DoctorPigWriteService doctorPigWriteService;
     @Autowired
@@ -312,7 +315,7 @@ public abstract class AbstractJobProducer {
      */
     protected DoctorPigEvent getMatingPigEvent(DoctorPigInfoDto pigDto) {
         try {
-            List<DoctorPigEvent> eventList = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() != null).sorted(Comparator.comparing(DoctorPigEvent::getEventAt).reversed()).collect(Collectors.toList());
+            List<DoctorPigEvent> eventList = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() != null).sorted(this::pigEventCompare).collect(Collectors.toList());
             DoctorPigEvent doctorPigEvent = null;
             Boolean flag = false;
             for (DoctorPigEvent event : eventList) {
@@ -345,15 +348,15 @@ public abstract class AbstractJobProducer {
             if (STATUS != null) {
                 switch (STATUS) {
                     case Entry:// 进场
-                        doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.ENTRY.getKey());
+                        doctorPigEvent = getPigEventByEventType(pigDto.getPigId(), PigEvent.ENTRY.getKey());
                         dateTime = new DateTime(doctorPigEvent.getEventAt());
                         break;
                     case Wean: //断奶
-                        doctorPigEvent = getLeadToWeanEvent(pigDto.getDoctorPigEvents());
+                        doctorPigEvent = getPigEventByEventType(pigDto.getPigId(), PigEvent.WEAN.getKey());
                         dateTime = new DateTime(doctorPigEvent.getEventAt());
                         break;
                     case KongHuai: // 空怀
-                        doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.PREG_CHECK.getKey());
+                        doctorPigEvent = getPigEventByEventType(pigDto.getPigId(), PigEvent.PREG_CHECK.getKey());
                         pigDto.setStatusName(PregCheckResult.from(doctorPigEvent.getPregCheckResult()).getDesc());
                         dateTime = new DateTime(doctorPigEvent.getEventAt());
                         break;
@@ -367,23 +370,6 @@ public abstract class AbstractJobProducer {
         return null;
     }
 
-    /**
-     * 获取导致断奶的事件
-     * @param events
-     * @return
-     */
-    protected DoctorPigEvent getLeadToWeanEvent(List<DoctorPigEvent> events){
-        try {
-            List<DoctorPigEvent> tempList =  events.stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() !=null &&
-                    ((!Objects.equals(doctorPigEvent.getPigStatusBefore(), PigStatus.Wean.getKey()) && Objects.equals(doctorPigEvent.getPigStatusAfter(), PigStatus.Wean.getKey())) || Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey()))).collect(Collectors.toList());
-            if (!Arguments.isNullOrEmpty(tempList)){
-                return tempList.stream().max(Comparator.comparing(DoctorPigEvent::getEventAt)).get();
-            }
-        } catch (Exception e){
-            log.error(" get.lead.to.wean.event.failed ");
-        }
-        return null;
-    }
     /**
      * 根据猪舍过滤用户
      *
@@ -412,19 +398,13 @@ public abstract class AbstractJobProducer {
     /**
      * 根据事件类型时间列表中取出最近事件
      *
-     * @param events
+     * @param pigId
      * @param type
      * @return DoctorPigEvent
      */
-    protected DoctorPigEvent getPigEventByEventType(List<DoctorPigEvent> events, Integer type) {
+    protected DoctorPigEvent getPigEventByEventType(Long pigId, Integer type) {
         try {
-            if (Arguments.isNullOrEmpty(events)){
-                return null;
-            }
-            List<DoctorPigEvent> eventList = events.stream().filter(doctorPigEvent -> (doctorPigEvent.getEventAt() != null) && Objects.equals(doctorPigEvent.getType(), type)).collect(Collectors.toList());
-            if (!Arguments.isNullOrEmpty(eventList)) {
-                return eventList.stream().max(Comparator.comparing(DoctorPigEvent::getEventAt)).get();
-            }
+            return RespHelper.orServEx(doctorPigEventReadService.findLastEventByType(pigId, type));
         } catch (Exception e) {
             log.error("get.pig.event.by.event.type.failed");
         }
@@ -444,7 +424,7 @@ public abstract class AbstractJobProducer {
             }
             List<DoctorGroupEvent> eventList = events.stream().filter(doctorGroupEvent -> (doctorGroupEvent.getEventAt() != null) && Objects.equals(doctorGroupEvent.getType(), type)).collect(Collectors.toList());
             if (!Arguments.isNullOrEmpty(events)) {
-                return eventList.stream().max(Comparator.comparing(DoctorGroupEvent::getEventAt)).get();
+                return eventList.stream().max(this::groupEventCompare).get();
             }
         } catch (Exception e) {
             log.error("get.last.group.event.by.event.type.failed");
@@ -558,5 +538,33 @@ public abstract class AbstractJobProducer {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 猪事件事件比较
+     * @param event1
+     * @param event2
+     * @return
+     */
+    private int pigEventCompare(DoctorPigEvent event1, DoctorPigEvent event2) {
+        if (Objects.equals(event1.getEventAt(), event2.getEventAt())) {
+            return event2.getId().compareTo(event1.getId());
+        } else {
+            return event2.getEventAt().compareTo(event1.getEventAt());
+        }
+    }
+
+    /**
+     * 猪群事件事件比较
+     * @param event1
+     * @param event2
+     * @return
+     */
+    private int groupEventCompare(DoctorGroupEvent event1, DoctorGroupEvent event2) {
+        if (Objects.equals(event1.getEventAt(), event2.getEventAt())) {
+            return event1.getId().compareTo(event2.getId());
+        } else {
+            return event1.getEventAt().compareTo(event2.getEventAt());
+        }
     }
 }

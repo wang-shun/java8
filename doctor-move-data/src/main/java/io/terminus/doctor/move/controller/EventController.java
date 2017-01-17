@@ -2,21 +2,22 @@ package io.terminus.doctor.move.controller;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
-import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
-import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
-import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
+import io.terminus.doctor.basic.dao.DoctorMaterialConsumeProviderDao;
+import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
+import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,8 +61,7 @@ public class EventController {
             List<DoctorPigEvent> pigEvents = doctorPigEventDao.findByDateRange(beginDate, new Date());
             pigEvents.forEach(pigEvent -> {
                 if(pigEvent.getExtraMap() != null){
-                    basicPigInput.setEventType(pigEvent.getType());
-                    pigEvent.setDesc(basicPigInput.generateEventDescFromExtra(pigEvent.getExtraMap()));
+                    pigEvent.setDesc(basicPigInput.generateEventDescFromExtra(BeanMapper.map(pigEvent.getExtraMap(), BasePigEventInputDto.class)));
                     doctorPigEventDao.update(pigEvent);
                 }
             });

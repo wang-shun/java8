@@ -37,8 +37,6 @@ public class DoctorDailyReportManager {
      */
     @Transactional
     public void realTimeDailyReports(Long farmId, Date sumAt) {
-        doctorDailyReportDao.deleteByFarmIdAndSumAt(farmId, sumAt);
-
         DoctorDailyReport report = new DoctorDailyReport();
         report.setFarmId(farmId);
         report.setSumAt(sumAt);
@@ -49,6 +47,7 @@ public class DoctorDailyReportManager {
         report.setNurseryCount(dto.getLiveStock().getNursery());    //保育猪
         report.setFattenCount(dto.getLiveStock().getFatten());      //育肥猪
         report.setReportData(dto);
+        doctorDailyReportDao.deleteByFarmIdAndSumAt(farmId, sumAt);
         doctorDailyReportDao.create(report);
     }
 }

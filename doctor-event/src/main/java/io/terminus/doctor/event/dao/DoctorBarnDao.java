@@ -4,11 +4,15 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.utils.Iters;
+import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
 import io.terminus.doctor.event.model.DoctorBarn;
 import org.springframework.stereotype.Repository;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 猪舍表Dao类
@@ -38,19 +42,13 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
         return getSqlSession().selectList(sqlId("findByFarmIds"), farmIds);
     }
 
-    public List<DoctorBarn> findByEnums(Long farmId, Integer pigType, Integer canOpenGroup, Integer status) {
+    public List<DoctorBarn> findByEnums(@NotNull Long farmId, List<Integer> pigTypes, Integer canOpenGroup, Integer status, List<Long> barnIds) {
         return getSqlSession().selectList(sqlId("findByEnums"), MapBuilder.<String, Object>newHashMap()
                 .put("farmId", farmId)
-                .put("pigType", pigType)
+                .put("pigTypes", Iters.emptyToNull(pigTypes))
                 .put("canOpenGroup", canOpenGroup)
                 .put("status", status)
-                .map());
-    }
-
-    public List<DoctorBarn> findByPigTypes(Long farmId, List<Integer> pigTypes) {
-        return getSqlSession().selectList(sqlId("findByPigTypes"), MapBuilder.<String, Object>newHashMap()
-                .put("farmId", farmId)
-                .put("pigTypes", pigTypes)
+                .put("barnIds", Iters.emptyToNull(barnIds))
                 .map());
     }
 
@@ -71,5 +69,14 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
     public List<DoctorBarn> listSince(Long lastId, String since, int limit) {
         return getSqlSession().selectList(sqlId("listSince"),
                 ImmutableMap.of("lastId", lastId, "limit", limit, "since", since));
+    }
+
+    /**
+     * 统计每种猪舍类型猪舍数量
+     * @param criteria 查询条件
+     * @return
+     */
+    public DoctorBarnCountForPigTypeDto countForTypes(Map<String, Object> criteria){
+        return getSqlSession().selectOne("countForTypes", criteria);
     }
 }

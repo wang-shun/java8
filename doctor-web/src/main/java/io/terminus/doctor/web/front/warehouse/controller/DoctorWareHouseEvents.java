@@ -11,18 +11,22 @@ import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
+import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
+import io.terminus.doctor.basic.service.DoctorMaterialInWareHouseReadService;
+import io.terminus.doctor.basic.service.DoctorMaterialInWareHouseWriteService;
+import io.terminus.doctor.basic.service.DoctorMaterialPriceInWareHouseReadService;
+import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
-import io.terminus.doctor.warehouse.dto.DoctorMaterialInWareHouseDto;
-import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
-import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
-import io.terminus.doctor.warehouse.model.DoctorWareHouse;
-import io.terminus.doctor.warehouse.service.*;
+import io.terminus.doctor.basic.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.basic.dto.DoctorMaterialInWareHouseDto;
+import io.terminus.doctor.basic.dto.DoctorWareHouseDto;
+import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
+import io.terminus.doctor.basic.model.DoctorMaterialInWareHouse;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
 import io.terminus.pampas.common.UserUtil;
@@ -262,7 +266,7 @@ public class DoctorWareHouseEvents {
                 || Objects.equals(material.getType(), WareHouseType.MEDICINE.getKey())
                 || Objects.equals(material.getType(), WareHouseType.VACCINATION.getKey())){
             if(unitId != null){
-                DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(unitId));
+                DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicByIdFilterByFarmId(wareHouse.getFarmId(), unitId));
                 if(doctorBasic == null || !Objects.equals(doctorBasic.getType(), DoctorBasic.Type.UNIT.getValue())){
                     throw new JsonResponseException("unit.miss");
                 }
@@ -327,7 +331,7 @@ public class DoctorWareHouseEvents {
                     || Objects.equals(doctorBasicMaterial.getType(), WareHouseType.MEDICINE.getKey())
                     || Objects.equals(doctorBasicMaterial.getType(), WareHouseType.VACCINATION.getKey())){
                 if(dto.getUnitId() != null){
-                    DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(dto.getUnitId()));
+                    DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicByIdFilterByFarmId(dto.getFarmId(), dto.getUnitId()));
                     doctorMaterialConsumeProviderDto.setUnitName(doctorBasic.getName());
                     doctorMaterialConsumeProviderDto.setUnitId(doctorBasic.getId());
                 }else{

@@ -9,7 +9,6 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,8 +20,7 @@ public class DoctorRollbackSowRemovalEventHandler extends DoctorAbstractRollback
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
         return Objects.equals(pigEvent.getType(), PigEvent.REMOVAL.getKey()) &&
-                Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
-                isLastEvent(pigEvent);
+                Objects.equals(pigEvent.getKind(), DoctorPig.PigSex.SOW.getKey());
     }
 
     @Override
@@ -37,7 +35,8 @@ public class DoctorRollbackSowRemovalEventHandler extends DoctorAbstractRollback
                 .esPigId(pigEvent.getPigId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG, RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT))
                 .farmId(pigEvent.getFarmId())
-                .eventAt(new Date())
+                .orgId(pigEvent.getOrgId())
+                .eventAt(pigEvent.getEventAt())
                 .build();
         return Lists.newArrayList(doctorRollbackDto);
     }

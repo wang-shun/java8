@@ -12,10 +12,12 @@ import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -129,13 +131,32 @@ public class DoctorBarns {
      * 根据farmId查询猪舍表, 根据pigIds过滤
      *
      * @param farmId 猪场id
+     * @param barnStatus 筛选猪舍状态
+     *                   @see DoctorBarn.Status
      * @param pigIds 猪id 逗号分隔
      * @return 猪舍表列表
      */
     @RequestMapping(value = "/farmId", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmId(@RequestParam("farmId") Long farmId,
+                                              @RequestParam(value = "status", required = false) Integer barnStatus,
                                               @RequestParam(value = "pigIds", required = false) String pigIds) {
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId)), pigIds);
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null,
+                null, barnStatus, doctorFarmAuthCenter.getAuthBarnIds())), pigIds);
+    }
+
+    /**
+     * 查询猪群的猪舍表
+     *
+     * @param farmId 猪场id
+     * @param barnStatus 筛选猪舍状态
+     *                   @see DoctorBarn.Status
+     * @return 猪舍表列表
+     */
+    @RequestMapping(value = "/groups", method = RequestMethod.GET)
+    public List<DoctorBarn> findGroupBarnsByfarmId(@RequestParam("farmId") Long farmId,
+                                                   @RequestParam(value = "status", required = false) Integer barnStatus) {
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, PigType.GROUP_TYPES,
+                null, barnStatus, doctorFarmAuthCenter.getAuthBarnIds()));
     }
 
     /**
@@ -156,13 +177,7 @@ public class DoctorBarns {
             Map<String, Object> extra = RespHelper.or500(subRoleReadService.findById(roleId)).getExtra();
             if(extra != null && extra.get("defaultBarnType") != null){
                 List<Integer> barnType = (List<Integer>) extra.get("defaultBarnType");
-                barnSelects.forEach(select -> {
-                    if(barnType.contains(select.getPigType())){
-                        select.setSelect(true);
-                    }else{
-                        select.setSelect(false);
-                    }
-                });
+                barnSelects.forEach(select -> select.setSelect(barnType.contains(select.getPigType())));
             }
         }
 
@@ -181,8 +196,10 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigType", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
                                                      @RequestParam("pigType") Integer pigType,
+                                                     @RequestParam(value = "status", required = false) Integer status,
                                                      @RequestParam(value = "pigIds", required = false) String pigIds) {
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, pigType, null, null)), pigIds);
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, Lists.newArrayList(pigType),
+                null, status, doctorFarmAuthCenter.getAuthBarnIds())), pigIds);
     }
 
     //根据猪id过滤猪舍: 取出猪的猪舍type, 过滤一把
@@ -209,12 +226,14 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigTypes", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
                                                      @RequestParam(value = "pigTypes", required = false) String pigTypes,
+                                                     @RequestParam(value = "status", required = false) Integer status,
                                                      @RequestParam(value = "pigIds", required = false) String pigIds) {
         List<Integer> types = Lists.newArrayList();
         if (notEmpty(pigTypes)) {
             types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
         }
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, types)), pigIds);
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, types,
+                null, status, null)), pigIds);
     }
 
 
@@ -229,20 +248,17 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigTypes/trans", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndTypeWhenBatchTransBarn(@RequestParam("farmId") Long farmId,
                                                                        @RequestParam("eventType") Integer eventType,
+                                                                       @RequestParam(value = "status", required = false) Integer status,
                                                                        @RequestParam("pigIds") String pigIds) {
         List<Integer> barnTypes;
         if (Objects.equals(eventType, PigEvent.CHG_LOCATION.getKey())) {
             barnTypes = getTransBarnTypes(pigIds);
-        } else if (Objects.equals(eventType, PigEvent.TO_MATING.getKey())) {
-            barnTypes = PigType.MATING_TYPES;
-        } else if (Objects.equals(eventType, PigEvent.TO_FARROWING.getKey())) {
-            barnTypes = PigType.FARROW_TYPES;
         } else {
             //转舍类型: 普通转舍, 去配种, 去分娩, 其他报错
             throw new JsonResponseException("not.trans.barn.type");
         }
-        return notEmpty(barnTypes) ? RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, barnTypes))
-                : Collections.emptyList();
+        return notEmpty(barnTypes) ? RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, barnTypes,
+                null, status, doctorFarmAuthCenter.getAuthBarnIds())) : Collections.emptyList();
     }
 
     //普通转舍 转入猪舍类型
@@ -251,11 +267,22 @@ public class DoctorBarns {
         //遍历求猪舍类型交集
         for (Long pigId : Splitters.splitToLong(pigIds, Splitters.COMMA)) {
             DoctorBarn pigBarn = RespHelper.or500(doctorPigReadService.findBarnByPigId(pigId));
-            if (PigType.MATING_TYPES.contains(pigBarn.getPigType())) {
+            DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
+            if (Objects.equals(pigBarn.getPigType(), PigType.MATE_SOW.getValue())) {
                 barnTypes.retainAll(PigType.MATING_TYPES);
+            } else if (Objects.equals(pigBarn.getPigType(), PigType.PREG_SOW.getValue())) {
+                if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Pregnancy.getKey())) {
+                    barnTypes.retainAll(PigType.MATING_FARROW_TYPES);
+                } else {
+                    barnTypes.retainAll(PigType.MATING_TYPES);
+                }
             }
             else if (PigType.FARROW_TYPES.contains(pigBarn.getPigType())) {
-                barnTypes.retainAll(PigType.FARROW_TYPES);
+                if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey())) {
+                    barnTypes.retainAll(PigType.MATING_FARROW_TYPES);
+                } else {
+                    barnTypes.retainAll(PigType.FARROW_TYPES);
+                }
             }
             else if (PigType.HOUBEI_TYPES.contains(pigBarn.getPigType())) {
                 barnTypes.retainAll(PigType.HOUBEI_TYPES);
@@ -375,7 +402,7 @@ public class DoctorBarns {
         Paging<DoctorPigInfoDto> pigPaging = RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(DoctorPigTrack.builder()
                 .status(status)
                 .currentBarnId(barnId)
-                .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
+                .pigType(DoctorPig.PigSex.SOW.getKey())
                 .farmId(barn.getFarmId()).build(), pageNo, size));
 
         //如果母猪和猪群都存在, 全部返回, 由前台选择取哪里的数据
@@ -407,7 +434,7 @@ public class DoctorBarns {
             barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(DoctorPigTrack.builder()
                     .status(status)
                     .currentBarnId(barnId)
-                    .pigType(DoctorPig.PIG_TYPE.BOAR.getKey())
+                    .pigType(DoctorPig.PigSex.BOAR.getKey())
                     .farmId(barn.getFarmId()).build(), pageNo, size)));
             barnDetail.setStatuses(RespHelper.or500(doctorPigReadService.findPigStatusByBarnId(barnId)));
             return barnDetail;
@@ -463,6 +490,16 @@ public class DoctorBarns {
         }else{
             throw new JsonResponseException("barn.has.event.forbid.update.name");
         }
+    }
+
+    /**
+     * 统计每种猪舍类型猪舍数量
+     * @param params 查询条件
+     * @return
+     */
+    @RequestMapping(value = "/countForTypes", method = RequestMethod.GET)
+    public DoctorBarnCountForPigTypeDto countForTypes(@RequestParam Map<String, Object> params) {
+        return RespHelper.or500(doctorBarnReadService.countForTypes(params));
     }
 
 }

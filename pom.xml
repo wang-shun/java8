@@ -7,28 +7,18 @@
     <artifactId>doctor</artifactId>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>doctor-workflow</module>
-        <module>doctor-workflow-api</module>
-        <module>doctor-workflow-job</module>
         <module>doctor-web-core</module>
         <module>doctor-web</module>
-        <module>doctor-standalone-web</module>
-        <module>doctor-standalone-admin</module>
-        <module>doctor-standalone-open</module>
-        <module>doctor-standalone-schedule</module>
         <module>doctor-admin</module>
         <module>doctor-event</module>
         <module>doctor-event-api</module>
         <module>doctor-basic</module>
         <module>doctor-basic-api</module>
-        <module>doctor-warehouse</module>
-        <module>doctor-warehouse-api</module>
         <module>doctor-user-api</module>
         <module>doctor-user-interface</module>
         <module>doctor-user</module>
         <module>doctor-msg-api</module>
         <module>doctor-msg</module>
-        <module>doctor-config</module>
         <module>doctor-open</module>
         <module>doctor-schedule</module>
         <module>doctor-common</module>
@@ -47,7 +37,6 @@
         <hikari.version>2.4.3</hikari.version>
         <terminus-common.version>2.0.1.RELEASE</terminus-common.version>
         <terminus.session.version>1.5.RELEASE</terminus.session.version>
-        <terminus.search.version>3.0.RELEASE</terminus.search.version>
         <pampas.version>2.8.RELEASE</pampas.version>
         <parana.core.version>4.2.7-SNAPSHOT</parana.core.version>
         <parana.extra.version>4.2.7-SNAPSHOT</parana.extra.version>
@@ -192,17 +181,7 @@
                 <artifactId>terminus-session</artifactId>
                 <version>${terminus.session.version}</version>
             </dependency>
-            <!-- Terminus Search -->
-            <dependency>
-                <groupId>io.terminus.search</groupId>
-                <artifactId>search-api</artifactId>
-                <version>${terminus.search.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.terminus.search</groupId>
-                <artifactId>spring-boot-starter-search</artifactId>
-                <version>${terminus.search.version}</version>
-            </dependency>
+
             <!-- Pampas -->
             <dependency>
                 <groupId>io.terminus.pampas</groupId>
@@ -320,11 +299,6 @@
                 <artifactId>doctor-web-core</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-web-admin</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
@@ -377,36 +351,6 @@
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-basic-api</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-warehouse-api</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-warehouse</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-workflow-api</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-workflow</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-workflow-job</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
 
@@ -481,11 +425,6 @@
                 <version>${terminus.file.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-config</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
             <!-- utils -->
             <dependency>
                 <groupId>org.jodd</groupId>

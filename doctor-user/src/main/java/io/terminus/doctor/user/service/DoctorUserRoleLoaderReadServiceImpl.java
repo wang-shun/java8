@@ -60,23 +60,12 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
                 log.warn("user(id={}) is not exist, no roles found", userId);
                 return Response.fail("user.not.found");
             }
-            Set<String> roleBuilder = new HashSet<>();
             DoctorRoleContent roleContent=new DoctorRoleContent();
             forAdmin(user, roleContent);
             forOperator(user, roleContent);
             forNormal(user, roleContent);
             forPrimary(user, roleContent);
             forSub(user, roleContent);
-
-            Set<String> originRoles = new HashSet<>();
-            if (user.getRoles() != null) {
-                originRoles.addAll(user.getRoles());
-            }
-            List<String> result = new ArrayList<>(roleBuilder);
-
-            if (!roleBuilder.equals(originRoles)) {
-                userDao.updateRoles(userId, result);
-            }
             return Response.ok(roleContent);
         } catch (Exception e) {
             log.error("hard load roles failed, userId={}, cause:{}", userId, Throwables.getStackTraceAsString(e));

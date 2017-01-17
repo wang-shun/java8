@@ -232,4 +232,12 @@
         FROM <include refid="tb" />
         WHERE farm_id = #{farmId} AND pig_code = #{pigCode}
     </select>
+
+    <select id="getPigCount" parameterType="map" resultType="long" >
+        SELECT COUNT(1)
+        FROM <include refid="tb" />
+        WHERE farm_id = #{farmId}
+          AND is_removal = 0
+          AND pig_type = #{sex}
+    </select>
 </mapper>

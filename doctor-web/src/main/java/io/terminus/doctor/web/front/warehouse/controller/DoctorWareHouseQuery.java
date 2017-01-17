@@ -15,21 +15,21 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
-import io.terminus.doctor.warehouse.dto.BarnConsumeMaterialReport;
-import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
-import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
-import io.terminus.doctor.warehouse.dto.WarehouseEventReport;
-import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
-import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
-import io.terminus.doctor.warehouse.model.DoctorWareHouse;
-import io.terminus.doctor.warehouse.model.MaterialFactory;
-import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
-import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
-import io.terminus.doctor.warehouse.service.DoctorMaterialPriceInWareHouseReadService;
-import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
-import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
-import io.terminus.doctor.warehouse.service.MaterialFactoryReadService;
+import io.terminus.doctor.basic.dto.BarnConsumeMaterialReport;
+import io.terminus.doctor.basic.dto.DoctorWareHouseDto;
+import io.terminus.doctor.basic.dto.MaterialCountAmount;
+import io.terminus.doctor.basic.dto.WarehouseEventReport;
+import io.terminus.doctor.basic.model.DoctorFarmWareHouseType;
+import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
+import io.terminus.doctor.basic.model.DoctorMaterialInWareHouse;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.MaterialFactory;
+import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
+import io.terminus.doctor.basic.service.DoctorMaterialInWareHouseReadService;
+import io.terminus.doctor.basic.service.DoctorMaterialPriceInWareHouseReadService;
+import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
+import io.terminus.doctor.basic.service.DoctorWareHouseWriteService;
+import io.terminus.doctor.basic.service.MaterialFactoryReadService;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseCreateDto;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseUpdateDto;
 import io.terminus.doctor.web.front.warehouse.dto.MaterialReport;
@@ -226,6 +226,14 @@ public class DoctorWareHouseQuery {
                 .stream()
                 .filter(basicMaterial -> !exist.contains(basicMaterial.getId()))
                 .collect(Collectors.toList());
+    }
+
+    @RequestMapping(value = "/materials", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DoctorBasicMaterial> getDoctorBasicMaterials(@RequestParam Long farmId,
+                                                             @RequestParam Long type,
+                                                             @RequestParam(value = "srm", required = false) String srm){
+        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialsOwned(farmId, type, srm));
     }
 
     /**

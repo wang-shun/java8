@@ -2,6 +2,8 @@ package io.terminus.doctor.web.front.event.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.web.front.event.dto.DoctorBatchGroupEventDto;
+import io.terminus.doctor.web.front.event.dto.DoctorBatchNewGroupEventDto;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -53,4 +55,20 @@ public interface DoctorGroupWebService {
      * @return
      */
     Response<String> findRealName(Long userId);
+
+    /**
+     * 批量新建猪群
+     * @param batchNewGroupEventDto 批量新建信息
+     * @return
+     */
+    Response<Boolean> batchNewGroupEvent(DoctorBatchNewGroupEventDto batchNewGroupEventDto);
+
+    /**
+     * 批量事件(出去新建猪群)
+     * @param batchGroupEventDto 批量事件信息
+     * @return
+     */
+    Response<Boolean> batchGroupEvent(DoctorBatchGroupEventDto batchGroupEventDto);
+
+
 }

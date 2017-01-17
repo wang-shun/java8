@@ -20,6 +20,7 @@ import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -99,6 +100,18 @@ public class ServiceReviews {
         ServiceBetaStatusToken dto = serviceBetaStatusHandler.getServiceBetaStatusToken();
         if(dto.inBeta(DoctorServiceReview.Type.from(serviceApplyDto.getType()))){
             throw new JsonResponseException("service.in.beta");
+        }
+        if(serviceApplyDto.getOrg() == null){
+            throw new JsonResponseException("required.org.info.missing");
+        }
+        if(StringUtils.isBlank(serviceApplyDto.getOrg().getName())){
+            throw new JsonResponseException("org.name.not.null");
+        }
+        if(StringUtils.isBlank(serviceApplyDto.getOrg().getLicense())){
+            throw new JsonResponseException("org.license.not.null");
+        }
+        if(StringUtils.isBlank(serviceApplyDto.getOrg().getMobile())){
+            throw new JsonResponseException("org.mobile.not.null");
         }
         return RespHelper.or500(doctorServiceReviewService.applyOpenService(baseUser, serviceApplyDto));
     }

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Created by xiao on 16/9/22.
+ * Created by xjn on 16/9/22.
  */
 @Component
 public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRollbackPigEventHandler {
@@ -30,8 +30,7 @@ public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRoll
     @Autowired private DoctorRollbackGroupTransHandler doctorRollbackGroupTransHandler;
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-
-        return Objects.equals(pigEvent.getType(), PigEvent.CHG_LOCATION.getKey()) && Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey());
+        return Objects.equals(pigEvent.getType(), PigEvent.CHG_LOCATION.getKey()) && Objects.equals(pigEvent.getKind(), DoctorPig.PigSex.SOW.getKey());
     }
 
     @Override
@@ -53,12 +52,14 @@ public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRoll
                 .esBarnId(dto.getChgLocationFromBarnId())
                 .esPigId(pigEvent.getPigId())
                 .farmId(pigEvent.getFarmId())
+                .orgId(pigEvent.getOrgId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG, RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT))
                 .eventAt(pigEvent.getEventAt())
                 .build();
         DoctorRollbackDto doctorRollbackDto1 = DoctorRollbackDto.builder()
                 .esBarnId(dto.getChgLocationToBarnId())
                 .farmId(pigEvent.getFarmId())
+                .orgId(pigEvent.getOrgId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN))
                 .eventAt(pigEvent.getEventAt())
                 .build();

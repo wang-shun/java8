@@ -15,7 +15,7 @@
     <!-- 某一猪群死淘率 -->
     <select id="getDeadRateByGroupId" parameterType="map" resultType="double">
         SELECT
-        (
+        ifnull((
           SELECT
             ifnull(sum(quantity),0) AS dead_count
           FROM doctor_group_events
@@ -31,7 +31,7 @@
           WHERE
             type = 2 AND -- 转入猪群事件
             group_id = #{groupId}
-        )
+        ), 0)
         FROM DUAL
     </select>
 
@@ -168,7 +168,7 @@
     <!-- 断奶仔猪均重-->
     <select id="weanPigletWeightAvg" parameterType="map" resultType="double">
         select ifnull(sum(wean_count*wean_avg_weight)/sum(wean_count),0) from doctor_pig_events
-        where type = 16
+        where type = 16 AND wean_avg_weight != 0
         <include refid="criteria"/>
     </select>
 
@@ -341,6 +341,7 @@
         sum_at = date_format(#{endAt}, '%Y-%m-%d')
         ) AS c
         ON a.farm_id = c.farm_id
+        limit 1
     </select>
 
     <!-- 死淘情况: 保育死淘率 -->
@@ -383,6 +384,7 @@
         sum_at = date_format(#{endAt}, '%Y-%m-%d')
         ) AS c
         ON a.farm_id = c.farm_id
+        limit 1
     </select>
 
     <!-- 死淘情况: 育肥死淘率 -->
@@ -425,6 +427,7 @@
         sum_at = date_format(#{endAt}, '%Y-%m-%d')
         ) AS c
         ON a.farm_id = c.farm_id
+        limit 1
     </select>
 
     <!-- 配后备-->
@@ -677,6 +680,7 @@
         <if test="farmId != null">and farm_id = #{farmId}</if>
         <if test="startAt != null">and sum_at &gt;= #{startAt}</if>
         <if test="endAt != null">and sum_at &lt;= #{endAt}</if>
+        limit 1
         ) * 12 from dual
     </select>
 
@@ -700,6 +704,7 @@
         <if test="farmId != null">and farm_id = #{farmId}</if>
         <if test="startAt != null">and sum_at &gt;= #{startAt}</if>
         <if test="endAt != null">and sum_at &lt;= #{endAt}</if>
+        limit 1
         ) * 12
         FROM dual)) / (CASE (
         (SELECT ifnull(sum(preg_days), 0) / (CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
@@ -746,6 +751,26 @@
         <include refid="criteria"/>
         )
         FROM dual
+    </select>
+
+    <!-- 某一猪群即将关闭之前的存栏 -->
+    <select id="farrowGroupQuantityWhenClose" parameterType="map" resultType="int">
+        SELECT
+          ifnull(sum(ifnull(delta.inCount, 0)) - sum(ifnull(delta.outCount, 0)) - sum(ifnull(delta.turnCount, 0)), 0) AS deltaCount  -- 算出这段时间的增量
+        FROM (
+            SELECT
+                CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
+                CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END AS outCount,
+                CASE WHEN TYPE = 5 THEN 1 ELSE 0 END AS turnCount
+            FROM doctor_group_events
+            WHERE group_id = #{groupId}
+                AND  TYPE IN (2, 3, 4, 5, 9)
+                AND event_at &lt;= (
+                    SELECT event_at  FROM  doctor_group_events  WHERE group_id = #{groupId} AND TYPE = 2
+                    ORDER BY event_at DESC, id DESC
+                    LIMIT 1
+                )
+        ) AS delta
     </select>
 
     <!-- 实时存栏: 产房仔猪 -->

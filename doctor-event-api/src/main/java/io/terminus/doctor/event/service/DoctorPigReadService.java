@@ -4,14 +4,17 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -23,15 +26,12 @@ import java.util.Set;
 public interface DoctorPigReadService {
 
     /**
-     * 获取母猪数量
-     * @param range
-     * @see io.terminus.doctor.event.enums.DataRange
-     * @param id
-     * @return
+     * 获取猪场里猪的数量
+     * @param farmId 猪场id
+     * @param pigSex 性别
+     * @return 猪数量
      */
-    Response<Long> queryPigCount(@NotNull(message = "input.range.empty")Integer range,
-                                 @NotNull(message = "input.id.empty") Long id,
-                                 @NotNull(message = "input.pigType.empty") Integer pigType);
+    Response<Long> getPigCount(@NotNull(message = "farmId.not.null") Long farmId, @NotNull(message = "pigSex.not.null") DoctorPig.PigSex pigSex);
 
     /**
      * 通过pigId 获取对应的详细信息
@@ -64,6 +64,12 @@ public interface DoctorPigReadService {
      * @return
      */
     Response<Paging<DoctorPigInfoDto>> pagingDoctorInfoDtoByPigTrack(DoctorPigTrack doctorPigTrack, Integer pageNo, Integer pageSize);
+
+    /**
+     * 分页查询猪
+     */
+    Response<Paging<SearchedPig>> pagingPig(Map<String, Object> params, Integer pageNo, Integer pageSize);
+
 
     /**
      * 通过pigId 获取对应的 pigDto 信息内容
@@ -144,4 +150,13 @@ public interface DoctorPigReadService {
      * @return 第一次配种的时间
      */
     Response<Date> getFirstMatingTime(@NotNull(message = "pigId.not.null")Long pigId, @NotNull(message = "farmId.not.null") Long farmId);
+
+    /**
+     * 查询某一类或几类猪舍里的猪的数量
+     * @param farmId   猪场id
+     * @param pigTypes 猪类
+     * @return 猪的数量
+     */
+    Response<Long> getPigCountByBarnPigTypes(@NotNull(message = "farmId.not.null") Long farmId,
+                                             @NotEmpty(message = "pigTypes.not.empty") List<Integer> pigTypes);
 }

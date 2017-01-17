@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Created by xiao on 16/9/2.
+ * Created by xjn on 16/9/2.
  */
 public class DoctorEventDaoTest extends BaseDaoTest {
     @Autowired

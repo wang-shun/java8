@@ -3,31 +3,32 @@ package io.terminus.doctor.event.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
-import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
+import io.terminus.doctor.event.dto.DoctorSuggestPig;
+import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.manager.DoctorPigEventManager;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.workflow.query.FlowDefinitionNodeEventQuery;
-import io.terminus.doctor.workflow.service.FlowQueryService;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -59,19 +59,21 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
     private final DoctorPigTrackDao doctorPigTrackDao;
 
-    private final FlowQueryService flowQueryService;
-
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
+
+    @Autowired
+    private DoctorPigEventManager pigEventManager;
+
+    @Autowired
+    private DoctorBarnDao doctorBarnDao;
 
     @Value("${flow.definition.key.sow:sow}")
     private String sowFlowKey;
 
     @Autowired
     public DoctorPigEventReadServiceImpl(DoctorPigEventDao doctorPigEventDao,
-                                         FlowQueryService flowQueryService,
                                          DoctorPigTrackDao doctorPigTrackDao){
         this.doctorPigEventDao = doctorPigEventDao;
-        this.flowQueryService = flowQueryService;
         this.doctorPigTrackDao = doctorPigTrackDao;
     }
 
@@ -128,30 +130,33 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     @Override
     public Response<List<Integer>> queryPigEvents(List<Long> pigIds) {
         try{
-            checkState(!isNull(pigIds) && !Iterables.isEmpty(pigIds), "input.pigIds.empty");
-            FlowDefinitionNodeEventQuery definitionNodeDao = flowQueryService.getFlowDefinitionNodeEventQuery();
-
-            Set<Integer> collectExecute = Sets.newHashSet();
-
-            collectExecute.addAll(
-                    definitionNodeDao.getNextTaskNodeEvents(sowFlowKey, pigIds.get(0)).stream()
-                    .map(s->Integer.valueOf(s.getValue()))
-                    .collect(Collectors.toList()));
-
-            for(int i = 1; i<pigIds.size(); i++){
-                Long pigId = pigIds.get(i);
-
-                collectExecute.retainAll(definitionNodeDao.getNextTaskNodeEvents(sowFlowKey, pigId).stream()
-                        .map(s->Integer.valueOf(s.getValue()))
-                        .collect(Collectors.toList()));
-            }
-
-            // remove FOSTERS_BY
-            collectExecute.remove(PigEvent.FOSTERS_BY.getKey());
-            return Response.ok(Lists.newArrayList(collectExecute));
+            List<PigEvent> pigEvents = Lists.newArrayList(PigEvent.values());
+            pigIds.forEach(pigId -> {
+                DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
+                DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
+                pigEvents.retainAll(pigEventManager.selectEvents(PigStatus.from(doctorPigTrack.getStatus()), PigType.from(doctorBarn.getPigType())));
+                if (pigEvents.contains(PigEvent.MATING) && Objects.equals(doctorPigTrack.getCurrentMatingCount(), 3)) {
+                    pigEvents.remove(PigEvent.MATING);
+                }
+            });
+            return Response.ok(pigEvents.stream().map(PigEvent::getKey).collect(Collectors.toList()));
         }catch (Exception e){
             log.error("query pig events fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.pigEvents.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorSuggestPig>> suggestPigsByEvent(Integer eventType, Long farmId, String pigCode, Integer sex) {
+        try {
+            DoctorSuggestPigSearch suggestPigSearch = pigEventManager.selectPigs(eventType);
+            suggestPigSearch.setFarmId(farmId);
+            suggestPigSearch.setPigCode(pigCode);
+            suggestPigSearch.setSex(sex);
+            return Response.ok(doctorPigTrackDao.suggestPigs(suggestPigSearch));
+        } catch (Exception e) {
+            log.error("suggest.pigs.by.event.failed, eventType:{}, farmId:{}, cause:{}", eventType, farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("suggest.pigs.by.event.failed");
         }
     }
 
@@ -171,12 +176,12 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             // 获取母猪Track 信息
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
             checkState(!isNull(doctorPigTrack), "input.pigIdCode.error");
-            checkState(Objects.equals(doctorPigTrack.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()), "count.pigType.error");
+            checkState(Objects.equals(doctorPigTrack.getPigType(), DoctorPig.PigSex.SOW.getKey()), "count.pigType.error");
 
             // 获取Pig 所有的 EventId
             Map<Integer, List<DoctorPigEvent>> map = doctorPigEventDao.queryAllEventsByPigId(pigId).stream()
                     .sorted(Comparator.comparing(DoctorPigEvent::getParity))
-                    .collect(Collectors.groupingBy(k -> k.getParity(), Collectors.toList()));
+                    .collect(Collectors.groupingBy(DoctorPigEvent::getParity, Collectors.toList()));
             List<DoctorSowParityCount> doctorSowParityCounts = Lists.newArrayList();
             map.keySet().forEach(parity ->
                     doctorSowParityCounts.add(DoctorSowParityCount.doctorSowParityCountConvert(parity, map.get(parity)))
@@ -210,21 +215,6 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }
     }
 
-    /**
-     * 通过PigRel EventId
-     * @param pigRelEventId
-     * @return
-     */
-    @SneakyThrows
-    private static Map<Integer, List<Long>> convertPigRelEventId(String pigRelEventId){
-        Map<String, String> parityEventIds = OBJECT_MAPPER.readValue(pigRelEventId, JacksonType.MAP_OF_STRING);
-        return parityEventIds.entrySet().stream()
-                .collect(Collectors.toMap(
-                        k -> Integer.valueOf(k.getKey()),
-                        v -> Splitters.COMMA.splitToList(v.getValue())
-                                .stream().map(s->Long.valueOf(s)).collect(Collectors.toList())));
-    }
-
     @Override
     public Response<Paging<DoctorPigEvent>> queryPigEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
         try {
@@ -246,6 +236,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }
     }
 
+    @Override
     public Response<Boolean> isLastEvent(Long pigId, Long eventId) {
         try {
             DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(pigId);
@@ -260,10 +251,24 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     }
 
     @Override
+    public Response<Boolean> isLastManualEvent(Long pigId, Long eventId) {
+        try {
+            DoctorPigEvent lastEvent = doctorPigEventDao.queryLastManualPigEventById(pigId);
+            if (!Objects.equals(eventId, lastEvent.getId())) {
+                return Response.ok(Boolean.FALSE);
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("find pig event is last manual event failed, pigId:{}, eventId:{}, cause:{}", pigId, eventId, Throwables.getStackTraceAsString(e));
+            return Response.ok(Boolean.FALSE);
+        }
+    }
+
+    @Override
     public Response<DoctorPigEvent> canRollbackEvent(@NotNull(message = "input.pigId.empty") Long pigId) {
         try {
-            return Response.ok(doctorPigEventDao.canRollbackEvent(ImmutableMap.of("pigId", pigId, "isAuto", IsOrNot.NO.getValue(), "beginDate", DateTime.now().minusMonths(3).toDate())));
-            } catch (Exception e) {
+            return Response.ok(doctorPigEventDao.canRollbackEvent(ImmutableMap.of("pigId", pigId, "isAuto", IsOrNot.NO.getValue())));
+        } catch (Exception e) {
             log.error("can.rollback.event.failed, cause {}", Throwables.getStackTraceAsString(e));
             return Response.fail("can.rollback.event.failed");
         }
@@ -296,6 +301,26 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         } catch (Exception e) {
             log.error("add.wean.event.after.failed, cause{}", Throwables.getStackTraceAsString(e));
             return Response.fail("add.wean.event.after.failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorSowParityAvgDto> querySowParityAvg(@NotNull(message = "input.pigId.empty") Long pigId) {
+        try {
+            return Response.ok(BeanMapper.map(doctorPigEventDao.querySowParityAvg(pigId), DoctorSowParityAvgDto.class));
+        } catch (Exception e) {
+            log.error("query.sow.parity.failed, cause: {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query sow parity failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorPigEvent> findLastEventByType(@NotNull(message = "input.pigId.empty") Long pigId, Integer type) {
+        try {
+            return Response.ok(doctorPigEventDao.queryLastEventByType(pigId, type));
+        } catch (Exception e) {
+            log.error("find.last.event.by.type, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find last event by type failed");
         }
     }
 }

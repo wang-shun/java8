@@ -3,12 +3,14 @@ package io.terminus.doctor.event.test;
 import com.google.common.collect.Lists;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
-import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
+<<<<<<< HEAD
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.handler.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
+=======
+>>>>>>> master
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgFarmEventHandler;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgLocationEventHandler;
@@ -42,45 +44,29 @@ import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowRemovalEve
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowToChgLocationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowVaccinationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowWeanHandler;
-import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
-import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
-import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
-import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
-import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
-import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
-import io.terminus.doctor.event.search.barn.BarnSearchProperties;
-import io.terminus.doctor.event.search.barn.BaseBarnQueryBuilder;
-import io.terminus.doctor.event.search.barn.DefaultBarnQueryBuilder;
-import io.terminus.doctor.event.search.barn.DefaultIndexedBarnFactory;
-import io.terminus.doctor.event.search.barn.IndexedBarn;
-import io.terminus.doctor.event.search.barn.IndexedBarnFactory;
-import io.terminus.doctor.event.search.group.BaseGroupQueryBuilder;
-import io.terminus.doctor.event.search.group.DefaultGroupQueryBuilder;
-import io.terminus.doctor.event.search.group.DefaultIndexedGroupFactory;
-import io.terminus.doctor.event.search.group.GroupSearchProperties;
-import io.terminus.doctor.event.search.group.IndexedGroup;
-import io.terminus.doctor.event.search.group.IndexedGroupFactory;
-import io.terminus.doctor.event.search.pig.BasePigQueryBuilder;
-import io.terminus.doctor.event.search.pig.DefaultIndexedPigFactory;
-import io.terminus.doctor.event.search.pig.DefaultPigQueryBuilder;
-import io.terminus.doctor.event.search.pig.IndexedPig;
-import io.terminus.doctor.event.search.pig.IndexedPigFactory;
-import io.terminus.doctor.event.search.pig.PigSearchProperties;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.search.core.ESClient;
 import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+<<<<<<< HEAD
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+=======
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+>>>>>>> master
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+<<<<<<< HEAD
+=======
+import org.springframework.context.annotation.Profile;
+
+import java.util.concurrent.Executors;
+>>>>>>> master
 
 /**
  * Desc: 工作基础测试类配置类
@@ -89,9 +75,9 @@ import org.springframework.context.annotation.Import;
  * Date: 16/4/25
  */
 @Configuration
-@EnableAutoConfiguration(exclude = {DubboBaseAutoConfiguration.class, ESSearchAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {DubboBaseAutoConfiguration.class})
 @Import({DoctorCommonConfiguration.class})
-@ComponentScan({"io.terminus.doctor.event.*","io.terminus.doctor.workflow.*"})
+@ComponentScan({"io.terminus.doctor.event.*"})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class ServiceConfiguration {
 
@@ -177,6 +163,7 @@ public class ServiceConfiguration {
     /**
      * 对应handler chain
      */
+<<<<<<< HEAD
     @Bean
     public DoctorEventHandlerChain doctorEventHandlerChain(
             DoctorSemenHandler doctorSemenHandler,DoctorEntryHandler doctorEntryHandler,
@@ -191,80 +178,47 @@ public class ServiceConfiguration {
                 doctorRemovalHandler, doctorVaccinationHandler));
         return chain;
     }
+=======
+//    @Bean
+//    public DoctorPigEventHandlers doctorEventHandlerChain(
+//            DoctorSemenHandler doctorSemenHandler,DoctorEntryHandler doctorEntryHandler,
+//            DoctorChgFarmHandler doctorChgFarmHandler, DoctorChgLocationHandler doctorChgLocationHandler,
+//            DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
+//            DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
+//        DoctorPigEventHandlers chain = new DoctorPigEventHandlers();
+//        List<DoctorPigEventHandler> list = Lists.newArrayList(
+//                doctorSemenHandler,doctorEntryHandler,
+//                doctorChgFarmHandler, doctorChgLocationHandler,
+//                doctorConditionHandler, doctorDiseaseHandler,
+//                doctorRemovalHandler, doctorVaccinationHandler);
+//        chain.setEventHandlerMap(Lists.newArrayList(list));
+//        return chain;
+//    }
+>>>>>>> master
 
     @Configuration
+<<<<<<< HEAD
     public static class ZookeeperConfiguration{
+=======
+    @ConditionalOnBean(ZKClientFactory.class)
+    @Profile("zookeeper")
+    public static class ZookeeperConfiguration {
+>>>>>>> master
 
         @Bean
         public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
-            return new Subscriber(zkClientFactory,zkTopic);
+                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception {
+            return new Subscriber(zkClientFactory, zkTopic);
         }
 
         @Bean
         public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
+<<<<<<< HEAD
                                             @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
+=======
+                                            @Value("${zookeeper.zkTopic}}") String zkTopic) throws Exception {
+>>>>>>> master
             return new Publisher(zkClientFactory, zkTopic);
-        }
-    }
-
-    @Configuration
-    @ConditionalOnClass(ESClient.class)
-    @ComponentScan({"io.terminus.search.api"})
-    public static class SearchConfiguration {
-
-        @Bean
-        public ESClient esClient(@Value("${search.host:localhost}") String host,
-                                 @Value("${search.port:9200}") Integer port) {
-            return new ESClient(host, port);
-        }
-
-        @Configuration
-        @EnableConfigurationProperties(PigSearchProperties.class)
-        protected static class PigSearchConfiguration {
-            @Bean
-            @ConditionalOnMissingBean(IndexedPigFactory.class)
-            public IndexedPigFactory<? extends IndexedPig> indexedPigFactory(DoctorPigDao doctorPigDao) {
-                return new DefaultIndexedPigFactory(doctorPigDao);
-            }
-
-            @Bean
-            @ConditionalOnMissingBean(BasePigQueryBuilder.class)
-            public BasePigQueryBuilder pigQueryBuilder() {
-                return new DefaultPigQueryBuilder();
-            }
-        }
-
-        @Configuration
-        @EnableConfigurationProperties(GroupSearchProperties.class)
-        protected static class GroupSearchConfiguration {
-            @Bean
-            @ConditionalOnMissingBean(IndexedGroupFactory.class)
-            public IndexedGroupFactory<? extends IndexedGroup> indexedGroupFactory() {
-                return new DefaultIndexedGroupFactory();
-            }
-
-            @Bean
-            @ConditionalOnMissingBean(BaseGroupQueryBuilder.class)
-            public BaseGroupQueryBuilder groupQueryBuilder() {
-                return new DefaultGroupQueryBuilder();
-            }
-        }
-
-        @Configuration
-        @EnableConfigurationProperties(BarnSearchProperties.class)
-        protected static class BarnSearchConfiguration {
-            @Bean
-            @ConditionalOnMissingBean(IndexedBarnFactory.class)
-            public IndexedBarnFactory<? extends IndexedBarn> indexedBarnFactory(DoctorBarnReadService doctorBarnReadService) {
-                return new DefaultIndexedBarnFactory(doctorBarnReadService);
-            }
-
-            @Bean
-            @ConditionalOnMissingBean(BaseBarnQueryBuilder.class)
-            public BaseBarnQueryBuilder BarnQueryBuilder() {
-                return new DefaultBarnQueryBuilder();
-            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.enums;
 
+import com.google.common.collect.Lists;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -84,4 +85,6 @@ public enum PigEvent {
     public static List<PigEvent> from(List<Integer> types){
         return Arrays.asList(values()).stream().filter(pigEvent -> types.contains(pigEvent.getType())).collect(Collectors.toList());
     }
+
+    public static final List<Integer> NOTICE_MESSAGE_PIG_EVENT = Lists.newArrayList(CONDITION.getKey(), VACCINATION.getKey(), REMOVAL.getKey(), MATING.getKey(), PREG_CHECK.getKey(), TO_FARROWING.getKey(), WEAN.getKey());
 }

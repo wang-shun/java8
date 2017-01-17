@@ -1,36 +1,29 @@
 package io.terminus.doctor.event.handler.sow;
 
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
-import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
-import io.terminus.doctor.workflow.core.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Created by yaoqijun.
@@ -39,107 +32,86 @@ import static io.terminus.common.utils.Arguments.notNull;
  * Descirbe: 仔猪变动事件 （仔猪转出信息的录入方式）
  */
 @Component
-public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
-
-    private final DoctorGroupWriteService doctorGroupWriteService;
-
-    private final DoctorGroupReadService doctorGroupReadService;
+public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
 
     @Autowired
-    public DoctorSowPigletsChgHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
-                                      DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                      DoctorRevertLogDao doctorRevertLogDao,
-                                      DoctorGroupWriteService doctorGroupWriteService,
-                                      DoctorGroupReadService doctorGroupReadService,
-                                      DoctorBarnDao doctorBarnDao) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
-        this.doctorGroupWriteService = doctorGroupWriteService;
-        this.doctorGroupReadService = doctorGroupReadService;
-    }
+    private DoctorGroupWriteService doctorGroupWriteService;
+
+    @Autowired
+    private DoctorGroupReadService doctorGroupReadService;
+
+    @Autowired
+    private DoctorSowWeanHandler doctorSowWeanHandler;
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "piglets.chgSowStatus.error");
+    protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) inputDto;
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigletsChgDto.getPigId());
+        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "仔猪变动母猪状态错误,猪号:" + pigletsChgDto.getPigCode());
 
         // 校验转出的数量信息
         Integer unweanCount = doctorPigTrack.getUnweanQty();        //未断奶数量
         Integer weanCount = doctorPigTrack.getWeanQty();            //已断奶数量
 
         //变动数量
-        Integer changeCount = (Integer) extra.get("pigletsCount");
-        checkState(changeCount != null, "quantity.not.null");
-        checkState(changeCount <= unweanCount, "change.countInput.error");
+        Integer changeCount = pigletsChgDto.getPigletsCount();
+        checkState(changeCount != null, "变动数量不能为空,猪号:", pigletsChgDto.getPigCode());
+        checkState(changeCount <= unweanCount, "变动数量大于未断奶数,猪号:" + pigletsChgDto.getPigCode());
         doctorPigTrack.setUnweanQty(unweanCount - changeCount);  //未断奶数量 - 变动数量, 已断奶数量不用变
 
         //变动重量
-        Double changeWeight = (Double) extra.get("pigletsWeight");
-        checkState(changeWeight != null, "weight.not.null");
+        Double changeWeight = pigletsChgDto.getPigletsWeight();
+        checkState(changeWeight != null, "变动重量不能为空,猪号:" + pigletsChgDto.getPigCode());
         //checkState(changeWeight <= unweanCount, "wean.countInput.error");
 
+        doctorPigTrack.setCurrentMatingCount(0);
+
+        Map<String, Object> extra = doctorPigTrack.getExtraMap();
         //更新extra字段
         extra.put("partWeanPigletsCount", weanCount);
         extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
-        doctorPigTrack.addAllExtraMap(extra);
-        Long groupId = doctorPigTrack.getGroupId();
+        doctorPigTrack.setExtraMap(extra);
+        //Long groupId = doctorPigTrack.getGroupId();
         //全部断奶后, 初始化所有本次哺乳的信息
-        Long pigEventId = (Long) context.get("doctorPigEventId");
-        //全部断奶后, 初始化所有本次哺乳的信息
-        if (doctorPigTrack.getUnweanQty() == 0) {
-            doctorPigTrack.setStatus(PigStatus.Wean.getKey());
-            doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
-            doctorPigTrack.setFarrowQty(0);  //分娩数 0
-            doctorPigTrack.setFarrowAvgWeight(0D);
-            doctorPigTrack.setWeanAvgWeight(0D);
-            DoctorPig doctorPig = doctorPigDao.findById(doctorPigTrack.getPigId());
-            DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
-                    .type(PigEvent.WEAN.getKey())
-                    .pigId(doctorPigTrack.getPigId())
-                    .pigStatusBefore(PigStatus.FEED.getKey())
-                    .pigStatusAfter(PigStatus.Wean.getKey())
-                    .isAuto(IsOrNot.YES.getValue())
-                    .barnId(doctorPigTrack.getCurrentBarnId())
-                    .barnName(doctorPigTrack.getCurrentBarnName())
-                    .relPigEventId(pigEventId)
-                    .partweanDate(new Date())
-                    .farmId(doctorPigTrack.getFarmId())
-                    .weanCount(changeCount)
-                    .pigCode(doctorPig.getPigCode())
-                    .name(PigEvent.WEAN.getName())
-                    .weanAvgWeight(0D)
-                    .farmName(basic.getFarmName())
-                    .eventAt(basic.generateEventAtFromExtra(extra))
-                    .kind(DoctorPig.PIG_TYPE.SOW.getKey())
-                    .orgId(basic.getOrgId()).orgName(basic.getOrgName())
-                    .npd(0)
-                    .dpnpd(0)
-                    .pfnpd(0)
-                    .plnpd(0)
-                    .psnpd(0)
-                    .pynpd(0)
-                    .ptnpd(0)
-                    .jpnpd(0)
-                    .build();
-            doctorPigEventDao.create(doctorPigEvent);
-
-        }
-        doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
-        execution.getExpression().put("leftCount", (doctorPigTrack.getUnweanQty()));
+        //Long pigEventId = (Long) context.get("doctorPigEventId");
+//        //全部断奶后, 初始化所有本次哺乳的信息
+//        if (doctorPigTrack.getUnweanQty() == 0) {
+//            doctorPigTrack.setStatus(PigStatus.Wean.getKey());
+//            doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
+//            doctorPigTrack.setFarrowQty(0);  //分娩数 0
+//            doctorPigTrack.setFarrowAvgWeight(0D);
+//            doctorPigTrack.setWeanAvgWeight(0D);
+//
+//        }
+       // doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
 
         // 调用对应的猪猪群事件,对应的操作方式
-        checkState(notNull(doctorPigTrack.getGroupId()), "pigletsChg.groupId.notFound");
-        changePigletsChangeInfo(groupId, extra, basic, pigEventId);
-
         return doctorPigTrack;
     }
 
+    @Override
+    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
+        if (Objects.equals(doctorPigTrack.getUnweanQty(), 0)) {
+            DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) inputDto;
+            DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
+                    .partWeanDate(doctorPigEvent.getEventAt())
+                    .partWeanPigletsCount(0)
+                    .partWeanAvgWeight(0d)
+                    .build();
+            buildAutoEventCommonInfo(pigletsChgDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
+            doctorSowWeanHandler.handle(doctorEventInfoList, partWeanDto, basic);
+        }
 
-    private void changePigletsChangeInfo(Long groupId, Map<String, Object> extra, DoctorBasicInputInfoDto basic, Long pigEventId) {
-        RespHelper.orServEx(doctorGroupWriteService.groupEventChange(RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId)),
-                buildInputInfo(extra, basic, pigEventId)));
+        changePigletsChangeInfo(doctorPigTrack.getGroupId(), inputDto, basic, doctorPigEvent.getId());
     }
 
-    private DoctorChangeGroupInput buildInputInfo(Map<String, Object> mapInfo, DoctorBasicInputInfoDto basic, Long pigEventId) {
-        DoctorPigletsChgDto dto = BeanMapper.map(mapInfo, DoctorPigletsChgDto.class);
+    private void changePigletsChangeInfo(Long groupId, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic, Long pigEventId) {
+        RespHelper.orServEx(doctorGroupWriteService.groupEventChange(RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId)),
+                buildInputInfo(inputDto, basic, pigEventId)));
+    }
+
+    private DoctorChangeGroupInput buildInputInfo(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic, Long pigEventId) {
+        DoctorPigletsChgDto dto = (DoctorPigletsChgDto) inputDto;
         DoctorChangeGroupInput doctorChangeGroupInput = new DoctorChangeGroupInput();
         doctorChangeGroupInput.setEventAt(DateUtil.toDateString(dto.getPigletsChangeDate()));
         doctorChangeGroupInput.setChangeTypeId(dto.getPigletsChangeType());             //变动类型id

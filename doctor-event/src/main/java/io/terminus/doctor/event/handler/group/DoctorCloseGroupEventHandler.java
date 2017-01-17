@@ -1,19 +1,21 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.DataEventType;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
-import io.terminus.doctor.common.event.DoctorZkGroupEvent;
+import io.terminus.doctor.common.event.ZkGroupPublishDto;
+import io.terminus.doctor.common.event.ZkListenedGroupEvent;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorCloseGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -21,14 +23,13 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
 /**
  * Desc: 关闭猪群事件处理器
@@ -49,18 +50,19 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
     @Autowired
     public DoctorCloseGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                         DoctorGroupTrackDao doctorGroupTrackDao,
-                                        CoreEventDispatcher coreEventDispatcher,
                                         DoctorGroupDao doctorGroupDao,
                                         DoctorGroupEventDao doctorGroupEventDao,
-                                        DoctorBarnReadService doctorBarnReadService) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
+                                        DoctorBarnDao doctorBarnDao) {
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
 
     @Override
-    protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.CLOSE.getValue());
+
         //校验能否关闭
         checkCanClose(groupTrack);
 
@@ -92,15 +94,13 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.CLOSE);
 
         //发布统计事件
-        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
+        //publistGroupAndBarn(event);
 
         //发布zk事件
         try{
             // 向zk发送刷新消息的事件
-            Map<String, Object> publishData = Maps.newHashMap();
-            publishData.put("eventType", GroupEventType.CLOSE.getValue());
-            publishData.put("doctorGroupId", group.getId());
-            publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new DoctorZkGroupEvent(publishData)));
+            ZkGroupPublishDto zkGroupPublishDto = new ZkGroupPublishDto(group.getId(), event.getId(), event.getEventAt(), event.getType());
+            publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new ZkListenedGroupEvent(group.getOrgId(), group.getFarmId(), Lists.newArrayList(zkGroupPublishDto))));
         }catch(Exception e){
             log.error(Throwables.getStackTraceAsString(e));
         }

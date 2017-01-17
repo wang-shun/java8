@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dao;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
@@ -36,6 +37,15 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     public DoctorPigEvent queryLastPigEventById(Long pigId) {
         return this.getSqlSession().selectOne(sqlId("queryLastPigEventById"), pigId);
+    }
+
+    /**
+     *查询最新的手动事件
+     * @param pigId 猪id
+     * @return 最新事件
+     */
+    public DoctorPigEvent queryLastManualPigEventById(Long pigId) {
+        return this.getSqlSession().selectOne(sqlId("queryLastManualPigEventById"), pigId);
     }
 
     public DoctorPigEvent queryLastPigEventByPigIds(List<Long> pigIds) {
@@ -91,9 +101,18 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @deprecated 建议查询最近一次导致其断奶的事件，而不是单纯查询断奶事件
      * @return
      */
-    @Deprecated
     public DoctorPigEvent queryLastWean(Long pigId) {
         return this.getSqlSession().selectOne(sqlId("queryLastEvent"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.WEAN.getKey()).map());
+    }
+
+    /**
+     * 获取猪某一事件类型的最新事件
+     * @param pigId
+     * @param type
+     * @return
+     */
+    public DoctorPigEvent queryLastEventByType(Long pigId, Integer type) {
+        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", type).map());
     }
 
     /**
@@ -227,7 +246,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @return
      */
     public List<DoctorPigEvent> findOperators(Map<String, Object> criteria){
-        return getSqlSession().selectList(sqlId("findOperator"), criteria);
+        return getSqlSession().selectList(sqlId("findOperators"), criteria);
     }
 
     public List<DoctorPigEvent> findByPigId(Long pigId) {
@@ -270,5 +289,33 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     public void updatePigCode(Long pigId, String code) {
         sqlSession.update(sqlId("updatePigCode"), ImmutableMap.of("pigId", pigId, "pigCode", code));
+    }
+
+    /**
+     * 查询母猪胎次中数据平均值
+     * @param pigId
+     * @return
+     */
+    public Map<String, Object> querySowParityAvg(Long pigId) {
+        return sqlSession.selectOne("querySowParityAvg", pigId);
+    }
+
+    /**
+     * 查询最新的几个事件
+     * @param pigId 猪id
+     * @param limit 查询几条
+     * @return 猪事件列表
+     */
+    public List<DoctorPigEvent> limitPigEventOrderByEventAt(Long pigId, Integer limit) {
+        return getSqlSession().selectList(sqlId("limitPigEventOrderByEventAt"), ImmutableMap.of("pigId", pigId, "limit", MoreObjects.firstNonNull(limit, 1)));
+    }
+
+    /**
+     * 查询和猪群相关联的猪事件
+     * @param groupId 猪群id
+     * @return 猪事件
+     */
+    public List<DoctorPigEvent> findByGroupId(Long groupId) {
+        return getSqlSession().selectList(sqlId("findByGroupId"), ImmutableMap.of("groupId", groupId));
     }
 }

@@ -74,4 +74,11 @@ public class DoctorPigDao extends MyBatisDao<DoctorPig> {
     public DoctorPig findPigByFarmIdAndPigCode(Long farmId, String pigCode){
         return getSqlSession().selectOne(sqlId("findPigByFarmIdAndPigCode"), ImmutableMap.of("farmId", farmId, "pigCode", pigCode));
     }
+
+    /**
+     * 获取猪的数量（未离场的）
+     */
+    public Long getPigCount(Long farmId, DoctorPig.PigSex sex) {
+        return getSqlSession().selectOne(sqlId("getPigCount"), ImmutableMap.of("farmId", farmId, "sex", sex.getKey()));
+    }
 }

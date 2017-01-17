@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2016 杭州端点网络科技有限公司,陈增辉
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="DoctorMaterialPriceInWareHouse">
+    <resultMap id="DoctorMaterialPriceInWareHouseMap" type="DoctorMaterialPriceInWareHouse">
+        <result column="farm_id" property="farmId"/>
+        <result column="farm_name" property="farmName"/>
+        <result column="ware_house_id" property="wareHouseId"/>
+        <result column="ware_house_name" property="wareHouseName"/>
+        <result column="material_id" property="materialId"/>
+        <result column="material_name" property="materialName"/>
+        <result column="type" property="type"/>
+        <result column="provider_id" property="providerId"/>
+        <result column="unit_price" property="unitPrice"/>
+        <result column="remainder" property="remainder"/>
+        <result column="provider_time" property="providerTime"/>
+        <result column="extra" property="extra"/>
+        <result column="creator_id" property="creatorId"/>
+        <result column="updator_id" property="updatorId"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        
+    </resultMap>
+
+    <sql id="tb">
+        doctor_material_price_in_ware_houses
+    </sql>
+
+    <sql id="cols_all">
+        id, <include refid="cols_exclude_id" />
+    </sql>
+
+    <sql id="cols_exclude_id">
+        farm_id, farm_name, ware_house_id, ware_house_name, material_id, material_name, type, provider_id, unit_price, remainder, provider_time, extra, creator_id, updator_id, created_at, updated_at
+    </sql>
+
+    <sql id="vals">
+        #{farmId}, #{farmName}, #{wareHouseId}, #{wareHouseName}, #{materialId}, #{materialName}, #{type}, #{providerId}, #{unitPrice}, #{remainder}, #{providerTime}, #{extra}, #{creatorId}, #{updatorId}, now(), now()
+    </sql>
+
+    <insert id="create" parameterType="DoctorMaterialPriceInWareHouse" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        (<include refid="vals" />)
+    </insert>
+
+    <select id="findById" parameterType="long" resultMap="DoctorMaterialPriceInWareHouseMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByWareHouseAndMaterialId" parameterType="map" resultMap="DoctorMaterialPriceInWareHouseMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE ware_house_id = #{wareHouseId} and material_id = #{materialId}
+        order by provider_time asc
+    </select>
+
+    <select id="findByProviderId" parameterType="long" resultMap="DoctorMaterialPriceInWareHouseMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE provider_id = #{providerId}
+    </select>
+
+    <update id="update" parameterType="DoctorMaterialPriceInWareHouse">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            <if test="farmId != null">farm_id = #{farmId},</if>
+            <if test="farmName != null">farm_name = #{farmName},</if>
+            <if test="wareHouseId != null">ware_house_id = #{wareHouseId},</if>
+            <if test="wareHouseName != null">ware_house_name = #{wareHouseName},</if>
+            <if test="materialId != null">material_id = #{materialId},</if>
+            <if test="materialName != null">material_name = #{materialName},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="providerId != null">provider_id = #{providerId},</if>
+            <if test="unitPrice != null">unit_price = #{unitPrice},</if>
+            <if test="remainder != null">remainder = #{remainder},</if>
+            <if test="providerTime != null">provider_time = #{providerTime},</if>
+            <if test="extra != null">extra = #{extra},</if>
+            <if test="creatorId != null">creator_id = #{creatorId},</if>
+            <if test="updatorId != null">updator_id = #{updatorId},</if>
+            updated_at=now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE id = #{id}
+    </delete>
+
+    <sql id="criteria">
+        <if test="farmId != null"> and farm_id = #{farmId} </if>
+        <if test="warehouseId != null"> and ware_house_id = #{warehouseId} </if>
+        <if test="type != null"> and `type` = #{type} </if>
+        <if test="startAt != null"> and event_time &gt;= #{startAt} </if>
+        <if test="endAt != null"> and event_time &lt; endAt </if>
+    </sql>
+
+    <select id="stockAmount" parameterType="map" resultType="map">
+        select ware_house_id, ifnull(sum(remainder), 0) as count, ifnull(sum(unit_price * remainder), 0) as amount
+        from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        group by ware_house_id
+    </select>
+
+</mapper>

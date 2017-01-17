@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.event;
 
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import io.terminus.common.utils.Dates;
@@ -7,13 +8,11 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
-import io.terminus.doctor.event.constants.DoctorBasicEnums;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.search.group.GroupSearchWriteService;
+import io.terminus.doctor.event.manager.DoctorCommonReportManager;
+import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -21,7 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
+
+import static io.terminus.doctor.event.event.DoctorGroupPublishDto.filterBy;
 
 /**
  * Desc:
@@ -31,100 +34,119 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unused")
 public class DoctorGroupEventListener implements EventListener {
 
     @Autowired
     private DoctorKpiDao doctorKpiDao;
 
     @Autowired
-    private GroupSearchWriteService groupSearchWriteService;
-
-    @Autowired
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
-
-    @Autowired
-    private DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired
     private DoctorDailyReportCache doctorDailyReportCache;
 
+    @Autowired
+    private DoctorCommonReportWriteService doctorCommonReportWriteService;
+
+    @Autowired
+    private DoctorCommonReportManager doctorCommonReportManager;
+
+    private static final List<Integer> NEED_TYPES = Lists.newArrayList(
+            GroupEventType.MOVE_IN.getValue(),
+            GroupEventType.CHANGE.getValue(),
+            GroupEventType.TRANS_GROUP.getValue(),
+            GroupEventType.TURN_SEED.getValue(),
+            GroupEventType.TRANS_FARM.getValue()
+    );
+
     @AllowConcurrentEvents
     @Subscribe
     public void handleGroupEvent(ListenedGroupEvent groupEvent) {
-        log.info("[DoctorGroupEventListener]-> handle.group.event, groupEvent -> {}", groupEvent);
+        log.info("handle group event, event info:{}", groupEvent);
 
-        //更新猪群搜索
-        groupSearchWriteService.update(groupEvent.getGroupId());
-
-        DoctorGroupEvent event = doctorGroupEventDao.findById(groupEvent.getDoctorGroupEventId());
-        if (event == null) {
-            log.error("handle group event({}), but event not found!", groupEvent);
+        //不需要统计的事件直接返回
+        if (!NEED_TYPES.contains(groupEvent.getEventType())) {
+            log.info("this eventType({}) no need to handle", groupEvent.getEventType());
             return;
         }
 
-        GroupEventType eventType = GroupEventType.from(event.getType());
-        if (eventType == null) {
-            log.error("handle group event type not find, groupEvent:{}, event:{}", groupEvent, event);
+        Function<DoctorGroupPublishDto, Date> eventAtFunc = e -> Dates.startOfDay(e.getEventAt());
+        Function<DoctorGroupPublishDto, Date> monthFunc = e -> DateUtil.monthStart(e.getEventAt());
+
+        //更新日报
+        filterBy(groupEvent.getGroups(), DoctorGroupPublishDto::getPigType, eventAtFunc)
+                .forEach(event -> handleDaily(groupEvent.getOrgId(), groupEvent.getFarmId(), groupEvent.getEventType(), event));
+
+        //更新月报
+        filterBy(groupEvent.getGroups(), monthFunc)
+                .forEach(event -> handlyCommon(groupEvent.getFarmId(), groupEvent.getEventType(), event));
+        log.info("handleGroupEvent ok！");
+    }
+
+    //处理月报
+    private void handlyCommon(Long farmId, Integer eventType, DoctorGroupPublishDto publishDto) {
+        GroupEventType type = GroupEventType.from(eventType);
+        if (type == null) {
+            log.error("handle group event type not find, farmId:{}, eventType:{}, pigType:{}, eventAt:{}",
+                    farmId, eventType, publishDto.getPigType(), publishDto.getEventAt());
             return;
         }
 
-        switch (eventType) {
-            case MOVE_IN:
-                handleGroupLiveStock(event);
-                break;
-            case CHANGE:
-                handleGroupLiveStock(event);
-                handleChange(event);
-                break;
-            case TRANS_GROUP:
-                handleGroupLiveStock(event);
-                break;
-            case TURN_SEED:
-                handleGroupLiveStock(event);
-                break;
-            case TRANS_FARM:
-                handleGroupLiveStock(event);
-                break;
-            default:
-                break;
+        //所有的都更新存栏
+        doctorCommonReportManager.updateLiveStockChange(new DoctorCommonReportManager.FarmIdAndEventAt(farmId, publishDto.getEventAt()));
+
+        //如果是变动事件，处理下变动
+        if (Objects.equals(type, GroupEventType.CHANGE)) {
+            doctorCommonReportManager.updateSaleDead(new DoctorCommonReportManager.FarmIdAndEventAt(farmId, publishDto.getEventAt()));
         }
     }
 
-    //处理变动事件
-    private void handleChange(DoctorGroupEvent event) {
-        Date startAt = Dates.startOfDay(event.getEventAt());
-        Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
-
-        if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.DEAD.getId())
-                || Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
-            getDead(PigType.from(event.getPigType()), event.getFarmId(), startAt, endAt);
+    //处理日报
+    private void handleDaily(Long orgId, Long farmId, Integer eventType, DoctorGroupPublishDto publishDto) {
+        GroupEventType type = GroupEventType.from(eventType);
+        if (type == null) {
+            log.error("handle group event type not find, farmId:{}, eventType:{}, pigType:{}, eventAt:{}", 
+                    farmId, eventType, publishDto.getPigType(), publishDto.getEventAt());
             return;
         }
-        if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.SALE.getId())) {
-            getSale(PigType.from(event.getPigType()), event.getFarmId(), startAt, endAt);
+
+        handleGroupLiveStock(orgId, farmId, publishDto.getPigType(), publishDto.getEventAt());
+
+        //如果是变动事件，处理下变动
+        if (Objects.equals(type, GroupEventType.CHANGE)) {
+            handleChange(orgId, publishDto.getPigType(), publishDto.getEventAt());
         }
+    }
+
+    //处理变动事件(暂时不区分死淘和销售了，全部算更方便些)
+    private void handleChange(Long farmId, Integer pigType, Date eventAt) {
+        Date startAt = Dates.startOfDay(eventAt);
+        Date endAt = DateUtil.getDateEnd(new DateTime(eventAt)).toDate();
+        
+        getDead(PigType.from(pigType), farmId, startAt, endAt);
+        getSale(PigType.from(pigType), farmId, startAt, endAt);
     }
 
     //更新存栏相关的统计
-    private void handleGroupLiveStock(DoctorGroupEvent event) {
-        Date startAt = Dates.startOfDay(event.getEventAt());
+    private void handleGroupLiveStock(Long orgId, Long farmId, Integer pigType, Date eventAt) {
+        Date startAt = Dates.startOfDay(eventAt);
         Date endAt = Dates.startOfDay(new Date());
-        Long farmId = event.getFarmId();
 
         //更新数据库的存栏统计
-        doctorPigTypeStatisticWriteService.statisticGroup(event.getOrgId(), event.getFarmId());
+        doctorPigTypeStatisticWriteService.statisticGroup(orgId, farmId);
 
-        PigType pigType = PigType.from(event.getPigType());
-        if (pigType == null) {
-            log.error("group event pigType({}) not support! eventId:{}", event.getPigType(), event.getId());
+        PigType type = PigType.from(pigType);
+        if (type == null) {
+            log.error("group event pigType({}) not support!", pigType);
             return;
         }
 
         //更新到今天的存栏
         while (!startAt.after(endAt)) {
             //查询startAt 这条的日报是否存在，如果已经初始化过了，则不做处理
-            if (!doctorDailyReportCache.reportIsFullInit(event.getFarmId(), startAt)) {
-                getLiveStock(pigType, farmId, startAt);
+            if (!doctorDailyReportCache.reportIsFullInit(farmId, startAt)) {
+                getLiveStock(type, farmId, startAt);
             }
             startAt = new DateTime(startAt).plusDays(1).toDate();
         }

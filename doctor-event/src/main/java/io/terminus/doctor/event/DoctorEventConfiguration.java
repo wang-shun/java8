@@ -1,12 +1,13 @@
 package io.terminus.doctor.event;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
-import io.terminus.doctor.event.daily.DoctorDailyEventCount;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.handler.DoctorEntryHandler;
-import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
+import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
+import io.terminus.doctor.event.handler.DoctorPigEventHandler;
+import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgFarmEventHandler;
@@ -41,48 +42,30 @@ import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowRemovalEve
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowToChgLocationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowVaccinationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowWeanHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowFarrowingHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowFostersByHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowFostersHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowPigletsChgHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowPregCheckHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowWeanHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
 import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
 import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
 import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
 import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
-import io.terminus.doctor.event.search.barn.BarnSearchProperties;
-import io.terminus.doctor.event.search.barn.BaseBarnQueryBuilder;
-import io.terminus.doctor.event.search.barn.DefaultBarnQueryBuilder;
-import io.terminus.doctor.event.search.barn.DefaultIndexedBarnFactory;
-import io.terminus.doctor.event.search.barn.IndexedBarn;
-import io.terminus.doctor.event.search.barn.IndexedBarnFactory;
-import io.terminus.doctor.event.search.group.BaseGroupQueryBuilder;
-import io.terminus.doctor.event.search.group.DefaultGroupQueryBuilder;
-import io.terminus.doctor.event.search.group.DefaultIndexedGroupFactory;
-import io.terminus.doctor.event.search.group.GroupSearchProperties;
-import io.terminus.doctor.event.search.group.IndexedGroup;
-import io.terminus.doctor.event.search.group.IndexedGroupFactory;
-import io.terminus.doctor.event.search.pig.BasePigQueryBuilder;
-import io.terminus.doctor.event.search.pig.DefaultIndexedPigFactory;
-import io.terminus.doctor.event.search.pig.DefaultPigQueryBuilder;
-import io.terminus.doctor.event.search.pig.IndexedPig;
-import io.terminus.doctor.event.search.pig.IndexedPigFactory;
-import io.terminus.doctor.event.search.pig.PigSearchProperties;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.workflow.DoctorWorkflowConfiguration;
-import io.terminus.search.core.ESClient;
 import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Profile;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -94,7 +77,7 @@ import java.util.List;
 @ComponentScan(basePackages = {
         "io.terminus.doctor.event",
 })
-@Import({DoctorWorkflowConfiguration.class, DoctorCommonConfiguration.class})
+@Import({DoctorCommonConfiguration.class})
 @AutoConfigureAfter({MybatisAutoConfiguration.class})
 public class  DoctorEventConfiguration {
 
@@ -178,21 +161,46 @@ public class  DoctorEventConfiguration {
 
 
     /**
-     * 对应handler chain
+     * 对应event handler
      */
     @Bean
-    public DoctorEventHandlerChain doctorEventHandlerChain(
-            DoctorSemenHandler doctorSemenHandler,DoctorEntryHandler doctorEntryHandler,
-            DoctorChgFarmHandler doctorChgFarmHandler, DoctorChgLocationHandler doctorChgLocationHandler,
-            DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
-            DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
-        DoctorEventHandlerChain chain = new DoctorEventHandlerChain();
-        chain.setDoctorEventCreateHandlers(Lists.newArrayList(
-                doctorSemenHandler,doctorEntryHandler,
-                doctorChgFarmHandler, doctorChgLocationHandler,
-                doctorConditionHandler, doctorDiseaseHandler,
-                doctorRemovalHandler, doctorVaccinationHandler));
-        return chain;
+    public DoctorPigEventHandlers doctorPigEventHandlers(
+            DoctorEntryHandler doctorEntryHandler,
+            DoctorSemenHandler doctorSemenHandler,
+           DoctorSowFostersByHandler doctorSowFostersByHandler,
+            DoctorSowMatingHandler doctorSowMatingHandler,
+            DoctorSowPregCheckHandler doctorSowPregCheckHandler,
+            DoctorChgFarmHandler doctorChgFarmHandler,
+            DoctorChgLocationHandler doctorChgLocationHandler,
+            DoctorConditionHandler doctorConditionHandler,
+            DoctorDiseaseHandler doctorDiseaseHandler,
+            DoctorRemovalHandler doctorRemovalHandler,
+            DoctorVaccinationHandler doctorVaccinationHandler,
+            DoctorSowWeanHandler doctorSowWeanHandler,
+            DoctorSowFostersHandler doctorSowFostersHandler,
+            DoctorSowFarrowingHandler doctorSowFarrowingHandler,
+            DoctorSowPigletsChgHandler doctorSowPigletsChgHandler
+    ) {
+        Map<Integer, DoctorPigEventHandler> eventHandlerMap = Maps.newHashMap();
+        eventHandlerMap.put(PigEvent.ENTRY.getKey(), doctorEntryHandler);
+        eventHandlerMap.put(PigEvent.SEMEN.getKey(), doctorSemenHandler);
+        eventHandlerMap.put(PigEvent.FARROWING.getKey(), doctorSowFarrowingHandler);
+        eventHandlerMap.put(PigEvent.FOSTERS_BY.getKey(), doctorSowFostersByHandler);
+        eventHandlerMap.put(PigEvent.FOSTERS.getKey(), doctorSowFostersHandler);
+        eventHandlerMap.put(PigEvent.MATING.getKey(), doctorSowMatingHandler);
+        eventHandlerMap.put(PigEvent.PIGLETS_CHG.getKey(), doctorSowPigletsChgHandler);
+        eventHandlerMap.put(PigEvent.PREG_CHECK.getKey(), doctorSowPregCheckHandler);
+        eventHandlerMap.put(PigEvent.WEAN.getKey(), doctorSowWeanHandler);
+        eventHandlerMap.put(PigEvent.CHG_FARM.getKey(), doctorChgFarmHandler);
+        eventHandlerMap.put(PigEvent.CHG_LOCATION.getKey(), doctorChgLocationHandler);
+        eventHandlerMap.put(PigEvent.CONDITION.getKey(), doctorConditionHandler);
+        eventHandlerMap.put(PigEvent.DISEASE.getKey(), doctorDiseaseHandler);
+        eventHandlerMap.put(PigEvent.REMOVAL.getKey(), doctorRemovalHandler);
+        eventHandlerMap.put(PigEvent.VACCINATION.getKey(), doctorVaccinationHandler);
+
+        DoctorPigEventHandlers doctorEventHandlers = new DoctorPigEventHandlers();
+        doctorEventHandlers.setEventHandlerMap(eventHandlerMap);
+        return doctorEventHandlers;
     }
 
     @Configuration
@@ -208,66 +216,6 @@ public class  DoctorEventConfiguration {
         public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
                                             @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
             return new Publisher(zkClientFactory, zkTopic);
-        }
-    }
-
-    @Configuration
-    @ConditionalOnClass(ESClient.class)
-    @ComponentScan({"io.terminus.search.api"})
-    public static class SearchConfiguration {
-
-        @Bean
-        public ESClient esClient(@Value("${search.host:localhost}") String host,
-                                 @Value("${search.port:9200}") Integer port) {
-            return new ESClient(host, port);
-        }
-
-        @Configuration
-        @EnableConfigurationProperties(PigSearchProperties.class)
-        protected static class PigSearchConfiguration {
-            @Bean
-            @ConditionalOnMissingBean(IndexedPigFactory.class)
-            public IndexedPigFactory<? extends IndexedPig> indexedPigFactory(DoctorPigDao doctorPigDao) {
-                return new DefaultIndexedPigFactory(doctorPigDao);
-            }
-
-            @Bean
-            @ConditionalOnMissingBean(BasePigQueryBuilder.class)
-            public BasePigQueryBuilder pigQueryBuilder() {
-                return new DefaultPigQueryBuilder();
-            }
-        }
-
-        @Configuration
-        @EnableConfigurationProperties(GroupSearchProperties.class)
-        protected static class GroupSearchConfiguration {
-            @Bean
-            @ConditionalOnMissingBean(IndexedGroupFactory.class)
-            public IndexedGroupFactory<? extends IndexedGroup> indexedGroupFactory() {
-                return new DefaultIndexedGroupFactory();
-            }
-
-            @Bean
-            @ConditionalOnMissingBean(BaseGroupQueryBuilder.class)
-            public BaseGroupQueryBuilder groupQueryBuilder() {
-                return new DefaultGroupQueryBuilder();
-            }
-        }
-
-        @Configuration
-        @EnableConfigurationProperties(BarnSearchProperties.class)
-        protected static class BarnSearchConfiguration {
-            @Bean
-            @ConditionalOnMissingBean(IndexedBarnFactory.class)
-            public IndexedBarnFactory<? extends IndexedBarn> indexedBarnFactory(DoctorBarnReadService doctorBarnReadService) {
-                return new DefaultIndexedBarnFactory(doctorBarnReadService);
-            }
-
-            @Bean
-            @ConditionalOnMissingBean(BaseBarnQueryBuilder.class)
-            public BaseBarnQueryBuilder BarnQueryBuilder() {
-                return new DefaultBarnQueryBuilder();
-            }
         }
     }
 }

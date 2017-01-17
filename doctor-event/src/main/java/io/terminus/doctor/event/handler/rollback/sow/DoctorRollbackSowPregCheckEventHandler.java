@@ -22,6 +22,7 @@ public class DoctorRollbackSowPregCheckEventHandler extends DoctorAbstractRollba
                 .esPigId(pigEvent.getPigId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_PIG, RollbackType.DAILY_PREG_CHECK))
                 .farmId(pigEvent.getFarmId())
+                .orgId(pigEvent.getOrgId())
                 .eventAt(pigEvent.getEventAt())
                 .build();
         return Lists.newArrayList(doctorRollbackDto);
@@ -29,7 +30,7 @@ public class DoctorRollbackSowPregCheckEventHandler extends DoctorAbstractRollba
 
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        return Objects.equals(pigEvent.getType(), PigEvent.PREG_CHECK.getKey()) && isLastEvent(pigEvent);
+        return Objects.equals(pigEvent.getType(), PigEvent.PREG_CHECK.getKey());
     }
 
     @Override

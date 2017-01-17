@@ -16,7 +16,7 @@ import java.util.Objects;
 public class DoctorRollbackBoarSemenEventHandler extends DoctorAbstractRollbackPigEventHandler {
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        return Objects.equals(pigEvent.getType(), PigEvent.SEMEN.getKey()) && isLastEvent(pigEvent);
+        return Objects.equals(pigEvent.getType(), PigEvent.SEMEN.getKey());
     }
 
     @Override

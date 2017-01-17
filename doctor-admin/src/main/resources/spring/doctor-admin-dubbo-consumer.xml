@@ -71,9 +71,6 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService" id="DoctorMessageRuleRoleReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleRoleWriteService" id="doctorMessageRuleRoleWriteService" check="false"/>
 
-    <!--config-->
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.config.service.ConfigReadService" id="configReadService" check="false"/>
-
     <!-- article service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleReadService" id="articleReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleWriteService" id="articleWriteService" check="false"/>

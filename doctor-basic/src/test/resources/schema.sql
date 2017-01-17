@@ -93,3 +93,28 @@ CREATE TABLE `doctor_user_sellers` (
 ) COMMENT = '商家子账户表';
 CREATE INDEX idx_user_seller_user_id ON `doctor_user_sellers` (`user_id`);
 CREATE INDEX idx_user_seller_sub_id ON `doctor_user_sellers` (shop_id);
+
+
+
+CREATE TABLE `doctor_material_price_in_ware_houses` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '冗余仓库信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场姓名',
+  `ware_house_id` bigint(20) unsigned NOT NULL COMMENT '仓库信息',
+  `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `material_id` bigint(20) NOT NULL COMMENT '物料Id',
+  `material_name` varchar(64) DEFAULT NULL COMMENT '物料名称',
+  `type` smallint(6) DEFAULT NULL COMMENT '仓库类型, 冗余',
+  `provider_id` bigint(20) NOT NULL COMMENT '入库事件id',
+  `unit_price` bigint(20) NOT NULL COMMENT '本次入库单价，单位为“分”',
+  `remainder` decimal(23,3) NOT NULL COMMENT '本次入库量的剩余量，比如本次入库100个，那么就是这100个的剩余量，减少到0时删除',
+  `provider_time` datetime NOT NULL COMMENT '入库时间，冗余字段',
+  `extra` text COMMENT '扩展',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `provider_id_UNIQUE` (`provider_id`),
+  KEY `ware_house_id_index` (`ware_house_id`)
+) COMMENT='仓库中各物料每次入库的剩余量';

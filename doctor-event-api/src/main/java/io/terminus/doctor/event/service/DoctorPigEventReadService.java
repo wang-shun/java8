@@ -2,7 +2,9 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
+import io.terminus.doctor.event.dto.DoctorSuggestPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
 import javax.validation.constraints.NotNull;
@@ -61,6 +63,14 @@ public interface DoctorPigEventReadService {
     Response<List<Integer>> queryPigEvents(@NotNull(message = "input.pigIds.empty") List<Long> pigIds);
 
     /**
+     * 查询某一猪场可执行此事件的猪
+     * @param eventType 事件类型
+     * @param farmId 猪场id
+     * @return
+     */
+    Response<List<DoctorSuggestPig>> suggestPigsByEvent(Integer eventType, Long farmId, String pigCode, Integer sex);
+
+    /**
      * 通过 id 获取 PigEvent
      * @param id
      * @return
@@ -101,6 +111,13 @@ public interface DoctorPigEventReadService {
     Response<Boolean> isLastEvent(@NotNull(message = "input.pigId.empty") Long pigId, @NotNull(message = "eventId.not.null") Long eventId);
 
     /**
+     * 判断是否是最新手动事件
+     * @param pigId 猪id
+     * @return true 是最新事件, false 不是
+     */
+    Response<Boolean> isLastManualEvent(@NotNull(message = "input.pigId.empty") Long pigId, @NotNull(message = "eventId.not.null") Long eventId);
+
+    /**
      * 查询猪回滚事件
      * @param pigId
      * @return
@@ -128,5 +145,18 @@ public interface DoctorPigEventReadService {
      */
     Response<List<DoctorPigEvent>> addWeanEventAfterFosAndPigLets();
 
+    /**
+     * 查询母猪胎次中数据平均值
+     * @param pigId
+     * @return
+     */
+    Response<DoctorSowParityAvgDto> querySowParityAvg(@NotNull(message = "input.pigId.empty") Long pigId);
 
+    /**
+     *  获取猪某一类型的最新事件
+     * @param pigId
+     * @param type
+     * @return
+     */
+    Response<DoctorPigEvent> findLastEventByType(@NotNull(message = "input.pigId.empty") Long pigId, Integer type);
 }

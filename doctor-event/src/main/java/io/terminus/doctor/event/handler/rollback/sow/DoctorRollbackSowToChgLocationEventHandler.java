@@ -19,7 +19,7 @@ import java.util.Objects;
 public class DoctorRollbackSowToChgLocationEventHandler extends DoctorAbstractRollbackPigEventHandler{
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        return (Objects.equals(pigEvent.getType(), PigEvent.TO_MATING.getKey()) || Objects.equals(pigEvent.getType(), PigEvent.TO_FARROWING.getKey())) && isLastEvent(pigEvent);
+        return (Objects.equals(pigEvent.getType(), PigEvent.TO_MATING.getKey()) || Objects.equals(pigEvent.getType(), PigEvent.TO_FARROWING.getKey()));
     }
 
     @Override
@@ -34,12 +34,14 @@ public class DoctorRollbackSowToChgLocationEventHandler extends DoctorAbstractRo
                 .esBarnId(dto.getChgLocationFromBarnId())
                 .esPigId(pigEvent.getPigId())
                 .farmId(pigEvent.getFarmId())
+                .orgId(pigEvent.getOrgId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG, RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT))
                 .eventAt(pigEvent.getEventAt())
                 .build();
         DoctorRollbackDto doctorRollbackDto1 = DoctorRollbackDto.builder()
                 .esBarnId(dto.getChgLocationToBarnId())
                 .farmId(pigEvent.getFarmId())
+                .orgId(pigEvent.getOrgId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN))
                 .eventAt(pigEvent.getEventAt())
                 .build();

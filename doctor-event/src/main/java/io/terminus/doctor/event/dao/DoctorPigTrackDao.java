@@ -4,6 +4,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.event.dto.DoctorSuggestPig;
+import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPigStatusCount;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -121,11 +123,29 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
     }
 
     /**
+     * 根据猪舍ids统计猪的数量
+     * @param barnIds 猪舍ids
+     * @return 猪的数量
+     */
+    public Long countByBarnIds(List<Long> barnIds) {
+        return this.getSqlSession().selectOne(sqlId("countByPigTypes"), ImmutableMap.of(barnIds, barnIds));
+    }
+
+    /**
      * 根据猪群id查询哺乳母猪的跟踪
      * @param groupId 猪群id
      * @return 母猪跟踪
      */
     public List<DoctorPigTrack> findFeedSowTrackByGroupId(Long groupId) {
         return getSqlSession().selectList(sqlId("findFeedSowTrackByGroupId"), ImmutableMap.of("groupId", groupId, "status", PigStatus.FEED.getKey()));
+    }
+
+    /**
+     * 根据事件suggestpig
+     * @param suggestPigSearch 查询条件
+     * @return
+     */
+    public List<DoctorSuggestPig> suggestPigs(DoctorSuggestPigSearch suggestPigSearch) {
+        return getSqlSession().selectList(sqlId("suggestPigs"), suggestPigSearch);
     }
 }

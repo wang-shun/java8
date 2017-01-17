@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -24,6 +25,8 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
+import io.terminus.doctor.web.front.event.dto.DoctorBatchGroupEventDto;
+import io.terminus.doctor.web.front.event.dto.DoctorBatchNewGroupEventDto;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupDetailEventsDto;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupEventPagingDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
@@ -104,6 +107,16 @@ public class DoctorGroupEvents {
     }
 
     /**
+     * 批量新建猪群
+     * @param batchNewGroupEventDto 批量新建信息
+     * @return
+     */
+    @RequestMapping(value = "/batchNew", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Boolean batchCreateNewGroup(@RequestBody DoctorBatchNewGroupEventDto batchNewGroupEventDto) {
+        return RespHelper.or500(doctorGroupWebService.batchNewGroupEvent(batchNewGroupEventDto));
+    }
+
+    /**
      * 录入猪群事件
      *
      * @param groupId   猪群id
@@ -120,6 +133,15 @@ public class DoctorGroupEvents {
         return RespHelper.or500(doctorGroupWebService.createGroupEvent(groupId, eventType, data));
     }
 
+    /**
+     * 批量猪群事件
+     * @param batchGroupEventDto 批量事件输入封装
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/batchOther", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Boolean batchCreateGroupEvent(@RequestBody DoctorBatchGroupEventDto batchGroupEventDto) {
+        return RespHelper.or500(doctorGroupWebService.batchGroupEvent(batchGroupEventDto));
+    }
     /**
      * 根据猪群id查询可以操作的事件类型
      *
@@ -162,15 +184,17 @@ public class DoctorGroupEvents {
      * 查询猪群详情
      *
      * @param groupId 猪群id
+     * @param eventSize 事件大小
      * @return 猪群详情
      */
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
-    public DoctorGroupDetailEventsDto findGroupDetailByGroupId(@RequestParam("groupId") Long groupId) {
+    public DoctorGroupDetailEventsDto findGroupDetailByGroupId(@RequestParam("groupId") Long groupId,
+                                                               @RequestParam(value = "eventSize", required = false) Integer eventSize) {
         DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
 
         //查询猪群的事件, 默认3条
         List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(
-                groupDetail.getGroup().getFarmId(), groupId, null, null, 3)).getData();
+                groupDetail.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3))).getData();
 
         transFromUtil.transFromGroupEvents(groupEvents);
         DoctorGroupEvent rollbackEvent = RespHelper.or500(doctorGroupReadService.canRollbackEvent(groupId));
@@ -323,7 +347,7 @@ public class DoctorGroupEvents {
     @RequestMapping(value = "/groupEvents")
     @ResponseBody
     public List<String> queryGroupEvents() {
-        return Arrays.asList(GroupEventType.values()).stream().map(groupEventType -> groupEventType.getDesc()).collect(Collectors.toList());
+        return Arrays.stream(GroupEventType.values()).map(GroupEventType::getDesc).collect(Collectors.toList());
     }
 
     /**

@@ -1,9 +1,11 @@
 package io.terminus.doctor.event.handler;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableMap;
-import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -11,165 +13,116 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
-import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 
-import java.util.Map;
-
-import static io.terminus.common.utils.Arguments.notNull;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 /**
- * Created by yaoqijun.
- * Date:2016-05-27
- * Email:yaoqj@terminus.io
- * Descirbe: workflow 事件处理方式
+ * Created by xjn.
+ * Date:2017/1/3
  */
 @Slf4j
-public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHandler {
-
-    protected final DoctorPigDao doctorPigDao;
-    protected final DoctorPigEventDao doctorPigEventDao;
-    protected final DoctorPigTrackDao doctorPigTrackDao;
-    protected final DoctorPigSnapshotDao doctorPigSnapshotDao;
-    protected final DoctorRevertLogDao doctorRevertLogDao;
+public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandler {
 
     @Autowired
-    public DoctorAbstractEventHandler(DoctorPigDao doctorPigDao,
-                                      DoctorPigEventDao doctorPigEventDao,
-                                      DoctorPigTrackDao doctorPigTrackDao,
-                                      DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                      DoctorRevertLogDao doctorRevertLogDao) {
-        this.doctorPigEventDao = doctorPigEventDao;
-        this.doctorPigDao = doctorPigDao;
-        this.doctorPigTrackDao = doctorPigTrackDao;
-        this.doctorPigSnapshotDao = doctorPigSnapshotDao;
-        this.doctorRevertLogDao = doctorRevertLogDao;
+    protected  DoctorPigDao doctorPigDao;
+    @Autowired
+    protected  DoctorPigEventDao doctorPigEventDao;
+    @Autowired
+    protected  DoctorPigTrackDao doctorPigTrackDao;
+    @Autowired
+    protected  DoctorPigSnapshotDao doctorPigSnapshotDao;
+    @Autowired
+    protected  DoctorRevertLogDao doctorRevertLogDao;
+    @Autowired
+    protected DoctorBarnDao doctorBarnDao;
+
+    protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+
+    @Override
+    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+        checkEventAt(eventDto);
     }
 
     @Override
-    public Boolean preHandler(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) throws RuntimeException {
-        // 默认可执行
-        return Boolean.TRUE;
-    }
+    public void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
 
-    @Override
-    public void handler(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) throws RuntimeException {
-        // create event info
-        DoctorPigEvent doctorPigEvent = buildAllPigDoctorEvent(basic, extra);
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+        //获取镜像有关event和track
+        DoctorPigTrack pigSnapshotTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        DoctorPigEvent pigSnapshotEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
 
-        eventCreatePrepare(doctorPigEvent, doctorPigTrack, basic, extra, context);
+        //1.创建事件
+        DoctorPigEvent doctorPigEvent = buildPigEvent(basic, inputDto);
         doctorPigEventDao.create(doctorPigEvent);
-        context.put("doctorPigEventId", doctorPigEvent.getId());
 
-        // create track snapshot
-        createPigTrackSnapshot(doctorPigEvent, basic, extra, context);
-    }
+        //2.创建镜像
+        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(pigSnapshotTrack, pigSnapshotEvent,  doctorPigEvent.getId());
+        doctorPigSnapshotDao.create(doctorPigSnapshot);
 
-    @Override
-    public void afterHandler(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) throws RuntimeException {
+        //3.创建或更新track
+        DoctorPigTrack doctorPigTrack = createOrUpdatePigTrack(basic, inputDto);
+        doctorPigTrackDao.update(doctorPigTrack);
 
-    }
+        //4.特殊处理
+        specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
 
+        //5.记录发生的事件信息
+        DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
+        DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
+                .orgId(doctorPigEvent.getOrgId())
+                .farmId(doctorPigEvent.getFarmId())
+                .eventId(doctorPigEvent.getId())
+                .eventAt(doctorPigEvent.getEventAt())
+                .kind(doctorPigEvent.getKind())
+                .mateType(doctorPigEvent.getDoctorMateType())
+                .pregCheckResult(doctorPigEvent.getPregCheckResult())
+                .businessId(doctorPigEvent.getPigId())
+                .code(doctorPigEvent.getPigCode())
+                .status(doctorPigTrack.getStatus())
+                .businessType(DoctorEventInfo.Business_Type.PIG.getValue())
+                .eventType(doctorPigEvent.getType())
+                .pigType(doctorBarn.getPigType())
+                .build();
+        doctorEventInfoList.add(doctorEventInfo);
 
-    /**
-     * event 事件 回掉类型接口
-     *
-     * @param basicInputInfoDto
-     * @param extra
-     * @param context
-     */
-    private void eventCreatePrepare(DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
-                                    Map<String, Object> extra, Map<String, Object> context) {
-        //添加当前事件发生前猪的状态
-        doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
-        eventCreatePreHandler(doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
-    }
-
-    /**
-     * 用于子类的覆盖
-     *
-     * @param doctorPigEvent
-     * @param doctorPigTrack
-     * @param basicInputInfoDto
-     * @param extra
-     * @param context
-     */
-    protected void eventCreatePreHandler(DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
-                                         Map<String, Object> extra, Map<String, Object> context) {
-
+        //6.触发事件
+        triggerEvent(doctorEventInfoList, doctorPigEvent, doctorPigTrack, inputDto, basic);
     }
 
     /**
-     * event 事件创建后用于二次更新
-     *
-     * @param basicInputInfoDto
-     * @param extra
-     * @param context
-     */
-    private void eventCreatedAfter(DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
-                                   Map<String, Object> extra, Map<String, Object> context) {
-
-
-        eventCreateAfterHandler(doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
-
-        //往事件当中添加事件发生之后猪的状态
-        doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
-        //添加时间发生之后母猪的胎次
-        doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
-        doctorPigEventDao.update(doctorPigEvent);
-    }
-
-    /**
-     * event 事件创建后用于二次更新 用于子类的覆盖
-     *
-     * @param doctorPigEvent
-     * @param doctorPigTrack
-     * @param basicInputInfoDto
-     * @param extra
-     * @param context
-     */
-    protected void eventCreateAfterHandler(DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
-                                           Map<String, Object> extra, Map<String, Object> context) {
-
-    }
-
-    /**
-     * 事件对母猪的状态信息的影响
-     *
-     * @param doctorPigTrack 基础的母猪事件信息
-     * @param basic          录入基础信息内容
-     * @param extra          事件关联的信息内容
-     * @param content        执行上下文信息
+     * 构建基础事件信息
+     * @param basic
+     * @param inputDto
      * @return
      */
-    protected abstract DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack,
-                                                               DoctorBasicInputInfoDto basic,
-                                                               Map<String, Object> extra, Map<String, Object> content);
-
-    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, Map<String, Object> extra) {
-
-    }
-
-    protected DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
-        AbstractPigEventInputDto abstractPigEventInputDto = DoctorBasicInputInfoDto.transFromPigEventAndExtra(PigEvent.from(basic.getEventType()), extra);
+    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName())
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
-                .pigId(basic.getPigId()).pigCode(basic.getPigCode())
-                .eventAt(basic.generateEventAtFromExtra(extra)).type(basic.getEventType())
-                .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
-                .barnId(basic.getBarnId()).barnName(basic.getBarnName())
-                .operatorId(abstractPigEventInputDto.getOperatorId()).operatorName(abstractPigEventInputDto.getOperatorName())
-                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName()).isAuto(MoreObjects.firstNonNull(basic.getIsAuto(), IsOrNot.NO.getValue()))
-                .relPigEventId(basic.getRelPigEventId())
+                .pigId(inputDto.getPigId()).pigCode(inputDto.getPigCode())
+                .eventAt(generateEventAt(inputDto.eventAt())).type(inputDto.getEventType())
+                .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName())
+                .kind(inputDto.getPigType()).relPigEventId(inputDto.getRelPigEventId()).relGroupEventId(inputDto.getRelGroupEventId())
+                .name(inputDto.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))//.relEventId(basic.getRelEventId())
+                .operatorId(MoreObjects.firstNonNull(inputDto.getOperatorId(), basic.getStaffId()))
+                .operatorName(StringUtils.hasText(inputDto.getOperatorName()) ? inputDto.getOperatorName() : basic.getStaffName())
+                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
+                .isAuto(MoreObjects.firstNonNull(inputDto.getIsAuto(), IsOrNot.NO.getValue()))
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)
@@ -179,45 +132,119 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                 .ptnpd(0)
                 .jpnpd(0)
                 .build();
-        doctorPigEvent.setExtraMap(extra);
-        //查询上次的事件
-        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventInWorkflow(basic.getPigId(), null);
-        if (notNull(lastEvent)) {
-            doctorPigEvent.setRelEventId(lastEvent.getId());
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        if (doctorPigTrack != null) {
+            doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
+            doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
         }
+        doctorPigEvent.setExtraMap(inputDto.toMap());
         return doctorPigEvent;
     }
 
     //创建猪跟踪和镜像表
-    protected void createPigTrackSnapshot(DoctorPigEvent doctorPigEvent, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        // update track info
+    protected DoctorPigSnapshot createPigSnapshot(DoctorPigTrack doctorPigTrack, DoctorPigEvent doctorPigEvent, Long currentEventId) {
         DoctorPig snapshotPig = doctorPigDao.findById(doctorPigEvent.getPigId());
-        DoctorPigTrack snapshotTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
-        DoctorPigTrack doctorPigTrack = BeanMapper.map(snapshotTrack, DoctorPigTrack.class);
-
-        DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(doctorPigTrack, basic, extra, context);
-        refreshPigTrack.setUpdatorId(basic.getStaffId());
-        refreshPigTrack.setUpdatorName(basic.getStaffName());
-        doctorPigTrackDao.update(refreshPigTrack);
-        //二次更新event
-        eventCreatedAfter(doctorPigEvent, refreshPigTrack, basic, extra, context);
-        afterEventCreateHandle(doctorPigEvent, refreshPigTrack, extra);
 
         //创建猪镜像
-        DoctorPigSnapshot snapshot = DoctorPigSnapshot.builder()
+        return DoctorPigSnapshot.builder()
                 .pigId(snapshotPig.getId())
                 .farmId(snapshotPig.getFarmId())
                 .orgId(snapshotPig.getOrgId())
-                .eventId(doctorPigEvent.getId())
+                .eventId(currentEventId)
                 .pigInfo(JsonMapper.nonEmptyMapper().toJson(
-                        DoctorPigSnapShotInfo.builder().pig(snapshotPig).pigTrack(snapshotTrack).pigEvent(doctorPigEvent).build()))
+                        DoctorPigSnapShotInfo.builder().pig(snapshotPig).pigTrack(doctorPigTrack).pigEvent(doctorPigEvent).build()))
                 .build();
-        doctorPigSnapshotDao.create(snapshot);
-
-        context.put("createEventResult",
-                JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
-                        ImmutableMap.of("doctorPigId", basic.getPigId(),
-                                "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", snapshot.getId())));
     }
 
+    /**
+     * 构建需要更新的track信息
+     * @param basic
+     * @param inputDto
+     * @return
+     */
+    protected abstract DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto);
+
+    /**
+     * 事件的创建后的补充和特殊处理
+     * @param doctorPigEvent
+     * @param doctorPigTrack
+     * @param inputDto
+     * @param basic
+     */
+    protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
+        doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
+        doctorPigEventDao.update(doctorPigEvent);
+    }
+
+    /**
+     * 触发事件, 触发其他事件时需要实现此方法
+     * @param doctorEventInfoList
+     * @param doctorPigEvent
+     * @param doctorPigTrack
+     * @param inputDto 事件输入信息
+     * @param basic 基础信息
+     */
+    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
+
+    }
+
+    /**
+     * 构建自动事件的共有信息(原事件与触发事件为同一头猪时)
+     * @param fromInputDto 原事件信息
+     * @param toInputDto 被触发事件信息
+     * @param basic 基础信息
+     * @param pigEvent 被触发的事件
+     */
+    protected void buildAutoEventCommonInfo(BasePigEventInputDto fromInputDto, BasePigEventInputDto toInputDto, DoctorBasicInputInfoDto basic, PigEvent pigEvent, Long fromEventId) {
+        toInputDto.setIsAuto(IsOrNot.YES.getValue());
+        toInputDto.setPigId(fromInputDto.getPigId());
+        toInputDto.setPigCode(fromInputDto.getPigCode());
+        toInputDto.setPigType(fromInputDto.getPigType());
+        toInputDto.setBarnId(fromInputDto.getBarnId());
+        toInputDto.setBarnName(fromInputDto.getBarnName());
+        toInputDto.setRelPigEventId(fromEventId);
+        toInputDto.setEventName(pigEvent.getName());
+        toInputDto.setEventType(pigEvent.getKey());
+        toInputDto.setEventDesc(pigEvent.getDesc());
+    }
+
+    protected Date generateEventAt(Date eventAt){
+        if(eventAt != null){
+            Date now = new Date();
+            if(DateUtil.inSameDate(eventAt, now)){
+                // 如果处在今天, 则使用此刻瞬间
+                return now;
+            } else {
+                // 如果不在今天, 则将时间置为0, 只保留日期
+                return Dates.startOfDay(eventAt);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 事件日期校验
+     * @param inputDto
+     */
+    private void checkEventAt(BasePigEventInputDto inputDto) {
+        if (Objects.equals(inputDto.getPigType(), PigEvent.ENTRY.getKey())) {
+            return;
+        }
+        try {
+            Date eventAt = inputDto.eventAt();
+            if(eventAt == null){
+                throw new ServiceException("event.at.illegal");
+            }
+            DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
+            if (lastEvent != null) {
+                if (new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime()) && eventAt.before(DateUtil.toDate(DateTime.now().plusDays(1).toString(DateTimeFormat.forPattern("yyyy-MM-dd"))))) {
+                    return;
+                } else {
+                    throw new ServiceException("event.at.illegal");
+                }
+            }
+        } catch (Exception e) {
+            throw new ServiceException("event.at.illegal");
+        }
+    }
 }

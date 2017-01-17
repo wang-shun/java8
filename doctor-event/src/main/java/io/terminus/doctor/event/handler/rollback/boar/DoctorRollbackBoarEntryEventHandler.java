@@ -24,8 +24,7 @@ public class DoctorRollbackBoarEntryEventHandler extends DoctorAbstractRollbackP
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
         return Objects.equals(pigEvent.getType(), PigEvent.ENTRY.getKey()) &&
-                Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.BOAR.getKey()) &&
-                isLastEvent(pigEvent);
+                Objects.equals(pigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey());
     }
 
     @Override
@@ -49,6 +48,7 @@ public class DoctorRollbackBoarEntryEventHandler extends DoctorAbstractRollbackP
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG, RollbackType.SEARCH_PIG_DELETE,
                         RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT))
                 .farmId(pigEvent.getFarmId())
+                .orgId(pigEvent.getOrgId())
                 .eventAt(pigEvent.getEventAt())
                 .build();
         return Lists.newArrayList(doctorRollbackDto);

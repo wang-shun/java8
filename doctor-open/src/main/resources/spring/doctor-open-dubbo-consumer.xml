@@ -23,10 +23,6 @@
     <dubbo:reference version="1.0.0" interface="io.terminus.parana.file.service.UserFileService" id="userFileService" check="false" retries="0"/>
     <dubbo:reference version="1.0.0" interface="io.terminus.parana.file.service.UserFolderService" id="userFolderService" check="false" retries="0"/>
 
-    <!-- config service -->
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.config.service.ConfigReadService" id="configReadService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.config.service.ConfigWriteService" id="configWriteService" check="false"/>
-
     <!--farm service-->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmReadService" id="doctorFarmReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmWriteService" id="doctorFarmWriteService" check="false"/>
