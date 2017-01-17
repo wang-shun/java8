@@ -965,7 +965,7 @@ public class DoctorImportDataService {
             return DateUtil.toDate(remark.substring(remark.length() - 10, remark.length()));
         } catch (Exception e) {
             log.error("get check date by remark failed, remark:{}, cause:{}", remark, Throwables.getStackTraceAsString(e));
-            return null;
+            throw new JsonResponseException("获取妊娠检查日期失败，请检查：" + remark);
         }
     }
 
