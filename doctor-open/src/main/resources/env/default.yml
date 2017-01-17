@@ -116,3 +116,5 @@ service-domain:
   pigmall: http://mphoenix.xrnm.com?navigation=1
   neverest: xxx
   pigtrade: xxx
+
+open.domain: http://www.xrnm.com
