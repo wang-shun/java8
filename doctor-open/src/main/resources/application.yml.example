@@ -35,3 +35,6 @@ zookeeper-pigmall:
   host: 127.0.0.1
   port: 2181
   cacheTopic: pigmall.cache.user.clear # pigmall 电商系统的 cacheTopic
+
+open:
+  domain: www.xrnm.com
