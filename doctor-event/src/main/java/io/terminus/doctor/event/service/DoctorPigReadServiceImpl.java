@@ -75,7 +75,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
     private final DoctorPigJoinDao doctorPigJoinDao;
 
-    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM");
+    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyyMM");
 
     @Autowired
     public DoctorPigReadServiceImpl(DoctorPigDao doctorPigDao, DoctorPigTrackDao doctorPigTrackDao,
@@ -155,14 +155,14 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                 return Response.ok(Paging.empty());
             }
             List<DoctorPig> doctorPigs = paging.getData();
-            List<DoctorPigTrack> doctorPigTracks = doctorPigTrackDao.findByPigIds(doctorPigs.stream().map(s->s.getId()).collect(Collectors.toList()));
+            List<DoctorPigTrack> doctorPigTracks = doctorPigTrackDao.findByPigIds(doctorPigs.stream().map(DoctorPig::getId).collect(Collectors.toList()));
 
             Map<Long, List<DoctorPigEvent>> doctorPigEventMap = Maps.newHashMap();
             doctorPigTracks.forEach(doctorPigTrack -> {
                 List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.queryAllEventsByPigId(doctorPigTrack.getPigId());
                 doctorPigEventMap.put(doctorPigTrack.getPigId(), doctorPigEvents);
             });
-            Map<Long, DoctorPigTrack> doctorPigTrackMap = doctorPigTracks.stream().collect(Collectors.toMap(k->k.getPigId(), v->v));
+            Map<Long, DoctorPigTrack> doctorPigTrackMap = doctorPigTracks.stream().collect(Collectors.toMap(DoctorPigTrack::getPigId, v->v));
 
             return Response.ok(new Paging<>(paging.getTotal(),
                         doctorPigs.stream().map(s->DoctorPigInfoDto.buildDoctorPigInfoDto(s, doctorPigTrackMap.get(s.getId()), doctorPigEventMap.get(s.getId()))).collect(Collectors.toList())
@@ -191,8 +191,8 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                 List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.queryAllEventsByPigId(doctorPigTrack.getPigId());
                 doctorPigEventMap.put(track.getPigId(), doctorPigEvents);
             });
-            List<DoctorPig> doctorPigs = doctorPigDao.findByIds(doctorPigTracks.stream().map(s->s.getPigId()).collect(Collectors.toList()));
-            Map<Long, DoctorPigTrack> doctorPigTrackMap = doctorPigTracks.stream().collect(Collectors.toMap(k->k.getPigId(),v->v));
+            List<DoctorPig> doctorPigs = doctorPigDao.findByIds(doctorPigTracks.stream().map(DoctorPigTrack::getPigId).collect(Collectors.toList()));
+            Map<Long, DoctorPigTrack> doctorPigTrackMap = doctorPigTracks.stream().collect(Collectors.toMap(DoctorPigTrack::getPigId, v->v));
 
             return Response.ok(new Paging<>(paging.getTotal(),
                     doctorPigs.stream().map(s->DoctorPigInfoDto.buildDoctorPigInfoDto(s, doctorPigTrackMap.get(s.getId()), doctorPigEventMap.get(s.getId()))).collect(Collectors.toList())
@@ -286,19 +286,17 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
-    public Response<String> generateFostersCode(String eventAt, Long farmId) {
-        try{
+    public Response<String> genNest(Long farmId, String eventAt, Integer size) {
+        try {
             DateTime dateTime = Arguments.isEmpty(eventAt) ? DateTime.now() : DateUtil.DATE.parseDateTime(eventAt);
             Long farrowingCount =  doctorPigEventDao.countPigEventTypeDuration(
-                    farmId, PigEvent.FARROWING.getKey(),
+                    farmId,
+                    PigEvent.FARROWING.getKey(),
                     dateTime.withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
                     dateTime.plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().toDate());
-            farrowingCount += 1;
-            return Response.ok(dateTime.toString(DTF) + "-" + farrowingCount);
-        }catch (IllegalStateException e){
-            log.error(" input pigId not exist, farmId:{} ", farmId);
-            return Response.fail(e.getMessage());
-        }catch (Exception e){
+            farrowingCount += MoreObjects.firstNonNull(size, 1);
+            return Response.ok(dateTime.toString(DTF) + farrowingCount);
+        } catch (Exception e) {
             log.error("generate foster code fail,farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("generate.fostersCode.fail");
         }
@@ -312,13 +310,13 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                 return Response.ok(Collections.emptyList());
             }
 
-            List<DoctorPigTrack> tracks = doctorPigTrackDao.findByPigIds(doctorPigs.stream().map(d -> d.getId()).collect(Collectors.toList()));
+            List<DoctorPigTrack> tracks = doctorPigTrackDao.findByPigIds(doctorPigs.stream().map(DoctorPig::getId).collect(Collectors.toList()));
             Map<Long, List<DoctorPigEvent>> doctorPigEventMap = Maps.newHashMap();
             tracks.forEach(track -> {
                 List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.queryAllEventsByPigId(track.getPigId());
                 doctorPigEventMap.put(track.getPigId(), doctorPigEvents);
             });
-            Map<Long, DoctorPigTrack> trackMap = tracks.stream().collect(Collectors.toMap(k->k.getPigId(), v->v));
+            Map<Long, DoctorPigTrack> trackMap = tracks.stream().collect(Collectors.toMap(DoctorPigTrack::getPigId, v->v));
 
             List<DoctorPigInfoDto> dtos =  doctorPigs.stream()
                     .map(doc->DoctorPigInfoDto.buildDoctorPigInfoDto(doc, trackMap.get(doc.getId()), doctorPigEventMap.get(doc.getId())))
