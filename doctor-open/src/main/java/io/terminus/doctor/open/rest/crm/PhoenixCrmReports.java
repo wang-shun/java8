@@ -1,6 +1,7 @@
 package io.terminus.doctor.open.rest.crm;
 
 import com.google.common.base.Throwables;
+import com.thoughtworks.xstream.mapper.Mapper;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
@@ -91,7 +92,7 @@ public class PhoenixCrmReports {
             DoctorDailyReportOpen doctorDailyReportOpen = new DoctorDailyReportOpen();
             BeanMapper.copy(doctorDailyReport.getReportData(), doctorDailyReportOpen);
             doctorDailyReportOpen.setFarmName(farmMap.get(doctorDailyReport.getFarmId()));
-            doctorDailyReportOpen.getLiveStock().setFattenOut(fattenOutMap.get(doctorDailyReport.getFarmId()));
+            doctorDailyReportOpen.getLiveStock().setFattenOut(fattenOutMap.containsKey(doctorDailyReport.getFarmId()) ? fattenOutMap.get(doctorDailyReport.getFarmId()) : 0);
             return doctorDailyReportOpen;
         }).collect(Collectors.toList());
         return MAPPER.toJson(doctorDailyReportDtos);
