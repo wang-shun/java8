@@ -179,6 +179,6 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         return (Objects.equals(fromBarn.getPigType(), toBarn.getPigType())
                 || (MATING_TYPES.contains(fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType()))
                 || (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_FARROW_TYPES.contains(toBarn.getPigType())))
-                || Objects.equals(pigStatus, PigStatus.Pregnancy.getKey()) && MATING_FARROW_TYPES.contains(toBarn.getPigType());
+                || Objects.equals(pigStatus, PigStatus.Pregnancy.getKey()) && Objects.equals(fromBarn.getPigType(), PigType.PREG_SOW.getValue()) && MATING_FARROW_TYPES.contains(toBarn.getPigType());
     }
 }

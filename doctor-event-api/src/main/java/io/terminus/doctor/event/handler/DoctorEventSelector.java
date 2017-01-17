@@ -53,12 +53,18 @@ public class DoctorEventSelector {
         pigTable.put(PigStatus.Pregnancy, PigType.MATE_SOW, Lists.newArrayList(PigEvent.PREG_CHECK));
         pigTable.put(PigStatus.Pregnancy, PigType.PREG_SOW, Lists.newArrayList(PigEvent.PREG_CHECK));
 
+        // (阳性，产房) => 分娩, 妊娠检查(只能到空怀：阴性、流产、返情)(理论上是不会出现这种情况的，因为阳性在产房会是待分娩)
+        pigTable.put(PigStatus.Pregnancy, PigType.DELIVER_SOW, Lists.newArrayList(PigEvent.FARROWING, PigEvent.PREG_CHECK));
+
         // (空怀，配怀舍) => 配种，妊检(只能到阳性)
         pigTable.put(PigStatus.KongHuai, PigType.MATE_SOW, Lists.newArrayList(PigEvent.MATING, PigEvent.PREG_CHECK));
         pigTable.put(PigStatus.KongHuai, PigType.PREG_SOW, Lists.newArrayList(PigEvent.MATING, PigEvent.PREG_CHECK));
 
-        // (待分娩，配怀舍) => 分娩
-        pigTable.put(PigStatus.Farrow, PigType.DELIVER_SOW, Lists.newArrayList(PigEvent.FARROWING));
+        // (空怀, 产房) => 妊检(只能到阳性，其实是待分娩)
+        pigTable.put(PigStatus.KongHuai, PigType.DELIVER_SOW, Lists.newArrayList(PigEvent.PREG_CHECK));
+
+        // (待分娩, 产房) => 分娩, 妊娠检查(只能到空怀：阴性、流产、返情)
+        pigTable.put(PigStatus.Farrow, PigType.DELIVER_SOW, Lists.newArrayList(PigEvent.FARROWING, PigEvent.PREG_CHECK));
 
         // (哺乳，配怀舍) => 拼窝，断奶，仔猪变动
         pigTable.put(PigStatus.FEED, PigType.DELIVER_SOW, Lists.newArrayList(PigEvent.FOSTERS, PigEvent.WEAN, PigEvent.PIGLETS_CHG));
@@ -67,9 +73,6 @@ public class DoctorEventSelector {
         pigTable.put(PigStatus.Wean, PigType.MATE_SOW, Lists.newArrayList(PigEvent.MATING));
         pigTable.put(PigStatus.Wean, PigType.PREG_SOW, Lists.newArrayList(PigEvent.MATING));
 
-        // (返情，配怀舍) => 配种，妊检  这种情况已经作废，只是为了兼容历史数据
-        pigTable.put(PigStatus.FanQing, PigType.MATE_SOW, Lists.newArrayList(PigEvent.MATING, PigEvent.PREG_CHECK));
-        pigTable.put(PigStatus.FanQing, PigType.PREG_SOW, Lists.newArrayList(PigEvent.MATING, PigEvent.PREG_CHECK));
         return pigTable;
     }
 }
