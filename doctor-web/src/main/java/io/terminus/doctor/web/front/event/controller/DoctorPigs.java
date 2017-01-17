@@ -118,16 +118,6 @@ public class DoctorPigs {
      */
     @RequestMapping(value = "/generate/fostersCode", method = RequestMethod.GET)
     @ResponseBody
-    public String generateFostersCode(@RequestParam(value = "eventAt", required = false) String eventAt,
-                                      @RequestParam("farmId") Long farmId){
-        return RespHelper.or500(doctorPigReadService.generateFostersCode(eventAt, farmId));
-    }
-
-    /**
-     * 生成窝号
-     */
-    @RequestMapping(value = "/generate/nest", method = RequestMethod.GET)
-    @ResponseBody
     public String generestNest(@RequestParam("farmId") Long farmId,
                                @RequestParam(value = "eventAt", required = false) String eventAt,
                                @RequestParam(value = "size", required = false) Integer size) {

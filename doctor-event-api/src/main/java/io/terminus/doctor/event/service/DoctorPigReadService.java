@@ -80,14 +80,6 @@ public interface DoctorPigReadService {
 
     /**
      * 生成对应的窝号 年+月+胎次
-     * @param farmId
-     * @return
-     */
-    Response<String> generateFostersCode(@Nullable String eventAt,
-                                         @NotNull(message = "input.farmId.empty") Long farmId);
-
-    /**
-     * 生成对应的窝号 年+月+胎次
      */
     Response<String> genNest(@NotNull(message = "farmId.not.null") Long farmId,
                              @Nullable String eventAt,

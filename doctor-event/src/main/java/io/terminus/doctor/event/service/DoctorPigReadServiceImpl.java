@@ -286,11 +286,6 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
-    public Response<String> generateFostersCode(String eventAt, Long farmId) {
-        return genNest(farmId, eventAt, 1);
-    }
-
-    @Override
     public Response<String> genNest(Long farmId, String eventAt, Integer size) {
         try {
             DateTime dateTime = Arguments.isEmpty(eventAt) ? DateTime.now() : DateUtil.DATE.parseDateTime(eventAt);
