@@ -3,6 +3,7 @@ package io.terminus.doctor.move.service;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.JsonResponseException;
@@ -15,10 +16,16 @@ import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorFarmBasicDao;
+import io.terminus.doctor.basic.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
+import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.service.DoctorMaterialInWareHouseWriteService;
+import io.terminus.doctor.basic.service.DoctorWareHouseTypeWriteService;
+import io.terminus.doctor.basic.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
@@ -35,8 +42,8 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.DoctorMatingType;
@@ -83,12 +90,6 @@ import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
-import io.terminus.doctor.basic.dto.DoctorMaterialConsumeProviderDto;
-import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
-import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.service.DoctorMaterialInWareHouseWriteService;
-import io.terminus.doctor.basic.service.DoctorWareHouseTypeWriteService;
-import io.terminus.doctor.basic.service.DoctorWareHouseWriteService;
 import io.terminus.parana.user.address.model.Address;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.LoginType;
@@ -114,6 +115,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -867,19 +869,19 @@ public class DoctorImportDataService {
                     }
                     if (Objects.equals(is.getStatus(), PigStatus.Pregnancy.getKey())) {
                         DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP, 1, null);
-                        DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG);
+                        DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG, null);
                         putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId(), pregYang.getId()));
                         continue;
                     }
                     if (Objects.equals(is.getStatus(), PigStatus.KongHuai.getKey())) {
                         DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP, null, null);
-                        DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, getCheckResultByRemark(is.getRemark()));
+                        DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, getCheckResultByRemark(is.getRemark()), getCheckDateByRemark(is.getRemark()));
                         putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId(), pregYang.getId()));
                         continue;
                     }
                     if (Objects.equals(is.getStatus(), PigStatus.FEED.getKey())) {
                         DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP, 1, 1);
-                        DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG);
+                        DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG, null);
                         DoctorPigEvent farrowEvent = createFarrowEvent(is, sow, pregYang);
                         putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId(), pregYang.getId(), farrowEvent.getId()));
                         feedSowLast.add(last);
@@ -894,10 +896,10 @@ public class DoctorImportDataService {
 
                 //如果妊检是不是阳性，只生成到妊检事件
                 if (notEmpty(is.getRemark()) && is.getRemark().contains("检查：")) {
-                    DoctorPigEvent pregNotYang = createPregCheckEvent(is, sow, mateEvent, getCheckResultByRemark(is.getRemark()));
+                    DoctorPigEvent pregNotYang = createPregCheckEvent(is, sow, mateEvent, getCheckResultByRemark(is.getRemark()), getCheckDateByRemark(is.getRemark()));
                     putParityMap(parityMap, is.getParity(), Lists.newArrayList(pregNotYang.getId()));
                 } else {
-                    DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG);
+                    DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG, null);
 
                     // 如果妊娠检查为阳性并且猪舍为产房， 则转入分娩舍
                     DoctorPigEvent toFarrowEvent = new DoctorPigEvent();
@@ -929,6 +931,18 @@ public class DoctorImportDataService {
             return PregCheckResult.LIUCHAN;
         }
         return PregCheckResult.YING;
+    }
+
+    private static Date getCheckDateByRemark(String remark) {
+        try {
+            if (isEmpty(remark)) {
+                return null;
+            }
+            return DateUtil.toDate(remark.substring(remark.length() - 10, remark.length()));
+        } catch (Exception e) {
+            log.error("get check date by remark failed, remark:{}, cause:{}", remark, Throwables.getStackTraceAsString(e));
+            return null;
+        }
     }
 
     //同一胎次的事件id，放到同一个list里
@@ -1150,9 +1164,9 @@ public class DoctorImportDataService {
     }
 
     //创建妊检事件
-    private DoctorPigEvent createPregCheckEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent, PregCheckResult checkResult) {
+    private DoctorPigEvent createPregCheckEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent, PregCheckResult checkResult, Date pregDate) {
         DoctorPigEvent event = createSowEvent(info, sow);
-        event.setEventAt(new DateTime(beforeEvent.getEventAt()).plusWeeks(3).toDate());  //妊检事件事件 = 配种时间 + 3周
+        event.setEventAt(MoreObjects.firstNonNull(pregDate, new DateTime(beforeEvent.getEventAt()).plusWeeks(3).toDate()));  //妊检事件事件 = 配种时间 + 3周
         event.setType(PigEvent.PREG_CHECK.getKey());
         event.setName(PigEvent.PREG_CHECK.getName());
         event.setRelEventId(beforeEvent.getId());
