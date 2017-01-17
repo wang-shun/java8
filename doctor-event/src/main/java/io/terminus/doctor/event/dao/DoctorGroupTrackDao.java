@@ -7,6 +7,7 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 猪群卡片明细表Dao类
@@ -58,5 +59,14 @@ public class DoctorGroupTrackDao extends MyBatisDao<DoctorGroupTrack> {
 
     public void deleteByGroupId(Long groupId) {
         getSqlSession().delete("deleteGroupTrackByGroupId", groupId);
+    }
+
+    /**
+     * 根据查询日期统计每个猪场的待出栏猪只数
+     * @param criteria 查询条件
+     * @return
+     */
+    public List<Map<String, Object>> queryFattenOutBySumAt(Map<String, Object> criteria){
+        return getSqlSession().selectList(sqlId("queryFattenOutBySumAt"), criteria);
     }
 }

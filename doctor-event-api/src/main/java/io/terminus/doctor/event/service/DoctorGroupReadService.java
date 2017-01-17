@@ -194,4 +194,11 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<List<DoctorGroupEvent>> queryAllGroupEventByGroupId(@NotNull(message = "input.groupId.empty") Long groupId);
+
+    /**
+     * 根据查询日期统计每个猪场的待出栏猪只数
+     * @param sumAt 查询日期
+     * @return
+     */
+    Response<Map<Long, Integer>> queryFattenOutBySumAt(String sumAt);
 }

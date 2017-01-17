@@ -125,6 +125,12 @@
         limit 1
     </select>
 
+    <select id="findBySumAt" parameterType="map" resultMap="DoctorMonthlyReportMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE sum_at = #{sumAt}
+    </select>
+
     <delete id="deleteBySumAt" parameterType="date">
         DELETE FROM <include refid="tb"/>
         WHERE sum_at = #{sumAt}

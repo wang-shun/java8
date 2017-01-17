@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -696,5 +697,12 @@ public class DoctorKpiDao {
     public double getMateInSeven(Long farmId, Date startAt, Date endAt) {
         Double d = sqlSession.selectOne(sqlId("getMateInSeven"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
         return d == null ? 0D : EventUtil.get4(d);
+    }
+
+    /**
+     * 根据日期获取当时猪群的情况
+     */
+    public List<Map<String, Object>> getEveryGroupInfo(String date) {
+        return sqlSession.selectList(sqlId("getEveryGroupInfo"), ImmutableMap.of("date", date));
     }
 }

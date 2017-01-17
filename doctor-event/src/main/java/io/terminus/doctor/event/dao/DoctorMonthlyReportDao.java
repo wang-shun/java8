@@ -7,6 +7,7 @@ import io.terminus.doctor.event.model.DoctorMonthlyReport;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Desc: 猪场月报表Dao类
@@ -26,6 +27,16 @@ public class DoctorMonthlyReportDao extends MyBatisDao<DoctorMonthlyReport> {
     public DoctorMonthlyReport findByFarmIdAndSumAt(Long farmId, Date sumAt) {
         return getSqlSession().selectOne(sqlId("findByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", Dates.startOfDay(sumAt)));
     }
+
+    /**
+     * 根据统计日期查询
+     * @param sumAt 统计时间
+     * @return 猪场月报列表
+     */
+    public List<DoctorMonthlyReport> findBySumAt(String sumAt) {
+        return getSqlSession().selectList(sqlId("findBySumAt"), sumAt);
+    }
+
 
     /**
      * 根据统计日期删除月报统计

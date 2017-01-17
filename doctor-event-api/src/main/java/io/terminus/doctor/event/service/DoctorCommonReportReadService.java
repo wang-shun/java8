@@ -2,9 +2,12 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
+import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
+import io.terminus.doctor.event.model.DoctorMonthlyReport;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Desc: 猪场报表读服务
@@ -40,4 +43,16 @@ public interface DoctorCommonReportReadService {
                                                                                @Nullable Integer year,
                                                                                @Nullable Integer week,
                                                                                @Nullable Integer index);
+
+    /**
+     * 根据统计时间查询所有猪场月报数据列
+     * @param sumAt 统计时间
+     * @return
+     */
+    Response<List<DoctorMonthlyReport>> findMonthlyReports(@NotNull(message = "date.not.null") String sumAt);
+
+    /**
+     * 根据日期获取当时猪群的情况
+     */
+    Response<List<DoctorGroupLiveStockDetailDto>> findEveryGroupInfo(@NotNull(message = "date.not.null") String sumAt);
 }

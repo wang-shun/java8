@@ -1,8 +1,6 @@
 package io.terminus.doctor.event.test;
 
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.AsyncEventBus;
-import com.google.common.eventbus.EventBus;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
@@ -33,7 +31,10 @@ import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFarrowHand
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFosterByHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFosterHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowMatingEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowPigletChangeEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowPregCheckEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowRemovalEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowToChgLocationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowVaccinationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowWeanHandler;
 import io.terminus.zookeeper.ZKClientFactory;
@@ -48,8 +49,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
-
-import java.util.concurrent.Executors;
 
 /**
  * Desc: 工作基础测试类配置类
@@ -69,6 +68,8 @@ public class ServiceConfiguration {
      */
     @Bean
     public DoctorRollbackHandlerChain doctorRollbackHandlerChain(
+            DoctorRollbackSowPigletChangeEventHandler rollbackSowPigletChangeEventHandler,
+            DoctorRollbackSowToChgLocationEventHandler rollbackSowToChgLocationEventHandler,
             DoctorRollbackGroupChangeHandler rollbackGroupChangeEventHandler,
             DoctorRollbackGroupDiseaseHandler rollbackGroupDiseaseHandler,
             DoctorRollbackGroupLiveStockHandler rollbackGroupLiveStockHandler,
@@ -97,7 +98,8 @@ public class ServiceConfiguration {
             DoctorRollbackSowMatingEventHandler rollbackSowMatingEventHandler,
             DoctorRollbackSowRemovalEventHandler rollbackSowRemovalEventHandler,
             DoctorRollbackSowVaccinationEventHandler rollbackSowVaccinationEventHandler,
-            DoctorRollbackSowWeanHandler rollbackSowWeanHandler
+            DoctorRollbackSowWeanHandler rollbackSowWeanHandler,
+            DoctorRollbackSowPregCheckEventHandler rollbackSowPregCheckEventHandler
     ) {
         DoctorRollbackHandlerChain chain = new DoctorRollbackHandlerChain();
         chain.setRollbackGroupEventHandlers(Lists.newArrayList(rollbackGroupChangeEventHandler,
@@ -112,6 +114,7 @@ public class ServiceConfiguration {
         ));
 
         chain.setRollbackPigEventHandlers(Lists.newArrayList(
+                rollbackSowPigletChangeEventHandler,
                 rollbackBoarChgFarmEventHandler,
                 rollbackBoarChgLocationEventHandler,
                 rollbackBoarConditionEventHandler,
@@ -131,15 +134,31 @@ public class ServiceConfiguration {
                 rollbackSowMatingEventHandler,
                 rollbackSowRemovalEventHandler,
                 rollbackSowVaccinationEventHandler,
-                rollbackSowWeanHandler
+                rollbackSowWeanHandler,
+                rollbackSowToChgLocationEventHandler,
+                rollbackSowPregCheckEventHandler
         ));
         return chain;
     }
 
+
     /**
      * 对应handler chain
-     * @return
      */
+//    @Bean
+//    public DoctorEventHandlerChain doctorEventHandlerChain(
+//            DoctorSemenHandler doctorSemenHandler, DoctorEntryHandler doctorEntryHandler,
+//            DoctorChgFarmHandler doctorChgFarmHandler, DoctorChgLocationHandler doctorChgLocationHandler,
+//            DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
+//            DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
+//        DoctorEventHandlerChain chain = new DoctorEventHandlerChain();
+//        chain.setDoctorEventCreateHandlers(Lists.newArrayList(
+//                doctorSemenHandler,doctorEntryHandler,
+//                doctorChgFarmHandler, doctorChgLocationHandler,
+//                doctorConditionHandler, doctorDiseaseHandler,
+//                doctorRemovalHandler, doctorVaccinationHandler));
+//        return chain;
+//    }
 //    @Bean
 //    public DoctorPigEventHandlers doctorEventHandlerChain(
 //            DoctorSemenHandler doctorSemenHandler,DoctorEntryHandler doctorEntryHandler,
@@ -156,27 +175,21 @@ public class ServiceConfiguration {
 //        return chain;
 //    }
 
-    @Bean
-    public EventBus eventBus(){
-        return new AsyncEventBus(
-                Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
-    }
+        @ConditionalOnBean(ZKClientFactory.class)
+        @Profile("zookeeper")
+        public static class ZookeeperConfiguration {
 
-    @Configuration
-    @ConditionalOnBean(ZKClientFactory.class)
-    @Profile("zookeeper")
-    public static class ZookeeperConfiguration {
+            @Bean
+            public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
+                                                @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception {
+                return new Subscriber(zkClientFactory, zkTopic);
+            }
 
-        @Bean
-        public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception {
-            return new Subscriber(zkClientFactory, zkTopic);
+            @Bean
+            public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
+                                                @Value("${zookeeper.zkTopic}}") String zkTopic) throws Exception {
+                return new Publisher(zkClientFactory, zkTopic);
+            }
         }
 
-        @Bean
-        public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}}") String zkTopic) throws Exception {
-            return new Publisher(zkClientFactory, zkTopic);
-        }
-    }
 }

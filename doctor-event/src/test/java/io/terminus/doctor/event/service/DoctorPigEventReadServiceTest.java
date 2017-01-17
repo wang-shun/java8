@@ -20,6 +20,8 @@ public class DoctorPigEventReadServiceTest extends BaseServiceTest{
 
     @Autowired
     private DoctorPigEventReadService doctorPigEventReadService;
+    @Autowired
+    private DoctorGroupReadService doctorGroupReadService;
 
     @Test
     public void testPagingPigEvent(){
@@ -29,5 +31,10 @@ public class DoctorPigEventReadServiceTest extends BaseServiceTest{
         List<DoctorPigEvent> doctorPigEvents = response.getResult().getData();
         Assert.assertEquals(doctorPigEvents.size(), 1);
 
+    }
+
+    @Test
+    public void testQueryFattenOut() {
+        System.out.println(doctorGroupReadService.queryFattenOutBySumAt("2016-10-10"));
     }
 }

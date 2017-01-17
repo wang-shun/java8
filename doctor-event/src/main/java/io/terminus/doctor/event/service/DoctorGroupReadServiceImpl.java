@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
@@ -10,6 +11,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -26,11 +28,13 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -356,6 +360,24 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("query.all.group.event.by.group.id.failed, cause {}", Throwables.getStackTraceAsString(e));
             return Response.fail("query all group event by group id failed");
+        }
+    }
+
+    @Override
+    public Response<Map<Long, Integer>> queryFattenOutBySumAt(String sumAt) {
+        try {
+            DateTime date = new DateTime(DateUtil.toDate(sumAt));
+            if (date.isAfterNow()) {
+                return Response.ok(Maps.newHashMap());
+            }
+            int deltaDay = DateUtil.getDeltaDays(date.withTimeAtStartOfDay().toDate(), DateTime.now().withTimeAtStartOfDay().toDate());
+            List<Map<String, Object>> list = doctorGroupTrackDao.queryFattenOutBySumAt(ImmutableMap.of("sumAt", sumAt, "avgDayAge", 180 + deltaDay));
+            Map<Long, Integer> fattenOutMap = Maps.newHashMap();
+            list.forEach(map -> fattenOutMap.put((long)map.get("farmId"), ((BigDecimal) map.get("fattenOut")).intValue()));
+            return Response.ok(fattenOutMap);
+        } catch (Exception e) {
+            log.error("query.fatten.out.by.sumAt.failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query fatten out by sumAt failed");
         }
     }
 }

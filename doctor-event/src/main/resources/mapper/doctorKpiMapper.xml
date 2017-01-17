@@ -1639,4 +1639,39 @@
         )
         ) end from dual
     </select>
+
+    <!--根据日期获取当时猪群的情况-->
+    <select id="getEveryGroupInfo" parameterType="string" resultType="map">
+        SELECT
+            g.farm_name AS farmName,
+            g.group_code AS groupCode,
+            g.quantity - ifnull(c.deltaQty, 0) AS qty,
+            TIMESTAMPDIFF(DAY, g.birth_date, #{start}) + 2 AS avgAge,
+            g.pig_type AS type
+        FROM  (
+            SELECT a.farm_id, a.farm_name, a.id, a.group_code, b.quantity, b.birth_date, a.pig_type
+            FROM  doctor_groups a
+            LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
+                WHERE a.open_at &lt;= #{date}
+                    AND (a.close_at &gt; date_add(DATE(#{date}), INTERVAL 1 DAY) OR a.close_at IS NULL)
+        ) AS g
+        LEFT JOIN (
+            SELECT
+                delta.group_id,
+                delta.inCount - delta.outCount - delta.turnCount AS deltaQty  -- 算出这段时间的增量
+            FROM (
+               SELECT
+                    group_id,
+                    CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
+                    CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END AS outCount,
+                    CASE WHEN TYPE = 5 THEN 1 ELSE 0 END AS turnCount
+               FROM doctor_group_events
+               WHERE event_at &gt;= date_add(DATE(#{date}), INTERVAL 1 DAY)   -- 日期取下一天的天初(因为每天的存栏算的是天末)
+                    AND pig_type IN (1, 7)
+                    AND TYPE IN (2, 3, 4, 5, 9)
+                GROUP BY group_id
+            ) AS delta
+        ) c ON g.id = c.group_id
+        WHERE g.quantity - ifnull(c.deltaQty, 0)  &gt; 0
+    </select>
 </mapper>
