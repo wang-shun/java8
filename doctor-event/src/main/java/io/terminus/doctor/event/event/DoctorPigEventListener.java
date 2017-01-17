@@ -296,7 +296,7 @@ public class DoctorPigEventListener implements EventListener {
                 doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoYING);
                 break;
             case LIUCHAN:
-                int lc = doctorKpiDao.checkYangCounts(farmId, startAt, endAt);
+                int lc = doctorKpiDao.checkAbortionCounts(farmId, startAt, endAt);
                 DoctorDailyReportDto reportDtoLIUCHAN = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
                 reportDtoLIUCHAN.getCheckPreg().setLiuchan(lc);
                 doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoLIUCHAN);
