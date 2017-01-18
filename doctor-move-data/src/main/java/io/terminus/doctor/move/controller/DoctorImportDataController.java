@@ -285,4 +285,24 @@ public class DoctorImportDataController {
             return false;
         }
     }
+
+    /**
+     * 刷新公猪类型
+     */
+    @RequestMapping(value = "/flushBoarType", method = RequestMethod.GET)
+    public boolean flushBoarType(@RequestParam(value = "farmId", required = false) Long farmId) {
+        try {
+            log.info("******* flushBoarType start, farmId:{}", farmId);
+            if (farmId != null) {
+                doctorImportDataService.flushBoarType(farmId);
+            } else {
+                RespHelper.or500(doctorFarmReadService.findAllFarms()).forEach(farm -> doctorImportDataService.flushBoarType(farm.getId()));
+            }
+            log.info("******* flushBoarType end");
+            return true;
+        } catch (Exception e) {
+            log.error("flushBoarType failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }

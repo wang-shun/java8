@@ -32,6 +32,7 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -1657,5 +1658,34 @@ public class DoctorImportDataService {
         } else {
             log.warn("update event group id error, group not found! eventId:{}", eventId);
         }
+    }
+
+    /**
+     * 刷新公猪类型
+     * @see BoarEntryType
+     */
+    @Transactional
+    public void flushBoarType(Long farmId) {
+        List<DoctorPig> boars = doctorPigDao.findPigsByFarmIdAndPigType(farmId, DoctorPig.PigSex.BOAR.getKey());
+        if (!notEmpty(boars)) {
+            log.info("this farm do not have any boars, farmId:{}", farmId);
+            return;
+        }
+        boars.forEach(boar -> {
+            Map<String, Object> map = boar.getExtraMap();
+            if (map == null || !map.containsKey(DoctorFarmEntryConstants.BOAR_TYPE_ID)) {
+                updateBoarType(boar.getId(), BoarEntryType.HGZ.getKey());
+            } else {
+                Integer boarType = Integer.valueOf(String.valueOf(map.get(DoctorFarmEntryConstants.BOAR_TYPE_ID)));
+                updateBoarType(boar.getId(), boarType);
+            }
+        });
+    }
+
+    private void updateBoarType(Long boarId, Integer boarType) {
+        DoctorPig pig = new DoctorPig();
+        pig.setId(boarId);
+        pig.setBoarType(MoreObjects.firstNonNull(boarType, BoarEntryType.HGZ.getKey()));
+        doctorPigDao.update(pig);
     }
 }
