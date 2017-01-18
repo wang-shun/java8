@@ -515,7 +515,8 @@ public class DoctorBarns {
         if (Arguments.isNullOrEmpty(pigIdList)) {
             return Collections.emptyList();
         }
-        List<Integer> barnType = PigType.PIG_TYPES;
+        List<Integer> barnType = Lists.newArrayList();
+        barnType.addAll(PigType.PIG_TYPES);
         pigIdList.forEach(pigId -> {
         DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
         barnType.retainAll(DoctorEventSelector.selectBarn(PigStatus.from(pigTrack.getStatus()), PigType.from(pigTrack.getCurrentBarnType()))
