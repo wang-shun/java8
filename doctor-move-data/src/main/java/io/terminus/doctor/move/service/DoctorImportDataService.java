@@ -886,11 +886,11 @@ public class DoctorImportDataService {
                 if (i == 0) {
                     delta = is.getParity();
                 } else {
-                    if (notEmpty(is.getRemark())  && is.getRemark().contains("检查：")) {
-                        delta -= 1;
-                    }
                     if ((is.getParity() - i) != delta) {
                         throw new JsonResponseException("母猪号(" + sow.getPigCode() + ")的胎次( " + is.getParity() + " )不连续, 请检查");
+                    }
+                    if (notEmpty(is.getRemark())  && is.getRemark().contains("检查：")) {
+                        delta -= 1;
                     }
                 }
 
