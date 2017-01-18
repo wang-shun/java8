@@ -295,7 +295,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                     dateTime.withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
                     dateTime.plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().toDate());
             farrowingCount += MoreObjects.firstNonNull(size, 1);
-            return Response.ok(dateTime.toString(DTF) + farrowingCount);
+            return Response.ok(dateTime.toString(DTF) + "-" + farrowingCount);
         } catch (Exception e) {
             log.error("generate foster code fail,farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("generate.fostersCode.fail");
