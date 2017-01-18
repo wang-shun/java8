@@ -46,6 +46,7 @@ import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -641,6 +642,7 @@ public class DoctorImportDataService {
                     throw new JsonResponseException("公猪品种错误：" + boar.getBreedName() + "，row " + (row.getRowNum() + 1) + "column" + 7);
                 }
             }
+            boar.setBoarType(BoarEntryType.HGZ.getKey()); //进场默认活公猪
             doctorPigDao.create(boar);
 
             //公猪跟踪
