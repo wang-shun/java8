@@ -3,6 +3,7 @@ package io.terminus.doctor.event.manager;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -214,6 +215,12 @@ public class DoctorGroupEventManager {
      * @param inputList 批量事件输入
      */
     private void eventRepeatCheck(List<DoctorGroupInputInfo> inputList) {
+        if (Arguments.isNullOrEmpty(inputList)) {
+            throw new ServiceException("batch.event.input.empty");
+        }
+        if (Objects.equals(inputList.get(0).getInput().getEventType(), GroupEventType.TURN_SEED.getValue())) {
+            return;
+        }
         Set<String> inputSet = inputList.stream().map(groupInputInfo -> groupInputInfo.getGroupDetail().getGroup().getGroupCode()).collect(Collectors.toSet());
         if (inputList.size() != inputSet.size()) {
             throw new ServiceException("batch.event.groupCode.not.repeat");
