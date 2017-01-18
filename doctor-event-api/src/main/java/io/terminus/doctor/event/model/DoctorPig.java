@@ -80,6 +80,12 @@ public class DoctorPig implements Serializable{
 
     private String geneticName;
 
+    /**
+     * 公猪类型
+     * @see io.terminus.doctor.event.enums.BoarEntryType
+     */
+    private Integer boarType;
+
     @Setter(AccessLevel.NONE)
     private Map<String, Object> extraMap;
 
