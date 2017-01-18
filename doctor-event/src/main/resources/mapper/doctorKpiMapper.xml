@@ -949,7 +949,7 @@
           (
             SELECT count(1)
             FROM doctor_pigs
-            WHERE is_removal = 0 AND pig_type = 2 AND farm_id = #{farmId}
+            WHERE is_removal = 0 AND pig_type = 2 AND farm_id = #{farmId} AND boar_type = 1  -- 活公猪才计算
           )
           -
           (

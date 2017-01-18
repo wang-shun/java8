@@ -31,6 +31,7 @@
         <result column="breed_name" property="breedName"/>
         <result column="genetic_id" property="geneticId"/>
         <result column="genetic_name" property="geneticName"/>
+        <result column="boar_type" property="boarType"/>
         <result column="extra" property="extra"/>
         <result column="remark" property="remark"/>
         <result column="creator_id" property="creatorId"/>
@@ -51,11 +52,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `org_id`,`org_name`,`farm_id`,`farm_name`,`out_id`,`pig_code`,`pig_type`,`is_removal`,`pig_father_code`,`pig_mother_code`,`source`,`birth_date`,`birth_weight`,`in_farm_date`,`in_farm_day_age`,`init_barn_id`,`init_barn_name`,`breed_id`,`breed_name`,`genetic_id`,`genetic_name`,`extra`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `org_id`,`org_name`,`farm_id`,`farm_name`,`out_id`,`pig_code`,`pig_type`,`is_removal`,`pig_father_code`,`pig_mother_code`,`source`,`birth_date`,`birth_weight`,`in_farm_date`,`in_farm_day_age`,`init_barn_id`,`init_barn_name`,`breed_id`,`breed_name`,`genetic_id`,`genetic_name`,`boar_type`,`extra`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{orgId},#{orgName},#{farmId},#{farmName},#{outId},#{pigCode},#{pigType},#{isRemoval},#{pigFatherCode},#{pigMotherCode},#{source},#{birthDate},#{birthWeight},#{inFarmDate},#{inFarmDayAge},#{initBarnId},#{initBarnName},#{breedId},#{breedName},#{geneticId},#{geneticName},#{extra},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{orgId},#{orgName},#{farmId},#{farmName},#{outId},#{pigCode},#{pigType},#{isRemoval},#{pigFatherCode},#{pigMotherCode},#{source},#{birthDate},#{birthWeight},#{inFarmDate},#{inFarmDayAge},#{initBarnId},#{initBarnName},#{breedId},#{breedName},#{geneticId},#{geneticName},#{boarType},#{extra},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <sql id="criteria">
@@ -106,6 +107,7 @@
                 #{item.breedName},
                 #{item.geneticId},
                 #{item.geneticName},
+                #{item.boarType},
                 #{item.extra},
                 #{item.remark},
                 #{item.creatorId},
@@ -204,6 +206,7 @@
             <if test="breedName != null" > ,`breed_name` = #{breedName}</if>
             <if test="geneticId != null" > ,`genetic_id` = #{geneticId}</if>
             <if test="geneticName != null" > ,`genetic_name` = #{geneticName}</if>
+            <if test="boarType != null" > ,`boar_type` = #{boarType}</if>
             <if test="extra != null" > ,`extra` = #{extra}</if>
             <if test="remark != null" > ,`remark` = #{remark}</if>
             <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>

@@ -32,6 +32,7 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -46,6 +47,7 @@ import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -641,6 +643,7 @@ public class DoctorImportDataService {
                     throw new JsonResponseException("公猪品种错误：" + boar.getBreedName() + "，row " + (row.getRowNum() + 1) + "column" + 7);
                 }
             }
+            boar.setBoarType(BoarEntryType.HGZ.getKey()); //进场默认活公猪
             doctorPigDao.create(boar);
 
             //公猪跟踪
@@ -878,8 +881,21 @@ public class DoctorImportDataService {
             Map<Integer, List<Long>> parityMap = MapBuilder.<Integer, List<Long>>of()
                     .put(first.getParity(), Lists.newArrayList(entryEvent.getId())).map();
 
+            int delta = 0;
             for (int i = 0; i < size; i++) {
                 DoctorImportSow is = importSows.get(i);
+
+                //这个判断是为了保证胎次连续的
+                if (i == 0) {
+                    delta = is.getParity();
+                } else {
+                    if ((is.getParity() - i) != delta) {
+                        throw new JsonResponseException("母猪号(" + sow.getPigCode() + ")的胎次( " + is.getParity() + " )不连续, 请检查");
+                    }
+                    if (notEmpty(is.getRemark())  && is.getRemark().contains("检查：")) {
+                        delta -= 1;
+                    }
+                }
 
                 //如果是最后一个元素，要根据当前状态生成事件
                 if (i == size - 1) {
@@ -1642,5 +1658,34 @@ public class DoctorImportDataService {
         } else {
             log.warn("update event group id error, group not found! eventId:{}", eventId);
         }
+    }
+
+    /**
+     * 刷新公猪类型
+     * @see BoarEntryType
+     */
+    @Transactional
+    public void flushBoarType(Long farmId) {
+        List<DoctorPig> boars = doctorPigDao.findPigsByFarmIdAndPigType(farmId, DoctorPig.PigSex.BOAR.getKey());
+        if (!notEmpty(boars)) {
+            log.info("this farm do not have any boars, farmId:{}", farmId);
+            return;
+        }
+        boars.forEach(boar -> {
+            Map<String, Object> map = boar.getExtraMap();
+            if (map == null || map.get(DoctorFarmEntryConstants.BOAR_TYPE_ID) == null) {
+                updateBoarType(boar.getId(), BoarEntryType.HGZ.getKey());
+            } else {
+                Integer boarType = Integer.valueOf(String.valueOf(map.get(DoctorFarmEntryConstants.BOAR_TYPE_ID)));
+                updateBoarType(boar.getId(), boarType);
+            }
+        });
+    }
+
+    private void updateBoarType(Long boarId, Integer boarType) {
+        DoctorPig pig = new DoctorPig();
+        pig.setId(boarId);
+        pig.setBoarType(MoreObjects.firstNonNull(boarType, BoarEntryType.HGZ.getKey()));
+        doctorPigDao.update(pig);
     }
 }

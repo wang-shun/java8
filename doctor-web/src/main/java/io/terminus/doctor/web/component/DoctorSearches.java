@@ -320,7 +320,7 @@ public class DoctorSearches {
         if (notEmpty(searchDto.getBarnIdList())) {
             for (Long barnId : searchDto.getBarnIdList()) {
                 DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
-                if (Objects.equals(barn.getPigType(), PigType.DELIVER_SOW.getValue())) {
+                if (barn != null && Objects.equals(barn.getPigType(), PigType.DELIVER_SOW.getValue())) {
                     List<DoctorPigTrack> pigTracks = RespHelper.or(doctorPigReadService
                             .findActivePigTrackByCurrentBarnId(barnId), Collections.emptyList());
                     sowCount += pigTracks.size();

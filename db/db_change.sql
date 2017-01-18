@@ -571,3 +571,6 @@ alter table doctor_farm_basics add column material_ids TEXT default null comment
 
 -- 2017-01-12
 ALTER TABLE doctor_pig_tracks ADD COLUMN current_barn_type smallint(6) DEFAULT NULL COMMENT '猪舍类型' after current_barn_name;
+
+-- 2017-01-18
+ALTER TABLE doctor_pigs ADD COLUMN boar_type SMALLINT(6) DEFAULT NULL COMMENT '公猪类型: 1 活公猪, 2 冷冻精液, 3 新鲜精液' AFTER genetic_name;
