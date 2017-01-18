@@ -1673,7 +1673,7 @@ public class DoctorImportDataService {
         }
         boars.forEach(boar -> {
             Map<String, Object> map = boar.getExtraMap();
-            if (map == null || !map.containsKey(DoctorFarmEntryConstants.BOAR_TYPE_ID)) {
+            if (map == null || map.get(DoctorFarmEntryConstants.BOAR_TYPE_ID) == null) {
                 updateBoarType(boar.getId(), BoarEntryType.HGZ.getKey());
             } else {
                 Integer boarType = Integer.valueOf(String.valueOf(map.get(DoctorFarmEntryConstants.BOAR_TYPE_ID)));
