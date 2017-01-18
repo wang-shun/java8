@@ -81,6 +81,11 @@ public enum PigType {
             PigType.RESERVE.getValue(),
             PigType.DELIVER_SOW.getValue());
 
+    public static final List<Integer> PIG_TYPES = Lists.newArrayList(
+            PigType.MATE_SOW.getValue(),
+            PigType.PREG_SOW.getValue(),
+            PigType.DELIVER_SOW.getValue(),
+            PigType.BOAR.getValue());
     //产房仔猪的类型
     public static final List<Integer> FARROW_TYPES = Lists.newArrayList(DELIVER_SOW.getValue());
 

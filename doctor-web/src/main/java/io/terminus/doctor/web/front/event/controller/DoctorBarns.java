@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigSearchType;
@@ -505,17 +506,24 @@ public class DoctorBarns {
 
     /**
      * 查询可转猪舍
-     * @param pigId 猪id
+     * @param pigIds 猪id
      * @return
      */
     @RequestMapping(value = "/selectBarns", method = RequestMethod.GET)
-    public List<DoctorBarn> selectChgLocationBarn(@RequestParam Long pigId){
-        DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
-        if (pigTrack == null) {
+    public List<DoctorBarn> selectChgLocationBarn(@RequestParam String pigIds, @RequestParam Long farmId){
+        List<Long> pigIdList = Splitters.COMMA.splitToList(pigIds).stream().map(Long::parseLong).collect(Collectors.toList());
+        if (Arguments.isNullOrEmpty(pigIdList)) {
             return Collections.emptyList();
         }
-        List<Integer> barnType = DoctorEventSelector.selectBarn(PigStatus.from(pigTrack.getStatus()), PigType.from(pigTrack.getCurrentBarnType()))
-                .stream().map(PigType::getValue).collect(Collectors.toList());
-        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(pigTrack.getFarmId(), barnType, null, null, null));
+        List<Integer> barnType = PigType.PIG_TYPES;
+        pigIdList.forEach(pigId -> {
+        DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
+        barnType.retainAll(DoctorEventSelector.selectBarn(PigStatus.from(pigTrack.getStatus()), PigType.from(pigTrack.getCurrentBarnType()))
+                .stream().map(PigType::getValue).collect(Collectors.toList()));
+        });
+        if (barnType.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, barnType, null, null, null));
     }
 }

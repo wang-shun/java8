@@ -68,6 +68,13 @@
         WHERE org_id = #{orgId}
     </select>
 
+    <select id="findByOrgIdAndStatus" parameterType="long" resultMap="DoctorStaffMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE org_id = #{orgId}
+        <if test="status != null">AND status = #{status}</if>
+    </select>
+
     <update id="update" parameterType="DoctorStaff">
         UPDATE
         <include refid="tb"/>

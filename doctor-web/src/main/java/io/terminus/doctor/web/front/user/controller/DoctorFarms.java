@@ -96,7 +96,7 @@ public class DoctorFarms {
         }
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
         Map<Long, Long> userIdJoinStaffId = new HashMap<>(); // key = userId, value = staffId
-        RespHelper.or500(doctorStaffReadService.findStaffByOrgId(farm.getOrgId()))
+        RespHelper.or500(doctorStaffReadService.findStaffByOrgIdAndStatus(farm.getOrgId(), DoctorStaff.Status.PRESENT.value()))
                 .forEach(staff -> userIdJoinStaffId.put(staff.getUserId(), staff.getId()));
         List<Long> matchUserIds = Lists.newArrayList();
         RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserIds(userIdJoinStaffId.keySet().stream().collect(Collectors.toList())))

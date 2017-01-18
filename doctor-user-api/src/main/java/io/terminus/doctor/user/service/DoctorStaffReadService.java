@@ -10,7 +10,13 @@ public interface DoctorStaffReadService {
 
     Response<DoctorStaff> findStaffByUserId(Long userId);
 
-    Response<List<DoctorStaff>> findStaffByOrgId(Long orgId);
+    /**
+     * 查询员工
+     * @param orgId  公司id
+     * @param status 员工状态
+     * @return
+     */
+    Response<List<DoctorStaff>> findStaffByOrgIdAndStatus(@NotNull(message = "orgId.not.null") Long orgId, Integer status);
 
     /**
      * 根据id查询员工表

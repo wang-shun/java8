@@ -85,32 +85,4 @@ public class PigDtoFactory {
         }
         return "";
     }
-
-//    /**
-//     * 获取预产期
-//     */
-//    public String getBirthDate(DoctorPigInfoDto pigDto) {
-//        // 获取预产期
-//        try{
-//            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
-//            if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-//                Map map = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(pigDto.getExtraTrack(), Map.class);
-//                // @see DoctorMatingDto
-//                Long dateMillis = (Long) map.get("judgePregDate");
-//                if (dateMillis != null) {
-//                    return formatter.print(dateMillis);
-//                } else {
-//                    // 获取配种日期
-//                    dateMillis = (Long) map.get("matingDate");
-//                    if (dateMillis != null) {
-//                        // 配种日期 + 3 个月返回
-//                        return formatter.print(new DateTime(dateMillis).plusMonths(3));
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            log.error("[PigDtoFactory] get birth date failed, pigDto is {}", pigDto);
-//        }
-//        return "";
-//    }
 }

@@ -1,5 +1,6 @@
 package io.terminus.doctor.user.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.user.model.DoctorStaff;
 import org.springframework.stereotype.Repository;
@@ -21,5 +22,9 @@ public class DoctorStaffDao extends MyBatisDao<DoctorStaff> {
 
     public List<DoctorStaff> findByOrgId(Long orgId){
         return sqlSession.selectList(sqlId("findByOrgId"), orgId);
+    }
+
+    public List<DoctorStaff> findByOrgIdAndStatus(Long orgId, Integer status){
+        return sqlSession.selectList(sqlId("findByOrgIdAndStatus"), ImmutableMap.of("orgId", orgId, "status", status));
     }
 }
