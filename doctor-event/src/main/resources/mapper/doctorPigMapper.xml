@@ -243,4 +243,12 @@
           AND is_removal = 0
           AND pig_type = #{sex}
     </select>
+
+    <select id="getPigSexList" parameterType="map" resultMap="DoctorPigMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE farm_id = #{farmId}
+        AND is_removal = 0
+        AND pig_type = #{sex}
+    </select>
 </mapper>

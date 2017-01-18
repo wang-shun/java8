@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
 import io.terminus.doctor.event.dto.DoctorGroupCount;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTypeStatistic;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -114,18 +116,19 @@ public class DoctorPigTypeStatisticWriteServiceImpl implements DoctorPigTypeStat
     @Override
     public Response<Boolean> statisticPig(Long orgId, Long farmId, Integer pigType) {
         try {
-            Long pigCount = doctorPigDao.getPigCount(farmId, DoctorPig.PigSex.from(pigType));
-
-            Integer pigCountInt = Integer.valueOf(pigCount.toString());
+            List<DoctorPig> pigs = doctorPigDao.getPigSexList(farmId, DoctorPig.PigSex.from(pigType)).stream()
+                    .filter(pig -> Objects.equals(pig.getPigType(), DoctorPig.PigSex.SOW.getKey())
+                            || Objects.equals(pig.getBoarType(), BoarEntryType.HGZ.getKey()))
+                    .collect(Collectors.toList());
 
             DoctorPigTypeStatistic statistic = doctorPigTypeStatisticDao.findByFarmId(farmId);
 
             if(isNull(statistic)){
                 statistic = DoctorPigTypeStatistic.builder().farmId(farmId).orgId(orgId).build();
-                statistic.putPigTypeCount(pigType, pigCountInt);
+                statistic.putPigTypeCount(pigType, pigs.size());
                 RespHelper.orServEx(createPigTypeStatistic(statistic));
             } else {
-                statistic.putPigTypeCount(pigType, pigCountInt);
+                statistic.putPigTypeCount(pigType, pigs.size());
                 RespHelper.orServEx(updatePigTypeStatistic(statistic));
             }
             return Response.ok(Boolean.TRUE);
