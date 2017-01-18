@@ -878,8 +878,21 @@ public class DoctorImportDataService {
             Map<Integer, List<Long>> parityMap = MapBuilder.<Integer, List<Long>>of()
                     .put(first.getParity(), Lists.newArrayList(entryEvent.getId())).map();
 
+            int delta = 0;
             for (int i = 0; i < size; i++) {
                 DoctorImportSow is = importSows.get(i);
+
+                //这个判断是为了保证胎次连续的
+                if (i == 0) {
+                    delta = is.getParity();
+                } else {
+                    if (notEmpty(is.getRemark())  && is.getRemark().contains("检查：")) {
+                        delta -= 1;
+                    }
+                    if ((is.getParity() - i) != delta) {
+                        throw new JsonResponseException("母猪号(" + sow.getPigCode() + ")的胎次( " + is.getParity() + " )不连续, 请检查");
+                    }
+                }
 
                 //如果是最后一个元素，要根据当前状态生成事件
                 if (i == size - 1) {
