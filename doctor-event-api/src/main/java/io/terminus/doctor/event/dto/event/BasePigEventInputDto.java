@@ -6,7 +6,6 @@ import io.terminus.doctor.event.model.DoctorPig;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -72,7 +71,6 @@ public abstract class BasePigEventInputDto implements Serializable{
 
     public Map<String, Object> toMap(){
         return JsonMapper.nonEmptyMapper().getMapper()
-                .setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
                 .convertValue(this, Map.class);
     }
 }

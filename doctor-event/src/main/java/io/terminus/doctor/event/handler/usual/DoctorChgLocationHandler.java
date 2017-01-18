@@ -91,7 +91,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         checkState(checkBarnTypeEqual(fromBarn.getPigType(), doctorPigTrack.getStatus(), toBarn.getPigType()), "猪舍类型不可转,猪号:" + chgLocationDto.getPigCode());
         if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
             doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
-        } else if (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
+        } else if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()) && Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
             // 设置断奶到配置舍标志
             Map<String, Object> newExtraMap = Maps.newHashMap();
             newExtraMap.put("hasWeanToMating", true);
