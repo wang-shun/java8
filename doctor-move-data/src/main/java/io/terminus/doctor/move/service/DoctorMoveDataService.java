@@ -1734,7 +1734,7 @@ public class DoctorMoveDataService {
 
         //公猪进场类型
         BoarEntryType type = BoarEntryType.from(event.getBoarType());
-        entry.setBoarTypeId(type == null ? null : type.getKey());
+        entry.setBoarType(type == null ? null : type.getKey());
         entry.setBoarTypeName(event.getBoarType());
         entry.setPigType(DoctorPig.PigSex.BOAR.getKey());  //类型: 公猪
         entry.setPigCode(event.getPigCode());       // pig code 猪 编号

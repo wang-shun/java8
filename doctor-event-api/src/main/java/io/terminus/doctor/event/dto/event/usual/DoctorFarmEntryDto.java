@@ -69,7 +69,7 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
      *
      * @see io.terminus.doctor.event.enums.BoarEntryType
      */
-    private Integer boarTypeId;
+    private Integer boarType;
 
     private String boarTypeName;
 

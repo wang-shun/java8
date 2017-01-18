@@ -171,7 +171,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
                 .breedName(dto.getBreedName())
                 .geneticId(dto.getBreedType())
                 .geneticName(dto.getBreedTypeName())
-                .boarType(dto.getBoarTypeId())
+                .boarType(dto.getBoarType())
                 .remark(dto.getEntryMark())
                 .creatorId(basic.getStaffId())
                 .creatorName(basic.getStaffName())
@@ -184,11 +184,6 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
             extraMapInfo.put(DoctorFarmEntryConstants.LEFT_COUNT, dto.getLeft());
             extraMapInfo.put(DoctorFarmEntryConstants.RIGHT_COUNT, dto.getRight());
             doctorPig.setExtraMap(extraMapInfo);
-        } else if (Objects.equals(dto.getPigType(), DoctorPig.PigSex.BOAR.getKey())) {
-            Map<String, Object> extraMap = Maps.newHashMap();
-            extraMap.put(DoctorFarmEntryConstants.BOAR_TYPE_ID, dto.getBoarTypeId());
-            extraMap.put(DoctorFarmEntryConstants.BOAR_TYPE_NAME, dto.getBoarTypeName());
-            doctorPig.setExtraMap(extraMap);
         }
         return doctorPig;
     }

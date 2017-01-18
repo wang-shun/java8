@@ -207,7 +207,7 @@ public class DoctorCommonGroupEventHandler {
         ///恭母猪进场字段
         if (Objects.equals(sex, DoctorPig.PigSex.BOAR)) {
             farmEntryDto.setPigType(DoctorPig.PigSex.BOAR.getKey());
-            farmEntryDto.setBoarTypeId(BoarEntryType.HGZ.getKey());
+            farmEntryDto.setBoarType(BoarEntryType.HGZ.getKey());
             farmEntryDto.setBoarTypeName(BoarEntryType.HGZ.getCode());
         } else {
             farmEntryDto.setPigType(DoctorPig.PigSex.SOW.getKey());

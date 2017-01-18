@@ -67,6 +67,7 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.PigType.*;
+import static io.terminus.doctor.event.enums.PigEvent.CHG_FARM;
 import static java.util.Objects.isNull;
 
 /**
@@ -187,7 +188,7 @@ public class DoctorPigCreateEvents {
         if (isNull(doctorChgFarmDto))
             throw new JsonResponseException("create.chgFarm.error");
 
-        return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(doctorChgFarmDto, pigId, PigEvent.CHG_FARM), buildBasicInputInfoDto(farmId, PigEvent.CHG_FARM)));
+        return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(doctorChgFarmDto, pigId, CHG_FARM), buildBasicInputInfoDto(farmId, CHG_FARM)));
     }
 
     /**
@@ -209,10 +210,10 @@ public class DoctorPigCreateEvents {
 
         List<BasePigEventInputDto> inputDtos = Splitters.COMMA.splitToList(pigIds).stream().map(idStr -> {
             DoctorChgFarmDto chgFarmDto = BeanMapper.map(doctorChgFarmDto, DoctorChgFarmDto.class);
-            buildEventInput(chgFarmDto, Long.parseLong(idStr), PigEvent.CHG_FARM);
+            buildEventInput(chgFarmDto, Long.parseLong(idStr), CHG_FARM);
             return chgFarmDto;
         }).collect(Collectors.toList());
-        return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtos, buildBasicInputInfoDto(farmId, PigEvent.CHG_FARM)));
+        return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtos, buildBasicInputInfoDto(farmId, CHG_FARM)));
     }
 
     private void checkPigIds(String pigIds) {
