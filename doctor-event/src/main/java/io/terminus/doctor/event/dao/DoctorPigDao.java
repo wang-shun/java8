@@ -71,8 +71,8 @@ public class DoctorPigDao extends MyBatisDao<DoctorPig> {
         return getSqlSession().selectList(sqlId("findPigsByFarmIdAndPigType"), ImmutableMap.of("farmId", farmId, "pigType", pigType));
     }
 
-    public DoctorPig findPigByFarmIdAndPigCode(Long farmId, String pigCode){
-        return getSqlSession().selectOne(sqlId("findPigByFarmIdAndPigCode"), ImmutableMap.of("farmId", farmId, "pigCode", pigCode));
+    public DoctorPig findPigByFarmIdAndPigCodeAndSex(Long farmId, String pigCode, Integer sex) {
+        return getSqlSession().selectOne(sqlId("findPigByFarmIdAndPigCodeAndSex"), ImmutableMap.of("farmId", farmId, "pigCode", pigCode, "sex", sex));
     }
 
     /**
