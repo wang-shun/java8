@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.auth;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.common.enums.UserType;
@@ -49,6 +50,18 @@ public class DoctorFarmAuthCenter {
         List<Long> farmIds = RespHelper.orServEx(doctorFarmReadService.findFarmIdsByUserId(userId));
         if (!farmIds.contains(farmId)) {
             throw new ServiceException("user.not.auth.farm");
+        }
+        return UserUtil.getCurrentUser();
+    }
+
+    public BaseUser checkFarmAuthResponse(Long farmId) {
+        Long userId = UserUtil.getUserId();
+        if (userId == null) {
+            throw new JsonResponseException(500, "user.not.login");
+        }
+        List<Long> farmIds = RespHelper.or500(doctorFarmReadService.findFarmIdsByUserId(userId));
+        if (!farmIds.contains(farmId)) {
+            throw new JsonResponseException(401, "user.not.auth.farm");
         }
         return UserUtil.getCurrentUser();
     }

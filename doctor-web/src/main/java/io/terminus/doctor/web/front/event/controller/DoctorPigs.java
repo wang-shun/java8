@@ -135,40 +135,41 @@ public class DoctorPigs {
     @ResponseBody
     public DoctorPigInfoDto queryDoctorInfoDtoById(@RequestParam("pigId") Long pigId){
         DoctorPigInfoDto dto = RespHelper.or500(doctorPigReadService.queryDoctorInfoDtoById(pigId));
-        doctorFarmAuthCenter.checkFarmAuth(dto.getFarmId());
+        doctorFarmAuthCenter.checkFarmAuthResponse(dto.getFarmId());
         return dto;
     }
 
-    @RequestMapping(value = "/getPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public DoctorPigInfoDetailDto queryPigDetailInfoDto(@RequestParam("farmId") Long farmId,
-                                                        @RequestParam("pigId") Long pigId,
-                                                        @RequestParam(value = "eventSize", required = false) Integer eventSize) {
-        Response<DoctorPigInfoDetailDto> response = doctorPigReadService.queryPigDetailInfoByPigId(pigId, eventSize);
-        if (!response.isSuccess()) {
-            return null;
-        }
-        DoctorPigInfoDetailDto pigDetail = response.getResult();
-        doctorFarmAuthCenter.checkFarmAuth(pigDetail.getDoctorPig().getFarmId());
+    private DoctorPigInfoDetailDto getPigDetail(Long pigId, Integer eventSize) {
+        DoctorPigInfoDetailDto pigDetail = RespHelper.or500(doctorPigReadService.queryPigDetailInfoByPigId(pigId, eventSize));
+        doctorFarmAuthCenter.checkFarmAuthResponse(pigDetail.getDoctorPig().getFarmId());
         transFromUtil.transFromExtraMap(pigDetail.getDoctorPigEvents());
         return pigDetail;
     }
 
     @RequestMapping(value = "/getSowPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DoctorSowDetailDto querySowPigDetailInfoDto(@RequestParam("farmId") Long farmId,
-                                                       @RequestParam("pigId") Long pigId,
-                                                       @RequestParam(value = "eventSize", required = false) Integer eventSize){
-        return buildSowDetailDto(queryPigDetailInfoDto(farmId, pigId, eventSize));
+    public Response<DoctorSowDetailDto> querySowPigDetailInfoDto(@RequestParam("pigId") Long pigId,
+                                                                 @RequestParam(value = "eventSize", required = false) Integer eventSize){
+        try {
+            return Response.ok(buildSowDetailDto(getPigDetail(pigId, eventSize)));
+        } catch (JsonResponseException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            return Response.fail("query.pigDetailInfo.fail");
+        }
     }
 
     @RequestMapping(value = "/getBoarPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DoctorBoarDetailDto queryBoarPigDetailInfoDto(@RequestParam("farmId") Long farmId,
-                                                         @RequestParam("pigId") Long pigId,
-                                                         @RequestParam(value = "eventSize", required = false) Integer eventSize){
-        return buildDoctorBoarDetailDto(queryPigDetailInfoDto(farmId, pigId, eventSize));
-    }
+    public Response<DoctorBoarDetailDto> queryBoarPigDetailInfoDto(@RequestParam("pigId") Long pigId,
+                                                                   @RequestParam(value = "eventSize", required = false) Integer eventSize){
+        try {
+            return Response.ok(buildDoctorBoarDetailDto(getPigDetail(pigId, eventSize)));
+        } catch (JsonResponseException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            return Response.fail("query.pigDetailInfo.fail");
+        }    }
 
     private DoctorBoarDetailDto buildDoctorBoarDetailDto(DoctorPigInfoDetailDto dto){
         return DoctorBoarDetailDto.builder()
@@ -228,7 +229,7 @@ public class DoctorPigs {
         List<DoctorMessage> messages =  RespHelper.or500(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
 
         if (notEmpty(messages)) {
-            doctorFarmAuthCenter.checkFarmAuth(messages.get(0).getFarmId());
+            doctorFarmAuthCenter.checkFarmAuthResponse(messages.get(0).getFarmId());
         }
 
         List<DoctorPigMessage> doctorPigMessageList = Lists.newArrayList();
@@ -301,7 +302,7 @@ public class DoctorPigs {
 
         DoctorPigInfoDto doctorPigInfoDto = RespHelper.or500(doctorPigReadService.queryDoctorInfoDtoById(pigId));
 
-        doctorFarmAuthCenter.checkFarmAuth(doctorPigInfoDto.getFarmId());
+        doctorFarmAuthCenter.checkFarmAuthResponse(doctorPigInfoDto.getFarmId());
 
         DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
         if (pigTrack.getGroupId() == null) {
@@ -353,7 +354,7 @@ public class DoctorPigs {
     public DoctorBarn findCurrentBarnByPigId(@RequestParam("pigId") Long pigId){
         DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
 
-        doctorFarmAuthCenter.checkFarmAuth(pigTrack.getFarmId());
+        doctorFarmAuthCenter.checkFarmAuthResponse(pigTrack.getFarmId());
 
         return RespHelper.or500(doctorBarnReadService.findBarnById(pigTrack.getCurrentBarnId()));
     }
