@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNullOrEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -102,9 +104,13 @@ public class DoctorBasicMaterialReadServiceImpl implements DoctorBasicMaterialRe
     @Override
     public Response<List<DoctorBasicMaterial>> findBasicMaterialsOwned(Long farmId, Long type, String srm) {
         try{
+            List<DoctorBasicMaterial> doctorBasicMaterialList = Lists.newArrayList();
             DoctorFarmBasic doctorFarmBasic = doctorFarmBasicDao.findByFarmId(farmId);
             List idList = doctorFarmBasic.getMaterialIdList();
-            List<DoctorBasicMaterial> doctorBasicMaterialList = doctorBasicMaterialDao.findByIdsAndType(type, idList);
+            if(isNullOrEmpty(idList)){
+                return Response.ok(doctorBasicMaterialList);
+            }
+            doctorBasicMaterialList = doctorBasicMaterialDao.findByIdsAndType(type, idList);
             if (notEmpty(srm)) {
                 doctorBasicMaterialList = doctorBasicMaterialList.stream()
                         .filter(basic -> notEmpty(basic.getSrm()) && basic.getSrm().toLowerCase().contains(srm.toLowerCase()))
