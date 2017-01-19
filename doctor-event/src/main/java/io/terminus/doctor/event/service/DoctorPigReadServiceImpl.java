@@ -107,7 +107,9 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         try{
             Integer dayAge = null;
             DoctorPig doctorPig = doctorPigDao.findById(pigId);
-            checkState(!isNull(doctorPig), "query.doctorPigId.fail");
+            if (doctorPig == null) {
+                return Response.fail("pig.not.found");
+            }
 
             if (doctorPig.getBirthDate() != null) {
                 dayAge = (int)(DateTime.now()

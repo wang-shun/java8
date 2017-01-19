@@ -140,7 +140,11 @@ public class DoctorPigs {
     }
 
     private DoctorPigInfoDetailDto getPigDetail(Long pigId, Integer eventSize) {
-        DoctorPigInfoDetailDto pigDetail = RespHelper.or500(doctorPigReadService.queryPigDetailInfoByPigId(pigId, eventSize));
+        Response<DoctorPigInfoDetailDto> response = doctorPigReadService.queryPigDetailInfoByPigId(pigId, eventSize);
+        if (!response.isSuccess()) {
+            return null;
+        }
+        DoctorPigInfoDetailDto pigDetail = response.getResult();
         doctorFarmAuthCenter.checkFarmAuthResponse(pigDetail.getDoctorPig().getFarmId());
         transFromUtil.transFromExtraMap(pigDetail.getDoctorPigEvents());
         return pigDetail;
@@ -151,7 +155,11 @@ public class DoctorPigs {
     public Response<DoctorSowDetailDto> querySowPigDetailInfoDto(@RequestParam("pigId") Long pigId,
                                                                  @RequestParam(value = "eventSize", required = false) Integer eventSize){
         try {
-            return Response.ok(buildSowDetailDto(getPigDetail(pigId, eventSize)));
+            DoctorPigInfoDetailDto pigDetail = getPigDetail(pigId, eventSize);
+            if (pigDetail == null) {
+                return Response.ok();
+            }
+            return Response.ok(buildSowDetailDto(pigDetail));
         } catch (JsonResponseException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
@@ -164,7 +172,11 @@ public class DoctorPigs {
     public Response<DoctorBoarDetailDto> queryBoarPigDetailInfoDto(@RequestParam("pigId") Long pigId,
                                                                    @RequestParam(value = "eventSize", required = false) Integer eventSize){
         try {
-            return Response.ok(buildDoctorBoarDetailDto(getPigDetail(pigId, eventSize)));
+            DoctorPigInfoDetailDto pigDetail = getPigDetail(pigId, eventSize);
+            if (pigDetail == null) {
+                return Response.ok();
+            }
+            return Response.ok(buildDoctorBoarDetailDto(pigDetail));
         } catch (JsonResponseException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
