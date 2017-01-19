@@ -44,6 +44,8 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
         super.handleCheck(eventDto, basic);
         DoctorFostersDto fostersDto = (DoctorFostersDto) eventDto;
         checkState(!Objects.equals(fostersDto.getPigId(), fostersDto.getFosterSowId()), "不能拼自己猪号:" + fostersDto.getPigCode());
+        checkState(fostersDto.getFosterTotalWeight() != null,  "拼窝总重不能为空");
+        checkState(fostersDto.getFosterTotalWeight() >= 0,  "拼窝总重不能小于0");
     }
 
     @Override

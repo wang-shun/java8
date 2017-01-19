@@ -21,6 +21,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DoctorFosterByDto extends BasePigEventInputDto implements Serializable {
+    private static final long serialVersionUID = 7364302744766671168L;
     /**
      * 被拼窝时间
      */
