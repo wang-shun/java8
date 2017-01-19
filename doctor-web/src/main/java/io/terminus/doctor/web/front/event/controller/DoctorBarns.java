@@ -500,7 +500,13 @@ public class DoctorBarns {
      * @return
      */
     @RequestMapping(value = "/countForTypes", method = RequestMethod.GET)
-    public DoctorBarnCountForPigTypeDto countForTypes(@RequestParam Map<String, Object> params) {
+    public DoctorBarnCountForPigTypeDto countForTypes(@RequestParam(value = "farmId", required = false) Long farmId,
+                                                      @RequestParam Map<String, Object> params) {
+        if (farmId == null) {
+            return new DoctorBarnCountForPigTypeDto();
+        }
+        doctorFarmAuthCenter.checkFarmAuth(farmId);
+        params.put("farmId", farmId);
         return RespHelper.or500(doctorBarnReadService.countForTypes(params));
     }
 
