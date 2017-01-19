@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Maps;
 import com.google.api.client.util.Strings;
 import com.google.common.base.Joiner;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
@@ -135,7 +136,7 @@ public class DoctorPigCreateEvents {
     public Boolean createChangeLocationEvent(@RequestParam("pigId") Long pigId,
                                           @RequestParam("farmId") Long farmId,
                                           @RequestParam("doctorChgLocationDtoJson") String doctorChgLocationDtoJson) {
-        BasePigEventInputDto doctorChgLocationDto = eventInput(PigEvent.CHG_LOCATION, doctorChgLocationDtoJson, farmId, null);
+        BasePigEventInputDto doctorChgLocationDto = eventInput(PigEvent.CHG_LOCATION, doctorChgLocationDtoJson, farmId, null, pigId);
         return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(doctorChgLocationDto, pigId, PigEvent.CHG_LOCATION), buildBasicInputInfoDto(farmId, PigEvent.CHG_LOCATION)));
     }
 
@@ -154,7 +155,7 @@ public class DoctorPigCreateEvents {
 
         checkPigIds(pigIds);
         List<BasePigEventInputDto> inputDtos = Splitters.COMMA.splitToList(pigIds).stream().map(idStr -> {
-            BasePigEventInputDto doctorChgLocationDto = eventInput(PigEvent.CHG_LOCATION, doctorChgLocationDtoJson, farmId, null);
+            BasePigEventInputDto doctorChgLocationDto = eventInput(PigEvent.CHG_LOCATION, doctorChgLocationDtoJson, farmId, null, Long.parseLong(idStr));
             return buildEventInput(doctorChgLocationDto, Long.parseLong(idStr), PigEvent.CHG_LOCATION);
         }).collect(Collectors.toList());
         return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtos, buildBasicInputInfoDto(farmId, PigEvent.CHG_LOCATION)));
@@ -171,7 +172,7 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/createChgFarm", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean createChangeFarmEvent(@RequestParam("doctorChgFarmDtoJson") String doctorChgFarmDtoJson,
                                       @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId) {
-        BasePigEventInputDto doctorChgFarmDto = eventInput(CHG_FARM, doctorChgFarmDtoJson, farmId, null);
+        BasePigEventInputDto doctorChgFarmDto = eventInput(CHG_FARM, doctorChgFarmDtoJson, farmId, null, pigId);
         return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(doctorChgFarmDto, pigId, CHG_FARM), buildBasicInputInfoDto(farmId, CHG_FARM)));
     }
 
@@ -190,7 +191,7 @@ public class DoctorPigCreateEvents {
         checkPigIds(pigIds);
 
         List<BasePigEventInputDto> inputDtos = Splitters.COMMA.splitToList(pigIds).stream().map(idStr -> {
-            BasePigEventInputDto doctorChgFarmDto = eventInput(CHG_FARM, doctorChgFarmDtoJson, farmId, null);
+            BasePigEventInputDto doctorChgFarmDto = eventInput(CHG_FARM, doctorChgFarmDtoJson, farmId, null, Long.parseLong(idStr));
             buildEventInput(doctorChgFarmDto, Long.parseLong(idStr), CHG_FARM);
             return doctorChgFarmDto;
         }).collect(Collectors.toList());
@@ -214,7 +215,7 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/createRemovalEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean createRemovalEvent(@RequestParam("doctorRemovalDtoJson") String doctorRemovalDtoJson,
                                    @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId) {
-        BasePigEventInputDto doctorRemovalDto = eventInput(REMOVAL, doctorRemovalDtoJson, farmId, null);
+        BasePigEventInputDto doctorRemovalDto = eventInput(REMOVAL, doctorRemovalDtoJson, farmId, null, pigId);
         return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(doctorRemovalDto, pigId, PigEvent.REMOVAL), buildBasicInputInfoDto(farmId, PigEvent.REMOVAL)));
     }
 
@@ -234,7 +235,7 @@ public class DoctorPigCreateEvents {
 
         RespHelper.orServEx(doctorPigEventReadService.validatePigNotInFeed(pigIds));
         List<BasePigEventInputDto> inputDtos = Splitters.COMMA.splitToList(pigIds).stream().map(idStr -> {
-            BasePigEventInputDto doctorRemovalDto = eventInput(REMOVAL, doctorRemovalDtoJson, farmId, null);
+            BasePigEventInputDto doctorRemovalDto = eventInput(REMOVAL, doctorRemovalDtoJson, farmId, null, Long.parseLong(idStr));
             return buildEventInput(doctorRemovalDto, Long.parseLong(idStr), PigEvent.REMOVAL);
         }).collect(Collectors.toList());
         return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtos, buildBasicInputInfoDto(farmId, PigEvent.REMOVAL)));
@@ -251,7 +252,7 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/createDiseaseEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean createDiseaseEvent(@RequestParam("doctorDiseaseDtoJson") String doctorDiseaseDtoJson,
                                    @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId) {
-        BasePigEventInputDto doctorDiseaseDto = eventInput(PigEvent.DISEASE, doctorDiseaseDtoJson, farmId, null);
+        BasePigEventInputDto doctorDiseaseDto = eventInput(PigEvent.DISEASE, doctorDiseaseDtoJson, farmId, null, pigId);
         return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(doctorDiseaseDto, pigId, PigEvent.DISEASE), buildBasicInputInfoDto(farmId, PigEvent.DISEASE)));
     }
 
@@ -270,7 +271,7 @@ public class DoctorPigCreateEvents {
         //检查猪ids是否合格
         checkPigIds(pigIds);
         List<BasePigEventInputDto> inputDtos = Splitters.COMMA.splitToList(pigIds).stream().map(idStr -> {
-            BasePigEventInputDto doctorDiseaseDto = eventInput(PigEvent.DISEASE, doctorDiseaseDtoJson, farmId, null);
+            BasePigEventInputDto doctorDiseaseDto = eventInput(PigEvent.DISEASE, doctorDiseaseDtoJson, farmId, null, Long.parseLong(idStr));
             return buildEventInput(doctorDiseaseDto, Long.parseLong(idStr), PigEvent.DISEASE);
         }).collect(Collectors.toList());
         return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtos, buildBasicInputInfoDto(farmId, PigEvent.DISEASE)));
@@ -287,7 +288,7 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/createVaccinationEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean createVaccinationEvent(@RequestParam("doctorVaccinationDtoJson") String doctorVaccinationDtoJson,
                                        @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId) {
-        BasePigEventInputDto doctorVaccinationDto = eventInput(PigEvent.VACCINATION, doctorVaccinationDtoJson, farmId, null);
+        BasePigEventInputDto doctorVaccinationDto = eventInput(PigEvent.VACCINATION, doctorVaccinationDtoJson, farmId, null, pigId);
         return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(doctorVaccinationDto, pigId, PigEvent.VACCINATION), buildBasicInputInfoDto(farmId, PigEvent.VACCINATION)));
     }
 
@@ -307,7 +308,7 @@ public class DoctorPigCreateEvents {
         checkPigIds(pigIds);
 
         List<BasePigEventInputDto> inputDtos = Splitters.COMMA.splitToList(pigIds).stream().map(idStr -> {
-            BasePigEventInputDto vaccinationDto = eventInput(PigEvent.VACCINATION, doctorVaccinationDtoJson, farmId, null);
+            BasePigEventInputDto vaccinationDto = eventInput(PigEvent.VACCINATION, doctorVaccinationDtoJson, farmId, null, Long.parseLong(idStr));
             return buildEventInput(vaccinationDto, Long.parseLong(idStr), PigEvent.VACCINATION);
         }).collect(Collectors.toList());
         return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtos, buildBasicInputInfoDto(farmId, PigEvent.VACCINATION)));
@@ -325,7 +326,7 @@ public class DoctorPigCreateEvents {
     public Boolean createConditionEvent(@RequestParam("doctorConditionDtoJson") String doctorConditionDtoJson,
                                      @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId) {
         DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(pigId));
-        BasePigEventInputDto inputDto = eventInput(PigEvent.CONDITION, doctorConditionDtoJson, farmId, doctorPig.getPigType());
+        BasePigEventInputDto inputDto = eventInput(PigEvent.CONDITION, doctorConditionDtoJson, farmId, doctorPig.getPigType(), pigId);
         return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(inputDto, pigId, PigEvent.CONDITION), buildBasicInputInfoDto(farmId, PigEvent.CONDITION)));
     }
 
@@ -346,13 +347,8 @@ public class DoctorPigCreateEvents {
 
 
         List<BasePigEventInputDto> inputDtos = pigIdList.stream().map(id -> {
-            DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(pigIdList.get(0)));
-            BasePigEventInputDto doctorConditionDto;
-            if (Objects.equals(doctorPig.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
-                doctorConditionDto = jsonMapper.fromJson(doctorConditionDtoJson, DoctorConditionDto.class);
-            } else {
-                doctorConditionDto = jsonMapper.fromJson(doctorConditionDtoJson, DoctorBoarConditionDto.class);
-            }
+            DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(id));
+            BasePigEventInputDto doctorConditionDto = eventInput(PigEvent.CONDITION, doctorConditionDtoJson, farmId, doctorPig.getPigType(), id);
             return buildEventInput(doctorConditionDto, id, PigEvent.CONDITION);
         }).collect(Collectors.toList());
         return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtos, buildBasicInputInfoDto(farmId, PigEvent.CONDITION)));
@@ -363,7 +359,7 @@ public class DoctorPigCreateEvents {
                                  @RequestParam("pigId") Long pigId,
                                  @RequestParam("doctorSemenDtoJson") String doctorSemenDtoJson) {
 
-        BasePigEventInputDto doctorSemenDto = eventInput(PigEvent.SEMEN, doctorSemenDtoJson, farmId, DoctorPig.PigSex.BOAR.getKey());
+        BasePigEventInputDto doctorSemenDto = eventInput(PigEvent.SEMEN, doctorSemenDtoJson, farmId, DoctorPig.PigSex.BOAR.getKey(), pigId);
         return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(doctorSemenDto, pigId, PigEvent.SEMEN), buildBasicInputInfoDto(farmId, PigEvent.SEMEN)));
     }
 
@@ -371,7 +367,7 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Boolean createEntryEvent(@RequestParam("farmId") Long farmId,
                                  @RequestParam("doctorFarmEntryJson") String doctorFarmEntryDtoJson) {
-        BasePigEventInputDto doctorFarmEntryDto = eventInput(PigEvent.ENTRY, doctorFarmEntryDtoJson, farmId, null);
+        BasePigEventInputDto doctorFarmEntryDto = eventInput(PigEvent.ENTRY, doctorFarmEntryDtoJson, farmId, null, null);
         return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEntryEventInput(doctorFarmEntryDto, PigEvent.ENTRY),
                 buildBasicInputInfoDto(farmId, PigEvent.ENTRY)));
     }
@@ -381,7 +377,7 @@ public class DoctorPigCreateEvents {
                                    @RequestParam("pigId") Long pigId, @RequestParam("eventType") Integer eventType,
                                    @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
         try {
-            BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PigSex.SOW.getKey());
+            BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PigSex.SOW.getKey(), pigId);
             return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(inputDto, pigId, PigEvent.from(eventType)), buildBasicInputInfoDto(farmId, PigEvent.from(eventType))));
         } catch (Exception e) {
             log.error("pig.event.create.failed, cause:{}", Throwables.getStackTraceAsString(e));
@@ -396,7 +392,7 @@ public class DoctorPigCreateEvents {
         checkPigIds(pigIds);
         List<BasePigEventInputDto> inputDtos = Splitters.COMMA.splitToList(pigIds).stream().filter(idStr -> !Strings.isNullOrEmpty(idStr))
                 .map(idStr -> {
-                    BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PigSex.SOW.getKey());
+                    BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PigSex.SOW.getKey(), Long.parseLong(idStr));
                     return buildEventInput(inputDto, Long.parseLong(idStr), PigEvent.from(eventType));
                 })
                 .collect(Collectors.toList());
@@ -417,7 +413,7 @@ public class DoctorPigCreateEvents {
         PigEvent pigEvent = PigEvent.from(batchPigEventDto.getEventType());
         List<BasePigEventInputDto> inputDtoList = batchPigEventDto.getInputJsonList()
                 .stream().map(inputJson -> {
-                    BasePigEventInputDto inputDto = eventInput(pigEvent, inputJson, batchPigEventDto.getFarmId(), batchPigEventDto.getPigType());
+                    BasePigEventInputDto inputDto = eventInput(pigEvent, inputJson, batchPigEventDto.getFarmId(), batchPigEventDto.getPigType(), null);
                     if (Objects.equals(pigEvent.getKey(), PigEvent.ENTRY.getKey())) {
                         return buildEntryEventInput(inputDto, pigEvent);
                     } else {
@@ -493,17 +489,26 @@ public class DoctorPigCreateEvents {
      * @param pigType
      * @return
      */
-    private BasePigEventInputDto eventInput(PigEvent pigEvent, String eventInfoDtoJson, Long farmId, Integer pigType) {
-            switch (pigEvent) {
+    private BasePigEventInputDto eventInput(PigEvent pigEvent, String eventInfoDtoJson, Long farmId, Integer pigType, Long pigId) {
+        switch (pigEvent) {
                 case ENTRY:
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorFarmEntryDto.class);
                 case CHG_FARM:
-                    return jsonMapper.fromJson(eventInfoDtoJson, DoctorChgFarmDto.class);
+                    DoctorChgFarmDto chgFarmDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorChgFarmDto.class);
+                    DoctorFarm doctorFarm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+                    chgFarmDto.setFromFarmId(doctorFarm.getId());
+                    chgFarmDto.setFromFarmName(doctorFarm.getName());
+                    Long realPigId = MoreObjects.firstNonNull(pigId, chgFarmDto.getPigId());
+                    DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(realPigId));
+                    chgFarmDto.setFromBarnId(doctorPigTrack.getCurrentBarnId());
+                    chgFarmDto.setFromBarnName(doctorPigTrack.getCurrentBarnName());
+                    return chgFarmDto;
                 case CHG_LOCATION:
                     DoctorChgLocationDto doctorChgLocationDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorChgLocationDto.class);
-                    DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(doctorChgLocationDto.getPigId()));
-                    doctorChgLocationDto.setChgLocationFromBarnId(doctorPigTrack.getCurrentBarnId());
-                    doctorChgLocationDto.setChgLocationFromBarnName(doctorPigTrack.getCurrentBarnName());
+                    Long realPigId1 = MoreObjects.firstNonNull(pigId, doctorChgLocationDto.getPigId());
+                    DoctorPigTrack doctorPigTrack1 = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(realPigId1));
+                    doctorChgLocationDto.setChgLocationFromBarnId(doctorPigTrack1.getCurrentBarnId());
+                    doctorChgLocationDto.setChgLocationFromBarnName(doctorPigTrack1.getCurrentBarnName());
                     return doctorChgLocationDto;
                 case CONDITION:
                     if (Objects.equals(pigType, DoctorPig.PigSex.SOW.getKey())){
@@ -553,9 +558,9 @@ public class DoctorPigCreateEvents {
                     DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(pigletsChg.getPigletsChangeType()));
                     pigletsChg.setPigletsChangeTypeName(doctorBasic.getName());
                     //新录入的客户要创建一把
-                    DoctorFarm doctorFarm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
-                    Long customerId = RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorFarm.getId(),
-                            doctorFarm.getName(), pigletsChg.getPigletsCustomerId(), pigletsChg.getPigletsCustomerName(),
+                    DoctorFarm doctorFarm1 = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+                    Long customerId = RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorFarm1.getId(),
+                            doctorFarm1.getName(), pigletsChg.getPigletsCustomerId(), pigletsChg.getPigletsCustomerName(),
                             UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
                     pigletsChg.setPigletsCustomerId(customerId);
                     return pigletsChg;
