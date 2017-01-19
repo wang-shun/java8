@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 import static java.util.Objects.isNull;
 
 /**
@@ -268,7 +269,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     public Response<DoctorPigInfoDto> queryDoctorInfoDtoById(@NotNull(message = "input.pigId.empty") Long pigId) {
         try{
             DoctorPig doctorPig = doctorPigDao.findById(pigId);
-            checkState(!isNull(doctorPig), "doctorPig.findById.empty");
+            checkState(notNull(doctorPig), "pig.not.found");
 
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
             if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.KongHuai.getKey())) {
