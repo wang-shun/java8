@@ -50,12 +50,6 @@ public class DoctorFostersDto extends BasePigEventInputDto implements Serializab
 
     private String fosterRemark;    // 拼窝标识
 
-//    private String pigCode;
-//
-//    private Long barnId;
-//
-//    private String barnName;
-
     @Override
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();

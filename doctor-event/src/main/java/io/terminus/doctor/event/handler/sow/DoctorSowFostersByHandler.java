@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -11,6 +10,9 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFosterByDto;
+import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
@@ -19,6 +21,7 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Created by yaoqijun.
@@ -52,7 +56,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(fosterByDto.getPigId());
         DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) ||
-                (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()) && Objects.equals(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue())), "仔猪变动被拼窝母猪状态错误,被拼窝猪号:" + fosterByDto.getPigCode());
+                (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()) && Objects.equals(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue())), "被拼窝母猪状态错误,被拼窝猪号:" + fosterByDto.getPigCode());
 
         //被拼窝数量
         Integer fosterCount = fosterByDto.getFosterByCount();
@@ -61,7 +65,6 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
 
         // 修改当前的母猪状态信息
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());
-        //doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
         return doctorPigTrack;
     }
 
@@ -69,69 +72,59 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
     protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         DoctorFosterByDto fosterByDto = (DoctorFosterByDto) inputDto;
         DoctorPigTrack fromPigTrack = doctorPigTrackDao.findByPigId(fosterByDto.getFromSowId());
+
         //如果不是一个猪舍的拼窝，需要转群操作
         if (!Objects.equals(doctorPigTrack.getCurrentBarnId(), fromPigTrack.getCurrentBarnId())) {
-            throw new ServiceException("不同猪舍不能拼窝,猪号:" + fosterByDto.getPigCode());
-//            Long groupId = groupSowEventCreate(doctorEventInfoList, doctorPigTrack, basic, inputDto, doctorPigEvent.getId());
-//            doctorPigTrack.setGroupId(groupId);
-//            doctorPigTrackDao.update(doctorPigTrack);
+            Long groupId = groupSowEventCreate(doctorEventInfoList, doctorPigTrack, fosterByDto, basic, doctorPigEvent.getId(), doctorPigEvent.getEventAt());
+            doctorPigTrack.setGroupId(groupId);
+            doctorPigTrackDao.update(doctorPigTrack);
         }
-
     }
 
     /**
      * 对应的仔猪转群操作
-     *
-     * @param basicInputInfoDto
      */
-    private Long groupSowEventCreate(List<DoctorEventInfo> eventInfoList, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, BasePigEventInputDto inputDto, Long pigEventId) {
-        DoctorFosterByDto fostersDto = (DoctorFosterByDto) inputDto;
-        //拼窝的数据extra
-        Long fromSowId = fostersDto.getPigId();
-        DoctorPigTrack fromSowTrack = doctorPigTrackDao.findByPigId(fromSowId);
-        Long fromGroupId = fromSowTrack.getGroupId();
-        DoctorGroup fromGroup = doctorGroupDao.findById(fromGroupId);
-        DoctorGroupTrack fromGroupTrack = doctorGroupTrackDao.findByGroupId(fromGroupId);
-
-        // 构建Input 信息
-        DoctorTransGroupInput doctorTransGroupInput = new DoctorTransGroupInput();
-        doctorTransGroupInput.setToBarnId(doctorPigTrack.getCurrentBarnId());
-        doctorTransGroupInput.setToBarnName(doctorPigTrack.getCurrentBarnName());
-        if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey())) {
-            doctorTransGroupInput.setIsCreateGroup(0);
-            DoctorGroup toGroup = doctorGroupDao.findById(doctorPigTrack.getGroupId());
-            doctorTransGroupInput.setToGroupId(toGroup.getId());
-            doctorTransGroupInput.setToGroupCode(toGroup.getGroupCode());
+    private Long groupSowEventCreate(List<DoctorEventInfo> eventInfoList, DoctorPigTrack pigTrack, DoctorFosterByDto fosterByDto, DoctorBasicInputInfoDto basic, Long pigEventId, Date eventAt) {
+        //未断奶仔猪id
+        DoctorTransGroupInput input = new DoctorTransGroupInput();
+        input.setToBarnId(pigTrack.getCurrentBarnId());
+        input.setToBarnName(pigTrack.getCurrentBarnName());
+        List<DoctorGroup> groupList = doctorGroupDao.findByCurrentBarnId(pigTrack.getCurrentBarnId());
+        if (notEmpty(groupList)) {
+            input.setIsCreateGroup(IsOrNot.NO.getValue());
+            DoctorGroup toGroup = groupList.get(0);
+            input.setToGroupCode(toGroup.getGroupCode());
+            input.setToGroupId(toGroup.getId());
         } else {
-            List<DoctorGroup> groupList = doctorGroupDao.findByCurrentBarnId(doctorPigTrack.getCurrentBarnId());
-            if (groupList == null || groupList.size() > 0) {
-                throw new ServiceException();
-            }
-            if (groupList.isEmpty()) {
-                doctorTransGroupInput.setIsCreateGroup(1);
-                doctorTransGroupInput.setToGroupCode(generateGroupCode(doctorPigTrack.getCurrentBarnName()));
-            } else {
-                doctorTransGroupInput.setToGroupId(groupList.get(0).getId());
-                doctorTransGroupInput.setToGroupCode(groupList.get(0).getGroupCode());
-            }
+            input.setIsCreateGroup(IsOrNot.YES.getValue());
         }
 
-        doctorTransGroupInput.setQuantity(fostersDto.getFosterByCount());
-        doctorTransGroupInput.setBoarQty(fostersDto.getBoarFostersByCount());
-        doctorTransGroupInput.setSowQty(doctorTransGroupInput.getQuantity() - doctorTransGroupInput.getBoarQty());
-        doctorTransGroupInput.setWeight(fostersDto.getFosterByTotalWeight());
-        //doctorTransGroupInput.setAvgWeight(fromGroupTrack.getAV);    //均重//// TODO: 17/1/12 不知道从哪取 
-        doctorTransGroupInput.setEventAt(DateUtil.toDateString(fostersDto.eventAt()));
-        doctorTransGroupInput.setIsAuto(1);
-        doctorTransGroupInput.setCreatorId(basicInputInfoDto.getStaffId());
-        doctorTransGroupInput.setCreatorName(basicInputInfoDto.getStaffName());
-        doctorTransGroupInput.setRelPigEventId(pigEventId);
+        //来源猪舍的信息，转群事件应该是来源猪群触发
+        DoctorGroup fromGroup = doctorGroupDao.findById(fosterByDto.getFromGroupId());
+        DoctorGroupTrack fromGroupTrack = doctorGroupTrackDao.findByGroupId(fromGroup.getId());
+        input.setEventAt(DateUtil.toDateString(eventAt));
+        input.setEventType(GroupEventType.TRANS_GROUP.getValue());
 
-        doctorTransGroupEventHandler.handle(eventInfoList, fromGroup, fromGroupTrack, doctorTransGroupInput);
-        return doctorGroupDao.findByCurrentBarnId(doctorPigTrack.getCurrentBarnId()).get(0).getId();
-    }
+        input.setIsAuto(IsOrNot.YES.getValue());
+        input.setCreatorId(basic.getStaffId());
+        input.setCreatorName(basic.getStaffName());
+        input.setBreedId(fromGroup.getBreedId());
+        input.setBreedName(fromGroup.getBreedName());
+        input.setSowEvent(true);    //由母猪触发的猪群事件
+        input.setSource(PigSource.LOCAL.getKey());
 
-    private String generateGroupCode(String barnName) {
-        return barnName + "(" +DateUtil.toDateString(new Date()) + ")";
+        input.setQuantity(fosterByDto.getFosterByCount());
+        input.setBoarQty(0);
+        input.setSowQty(input.getQuantity() - input.getBoarQty());
+        input.setWeight(MoreObjects.firstNonNull(fosterByDto.getFosterByTotalWeight(), 0D));
+        input.setAvgWeight(EventUtil.getAvgWeight(input.getWeight(), input.getQuantity()));
+        input.setRelPigEventId(pigEventId);
+
+        doctorTransGroupEventHandler.handle(eventInfoList, fromGroup, fromGroupTrack, input);
+        if (Objects.equals(input.getIsCreateGroup(), IsOrNot.YES.getValue())) {
+            DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(fromGroup.getFarmId(), input.getToGroupCode());
+            return toGroup.getId();
+        }
+        return input.getToGroupId();
     }
 }

@@ -21,6 +21,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DoctorFosterByDto extends BasePigEventInputDto implements Serializable {
+    private static final long serialVersionUID = 7364302744766671168L;
     /**
      * 被拼窝时间
      */
@@ -41,6 +42,12 @@ public class DoctorFosterByDto extends BasePigEventInputDto implements Serializa
      * 原母猪id
      */
     private Long fromSowId;
+
+    /**
+     * 源猪群id
+     */
+    private Long fromGroupId;
+
     @Override
     public Map<String, String> descMap() {
         return Maps.newLinkedHashMap();
