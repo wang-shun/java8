@@ -77,7 +77,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //校验能否转群, 数量, 日龄差, 转群总重
         checkCanTransBarn(group.getPigType(), transGroup.getToBarnId());
-        checkCanTransGroup(transGroup.getToGroupId(), transGroup.getToBarnId());
+        checkCanTransGroup(transGroup.getToGroupId(), transGroup.getToBarnId(), transGroup.getIsCreateGroup());
         checkFarrowGroupUnique(transGroup.getIsCreateGroup(), transGroup.getToBarnId());
         checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
         checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());

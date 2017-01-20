@@ -343,7 +343,10 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     //校验目标猪群的猪舍id与目标猪舍是否相同
-    protected void checkCanTransGroup(Long toGroupId, Long toBarnId) {
+    protected void checkCanTransGroup(Long toGroupId, Long toBarnId, Integer isCreate) {
+        if (Objects.equals(isCreate, IsOrNot.YES.getValue())) {
+            return;
+        }
         if (toGroupId != null) {
             DoctorGroup toGroup = doctorGroupDao.findById(toGroupId);
             if (toGroup == null || !Objects.equals(toGroup.getCurrentBarnId(), toBarnId)) {
