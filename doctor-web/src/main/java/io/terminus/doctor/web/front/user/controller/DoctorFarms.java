@@ -68,7 +68,7 @@ public class DoctorFarms {
      * 根据用户id查询所拥有权限的公司信息
      * @return 公司信息
      */
-    @RequestMapping(value = "/companyInfo", method = RequestMethod.GET)
+    @RequestMapping(value = "/orgInfo", method = RequestMethod.GET)
     public DoctorBasicDto getCompanyInfo(){
         return RespHelper.or500(doctorStatisticReadService.getOrgStatistic(UserUtil.getUserId()));
     }
@@ -77,7 +77,7 @@ public class DoctorFarms {
      * 根据用户id查询所拥有权限的公司信息
      * @return 公司信息
      */
-    @RequestMapping(value = "/orgInfo", method = RequestMethod.GET)
+    @RequestMapping(value = "/companyInfo", method = RequestMethod.GET)
     public DoctorBasicDto getCompanyInfo(@RequestParam("orgId") Long orgId){
         return RespHelper.or500(doctorStatisticReadService.getOrgStatisticByOrg(UserUtil.getUserId(), orgId));
     }
