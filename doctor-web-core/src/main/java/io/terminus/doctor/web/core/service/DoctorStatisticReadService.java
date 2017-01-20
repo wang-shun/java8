@@ -1,8 +1,8 @@
-package io.terminus.doctor.open.rest.farm.service;
+package io.terminus.doctor.web.core.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.open.dto.DoctorBasicDto;
-import io.terminus.doctor.open.dto.DoctorFarmBasicDto;
+import io.terminus.doctor.web.core.dto.DoctorBasicDto;
+import io.terminus.doctor.web.core.dto.DoctorFarmBasicDto;
 
 import javax.validation.constraints.NotNull;
 
@@ -28,5 +28,5 @@ public interface DoctorStatisticReadService {
      * @return 猪场信息list
      */
     Response<DoctorBasicDto> getOrgStatistic(@NotNull(message = "userId.not.null") Long userId);
-    Response<DoctorBasicDto> getOrgStatisticByOrg(@NotNull(message = "userId.not.null") Long userId,@NotNull(message = "orgId.not.null")Long orgId);
+    Response<DoctorBasicDto> getOrgStatisticByOrg(@NotNull(message = "userId.not.null") Long userId, @NotNull(message = "orgId.not.null")Long orgId);
 }

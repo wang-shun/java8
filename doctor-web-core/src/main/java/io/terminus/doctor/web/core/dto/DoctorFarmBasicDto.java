@@ -1,4 +1,4 @@
-package io.terminus.doctor.open.dto;
+package io.terminus.doctor.web.core.dto;
 
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.AllArgsConstructor;

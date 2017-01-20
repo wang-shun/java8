@@ -46,7 +46,8 @@ import java.util.concurrent.Executors;
         "io.terminus.doctor.web.core.image",
         "io.terminus.doctor.web.core.component",
         "io.terminus.doctor.web.core.login",
-        "io.terminus.doctor.web.core.export"
+        "io.terminus.doctor.web.core.export",
+        "io.terminus.doctor.web.core.service"
 
 })
 @EnableConfigurationProperties(ExportTables.class)

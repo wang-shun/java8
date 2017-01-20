@@ -1,4 +1,4 @@
-package io.terminus.doctor.open.dto;
+package io.terminus.doctor.web.core.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

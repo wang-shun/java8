@@ -19,10 +19,6 @@
         <!-- doctor -->
         <dependency>
             <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-event-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-msg-api</artifactId>
         </dependency>
         <dependency>
