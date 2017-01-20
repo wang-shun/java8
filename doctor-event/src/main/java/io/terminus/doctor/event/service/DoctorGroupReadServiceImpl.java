@@ -143,7 +143,8 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     public Response<Paging<DoctorGroupDetail>> pagingGroup(DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size) {
         try {
             PageInfo pageInfo = PageInfo.of(pageNo, size);
-            Paging<DoctorGroup> groupPaging = doctorGroupDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), groupSearchDto);
+            Map<String, Object> params = JSON_MAPPER.getMapper().convertValue(groupSearchDto, Map.class);
+            Paging<DoctorGroup> groupPaging = doctorGroupDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), params);
             List<DoctorGroupDetail> groupDetails = groupPaging.getData().stream()
                     .map(group -> new DoctorGroupDetail(group, doctorGroupTrackDao.findByGroupId(group.getId())))
                     .collect(Collectors.toList());
