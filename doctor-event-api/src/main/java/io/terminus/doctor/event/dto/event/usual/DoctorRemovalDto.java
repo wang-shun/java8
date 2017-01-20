@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.event.usual;
 
+import io.terminus.common.utils.NumberUtils;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -61,7 +62,7 @@ public class DoctorRemovalDto extends BasePigEventInputDto implements Serializab
             map.put("重量", weight.toString());
         }
         if(price != null){
-            map.put("价格", price.toString());
+            map.put("价格", NumberUtils.divide(price, Long.valueOf(100), 2));
         }
         if(sum != null){
             map.put("总量", sum.toString());
