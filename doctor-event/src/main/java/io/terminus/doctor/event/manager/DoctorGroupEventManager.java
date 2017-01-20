@@ -122,7 +122,7 @@ public class DoctorGroupEventManager {
      */
     @Transactional
     public List<DoctorEventInfo> batchHandleEvent(List<DoctorGroupInputInfo> inputInfoList, Integer eventType) {
-        eventRepeatCheck(inputInfoList);
+        //eventRepeatCheck(inputInfoList); // TODO: 17/1/20 移除猪群事件的重复性校验 
         final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
         inputInfoList.forEach(inputInfo -> getHandler(eventType).handle(eventInfoList, inputInfo.getGroupDetail().getGroup(), inputInfo.getGroupDetail().getGroupTrack(), inputInfo.getInput()));
         return eventInfoList;
