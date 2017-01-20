@@ -75,6 +75,7 @@
         </if>
         <if test="breedId != null">AND breed_id = #{breedId}</if>
         <if test="geneticId != null">AND genetic_id = #{geneticId}</if>
+        <if test="staffId != null">AND staff_id = #{staffId}</if>
         <if test="startOpenAt != null">AND open_at &gt;= #{startOpenAt}</if>
         <if test="endOpenAt != null">AND open_at &lt;= #{endOpenAt}</if>
         <if test="startCloseAt != null">AND close_at &gt;= #{startCloseAt}</if>

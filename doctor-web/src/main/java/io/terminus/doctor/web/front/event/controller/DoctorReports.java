@@ -4,20 +4,21 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
-import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
+import io.terminus.doctor.event.service.DoctorCommonReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
-import io.terminus.doctor.event.service.DoctorCommonReportReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -123,6 +124,15 @@ public class DoctorReports {
                                                                    @RequestParam(required = false) Integer pageNo,
                                                                    @RequestParam(required = false) Integer pageSize) {
         DoctorGroupSearchDto dto = BeanMapper.map(Params.filterNullOrEmpty(params), DoctorGroupSearchDto.class);
+
+        dto.setStartOpenAt(DateUtil.toDate(String.valueOf(params.get("openStartAt"))));
+        dto.setEndOpenAt(DateUtil.toDate(String.valueOf(params.get("openEndAt"))));
+        dto.setStartCloseAt(DateUtil.toDate(String.valueOf(params.get("closeStartAt"))));
+        dto.setEndCloseAt(DateUtil.toDate(String.valueOf(params.get("closeEndAt"))));
+        if (params.get("barnId") != null) {
+            dto.setCurrentBarnId(Long.valueOf(String.valueOf(params.get("barnId"))));
+        }
+
         if (notEmpty(dto.getPigTypeCommas())) {
             dto.setPigTypes(Splitters.splitToInteger(dto.getPigTypeCommas(), Splitters.COMMA));
         }
