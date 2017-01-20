@@ -233,18 +233,18 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         try {
             Date eventAt = inputDto.eventAt();
             if(eventAt == null){
-                throw new ServiceException("event.at.illegal");
+                throw new ServiceException("事件输入有误,猪号:" + inputDto.getPigCode());
             }
             DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
             if (lastEvent != null) {
                 if (new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime()) && eventAt.before(DateUtil.toDate(DateTime.now().plusDays(1).toString(DateTimeFormat.forPattern("yyyy-MM-dd"))))) {
                     return;
                 } else {
-                    throw new ServiceException("event.at.illegal");
+                    throw new ServiceException("事件输入有误,猪号:" + inputDto.getPigCode());
                 }
             }
         } catch (Exception e) {
-            throw new ServiceException("event.at.illegal");
+            throw new ServiceException("事件输入有误,猪号:" + inputDto.getPigCode());
         }
     }
 }
