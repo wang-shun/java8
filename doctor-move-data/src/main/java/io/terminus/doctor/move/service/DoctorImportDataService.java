@@ -655,6 +655,7 @@ public class DoctorImportDataService {
             boarTrack.setIsRemoval(boar.getIsRemoval());
             boarTrack.setCurrentBarnId(boar.getInitBarnId());
             boarTrack.setCurrentBarnName(boar.getInitBarnName());
+            boarTrack.setCurrentBarnType(barn.getPigType());
             boarTrack.setCurrentParity(1);      //配种次数置成1
             doctorPigTrackDao.create(boarTrack);
         }
@@ -1050,6 +1051,7 @@ public class DoctorImportDataService {
         sowTrack.setIsRemoval(sow.getIsRemoval());
         sowTrack.setCurrentBarnId(sow.getInitBarnId());
         sowTrack.setCurrentBarnName(sow.getInitBarnName());
+        sowTrack.setCurrentBarnType(barn.getPigType());
         sowTrack.setWeight(sow.getBirthWeight());
         sowTrack.setCurrentParity(last.getParity());
 
