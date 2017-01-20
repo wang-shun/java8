@@ -1,16 +1,13 @@
 package io.terminus.doctor.open.rest.farm;
 
-import io.terminus.common.model.Response;
-import io.terminus.doctor.open.dto.DoctorBasicDto;
-import io.terminus.doctor.open.dto.DoctorFarmBasicDto;
-import io.terminus.doctor.open.rest.farm.service.DoctorStatisticReadService;
+import io.terminus.doctor.web.core.dto.DoctorBasicDto;
+import io.terminus.doctor.web.core.dto.DoctorFarmBasicDto;
+import io.terminus.doctor.web.core.service.DoctorStatisticReadService;
 import io.terminus.doctor.open.util.OPRespHelper;
-import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
-import io.terminus.pampas.openplatform.exceptions.OPClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 

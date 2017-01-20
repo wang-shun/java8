@@ -36,6 +36,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @ComponentScan(basePackages = {
         "io.terminus.doctor.web.core.component",
         "io.terminus.doctor.web.core.events",
+        "io.terminus.doctor.web.core.service",
         "io.terminus.doctor.web.front.component",
         "io.terminus.doctor.web.front.design"
 }, excludeFilters = {

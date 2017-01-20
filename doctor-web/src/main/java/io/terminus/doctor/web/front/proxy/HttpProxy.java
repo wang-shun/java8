@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Comparator;
 import java.util.List;
@@ -23,8 +22,8 @@ import java.util.Map;
  * Created by yudi on 2016/11/16.
  * Mail to yd@terminus.io
  */
-@RestController
-@RequestMapping("/api/gateway/proxy")
+//@RestController
+//@RequestMapping("/api/gateway/proxy")
 @Slf4j
 public class HttpProxy {
     private static final String APP_KEY="pigDoctorPC";
