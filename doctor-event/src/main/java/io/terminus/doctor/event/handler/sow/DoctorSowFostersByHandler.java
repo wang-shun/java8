@@ -10,6 +10,7 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFosterByDto;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -20,6 +21,7 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -73,7 +75,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
 
         //如果不是一个猪舍的拼窝，需要转群操作
         if (!Objects.equals(doctorPigTrack.getCurrentBarnId(), fromPigTrack.getCurrentBarnId())) {
-            Long groupId = groupSowEventCreate(doctorEventInfoList, doctorPigTrack, basic, doctorPigEvent.getId(), doctorPigEvent.getEventAt());
+            Long groupId = groupSowEventCreate(doctorEventInfoList, doctorPigTrack, fosterByDto, basic, doctorPigEvent.getId(), doctorPigEvent.getEventAt());
             doctorPigTrack.setGroupId(groupId);
             doctorPigTrackDao.update(doctorPigTrack);
         }
@@ -82,7 +84,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
     /**
      * 对应的仔猪转群操作
      */
-    private Long groupSowEventCreate(List<DoctorEventInfo> eventInfoList, DoctorPigTrack pigTrack, DoctorBasicInputInfoDto basic, Long pigEventId, Date eventAt) {
+    private Long groupSowEventCreate(List<DoctorEventInfo> eventInfoList, DoctorPigTrack pigTrack, DoctorFosterByDto fosterByDto, DoctorBasicInputInfoDto basic, Long pigEventId, Date eventAt) {
         //未断奶仔猪id
         DoctorTransGroupInput input = new DoctorTransGroupInput();
         input.setToBarnId(pigTrack.getCurrentBarnId());
@@ -97,34 +99,32 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
             input.setIsCreateGroup(IsOrNot.YES.getValue());
         }
 
-        DoctorGroup group = doctorGroupDao.findById(pigTrack.getGroupId());
-        DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(pigTrack.getGroupId());
+        //来源猪舍的信息，转群事件应该是来源猪群触发
+        DoctorGroup fromGroup = doctorGroupDao.findById(fosterByDto.getFromGroupId());
+        DoctorGroupTrack fromGroupTrack = doctorGroupTrackDao.findByGroupId(fromGroup.getId());
         input.setEventAt(DateUtil.toDateString(eventAt));
+        input.setEventType(GroupEventType.TRANS_GROUP.getValue());
+
         input.setIsAuto(IsOrNot.YES.getValue());
         input.setCreatorId(basic.getStaffId());
         input.setCreatorName(basic.getStaffName());
-        input.setBreedId(group.getBreedId());
-        input.setBreedName(group.getBreedName());
+        input.setBreedId(fromGroup.getBreedId());
+        input.setBreedName(fromGroup.getBreedName());
         input.setSowEvent(true);    //由母猪触发的猪群事件
         input.setSource(PigSource.LOCAL.getKey());
 
-        //未断奶的数量 = 总 - 断奶
-        input.setQuantity(pigTrack.getUnweanQty());
+        input.setQuantity(fosterByDto.getFosterByCount());
         input.setBoarQty(0);
         input.setSowQty(input.getQuantity() - input.getBoarQty());
-        input.setAvgWeight((MoreObjects.firstNonNull(pigTrack.getFarrowAvgWeight(), 0D)));
-        input.setWeight(input.getAvgWeight() * input.getQuantity());
+        input.setWeight(MoreObjects.firstNonNull(fosterByDto.getFosterByTotalWeight(), 0D));
+        input.setAvgWeight(EventUtil.getAvgWeight(input.getWeight(), input.getQuantity()));
         input.setRelPigEventId(pigEventId);
 
-        doctorTransGroupEventHandler.handle(eventInfoList, group, groupTrack, input);
+        doctorTransGroupEventHandler.handle(eventInfoList, fromGroup, fromGroupTrack, input);
         if (Objects.equals(input.getIsCreateGroup(), IsOrNot.YES.getValue())) {
-            DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(group.getFarmId(), input.getToGroupCode());
+            DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(fromGroup.getFarmId(), input.getToGroupCode());
             return toGroup.getId();
         }
         return input.getToGroupId();
-    }
-
-    private static String generateGroupCode(String barnName) {
-        return barnName + "(" +DateUtil.toDateString(new Date()) + ")";
     }
 }

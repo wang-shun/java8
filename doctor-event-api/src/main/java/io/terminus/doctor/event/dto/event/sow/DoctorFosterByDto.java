@@ -42,6 +42,12 @@ public class DoctorFosterByDto extends BasePigEventInputDto implements Serializa
      * 原母猪id
      */
     private Long fromSowId;
+
+    /**
+     * 源猪群id
+     */
+    private Long fromGroupId;
+
     @Override
     public Map<String, String> descMap() {
         return Maps.newLinkedHashMap();

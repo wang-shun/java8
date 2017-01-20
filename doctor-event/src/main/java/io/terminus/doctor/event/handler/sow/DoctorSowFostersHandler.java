@@ -45,7 +45,7 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
         DoctorFostersDto fostersDto = (DoctorFostersDto) eventDto;
         checkState(!Objects.equals(fostersDto.getPigId(), fostersDto.getFosterSowId()), "不能拼自己猪号:" + fostersDto.getPigCode());
         checkState(fostersDto.getFosterTotalWeight() != null,  "拼窝总重不能为空");
-        checkState(fostersDto.getFosterTotalWeight() >= 0,  "拼窝总重不能小于0");
+        checkState(fostersDto.getFosterTotalWeight() >= 0,  "拼窝总重不能小于等于0");
     }
 
     @Override
@@ -70,8 +70,20 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
 
     @Override
     protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        //断奶事件
         DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
+
+        //被拼窝事件
+        DoctorFosterByDto fosterByDto = DoctorFosterByDto.builder()
+                .fromSowId(fostersDto.getPigId())
+                .fosterByDate(DateUtil.toDate(fostersDto.getFostersDate()))
+                .fosterByCount(fostersDto.getFostersCount())
+                .boarFostersByCount(fostersDto.getBoarFostersCount())
+                .sowFostersByCount(fostersDto.getSowFostersCount())
+                .fosterByTotalWeight(fostersDto.getFosterTotalWeight())
+                .fromGroupId(doctorPigTrack.getGroupId())
+                .build();
+
+        //断奶事件
         if (doctorPigTrack.getUnweanQty() == 0) {
             DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
                     .partWeanDate(DateUtil.toDate(fostersDto.getFostersDate()))
@@ -81,15 +93,7 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
             buildAutoEventCommonInfo(fostersDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
             doctorSowWeanHandler.handle(doctorEventInfoList, partWeanDto, basic);
         }
-        //被拼窝事件
-        DoctorFosterByDto fosterByDto = DoctorFosterByDto.builder()
-                .fromSowId(fostersDto.getPigId())
-                .fosterByDate(DateUtil.toDate(fostersDto.getFostersDate()))
-                .fosterByCount(fostersDto.getFostersCount())
-                .boarFostersByCount(fostersDto.getBoarFostersCount())
-                .sowFostersByCount(fostersDto.getSowFostersCount())
-                .fosterByTotalWeight(fostersDto.getFosterTotalWeight())
-                .build();
+
         DoctorPigTrack fosterByTrack = doctorPigTrackDao.findByPigId(fostersDto.getFosterSowId());
         DoctorPig fosterByPig = doctorPigDao.findById(fostersDto.getFosterSowId());
         fosterByDto.setIsAuto(IsOrNot.YES.getValue());
