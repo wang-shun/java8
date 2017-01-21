@@ -534,6 +534,11 @@ public class DoctorPigCreateEvents {
                     removalDto.setChgTypeName(chgType.getName());
                     DoctorChangeReason changeReason = RespHelper.or500(doctorBasicReadService.findChangeReasonById(removalDto.getChgReasonId()));
                     removalDto.setChgReasonName(changeReason.getReason());
+                    DoctorFarm doctorFarm2 = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+                    Long customerId1 = RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorFarm2.getId(),
+                            doctorFarm2.getName(), removalDto.getCustomerId(), removalDto.getCustomerName(),
+                            UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+                    removalDto.setCustomerId(customerId1);
                     return removalDto;
                 case SEMEN:
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorSemenDto.class);
