@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -178,7 +179,9 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
                 return Response.ok(customerId);
             }
             if (isExistCustomerName(farmId, customerName)) {
-                return Response.fail("customer.name.is.duplicate");
+                Map<String, Long> customerMap = doctorCustomerDao.findByFarmId(farmId).stream().collect(Collectors.toMap(DoctorCustomer::getName, DoctorCustomer::getId));
+                return Response.ok(customerMap.get(customerName));
+                //return Response.fail("customer.name.is.duplicate");
             }
 
             DoctorCustomer customer = new DoctorCustomer();
