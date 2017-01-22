@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -123,12 +124,16 @@ public class DoctorReports {
     public Paging<DoctorGroupBatchSummary> pagingGroupBatchSummary(@RequestParam Map<String, Object> params,
                                                                    @RequestParam(required = false) Integer pageNo,
                                                                    @RequestParam(required = false) Integer pageSize) {
+        if (!params.containsKey("farmId") || params.get("farmId") == null) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
+
         DoctorGroupSearchDto dto = BeanMapper.map(Params.filterNullOrEmpty(params), DoctorGroupSearchDto.class);
 
-        dto.setStartOpenAt(DateUtil.toDate(String.valueOf(params.get("openStartAt"))));
-        dto.setEndOpenAt(DateUtil.toDate(String.valueOf(params.get("openEndAt"))));
-        dto.setStartCloseAt(DateUtil.toDate(String.valueOf(params.get("closeStartAt"))));
-        dto.setEndCloseAt(DateUtil.toDate(String.valueOf(params.get("closeEndAt"))));
+        dto.setStartOpenAt(DateUtil.toDate(getDate(params.get("openStartAt"))));
+        dto.setEndOpenAt(DateUtil.toDate(getDate(params.get("openEndAt"))));
+        dto.setStartCloseAt(DateUtil.toDate(getDate(params.get("closeStartAt"))));
+        dto.setEndCloseAt(DateUtil.toDate(getDate(params.get("closeEndAt"))));
         if (params.get("barnId") != null) {
             dto.setCurrentBarnId(Long.valueOf(String.valueOf(params.get("barnId"))));
         }
@@ -149,6 +154,13 @@ public class DoctorReports {
                 })
                 .collect(Collectors.toList());
         return new Paging<>(paging.getTotal(), summaries);
+    }
+
+    private static String getDate(Object o) {
+        if (o == null) {
+            return null;
+        }
+        return String.valueOf(o);
     }
 
     /**

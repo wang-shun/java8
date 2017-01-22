@@ -14,7 +14,9 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorStaffReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.web.core.dto.DoctorBasicDto;
 import io.terminus.doctor.web.core.dto.FarmStaff;
+import io.terminus.doctor.web.core.service.DoctorStatisticReadService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,16 +49,37 @@ public class DoctorFarms {
     private final DoctorStaffReadService doctorStaffReadService;
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
     private final DoctorUserReadService doctorUserReadService;
+    private final DoctorStatisticReadService doctorStatisticReadService;
 
     @Autowired
     public DoctorFarms(DoctorFarmReadService doctorFarmReadService,
                        DoctorStaffReadService doctorStaffReadService,
                        DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
-                       DoctorUserReadService doctorUserReadService) {
+                       DoctorUserReadService doctorUserReadService,
+                       DoctorStatisticReadService doctorStatisticReadService) {
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorStaffReadService = doctorStaffReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorUserReadService = doctorUserReadService;
+        this.doctorStatisticReadService = doctorStatisticReadService;
+    }
+
+    /**
+     * 根据用户id查询所拥有权限的公司信息
+     * @return 公司信息
+     */
+    @RequestMapping(value = "/orgInfo", method = RequestMethod.GET)
+    public DoctorBasicDto getCompanyInfo(){
+        return RespHelper.or500(doctorStatisticReadService.getOrgStatistic(UserUtil.getUserId()));
+    }
+
+    /**
+     * 根据用户id查询所拥有权限的公司信息
+     * @return 公司信息
+     */
+    @RequestMapping(value = "/companyInfo", method = RequestMethod.GET)
+    public DoctorBasicDto getCompanyInfo(@RequestParam("orgId") Long orgId){
+        return RespHelper.or500(doctorStatisticReadService.getOrgStatisticByOrg(UserUtil.getUserId(), orgId));
     }
 
     /**
