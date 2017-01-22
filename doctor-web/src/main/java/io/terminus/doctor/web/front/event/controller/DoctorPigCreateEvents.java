@@ -532,8 +532,10 @@ public class DoctorPigCreateEvents {
                     DoctorRemovalDto removalDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorRemovalDto.class);
                     DoctorBasic chgType = RespHelper.or500(doctorBasicReadService.findBasicById(removalDto.getChgTypeId()));
                     removalDto.setChgTypeName(chgType.getName());
-                    DoctorChangeReason changeReason = RespHelper.or500(doctorBasicReadService.findChangeReasonById(removalDto.getChgReasonId()));
-                    removalDto.setChgReasonName(changeReason.getReason());
+                    if (removalDto.getChgReasonId() != null) {
+                        DoctorChangeReason changeReason = RespHelper.or500(doctorBasicReadService.findChangeReasonById(removalDto.getChgReasonId()));
+                        removalDto.setChgReasonName(changeReason.getReason());
+                    }
                     DoctorFarm doctorFarm2 = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
                     Long customerId1 = RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorFarm2.getId(),
                             doctorFarm2.getName(), removalDto.getCustomerId(), removalDto.getCustomerName(),
