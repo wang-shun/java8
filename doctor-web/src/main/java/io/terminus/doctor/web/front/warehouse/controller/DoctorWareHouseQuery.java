@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.warehouse.controller;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
@@ -7,6 +8,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -231,7 +233,7 @@ public class DoctorWareHouseQuery {
     @RequestMapping(value = "/materials", method = RequestMethod.GET)
     @ResponseBody
     public List<DoctorBasicMaterial> getDoctorBasicMaterials(@RequestParam Long farmId,
-                                                             @RequestParam Long type,
+                                                             @RequestParam(value = "type", required = false) Long type,
                                                              @RequestParam(value = "srm", required = false) String srm){
         return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialsOwned(farmId, type, srm));
     }
@@ -259,13 +261,18 @@ public class DoctorWareHouseQuery {
             @RequestParam(name = "warehouseId", required = false) Long warehouseId,
             @RequestParam(required = false) Long materialId,
             @RequestParam(required = false) Integer eventType,
+            @RequestParam(required = false) String eventTypes,
             @RequestParam(required = false) Integer materilaType,
             @RequestParam(required = false) Long staffId,
             @RequestParam(required = false) String startAt,
             @RequestParam(required = false) String endAt,
             @RequestParam(required = false) Integer pageNo,
             @RequestParam(required = false) Integer size){
-        return RespHelper.or500(doctorMaterialConsumeProviderReadService.page(farmId, warehouseId, materialId, eventType,
+        List<Integer> types = Lists.newArrayList();
+        if(!Strings.isNullOrEmpty(eventTypes)){
+            types = Splitters.splitToInteger(eventTypes, Splitters.UNDERSCORE);
+        }
+        return RespHelper.or500(doctorMaterialConsumeProviderReadService.page(farmId, warehouseId, materialId, eventType, types,
                 materilaType, staffId, startAt, endAt, pageNo, size));
     }
 
