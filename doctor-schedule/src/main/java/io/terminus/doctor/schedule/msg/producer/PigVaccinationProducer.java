@@ -29,6 +29,7 @@ import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import io.terminus.doctor.schedule.msg.producer.factory.GroupDetailFactory;
 import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -562,7 +563,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private void getMessage(DoctorPigInfoDto pigDto, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, DoctorVaccinationPigWarn warn, DateTime vaccDate) {
         // 创建消息
-        String jumpUrl = sowPigDetailUrl.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + ruleRole.getFarmId());
+        String jumpUrl = getPigJumpUrl(pigDto, ruleRole);
         Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, null, url);
         jsonData.put("pigType", warn.getPigType());
         jsonData.put("materialId", warn.getMaterialId());
@@ -574,7 +575,19 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
 
         try {
-            createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), PigEvent.VACCINATION.getKey(), pigDto.getPigId(), DoctorMessage.BUSINESS_TYPE.PIG.getValue(), null, jumpUrl);
+            DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                    .data(MAPPER.writeValueAsString(jsonData))
+                    .barnId(pigDto.getBarnId())
+                    .barnName(pigDto.getBarnName())
+                    .eventType(PigEvent.VACCINATION.getKey())
+                    .url(jumpUrl)
+                    .businessId(pigDto.getPigId())
+                    .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
+                    .status(pigDto.getStatus())
+                    .statusName(pigDto.getStatusName())
+                    .build();
+
+            createMessage(subUsers, ruleRole, messageInfo);
         } catch (JsonProcessingException e) {
             log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
         }
@@ -597,7 +610,17 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("vaccinationDateType", warn.getVaccinationDateType());
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
         try {
-            createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), PigEvent.VACCINATION.getKey(), detail.getGroup().getId(), DoctorMessage.BUSINESS_TYPE.GROUP.getValue(), null, jumpUrl);
+            DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                    .data(MAPPER.writeValueAsString(jsonData))
+                    .barnId(detail.getGroup().getCurrentBarnId())
+                    .barnName(detail.getGroup().getCurrentBarnName())
+                    .eventType(GroupEventType.ANTIEPIDEMIC.getValue())
+                    .url(jumpUrl)
+                    .businessId(detail.getGroup().getId())
+                    .businessType(DoctorMessage.BUSINESS_TYPE.GROUP.getValue())
+                    .build();
+
+            createMessage(subUsers, ruleRole, messageInfo);
         } catch (JsonProcessingException e) {
             log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
         }

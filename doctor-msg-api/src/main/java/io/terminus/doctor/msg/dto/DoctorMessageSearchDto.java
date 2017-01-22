@@ -20,4 +20,18 @@ public class DoctorMessageSearchDto extends DoctorMessage {
      * 消息类型列表
      */
     private List<Integer> types;
+
+    /**
+     * 消息ids
+     */
+    private List<Long> ids;
+
+    private String eventStartAt;
+
+    private String eventEndAt;
+
+    private String otherStartAt;
+
+    private String otherEndAt;
+
 }

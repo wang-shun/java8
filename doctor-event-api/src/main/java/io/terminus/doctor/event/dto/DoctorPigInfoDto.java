@@ -80,11 +80,6 @@ public class DoctorPigInfoDto implements Serializable{
 
     private Long creatorId;
     private String creatorName;
-    private String operatorName;
-
-    private Date eventDate;
-    private String reason;
-    private Integer ruleValueId;
     private Integer unweanQty;
     private Integer weanQty;
 

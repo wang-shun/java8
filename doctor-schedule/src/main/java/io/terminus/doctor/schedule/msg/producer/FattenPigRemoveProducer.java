@@ -1,8 +1,6 @@
 package io.terminus.doctor.schedule.msg.producer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
-import com.google.common.base.Throwables;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -15,7 +13,7 @@ import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
-import io.terminus.doctor.schedule.msg.producer.factory.GroupDetailFactory;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,9 +56,18 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
             groupDetails.forEach(doctorGroupDetail -> {
                 try {
                     //根据用户拥有的猪舍权限过滤拥有user
+                    RuleValue ruleValue = ruleValueMap.get(1);
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, doctorGroupDetail.getGroup().getCurrentBarnId());
-                    if (checkRuleValue(ruleValueMap.get(1), (double) doctorGroupDetail.getGroupTrack().getAvgDayAge())) {
-                        getMessage(doctorGroupDetail, ruleRole, sUsers, rule.getUrl(), null, ruleValueMap.get(1).getId());
+                    if (checkRuleValue(ruleValue, (double) doctorGroupDetail.getGroupTrack().getAvgDayAge())) {
+                        DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                .url(getGroupJumpUrl(doctorGroupDetail, ruleRole))
+                                .reason(ruleValue.getDescribe() + ruleValue.getValue().toString())
+                                .barnId(doctorGroupDetail.getGroup().getCurrentBarnId())
+                                .barnName(doctorGroupDetail.getGroup().getCurrentBarnName())
+                                .businessType(DoctorMessage.BUSINESS_TYPE.GROUP.getValue())
+                                .ruleValueId(ruleValue.getId())
+                                .build();
+                        createMessage(sUsers, ruleRole, messageInfo);
                     }
                 } catch (Exception e) {
                     log.error("[FattenPigRemoveProducer]->message.failed");
@@ -70,17 +77,17 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
         }
     }
 
-    /**
-     * 创建消息
-     */
-    private void getMessage(DoctorGroupDetail doctorGroupDetail, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, Integer eventType, Integer ruleValueId) {
-        // 创建消息
-        String jumpUrl = groupDetailUrl.concat("?groupId=" + doctorGroupDetail.getGroup().getId() + "&farmId=" + ruleRole.getFarmId());
-        Map<String, Object> jsonData = GroupDetailFactory.getInstance().createGroupMessage(doctorGroupDetail, url);
-            try {
-                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, doctorGroupDetail.getGroup().getId(), DoctorMessage.BUSINESS_TYPE.GROUP.getValue(), ruleValueId, jumpUrl);
-            } catch (JsonProcessingException e) {
-                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
-            }
-    }
+//    /**
+//     * 创建消息
+//     */
+//    private void getMessage(DoctorGroupDetail doctorGroupDetail, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, Integer eventType, Integer ruleValueId) {
+//        // 创建消息
+//        String jumpUrl = groupDetailUrl.concat("?groupId=" + doctorGroupDetail.getGroup().getId() + "&farmId=" + ruleRole.getFarmId());
+//        Map<String, Object> jsonData = GroupDetailFactory.getInstance().createGroupMessage(doctorGroupDetail, url);
+//            try {
+//                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, doctorGroupDetail.getGroup().getId(), DoctorMessage.BUSINESS_TYPE.GROUP.getValue(), ruleValueId, jumpUrl);
+//            } catch (JsonProcessingException e) {
+//                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
+//            }
+//    }
 }

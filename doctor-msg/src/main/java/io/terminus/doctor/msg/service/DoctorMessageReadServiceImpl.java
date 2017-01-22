@@ -7,6 +7,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.msg.dao.DoctorMessageDao;
 import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
+import io.terminus.doctor.msg.dto.DoctorSuggestBarn;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
@@ -139,5 +140,16 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
             log.error("find message list by criteria failed, criteria:{}, cause:{}", doctorMessageSearchDto, Throwables.getStackTraceAsString(e));
             return Response.fail("message.list.find.fail");
         }
+    }
+
+    @Override
+    public Response<List<DoctorSuggestBarn>> suggestMessageBarn(DoctorMessageSearchDto doctorMessageSearchDto) {
+        try {
+            return Response.ok(doctorMessageDao.suggestMessageBarn(doctorMessageSearchDto));
+        } catch (Exception e) {
+            log.error("suggest message barn failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("suggest.message.barn.failed");
+        }
+
     }
 }

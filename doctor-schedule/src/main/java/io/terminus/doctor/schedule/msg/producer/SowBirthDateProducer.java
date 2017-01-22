@@ -1,5 +1,6 @@
 package io.terminus.doctor.schedule.msg.producer;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -11,8 +12,10 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
@@ -68,41 +71,37 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
-                    DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
+                    DoctorPigEvent matingPigEvent = getMatingPigEvent(pigDto);
                     // 母猪怀孕天数
-                    Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
+                    Double timeDiff = getTimeDiff(new DateTime(matingPigEvent.getEventAt()));
 
                     ruleValueMap.values().forEach(ruleValue -> {
                         if (checkRuleValue(ruleValue, timeDiff)) {
-                            pigDto.setEventDate(doctorPigEvent.getEventAt());
-                            pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                            getMessage(pigDto, ruleRole, sUsers, timeDiff, timeDiff, rule.getUrl(), PigEvent.TO_FARROWING.getKey(), ruleValue.getId());
+                            DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                    .barnId(pigDto.getBarnId())
+                                    .barnName(pigDto.getBarnName())
+                                    .timeDiff(timeDiff)
+                                    .ruleTimeDiff(getRuleTimeDiff(ruleValue, timeDiff))
+                                    .reason(ruleValue.getDescribe())
+                                    .eventAt(matingPigEvent.getEventAt())
+                                    .eventType(PigEvent.TO_FARROWING.getKey())
+                                    .ruleValueId(ruleValue.getId())
+                                    .url(getPigJumpUrl(pigDto, ruleRole))
+                                    .businessId(pigDto.getPigId())
+                                    .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
+                                    .operatorId(matingPigEvent.getOperatorId())
+                                    .operatorName(matingPigEvent.getOperatorName())
+                                    .status(pigDto.getStatus())
+                                    .statusName(pigDto.getStatusName())
+                                    .build();
+                            createMessage(sUsers, ruleRole, messageInfo);
                         }
                     });
                 } catch (Exception e) {
-                    log.error("[SowBirthDateProduce]-handle.message.failed");
+                    log.error("[SowBirthDateProduce]-handle.message.failed, cause:{}", Throwables.getStackTraceAsString(e));
                 }
             }
         }
     }
 
-//    /**
-//     * 获取母猪提示里的时间差
-//     * @param events
-//     * @param value
-//     * @return
-//     */
-//    private Double getBirthDateTimeDiff(List<DoctorPigEvent> events, Integer value){
-//        Date pregCheckDate = getPigEventByEventType(events, PigEvent.PREG_CHECK.getKey()).getEventAt();
-//        Double diffTime = getTimeDiff(new DateTime(pregCheckDate));
-//        List<DoctorPigEvent> afterPregCheckEvents = events.stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt().after(pregCheckDate)).collect(Collectors.toList());
-//        DoctorPigEvent toFarrowingEvent = getPigEventByEventType(afterPregCheckEvents, PigEvent.TO_FARROWING.getKey());
-//        Double warnDiffTime;
-//        if (toFarrowingEvent == null){
-//             warnDiffTime = value - diffTime;
-//        }else {
-//             warnDiffTime = (double)((DateTime.now().getMillis() + 28800000) / 86400000 - (toFarrowingEvent.getEventAt().getTime() + 28800000) / 86400000);
-//        }
-//        return warnDiffTime;
-//    }
 }

@@ -20,6 +20,16 @@
         <result column="event_type" property="eventType"/>
         <result column="category" property="category"/>
         <result column="data" property="data"/>
+        <result column="event_at" property="eventAt"/>
+        <result column="other_at" property="otherAt"/>
+        <result column="rule_time_diff" property="ruleTimeDiff"/>
+        <result column="time_diff" property="timeDiff"/>
+        <result column="barn_id" property="barnId"/>
+        <result column="barn_name" property="barnName"/>
+        <result column="status" property="status"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="operator_name" property="operatorName"/>
+        <result column="reason" property="reason"/>
         <result column="url" property="url"/>
         <result column="created_by" property="createdBy"/>
         <result column="created_at" property="createdAt"/>
@@ -35,11 +45,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, rule_id, role_id, template_id, template_name, business_id, business_type, rule_value_id, message_template, type, event_type, category, data , url, created_by, created_at, updated_at
+        farm_id, rule_id, role_id, template_id, template_name, business_id, business_type, rule_value_id, message_template, type, event_type, category, data, event_at, other_at, rule_time_diff, time_diff, barn_id, barn_name, status, operator_id, operator_name, reason, url, created_by, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId},#{businessType}, #{ruleValueId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{url}, #{createdBy}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId},#{businessType}, #{ruleValueId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{eventAt}, #{otherAt}, #{ruleTimeDiff}, #{timeDiff}, #{barnId}, #{barnName}, #{status}, #{operatorId}, #{operatorName}, #{reason}, #{url}, #{createdBy}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -56,7 +66,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" item="i" separator=",">
-            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{businessType}, #{i.messageTemplate}, #{i.type}, #{i.eventType},#{i.category}, #{i.data}, #{i.url} ,#{i.createdBy}, now(), now())
+            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{businessType}, #{i.messageTemplate}, #{i.type}, #{i.eventType},#{i.category}, #{i.data}, #{i.eventAt}, #{i.otherAt}, #{i.ruleTimeDiff}, #{i.timeDiff}, #{i.barnId}, #{i.barnName}, #{i.status}, #{i.operatorId}, #{i.operatorName}, #{i.reason}, #{i.url} ,#{i.createdBy}, now(), now())
         </foreach>
     </insert>
 
@@ -91,7 +101,16 @@
             <if test="type != null">type = #{type},</if>
             <if test="eventType != null">event_type = #{eventType},</if>
             <if test="category != null">category = #{category},</if>
-            <if test="data != null">data = #{data},</if>
+            <if test="eventAt != null">event_at = #{eventAt},</if>
+            <if test="otherAt != null">other_at = #{other_at},</if>
+            <if test="ruleTimeDiff != null">rule_time_diff = #{ruleTimeDiff},</if>
+            <if test="timeDiff != null">time_diff = #{timeDiff},</if>
+            <if test="barnId != null">barn_id = #{barnId},</if>
+            <if test="barnName != null">barn_name = #{barnName},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="operatorId != null">operator_id = #{operatorId},</if>
+            <if test="operatorName != null">operator_name = #{operatorName},</if>
+            <if test="reason != null">reason = #{reason},</if>
             <if test="url != null">url = #{url},</if>
             <if test="createdBy != null">created_by = #{createdBy},</if>
             updated_at=now()
@@ -125,10 +144,31 @@
             <if test="type != null">AND `type` = #{type}</if>
             <if test="eventType != null">AND `event_type` = #{eventType}</if>
             <if test="category != null">AND category = #{category}</if>
+            <if test="eventStartAt != null">AND event_at &gt;= #{eventStartAt}</if>
+            <if test="eventEndAt != null">AND event_at &lt;= #{eventEndAt}</if>
+            <if test="otherStartAt != null">AND other_at &gt;= #{otherStartAt}</if>
+            <if test="otherEndAt != null">AND other_at &lt;= #{otherEndAt}</if>
+            <if test="barnId != null">AND barn_id = #{barnId}</if>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="operatorId != null">AND operator_id = #{operatorId}</if>
             <if test="types != null &amp;&amp; types.size() > 0">
                 AND `type` IN
                 <foreach collection="types" item="i" open="(" separator="," close=")">
                     #{i}
+                </foreach>
+            </if>
+
+            <if test="ids != null &amp;&amp; ids.size() > 0">
+                AND `id` IN
+                <foreach collection="ids" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+
+            <if test="statuses != null &amp;&amp; ids.size() > 0">
+                AND `status` IN
+                <foreach collection="statuses" item="status" open="(" separator="," close=")">
+                    #{status}
                 </foreach>
             </if>
         </where>
@@ -189,6 +229,24 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
+    </select>
+
+    <select id="suggestMessageBarn" parameterType="map" resultType="io.terminus.doctor.msg.dto.DoctorSuggestBarn">
+        SELECT DISTINCT barn_id AS barnId, barn_name AS barnName
+        FROM <include refid="tb"/>
+        WHERE
+        1=1
+        <if test="barnName != null">AND barn_name LIKE concat('%', #{barnName}, '%') </if>
+        <if test="ids != null &amp;&amp; ids.size() > 0">
+            AND `id` IN
+            <foreach collection="ids" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test="barnName != null">
+            ORDER BY instr(barn_name, #{barnName}) ASC, length(barnName) ASC
+        </if>
+        limit 20;
     </select>
 
 </mapper>

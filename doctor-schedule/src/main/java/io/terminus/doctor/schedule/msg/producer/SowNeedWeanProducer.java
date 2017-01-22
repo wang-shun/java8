@@ -11,9 +11,11 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
@@ -73,22 +75,38 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
-                    // 母猪的updatedAt与当前时间差 (天)
-                    DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getPigId(), PigEvent.FARROWING.getKey());
-                    Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
-                    // 1. 哺乳状态日期判断 -> id:1
-
-                    Double ruleTimeDiff = getRuleTimeDiff(ruleValueMap.get(1), timeDiff);
-                    Boolean isSend = checkRuleValue(ruleValueMap.get(1), timeDiff);
+                    DoctorPigEvent matingEvent = getMatingPigEvent(pigDto);
+                    //母猪分娩事件
+                    DoctorPigEvent farrowingEvent = getPigEventByEventType(pigDto.getPigId(), PigEvent.FARROWING.getKey());
+                    Double timeDiff = getTimeDiff(new DateTime(farrowingEvent.getEventAt()));
+                    RuleValue ruleValue = ruleValueMap.get(1);
+                    Double ruleTimeDiff = getRuleTimeDiff(ruleValue, timeDiff);
+                    Boolean isSend = checkRuleValue(ruleValue, timeDiff);
                     if (Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                         isSend =  isSend && !checkRuleValue(errorRule.getRule().getValues().get(0), timeDiff);
                     }else {
                         ruleTimeDiff = getRuleTimeDiff(warnRule.getRule().getValues().get(0), timeDiff);
                     }
                     if (isSend) {
-                        pigDto.setEventDate(doctorPigEvent.getEventAt());
-                        pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                        getMessage(pigDto, ruleRole, sUsers, timeDiff, ruleTimeDiff, rule.getUrl(), PigEvent.WEAN.getKey(), ruleValueMap.get(1).getId());
+                        DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                .barnId(pigDto.getBarnId())
+                                .barnName(pigDto.getBarnName())
+                                .timeDiff(timeDiff)
+                                .ruleTimeDiff(ruleTimeDiff)
+                                .reason(ruleValue.getDescribe())
+                                .eventAt(farrowingEvent.getEventAt())
+                                .eventType(PigEvent.WEAN.getKey())
+                                .otherAt(matingEvent.getEventAt())
+                                .ruleValueId(ruleValue.getId())
+                                .url(getPigJumpUrl(pigDto, ruleRole))
+                                .businessId(pigDto.getPigId())
+                                .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
+                                .operatorId(farrowingEvent.getOperatorId())
+                                .operatorName(farrowingEvent.getOperatorName())
+                                .status(pigDto.getStatus())
+                                .statusName(pigDto.getStatusName())
+                                .build();
+                        createMessage(sUsers, ruleRole, messageInfo);
                     }
                 } catch (Exception e) {
                     log.error("[sowEliminateProduce]-handle.message.failed");

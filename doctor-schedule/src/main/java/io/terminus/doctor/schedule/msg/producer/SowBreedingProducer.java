@@ -6,15 +6,19 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -84,22 +88,39 @@ public class SowBreedingProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 母猪的updatedAt与当前时间差 (天)
-                    if (getStatusDate(pigDto) == null) {
+                    DoctorPigEvent pigEvent = getStatusEvent(pigDto);
+                    if (pigEvent == null) {
                         break;
                     }
-                    Double timeDiff = getTimeDiff(getStatusDate(pigDto));
+                    Double timeDiff = getTimeDiff(new DateTime(pigEvent.getEventAt()));
                     // 获取配置的天数, 并判断
-                    Boolean isSend = checkRuleValue(ruleValueMap.get(1), timeDiff);
-                    Double ruleTimeDiff = getRuleTimeDiff(ruleValueMap.get(1), timeDiff);
+                    RuleValue ruleValue = ruleValueMap.get(1);
+                    Boolean isSend = checkRuleValue(ruleValue, timeDiff);
+                    Double ruleTimeDiff = getRuleTimeDiff(ruleValue, timeDiff);
                     if (Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                         isSend =  isSend && !checkRuleValue(errorRule.getRule().getValues().get(0), timeDiff);
                     }else {
                         ruleTimeDiff = getRuleTimeDiff(warnRule.getRule().getValues().get(0), timeDiff);
                     }
                     if (isSend) {
-                        pigDto.setOperatorName(RespHelper.orServEx(doctorBarnReadService.findBarnById(pigDto.getBarnId())).getStaffName());
-                        getMessage(pigDto, ruleRole, sUsers, timeDiff, ruleTimeDiff, rule.getUrl(), PigEvent.MATING.getKey(), ruleValueMap.get(1).getId());
-
+                        DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                .barnId(pigDto.getBarnId())
+                                .barnName(pigDto.getBarnName())
+                                .timeDiff(timeDiff)
+                                .ruleTimeDiff(getRuleTimeDiff(ruleValue, timeDiff))
+                                .reason(ruleValue.getDescribe())
+                                .eventAt(pigEvent.getEventAt())
+                                .eventType(PigEvent.TO_FARROWING.getKey())
+                                .ruleValueId(ruleValue.getId())
+                                .url(getPigJumpUrl(pigDto, ruleRole))
+                                .businessId(pigDto.getPigId())
+                                .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
+                                .operatorId(pigEvent.getOperatorId())
+                                .operatorName(pigEvent.getOperatorName())
+                                .status(pigDto.getStatus())
+                                .statusName(pigDto.getStatusName())
+                                .build();
+                        createMessage(sUsers, ruleRole, messageInfo);
                     }
                 } catch (Exception e) {
                     log.error("[SowBreedingProduce]-handle.message.failed");
