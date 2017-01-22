@@ -90,7 +90,7 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                                     //精液重量小于预定值
                                     isSend = semenActive < ruleValue.getValue().doubleValue();
                                 } catch (Exception e) {
-                                    log.error("[BoarEliminateProducer].get.semenActive.fail, event{}", doctorPigEvent);
+                                    log.error("[BoarEliminateProducer].get.semenActive.fail, eventId:{}", doctorPigEvent.getId());
                                 }
                             }
                         } else if (key == 3) {
@@ -101,7 +101,7 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                                     //精液重量小于预定值
                                     isSend = semenActive < ruleValue.getValue().doubleValue();
                                 } catch (Exception e) {
-                                    log.error("[BoarEliminateProducer].get.semenWeight.fail, event{}", doctorPigEvent);
+                                    log.error("[BoarEliminateProducer].get.semenWeight.fail, eventId:{}", doctorPigEvent.getId());
                                 }
 
                             }

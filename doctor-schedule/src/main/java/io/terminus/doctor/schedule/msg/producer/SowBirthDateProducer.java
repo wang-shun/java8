@@ -1,6 +1,5 @@
 package io.terminus.doctor.schedule.msg.producer;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -98,7 +97,7 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                         }
                     });
                 } catch (Exception e) {
-                    log.error("[SowBirthDateProduce]-handle.message.failed, cause:{}", Throwables.getStackTraceAsString(e));
+                    log.error("[SowBirthDateProduce]-handle.message.failed");
                 }
             }
         }
