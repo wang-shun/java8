@@ -19,7 +19,6 @@ import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -27,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.text.SimpleDateFormat;
+import java.util.Objects;
 
 /**
  * Desc: 猪事件回滚handler
@@ -59,8 +59,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
     protected DoctorPigDao doctorPigDao;
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
-    @Autowired
-    protected DoctorPigEventReadService doctorPigEventReadService;
+
     @Value("${flow.definition.key.sow:sow}")
     protected String sowFlowKey;
 
@@ -86,7 +85,8 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
      * 是否是最新事件
      */
     protected boolean isLastManualEvent(DoctorPigEvent pigEvent) {
-        return RespHelper.orFalse(doctorPigEventReadService.isLastManualEvent(pigEvent.getPigId(), pigEvent.getId()));
+        DoctorPigEvent lastManualEvent = doctorPigEventDao.queryLastManualPigEventById(pigEvent.getPigId());
+        return Objects.equals(lastManualEvent.getId(), pigEvent.getId());
     }
 
     /**
