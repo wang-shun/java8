@@ -3,7 +3,7 @@ package io.terminus.doctor.event.handler;
 import com.google.common.base.MoreObjects;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Dates;
-import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -52,7 +52,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
 
-    protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
     @Override
     public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
@@ -151,7 +151,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .farmId(snapshotPig.getFarmId())
                 .orgId(snapshotPig.getOrgId())
                 .eventId(currentEventId)
-                .pigInfo(JsonMapper.nonEmptyMapper().toJson(
+                .pigInfo(JSON_MAPPER.toJson(
                         DoctorPigSnapShotInfo.builder().pig(snapshotPig).pigTrack(doctorPigTrack).pigEvent(doctorPigEvent).build()))
                 .build();
     }

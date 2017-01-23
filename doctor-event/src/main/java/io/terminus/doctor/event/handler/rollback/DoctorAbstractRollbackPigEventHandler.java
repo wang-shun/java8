@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.handler.rollback;
 
-import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -37,7 +37,7 @@ import java.util.Objects;
 @Slf4j
 public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRollbackPigEventHandler {
 
-    protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.nonEmptyMapper();
 
     @Autowired
     private DoctorRevertLogWriteService doctorRevertLogWriteService;

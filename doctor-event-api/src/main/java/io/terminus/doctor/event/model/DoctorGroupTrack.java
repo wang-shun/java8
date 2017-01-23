@@ -3,7 +3,7 @@ package io.terminus.doctor.event.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.util.JsonMapperUtil;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -203,8 +203,8 @@ public class DoctorGroupTrack implements Serializable {
         if (Strings.isNullOrEmpty(extra)) {
             this.extraEntity = new Extra();
         } else {
-            JsonMapper.nonEmptyMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-            this.extraEntity = JsonMapper.nonEmptyMapper().fromJson(extra, Extra.class);
+            JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+            this.extraEntity = jsonMapperUtil.fromJson(extra, Extra.class);
         }
     }
 
@@ -214,8 +214,7 @@ public class DoctorGroupTrack implements Serializable {
         if (isNull(extraEntity)) {
             this.extra = "";
         } else {
-            JsonMapper.nonEmptyMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-            this.extra = JsonMapper.nonEmptyMapper().toJson(extraEntity);
+            this.extra = JsonMapperUtil.nonEmptyMapper().toJson(extraEntity);
         }
     }
 
@@ -224,7 +223,8 @@ public class DoctorGroupTrack implements Serializable {
         if (Strings.isNullOrEmpty(this.extra)) {
             return new Extra();
         }
-        return JsonMapper.nonEmptyMapper().fromJson(this.extra, Extra.class);
+        JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        return jsonMapperUtil.fromJson(this.extra, Extra.class);
     }
 
     /**
