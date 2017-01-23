@@ -106,7 +106,7 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
             DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(orgId));
             List<DoctorFarm> farms=RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(org.getId()));
             if (farms!=null){
-                farms.stream().filter(t-> farmList.contains(t.getId()));
+                farms = farms.stream().filter(t-> farmList.contains(t.getId())).collect(Collectors.toList());
             }
 //            List<DoctorFarm> farms = RespHelper.orServEx()(doctorFarmReadService.findFarmsByUserId(userId));
 
