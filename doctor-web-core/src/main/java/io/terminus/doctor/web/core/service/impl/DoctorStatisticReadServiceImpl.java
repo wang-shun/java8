@@ -113,6 +113,11 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
             //查询公司统计
             List<DoctorPigTypeStatistic> stats = RespHelper.orServEx(doctorPigTypeStatisticReadService.findPigTypeStatisticsByOrgId(org.getId()));
 
+            //查询有权限的猪场的统计
+            if (stats != null){
+                stats = stats.stream().filter(s-> farmList.contains(s.getFarmId())).collect(Collectors.toList());
+            }
+
             //获取猪场统计
             List<DoctorFarmBasicDto> farmBasicDtos = farms.stream()
                     .map(farm -> {
