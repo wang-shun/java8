@@ -19,6 +19,8 @@ import java.util.Date;
 public class DoctorMessageInfo implements Serializable{
 
     private static final long serialVersionUID = 3741679960394645140L;
+
+    private String code;
     /**
      * 猪场id
      */

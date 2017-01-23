@@ -121,6 +121,7 @@ public class SowEliminateProducer extends AbstractJobProducer {
                         }
                         if (isSend) {
                             DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                    .code(pigDto.getPigCode())
                                     .barnId(pigDto.getBarnId())
                                     .barnName(pigDto.getBarnName())
                                     .timeDiff(timeDiff)
@@ -128,7 +129,7 @@ public class SowEliminateProducer extends AbstractJobProducer {
                                     .reason(ruleValue.getDescribe() + ruleValue.getValue().toString())
                                     .eventType(PigEvent.REMOVAL.getKey())
                                     .ruleValueId(ruleValue.getId())
-                                    .url(getPigJumpUrl(pigDto, ruleRole))
+                                    .url(getPigJumpUrl(pigDto))
                                     .businessId(pigDto.getPigId())
                                     .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
                                     .status(pigDto.getStatus())

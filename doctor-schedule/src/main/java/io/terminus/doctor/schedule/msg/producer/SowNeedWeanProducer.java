@@ -89,6 +89,7 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                     }
                     if (isSend) {
                         DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                .code(pigDto.getPigCode())
                                 .barnId(pigDto.getBarnId())
                                 .barnName(pigDto.getBarnName())
                                 .timeDiff(timeDiff)
@@ -98,7 +99,7 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                                 .eventType(PigEvent.WEAN.getKey())
                                 .otherAt(matingEvent.getEventAt())
                                 .ruleValueId(ruleValue.getId())
-                                .url(getPigJumpUrl(pigDto, ruleRole))
+                                .url(getPigJumpUrl(pigDto))
                                 .businessId(pigDto.getPigId())
                                 .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
                                 .operatorId(farrowingEvent.getOperatorId())

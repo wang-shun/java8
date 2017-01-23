@@ -563,7 +563,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private void getMessage(DoctorPigInfoDto pigDto, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, DoctorVaccinationPigWarn warn, DateTime vaccDate) {
         // 创建消息
-        String jumpUrl = getPigJumpUrl(pigDto, ruleRole);
+        String jumpUrl = getPigJumpUrl(pigDto);
         Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, null, url);
         jsonData.put("pigType", warn.getPigType());
         jsonData.put("materialId", warn.getMaterialId());
@@ -576,6 +576,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
 
         try {
             DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                    .code(pigDto.getPigCode())
                     .data(MAPPER.writeValueAsString(jsonData))
                     .barnId(pigDto.getBarnId())
                     .barnName(pigDto.getBarnName())
@@ -598,7 +599,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private void getGroupMessage(DoctorGroupDetail detail, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, DoctorVaccinationPigWarn warn, DateTime vaccDate) {
         // 创建消息
-        String jumpUrl = groupDetailUrl.concat("?groupId=" + detail.getGroup().getId() + "&farmId=" + ruleRole.getFarmId());
+        String jumpUrl = getGroupJumpUrl(detail, ruleRole);
         Map<String, Object> jsonData = GroupDetailFactory.getInstance().createGroupMessage(detail, url);
         jsonData.put("pigType", warn.getPigType());
         jsonData.put("materialId", warn.getMaterialId());
@@ -611,6 +612,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
         try {
             DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                    .code(detail.getGroup().getGroupCode())
                     .data(MAPPER.writeValueAsString(jsonData))
                     .barnId(detail.getGroup().getCurrentBarnId())
                     .barnName(detail.getGroup().getCurrentBarnName())

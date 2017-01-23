@@ -421,14 +421,13 @@ public abstract class AbstractJobProducer {
     /**
      * 获取猪的跳转url
      * @param pigDto 主信息
-     * @param ruleRole 规则信息
      * @return url
      */
-    protected String getPigJumpUrl(DoctorPigInfoDto pigDto, DoctorMessageRuleRole ruleRole) {
+    protected String getPigJumpUrl(DoctorPigInfoDto pigDto) {
         if (Objects.equals(pigDto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
-            return sowPigDetailUrl.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + ruleRole.getFarmId());
+            return sowPigDetailUrl.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + pigDto.getFarmId());
         } else if (Objects.equals(pigDto.getPigType(), DoctorPig.PigSex.BOAR.getKey())) {
-            return boarPigDetailUrl.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + ruleRole.getFarmId());
+            return boarPigDetailUrl.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + pigDto.getFarmId());
         }
         throw new ServiceException("pigSex.failed");
 

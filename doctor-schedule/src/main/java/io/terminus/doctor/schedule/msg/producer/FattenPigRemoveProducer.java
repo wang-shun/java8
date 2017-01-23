@@ -60,6 +60,7 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, doctorGroupDetail.getGroup().getCurrentBarnId());
                     if (checkRuleValue(ruleValue, (double) doctorGroupDetail.getGroupTrack().getAvgDayAge())) {
                         DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                .code(doctorGroupDetail.getGroup().getGroupCode())
                                 .url(getGroupJumpUrl(doctorGroupDetail, ruleRole))
                                 .reason(ruleValue.getDescribe() + ruleValue.getValue().toString())
                                 .barnId(doctorGroupDetail.getGroup().getCurrentBarnId())

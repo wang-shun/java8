@@ -95,6 +95,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
                         }
                         if (isSend) {
                             DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                    .code(pigDto.getPigCode())
                                     .barnId(pigDto.getBarnId())
                                     .barnName(pigDto.getBarnName())
                                     .timeDiff(timeDiff)
@@ -103,7 +104,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
                                     .eventAt(matingPigEvent.getEventAt())
                                     .eventType(PigEvent.CONDITION.getKey())
                                     .ruleValueId(ruleValue.getId())
-                                    .url(getPigJumpUrl(pigDto, ruleRole))
+                                    .url(getPigJumpUrl(pigDto))
                                     .businessId(pigDto.getPigId())
                                     .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
                                     .operatorId(matingPigEvent.getOperatorId())

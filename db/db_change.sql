@@ -587,4 +587,5 @@ alter table doctor_messages add column status_name VARCHAR (64) default null com
 alter table doctor_messages add column operator_id bigint(20) default null comment '事件操作人id' after status;
 alter table doctor_messages add column operator_name VARCHAR(64) default null comment '事件操作人' after operator_id;
 alter table doctor_messages add column reason VARCHAR(64) default null comment '消息产生的原因' after operator_name;
+alter table doctor_messages add column code VARCHAR(64) default null comment '消息对象的code' after reason;
 

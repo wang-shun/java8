@@ -77,6 +77,7 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                     ruleValueMap.values().forEach(ruleValue -> {
                         if (checkRuleValue(ruleValue, timeDiff)) {
                             DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                    .code(pigDto.getPigCode())
                                     .barnId(pigDto.getBarnId())
                                     .barnName(pigDto.getBarnName())
                                     .timeDiff(timeDiff)
@@ -85,7 +86,7 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                                     .eventAt(matingPigEvent.getEventAt())
                                     .eventType(PigEvent.TO_FARROWING.getKey())
                                     .ruleValueId(ruleValue.getId())
-                                    .url(getPigJumpUrl(pigDto, ruleRole))
+                                    .url(getPigJumpUrl(pigDto))
                                     .businessId(pigDto.getPigId())
                                     .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
                                     .operatorId(matingPigEvent.getOperatorId())

@@ -92,6 +92,7 @@ public class SowPregCheckProducer extends AbstractJobProducer {
                     }
                     if (isSend) {
                         DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                .code(pigDto.getPigCode())
                                 .barnId(pigDto.getBarnId())
                                 .barnName(pigDto.getBarnName())
                                 .timeDiff(timeDiff)
@@ -99,7 +100,7 @@ public class SowPregCheckProducer extends AbstractJobProducer {
                                 .reason(ruleValue.getDescribe())
                                 .eventType(PigEvent.PREG_CHECK.getKey())
                                 .ruleValueId(ruleValue.getId())
-                                .url(getPigJumpUrl(pigDto, ruleRole))
+                                .url(getPigJumpUrl(pigDto))
                                 .businessId(pigDto.getPigId())
                                 .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
                                 .status(pigDto.getStatus())

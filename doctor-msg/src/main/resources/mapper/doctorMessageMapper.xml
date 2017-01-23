@@ -27,9 +27,11 @@
         <result column="barn_id" property="barnId"/>
         <result column="barn_name" property="barnName"/>
         <result column="status" property="status"/>
+        <result column="status_name" property="statusName"/>
         <result column="operator_id" property="operatorId"/>
         <result column="operator_name" property="operatorName"/>
         <result column="reason" property="reason"/>
+        <result column="code" property="code"/>
         <result column="url" property="url"/>
         <result column="created_by" property="createdBy"/>
         <result column="created_at" property="createdAt"/>
@@ -45,11 +47,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, rule_id, role_id, template_id, template_name, business_id, business_type, rule_value_id, message_template, type, event_type, category, data, event_at, other_at, rule_time_diff, time_diff, barn_id, barn_name, status, operator_id, operator_name, reason, url, created_by, created_at, updated_at
+        farm_id, rule_id, role_id, template_id, template_name, business_id, business_type, rule_value_id, message_template, type, event_type, category, data, event_at, other_at, rule_time_diff, time_diff, barn_id, barn_name, status, status_name, operator_id, operator_name, reason, code, url, created_by, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId},#{businessType}, #{ruleValueId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{eventAt}, #{otherAt}, #{ruleTimeDiff}, #{timeDiff}, #{barnId}, #{barnName}, #{status}, #{operatorId}, #{operatorName}, #{reason}, #{url}, #{createdBy}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId},#{businessType}, #{ruleValueId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{eventAt}, #{otherAt}, #{ruleTimeDiff}, #{timeDiff}, #{barnId}, #{barnName}, #{status}, #{statusName}, #{operatorId}, #{operatorName}, #{reason}, #{code}, #{url}, #{createdBy}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -66,7 +68,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" item="i" separator=",">
-            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{businessType}, #{i.messageTemplate}, #{i.type}, #{i.eventType},#{i.category}, #{i.data}, #{i.eventAt}, #{i.otherAt}, #{i.ruleTimeDiff}, #{i.timeDiff}, #{i.barnId}, #{i.barnName}, #{i.status}, #{i.operatorId}, #{i.operatorName}, #{i.reason}, #{i.url} ,#{i.createdBy}, now(), now())
+            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{businessType}, #{i.messageTemplate}, #{i.type}, #{i.eventType},#{i.category}, #{i.data}, #{i.eventAt}, #{i.otherAt}, #{i.ruleTimeDiff}, #{i.timeDiff}, #{i.barnId}, #{i.barnName}, #{i.status}, #{i.statusName}, #{i.operatorId}, #{i.operatorName}, #{i.reason}, #{i.code}, #{i.url} ,#{i.createdBy}, now(), now())
         </foreach>
     </insert>
 
@@ -108,9 +110,11 @@
             <if test="barnId != null">barn_id = #{barnId},</if>
             <if test="barnName != null">barn_name = #{barnName},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="statusName != null">status_name = #{statusName},</if>
             <if test="operatorId != null">operator_id = #{operatorId},</if>
             <if test="operatorName != null">operator_name = #{operatorName},</if>
             <if test="reason != null">reason = #{reason},</if>
+            <if test="code != null">code = #{code},</if>
             <if test="url != null">url = #{url},</if>
             <if test="createdBy != null">created_by = #{createdBy},</if>
             updated_at=now()
@@ -150,6 +154,7 @@
             <if test="otherEndAt != null">AND other_at &lt;= #{otherEndAt}</if>
             <if test="barnId != null">AND barn_id = #{barnId}</if>
             <if test="status != null">AND status = #{status}</if>
+            <if test="code != null">AND code = #{code}</if>
             <if test="operatorId != null">AND operator_id = #{operatorId}</if>
             <if test="types != null &amp;&amp; types.size() > 0">
                 AND `type` IN

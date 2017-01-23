@@ -124,6 +124,11 @@ public class DoctorMessage implements Serializable {
     private String reason;
 
     /**
+     * 消息对象code
+     */
+    private String code;
+
+    /**
      * app回调url
      */
     private String url;

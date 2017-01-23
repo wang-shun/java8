@@ -95,7 +95,7 @@ public class DoctorPigInfoDto implements Serializable{
         if (!isNull(doctorPigTrack)) {
             PigStatus pigStatus = PigStatus.from(doctorPigTrack.getStatus());
             builder.status(doctorPigTrack.getStatus())
-                    .statusName(pigStatus == null ? null : pigStatus.getDesc())
+                    .statusName(pigStatus == null ? null : pigStatus.getName())
                     .parity(doctorPigTrack.getCurrentParity())
                     .weight(doctorPigTrack.getWeight())
                     .barnId(doctorPigTrack.getCurrentBarnId())
