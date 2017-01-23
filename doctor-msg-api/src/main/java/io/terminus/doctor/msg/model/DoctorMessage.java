@@ -129,6 +129,11 @@ public class DoctorMessage implements Serializable {
     private String code;
 
     /**
+     * 母猪胎次
+     */
+    private Integer parity;
+
+    /**
      * app回调url
      */
     private String url;
