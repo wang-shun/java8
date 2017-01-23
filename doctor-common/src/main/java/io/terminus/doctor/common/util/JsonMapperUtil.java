@@ -44,14 +44,34 @@ public class JsonMapperUtil {
      * 创建只输出非Null且非Empty(如List.isEmpty)的属性到Json字符串的Mapper,建议在外部接口中使用.
      */
     public static JsonMapperUtil nonEmptyMapper() {
-        return new JsonMapperUtil(JsonInclude.Include.NON_EMPTY);
+        return nonEmptyMapperWithFormat(null);
+    }
+
+    /**
+     * 获取带有格式的jsonMapper
+     * @param format 时间格式
+     * @return 新建的mapper
+     */
+    public static JsonMapperUtil nonEmptyMapperWithFormat(DateFormat format) {
+        JsonMapperUtil jsonMapperUtil =  new JsonMapperUtil(JsonInclude.Include.NON_EMPTY);
+        return format != null? jsonMapperUtil.setDateFormat(format) : jsonMapperUtil;
     }
 
     /**
      * 创建只输出初始值被改变的属性到Json字符串的Mapper, 最节约的存储方式，建议在内部接口中使用。
      */
     public static JsonMapperUtil nonDefaultMapper() {
-        return new JsonMapperUtil(JsonInclude.Include.NON_DEFAULT);
+        return nonDefaultMapperWithFormat(null);
+    }
+
+    /**
+     * 获取带有时间格式defaultMapper
+     * @param format 时间格式
+     * @return 新建的mapper
+     */
+    public static JsonMapperUtil nonDefaultMapperWithFormat(DateFormat format) {
+        JsonMapperUtil jsonMapperUtil =  new JsonMapperUtil(JsonInclude.Include.NON_DEFAULT);
+        return format != null? jsonMapperUtil.setDateFormat(format) : jsonMapperUtil;
     }
 
     /**
@@ -161,7 +181,7 @@ public class JsonMapperUtil {
         mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
     }
 
-    public JsonMapperUtil setDateFormat(DateFormat format) {
+    private JsonMapperUtil setDateFormat(DateFormat format) {
         mapper.setDateFormat(format);
         return this;
     }

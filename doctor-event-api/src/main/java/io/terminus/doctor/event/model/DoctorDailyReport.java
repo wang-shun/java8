@@ -92,7 +92,7 @@ public class DoctorDailyReport implements Serializable {
         if (isEmpty(this.data)) {
             return null;
         }
-        return JsonMapperUtil.nonEmptyMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
+        return JsonMapperUtil.nonEmptyMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
                 .fromJson(this.data, JSON_MAPPER.createCollectionType(DoctorDailyReportDto.class));
     }
 }

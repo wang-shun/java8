@@ -203,7 +203,7 @@ public class DoctorGroupTrack implements Serializable {
         if (Strings.isNullOrEmpty(extra)) {
             this.extraEntity = new Extra();
         } else {
-            JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+            JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
             this.extraEntity = jsonMapperUtil.fromJson(extra, Extra.class);
         }
     }
@@ -223,7 +223,7 @@ public class DoctorGroupTrack implements Serializable {
         if (Strings.isNullOrEmpty(this.extra)) {
             return new Extra();
         }
-        JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
         return jsonMapperUtil.fromJson(this.extra, Extra.class);
     }
 

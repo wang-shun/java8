@@ -108,7 +108,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
         DoctorPig doctorPig = doctorPigDao.findById(pigEvent.getPigId());
         DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
-        JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapper().setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
         DoctorPigSnapShotInfo info = jsonMapperUtil.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
         doctorPigEventDao.delete(pigEvent.getId());
         doctorPigTrackDao.update(info.getPigTrack());
