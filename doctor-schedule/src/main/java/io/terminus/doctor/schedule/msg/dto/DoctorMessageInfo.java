@@ -21,6 +21,12 @@ public class DoctorMessageInfo implements Serializable{
     private static final long serialVersionUID = 3741679960394645140L;
 
     private String code;
+
+    /**
+     * 母猪胎次
+     */
+    private Integer parity;
+
     /**
      * 猪场id
      */

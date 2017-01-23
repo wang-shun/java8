@@ -122,6 +122,7 @@ public class SowEliminateProducer extends AbstractJobProducer {
                         if (isSend) {
                             DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
                                     .code(pigDto.getPigCode())
+                                    .parity(pigDto.getParity())
                                     .barnId(pigDto.getBarnId())
                                     .barnName(pigDto.getBarnName())
                                     .timeDiff(timeDiff)
