@@ -214,7 +214,7 @@ public class DoctorGroupTrack implements Serializable {
         if (isNull(extraEntity)) {
             this.extra = "";
         } else {
-            this.extra = JsonMapperUtil.nonEmptyMapper().toJson(extraEntity);
+            this.extra = JsonMapperUtil.JSON_NON_EMPTY_MAPPER.toJson(extraEntity);
         }
     }
 
