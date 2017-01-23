@@ -37,8 +37,8 @@ public interface DoctorMaterialConsumeProviderReadService {
      * @param size 每页数量
      * @return
      */
-    Response<Paging<DoctorMaterialConsumeProvider>> page(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
-                                                       Long staffId, String startAt, String endAt, Integer pageNo, Integer size);
+    Response<Paging<DoctorMaterialConsumeProvider>> page(Long farmId, Long warehouseId, Long materialId, Integer eventType, List<Integer> eventTypes, Integer materilaType,
+                                                          Long staffId, String startAt, String endAt, Integer pageNo, Integer size);
 
     Response<List<DoctorMaterialConsumeProvider>> list(Long farmId, Long warehouseId, Long materialId, String materialName,
                                                        Integer eventType, List<Integer> eventTypes, Integer materilaType,

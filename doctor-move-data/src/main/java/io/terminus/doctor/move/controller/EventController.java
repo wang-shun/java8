@@ -94,7 +94,7 @@ public class EventController {
         try{
             while(true){
                 Paging<DoctorMaterialConsumeProvider> paging = RespHelper.or500(doctorMaterialConsumeProviderReadService.page(
-                        farmId, null, null, DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue(),
+                        farmId, null, null, DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue(), null,
                         null, null, null, null, pageNo++, 1000));
                 if(paging.isEmpty()){
                     break;

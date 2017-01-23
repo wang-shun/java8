@@ -39,6 +39,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -495,13 +496,18 @@ public class DoctorPigCreateEvents {
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorFarmEntryDto.class);
                 case CHG_FARM:
                     DoctorChgFarmDto chgFarmDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorChgFarmDto.class);
-                    DoctorFarm doctorFarm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
-                    chgFarmDto.setFromFarmId(doctorFarm.getId());
-                    chgFarmDto.setFromFarmName(doctorFarm.getName());
+                    DoctorFarm fromFarm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+                    chgFarmDto.setFromFarmId(fromFarm.getId());
+                    chgFarmDto.setFromFarmName(fromFarm.getName());
                     Long realPigId = MoreObjects.firstNonNull(pigId, chgFarmDto.getPigId());
                     DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(realPigId));
                     chgFarmDto.setFromBarnId(doctorPigTrack.getCurrentBarnId());
                     chgFarmDto.setFromBarnName(doctorPigTrack.getCurrentBarnName());
+
+                    DoctorFarm toFarm = RespHelper.or500(doctorFarmReadService.findFarmById(chgFarmDto.getToFarmId()));
+                    DoctorBarn toBarn = RespHelper.or500(doctorBarnReadService.findBarnById(chgFarmDto.getToBarnId()));
+                    chgFarmDto.setToFarmName(toFarm.getName());
+                    chgFarmDto.setToBarnName(toBarn.getName());
                     return chgFarmDto;
                 case CHG_LOCATION:
                     DoctorChgLocationDto doctorChgLocationDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorChgLocationDto.class);
@@ -532,8 +538,10 @@ public class DoctorPigCreateEvents {
                     DoctorRemovalDto removalDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorRemovalDto.class);
                     DoctorBasic chgType = RespHelper.or500(doctorBasicReadService.findBasicById(removalDto.getChgTypeId()));
                     removalDto.setChgTypeName(chgType.getName());
-                    DoctorChangeReason changeReason = RespHelper.or500(doctorBasicReadService.findChangeReasonById(removalDto.getChgReasonId()));
-                    removalDto.setChgReasonName(changeReason.getReason());
+                    if (removalDto.getChgReasonId() != null) {
+                        DoctorChangeReason changeReason = RespHelper.or500(doctorBasicReadService.findChangeReasonById(removalDto.getChgReasonId()));
+                        removalDto.setChgReasonName(changeReason.getReason());
+                    }
                     DoctorFarm doctorFarm2 = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
                     Long customerId1 = RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorFarm2.getId(),
                             doctorFarm2.getName(), removalDto.getCustomerId(), removalDto.getCustomerName(),
