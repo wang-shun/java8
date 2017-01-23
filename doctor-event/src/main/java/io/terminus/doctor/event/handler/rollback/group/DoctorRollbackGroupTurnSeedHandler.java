@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.rollback.group;
 
 import com.google.common.collect.Lists;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.RollbackType;
@@ -46,7 +45,9 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
 
         //商品猪转种猪会触发猪的进场事件，所以需要校验猪的进场事件是否是最新事件
         DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(groupEvent.getId());
-        return RespHelper.orFalse(doctorPigEventReadService.isLastEvent(toPigEvent.getPigId(), toPigEvent.getId()));
+        DoctorPigEvent lastPigEvent = doctorPigEventDao.queryLastPigEventById(toPigEvent.getPigId());
+        return Objects.equals(lastPigEvent.getId(), toPigEvent.getId());
+
 
     }
 

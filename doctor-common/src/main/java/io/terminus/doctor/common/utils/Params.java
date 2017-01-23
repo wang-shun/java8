@@ -7,7 +7,7 @@
 package io.terminus.doctor.common.utils;
 
 import com.google.common.base.Strings;
-import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.util.JsonMapperUtil;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Nullable;
@@ -24,7 +24,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class Params {
 
-    private static final JsonMapper JSON = JsonMapper.nonEmptyMapper();
+    private static final JsonMapperUtil JSON = JsonMapperUtil.nonEmptyMapper();
 
     /**
      * 过滤Map中的NULL或""值

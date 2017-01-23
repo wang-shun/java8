@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.handler.rollback;
 
-import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -19,7 +19,6 @@ import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -27,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.text.SimpleDateFormat;
+import java.util.Objects;
 
 /**
  * Desc: 猪事件回滚handler
@@ -37,7 +37,7 @@ import java.text.SimpleDateFormat;
 @Slf4j
 public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRollbackPigEventHandler {
 
-    protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
     @Autowired
     private DoctorRevertLogWriteService doctorRevertLogWriteService;
@@ -59,8 +59,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
     protected DoctorPigDao doctorPigDao;
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
-    @Autowired
-    protected DoctorPigEventReadService doctorPigEventReadService;
+
     @Value("${flow.definition.key.sow:sow}")
     protected String sowFlowKey;
 
@@ -86,7 +85,8 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
      * 是否是最新事件
      */
     protected boolean isLastManualEvent(DoctorPigEvent pigEvent) {
-        return RespHelper.orFalse(doctorPigEventReadService.isLastManualEvent(pigEvent.getPigId(), pigEvent.getId()));
+        DoctorPigEvent lastManualEvent = doctorPigEventDao.queryLastManualPigEventById(pigEvent.getPigId());
+        return Objects.equals(lastManualEvent.getId(), pigEvent.getId());
     }
 
     /**
@@ -108,8 +108,8 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
         DoctorPig doctorPig = doctorPigDao.findById(pigEvent.getPigId());
         DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
-        JSON_MAPPER.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-        DoctorPigSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
+        JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        DoctorPigSnapShotInfo info = jsonMapperUtil.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
         doctorPigEventDao.delete(pigEvent.getId());
         doctorPigTrackDao.update(info.getPigTrack());
         doctorPigDao.update(info.getPig());

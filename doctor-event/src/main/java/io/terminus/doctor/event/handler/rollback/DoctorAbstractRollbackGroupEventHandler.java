@@ -15,7 +15,6 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -41,7 +40,6 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
     @Autowired protected DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired protected DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     @Autowired protected DoctorPigEventDao doctorPigEventDao;
-    @Autowired protected DoctorPigEventReadService doctorPigEventReadService;
 
     /**
      * 判断能否回滚(1.手动事件 2.三个月内的事件 3.最新事件 4.子类根据事件类型特殊处理)

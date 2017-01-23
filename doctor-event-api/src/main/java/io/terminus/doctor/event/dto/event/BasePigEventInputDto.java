@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.dto.event;
 
 
-import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.event.model.DoctorPig;
 import lombok.Data;
 
@@ -70,7 +70,7 @@ public abstract class BasePigEventInputDto implements Serializable{
     public abstract Date eventAt();
 
     public Map<String, Object> toMap(){
-        return JsonMapper.nonEmptyMapper().getMapper()
+        return JsonMapperUtil.nonEmptyMapper().getMapper()
                 .convertValue(this, Map.class);
     }
 }
