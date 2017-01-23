@@ -164,7 +164,7 @@ public class DoctorFarms {
         List<Long> doctorFarmIds=doctorUserDataPermission.getFarmIdsList();
         List<DoctorFarm> doctorFarms=RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(orgId));
         if (doctorFarms!=null){
-            doctorFarms.stream().filter(t->doctorFarmIds.contains(t.getId()));
+            doctorFarms = doctorFarms.stream().filter(t->doctorFarmIds.contains(t.getId())).collect(Collectors.toList());
         }
         return doctorFarms;
     }
