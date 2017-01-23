@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.handler.rollback;
 
-import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -37,7 +37,7 @@ import java.util.Objects;
 @Slf4j
 public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRollbackPigEventHandler {
 
-    protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
     @Autowired
     private DoctorRevertLogWriteService doctorRevertLogWriteService;
@@ -108,8 +108,8 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
         DoctorPig doctorPig = doctorPigDao.findById(pigEvent.getPigId());
         DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
-        JSON_MAPPER.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-        DoctorPigSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
+        JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        DoctorPigSnapShotInfo info = jsonMapperUtil.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
         doctorPigEventDao.delete(pigEvent.getId());
         doctorPigTrackDao.update(info.getPigTrack());
         doctorPigDao.update(info.getPig());
