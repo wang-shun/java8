@@ -3,6 +3,7 @@ package io.terminus.doctor.move.controller;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -230,6 +231,22 @@ public class DoctorMoveDataController {
         doctorPigTypeStatisticWriteService.statisticGroup(farm.getOrgId(), farm.getId());
         doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PigSex.BOAR.getKey());
         doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PigSex.SOW.getKey());
+    }
+
+    @RequestMapping(value = "/flushStatistic", method = RequestMethod.GET)
+    public Boolean flushStatistic(@RequestParam(value = "farmId", required = false) Long farmId) {
+        log.warn("flushStatistic start, farmId:{}", farmId);
+        if (farmId == null) {
+            doctorFarmDao.findAll().forEach(this::movePigTypeStatistic);
+        } else {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            if (farm == null) {
+                throw new JsonResponseException("farm.not.found");
+            }
+            movePigTypeStatistic(farm);
+        }
+        log.warn("flushStatistic end, farmId:{}", farmId);
+        return true;
     }
 
     /**
