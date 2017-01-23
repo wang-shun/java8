@@ -2,7 +2,6 @@ package io.terminus.doctor.event.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -20,9 +19,10 @@ import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.dto.DoctorSuggestPig;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
-import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
+import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -63,6 +63,9 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
     @Autowired
     private DoctorPigEventManager pigEventManager;
+
+    @Autowired
+    private DoctorRollbackHandlerChain doctorRollbackHandlerChain;
 
     @Autowired
     private DoctorBarnDao doctorBarnDao;
@@ -267,7 +270,13 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     @Override
     public Response<DoctorPigEvent> canRollbackEvent(@NotNull(message = "input.pigId.empty") Long pigId) {
         try {
-            return Response.ok(doctorPigEventDao.canRollbackEvent(ImmutableMap.of("pigId", pigId, "isAuto", IsOrNot.NO.getValue())));
+            DoctorPigEvent pigEvent = doctorPigEventDao.queryLastManualPigEventById(pigId);
+            for (DoctorRollbackPigEventHandler handler : doctorRollbackHandlerChain.getRollbackPigEventHandlers()) {
+                if (handler.canRollback(pigEvent)) {
+                    return Response.ok(pigEvent);
+                }
+            }
+            return Response.ok(null);
         } catch (Exception e) {
             log.error("can.rollback.event.failed, cause {}", Throwables.getStackTraceAsString(e));
             return Response.fail("can.rollback.event.failed");
