@@ -47,6 +47,7 @@ public class DoctorRemovalDto extends BasePigEventInputDto implements Serializab
     private Long sum; // 总量
 
     private Long customerId;    // 客户Id
+    private String customerName;    // 客户Id
 
     private String remark;  //注解
 
