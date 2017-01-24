@@ -79,8 +79,8 @@ public class SowPregCheckProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 母猪的updatedAt与当前时间差 (天)
-                    DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
-                    Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
+                    DoctorPigEvent matingPigEvent = getMatingPigEvent(pigDto);
+                    Double timeDiff = getTimeDiff(new DateTime(matingPigEvent.getEventAt()));
 
                     RuleValue ruleValue = ruleValueMap.get(1);
                     Double ruleTimeDiff = getRuleTimeDiff(ruleValue, timeDiff);
@@ -99,6 +99,7 @@ public class SowPregCheckProducer extends AbstractJobProducer {
                                 .ruleTimeDiff(ruleTimeDiff)
                                 .reason(ruleValue.getDescribe())
                                 .eventType(PigEvent.PREG_CHECK.getKey())
+                                .eventAt(matingPigEvent.getEventAt())
                                 .ruleValueId(ruleValue.getId())
                                 .url(getPigJumpUrl(pigDto))
                                 .businessId(pigDto.getPigId())

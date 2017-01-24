@@ -173,9 +173,9 @@
                 </foreach>
             </if>
 
-            <if test="statuses != null &amp;&amp; ids.size() > 0">
+            <if test="statusList != null &amp;&amp; ids.size() > 0">
                 AND `status` IN
-                <foreach collection="statuses" item="status" open="(" separator="," close=")">
+                <foreach collection="statusList" item="status" open="(" separator="," close=")">
                     #{status}
                 </foreach>
             </if>

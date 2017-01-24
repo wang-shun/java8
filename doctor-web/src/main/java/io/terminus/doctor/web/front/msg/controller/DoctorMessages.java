@@ -9,6 +9,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
@@ -102,7 +103,7 @@ public class DoctorMessages {
         if (!isUserLogin()) {
             return new DoctorMessageDto(new Paging<>(0L, Collections.emptyList()),null);
         }
-        DoctorMessageUserDto doctorMessageUserDto = JsonMapper.JSON_NON_EMPTY_MAPPER.getMapper().convertValue(criteria, DoctorMessageUserDto.class);
+        DoctorMessageUserDto doctorMessageUserDto = JsonMapperUtil.JSON_NON_EMPTY_MAPPER.getMapper().convertValue(criteria, DoctorMessageUserDto.class);
         doctorMessageUserDto.setUserId(UserUtil.getUserId());
         List<DoctorMessageUser> messageUserList = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto));
         if (Arguments.isNullOrEmpty(messageUserList)) {
@@ -110,8 +111,9 @@ public class DoctorMessages {
         }
 
         List<Long> messageIds = messageUserList.stream().map(DoctorMessageUser::getMessageId).collect(Collectors.toList());
-        DoctorMessageSearchDto messageSearchDto = JsonMapper.JSON_NON_EMPTY_MAPPER.getMapper().convertValue(criteria, DoctorMessageSearchDto.class);
+        DoctorMessageSearchDto messageSearchDto = JsonMapperUtil.JSON_NON_EMPTY_MAPPER.getMapper().convertValue(criteria, DoctorMessageSearchDto.class);
         messageSearchDto.setIds(messageIds);
+        messageSearchDto.setTemplateName(null);
 
         Paging<DoctorMessage> messagePaging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(messageSearchDto, pageNo, pageSize));
         DoctorMessageDto msgDto = new DoctorMessageDto();
