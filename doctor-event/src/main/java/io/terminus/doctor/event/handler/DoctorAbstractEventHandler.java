@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
@@ -229,20 +228,13 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         if (Objects.equals(inputDto.getPigType(), PigEvent.ENTRY.getKey())) {
             return;
         }
-        try {
-            Date eventAt = inputDto.eventAt();
-            if(eventAt == null){
-                throw new ServiceException("事件时间输入有误,猪号:" + inputDto.getPigCode());
-            }
-            DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
-            if (lastEvent != null) {
-                if (Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt()))) {
-                    throw new ServiceException("事件时间不能早于最新事件,猪号:" + inputDto.getPigCode());
-                }
-            }
-        } catch (Exception e) {
-            log.error("check event at fail, input:{}, cause:{}", inputDto, Throwables.getStackTraceAsString(e));
-            throw new ServiceException("事件时间输入有误, 猪号:" + inputDto.getPigCode());
+        Date eventAt = inputDto.eventAt();
+        if(eventAt == null){
+            throw new ServiceException("事件时间输入有误,猪号:" + inputDto.getPigCode());
+        }
+        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
+        if (lastEvent != null && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt()))) {
+            throw new ServiceException("事件时间不能早于最新事件,猪号:" + inputDto.getPigCode());
         }
     }
 }
