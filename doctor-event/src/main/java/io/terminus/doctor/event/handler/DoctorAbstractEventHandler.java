@@ -234,7 +234,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         }
         DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
         if (lastEvent != null && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt()))) {
-            throw new ServiceException("事件时间不能早于最新事件,猪号:" + inputDto.getPigCode());
+            throw new ServiceException("事件时间不能早于最近一次事件时间(" + DateUtil.toDateString(lastEvent.getEventAt()) + "), 猪号:" + inputDto.getPigCode());
         }
     }
 }
