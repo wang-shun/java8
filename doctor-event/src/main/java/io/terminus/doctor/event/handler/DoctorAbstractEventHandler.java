@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
@@ -240,6 +241,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 }
             }
         } catch (Exception e) {
+            log.error("check event at fail, input:{}, cause:{}", inputDto, Throwables.getStackTraceAsString(e));
             throw new ServiceException("事件时间输入有误, 猪号:" + inputDto.getPigCode());
         }
     }
