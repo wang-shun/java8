@@ -12,7 +12,9 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -88,7 +90,7 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                                     //精液重量小于预定值
                                     isSend = semenActive < ruleValue.getValue().doubleValue();
                                 } catch (Exception e) {
-                                    log.error("[BoarEliminateProducer].get.semenActive.fail, event{}", doctorPigEvent);
+                                    log.error("[BoarEliminateProducer].get.semenActive.fail, eventId:{}", doctorPigEvent.getId());
                                 }
                             }
                         } else if (key == 3) {
@@ -99,14 +101,29 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                                     //精液重量小于预定值
                                     isSend = semenActive < ruleValue.getValue().doubleValue();
                                 } catch (Exception e) {
-                                    log.error("[BoarEliminateProducer].get.semenWeight.fail, event{}", doctorPigEvent);
+                                    log.error("[BoarEliminateProducer].get.semenWeight.fail, eventId:{}", doctorPigEvent.getId());
                                 }
 
                             }
                         }
                         if (isSend) {
-                            pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().toString());
-                            getMessage(pigDto, ruleRole, sUsers, timeDiff, null, rule.getUrl(), PigEvent.REMOVAL.getKey(), ruleValue.getId());
+                            DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                    .code(pigDto.getPigCode())
+                                    .barnId(pigDto.getBarnId())
+                                    .barnName(pigDto.getBarnName())
+                                    .timeDiff(timeDiff)
+                                    .ruleTimeDiff(null)
+                                    .reason(ruleValue.getDescribe() + ruleValue.getValue().toString())
+                                    .eventAt(null)
+                                    .eventType(PigEvent.REMOVAL.getKey())
+                                    .ruleValueId(ruleValue.getId())
+                                    .url(getPigJumpUrl(pigDto))
+                                    .businessId(pigDto.getPigId())
+                                    .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
+                                    .status(pigDto.getStatus())
+                                    .statusName(pigDto.getStatusName())
+                                    .build();
+                            createMessage(sUsers, ruleRole, messageInfo);
                             break;
                         }
                     }

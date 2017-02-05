@@ -1,18 +1,15 @@
 package io.terminus.doctor.schedule.msg.producer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
-import com.google.common.base.Throwables;
+import io.terminus.doctor.basic.dto.DoctorMaterialConsumeAvgDto;
+import io.terminus.doctor.basic.service.DoctorMaterialConsumeAvgReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
-import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
-import io.terminus.doctor.schedule.msg.producer.factory.MaterialDtoFactory;
-import io.terminus.doctor.basic.dto.DoctorMaterialConsumeAvgDto;
-import io.terminus.doctor.basic.service.DoctorMaterialConsumeAvgReadService;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,22 +53,23 @@ public class StorageShortageProducer extends AbstractJobProducer {
             if (ruleValueMap.get(1) != null && lotConsumeDay != null) {
                 // 如果剩余使用天数 小于 配置的天数
                 if (lotConsumeDay < ruleValueMap.get(1).getValue()) {
-                    getMessage(materialConsumeAvg, ruleRole, subUsers, rule.getUrl(), ruleValueMap.get(1));
+                    DoctorMessageInfo messageInfo = DoctorMessageInfo.builder().build();
+                    createMessage(subUsers, ruleRole, messageInfo);
                 }
             }
         }
     }
 
-    /**
-     * 创建消息
-     */
-    private void getMessage(DoctorMaterialConsumeAvgDto materialConsumeAvg, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, RuleValue ruleValue) {
-        // 创建消息
-        Map<String, Object> jsonData = MaterialDtoFactory.getInstance().createMaterialMessage(materialConsumeAvg, url);
-            try {
-                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, materialConsumeAvg.getMaterialId(), DoctorMessage.BUSINESS_TYPE.WAREHOUSE.getValue(), ruleValue.getId(), null);
-            } catch (JsonProcessingException e) {
-                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
-            }
-    }
+//    /**
+//     * 创建消息
+//     */
+//    private void getMessage(DoctorMaterialConsumeAvgDto materialConsumeAvg, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, RuleValue ruleValue) {
+//        // 创建消息
+//        Map<String, Object> jsonData = MaterialDtoFactory.getInstance().createMaterialMessage(materialConsumeAvg, url);
+//            try {
+//                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, materialConsumeAvg.getMaterialId(), DoctorMessage.BUSINESS_TYPE.WAREHOUSE.getValue(), ruleValue.getId(), null);
+//            } catch (JsonProcessingException e) {
+//                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
+//            }
+//    }
 }

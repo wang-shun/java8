@@ -1,18 +1,21 @@
 package io.terminus.doctor.schedule.msg.producer;
 
 import com.google.common.collect.Maps;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
-import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
@@ -50,10 +53,7 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                 .farmId(ruleRole.getFarmId())
                 .pigType(DoctorPig.PigSex.SOW.getKey())
                 .build();
-        DoctorMessageRuleTemplate ruleTemplate = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
-        Map<String, Object> criMap = Maps.newHashMap();
-        criMap.put("farmId", ruleRole.getFarmId());
-        criMap.put("category", category.getKey());
+
         // 批量获取母猪信息
         Long total = RespHelper.orServEx(doctorPigReadService.getPigCount(ruleRole.getFarmId(), DoctorPig.PigSex.SOW));
         // 计算size, 分批处理
@@ -68,15 +68,33 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
-                    DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
+                    DoctorPigEvent matingPigEvent = getMatingPigEvent(pigDto);
+                    DoctorPigTrack doctorPigTrack = RespHelper.orServEx(doctorPigReadService.findPigTrackByPigId(pigDto.getPigId()));
                     // 母猪怀孕天数
-                    Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
+                    Double timeDiff = getTimeDiff(new DateTime(matingPigEvent.getEventAt()));
 
                     ruleValueMap.values().forEach(ruleValue -> {
                         if (checkRuleValue(ruleValue, timeDiff)) {
-                            pigDto.setEventDate(doctorPigEvent.getEventAt());
-                            pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                            getMessage(pigDto, ruleRole, sUsers, timeDiff, timeDiff, rule.getUrl(), PigEvent.TO_FARROWING.getKey(), ruleValue.getId());
+                            DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                    .code(pigDto.getPigCode())
+                                    .barnId(pigDto.getBarnId())
+                                    .barnName(pigDto.getBarnName())
+                                    .timeDiff(timeDiff)
+                                    .ruleTimeDiff(getRuleTimeDiff(ruleValue, timeDiff))
+                                    .reason(ruleValue.getDescribe())
+                                    .eventAt(matingPigEvent.getEventAt())
+                                    .otherAt(DateUtil.stringToDate(doctorPigTrack.getExtraMap().get("judgePregDate").toString()))
+                                    .eventType(PigEvent.TO_FARROWING.getKey())
+                                    .ruleValueId(ruleValue.getId())
+                                    .url(getPigJumpUrl(pigDto))
+                                    .businessId(pigDto.getPigId())
+                                    .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
+                                    .operatorId(matingPigEvent.getOperatorId())
+                                    .operatorName(matingPigEvent.getOperatorName())
+                                    .status(pigDto.getStatus())
+                                    .statusName(pigDto.getStatusName())
+                                    .build();
+                            createMessage(sUsers, ruleRole, messageInfo);
                         }
                     });
                 } catch (Exception e) {
@@ -86,23 +104,4 @@ public class SowBirthDateProducer extends AbstractJobProducer {
         }
     }
 
-//    /**
-//     * 获取母猪提示里的时间差
-//     * @param events
-//     * @param value
-//     * @return
-//     */
-//    private Double getBirthDateTimeDiff(List<DoctorPigEvent> events, Integer value){
-//        Date pregCheckDate = getPigEventByEventType(events, PigEvent.PREG_CHECK.getKey()).getEventAt();
-//        Double diffTime = getTimeDiff(new DateTime(pregCheckDate));
-//        List<DoctorPigEvent> afterPregCheckEvents = events.stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt().after(pregCheckDate)).collect(Collectors.toList());
-//        DoctorPigEvent toFarrowingEvent = getPigEventByEventType(afterPregCheckEvents, PigEvent.TO_FARROWING.getKey());
-//        Double warnDiffTime;
-//        if (toFarrowingEvent == null){
-//             warnDiffTime = value - diffTime;
-//        }else {
-//             warnDiffTime = (double)((DateTime.now().getMillis() + 28800000) / 86400000 - (toFarrowingEvent.getEventAt().getTime() + 28800000) / 86400000);
-//        }
-//        return warnDiffTime;
-//    }
 }

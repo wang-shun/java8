@@ -51,18 +51,6 @@ public class PigDtoFactory {
         jsonData.put("timeDiff", timeDiff);
         jsonData.put("ruleTimeDiff", ruleTimeDiff);
         jsonData.put("url", url);
-        if (pigDto.getOperatorName() != null) {
-            jsonData.put("operatorName", pigDto.getOperatorName());
-        }
-        if (pigDto.getEventDate() != null){
-            jsonData.put("eventDate", pigDto.getEventDate());
-        }
-        if (pigDto.getReason() != null){
-            jsonData.put("reason", pigDto.getReason());
-        }
-        if (pigDto.getRuleValueId() != null){
-            jsonData.put("ruleValueId", pigDto.getRuleValueId());
-        }
         return jsonData;
     }
 
