@@ -18,7 +18,6 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.model.DoctorRevertLog;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -41,8 +40,6 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
 
     @Autowired
     private DoctorRevertLogWriteService doctorRevertLogWriteService;
-    @Autowired
-    protected DoctorGroupReadService doctorGroupReadService;
     @Autowired
     protected DoctorGroupDao doctorGroupDao;
     @Autowired
@@ -166,6 +163,10 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
             tmpEvent = event;
             event = doctorGroupEventDao.findByRelGroupEventId(event.getId());
         }
-        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(tmpEvent.getGroupId(), tmpEvent.getId()));
+        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(tmpEvent.getGroupId());
+        if (!Objects.equals(tmpEvent.getId(), lastEvent.getId())) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
     }
 }
