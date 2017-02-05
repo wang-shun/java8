@@ -150,7 +150,7 @@ public class DoctorMessages {
      * @return
      */
     @RequestMapping(value = "/suggest/messageBarn", method = RequestMethod.GET)
-    public List<DoctorSuggestBarn> suggestMessageBarn(@RequestParam Long templateId, @RequestParam Long farmId, String barnName){
+    public List<DoctorSuggestBarn> suggestMessageBarn(@RequestParam Long templateId, @RequestParam Long farmId, @RequestParam(required = false) String barnName){
         DoctorMessageUserDto messageUserDto = new DoctorMessageUserDto();
         messageUserDto.setTemplateId(templateId);
         messageUserDto.setFarmId(farmId);
