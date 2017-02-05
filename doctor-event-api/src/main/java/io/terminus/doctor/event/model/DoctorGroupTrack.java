@@ -1,23 +1,11 @@
 package io.terminus.doctor.event.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
-import com.google.common.base.Strings;
-import io.terminus.doctor.common.util.JsonMapperUtil;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.SneakyThrows;
-import lombok.experimental.Builder;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static java.util.Objects.isNull;
 
 /**
  * Desc: 猪群卡片明细表Model类
@@ -125,13 +113,7 @@ public class DoctorGroupTrack implements Serializable {
     /**
      * 附加字段
      */
-    @Setter(AccessLevel.NONE)
-    @JsonIgnore
     private String extra;
-
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private Extra extraEntity;
     
     /**
      * 创建人id
@@ -195,56 +177,5 @@ public class DoctorGroupTrack implements Serializable {
             }
             return null;
         }
-    }
-
-    @SneakyThrows
-    public void setExtra(String extra) {
-        this.extra = Strings.nullToEmpty(extra);
-        if (Strings.isNullOrEmpty(extra)) {
-            this.extraEntity = new Extra();
-        } else {
-            JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-            this.extraEntity = jsonMapperUtil.fromJson(extra, Extra.class);
-        }
-    }
-
-    @SneakyThrows
-    public void setExtraEntity(Extra extraEntity){
-        this.extraEntity = extraEntity;
-        if (isNull(extraEntity)) {
-            this.extra = "";
-        } else {
-            this.extra = JsonMapperUtil.JSON_NON_EMPTY_MAPPER.toJson(extraEntity);
-        }
-    }
-
-    @SneakyThrows
-    public Extra getExtraEntity() {
-        if (Strings.isNullOrEmpty(this.extra)) {
-            return new Extra();
-        }
-        JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-        return jsonMapperUtil.fromJson(this.extra, Extra.class);
-    }
-
-    /**
-     * track 的 extra字段
-     */
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Extra implements Serializable {
-        private static final long serialVersionUID = -4134534768021946700L;
-        private Date newAt;          //新建猪群时间
-        private Date moveInAt;       //转入猪群时间
-        private Date changeAt;       //猪群变动时间
-        private Date transGroupAt;   //猪群转群时间
-        private Date turnSeedAt;     //商品猪转为种猪时间
-        private Date liveStockAt;    //猪只存栏时间
-        private Date diseaseAt;      //疾病时间
-        private Date antiepidemicAt; //防疫时间
-        private Date transFarmAt;    //转场时间
-        private Date closeAt;        //关闭猪群时间
     }
 }
