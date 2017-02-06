@@ -239,8 +239,10 @@ public class DoctorPigEvents {
                         extraMap.put("checkResult", PregCheckResult.from(doctorPigEvent.getPregCheckResult()).getDesc());
                     }
                     doctorPigEvent.setExtraMap(extraMap);
-
-                    return new DoctorPigEventDetail(doctorPigEvent, RespHelper.or500(doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId())));
+                    DoctorPigEventDetail detail = OBJECT_MAPPER.convertValue(doctorPigEvent, DoctorPigEventDetail.class);
+                    Boolean isRollback = RespHelper.or500(doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId()));
+                    detail.setIsRollback(isRollback);
+                    return detail;
                 }).collect(toList());
         return new Paging<>(pigEventPagingResponse.getResult().getTotal(), pigEventDetailList);
     }
@@ -350,8 +352,12 @@ public class DoctorPigEvents {
             return Paging.empty();
         }
         List<DoctorGroupEventDetail> groupEventDetailList = pagingResponse.getResult().getData().stream()
-                .map(doctorGroupEvent -> new DoctorGroupEventDetail(doctorGroupEvent, RespHelper.or500(doctorGroupReadService.eventCanRollback(doctorGroupEvent.getId()))))
-                .collect(toList());
+                .map(doctorGroupEvent -> {
+                    DoctorGroupEventDetail detail = OBJECT_MAPPER.convertValue(doctorGroupEvent, DoctorGroupEventDetail.class);
+                    Boolean isRollback = RespHelper.or500(doctorGroupReadService.eventCanRollback(doctorGroupEvent.getId()));
+                    detail.setIsRollback(isRollback);
+                    return detail;
+                }).collect(toList());
         return new Paging<>(pagingResponse.getResult().getTotal(), groupEventDetailList);
     }
 
@@ -387,7 +393,7 @@ public class DoctorPigEvents {
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
         Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
         List<DoctorPigEventExportData> list = pigEventPaging.getData()
-                .stream().map(doctorPigEventDetail -> OBJECT_MAPPER.convertValue(doctorPigEventDetail.getDoctorPigEvent(), DoctorPigEventExportData.class)).collect(toList());
+                .stream().map(doctorPigEventDetail -> OBJECT_MAPPER.convertValue(doctorPigEventDetail, DoctorPigEventExportData.class)).collect(toList());
         return new Paging<>(pigEventPaging.getTotal(), list);
     }
 
@@ -400,7 +406,7 @@ public class DoctorPigEvents {
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(groupEventCriteria, Map.class);
         Paging<DoctorGroupEventDetail> groupEventPaging = queryGroupEventsByCriteria(criteriaMap, Integer.parseInt(groupEventCriteria.get("pageNo")), Integer.parseInt(groupEventCriteria.get("size")));
         List<DoctorGroupEventExportData> list = groupEventPaging.getData()
-                .stream().map(doctorGroupEventDetail -> OBJECT_MAPPER.convertValue(doctorGroupEventDetail.getDoctorGroupEvent(), DoctorGroupEventExportData.class)).collect(toList());
+                .stream().map(doctorGroupEventDetail -> OBJECT_MAPPER.convertValue(doctorGroupEventDetail, DoctorGroupEventExportData.class)).collect(toList());
         return new Paging<>(groupEventPaging.getTotal(), list);
     }
 }

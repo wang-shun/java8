@@ -13,9 +13,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DoctorPigEventDetail implements Serializable {
+public class DoctorPigEventDetail extends DoctorPigEvent implements Serializable {
     private static final long serialVersionUID = 6810984617242339516L;
-
-    private DoctorPigEvent doctorPigEvent;
     private Boolean isRollback;
 }

@@ -13,9 +13,8 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DoctorGroupEventDetail implements Serializable {
+public class DoctorGroupEventDetail extends DoctorGroupEvent implements Serializable {
     private static final long serialVersionUID = 3941077199183497746L;
 
-    private DoctorGroupEvent doctorGroupEvent;
     private Boolean isRollback;
 }
