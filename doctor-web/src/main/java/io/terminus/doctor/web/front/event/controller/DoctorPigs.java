@@ -249,16 +249,11 @@ public class DoctorPigs {
         messages.forEach(doctorMessage -> map.put(doctorMessage.getCategory(), doctorMessage));
         map.values().forEach(doctorMessage -> {
             try {
-                Map<String, Object> data = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorMessage.getData(), JacksonType.MAP_OF_OBJECT);
-                Double timeDiff = null;
-                if (data.get("ruleTimeDiff") != null) {
-                    timeDiff = (double) data.get("ruleTimeDiff");
-                }
                 DoctorPigMessage pigMessage = DoctorPigMessage.builder()
                         .pigId(pigId)
                         .eventType(doctorMessage.getEventType())
-                        .eventTypeName(PigEvent.from(doctorMessage.getEventType()).getName())
-                        .timeDiff(timeDiff)
+                        .eventTypeName(doctorMessage.getEventType() == null ? null : PigEvent.from(doctorMessage.getEventType()).getName())
+                        .timeDiff(doctorMessage.getTimeDiff())
                         .build();
                 if (Objects.equals(doctorMessage.getCategory(), Category.SOW_BACK_FAT.getKey())) {
                     DoctorMessageRuleTemplate doctorMessageRuleTemplate = RespHelper.or500(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(doctorMessage.getTemplateId()));
