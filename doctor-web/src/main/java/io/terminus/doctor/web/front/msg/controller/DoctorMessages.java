@@ -96,8 +96,8 @@ public class DoctorMessages {
      * @return
      */
     @RequestMapping(value = "/warn/messages", method = RequestMethod.GET)
-    public DoctorMessageDto pagingWarnDoctorMessages(@RequestParam("pageNo") Integer pageNo,
-                                                                     @RequestParam("pageSize") Integer pageSize,
+    public DoctorMessageDto pagingWarnDoctorMessages(@RequestParam(value = "pageNo", required = false) Integer pageNo,
+                                                                     @RequestParam(value = "pageSize", required = false) Integer pageSize,
                                                                      @RequestParam Map<String, Object> criteria) {
         Params.filterNullOrEmpty(criteria);
         if (!isUserLogin()) {
