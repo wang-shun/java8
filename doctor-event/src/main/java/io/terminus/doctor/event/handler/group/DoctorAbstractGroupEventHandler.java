@@ -153,43 +153,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         groupTrack.setUpdatorId(event.getCreatorId());
         groupTrack.setUpdatorName(event.getCreatorName());
         groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
-
         groupTrack.setBirthDate(DateTime.now().plusDays(1 - groupTrack.getAvgDayAge()).toDate());
-
-        DoctorGroupTrack.Extra extra = groupTrack.getExtraEntity();
-        switch (GroupEventType.from(event.getType())) {
-            case MOVE_IN:
-                extra.setMoveInAt(event.getEventAt());
-                break;
-            case CHANGE:
-                extra.setChangeAt(event.getEventAt());
-                break;
-            case TRANS_GROUP:
-                extra.setTransGroupAt(event.getEventAt());
-                break;
-            case TURN_SEED:
-                extra.setTurnSeedAt(event.getEventAt());
-                break;
-            case LIVE_STOCK:
-                extra.setLiveStockAt(event.getEventAt());
-                break;
-            case DISEASE:
-                extra.setDiseaseAt(event.getEventAt());
-                break;
-            case ANTIEPIDEMIC:
-                extra.setAntiepidemicAt(event.getEventAt());
-                break;
-            case TRANS_FARM:
-                extra.setTransFarmAt(event.getEventAt());
-                break;
-            case CLOSE:
-                extra.setCloseAt(event.getEventAt());
-                break;
-            default:
-                break;
-        }
-        groupTrack.setExtraEntity(extra);
-
         doctorGroupTrackDao.update(groupTrack);
     }
 

@@ -9,6 +9,7 @@ import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -60,7 +61,7 @@ public class SysMessageProducer extends AbstractJobProducer {
                     }
                 }
             }
-            createMessage(subUsers, ruleRole, template.getContent(), null, null, null,null, null);
+            createMessage(subUsers, ruleRole, new DoctorMessageInfo());
         }
         log.info("系统消息产生 --- SysMessageProducer 结束执行执行, 产生 {} 条消息", messages.size());
     }

@@ -101,7 +101,6 @@ public class DoctorGroupManager {
 
         //3. 创建猪群跟踪
         DoctorGroupTrack groupTrack = BeanMapper.map(groupEvent, DoctorGroupTrack.class);
-        groupTrack.setExtraEntity(DoctorGroupTrack.Extra.builder().newAt(DateUtil.toDate(newGroupInput.getEventAt())).build());  //dozer不需要转换extra字段
         groupTrack.setGroupId(groupId);
         groupTrack.setRelEventId(groupEvent.getId());
         groupTrack.setBoarQty(0);

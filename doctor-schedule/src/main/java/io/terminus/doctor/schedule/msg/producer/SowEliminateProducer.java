@@ -13,7 +13,9 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
@@ -118,9 +120,23 @@ public class SowEliminateProducer extends AbstractJobProducer {
                             isSend = count > ruleValue.getValue().intValue() - 1;
                         }
                         if (isSend) {
-                            pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().intValue());
-                            getMessage(pigDto, ruleRole, sUsers, null, null, rule.getUrl(), PigEvent.REMOVAL.getKey(), ruleValue.getId());
-                            break;
+                            DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                    .code(pigDto.getPigCode())
+                                    .parity(pigDto.getParity())
+                                    .barnId(pigDto.getBarnId())
+                                    .barnName(pigDto.getBarnName())
+                                    .timeDiff(timeDiff)
+                                    .ruleTimeDiff(getRuleTimeDiff(ruleValue, timeDiff))
+                                    .reason(ruleValue.getDescribe() + ruleValue.getValue().toString())
+                                    .eventType(PigEvent.REMOVAL.getKey())
+                                    .ruleValueId(ruleValue.getId())
+                                    .url(getPigJumpUrl(pigDto))
+                                    .businessId(pigDto.getPigId())
+                                    .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
+                                    .status(pigDto.getStatus())
+                                    .statusName(pigDto.getStatusName())
+                                    .build();
+                            createMessage(sUsers, ruleRole, messageInfo);                            break;
                         }
                     }
                 } catch (Exception e) {

@@ -3,6 +3,7 @@ package io.terminus.doctor.msg.service;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
+import io.terminus.doctor.msg.dto.DoctorSuggestBarn;
 import io.terminus.doctor.msg.model.DoctorMessage;
 
 import java.util.List;
@@ -87,5 +88,12 @@ public interface DoctorMessageReadService {
      * @return
      */
     Response<List<DoctorMessage>> findMessageListByCriteria(DoctorMessageSearchDto doctorMessageSearchDto);
+
+    /**
+     * suggest 猪舍名
+     * @param doctorMessageSearchDto 查询条件
+     * @return suggest 猪舍列表
+     */
+    Response<List<DoctorSuggestBarn>> suggestMessageBarn(DoctorMessageSearchDto doctorMessageSearchDto);
 
 }

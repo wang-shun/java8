@@ -2164,7 +2164,6 @@ public class DoctorMoveDataService {
         DoctorGroupTrack groupTrack = new DoctorGroupTrack();
         groupTrack.setGroupId(group.getId());
         groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
-        groupTrack.setExtraEntity(getGroupTrackExtra(events));
 
         //如果猪群已经关闭, 大部分的统计值可以置成0
         if (Objects.equals(group.getStatus(), DoctorGroup.Status.CLOSED.getValue())) {
@@ -2198,53 +2197,6 @@ public class DoctorMoveDataService {
         groupTrack.setBoarQty(0);
         groupTrack.setSowQty(0);
         return groupTrack;
-    }
-
-    //拼接猪群跟踪的extra
-    private DoctorGroupTrack.Extra getGroupTrackExtra(List<DoctorGroupEvent> events) {
-        DoctorGroupTrack.Extra extra = new DoctorGroupTrack.Extra();
-        for (DoctorGroupEvent event : events) {
-
-            //记录不同事件类型的时间
-            GroupEventType type = GroupEventType.from(event.getType());
-            if (type != null) {
-                switch (type) {
-                    case NEW:
-                        extra.setNewAt(event.getEventAt());
-                        break;
-                    case MOVE_IN:
-                        extra.setMoveInAt(event.getEventAt());
-                        break;
-                    case CHANGE:
-                        extra.setChangeAt(event.getEventAt());
-                        break;
-                    case TRANS_GROUP:
-                        extra.setTransGroupAt(event.getEventAt());
-                        break;
-                    case TURN_SEED:
-                        extra.setTurnSeedAt(event.getEventAt());
-                        break;
-                    case LIVE_STOCK:
-                        extra.setLiveStockAt(event.getEventAt());
-                        break;
-                    case DISEASE:
-                        extra.setDiseaseAt(event.getEventAt());
-                        break;
-                    case ANTIEPIDEMIC:
-                        extra.setAntiepidemicAt(event.getEventAt());
-                        break;
-                    case TRANS_FARM:
-                        extra.setTransFarmAt(event.getEventAt());
-                        break;
-                    case CLOSE:
-                        extra.setCloseAt(event.getEventAt());
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        return extra;
     }
 
     //拼接猪群

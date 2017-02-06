@@ -247,6 +247,7 @@ public class DoctorCommonGroupEventHandler {
         farmEntryDto.setEarCode(input.getEarCode());
         farmEntryDto.setWeight(input.getWeight());
 
+        doctorEntryHandler.handleCheck(farmEntryDto, basicDto);
         doctorEntryHandler.handle(eventInfoList, farmEntryDto, basicDto);
     }
 
