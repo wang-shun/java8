@@ -75,11 +75,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
                     for (Integer key : keyList) {
                         RuleValue ruleValue = ruleValueMap.get(key);
                         timeDiff = getTimeDiff(new DateTime(matingPigEvent.getEventAt()));
-                        if (key == 1) {
-                            if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, new DateTime(matingPigEvent.getEventAt()), PigEvent.CONDITION)) {
-                                isSend = true;
-                            }
-                        } else if (key == 2 || key == 3) {
+                        if (key == 1 || key == 2 || key == 3) {
                             if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, new DateTime(matingPigEvent.getEventAt()).plusDays(ruleValue.getValue().intValue()), PigEvent.CONDITION)) {
                                 isSend = true;
                             }

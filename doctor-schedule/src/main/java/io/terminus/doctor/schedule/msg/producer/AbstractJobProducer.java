@@ -498,7 +498,7 @@ public abstract class AbstractJobProducer {
         }
         // 1. 值类型
         if (Objects.equals(RuleValue.RuleType.VALUE.getValue(), ruleValue.getRuleType())) {
-            if (value > ruleValue.getValue()) {
+            if (value >= ruleValue.getValue()) {
                 return true;
             }
         }
