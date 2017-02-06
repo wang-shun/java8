@@ -254,7 +254,6 @@
         <if test="barnName != null">
             ORDER BY instr(barn_name, #{barnName}) ASC, length(barnName) ASC
         </if>
-        limit 20;
     </select>
 
 </mapper>
