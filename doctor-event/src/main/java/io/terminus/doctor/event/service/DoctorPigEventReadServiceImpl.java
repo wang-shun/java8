@@ -257,6 +257,9 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     public Response<Boolean> isLastManualEvent(Long pigId, Long eventId) {
         try {
             DoctorPigEvent lastEvent = doctorPigEventDao.queryLastManualPigEventById(pigId);
+            if (lastEvent == null) {
+                return Response.ok(Boolean.FALSE);
+            }
             if (!Objects.equals(eventId, lastEvent.getId())) {
                 return Response.ok(Boolean.FALSE);
             }

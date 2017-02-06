@@ -83,7 +83,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
      */
     protected boolean isLastManualEvent(DoctorPigEvent pigEvent) {
         DoctorPigEvent lastManualEvent = doctorPigEventDao.queryLastManualPigEventById(pigEvent.getPigId());
-        return Objects.equals(lastManualEvent.getId(), pigEvent.getId());
+        return lastManualEvent != null && Objects.equals(lastManualEvent.getId(), pigEvent.getId());
     }
 
     /**
