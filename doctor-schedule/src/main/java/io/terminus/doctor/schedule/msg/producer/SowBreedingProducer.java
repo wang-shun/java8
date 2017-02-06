@@ -111,7 +111,7 @@ public class SowBreedingProducer extends AbstractJobProducer {
                                 .ruleTimeDiff(getRuleTimeDiff(ruleValue, timeDiff))
                                 .reason(ruleValue.getDescribe())
                                 .eventAt(pigEvent.getEventAt())
-                                .eventType(PigEvent.TO_FARROWING.getKey())
+                                .eventType(PigEvent.MATING.getKey())
                                 .ruleValueId(ruleValue.getId())
                                 .url(getPigJumpUrl(pigDto))
                                 .businessId(pigDto.getPigId())
