@@ -253,7 +253,7 @@ public class DoctorPigs {
                         .pigId(pigId)
                         .eventType(doctorMessage.getEventType())
                         .eventTypeName(doctorMessage.getEventType() == null ? null : PigEvent.from(doctorMessage.getEventType()).getName())
-                        .timeDiff(doctorMessage.getTimeDiff())
+                        .timeDiff(doctorMessage.getRuleTimeDiff())
                         .build();
                 if (Objects.equals(doctorMessage.getCategory(), Category.SOW_BACK_FAT.getKey())) {
                     DoctorMessageRuleTemplate doctorMessageRuleTemplate = RespHelper.or500(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(doctorMessage.getTemplateId()));
