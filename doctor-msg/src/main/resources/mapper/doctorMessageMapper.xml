@@ -33,6 +33,9 @@
         <result column="reason" property="reason"/>
         <result column="code" property="code"/>
         <result column="parity" property="parity"/>
+        <result column="ware_house_id" property="wareHouseId"/>
+        <result column="ware_house_name" property="wareHouseName"/>
+        <result column="lot_number" property="lotNumber"/>
         <result column="url" property="url"/>
         <result column="created_by" property="createdBy"/>
         <result column="created_at" property="createdAt"/>
@@ -48,11 +51,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, rule_id, role_id, template_id, template_name, business_id, business_type, rule_value_id, message_template, type, event_type, category, data, event_at, other_at, rule_time_diff, time_diff, barn_id, barn_name, status, status_name, operator_id, operator_name, reason, code, parity, url, created_by, created_at, updated_at
+        farm_id, rule_id, role_id, template_id, template_name, business_id, business_type, rule_value_id, message_template, type, event_type, category, data, event_at, other_at, rule_time_diff, time_diff, barn_id, barn_name, status, status_name, operator_id, operator_name, reason, code, parity, ware_house_id, ware_house_name,lot_number, url, created_by, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId},#{businessType}, #{ruleValueId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{eventAt}, #{otherAt}, #{ruleTimeDiff}, #{timeDiff}, #{barnId}, #{barnName}, #{status}, #{statusName}, #{operatorId}, #{operatorName}, #{reason}, #{code}, #{parity}, #{url}, #{createdBy}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId},#{businessType}, #{ruleValueId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{eventAt}, #{otherAt}, #{ruleTimeDiff}, #{timeDiff}, #{barnId}, #{barnName}, #{status}, #{statusName}, #{operatorId}, #{operatorName}, #{reason}, #{code}, #{parity}, #{wareHouseId}, #{wareHouseName}, #{lotNumber}, #{url}, #{createdBy}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -117,6 +120,9 @@
             <if test="reason != null">reason = #{reason},</if>
             <if test="code != null">code = #{code},</if>
             <if test="parity != null">parity = #{parity},</if>
+            <if test="wareHouseId != null">ware_house_id = #{wareHouseId},</if>
+            <if test="wareHouseName != null">ware_house_name = #{wareHouseName},</if>
+            <if test="lotNumber != null">lot_number = #{lotNumber},</if>
             <if test="url != null">url = #{url},</if>
             <if test="createdBy != null">created_by = #{createdBy},</if>
             updated_at=now()
@@ -158,6 +164,7 @@
             <if test="status != null">AND status = #{status}</if>
             <if test="code != null">AND code = #{code}</if>
             <if test="parity != null">AND parity = #{parity}</if>
+            <if test="wareHouseId != null">AND ware_house_id = #{wareHouseId}</if>
             <if test="operatorId != null">AND operator_id = #{operatorId}</if>
             <if test="types != null &amp;&amp; types.size() > 0">
                 AND `type` IN
