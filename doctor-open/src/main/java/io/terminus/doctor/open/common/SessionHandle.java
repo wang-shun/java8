@@ -45,6 +45,8 @@ public class SessionHandle implements ParamPreHandle {
     private AFSessionManager sessionManager;
     @Autowired
     private UserReadService<User> userReadService;
+    @Autowired
+    private DoctorUserMaker doctorUserMaker;
 
     /**
      * check params before calling
@@ -73,7 +75,7 @@ public class SessionHandle implements ParamPreHandle {
             throw new OPClientException(400, res.getError());
         }
 
-        ParanaUser paranaUser = DoctorUserMaker.from(res.getResult());
+        ParanaUser paranaUser = doctorUserMaker.from(res.getResult());
         UserUtil.putCurrentUser(paranaUser);
     }
 

@@ -17,7 +17,6 @@ import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.user.model.DoctorUser;
-import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.Constants;
@@ -64,31 +63,24 @@ public class Users {
     private static final String ImportExcelRedisKey = "import-excel-result:";
 
     private final DoctorUserReadService doctorUserReadService;
-
-    private final DoctorFarmReadService doctorFarmReadService;
-
     private final MobilePattern mobilePattern;
-
     private final EventBus eventBus;
-
     private final AclLoader aclLoader;
-
     private final PermissionHelper permissionHelper;
-
     private final Publisher publisher;
-
     private final JedisTemplate jedisTemplate;
+    private final DoctorUserMaker doctorUserMaker;
 
     @Autowired
     public Users(DoctorUserReadService doctorUserReadService,
-                 DoctorFarmReadService doctorFarmReadService, EventBus eventBus,
+                 DoctorUserMaker doctorUserMaker, EventBus eventBus,
                  AclLoader aclLoader,
                  PermissionHelper permissionHelper,
                  MobilePattern mobilePattern,
                  Publisher publisher,
                  JedisTemplate jedisTemplate) {
         this.doctorUserReadService = doctorUserReadService;
-        this.doctorFarmReadService = doctorFarmReadService;
+        this.doctorUserMaker = doctorUserMaker;
         this.eventBus = eventBus;
         this.aclLoader = aclLoader;
         this.permissionHelper = permissionHelper;
@@ -160,7 +152,7 @@ public class Users {
         }
         request.getSession().setAttribute(Constants.SESSION_USER_ID, user.getId());
 
-        LoginEvent loginEvent = new LoginEvent(request, response, DoctorUserMaker.from(user));
+        LoginEvent loginEvent = new LoginEvent(request, response, doctorUserMaker.from(user));
         eventBus.post(loginEvent);
         target = !StringUtils.hasText(target)?"/":target;
         map.put("redirect",target);

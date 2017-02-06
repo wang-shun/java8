@@ -94,6 +94,8 @@ public class DoctorCommonSessionBean {
     private CoreEventDispatcher coreEventDispatcher;
     @Autowired
     private DeviceReadService deviceReadService;
+    @Autowired
+    private DoctorUserMaker doctorUserMaker;
 
     public DoctorCommonSessionBean() {
         String hostIp;
@@ -236,7 +238,7 @@ public class DoctorCommonSessionBean {
         // 校验手机验证码
         validateSmsCode(code, mobile, sessionId);
         User user = registerByMobile(mobile, password, null);
-        coreEventDispatcher.publish(new RegisterEvent(null, null, DoctorUserMaker.from(user)));
+        coreEventDispatcher.publish(new RegisterEvent(null, null, doctorUserMaker.from(user)));
         return user.getId();
     }
 
