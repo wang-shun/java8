@@ -99,6 +99,18 @@ public class DoctorMessage implements Serializable {
      * 记录事件发生到消息产生时的时间差
      */
     private Integer timeDiff;
+
+    /**
+     * 仓库
+     */
+    private Long wareHouseId;
+    private String wareHouseName;
+
+    /**
+     * 剩余量
+     */
+    private Double lotNumber;
+
     private Long barnId;
     private String barnName;
 
@@ -124,7 +136,7 @@ public class DoctorMessage implements Serializable {
     private String reason;
 
     /**
-     * 消息对象code
+     * 猪号、猪群号、物料名
      */
     private String code;
 
