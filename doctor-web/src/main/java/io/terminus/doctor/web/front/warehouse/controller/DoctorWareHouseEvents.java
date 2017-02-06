@@ -7,8 +7,16 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.basic.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.basic.dto.DoctorMaterialInWareHouseDto;
+import io.terminus.doctor.basic.dto.DoctorMoveMaterialDto;
+import io.terminus.doctor.basic.dto.DoctorWareHouseDto;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
+import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
+import io.terminus.doctor.basic.model.DoctorMaterialInWareHouse;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
@@ -21,14 +29,10 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.basic.dto.DoctorMaterialConsumeProviderDto;
-import io.terminus.doctor.basic.dto.DoctorMaterialInWareHouseDto;
-import io.terminus.doctor.basic.dto.DoctorWareHouseDto;
-import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
-import io.terminus.doctor.basic.model.DoctorMaterialInWareHouse;
-import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorInventoryInputDto;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorMoveMaterialInputDto;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
@@ -37,7 +41,11 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
 import java.util.Date;
@@ -195,40 +203,24 @@ public class DoctorWareHouseEvents {
     @RequestMapping(value = "/consume", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createConsumeEvent(@RequestBody @Valid DoctorConsumeProviderInputDto dto){
-        DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto;
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getEventType());
-        if(eventType == null || !eventType.isOut()){
-            throw new JsonResponseException("event.type.error");
-        }
-        try{
-
-            DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.orServEx(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(
-                    dto.getFarmId(),dto.getMaterialId(),dto.getWareHouseId()));
-            checkState(!isNull(doctorMaterialInWareHouse), "input.materialInfo.error");
-
-            Long currentUserId = dto.getStaffId() != null ? dto.getStaffId() : UserUtil.getUserId();
-
-            DoctorBasicMaterial doctorBasicMaterial = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
-
-            doctorMaterialConsumeProviderDto = DoctorMaterialConsumeProviderDto.builder()
-                    .actionType(eventType.getValue()).type(doctorMaterialInWareHouse.getType())
-                    .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
-                    .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
-                    .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
-                    .barnId(dto.getBarnId()).barnName(dto.getBarnName())
-                    .groupId(dto.getGroupId()).groupCode(dto.getGroupCode())
-                    .staffId(currentUserId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(currentUserId)))
-                    .count(dto.getCount()).consumeDays(dto.getConsumeDays())
-                    .eventTime(dto.getEventAt() == null ? new Date() : dto.getEventAt())
-                    .unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
-                    .unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
-                    .build();
-        }catch (Exception e){
-            log.error("consume material fail, cause:{}", Throwables.getStackTraceAsString(e));
-            throw new JsonResponseException(e.getMessage());
-        }
-        return RespHelper.or500(doctorMaterialInWareHouseWriteService.consumeMaterialInfo(doctorMaterialConsumeProviderDto));
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.consumeMaterialInfo(buildMaterialConsumeInfo(dto)));
     }
+
+    /**
+     * 批量出库
+     * @param dtoList
+     * @return
+     */
+    @RequestMapping(value = "/batch/consume", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Boolean batchCreateConsumeEvents(@RequestBody List<DoctorConsumeProviderInputDto> dtoList) {
+        if (Arguments.isNullOrEmpty(dtoList)) {
+            return Boolean.FALSE;
+        }
+        List<DoctorMaterialConsumeProviderDto> providerDtoList = dtoList.stream().map(this::buildMaterialConsumeInfo).collect(Collectors.toList());
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.batchConsumeMaterialInfo(providerDtoList));
+    }
+
 
     /**
      * 初始化库存数据
@@ -301,6 +293,130 @@ public class DoctorWareHouseEvents {
     @RequestMapping(value = "/provider", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createProviderEvent(@RequestBody @Valid DoctorConsumeProviderInputDto dto){
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.providerMaterialInfo(buildMaterialProviderInfo(dto)));
+    }
+
+    /**
+     * 批量入库
+     * @param dtoList
+     * @return
+     */
+    @RequestMapping(value = "/batch/provider", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Boolean batchCreateProviderEvents(@RequestBody List<DoctorConsumeProviderInputDto> dtoList){
+        if (Arguments.isNullOrEmpty(dtoList)) {
+            return Boolean.FALSE;
+        }
+        List<DoctorMaterialConsumeProviderDto> providerDtoList = dtoList.stream().map(this::buildMaterialProviderInfo).collect(Collectors.toList());
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.batchProviderMaterialInfo(providerDtoList));
+
+    }
+
+    /**
+     * 仓库间物料转移（调拨）
+     */
+    @RequestMapping(value = "/moveMaterial", method = RequestMethod.POST)
+    @ResponseBody
+    public boolean moveMaterial(@RequestBody DoctorMoveMaterialInputDto dto){
+        RespHelper.or500(doctorMaterialInWareHouseWriteService.moveMaterial(buildMoveMaterialInfo(dto)));
+        return true;
+    }
+
+    /**
+     * 批量调拨
+     */
+    @RequestMapping(value = "/batch/moveMaterial", method = RequestMethod.POST)
+    @ResponseBody
+    public Boolean moveMaterial(@RequestBody List<DoctorMoveMaterialInputDto> dtoList){
+        if (Arguments.isNullOrEmpty(dtoList)) {
+            return Boolean.FALSE;
+        }
+        List<DoctorMoveMaterialDto> moveMaterialDtoList = dtoList.stream().map(this::buildMoveMaterialInfo).collect(Collectors.toList());
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.batchMoveMaterial(moveMaterialDtoList));
+    }
+
+    /**
+     * 仓库物资盘点
+     * @param farmId 猪场id
+     * @param warehouseId 仓库id
+     * @param materialId 物料id
+     * @param count 新数量
+     * @return
+     */
+    @RequestMapping(value = "/inventory", method = RequestMethod.POST)
+    @ResponseBody
+    public boolean inventory(@RequestParam Long farmId, @RequestParam Long warehouseId, @RequestParam Long materialId,
+                             @RequestParam Double count, @RequestParam(required = false) String eventAt){
+        DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, materialId, warehouseId));
+        DoctorConsumeProviderInputDto dto = DoctorConsumeProviderInputDto.builder()
+                .farmId(farmId).wareHouseId(warehouseId).materialId(materialId)
+                .eventAt(eventAt == null ? new Date() : DateUtil.toDate(eventAt))
+                .build();
+        if (materialInWareHouse.getLotNumber() > count){
+            // 盘亏 (出库)
+            dto.setCount(materialInWareHouse.getLotNumber() - count);
+            dto.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI.getValue());
+            this.createConsumeEvent(dto);
+        } else if(materialInWareHouse.getLotNumber() < count){
+            // 盘盈(入库)
+            dto.setCount(count - materialInWareHouse.getLotNumber());
+            dto.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.PANYING.getValue());
+            this.createProviderEvent(dto);
+        } else {
+            return true;
+        }
+        return true;
+    }
+
+    /**
+     * 批量盘点
+     * @param inputDtoList
+     * @return
+     */
+    @RequestMapping(value = "/batch/inventory", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Boolean batchInventory(@RequestBody List<DoctorInventoryInputDto> inputDtoList) {
+        List<DoctorMaterialConsumeProviderDto> dtoList = inputDtoList.stream().map(inputDto -> {
+            DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(inputDto.getFarmId(), inputDto.getMaterialId(), inputDto.getWarehouseId()));
+            DoctorConsumeProviderInputDto dto = DoctorConsumeProviderInputDto.builder()
+                    .farmId(inputDto.getFarmId()).wareHouseId(inputDto.getWarehouseId()).materialId(inputDto.getMaterialId())
+                    .eventAt(inputDto.getEventAt() == null ? new Date() : DateUtil.toDate(inputDto.getEventAt()))
+                    .build();
+            Double count = inputDto.getCount();
+            if (materialInWareHouse.getLotNumber() > count) {
+                // 盘亏 (出库)
+                dto.setCount(materialInWareHouse.getLotNumber() - count);
+                dto.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI.getValue());
+                return buildMaterialConsumeInfo(dto);
+            } else if (materialInWareHouse.getLotNumber() < count) {
+                // 盘盈(入库)
+                dto.setCount(count - materialInWareHouse.getLotNumber());
+                dto.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.PANYING.getValue());
+                return buildMaterialProviderInfo(dto);
+            } else {
+                return null;
+            }
+        }).filter(dto -> dto != null).collect(Collectors.toList());
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.batchInventory(dtoList));
+    }
+
+    /**
+     * 仓库事件回滚
+     * @param eventId DoctorMaterialConsumeProvider的id
+     * @return
+     */
+    @RequestMapping(value = "/rollback", method = RequestMethod.GET)
+    @ResponseBody
+    public boolean rollback(@RequestParam Long eventId){
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.rollback(eventId));
+    }
+
+    /**
+     * 构建物料入库信息
+     * @param dto
+     * @return
+     */
+    private DoctorMaterialConsumeProviderDto buildMaterialProviderInfo(DoctorConsumeProviderInputDto dto) {
         DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto;
         DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getEventType());
         if(eventType == null || !eventType.isIn()){
@@ -343,36 +459,71 @@ public class DoctorWareHouseEvents {
                     }
                 }
             }
+            return doctorMaterialConsumeProviderDto;
         }catch (Exception e){
             log.error("provider material fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(e.getMessage());
         }
-        return RespHelper.or500(doctorMaterialInWareHouseWriteService.providerMaterialInfo(doctorMaterialConsumeProviderDto));
     }
 
     /**
-     * 仓库间物料转移（调拨）
-     * @param farmId 猪场id
-     * @param fromWareHouseId 来源仓库
-     * @param toWareHouseId 前往仓库
-     * @param materialId 物料id
-     * @param moveQuantity 调拨数量
+     * 物料出库信息构建
+     * @param dto 物料出库信息输入
+     * @return
      */
-    @RequestMapping(value = "/moveMaterial", method = RequestMethod.POST)
-    @ResponseBody
-    public boolean moveMaterial(@RequestParam Long farmId, @RequestParam Long fromWareHouseId, @RequestParam Long toWareHouseId,
-                                @RequestParam Long materialId, @RequestParam Double moveQuantity, @RequestParam(required = false) String eventAt){
-        if(moveQuantity == null || moveQuantity <= 0){
+    private DoctorMaterialConsumeProviderDto buildMaterialConsumeInfo(DoctorConsumeProviderInputDto dto) {
+        DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto;
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getEventType());
+        if(eventType == null || !eventType.isOut()){
+            throw new JsonResponseException("event.type.error");
+        }
+        try{
+
+            DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.orServEx(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(
+                    dto.getFarmId(),dto.getMaterialId(),dto.getWareHouseId()));
+            checkState(!isNull(doctorMaterialInWareHouse), "input.materialInfo.error");
+
+            Long currentUserId = dto.getStaffId() != null ? dto.getStaffId() : UserUtil.getUserId();
+
+            DoctorBasicMaterial doctorBasicMaterial = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
+
+            doctorMaterialConsumeProviderDto = DoctorMaterialConsumeProviderDto.builder()
+                    .actionType(eventType.getValue()).type(doctorMaterialInWareHouse.getType())
+                    .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
+                    .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
+                    .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
+                    .barnId(dto.getBarnId()).barnName(dto.getBarnName())
+                    .groupId(dto.getGroupId()).groupCode(dto.getGroupCode())
+                    .staffId(currentUserId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(currentUserId)))
+                    .count(dto.getCount()).consumeDays(dto.getConsumeDays())
+                    .eventTime(dto.getEventAt() == null ? new Date() : dto.getEventAt())
+                    .unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
+                    .unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
+                    .build();
+            return doctorMaterialConsumeProviderDto;
+        }catch (Exception e){
+            log.error("consume material fail, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException(e.getMessage());
+        }
+    }
+
+    /**
+     * 物料调拨信息构建
+     * @param dto 调拨输入信息
+     * @return 调拨信息
+     */
+    private DoctorMoveMaterialDto buildMoveMaterialInfo(DoctorMoveMaterialInputDto dto) {
+        if(dto.getMoveQuantity() == null || dto.getMoveQuantity() <= 0){
             throw new JsonResponseException("quantity.invalid");
         }
-        if(fromWareHouseId.equals(toWareHouseId)){
+        if(dto.getFromWareHouseId().equals(dto.getToWareHouseId())){
             throw new JsonResponseException("fromWareHouseId.equal.toWareHouseId"); // 调出和调入仓库不能是同一个仓库
         }
-        DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(materialId));
-        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
-        DoctorWareHouse consumeWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(fromWareHouseId));
-        DoctorWareHouse toWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(toWareHouseId));
-        DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, materialId, fromWareHouseId));
+        DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(dto.getFarmId()));
+        DoctorWareHouse consumeWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(dto.getFromWareHouseId()));
+        DoctorWareHouse toWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(dto.getToWareHouseId()));
+        DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(dto.getFarmId(), dto.getMaterialId(), dto.getFromWareHouseId()));
         if(materialInWareHouse == null){
             throw new JsonResponseException("no.material.consume");
         }
@@ -381,69 +532,24 @@ public class DoctorWareHouseEvents {
 
         DoctorMaterialConsumeProviderDto diaochu = DoctorMaterialConsumeProviderDto.builder()
                 .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU.getValue()).type(material.getType())
-                .farmId(farmId).farmName(farm.getName())
-                .materialTypeId(materialId).materialName(material.getName())
-                .wareHouseId(fromWareHouseId).wareHouseName(consumeWarehouse.getWareHouseName())
+                .farmId(dto.getFarmId()).farmName(farm.getName())
+                .materialTypeId(dto.getMaterialId()).materialName(material.getName())
+                .wareHouseId(dto.getFromWareHouseId()).wareHouseName(consumeWarehouse.getWareHouseName())
                 .staffId(userId).staffName(realName)
-                .count(moveQuantity)
-                .eventTime(eventAt == null ? new Date() : DateUtil.toDate(eventAt))
+                .count(dto.getMoveQuantity())
+                .eventTime(dto.getEventAt() == null ? new Date() : DateUtil.toDate(dto.getEventAt()))
                 .unitName(materialInWareHouse.getUnitName()).unitGroupName(materialInWareHouse.getUnitGroupName())
                 .build();
         DoctorMaterialConsumeProviderDto diaoru = DoctorMaterialConsumeProviderDto.builder()
                 .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU.getValue()).type(material.getType())
-                .farmId(farmId).farmName(farm.getName())
-                .materialTypeId(materialId).materialName(material.getName())
-                .wareHouseId(toWareHouseId).wareHouseName(toWarehouse.getWareHouseName())
+                .farmId(dto.getFarmId()).farmName(farm.getName())
+                .materialTypeId(dto.getMaterialId()).materialName(material.getName())
+                .wareHouseId(dto.getToWareHouseId()).wareHouseName(toWarehouse.getWareHouseName())
                 .staffId(userId).staffName(realName)
-                .count(moveQuantity)
-                .eventTime(eventAt == null ? new Date() : DateUtil.toDate(eventAt))
+                .count(dto.getMoveQuantity())
+                .eventTime(dto.getEventAt() == null ? new Date() : DateUtil.toDate(dto.getEventAt()))
                 .unitName(materialInWareHouse.getUnitName()).unitGroupName(materialInWareHouse.getUnitGroupName())
                 .build();
-        RespHelper.or500(doctorMaterialInWareHouseWriteService.moveMaterial(diaochu, diaoru));
-        return true;
-    }
-
-    /**
-     * 仓库物资盘点
-     * @param farmId 猪场id
-     * @param warehouseId 仓库id
-     * @param materialId 物料id
-     * @param count 新数量
-     * @return
-     */
-    @RequestMapping(value = "/inventory", method = RequestMethod.POST)
-    @ResponseBody
-    public boolean inventory(@RequestParam Long farmId, @RequestParam Long warehouseId, @RequestParam Long materialId,
-                             @RequestParam Double count, @RequestParam(required = false) String eventAt){
-        DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, materialId, warehouseId));
-        DoctorConsumeProviderInputDto dto = DoctorConsumeProviderInputDto.builder()
-                .farmId(farmId).wareHouseId(warehouseId).materialId(materialId)
-                .eventAt(eventAt == null ? new Date() : DateUtil.toDate(eventAt))
-                .build();
-        if (materialInWareHouse.getLotNumber() > count){
-            // 盘亏 (出库)
-            dto.setCount(materialInWareHouse.getLotNumber() - count);
-            dto.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI.getValue());
-            this.createConsumeEvent(dto);
-        } else if(materialInWareHouse.getLotNumber() < count){
-            // 盘盈(入库)
-            dto.setCount(count - materialInWareHouse.getLotNumber());
-            dto.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.PANYING.getValue());
-            this.createProviderEvent(dto);
-        } else {
-            return true;
-        }
-        return true;
-    }
-
-    /**
-     * 仓库事件回滚
-     * @param eventId DoctorMaterialConsumeProvider的id
-     * @return
-     */
-    @RequestMapping(value = "/rollback", method = RequestMethod.GET)
-    @ResponseBody
-    public boolean rollback(@RequestParam Long eventId){
-        return RespHelper.or500(doctorMaterialInWareHouseWriteService.rollback(eventId));
+        return new DoctorMoveMaterialDto(diaochu, diaoru);
     }
 }

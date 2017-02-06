@@ -118,9 +118,23 @@ public class DoctorWareHouseQuery {
     @ResponseBody
     public Paging<DoctorWareHouseDto> pagingDoctorWareHouseDto(@RequestParam("farmId") Long farmId,
                                                                @RequestParam(value = "type", required = false) Integer type,
+
                                                                @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize){
         return RespHelper.or500(doctorWareHouseReadService.queryDoctorWarehouseDto(farmId, type, pageNo, pageSize));
+    }
+
+    /**
+     * 获取猪场下的所有仓库
+     * @param farmId 猪场id
+     * @param type
+     * @return
+     */
+    @RequestMapping(value = "/queryAllDoctorWareHouseDto", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Paging<DoctorWareHouseDto> queryAllDoctorWareHouseDto(@RequestParam("farmId") Long farmId,
+                                                               @RequestParam(value = "type", required = false) Integer type) {
+        return RespHelper.or500(doctorWareHouseReadService.queryDoctorWarehouseDto(farmId, type, 1, Integer.MAX_VALUE));
     }
 
     @RequestMapping(value = "/listDoctorWareHouseDto", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
