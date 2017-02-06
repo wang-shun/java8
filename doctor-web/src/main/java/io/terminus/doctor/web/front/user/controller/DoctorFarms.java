@@ -147,6 +147,43 @@ public class DoctorFarms {
     }
 
     /**
+     * 查询猪场所有的staff信息
+     * @param farmId 猪场id
+     * @return staff信息
+     */
+    @RequestMapping(value = "/staff/{farmId}", method = RequestMethod.GET)
+    public List<FarmStaff> findStaffByFarmId(@PathVariable Long farmId){
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+        Map<Long, Long> userIdJoinStaffId = new HashMap<>(); // key = userId, value = staffId
+
+        //查所有的staff
+        RespHelper.or500(doctorStaffReadService.findStaffByOrgIdAndStatus(farm.getOrgId(), null))
+                .forEach(staff -> userIdJoinStaffId.put(staff.getUserId(), staff.getId()));
+        List<Long> matchUserIds = Lists.newArrayList();
+        RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserIds(userIdJoinStaffId.keySet().stream().collect(Collectors.toList())))
+                .forEach(permission -> {
+                    if (permission.getFarmIdsList().contains(farmId)) {
+                        matchUserIds.add(permission.getUserId());
+                    }
+                });
+        return RespHelper.or500(doctorUserReadService.findByIds(matchUserIds))
+                .stream()
+                .map(user1 -> {
+                    FarmStaff farmStaff = new FarmStaff();
+                    farmStaff.setUserId(user1.getId());
+                    farmStaff.setFarmId(farmId);
+                    farmStaff.setStaffId(userIdJoinStaffId.get(user1.getId()));
+                    if(Objects.equals(user1.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
+                        farmStaff.setRealName(user1.getName() == null ? user1.getMobile() : user1.getName());
+                    }else if(Objects.equals(user1.getType(), UserType.FARM_SUB.value())){
+                        farmStaff.setRealName(Params.get(user1.getExtra(), "realName"));
+                    }
+                    return farmStaff;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
      * 查询当前用户有权限的猪场
      * @return
      */

@@ -3,6 +3,7 @@ package io.terminus.doctor.user.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.DoctorStaff;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -16,7 +17,8 @@ public interface DoctorStaffReadService {
      * @param status 员工状态
      * @return
      */
-    Response<List<DoctorStaff>> findStaffByOrgIdAndStatus(@NotNull(message = "orgId.not.null") Long orgId, Integer status);
+    Response<List<DoctorStaff>> findStaffByOrgIdAndStatus(@NotNull(message = "orgId.not.null") Long orgId,
+                                                          @Nullable Integer status);
 
     /**
      * 根据id查询员工表
