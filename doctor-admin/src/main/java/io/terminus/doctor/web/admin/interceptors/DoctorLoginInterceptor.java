@@ -9,7 +9,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.user.util.DoctorUserMaker;
+import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.User;

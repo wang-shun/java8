@@ -18,7 +18,7 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.user.util.DoctorUserMaker;
+import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.Constants;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.events.user.LoginEvent;

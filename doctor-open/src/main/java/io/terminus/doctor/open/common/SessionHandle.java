@@ -1,7 +1,7 @@
 package io.terminus.doctor.open.common;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.user.util.DoctorUserMaker;
+import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.login.Sessions;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenParamHandler;
