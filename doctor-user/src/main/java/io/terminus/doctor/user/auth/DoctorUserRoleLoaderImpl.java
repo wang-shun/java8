@@ -8,13 +8,16 @@ import io.terminus.doctor.user.dao.OperatorDao;
 import io.terminus.doctor.user.dao.SellerDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.SubSellerDao;
-import io.terminus.doctor.user.model.*;
-import io.terminus.doctor.user.service.DoctorUserRoleLoader;
+import io.terminus.doctor.user.model.Operator;
+import io.terminus.doctor.user.model.Seller;
+import io.terminus.doctor.user.model.Sub;
+import io.terminus.doctor.user.model.SubSeller;
 import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.auth.UserRoleLoader;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -61,6 +64,8 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
     @Override
     public Response<List<String>> hardLoadRoles(Long userId) {
         try {
+            DateTime start = DateTime.now();
+            log.warn("invoke hard load roles start, now:{}, time:{}", start, start.getMillis());
             if (userId == null) {
                 log.warn("hard load roles failed, userId=null");
                 return Response.fail("user.id.null");
@@ -88,7 +93,8 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
             if (!roleBuilder.equals(originRoles)) {
                 userDao.updateRoles(userId, result);
             }
-
+            DateTime end = DateTime.now();
+            log.warn("invoke hard load roles end, now:{}, time:{}, cost:{}", end, end.getMillis(), end.getMillis() - start.getMillis());
             return Response.ok(result);
         } catch (Exception e) {
             log.error("hard load roles failed, userId={}, cause:{}", userId, Throwables.getStackTraceAsString(e));
