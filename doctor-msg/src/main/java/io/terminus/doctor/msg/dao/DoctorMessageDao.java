@@ -2,6 +2,8 @@ package io.terminus.doctor.msg.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
+import io.terminus.doctor.msg.dto.DoctorSuggestBarn;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import org.springframework.stereotype.Repository;
 
@@ -56,6 +58,15 @@ public class DoctorMessageDao extends MyBatisDao<DoctorMessage> {
      */
     public List<DoctorMessage> sendMessageList(Map<String, Object> criteria){
         return getSqlSession().selectList(sqlId("sendList"), criteria);
+    }
+
+    /**
+     * suggest 猪舍名
+     * @param doctorMessageSearchDto
+     * @return
+     */
+    public List<DoctorSuggestBarn> suggestMessageBarn(DoctorMessageSearchDto doctorMessageSearchDto){
+        return getSqlSession().selectList(sqlId("suggestMessageBarn"), doctorMessageSearchDto);
     }
 
 }

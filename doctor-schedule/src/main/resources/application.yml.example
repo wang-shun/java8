@@ -11,3 +11,9 @@ logging:
   file: ${user.home}/logs/doctor/schedule.log
   level.*: INFO
 
+msg:
+  jumpUrl:
+    pig:
+      sow: /sow/detail
+      boar: /boar/detail
+    group: /group/detail
