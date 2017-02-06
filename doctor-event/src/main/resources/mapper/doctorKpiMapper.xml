@@ -960,14 +960,17 @@
               )
             FROM (
                   SELECT
-                    type,
-                    count(type) AS quantity
-                  FROM doctor_pig_events
+                    a.TYPE,
+                    count(a.TYPE) AS quantity
+                  FROM doctor_pig_events a
+                  LEFT JOIN doctor_pigs b ON a.pig_id = b.id
                   WHERE
-                    event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
-                    farm_id = #{farmId} AND
-                    kind = 2 AND type IN (6, 7)
-                  GROUP BY type
+                    a.event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
+                    a.farm_id = #{farmId} AND
+                    a.kind = 2 AND
+                    a.TYPE IN (6, 7) AND
+                    b.boar_type = 1
+                  GROUP BY a.type
                 ) AS delta
           )
         FROM dual
