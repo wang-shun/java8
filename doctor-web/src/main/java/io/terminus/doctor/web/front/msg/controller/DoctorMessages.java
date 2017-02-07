@@ -5,7 +5,9 @@ import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
@@ -210,18 +212,18 @@ public class DoctorMessages {
      * @return
      */
     @RequestMapping(value = "/message/detail", method = RequestMethod.GET)
-    public Boolean findMessageDetail(@RequestParam("id") Long id) {
+    public void findMessageDetail(@RequestParam("id") Long id) {
         DoctorMessageUserDto doctorMessageUserDto = new DoctorMessageUserDto();
         doctorMessageUserDto.setUserId(UserUtil.getUserId());
         doctorMessageUserDto.setMessageId(id);
-        DoctorMessageUser doctorMessageUser = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto)).get(0);
-        if (doctorMessageUser != null) {
-            // 如果消息是未读, 将消息设置为已读
-            doctorMessageUser.setStatusSys(DoctorMessageUser.Status.READED.getValue());
-            doctorMessageUserWriteService.updateDoctorMessageUser(doctorMessageUser);
-            return true;
+        Response<List<DoctorMessageUser>> listResponse = doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto);
+        if (!listResponse.isSuccess() || Arguments.isNullOrEmpty(listResponse.getResult())) {
+            throw new JsonResponseException("find.message.detail.failed");
         }
-       return false;
+        DoctorMessageUser doctorMessageUser = listResponse.getResult().get(0);
+        // 如果消息是未读, 将消息设置为已读
+        doctorMessageUser.setStatusSys(DoctorMessageUser.Status.READED.getValue());
+        doctorMessageUserWriteService.updateDoctorMessageUser(doctorMessageUser);
     }
 
     /**
