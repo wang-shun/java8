@@ -377,7 +377,7 @@ public class DoctorWareHouseEvents {
     @ResponseBody
     public Boolean batchInventory(@RequestBody List<DoctorInventoryInputDto> inputDtoList) {
         List<DoctorMaterialConsumeProviderDto> dtoList = inputDtoList.stream().map(inputDto -> {
-            DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(inputDto.getFarmId(), inputDto.getMaterialId(), inputDto.getWarehouseId()));
+            DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(inputDto.getFarmId(), inputDto.getMaterialId(), inputDto.getWareHouseId()));
             DoctorConsumeProviderInputDto dto = DoctorConsumeProviderInputDto.builder()
                     .farmId(inputDto.getFarmId()).wareHouseId(inputDto.getWareHouseId()).materialId(inputDto.getMaterialId())
                     .eventAt(inputDto.getEventAt() == null ? new Date() : DateUtil.toDate(inputDto.getEventAt()))
