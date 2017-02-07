@@ -34,7 +34,6 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
     protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     @Autowired private DoctorRevertLogWriteService doctorRevertLogWriteService;
-    @Autowired protected DoctorGroupReadService doctorGroupReadService;
     @Autowired protected DoctorGroupDao doctorGroupDao;
     @Autowired protected DoctorGroupEventDao doctorGroupEventDao;
     @Autowired protected DoctorGroupTrackDao doctorGroupTrackDao;
@@ -73,7 +72,11 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
      * 是否是最新事件
      */
     protected boolean isLastEvent(DoctorGroupEvent groupEvent) {
-        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(groupEvent.getGroupId(), groupEvent.getId()));
+        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(groupEvent.getGroupId());
+        if (!Objects.equals(groupEvent.getId(), lastEvent.getId())) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
     }
 
     /**

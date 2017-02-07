@@ -99,7 +99,7 @@ public class DoctorMessages {
     public DoctorMessageDto pagingWarnDoctorMessages(@RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                                      @RequestParam(value = "pageSize", required = false) Integer pageSize,
                                                                      @RequestParam Map<String, Object> criteria) {
-        Params.filterNullOrEmpty(criteria);
+        criteria = Params.filterNullOrEmpty(criteria);
         if (!isUserLogin()) {
             return new DoctorMessageDto(new Paging<>(0L, Collections.emptyList()),null);
         }

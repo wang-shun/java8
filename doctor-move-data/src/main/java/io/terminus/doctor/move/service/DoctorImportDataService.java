@@ -1384,6 +1384,11 @@ public class DoctorImportDataService {
                 sow.setBirthDate(ImportExcelUtils.getDate(row, 22));      //出生日期
                 sow.setRemark(ImportExcelUtils.getString(row, 23));                                     //备注
                 sow.setBreed(ImportExcelUtils.getString(row, 24));                                      //品种
+
+                if (isEmpty(sow.getBreed())) {
+                    throw new JsonResponseException("母猪品种不能为空，猪号：" + sow.getSowCode() + "，行号：" + (row.getRowNum() + 1));
+                }
+
                 sow.setWeanWeight(ImportExcelUtils.getDoubleOrDefault(row, 25, 0D));                    //断奶重
                 sow.setWeanCount(ImportExcelUtils.getIntOrDefault(row, 26, 0));                         //断奶数
                 sow.setFatherCode(ImportExcelUtils.getString(row, 27));                                 //父号

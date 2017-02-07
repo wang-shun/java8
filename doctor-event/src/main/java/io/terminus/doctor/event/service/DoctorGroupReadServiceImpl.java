@@ -22,7 +22,8 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
+import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -59,6 +60,9 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupJoinDao doctorGroupJoinDao;
+
+    @Autowired
+    private DoctorRollbackHandlerChain doctorRollbackHandlerChain;
 
     @Autowired
     public DoctorGroupReadServiceImpl(DoctorGroupDao doctorGroupDao,
@@ -347,10 +351,35 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     @Override
     public Response<DoctorGroupEvent> canRollbackEvent(@NotNull(message = "input.groupId.empty") Long groupId) {
         try {
-           return Response.ok(doctorGroupEventDao.canRollbackEvent(ImmutableMap.of("groupId", groupId, "isAuto", IsOrNot.NO.getValue())));
+            DoctorGroupEvent groupEvent = doctorGroupEventDao.findLastManualEventByGroupId(groupId);
+            if (groupEvent == null) {
+                return Response.ok(null);
+            }
+            for (DoctorRollbackGroupEventHandler handler : doctorRollbackHandlerChain.getRollbackGroupEventHandlers()) {
+                if (handler.canRollback(groupEvent)) {
+                    return Response.ok(groupEvent);
+                }
+            }
+            return Response.ok(null);
         } catch (Exception e) {
             log.error("can.rollback.event.failed, cause {}", Throwables.getStackTraceAsString(e));
             return Response.fail("can.rollback.event.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId) {
+        try {
+            DoctorGroupEvent groupEvent = doctorGroupEventDao.findById(eventId);
+            for (DoctorRollbackGroupEventHandler handler : doctorRollbackHandlerChain.getRollbackGroupEventHandlers()) {
+                if (handler.canRollback(groupEvent)) {
+                    return Response.ok(Boolean.TRUE);
+                }
+            }
+            return Response.ok(Boolean.FALSE);
+        } catch (Exception e) {
+            log.error("event.can.rollback.failed, eventId:{}, cause:{}", eventId, Throwables.getStackTraceAsString(e));
+            return Response.fail("event can rollback failed");
         }
     }
 

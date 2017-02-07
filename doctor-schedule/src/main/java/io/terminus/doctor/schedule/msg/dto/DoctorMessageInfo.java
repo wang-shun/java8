@@ -20,7 +20,16 @@ public class DoctorMessageInfo implements Serializable{
 
     private static final long serialVersionUID = 3741679960394645140L;
 
+    /**
+     * 猪号、猪群号、物料名
+     */
     private String code;
+
+    /**
+     * 仓库
+     */
+    private Long wareHouseId;
+    private String wareHouseName;
 
     /**
      * 母猪胎次
@@ -98,6 +107,12 @@ public class DoctorMessageInfo implements Serializable{
      * 记录事件发生到消息产生时的时间差
      */
     private Double timeDiff;
+
+    /**
+     * 剩余量
+     */
+    private Double lotNumber;
+
     private Long barnId;
     private String barnName;
 

@@ -1,7 +1,9 @@
 package io.terminus.doctor.schedule.msg.producer;
 
 import com.google.api.client.util.Maps;
+import com.google.common.collect.ImmutableMap;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
@@ -67,6 +69,7 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
                                 .barnName(doctorGroupDetail.getGroup().getCurrentBarnName())
                                 .businessType(DoctorMessage.BUSINESS_TYPE.GROUP.getValue())
                                 .ruleValueId(ruleValue.getId())
+                                .data(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(ImmutableMap.of("quantity", doctorGroupDetail.getGroupTrack().getQuantity())))
                                 .build();
                         createMessage(sUsers, ruleRole, messageInfo);
                     }

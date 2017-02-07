@@ -29,7 +29,9 @@ import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.web.core.export.Exporter;
+import io.terminus.doctor.web.front.event.dto.DoctorGroupEventDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupEventExportData;
+import io.terminus.doctor.web.front.event.dto.DoctorPigEventDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorPigEventExportData;
 import io.terminus.doctor.web.front.event.dto.DoctorPigEventPagingDto;
 import io.terminus.doctor.web.util.TransFromUtil;
@@ -211,7 +213,7 @@ public class DoctorPigEvents {
      */
     @RequestMapping(value = "/pigPaging", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+    public Paging<DoctorPigEventDetail> queryPigEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
         }
@@ -227,7 +229,7 @@ public class DoctorPigEvents {
         if (!pigEventPagingResponse.isSuccess()) {
             return Paging.empty();
         }
-        pigEventPagingResponse.getResult().getData().stream()
+        List<DoctorPigEventDetail> pigEventDetailList = pigEventPagingResponse.getResult().getData().stream()
                 .map(doctorPigEvent -> {
                     Map<String, Object> extraMap = MoreObjects.firstNonNull(doctorPigEvent.getExtraMap(), Maps.newHashMap());
                     if (Objects.equals(doctorPigEvent.getType(), PigEvent.MATING.getKey()) && doctorPigEvent.getExtraMap().containsKey("matingType")) {
@@ -237,9 +239,12 @@ public class DoctorPigEvents {
                         extraMap.put("checkResult", PregCheckResult.from(doctorPigEvent.getPregCheckResult()).getDesc());
                     }
                     doctorPigEvent.setExtraMap(extraMap);
-                    return doctorPigEvent;
+                    DoctorPigEventDetail detail = OBJECT_MAPPER.convertValue(doctorPigEvent, DoctorPigEventDetail.class);
+                    Boolean isRollback = RespHelper.or500(doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId()));
+                    detail.setIsRollback(isRollback);
+                    return detail;
                 }).collect(toList());
-        return pigEventPagingResponse.getResult();
+        return new Paging<>(pigEventPagingResponse.getResult().getTotal(), pigEventDetailList);
     }
 
 
@@ -333,7 +338,7 @@ public class DoctorPigEvents {
         return RespHelper.or500(doctorPigEventReadService.queryOperators(params));
     }
 
-    private Paging<DoctorGroupEvent> queryGroupEventsByCriteria( Map<String, Object> params, Integer pageNo, Integer pageSize) {
+    private Paging<DoctorGroupEventDetail> queryGroupEventsByCriteria(Map<String, Object> params, Integer pageNo, Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
         }
@@ -342,7 +347,18 @@ public class DoctorPigEvents {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
-        return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize));
+        Response<Paging<DoctorGroupEvent>> pagingResponse = doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize);
+        if (!pagingResponse.isSuccess()) {
+            return Paging.empty();
+        }
+        List<DoctorGroupEventDetail> groupEventDetailList = pagingResponse.getResult().getData().stream()
+                .map(doctorGroupEvent -> {
+                    DoctorGroupEventDetail detail = OBJECT_MAPPER.convertValue(doctorGroupEvent, DoctorGroupEventDetail.class);
+                    Boolean isRollback = RespHelper.or500(doctorGroupReadService.eventCanRollback(doctorGroupEvent.getId()));
+                    detail.setIsRollback(isRollback);
+                    return detail;
+                }).collect(toList());
+        return new Paging<>(pagingResponse.getResult().getTotal(), groupEventDetailList);
     }
 
     /**
@@ -375,9 +391,9 @@ public class DoctorPigEvents {
      */
     private Paging<DoctorPigEventExportData> pagingPigEvent(Map<String, String> pigEventCriteria) {
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
-        Paging<DoctorPigEvent> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
+        Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
         List<DoctorPigEventExportData> list = pigEventPaging.getData()
-                .stream().map(doctorPigEvent -> OBJECT_MAPPER.convertValue(doctorPigEvent, DoctorPigEventExportData.class)).collect(toList());
+                .stream().map(doctorPigEventDetail -> OBJECT_MAPPER.convertValue(doctorPigEventDetail, DoctorPigEventExportData.class)).collect(toList());
         return new Paging<>(pigEventPaging.getTotal(), list);
     }
 
@@ -388,9 +404,9 @@ public class DoctorPigEvents {
      */
     private Paging<DoctorGroupEventExportData> pagingGroupEvent(Map<String, String> groupEventCriteria) {
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(groupEventCriteria, Map.class);
-        Paging<DoctorGroupEvent> groupEventPaging = queryGroupEventsByCriteria(criteriaMap, Integer.parseInt(groupEventCriteria.get("pageNo")), Integer.parseInt(groupEventCriteria.get("size")));
+        Paging<DoctorGroupEventDetail> groupEventPaging = queryGroupEventsByCriteria(criteriaMap, Integer.parseInt(groupEventCriteria.get("pageNo")), Integer.parseInt(groupEventCriteria.get("size")));
         List<DoctorGroupEventExportData> list = groupEventPaging.getData()
-                .stream().map(doctorGroupEvent -> OBJECT_MAPPER.convertValue(doctorGroupEvent, DoctorGroupEventExportData.class)).collect(toList());
+                .stream().map(doctorGroupEventDetail -> OBJECT_MAPPER.convertValue(doctorGroupEventDetail, DoctorGroupEventExportData.class)).collect(toList());
         return new Paging<>(groupEventPaging.getTotal(), list);
     }
 }

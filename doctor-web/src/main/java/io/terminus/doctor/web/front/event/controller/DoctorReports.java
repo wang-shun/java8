@@ -124,6 +124,7 @@ public class DoctorReports {
     public Paging<DoctorGroupBatchSummary> pagingGroupBatchSummary(@RequestParam Map<String, Object> params,
                                                                    @RequestParam(required = false) Integer pageNo,
                                                                    @RequestParam(required = false) Integer pageSize) {
+        params = Params.filterNullOrEmpty(params);
         if (!params.containsKey("farmId") || params.get("farmId") == null) {
             return new Paging<>(0L, Collections.emptyList());
         }
