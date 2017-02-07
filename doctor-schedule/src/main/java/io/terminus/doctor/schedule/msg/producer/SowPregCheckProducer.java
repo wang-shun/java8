@@ -11,9 +11,11 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
@@ -77,20 +79,35 @@ public class SowPregCheckProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 母猪的updatedAt与当前时间差 (天)
-                    DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
-                    Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
-                    // 1. 妊娠检查判断 -> id:1
-                    Double ruleTimeDiff = getRuleTimeDiff(ruleValueMap.get(1), timeDiff);
-                    Boolean isSend = checkRuleValue(ruleValueMap.get(1), timeDiff);
+                    DoctorPigEvent matingPigEvent = getMatingPigEvent(pigDto);
+                    Double timeDiff = getTimeDiff(new DateTime(matingPigEvent.getEventAt()));
+
+                    RuleValue ruleValue = ruleValueMap.get(1);
+                    Double ruleTimeDiff = getRuleTimeDiff(ruleValue, timeDiff);
+                    Boolean isSend = checkRuleValue(ruleValue, timeDiff);
                     if (Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                         isSend =  isSend && !checkRuleValue(errorRule.getRule().getValues().get(0), timeDiff);
                     }else {
                         ruleTimeDiff = getRuleTimeDiff(warnRule.getRule().getValues().get(0), timeDiff);
                     }
                     if (isSend) {
-                        pigDto.setEventDate(doctorPigEvent.getEventAt());
-                        getMessage(pigDto, ruleRole, sUsers, timeDiff, ruleTimeDiff, rule.getUrl(), PigEvent.PREG_CHECK.getKey(), ruleValueMap.get(1).getId());
-
+                        DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                .code(pigDto.getPigCode())
+                                .barnId(pigDto.getBarnId())
+                                .barnName(pigDto.getBarnName())
+                                .timeDiff(timeDiff)
+                                .ruleTimeDiff(ruleTimeDiff)
+                                .reason(ruleValue.getDescribe())
+                                .eventType(PigEvent.PREG_CHECK.getKey())
+                                .eventAt(matingPigEvent.getEventAt())
+                                .ruleValueId(ruleValue.getId())
+                                .url(getPigJumpUrl(pigDto))
+                                .businessId(pigDto.getPigId())
+                                .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
+                                .status(pigDto.getStatus())
+                                .statusName(pigDto.getStatusName())
+                                .build();
+                        createMessage(sUsers, ruleRole, messageInfo);
                     }
                 } catch (Exception e) {
                     log.error("[sowPregCheckProducer]-handle.message.failed");

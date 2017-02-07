@@ -12,7 +12,9 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
@@ -75,7 +77,11 @@ public class SowBackFatProducer extends AbstractJobProducer {
                     for (Integer key : keyList) {
                         RuleValue ruleValue = ruleValueMap.get(key);
                         timeDiff = getTimeDiff(new DateTime(matingPigEvent.getEventAt()));
-                        if (key == 1 || key == 2 || key == 3) {
+                        if (key == 1){
+                            if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, new DateTime(matingPigEvent.getEventAt()), PigEvent.CONDITION)) {
+                                isSend = true;
+                            }
+                        } else if (key == 2 || key == 3) {
                             if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, new DateTime(matingPigEvent.getEventAt()).plusDays(ruleValue.getValue().intValue()), PigEvent.CONDITION)) {
                                 isSend = true;
                             }
@@ -92,10 +98,25 @@ public class SowBackFatProducer extends AbstractJobProducer {
                             }
                         }
                         if (isSend) {
-                            pigDto.setEventDate(matingPigEvent.getEventAt());
-                            pigDto.setOperatorName(matingPigEvent.getOperatorName());
-                            pigDto.setRuleValueId(key);
-                            getMessage(pigDto, ruleRole, sUsers, timeDiff, getRuleTimeDiff(ruleValue, timeDiff), rule.getUrl(), PigEvent.CONDITION.getKey(), ruleValue.getId());
+                            DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
+                                    .code(pigDto.getPigCode())
+                                    .barnId(pigDto.getBarnId())
+                                    .barnName(pigDto.getBarnName())
+                                    .timeDiff(timeDiff)
+                                    .ruleTimeDiff(getRuleTimeDiff(ruleValue, timeDiff))
+                                    .reason(ruleValue.getDescribe())
+                                    .eventAt(matingPigEvent.getEventAt())
+                                    .eventType(PigEvent.CONDITION.getKey())
+                                    .ruleValueId(ruleValue.getId())
+                                    .url(getPigJumpUrl(pigDto))
+                                    .businessId(pigDto.getPigId())
+                                    .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
+                                    .operatorId(matingPigEvent.getOperatorId())
+                                    .operatorName(matingPigEvent.getOperatorName())
+                                    .status(pigDto.getStatus())
+                                    .statusName(pigDto.getStatusName())
+                                    .build();
+                            createMessage(sUsers, ruleRole, messageInfo);
                             break;
                         }
                     }

@@ -5,12 +5,16 @@ import com.google.api.client.util.Maps;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
 import io.terminus.doctor.msg.dto.DoctorMessageUserDto;
+import io.terminus.doctor.msg.dto.DoctorSuggestBarn;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
@@ -92,43 +96,75 @@ public class DoctorMessages {
      * @return
      */
     @RequestMapping(value = "/warn/messages", method = RequestMethod.GET)
-    public DoctorMessageDto pagingWarnDoctorMessages(@RequestParam("pageNo") Integer pageNo,
-                                                                     @RequestParam("pageSize") Integer pageSize,
+    public DoctorMessageDto pagingWarnDoctorMessages(@RequestParam(value = "pageNo", required = false) Integer pageNo,
+                                                                     @RequestParam(value = "pageSize", required = false) Integer pageSize,
                                                                      @RequestParam Map<String, Object> criteria) {
-        Params.filterNullOrEmpty(criteria);
+        criteria = Params.filterNullOrEmpty(criteria);
         if (!isUserLogin()) {
             return new DoctorMessageDto(new Paging<>(0L, Collections.emptyList()),null);
         }
-
-        DoctorMessageUserDto doctorMessageUserDto = BeanMapper.map(criteria, DoctorMessageUserDto.class);
+        DoctorMessageUserDto doctorMessageUserDto = JsonMapperUtil.JSON_NON_EMPTY_MAPPER.getMapper().convertValue(criteria, DoctorMessageUserDto.class);
         doctorMessageUserDto.setUserId(UserUtil.getUserId());
-        DoctorMessageRuleTemplate template = RespHelper.or500(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(doctorMessageUserDto.getTemplateId()));
-        Paging<DoctorMessageUser> doctorMessageUserPaging = RespHelper.or500(doctorMessageUserReadService.paging(doctorMessageUserDto, pageNo, pageSize));
-        DoctorMessageDto msgDto = DoctorMessageDto.builder().build();
-        List<DoctorMessageWithUserDto> list = Lists.newArrayList();
-        if (doctorMessageUserPaging.getData() != null && doctorMessageUserPaging.getData().size() > 0) {
-            if (Objects.equals(template.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
-                msgDto.setListUrl("/group/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
-            } else if (Objects.equals(template.getCategory(), Category.STORAGE_SHORTAGE.getKey())) {
-                msgDto.setListUrl("");
-            } else if (Objects.equals(template.getCategory(), Category.PIG_VACCINATION.getKey())) {
-                msgDto.setListUrl("");
-            } else {
-                if (Objects.equals(template.getCategory(), Category.BOAR_ELIMINATE.getKey())) {
-                    msgDto.setListUrl("/boar/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
-                } else {
-                    msgDto.setListUrl("/sow/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
-                }
-            }
-            doctorMessageUserPaging.getData().forEach(doctorMessageUser -> {
-                DoctorMessage doctorMessage = RespHelper.or500(doctorMessageReadService.findMessageById(doctorMessageUser.getMessageId()));
-                list.add(new DoctorMessageWithUserDto(doctorMessage, doctorMessageUser));
-            });
+        List<DoctorMessageUser> messageUserList = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto));
+        if (Arguments.isNullOrEmpty(messageUserList)) {
+            return new DoctorMessageDto(new Paging<>(0L, Collections.emptyList()), null);
         }
-        msgDto.setPaging(new Paging<>(doctorMessageUserPaging.getTotal(), list));
+
+        List<Long> messageIds = messageUserList.stream().map(DoctorMessageUser::getMessageId).collect(Collectors.toList());
+        DoctorMessageSearchDto messageSearchDto = JsonMapperUtil.JSON_NON_EMPTY_MAPPER.getMapper().convertValue(criteria, DoctorMessageSearchDto.class);
+        messageSearchDto.setIds(messageIds);
+        messageSearchDto.setTemplateName(null);
+
+        Paging<DoctorMessage> messagePaging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(messageSearchDto, pageNo, pageSize));
+        DoctorMessageDto msgDto = new DoctorMessageDto();
+        DoctorMessageRuleTemplate template = RespHelper.or500(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(doctorMessageUserDto.getTemplateId()));
+        if (Objects.equals(template.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
+            msgDto.setListUrl("/group/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
+        } else if (Objects.equals(template.getCategory(), Category.STORAGE_SHORTAGE.getKey())) {
+            msgDto.setListUrl("");
+        } else if (Objects.equals(template.getCategory(), Category.PIG_VACCINATION.getKey())) {
+            msgDto.setListUrl("");
+        } else {
+            if (Objects.equals(template.getCategory(), Category.BOAR_ELIMINATE.getKey())) {
+                msgDto.setListUrl("/boar/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
+            } else {
+                msgDto.setListUrl("/sow/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
+            }
+        }
+        List<DoctorMessageWithUserDto> list = messagePaging.getData().stream().map(doctorMessage -> {
+            DoctorMessageUserDto messageUserDto = new DoctorMessageUserDto();
+            messageUserDto.setUserId(UserUtil.getUserId());
+            messageUserDto.setMessageId(doctorMessage.getId());
+            DoctorMessageUser messageUser = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(messageUserDto)).get(0);
+            return new DoctorMessageWithUserDto(doctorMessage, messageUser);
+        }).collect(Collectors.toList());
+        msgDto.setPaging(new Paging<>(messagePaging.getTotal(), list));
         return msgDto;
     }
 
+    /**
+     * suggest 消息中存在的猪舍
+     * @param templateId 消息模板
+     * @param farmId 猪场id
+     * @param barnName 模糊猪舍猪舍名
+     * @return
+     */
+    @RequestMapping(value = "/suggest/messageBarn", method = RequestMethod.GET)
+    public List<DoctorSuggestBarn> suggestMessageBarn(@RequestParam Long templateId, @RequestParam Long farmId, @RequestParam(required = false) String barnName){
+        DoctorMessageUserDto messageUserDto = new DoctorMessageUserDto();
+        messageUserDto.setTemplateId(templateId);
+        messageUserDto.setFarmId(farmId);
+        messageUserDto.setUserId(UserUtil.getUserId());
+        List<Long> messageIds = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(messageUserDto))
+                .stream().map(DoctorMessageUser::getMessageId).collect(Collectors.toList());
+        if (Arguments.isNullOrEmpty(messageIds)) {
+            return Collections.emptyList();
+        }
+        DoctorMessageSearchDto messageSearchDto = new DoctorMessageSearchDto();
+        messageSearchDto.setIds(messageIds);
+        messageSearchDto.setBarnName(barnName);
+        return RespHelper.or500(doctorMessageReadService.suggestMessageBarn(messageSearchDto));
+    }
     /**
      * 查询系统消息分页
      *

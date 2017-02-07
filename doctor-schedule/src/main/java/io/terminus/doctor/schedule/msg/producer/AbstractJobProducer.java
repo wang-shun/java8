@@ -1,20 +1,22 @@
 package io.terminus.doctor.schedule.msg.producer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -35,7 +37,7 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageUserWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
-import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
+import io.terminus.doctor.schedule.msg.dto.DoctorMessageInfo;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
@@ -49,7 +51,6 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -216,32 +217,25 @@ public abstract class AbstractJobProducer {
      * 创建DoctorMessage对象
      * @param subUsers 子账号(已经通过roleId过滤)
      * @param ruleRole 规则角色
-     * @param jsonData 填充数据
+     * @param messageInfo 消息信息
      */
-    protected void createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, String jsonData, Integer eventType, Long businessId, Integer businessType, Integer ruleValueId, String url) {
+    protected void createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, DoctorMessageInfo messageInfo) {
         DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
         //1.当消息无人有权限时直接返回
         if (Arguments.isNullOrEmpty(subUsers)){
             return;
         }
         //2.产生新消息
-        DoctorMessage message = DoctorMessage.builder()
-                .farmId(ruleRole.getFarmId())
-                .ruleId(ruleRole.getRuleId())
-                .roleId(ruleRole.getRoleId())
-                .templateName(template.getName())
-                .templateId(ruleRole.getTemplateId())
-                .businessId(businessId)
-                .businessType(businessType)
-                .ruleValueId(ruleValueId)
-                .messageTemplate(template.getMessageTemplate())
-                .type(template.getType())
-                .eventType(eventType)
-                .category(template.getCategory())
-                .data(jsonData)
-                .url(url)
-                .createdBy(template.getUpdatedBy())
-                .build();
+        DoctorMessage message = BeanMapper.map(messageInfo, DoctorMessage.class);
+        message.setFarmId(ruleRole.getFarmId());
+        message.setRuleId(ruleRole.getRuleId());
+        message.setRoleId(ruleRole.getRoleId());
+        message.setTemplateName(template.getName());
+        message.setTemplateId(ruleRole.getTemplateId());
+        message.setMessageTemplate(template.getMessageTemplate());
+        message.setType(template.getType());
+        message.setCategory(template.getCategory());
+        message.setCreatedBy(template.getUpdatedBy());
         // 模板编译
 //        try {
 //            Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, JacksonType.MAP_OF_STRING);
@@ -257,8 +251,8 @@ public abstract class AbstractJobProducer {
             DoctorMessageUser doctorMessageUser = DoctorMessageUser.builder()
                     .userId(subUser.getUserId())
                     .messageId(messageId)
-                    .businessId(businessId)
-                    .ruleValueId(ruleValueId)
+                    .businessId(messageInfo.getBusinessId())
+                    .ruleValueId(messageInfo.getRuleValueId())
                     .farmId(ruleRole.getFarmId())
                     .templateId(ruleRole.getTemplateId())
                     .statusSys(DoctorMessageUser.Status.NORMAL.getValue())
@@ -340,30 +334,22 @@ public abstract class AbstractJobProducer {
      * @param pigDto
      * @return
      */
-    protected DateTime getStatusDate(DoctorPigInfoDto pigDto) {
+    protected DoctorPigEvent getStatusEvent(DoctorPigInfoDto pigDto) {
         try {
             PigStatus STATUS = PigStatus.from(pigDto.getStatus());
-            DateTime dateTime = null;
-            DoctorPigEvent doctorPigEvent = null;
+            DoctorPigEvent doctorPigEvent;
             if (STATUS != null) {
                 switch (STATUS) {
-                    case Entry:// 进场
-                        doctorPigEvent = getPigEventByEventType(pigDto.getPigId(), PigEvent.ENTRY.getKey());
-                        dateTime = new DateTime(doctorPigEvent.getEventAt());
-                        break;
-                    case Wean: //断奶
-                        doctorPigEvent = getPigEventByEventType(pigDto.getPigId(), PigEvent.WEAN.getKey());
-                        dateTime = new DateTime(doctorPigEvent.getEventAt());
-                        break;
+                    case Entry:    // 进场
+                        return getPigEventByEventType(pigDto.getPigId(), PigEvent.ENTRY.getKey());
+                    case Wean:     //断奶
+                        return getPigEventByEventType(pigDto.getPigId(), PigEvent.WEAN.getKey());
                     case KongHuai: // 空怀
                         doctorPigEvent = getPigEventByEventType(pigDto.getPigId(), PigEvent.PREG_CHECK.getKey());
                         pigDto.setStatusName(PregCheckResult.from(doctorPigEvent.getPregCheckResult()).getDesc());
-                        dateTime = new DateTime(doctorPigEvent.getEventAt());
-                        break;
+                        return doctorPigEvent;
                 }
             }
-            pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-            return dateTime;
         } catch (Exception e) {
             log.error("SowPregCheckProducer get status date failed, pigDto is {}", pigDto);
         }
@@ -433,33 +419,57 @@ public abstract class AbstractJobProducer {
     }
 
     /**
+     * 获取猪的跳转url
+     * @param pigDto 主信息
+     * @return url
+     */
+    protected String getPigJumpUrl(DoctorPigInfoDto pigDto) {
+        if (Objects.equals(pigDto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
+            return sowPigDetailUrl.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + pigDto.getFarmId());
+        } else if (Objects.equals(pigDto.getPigType(), DoctorPig.PigSex.BOAR.getKey())) {
+            return boarPigDetailUrl.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + pigDto.getFarmId());
+        }
+        throw new ServiceException("pigSex.failed");
+
+    }
+
+    /**
+     * 获取猪群消息跳转url
+     * @param doctorGroupDetail 猪群信息
+     * @param ruleRole 规则信息
+     * @return url
+     */
+    protected String getGroupJumpUrl(DoctorGroupDetail doctorGroupDetail, DoctorMessageRuleRole ruleRole) {
+        return groupDetailUrl.concat("?groupId=" + doctorGroupDetail.getGroup().getId() + "&farmId=" + ruleRole.getFarmId());
+    }
+    /**
      * 获取事件发生时间与当前时间差
      * @param eventTime
      * @return Double
      */
-    protected Double getTimeDiff(DateTime eventTime) {
+    protected  Double getTimeDiff(DateTime eventTime) {
         try {
             Long timeDiff = (DateTime.now().getMillis() + 28800000) / 86400000 - (eventTime.getMillis() + 28800000) / 86400000;
-            return (double) timeDiff;
+            return timeDiff.doubleValue();
         } catch (Exception e) {
             log.error("get.timeDiff.failed, eventTime {}", eventTime);
         }
         return null;
     }
 
-    /**
-     * 创建猪消息
-     */
-    protected void getMessage(DoctorPigInfoDto pigDto, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, Double ruleTimeDiff, String url, Integer eventType, Integer ruleValueId) {
-        // 创建消息
-        String jumpUrl = url.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + ruleRole.getFarmId());
-        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, ruleTimeDiff, url);
-        try {
-            createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, pigDto.getPigId(), DoctorMessage.BUSINESS_TYPE.PIG.getValue(), ruleValueId, jumpUrl);
-        } catch (JsonProcessingException e) {
-            log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
-        }
-    }
+//    /**
+//     * 创建猪消息
+//     */
+//    protected void getMessage(DoctorPigInfoDto pigDto, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, DoctorMessageInfo messageInfo) {
+//        // 创建消息
+//        String jumpUrl = url.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + ruleRole.getFarmId());
+//        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, ruleTimeDiff, url);
+//        try {
+//            createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, pigDto.getPigId(), DoctorMessage.BUSINESS_TYPE.PIG.getValue(), ruleValueId, jumpUrl);
+//        } catch (JsonProcessingException e) {
+//            log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
+//        }
+//    }
 
     /**
      * 获取与规则时间差

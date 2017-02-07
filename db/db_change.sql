@@ -574,3 +574,24 @@ ALTER TABLE doctor_pig_tracks ADD COLUMN current_barn_type smallint(6) DEFAULT N
 
 -- 2017-01-18
 ALTER TABLE doctor_pigs ADD COLUMN boar_type SMALLINT(6) DEFAULT NULL COMMENT '公猪类型: 1 活公猪, 2 冷冻精液, 3 新鲜精液' AFTER genetic_name;
+
+-- 2017-01-20
+alter table doctor_messages add column event_at DATE default null comment '事件发生日期' after `data`;
+alter table doctor_messages add column other_at DATE default null comment '其他事件发生日期' after `event_at`;
+alter table doctor_messages add column rule_time_diff INT(11) default null comment '规则已过多少天' after other_at;
+alter table doctor_messages add column time_diff INT(11) default null comment '事件已过天数' after rule_time_diff;
+alter table doctor_messages add column barn_id bigint(20) default null comment '产生消息时猪舍id' after time_diff;
+alter table doctor_messages add column barn_name VARCHAR (64) default null comment '产生消息时猪舍名' after barn_id;
+alter table doctor_messages add column status smallint (6) default null comment '产生消息时消息对象的状态' after barn_name;
+alter table doctor_messages add column status_name VARCHAR (64) default null comment '产生消息时消息对象的状态名' after status;
+alter table doctor_messages add column operator_id bigint(20) default null comment '事件操作人id' after status_name;
+alter table doctor_messages add column operator_name VARCHAR(64) default null comment '事件操作人' after operator_id;
+alter table doctor_messages add column reason VARCHAR(64) default null comment '消息产生的原因' after operator_name;
+alter table doctor_messages add column code VARCHAR(64) default null comment '消息对象的code' after reason;
+alter table doctor_messages add column parity int(11) default null comment '母猪胎次' after code;
+
+-- 2017-02-06
+alter table doctor_messages add column ware_house_id bigint(20) default null comment '仓库id' after parity;
+alter table doctor_messages add column ware_house_name VARCHAR(64) default null comment '仓库名' after ware_house_id;
+alter table doctor_messages add column lot_number double default null comment '物料剩余量' after ware_house_name;
+

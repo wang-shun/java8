@@ -41,11 +41,10 @@ public class DoctorPigMessage implements Serializable {
     /**
      * 距离需要执行事件的天数
      */
-    private Double timeDiff;
+    private Integer timeDiff;
 
     /**
      * 猪只当前的状态
-     * @see io.terminus.doctor.event.enums.PigStatus
      */
     private Integer status;
 
