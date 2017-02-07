@@ -844,6 +844,7 @@
         SET
         `name` = #{name}
         <if test="desc != null">,`desc` = #{desc}</if>
+        <if test="extra != null">, extra = #{extra}</if>
         WHERE
         1=1
         <if test="type != null">AND `type` = #{type}</if>
