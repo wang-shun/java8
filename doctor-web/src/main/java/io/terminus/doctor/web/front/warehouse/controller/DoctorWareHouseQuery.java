@@ -7,6 +7,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
@@ -32,6 +33,7 @@ import io.terminus.doctor.basic.service.DoctorMaterialPriceInWareHouseReadServic
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.basic.service.MaterialFactoryReadService;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorMaterialDetailDto;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseCreateDto;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseUpdateDto;
 import io.terminus.doctor.web.front.warehouse.dto.MaterialReport;
@@ -51,6 +53,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -250,6 +253,37 @@ public class DoctorWareHouseQuery {
                                                              @RequestParam(value = "type", required = false) Long type,
                                                              @RequestParam(value = "srm", required = false) String srm){
         return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialsOwned(farmId, type, srm));
+    }
+
+    /**
+     * 获取物料信息列表
+     * @param farmId 猪场id
+     * @param wareHouseId 仓库id
+     * @param type
+     * @param srm
+     * @return
+     */
+    @RequestMapping(value = "/materialDetails", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DoctorMaterialDetailDto> getMaterialDetails(@RequestParam Long farmId,
+                                                            @RequestParam Long wareHouseId,
+                                                            @RequestParam(value = "type", required = false) Long type,
+                                                            @RequestParam(value = "srm", required = false) String srm){
+        Response<List<DoctorBasicMaterial>> listResponse = doctorBasicMaterialReadService.findBasicMaterialsOwned(farmId, type, srm);
+        if (!listResponse.isSuccess() || Arguments.isNullOrEmpty(listResponse.getResult())) {
+            return Collections.emptyList();
+        }
+        List<DoctorBasicMaterial> materialList = listResponse.getResult();
+        List<DoctorMaterialDetailDto> detailDtoList = Lists.newArrayList();
+        materialList.forEach(doctorBasicMaterial -> {
+            DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, doctorBasicMaterial.getId(), wareHouseId));
+            DoctorMaterialDetailDto detailDto = BeanMapper.map(doctorBasicMaterial, DoctorMaterialDetailDto.class);
+            if (materialInWareHouse != null) {
+                detailDto.setLotNumber(materialInWareHouse.getLotNumber());
+                detailDtoList.add(detailDto);
+            }
+        });
+        return detailDtoList;
     }
 
     /**
