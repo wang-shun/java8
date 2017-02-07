@@ -1,6 +1,6 @@
 export.tables:
   web-pig-event:
-    display: 事件导出
+    display: 猪事件导出
     columns:
       - name: pigCode
         display: 猪号
@@ -14,7 +14,7 @@ export.tables:
       - name: desc
         display: 事件描述
   web-group-event:
-    display: 事件导出
+    display: 猪群事件导出
     columns:
       - name: groupCode
         display: 猪群号
@@ -25,3 +25,23 @@ export.tables:
         display: 事件名称
       - name: desc
         display: 事件描述
+  web-wareHouse-event:
+    display: 仓库事件导出
+    columns:
+      - name: materialName
+        display: 物料名称
+      - name: wareHouseName
+        display: 所属仓库
+      - name: eventTime
+        display: 日期
+        formatter: isoDateFormatter
+      - name: unitName
+        display: 单位
+      - name: unitPrice
+        display: 价格
+        format: priceFormatter
+      - name: amount
+        display: 总价
+        format: priceFormatter
+      - name: providerFactoryName
+        display: 供应商
