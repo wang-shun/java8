@@ -779,6 +779,17 @@
         </foreach>
     </update>
 
+    <update id="updatePigEventExtras" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update
+            <include refid="tb"/>
+            <set>
+                extra = #{item.extra}
+            </set>
+            where id = ${item.id}
+        </foreach>
+    </update>
+
     <select id="findOperators" parameterType="map" resultMap="DoctorPigEventMap">
         SELECT distinct operator_name,  operator_id
         FROM

@@ -287,6 +287,14 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         sqlSession.update("updatePigEvents", doctorPigEvent);
     }
 
+    /**
+     * 批量更新事件extra数据(临时修改数据)
+     * @param list
+     */
+    @Deprecated
+    public void updatePigEventExtras(List<DoctorPigEvent> list) {
+        sqlSession.update(sqlId("updatePigEventExtras"), list);
+    }
     public void updatePigCode(Long pigId, String code) {
         sqlSession.update(sqlId("updatePigCode"), ImmutableMap.of("pigId", pigId, "pigCode", code));
     }

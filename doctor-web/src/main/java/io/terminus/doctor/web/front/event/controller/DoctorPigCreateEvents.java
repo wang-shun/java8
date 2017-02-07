@@ -1,12 +1,12 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.util.Maps;
-import com.google.api.client.util.Strings;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
@@ -18,6 +18,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
+import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -25,6 +26,7 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorFosterByDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
@@ -63,6 +65,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -71,8 +75,7 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.PigType.*;
-import static io.terminus.doctor.event.enums.PigEvent.CHG_FARM;
-import static io.terminus.doctor.event.enums.PigEvent.REMOVAL;
+import static io.terminus.doctor.event.enums.PigEvent.*;
 import static java.util.Objects.isNull;
 
 /**
@@ -368,9 +371,9 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Boolean createEntryEvent(@RequestParam("farmId") Long farmId,
                                  @RequestParam("doctorFarmEntryJson") String doctorFarmEntryDtoJson) {
-        BasePigEventInputDto doctorFarmEntryDto = eventInput(PigEvent.ENTRY, doctorFarmEntryDtoJson, farmId, null, null);
-        return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEntryEventInput(doctorFarmEntryDto, PigEvent.ENTRY),
-                buildBasicInputInfoDto(farmId, PigEvent.ENTRY)));
+        BasePigEventInputDto doctorFarmEntryDto = eventInput(ENTRY, doctorFarmEntryDtoJson, farmId, null, null);
+        return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEntryEventInput(doctorFarmEntryDto, ENTRY),
+                buildBasicInputInfoDto(farmId, ENTRY)));
     }
 
     @RequestMapping(value = "/createSowEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -415,7 +418,7 @@ public class DoctorPigCreateEvents {
         List<BasePigEventInputDto> inputDtoList = batchPigEventDto.getInputJsonList()
                 .stream().map(inputJson -> {
                     BasePigEventInputDto inputDto = eventInput(pigEvent, inputJson, batchPigEventDto.getFarmId(), batchPigEventDto.getPigType(), null);
-                    if (Objects.equals(pigEvent.getKey(), PigEvent.ENTRY.getKey())) {
+                    if (Objects.equals(pigEvent.getKey(), ENTRY.getKey())) {
                         return buildEntryEventInput(inputDto, pigEvent);
                     } else {
                         return buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
@@ -613,13 +616,13 @@ public class DoctorPigCreateEvents {
             int pageSize = 5000;
             while (true) {
                 Map<String, Object> map = Maps.newHashMap();
-                map.put("types", Lists.newArrayList(PigEvent.ENTRY.getKey(), PigEvent.WEAN.getKey(), PigEvent.FARROWING.getKey()));
+                map.put("types", Lists.newArrayList(ENTRY.getKey(), PigEvent.WEAN.getKey(), PigEvent.FARROWING.getKey()));
                 List<DoctorPigEvent> events = RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(map, pageNo, pageSize)).getData();
                 events.parallelStream()
                         .forEach(doctorPigEvent -> {
                             try {
                                 Map<String, String> descMap = null;
-                                if (Objects.equals(doctorPigEvent.getType(), PigEvent.ENTRY.getKey())) {
+                                if (Objects.equals(doctorPigEvent.getType(), ENTRY.getKey())) {
                                     DoctorFarmEntryDto doctorFarmEntryDto = jsonMapper.fromJson(doctorPigEvent.getExtra(), DoctorFarmEntryDto.class);
                                     descMap = doctorFarmEntryDto.descMap();
                                 }
@@ -650,5 +653,99 @@ public class DoctorPigCreateEvents {
             return Boolean.FALSE;
         }
 
+    }
+
+    @RequestMapping(value = "/fixTimeFormate", method = RequestMethod.GET)
+    @ResponseBody
+    public Boolean fixEventExtraTimeFormate() {
+        try {
+            JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonDefaultMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"));
+            JsonMapperUtil jsonMapperUtil1 = JsonMapperUtil.nonDefaultMapper();
+            Integer pageNo = 1;
+            Integer pageSize = 5000;
+            while (true) {
+                List<DoctorPigEvent> events = RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(Maps.newHashMap(), pageNo, pageSize)).getData();
+                int size = events.size();
+                events = events.stream().filter(pigEvent -> !Strings.isNullOrEmpty(pigEvent.getExtra())).collect(Collectors.toList());
+                List<DoctorPigEvent> updateEvents = Lists.newArrayList();
+                events.parallelStream().forEach(pigEvent -> {
+                    Class clazz = null;
+                    switch (PigEvent.from(pigEvent.getType())) {
+                        case ENTRY:
+                            clazz = DoctorFarmEntryDto.class;
+                            break;
+                        case CHG_FARM:
+                            clazz = DoctorChgFarmDto.class;
+                            break;
+                        case CHG_LOCATION:
+                            clazz = DoctorChgLocationDto.class;
+                            break;
+                        case CONDITION:
+                            if (Objects.equals(pigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())){
+                                clazz = DoctorConditionDto.class;
+                            } else {
+                                clazz = DoctorBoarConditionDto.class;
+                            }
+                            break;
+                        case DISEASE:
+                            clazz = DoctorDiseaseDto.class;
+                            break;
+                        case VACCINATION:
+                            clazz = DoctorVaccinationDto.class;
+                            break;
+                        case REMOVAL:
+                            clazz = DoctorRemovalDto.class;
+                            break;
+                        case SEMEN:
+                            clazz = DoctorSemenDto.class;
+                            break;
+                        case MATING:
+                            clazz = DoctorMatingDto.class;
+                            break;
+                        case PREG_CHECK:
+                            clazz = DoctorPregChkResultDto.class;
+                            break;
+                        case TO_PREG:
+                        case TO_MATING:
+                        case TO_FARROWING:
+                            clazz = DoctorChgLocationDto.class;
+                            break;
+                        case FARROWING:
+                            clazz = DoctorFarrowingDto.class;
+                            break;
+                        case WEAN:
+                            clazz = DoctorWeanDto.class;
+                            break;
+                        case FOSTERS:
+                            clazz = DoctorFostersDto.class;
+                            break;
+                        case FOSTERS_BY:
+                            clazz = DoctorFosterByDto.class;
+                            break;
+                        case PIGLETS_CHG:
+                            clazz = DoctorPigletsChgDto.class;
+                            break;
+                    }
+                    try {
+                        jsonMapperUtil1.getMapper().readValue(pigEvent.getExtra(), clazz);
+                    } catch (IOException e) {
+                        DoctorPigEvent updateEvent = new DoctorPigEvent();
+                        updateEvent.setId(pigEvent.getId());
+                        updateEvent.setExtra(jsonMapperUtil1.toJson(jsonMapperUtil.fromJson(pigEvent.getExtra(), clazz)));
+                        RespHelper.or500(doctorPigEventWriteService.updatePigEvent(updateEvent));
+                    } catch (Exception e) {
+                        log.error("id:{}, cause:{}", pigEvent.getId(), Throwables.getStackTraceAsString(e));
+                    }
+                });
+                if (size < pageSize) {
+                    break;
+                }
+                pageNo++;
+            }
+        } catch (Exception e) {
+            log.error("fix extra time formate error, cause:{}", Throwables.getStackTraceAsString(e));
+            return false;
+        }
+        return true;
     }
 }
