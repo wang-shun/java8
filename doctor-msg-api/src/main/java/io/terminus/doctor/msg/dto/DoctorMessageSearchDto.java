@@ -40,6 +40,10 @@ public class DoctorMessageSearchDto extends DoctorMessage {
 
     private String otherEndAt;
 
+    private String sortBy;
+
+    private String desc;
+
     public void setStatuses(String statuses) {
         if (!Strings.isNullOrEmpty(statuses)) {
             this.statuses = statuses;
