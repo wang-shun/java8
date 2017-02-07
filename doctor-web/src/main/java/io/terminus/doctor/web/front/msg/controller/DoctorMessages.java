@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.msg.controller;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
 import com.google.common.base.Preconditions;
@@ -113,6 +114,12 @@ public class DoctorMessages {
         List<Long> messageIds = messageUserList.stream().map(DoctorMessageUser::getMessageId).collect(Collectors.toList());
         DoctorMessageSearchDto messageSearchDto = JsonMapperUtil.JSON_NON_EMPTY_MAPPER.getMapper().convertValue(criteria, DoctorMessageSearchDto.class);
         messageSearchDto.setIds(messageIds);
+        if (Strings.isNullOrEmpty(messageSearchDto.getSortBy())) {
+            messageSearchDto.setSortBy("time_diff");
+        }
+        if (Strings.isNullOrEmpty(messageSearchDto.getDesc())) {
+            messageSearchDto.setDesc("desc");
+        }
         messageSearchDto.setTemplateName(null);
 
         Paging<DoctorMessage> messagePaging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(messageSearchDto, pageNo, pageSize));
