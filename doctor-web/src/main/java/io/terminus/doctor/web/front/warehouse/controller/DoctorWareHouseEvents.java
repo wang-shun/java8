@@ -379,7 +379,7 @@ public class DoctorWareHouseEvents {
         List<DoctorMaterialConsumeProviderDto> dtoList = inputDtoList.stream().map(inputDto -> {
             DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(inputDto.getFarmId(), inputDto.getMaterialId(), inputDto.getWarehouseId()));
             DoctorConsumeProviderInputDto dto = DoctorConsumeProviderInputDto.builder()
-                    .farmId(inputDto.getFarmId()).wareHouseId(inputDto.getWarehouseId()).materialId(inputDto.getMaterialId())
+                    .farmId(inputDto.getFarmId()).wareHouseId(inputDto.getWareHouseId()).materialId(inputDto.getMaterialId())
                     .eventAt(inputDto.getEventAt() == null ? new Date() : DateUtil.toDate(inputDto.getEventAt()))
                     .build();
             Double count = inputDto.getCount();

@@ -13,7 +13,7 @@ public class DoctorInventoryInputDto implements Serializable{
     private static final long serialVersionUID = -1695708159501143707L;
 
     private Long farmId;
-    private Long warehouseId;
+    private Long wareHouseId;
     private Long materialId;
     private Double count;
     private String eventAt;
