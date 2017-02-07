@@ -205,7 +205,14 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        order by `id` desc -- 最新
+        <if test="sortBy != null">
+            <if test="desc != null">
+                ORDER BY ${sortBy} ${desc}
+            </if>
+        </if>
+        <if test="sortBy == null">
+            order by `id` desc -- 最新
+        </if>
         LIMIT #{offset}, #{limit}
     </select>
 
