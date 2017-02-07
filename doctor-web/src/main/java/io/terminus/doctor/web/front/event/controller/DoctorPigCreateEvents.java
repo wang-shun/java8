@@ -731,8 +731,9 @@ public class DoctorPigCreateEvents {
                     } catch (IOException e) {
                         DoctorPigEvent updateEvent = new DoctorPigEvent();
                         updateEvent.setId(pigEvent.getId());
+                        updateEvent.setName(pigEvent.getName());
                         updateEvent.setExtra(jsonMapperUtil1.toJson(jsonMapperUtil.fromJson(pigEvent.getExtra(), clazz)));
-                        RespHelper.or500(doctorPigEventWriteService.updatePigEvent(updateEvent));
+                        RespHelper.or500(doctorPigEventWriteService.updatePigEvents(updateEvent));
                     } catch (Exception e) {
                         log.error("id:{}, cause:{}", pigEvent.getId(), Throwables.getStackTraceAsString(e));
                     }

@@ -37,13 +37,6 @@ public interface DoctorPigEventWriteService {
     Response<Boolean> updatePigEvent(DoctorPigEvent doctorPigEvent);
 
     /**
-     * 批量更新事件
-     * @param doctorPigEventList
-     * @return
-     */
-    Response<Boolean> updates(List<DoctorPigEvent> doctorPigEventList);
-
-    /**
      * 猪事件接口
      * @param inputDto
      * @param basic

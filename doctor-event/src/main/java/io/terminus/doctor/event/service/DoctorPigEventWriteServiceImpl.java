@@ -104,15 +104,4 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             return Response.fail("update.pig.event.failed");
         }
     }
-
-    @Override
-    public Response<Boolean> updates(List<DoctorPigEvent> doctorPigEventList) {
-        try {
-            doctorPigEventDao.updatePigEventExtras(doctorPigEventList);
-            return Response.ok(Boolean.TRUE);
-        } catch (Exception e) {
-            log.error("updates.pig.event.failed, event:{}, cause:{}", doctorPigEventList, Throwables.getStackTraceAsString(e));
-            return Response.fail("updates.pig.event.failed");
-        }
-    }
 }
