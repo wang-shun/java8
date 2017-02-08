@@ -21,7 +21,7 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.enums.SmsCodeType;
 import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.user.util.DoctorUserMaker;
+import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.enums.MobileDeviceType;
@@ -94,6 +94,8 @@ public class DoctorCommonSessionBean {
     private CoreEventDispatcher coreEventDispatcher;
     @Autowired
     private DeviceReadService deviceReadService;
+    @Autowired
+    private DoctorUserMaker doctorUserMaker;
 
     public DoctorCommonSessionBean() {
         String hostIp;
@@ -236,7 +238,7 @@ public class DoctorCommonSessionBean {
         // 校验手机验证码
         validateSmsCode(code, mobile, sessionId);
         User user = registerByMobile(mobile, password, null);
-        coreEventDispatcher.publish(new RegisterEvent(null, null, DoctorUserMaker.from(user)));
+        coreEventDispatcher.publish(new RegisterEvent(null, null, doctorUserMaker.from(user)));
         return user.getId();
     }
 
