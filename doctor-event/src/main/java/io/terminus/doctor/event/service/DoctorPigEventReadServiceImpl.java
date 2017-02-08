@@ -19,6 +19,7 @@ import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.dto.DoctorSuggestPig;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
+import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
@@ -230,7 +231,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     }
 
     @Override
-    public Response<List<DoctorPigEvent>> queryOperators(Map<String, Object> criteria) {
+    public Response<List<DoctorEventOperator>> queryOperators(Map<String, Object> criteria) {
         try {
             return Response.ok(doctorPigEventDao.findOperators(criteria));
         } catch (Exception e) {
