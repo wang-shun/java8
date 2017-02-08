@@ -8,14 +8,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.user.util.DoctorUserMaker;
+import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.Constants;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.engine.common.WebUtil;
 import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
-import io.terminus.session.AFSessionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,17 +34,17 @@ import java.util.concurrent.TimeUnit;
 public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
 
     private final LoadingCache<Long, Response<User>> userCache;
-    private final AFSessionManager sessionManager;
+    private final DoctorUserMaker doctorUserMaker;
 
     @Autowired
-    public DoctorLoginInterceptor(final UserReadService<User> userReadService, AFSessionManager sessionManager) {
+    public DoctorLoginInterceptor(final UserReadService<User> userReadService, DoctorUserMaker doctorUserMaker) {
         userCache = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.MINUTES).maximumSize(10000).build(new CacheLoader<Long, Response<User>>() {
             @Override
             public Response<User> load(Long userId) throws Exception {
                 return userReadService.findById(userId);
             }
         });
-        this.sessionManager = sessionManager;
+        this.doctorUserMaker = doctorUserMaker;
     }
 
     @Override
@@ -66,7 +65,7 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
                 }
                 User user = result.getResult();
                 if (user != null) {
-                    ParanaUser paranaUser = DoctorUserMaker.from(user);
+                    ParanaUser paranaUser = doctorUserMaker.from(user);
                     UserUtil.putCurrentUser(paranaUser);
                 }
             }

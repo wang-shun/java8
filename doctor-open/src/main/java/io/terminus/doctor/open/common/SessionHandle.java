@@ -1,7 +1,7 @@
 package io.terminus.doctor.open.common;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.user.util.DoctorUserMaker;
+import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.login.Sessions;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenParamHandler;
@@ -45,6 +45,8 @@ public class SessionHandle implements ParamPreHandle {
     private AFSessionManager sessionManager;
     @Autowired
     private UserReadService<User> userReadService;
+    @Autowired
+    private DoctorUserMaker doctorUserMaker;
 
     /**
      * check params before calling
@@ -73,7 +75,7 @@ public class SessionHandle implements ParamPreHandle {
             throw new OPClientException(400, res.getError());
         }
 
-        ParanaUser paranaUser = DoctorUserMaker.from(res.getResult());
+        ParanaUser paranaUser = doctorUserMaker.from(res.getResult());
         UserUtil.putCurrentUser(paranaUser);
     }
 
