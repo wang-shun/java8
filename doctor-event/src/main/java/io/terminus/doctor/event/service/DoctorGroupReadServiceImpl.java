@@ -21,6 +21,7 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
@@ -408,6 +409,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("query.fatten.out.by.sumAt.failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query fatten out by sumAt failed");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorEventOperator>> queryOperators(Map<String, Object> criteria) {
+        try {
+            return Response.ok(doctorGroupEventDao.findOperators(criteria));
+        } catch (Exception e) {
+            log.error("query.Operator.failed, cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.Operator.failed");
         }
     }
 }

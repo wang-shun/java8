@@ -3,10 +3,12 @@ package io.terminus.doctor.web.admin.job.msg.producer;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
@@ -121,6 +123,12 @@ public class SowBreedingProducer extends AbstractJobProducer {
                                 .status(pigDto.getStatus())
                                 .statusName(pigDto.getStatusName())
                                 .build();
+                        if (Objects.equals(pigDto.getStatus(), PigStatus.KongHuai.getKey())) {
+                            DoctorPigTrack doctorPigTrack = RespHelper.orServEx(doctorPigReadService.findPigTrackByPigId(pigDto.getPigId()));
+                            KongHuaiPregCheckResult checkResult = KongHuaiPregCheckResult.from((int)doctorPigTrack.getExtraMap().get("pregCheckResult"));
+                            messageInfo.setStatus(checkResult.getKey());
+                            messageInfo.setStatusName(checkResult.getName());
+                        }
                         createMessage(sUsers, ruleRole, messageInfo);
                     }
                 } catch (Exception e) {

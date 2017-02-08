@@ -2,9 +2,11 @@ package io.terminus.doctor.basic.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.basic.dto.DoctorMoveMaterialDto;
 import io.terminus.doctor.basic.model.DoctorMaterialInWareHouse;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Created by yaoqijun.
@@ -23,6 +25,13 @@ public interface DoctorMaterialInWareHouseWriteService {
     Response<Long> consumeMaterialInfo(@NotNull(message = "input.dto.empty") DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto);
 
     /**
+     * 批量出库
+     * @param doctorMaterialConsumeProviderDtoList
+     * @return
+     */
+    Response<Boolean> batchConsumeMaterialInfo(List<DoctorMaterialConsumeProviderDto> doctorMaterialConsumeProviderDtoList);
+
+    /**
      * 用户录入生产数量信息
      * @param doctorMaterialConsumeProviderDto
      * @return
@@ -30,10 +39,31 @@ public interface DoctorMaterialInWareHouseWriteService {
     Response<Long> providerMaterialInfo(@NotNull(message = "input.dto.empty") DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto);
 
     /**
+     * 批量入库
+     * @param doctorMaterialConsumeProviderDtoList
+     * @return
+     */
+    Response<Boolean> batchProviderMaterialInfo(List<DoctorMaterialConsumeProviderDto> doctorMaterialConsumeProviderDtoList);
+
+    /**
      * 仓库间物资转移, 即调拨
      * @return
      */
-    Response moveMaterial(DoctorMaterialConsumeProviderDto diaochuDto, DoctorMaterialConsumeProviderDto diaoruDto);
+    Response moveMaterial(DoctorMoveMaterialDto dto);
+
+    /**
+     * 批量调拨
+     * @param dtoList
+     * @return
+     */
+    Response<Boolean> batchMoveMaterial(List<DoctorMoveMaterialDto> dtoList);
+
+    /**
+     * 批量盘点
+     * @param dtoList
+     * @return
+     */
+    Response<Boolean> batchInventory(List<DoctorMaterialConsumeProviderDto> dtoList);
 
     /**
      * 删除对应的仓库中某种物料信息

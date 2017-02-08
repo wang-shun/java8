@@ -7,32 +7,38 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
-import io.terminus.doctor.basic.model.DoctorBasicMaterial;
-import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
-import io.terminus.doctor.common.enums.WareHouseType;
-import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.basic.dto.BarnConsumeMaterialReport;
 import io.terminus.doctor.basic.dto.DoctorWareHouseDto;
 import io.terminus.doctor.basic.dto.MaterialCountAmount;
 import io.terminus.doctor.basic.dto.WarehouseEventReport;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.basic.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.MaterialFactory;
+import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.basic.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.basic.service.DoctorMaterialPriceInWareHouseReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.basic.service.MaterialFactoryReadService;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorMaterialDetailDto;
+import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.common.util.JsonMapperUtil;
+import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorUserProfileReadService;
+import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseCreateDto;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseEventCriteria;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseEventData;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseUpdateDto;
 import io.terminus.doctor.web.front.warehouse.dto.MaterialReport;
 import io.terminus.doctor.web.front.warehouse.dto.WarehouseReport;
@@ -51,6 +57,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Collections;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +101,8 @@ public class DoctorWareHouseQuery {
     private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
     @RpcConsumer
     private MaterialFactoryReadService materialFactoryReadService;
+    @Autowired
+    private Exporter exporter;
 
     @Autowired
     public DoctorWareHouseQuery(DoctorWareHouseReadService doctorWareHouseReadService,
@@ -118,9 +130,23 @@ public class DoctorWareHouseQuery {
     @ResponseBody
     public Paging<DoctorWareHouseDto> pagingDoctorWareHouseDto(@RequestParam("farmId") Long farmId,
                                                                @RequestParam(value = "type", required = false) Integer type,
+
                                                                @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize){
         return RespHelper.or500(doctorWareHouseReadService.queryDoctorWarehouseDto(farmId, type, pageNo, pageSize));
+    }
+
+    /**
+     * 获取猪场下的所有仓库
+     * @param farmId 猪场id
+     * @param type
+     * @return
+     */
+    @RequestMapping(value = "/queryAllDoctorWareHouseDto", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Paging<DoctorWareHouseDto> queryAllDoctorWareHouseDto(@RequestParam("farmId") Long farmId,
+                                                               @RequestParam(value = "type", required = false) Integer type) {
+        return RespHelper.or500(doctorWareHouseReadService.queryDoctorWarehouseDto(farmId, type, 1, Integer.MAX_VALUE));
     }
 
     @RequestMapping(value = "/listDoctorWareHouseDto", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -239,6 +265,37 @@ public class DoctorWareHouseQuery {
     }
 
     /**
+     * 获取物料信息列表
+     * @param farmId 猪场id
+     * @param wareHouseId 仓库id
+     * @param type
+     * @param srm
+     * @return
+     */
+    @RequestMapping(value = "/materialDetails", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DoctorMaterialDetailDto> getMaterialDetails(@RequestParam Long farmId,
+                                                            @RequestParam Long wareHouseId,
+                                                            @RequestParam(value = "type", required = false) Long type,
+                                                            @RequestParam(value = "srm", required = false) String srm){
+        Response<List<DoctorBasicMaterial>> listResponse = doctorBasicMaterialReadService.findBasicMaterialsOwned(farmId, type, srm);
+        if (!listResponse.isSuccess() || Arguments.isNullOrEmpty(listResponse.getResult())) {
+            return Collections.emptyList();
+        }
+        List<DoctorBasicMaterial> materialList = listResponse.getResult();
+        List<DoctorMaterialDetailDto> detailDtoList = Lists.newArrayList();
+        materialList.forEach(doctorBasicMaterial -> {
+            DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, doctorBasicMaterial.getId(), wareHouseId));
+            DoctorMaterialDetailDto detailDto = BeanMapper.map(doctorBasicMaterial, DoctorMaterialDetailDto.class);
+            if (materialInWareHouse != null) {
+                detailDto.setLotNumber(materialInWareHouse.getLotNumber());
+                detailDtoList.add(detailDto);
+            }
+        });
+        return detailDtoList;
+    }
+
+    /**
      * 分页查询仓库历史出入记录
      * @param farmId 猪场id , 必传
      * @param warehouseId 仓库id
@@ -274,6 +331,42 @@ public class DoctorWareHouseQuery {
         }
         return RespHelper.or500(doctorMaterialConsumeProviderReadService.page(farmId, warehouseId, materialId, eventType, types,
                 materilaType, staffId, startAt, endAt, pageNo, size));
+    }
+
+    /**
+     * 仓库事件导出
+     * @param criteria
+     */
+    @RequestMapping(value = "/export", method = RequestMethod.GET)
+    @ResponseBody
+    public void exportWareHouseEvent(@Valid DoctorWareHouseEventCriteria criteria,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
+        try {
+            exporter.export("web-wareHouse-event", JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.getMapper().convertValue(criteria, Map.class), 1, 200, this::pagingExportData ,request, response);
+        } catch (Exception e) {
+            log.error("ware.house.event.export.failed, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException("ware.house.event.export.fail");
+        }
+    }
+
+    public Paging<DoctorWareHouseEventData> pagingExportData(Map<String, String> wareHouseEventCriteriaMap) {
+        DoctorWareHouseEventCriteria criteria = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.getMapper().convertValue(wareHouseEventCriteriaMap, DoctorWareHouseEventCriteria.class);
+        Response<Paging<DoctorMaterialConsumeProvider>> pagingResponse =  doctorMaterialConsumeProviderReadService.page(criteria.getFarmId(), criteria.getWarehouseId(), criteria.getMaterialId(), criteria.getEventType(), criteria.getTypes(),
+                criteria.getMaterilaType(), criteria.getStaffId(), criteria.getStartAt(), criteria.getEndAt(), Integer.parseInt(wareHouseEventCriteriaMap.get("pageNo")), Integer.parseInt(wareHouseEventCriteriaMap.get("size")));
+        if (!pagingResponse.isSuccess() || Arguments.isNullOrEmpty(pagingResponse.getResult().getData())) {
+            return Paging.empty();
+        }
+        List<DoctorWareHouseEventData> dataList = pagingResponse.getResult().getData().stream().map(provide ->{
+            DoctorWareHouseEventData data = BeanMapper.map(provide, DoctorWareHouseEventData.class);
+            Response<DoctorBasicMaterial> basicMaterialResponse = doctorBasicMaterialReadService.findBasicMaterialById(provide.getMaterialId());
+            if (basicMaterialResponse.isSuccess()) {
+                data.setUnitName(basicMaterialResponse.getResult().getUnitName());
+            }
+            data.setAmount(provide.getUnitPrice()*provide.getEventCount());
+            return data;
+        }).collect(Collectors.toList());
+        return new Paging<>(pagingResponse.getResult().getTotal(), dataList);
     }
 
     /**
