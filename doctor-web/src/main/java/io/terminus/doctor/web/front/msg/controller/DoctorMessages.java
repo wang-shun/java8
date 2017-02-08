@@ -212,18 +212,23 @@ public class DoctorMessages {
      * @return
      */
     @RequestMapping(value = "/message/detail", method = RequestMethod.GET)
-    public void findMessageDetail(@RequestParam("id") Long id) {
-        DoctorMessageUserDto doctorMessageUserDto = new DoctorMessageUserDto();
-        doctorMessageUserDto.setUserId(UserUtil.getUserId());
-        doctorMessageUserDto.setMessageId(id);
-        Response<List<DoctorMessageUser>> listResponse = doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto);
-        if (!listResponse.isSuccess() || Arguments.isNullOrEmpty(listResponse.getResult())) {
+    public Boolean findMessageDetail(@RequestParam("id") Long id) {
+        try {
+            DoctorMessageUserDto doctorMessageUserDto = new DoctorMessageUserDto();
+            doctorMessageUserDto.setUserId(UserUtil.getUserId());
+            doctorMessageUserDto.setMessageId(id);
+            Response<List<DoctorMessageUser>> listResponse = doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto);
+            if (!listResponse.isSuccess() || Arguments.isNullOrEmpty(listResponse.getResult())) {
+                return Boolean.FALSE;
+            }
+            DoctorMessageUser doctorMessageUser = listResponse.getResult().get(0);
+            // 如果消息是未读, 将消息设置为已读
+            doctorMessageUser.setStatusSys(DoctorMessageUser.Status.READED.getValue());
+            doctorMessageUserWriteService.updateDoctorMessageUser(doctorMessageUser);
+            return Boolean.TRUE;
+        } catch (Exception e) {
             throw new JsonResponseException("find.message.detail.failed");
         }
-        DoctorMessageUser doctorMessageUser = listResponse.getResult().get(0);
-        // 如果消息是未读, 将消息设置为已读
-        doctorMessageUser.setStatusSys(DoctorMessageUser.Status.READED.getValue());
-        doctorMessageUserWriteService.updateDoctorMessageUser(doctorMessageUser);
     }
 
     /**
