@@ -3,11 +3,9 @@ package io.terminus.doctor.web.admin.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.event.service.DoctorBarnWriteService;
+import io.terminus.doctor.basic.service.DoctorWareHouseTypeWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.basic.service.DoctorWareHouseTypeWriteService;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
@@ -22,13 +20,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class DoctorInitBarnService {
-
-    @RpcConsumer
-    private DoctorBarnWriteService doctorBarnWriteService;
-
-    @RpcConsumer
-    private DoctorBarnReadService doctorBarnReadService;
-
     @RpcConsumer
     private DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
 
@@ -45,17 +36,6 @@ public class DoctorInitBarnService {
         try {
             Response<User> response = doctorUserReadService.findById(userId);
             String userName = RespHelper.orServEx(response).getName();
-
-            /*or500(doctorBarnReadService.findBarnsByFarmId(0L)).forEach(barn -> {
-                barn.setFarmId(farm.getId());
-                barn.setFarmName(farm.getName());
-                barn.setOrgId(farm.getOrgId());
-                barn.setOrgName(farm.getOrgName());
-                barn.setStaffId(userId);
-                Long barnId = or500(doctorBarnWriteService.createBarn(barn));
-                doctorBarnWriteService.publistBarnEvent(barnId);
-                log.info("init barn info, barn:{}", barn);
-            });*/
             doctorWareHouseTypeWriteService.initDoctorWareHouseType(farm.getId(), farm.getName(), userId, userName);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {

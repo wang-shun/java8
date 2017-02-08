@@ -20,7 +20,6 @@
         <module>doctor-msg-api</module>
         <module>doctor-msg</module>
         <module>doctor-open</module>
-        <module>doctor-schedule</module>
         <module>doctor-common</module>
         <module>integration-tests</module>
         <module>doctor-move-data</module>
@@ -321,12 +320,6 @@
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-open</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-schedule</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
 
