@@ -779,11 +779,11 @@
         </foreach>
     </update>
 
-    <select id="findOperators" parameterType="map" resultMap="DoctorPigEventMap">
-        SELECT distinct operator_name,  operator_id
+    <select id="findOperators" parameterType="map" resultType="io.terminus.doctor.event.dto.event.DoctorEventOperator">
+        SELECT distinct operator_name AS operatorName,  operator_id AS operatorId
         FROM
         <include refid="tb"/>
-        WHERE operator_name IS NOT NULL
+        WHERE operator_id IS NOT NULL
         <if test="types != null &amp;&amp; types.size() > 0">
             AND `type` IN
             <foreach collection="types" item="i" open="(" close=")" separator=",">

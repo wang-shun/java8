@@ -405,4 +405,18 @@
         </where>
         order by event_at desc ,id DESC limit 1;
     </select>
+
+    <select id="findOperators" parameterType="map" resultType="io.terminus.doctor.event.dto.event.DoctorEventOperator">
+        SELECT distinct creator_name AS operatorName,  creator_id AS operatorId
+        FROM
+        <include refid="tb"/>
+        WHERE creator_id IS NOT NULL
+        <if test="types != null &amp;&amp; types.size() > 0">
+            AND `type` IN
+            <foreach collection="types" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
+        <if test="farmId != null">AND `farm_id` = #{farmId}</if>
+    </select>
 </mapper>
