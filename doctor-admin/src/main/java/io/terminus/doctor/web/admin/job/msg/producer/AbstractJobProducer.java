@@ -92,13 +92,13 @@ public abstract class AbstractJobProducer {
     @Autowired
     private PrimaryUserReadService primaryUserReadService;
 
-    @Value("${msg.jumpUrl.pig.sow: }")
+    @Value("${msg.jumpUrl.pig.sow}")
     protected String sowPigDetailUrl;
 
-    @Value("${msg.jumpUrl.pig.boar: }")
+    @Value("${msg.jumpUrl.pig.boar}")
     protected String boarPigDetailUrl;
 
-    @Value("${msg.jumpUrl.group: }")
+    @Value("${msg.jumpUrl.group}")
     protected String groupDetailUrl;
 
     protected Category category;
