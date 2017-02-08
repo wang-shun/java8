@@ -22,10 +22,11 @@ import io.terminus.doctor.msg.enums.SmsCodeType;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorRoleContent;
 import io.terminus.doctor.user.model.DoctorServiceReview;
+import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
-import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
+import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.DoctorUserRoleLoader;
@@ -91,7 +92,7 @@ public class Users {
     @RpcConsumer
     private DoctorUserRoleLoader doctorUserRoleLoader;
     @RpcConsumer
-    private DoctorServiceReviewReadService doctorServiceReviewReadService;
+    private DoctorServiceStatusReadService doctorServiceStatusReadService;
 
     @Autowired
     public Users(UserWriteService<User> userWriteService,
@@ -143,9 +144,9 @@ public class Users {
         UserWithServiceStatus uss = BeanMapper.map(userResponse.getResult(), UserWithServiceStatus.class);
 
         //设置下猪场软件服务的审核状态  0 未申请, 2 待审核(已提交申请), 1 通过，-1 不通过, -2 冻结申请资格
-        Response<DoctorServiceReview> response = doctorServiceReviewReadService.findServiceReviewByUserIdAndType(uss.getId(), DoctorServiceReview.Type.PIG_DOCTOR);
+        Response<DoctorServiceStatus> response = doctorServiceStatusReadService.findByUserId(uss.getId());
         if (response.isSuccess() && response.getResult() != null) {
-            uss.setReviewStatusDoctor(response.getResult().getStatus());
+            uss.setReviewStatusDoctor(response.getResult().getPigdoctorReviewStatus());
         }
         return uss;
     }
