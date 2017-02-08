@@ -40,7 +40,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @ComponentScan(basePackages = {
         "io.terminus.doctor.web.core.component",
         "io.terminus.doctor.web.core.events",
-        "io.terminus.doctor.web.admin.jobs",
+        "io.terminus.doctor.web.admin",
 }, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
                 JsonExceptionResolver.class,
