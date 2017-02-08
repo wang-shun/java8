@@ -61,7 +61,10 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
 
         doctorPigEvent.setChangeTypeId(removalDto.getChgTypeId());   //变动类型id
         doctorPigEvent.setPrice(removalDto.getPrice());      //销售单价(分)
-        doctorPigEvent.setAmount(removalDto.getSum());       //销售总额(分)
+
+        if (removalDto.getWeight() != null && removalDto.getPrice() != null) {
+            doctorPigEvent.setAmount((long) (removalDto.getPrice() * removalDto.getWeight()));       //销售总额(分)
+        }
 
         if (Objects.equals(removalDto.getChgTypeId(), DoctorBasicEnums.DEAD.getId()) || Objects.equals(removalDto.getChgTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
             //如果是死亡 或者淘汰,查找最近一次配种事件
