@@ -6,12 +6,15 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.basic.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.basic.dto.DoctorMoveMaterialDto;
 import io.terminus.doctor.basic.manager.MaterialInWareHouseManager;
 import io.terminus.doctor.basic.model.DoctorMaterialInWareHouse;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Created by yaoqijun.
@@ -74,6 +77,19 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
         }
     }
 
+    @Override
+    public Response<Boolean> batchConsumeMaterialInfo(List<DoctorMaterialConsumeProviderDto> doctorMaterialConsumeProviderDtoList) {
+        try {
+            materialInWareHouseManager.batchConsumeMaterial(doctorMaterialConsumeProviderDtoList);
+            return Response.ok(Boolean.TRUE);
+        }catch (IllegalStateException se){
+            log.warn("illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
+            return Response.fail(se.getMessage());
+        }catch (Exception e){
+            log.error("batch consume material fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("batch.consume.material.fail");
+        }
+    }
 
     @Override
     public Response<Long> providerMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
@@ -89,15 +105,56 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
     }
 
     @Override
-    public Response moveMaterial(DoctorMaterialConsumeProviderDto diaochuDto, DoctorMaterialConsumeProviderDto diaoruDto){
+    public Response<Boolean> batchProviderMaterialInfo(List<DoctorMaterialConsumeProviderDto> doctorMaterialConsumeProviderDtoList) {
         try{
-            materialInWareHouseManager.moveMaterial(diaochuDto, diaoruDto);
+            materialInWareHouseManager.batchProviderMaterialInWareHouse(doctorMaterialConsumeProviderDtoList);
+            return Response.ok(Boolean.TRUE);
+        }catch (IllegalStateException | ServiceException se){
+            log.warn("batch provider illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
+            return Response.fail(se.getMessage());
+        }catch (Exception e){
+            log.error("batch provider material info fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("batch.provider.materialInfo.fail");
+        }
+    }
+
+    @Override
+    public Response moveMaterial(DoctorMoveMaterialDto dto){
+        try{
+            materialInWareHouseManager.moveMaterial(dto);
             return Response.ok();
         }catch(RuntimeException e){
             return Response.fail(e.getMessage());
         }catch(Exception e){
             log.error("move material fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("move.material.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> batchMoveMaterial(List<DoctorMoveMaterialDto> dtoList) {
+        try{
+            materialInWareHouseManager.batchMoveMaterial(dtoList);
+            return Response.ok(Boolean.TRUE);
+        }catch(RuntimeException e){
+            return Response.fail(e.getMessage());
+        }catch(Exception e){
+            log.error("batch move material fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("batch.move.material.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> batchInventory(List<DoctorMaterialConsumeProviderDto> dtoList) {
+        try {
+            materialInWareHouseManager.batchInventory(dtoList);
+            return Response.ok(Boolean.TRUE);
+        }catch (IllegalStateException | ServiceException se){
+            log.warn("batch inventory illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
+            return Response.fail(se.getMessage());
+        }catch (Exception e){
+            log.error("batch inventory fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("batch.inventory.fail");
         }
     }
 

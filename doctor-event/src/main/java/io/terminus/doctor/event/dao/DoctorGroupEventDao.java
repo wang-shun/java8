@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.springframework.stereotype.Repository;
 
@@ -112,5 +113,14 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      */
     public DoctorGroupEvent canRollbackEvent(Map<String, Object> criteria){
         return getSqlSession().selectOne(sqlId("canRollbackEvent"), criteria);
+    }
+
+    /**
+     *根据条件查询操作人列表
+     * @param criteria
+     * @return
+     */
+    public List<DoctorEventOperator> findOperators(Map<String, Object> criteria){
+        return getSqlSession().selectList(sqlId("findOperators"), criteria);
     }
 }
