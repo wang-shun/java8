@@ -5,6 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -208,4 +209,9 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<Map<Long, Integer>> queryFattenOutBySumAt(String sumAt);
+
+    /**
+     * 获取事件操作人列表
+     */
+    Response<List<DoctorEventOperator>> queryOperators(Map<String, Object> criteria);
 }

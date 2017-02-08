@@ -79,4 +79,38 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicReadService" id="doctorBasicReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicWriteService" id="doctorBasicWriteService" check="false"/>
 
+
+    <!-- user services -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserProfileReadService" id="userProfileReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserProfileWriteService" id="userProfileWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PrimaryUserWriteService" id="primaryUserWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PrimaryUserReadService" id="primaryUserReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SubRoleWriteService" id="subRoleWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SubRoleReadService" id="subRoleReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionReadService" id="doctorUserDataPermissionReadService" check="false"/>
+
+    <!-- search api -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigReadService" id="doctorPigReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigWriteService" id="doctorPigWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventReadService" id="doctorPigEventReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupReadService" id="doctorGroupReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnReadService" id="doctorBarnReadService" check="false"/>
+
+    <!-- warehouse api -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorMaterialConsumeAvgReadService" id="doctorMaterialConsumeAvgReadService" check="false"/>
+
+    <!-- Doctor Message api -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService" id="doctorMessageRuleRoleReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageTemplateReadService" id="doctorMessageTemplateReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorVaccinationPigWarnReadService" id="doctorVaccinationPigWarnReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorVaccinationPigWarnWriteService" id="doctorVaccinationPigWarnWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageUserWriteService" id="doctorMessageUserWriteService" check="false"/>
+
+    <!-- message service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceWriteService" id="deviceWriteService" check="false"/>
+
+    <!--event service-->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupWriteService" id="doctorGroupWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService" id="doctorPigTypeStatisticWriteService" check="false"/>
+
 </beans>

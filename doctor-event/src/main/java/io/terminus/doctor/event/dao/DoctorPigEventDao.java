@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
@@ -245,7 +246,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @param criteria
      * @return
      */
-    public List<DoctorPigEvent> findOperators(Map<String, Object> criteria){
+    public List<DoctorEventOperator> findOperators(Map<String, Object> criteria){
         return getSqlSession().selectList(sqlId("findOperators"), criteria);
     }
 

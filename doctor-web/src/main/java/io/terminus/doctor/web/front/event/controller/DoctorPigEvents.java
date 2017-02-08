@@ -18,6 +18,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
+import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PregCheckResult;
@@ -322,20 +323,24 @@ public class DoctorPigEvents {
 
 
     /**
-     * 获取拥有猪事件的操作人列表
+     * 获取拥有事件的操作人列表
      *
      * @param params
      * @return
      */
     @RequestMapping(value = "/event/operators", method = RequestMethod.GET)
     @ResponseBody
-    public List<DoctorPigEvent> queryOperatorForEvent(@RequestParam Map<String, Object> params) {
+    public List<DoctorEventOperator> queryOperatorForEvent(@RequestParam Map<String, Object> params) {
         params = Params.filterNullOrEmpty(params);
         if (params.get("eventTypes") != null) {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
-        return RespHelper.or500(doctorPigEventReadService.queryOperators(params));
+        if (Objects.equals(params.get("kind"), "4")) {
+            return RespHelper.or500(doctorGroupReadService.queryOperators(params));
+        } else {
+            return RespHelper.or500(doctorPigEventReadService.queryOperators(params));
+        }
     }
 
     private Paging<DoctorGroupEventDetail> queryGroupEventsByCriteria(Map<String, Object> params, Integer pageNo, Integer pageSize) {

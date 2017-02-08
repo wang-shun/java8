@@ -92,4 +92,16 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             return Response.fail("update.pig.event.failed");
         }
     }
+
+    @Deprecated
+    @Override
+    public Response<Boolean> updatePigEvent(DoctorPigEvent doctorPigEvent) {
+        try {
+            doctorPigEventDao.update(doctorPigEvent);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("update.pig.event.failed, event:{}, cause:{}", doctorPigEvent, Throwables.getStackTraceAsString(e));
+            return Response.fail("update.pig.event.failed");
+        }
+    }
 }

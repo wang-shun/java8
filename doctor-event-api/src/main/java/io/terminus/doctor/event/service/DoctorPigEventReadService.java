@@ -5,6 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.dto.DoctorSuggestPig;
+import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
 import javax.validation.constraints.NotNull;
@@ -101,7 +102,7 @@ public interface DoctorPigEventReadService {
     /**
      * 获取事件操作人列表
      */
-    Response<List<DoctorPigEvent>> queryOperators(Map<String, Object> criteria);
+    Response<List<DoctorEventOperator>> queryOperators(Map<String, Object> criteria);
 
     /**
      * 判断是否是最新事件
