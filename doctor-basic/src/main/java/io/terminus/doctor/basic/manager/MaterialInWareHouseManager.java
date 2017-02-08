@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.NumberUtils;
+import io.terminus.doctor.basic.dto.DoctorMoveMaterialDto;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.basic.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.basic.dao.DoctorMaterialConsumeProviderDao;
@@ -165,8 +166,55 @@ public class MaterialInWareHouseManager {
         return consumeMaterialInner(doctorMaterialConsumeProviderDto);
     }
 
+    /**
+     * 批量出库
+     * @param doctorMaterialConsumeProviderDtoList
+     */
     @Transactional
-    public void moveMaterial(DoctorMaterialConsumeProviderDto diaochuDto, DoctorMaterialConsumeProviderDto diaoruDto){
+    public void batchConsumeMaterial(List<DoctorMaterialConsumeProviderDto> doctorMaterialConsumeProviderDtoList){
+        doctorMaterialConsumeProviderDtoList.forEach(this::consumeMaterialInner);
+    }
+
+    /**
+     * 调拨
+     * @param dto
+     */
+    @Transactional
+    public void moveMaterial(DoctorMoveMaterialDto dto){
+        moveMaterialImpl(dto);
+    }
+
+    /**
+     * 批量调拨
+     *
+     * @param dtoList
+     */
+    @Transactional
+    public void batchMoveMaterial(List<DoctorMoveMaterialDto> dtoList) {
+        dtoList.forEach(this::moveMaterialImpl);
+    }
+
+    /**
+     * 批量盘点
+     * @param dtoList
+     */
+    @Transactional
+    public void batchInventory(List<DoctorMaterialConsumeProviderDto> dtoList) {
+        dtoList.forEach(dto -> {
+            if (Objects.equals(dto.getActionType(), DoctorMaterialConsumeProvider.EVENT_TYPE.PANYING.getValue())) {
+                providerMaterialInWareHouseInner(dto);
+            } else if (Objects.equals(dto.getActionType(), DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI.getValue())) {
+                consumeMaterialInner(dto);
+            }
+        });
+    }
+    /**
+     * 调拨的具体实现
+     * @param dto
+     */
+    private void moveMaterialImpl(DoctorMoveMaterialDto dto) {
+        DoctorMaterialConsumeProviderDto diaochuDto = dto.getDiaochuDto();
+        DoctorMaterialConsumeProviderDto diaoruDto = dto.getDiaoruDto();
         // 先调出
         Long diaochuEventId = consumeMaterialInner(diaochuDto);
         DoctorMaterialConsumeProvider diaochuEvent = doctorMaterialConsumeProviderDao.findById(diaochuEventId);
@@ -203,6 +251,17 @@ public class MaterialInWareHouseManager {
     public Long providerMaterialInWareHouse(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
         return providerMaterialInWareHouseInner(doctorMaterialConsumeProviderDto);
     }
+
+    /**
+     * 批量入库
+     * @param doctorMaterialConsumeProviderDtoList
+     * @return
+     */
+    @Transactional
+    public void batchProviderMaterialInWareHouse(List<DoctorMaterialConsumeProviderDto> doctorMaterialConsumeProviderDtoList){
+        doctorMaterialConsumeProviderDtoList.forEach(this::providerMaterialInWareHouseInner);
+    }
+
 
     /**
      * 删除对应的物料信息
