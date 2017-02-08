@@ -88,4 +88,9 @@ public class DoctorStatisticJobs {
             doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PigSex.SOW.getKey());
         });
     }
+
+    @Scheduled(cron = "*/10 * * * * ?")
+    public void testjob() {
+        log.info("hello dream oran...");
+    }
 }
