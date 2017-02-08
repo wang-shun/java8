@@ -62,14 +62,14 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyWriteService" id="notifyWriteService" check="false"/>
 
     <!-- Doctor message service -->
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageReadService" id="doctorMessageReadService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageWriteService" id="doctorMessageWriteService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService" id="doctorMessageRuleTemplateReadService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleTemplateWriteService" id="doctorMessageRuleTemplateWriteService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleReadService" id="doctorMessageRuleReadService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleWriteService" id="doctorMessageRuleWriteService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService" id="DoctorMessageRuleRoleReadService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleRoleWriteService" id="doctorMessageRuleRoleWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageReadService" id="doctorMessageReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageWriteService" id="doctorMessageWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageRuleTemplateReadService" id="doctorMessageRuleTemplateReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageRuleTemplateWriteService" id="doctorMessageRuleTemplateWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageRuleReadService" id="doctorMessageRuleReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageRuleWriteService" id="doctorMessageRuleWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageRuleRoleReadService" id="DoctorMessageRuleRoleReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageRuleRoleWriteService" id="doctorMessageRuleRoleWriteService" check="false"/>
 
     <!-- article service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleReadService" id="articleReadService" check="false"/>
@@ -100,11 +100,11 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorMaterialConsumeAvgReadService" id="doctorMaterialConsumeAvgReadService" check="false"/>
 
     <!-- Doctor Message api -->
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService" id="doctorMessageRuleRoleReadService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageTemplateReadService" id="doctorMessageTemplateReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageRuleRoleReadService" id="doctorMessageRuleRoleReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageTemplateReadService" id="doctorMessageTemplateReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorVaccinationPigWarnReadService" id="doctorVaccinationPigWarnReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorVaccinationPigWarnWriteService" id="doctorVaccinationPigWarnWriteService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageUserWriteService" id="doctorMessageUserWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageUserWriteService" id="doctorMessageUserWriteService" check="false"/>
 
     <!-- message service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceWriteService" id="deviceWriteService" check="false"/>

@@ -1,7 +1,7 @@
 package io.terminus.doctor.web.front.msg.dto;
 
-import io.terminus.doctor.msg.model.DoctorMessage;
-import io.terminus.doctor.msg.model.DoctorMessageUser;
+import io.terminus.doctor.event.model.DoctorMessage;
+import io.terminus.doctor.event.model.DoctorMessageUser;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

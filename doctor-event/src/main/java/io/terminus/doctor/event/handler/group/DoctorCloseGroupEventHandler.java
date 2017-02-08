@@ -6,8 +6,8 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.DataEvent;
-import io.terminus.doctor.common.event.ZkGroupPublishDto;
-import io.terminus.doctor.common.event.ZkListenedGroupEvent;
+import io.terminus.doctor.event.event.MsgGroupPublishDto;
+import io.terminus.doctor.event.event.MsgListenedGroupEvent;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -99,8 +99,8 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         //发布zk事件
         try{
             // 向zk发送刷新消息的事件
-            ZkGroupPublishDto zkGroupPublishDto = new ZkGroupPublishDto(group.getId(), event.getId(), event.getEventAt(), event.getType());
-            publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new ZkListenedGroupEvent(group.getOrgId(), group.getFarmId(), Lists.newArrayList(zkGroupPublishDto))));
+            MsgGroupPublishDto msgGroupPublishDto = new MsgGroupPublishDto(group.getId(), event.getId(), event.getEventAt(), event.getType());
+            publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new MsgListenedGroupEvent(group.getOrgId(), group.getFarmId(), Lists.newArrayList(msgGroupPublishDto))));
         }catch(Exception e){
             log.error(Throwables.getStackTraceAsString(e));
         }

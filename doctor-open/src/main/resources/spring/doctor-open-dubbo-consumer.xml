@@ -40,7 +40,7 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorCarouselFigureReadService" id="doctorCarouselFigureReadService" check="false"/>
 
     <!-- message service -->
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageUserReadService" id="doctorMessageUserReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageUserReadService" id="doctorMessageUserReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.ReceiverGroupReadService" id="receiverGroupReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.ReceiverGroupWriteService" id="receiverGroupWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.SubscriptionReadService" id="subscriptionReadService" check="false"/>
@@ -71,5 +71,5 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupReadService" id="doctorGroupReadService" check="false"/>
 
     <!-- Doctor Message Service -->
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageReadService" id="doctorMessageReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageReadService" id="doctorMessageReadService" check="false"/>
 </beans>

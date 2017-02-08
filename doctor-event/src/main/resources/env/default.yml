@@ -5,7 +5,7 @@ spring:
 # MyBatis
 mybatis:
   mapper-locations: classpath*:mapper/*Mapper.xml
-  type-aliases-package: io.terminus.doctor.event.model
+  type-aliases-package: io.terminus.doctor.event.model,io.terminus.parana.msg.model
 
 # Datasource
 datasource:
