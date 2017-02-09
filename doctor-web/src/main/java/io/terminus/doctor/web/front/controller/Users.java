@@ -26,7 +26,6 @@ import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
-import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
@@ -152,12 +151,9 @@ public class Users {
         if (Objects.equal(uss.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
             return getUserWithServiceStatus(uss, uss.getId());
         }
-        //如果是子账号，那就查一发主账号的
+        //如果是子账号，直接通过，因为只有审核过的猪场才会有子账号
         if (Objects.equal(uss.getType(), UserType.FARM_SUB.value())) {
-            Response<Sub> subResponse = primaryUserReadService.findSubByUserId(uss.getId());
-            if (subResponse.isSuccess() && subResponse.getResult() != null && subResponse.getResult().getParentUserId() != null) {
-                return getUserWithServiceStatus(uss, subResponse.getResult().getParentUserId());
-            }
+            uss.setReviewStatusDoctor(DoctorServiceReview.Status.OK.getValue());
         }
         return uss;
     }
