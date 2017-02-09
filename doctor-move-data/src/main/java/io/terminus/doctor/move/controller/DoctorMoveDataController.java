@@ -450,7 +450,7 @@ public class DoctorMoveDataController {
      * 月报/周报
      */
     @RequestMapping(value = "/monthly/since", method = RequestMethod.GET)
-    public Boolean moveMonthlyReport(@RequestParam("farmId") Long farmId,
+    public Boolean moveMonthlyReport(@RequestParam(value = "farmId", required = false) Long farmId,
                                      @RequestParam("since") String since,
                                      @RequestParam(value = "only", defaultValue = "false") boolean only) {
         try {
