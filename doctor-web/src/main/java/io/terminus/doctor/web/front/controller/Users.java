@@ -149,14 +149,14 @@ public class Users {
         UserWithServiceStatus uss = BeanMapper.map(userResponse.getResult(), UserWithServiceStatus.class);
 
         //设置下猪场软件服务的审核状态  0 未申请, 2 待审核(已提交申请), 1 通过，-1 不通过, -2 冻结申请资格
-        if (Objects.equals(uss.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
-            return getUserWithServiceStatus(uss);
+        if (Objects.equal(uss.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
+            return getUserWithServiceStatus(uss, uss.getId());
         }
         //如果是子账号，那就查一发主账号的
-        if (Objects.equals(uss.getType(), UserType.FARM_SUB.value())) {
+        if (Objects.equal(uss.getType(), UserType.FARM_SUB.value())) {
             Response<Sub> subResponse = primaryUserReadService.findSubByUserId(uss.getId());
             if (subResponse.isSuccess() && subResponse.getResult() != null && subResponse.getResult().getParentUserId() != null) {
-                return getUserWithServiceStatus(subResponse.getResult().getParentUserId());
+                return getUserWithServiceStatus(uss, subResponse.getResult().getParentUserId());
             }
         }
         return uss;
