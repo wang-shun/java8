@@ -3,7 +3,6 @@ package io.terminus.doctor.move;
 import io.terminus.doctor.basic.DoctorBasicConfiguration;
 import io.terminus.doctor.event.DoctorEventConfiguration;
 import io.terminus.doctor.move.sql.DoctorSqlFactory;
-import io.terminus.doctor.msg.DoctorMsgConfig;
 import io.terminus.doctor.user.DoctorUserConfiguration;
 import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;

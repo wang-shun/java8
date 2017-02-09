@@ -37,10 +37,6 @@
             <artifactId>doctor-user-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-msg-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.terminus.parana</groupId>
             <artifactId>parana-user-auth</artifactId>
         </dependency>

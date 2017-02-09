@@ -10,9 +10,7 @@ mybatis:
     io.terminus.parana.msg.model,
     io.terminus.doctor.event.model,
     io.terminus.parana.config.model,
-    io.terminus.doctor.basic.model,
-    io.terminus.parana.msg.model,
-    io.terminus.doctor.msg.model
+    io.terminus.doctor.basic.model
 
 # Datasource
 datasource:
@@ -36,6 +34,7 @@ zookeeper:
   host: 101.201.44.35
   port: 2181
   zkTopic: pig.doctor.topic
+  cacheTopic: pig.user.topic
 
 # Redis
 redis:

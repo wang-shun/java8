@@ -369,12 +369,6 @@
 
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-msg-api</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-msg</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
