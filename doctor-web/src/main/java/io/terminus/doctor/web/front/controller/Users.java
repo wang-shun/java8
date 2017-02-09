@@ -16,6 +16,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.enums.SmsCodeType;
@@ -25,11 +26,13 @@ import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.DoctorUserRoleLoader;
+import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.web.core.Constants;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
@@ -93,6 +96,8 @@ public class Users {
     private DoctorUserRoleLoader doctorUserRoleLoader;
     @RpcConsumer
     private DoctorServiceStatusReadService doctorServiceStatusReadService;
+    @RpcConsumer
+    private PrimaryUserReadService primaryUserReadService;
 
     @Autowired
     public Users(UserWriteService<User> userWriteService,
@@ -144,12 +149,27 @@ public class Users {
         UserWithServiceStatus uss = BeanMapper.map(userResponse.getResult(), UserWithServiceStatus.class);
 
         //设置下猪场软件服务的审核状态  0 未申请, 2 待审核(已提交申请), 1 通过，-1 不通过, -2 冻结申请资格
-        Response<DoctorServiceStatus> response = doctorServiceStatusReadService.findByUserId(uss.getId());
+        if (Objects.equals(uss.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
+            return getUserWithServiceStatus(uss);
+        }
+        //如果是子账号，那就查一发主账号的
+        if (Objects.equals(uss.getType(), UserType.FARM_SUB.value())) {
+            Response<Sub> subResponse = primaryUserReadService.findSubByUserId(uss.getId());
+            if (subResponse.isSuccess() && subResponse.getResult() != null && subResponse.getResult().getParentUserId() != null) {
+                return getUserWithServiceStatus(subResponse.getResult().getParentUserId());
+            }
+        }
+        return uss;
+    }
+
+    private UserWithServiceStatus getUserWithServiceStatus(UserWithServiceStatus uss, Long userId) {
+        Response<DoctorServiceStatus> response = doctorServiceStatusReadService.findByUserId(userId);
         if (response.isSuccess() && response.getResult() != null) {
             uss.setReviewStatusDoctor(response.getResult().getPigdoctorReviewStatus());
         }
         return uss;
     }
+
     @RequestMapping(value = "/{userId}/roles", method = {RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response<DoctorRoleContent> getUserRolesByUserId(@PathVariable Long userId) {
         return doctorUserRoleLoader.hardLoadRoles(userId);
