@@ -32,11 +32,9 @@ import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.DoctorUserRoleLoader;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
-import io.terminus.doctor.web.core.Constants;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.login.DoctorCommonSessionBean;
-import io.terminus.doctor.web.core.login.Sessions;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.auth.core.AclLoader;
 import io.terminus.parana.auth.core.PermissionHelper;
@@ -218,13 +216,9 @@ public class Users {
         String sessionId = MoreObjects.firstNonNull(sid, doctorCommonSessionBean.getSessionId(name));
         DoctorCommonSessionBean.Token token = doctorCommonSessionBean.login(name, password, code, sessionId, deviceId);
 
-        // 存一份 http session
-        Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.TOKEN_PREFIX, sessionId);
-        request.getSession().setAttribute(Constants.SESSION_USER_ID, snapshot.get(Sessions.USER_ID));
-
         //将后台生成的sessionId返回给前台，用于以后的sid
         return MapBuilder.<String, Object>of()
-                .put("userId",snapshot.get(Sessions.USER_ID))
+                .put("userId", token.getUserId())
                 .put("sid", token.getSessionId())
                 .put("redirect", !StringUtils.hasText(target) ? "/" : target)
                 .put("expiredAt", token.getExpiredAt())

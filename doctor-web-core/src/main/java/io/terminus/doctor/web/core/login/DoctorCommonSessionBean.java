@@ -284,6 +284,7 @@ public class DoctorCommonSessionBean {
 
         // 返回登录的凭证
         Token token = new Token();
+        token.setUserId(user.getId());
         token.setName(user.getName());
         token.setDomain(sessionProperties.getCookieDomain());
         token.setExpiredAt(DateTime.now().plusSeconds(Sessions.LONG_INACTIVE_INTERVAL)
@@ -639,6 +640,7 @@ public class DoctorCommonSessionBean {
     @Data
     public static class Token implements Serializable {
         private static final long serialVersionUID = 5867053861663885693L;
+        Long userId;
         String name;
         String expiredAt;
         String sessionId;
