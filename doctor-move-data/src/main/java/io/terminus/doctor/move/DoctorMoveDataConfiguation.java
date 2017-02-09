@@ -33,8 +33,7 @@ import java.io.IOException;
 @EnableAutoConfiguration
 @Import({DoctorBasicConfiguration.class,
         DoctorEventConfiguration.class,
-        DoctorUserConfiguration.class,
-        DoctorMsgConfig.class
+        DoctorUserConfiguration.class
 })
 public class DoctorMoveDataConfiguation extends WebMvcConfigurerAdapter {
 

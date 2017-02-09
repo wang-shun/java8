@@ -28,10 +28,6 @@
             <artifactId>doctor-basic-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-msg-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.terminus.parana</groupId>
             <artifactId>parana-config-client</artifactId>
         </dependency>
