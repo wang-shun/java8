@@ -198,7 +198,7 @@ public class UserInitService {
         status.setUserId(userId);
 
         status.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
-        status.setPigdoctorReviewStatus(DoctorServiceReview.Status.INIT.getValue());
+        status.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
 
         //电商初始状态
         status.setPigmallStatus(DoctorServiceStatus.Status.BETA.value());

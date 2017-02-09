@@ -13,24 +13,28 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.enums.SmsCodeType;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorRoleContent;
+import io.terminus.doctor.user.model.DoctorServiceReview;
+import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.DoctorUserRoleLoader;
-import io.terminus.doctor.web.core.Constants;
+import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.login.DoctorCommonSessionBean;
-import io.terminus.doctor.web.core.login.Sessions;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.auth.core.AclLoader;
 import io.terminus.parana.auth.core.PermissionHelper;
@@ -42,6 +46,7 @@ import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
 import io.terminus.session.AFSessionManager;
 import io.terminus.session.util.WebUtil;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -49,11 +54,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +91,10 @@ public class Users {
     private final DoctorOrgReadService doctorOrgReadService;
     @RpcConsumer
     private DoctorUserRoleLoader doctorUserRoleLoader;
-
+    @RpcConsumer
+    private DoctorServiceStatusReadService doctorServiceStatusReadService;
+    @RpcConsumer
+    private PrimaryUserReadService primaryUserReadService;
 
     @Autowired
     public Users(UserWriteService<User> userWriteService,
@@ -124,13 +138,32 @@ public class Users {
         }
     }
     @RequestMapping(value = "/getUserById/{id}",method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
-    public User getUserById(@PathVariable(value = "id") Long id) {
+    public UserWithServiceStatus getUserById(@PathVariable(value = "id") Long id) {
         Response<User> userResponse=doctorUserReadService.findById(id);
         if (!userResponse.isSuccess()){
             throw new JsonResponseException(userResponse.getError());
         }
-        return userResponse.getResult();
+        UserWithServiceStatus uss = BeanMapper.map(userResponse.getResult(), UserWithServiceStatus.class);
+
+        //设置下猪场软件服务的审核状态  0 未申请, 2 待审核(已提交申请), 1 通过，-1 不通过, -2 冻结申请资格
+        if (Objects.equal(uss.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
+            return getUserWithServiceStatus(uss, uss.getId());
+        }
+        //如果是子账号，直接通过，因为只有审核过的猪场才会有子账号
+        if (Objects.equal(uss.getType(), UserType.FARM_SUB.value())) {
+            uss.setReviewStatusDoctor(DoctorServiceReview.Status.OK.getValue());
+        }
+        return uss;
     }
+
+    private UserWithServiceStatus getUserWithServiceStatus(UserWithServiceStatus uss, Long userId) {
+        Response<DoctorServiceStatus> response = doctorServiceStatusReadService.findByUserId(userId);
+        if (response.isSuccess() && response.getResult() != null) {
+            uss.setReviewStatusDoctor(response.getResult().getPigdoctorReviewStatus());
+        }
+        return uss;
+    }
+
     @RequestMapping(value = "/{userId}/roles", method = {RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response<DoctorRoleContent> getUserRolesByUserId(@PathVariable Long userId) {
         return doctorUserRoleLoader.hardLoadRoles(userId);
@@ -183,13 +216,9 @@ public class Users {
         String sessionId = MoreObjects.firstNonNull(sid, doctorCommonSessionBean.getSessionId(name));
         DoctorCommonSessionBean.Token token = doctorCommonSessionBean.login(name, password, code, sessionId, deviceId);
 
-        // 存一份 http session
-        Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.TOKEN_PREFIX, sessionId);
-        request.getSession().setAttribute(Constants.SESSION_USER_ID, snapshot.get(Sessions.USER_ID));
-
         //将后台生成的sessionId返回给前台，用于以后的sid
         return MapBuilder.<String, Object>of()
-                .put("userId",snapshot.get(Sessions.USER_ID))
+                .put("userId", token.getUserId())
                 .put("sid", token.getSessionId())
                 .put("redirect", !StringUtils.hasText(target) ? "/" : target)
                 .put("expiredAt", token.getExpiredAt())
@@ -384,5 +413,15 @@ public class Users {
             throw new JsonResponseException(result.getError());
         }
         return result.getResult();
+    }
+
+    @Data
+    private static class UserWithServiceStatus extends User implements Serializable {
+        private static final long serialVersionUID = -4515482071656393479L;
+        /**
+         * 猪场软件服务的审核状态
+         * @see DoctorServiceReview.Status
+         */
+        private Integer reviewStatusDoctor;
     }
 }

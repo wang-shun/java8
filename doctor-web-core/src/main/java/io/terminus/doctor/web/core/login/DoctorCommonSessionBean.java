@@ -21,7 +21,7 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.enums.SmsCodeType;
 import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.user.util.DoctorUserMaker;
+import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.enums.MobileDeviceType;
@@ -94,6 +94,8 @@ public class DoctorCommonSessionBean {
     private CoreEventDispatcher coreEventDispatcher;
     @Autowired
     private DeviceReadService deviceReadService;
+    @Autowired
+    private DoctorUserMaker doctorUserMaker;
 
     public DoctorCommonSessionBean() {
         String hostIp;
@@ -236,7 +238,7 @@ public class DoctorCommonSessionBean {
         // 校验手机验证码
         validateSmsCode(code, mobile, sessionId);
         User user = registerByMobile(mobile, password, null);
-        coreEventDispatcher.publish(new RegisterEvent(null, null, DoctorUserMaker.from(user)));
+        coreEventDispatcher.publish(new RegisterEvent(null, null, doctorUserMaker.from(user)));
         return user.getId();
     }
 
@@ -282,6 +284,7 @@ public class DoctorCommonSessionBean {
 
         // 返回登录的凭证
         Token token = new Token();
+        token.setUserId(user.getId());
         token.setName(user.getName());
         token.setDomain(sessionProperties.getCookieDomain());
         token.setExpiredAt(DateTime.now().plusSeconds(Sessions.LONG_INACTIVE_INTERVAL)
@@ -637,6 +640,7 @@ public class DoctorCommonSessionBean {
     @Data
     public static class Token implements Serializable {
         private static final long serialVersionUID = 5867053861663885693L;
+        Long userId;
         String name;
         String expiredAt;
         String sessionId;

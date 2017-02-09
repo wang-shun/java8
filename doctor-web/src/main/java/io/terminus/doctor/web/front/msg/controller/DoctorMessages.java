@@ -206,11 +206,6 @@ public class DoctorMessages {
         return RespHelper.or500(doctorMessageUserReadService.findNoReadCount(UserUtil.getUserId()));
     }
 
-    /**
-     * 查询消息详情
-     * @param id
-     * @return
-     */
     @RequestMapping(value = "/message/detail", method = RequestMethod.GET)
     public Boolean findMessageDetail(@RequestParam("id") Long id) {
         try {

@@ -9,7 +9,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.user.util.DoctorUserMaker;
+import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.User;
@@ -34,9 +34,9 @@ import java.util.concurrent.TimeUnit;
 public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
 
     private final LoadingCache<Long, Response<User>> userCache;
-
+    private final DoctorUserMaker doctorUserMaker;
     @Autowired
-    public DoctorLoginInterceptor(final UserReadService<User> userReadService) {
+    public DoctorLoginInterceptor(final UserReadService<User> userReadService, DoctorUserMaker doctorUserMaker) {
         userCache = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.MINUTES).maximumSize(10000).build(new CacheLoader<Long, Response<User>>() {
             @Override
             public Response<User> load(Long userId) throws Exception {
@@ -44,6 +44,7 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
             }
         });
 
+        this.doctorUserMaker = doctorUserMaker;
     }
 
     @Override
@@ -63,7 +64,7 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
                 }
                 User user = result.getResult();
                 if (user != null) {
-                    ParanaUser paranaUser = DoctorUserMaker.from(user);
+                    ParanaUser paranaUser = doctorUserMaker.from(user);
                     if(user.getType() != UserType.ADMIN.value()) {
                         log.error("user(id={})'s is not admin, its type is {}", userId, user.getType());
                     }
