@@ -15,6 +15,8 @@ import io.terminus.pampas.engine.common.WebUtil;
 import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
+import io.terminus.session.AFSession;
+import io.terminus.session.AFSessionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,7 +37,9 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
 
     private final LoadingCache<Long, Response<User>> userCache;
     private final DoctorUserMaker doctorUserMaker;
-
+    @Autowired
+    private AFSessionManager sessionManager;
+    
     @Autowired
     public DoctorLoginInterceptor(final UserReadService<User> userReadService, DoctorUserMaker doctorUserMaker) {
         userCache = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.MINUTES).maximumSize(10000).build(new CacheLoader<Long, Response<User>>() {
@@ -67,6 +71,10 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
                 if (user != null) {
                     ParanaUser paranaUser = doctorUserMaker.from(user);
                     UserUtil.putCurrentUser(paranaUser);
+
+                    // TODO: 2017/2/9 先手动刷下session过期时间 
+                    AFSession afSession = (AFSession) session;
+                    sessionManager.refreshExpireTime(afSession, afSession.getMaxInactiveInterval());
                 }
             }
         }
