@@ -15,7 +15,7 @@ import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.RoleTemplate;
 import io.terminus.doctor.move.model.View_FarmInfo;
 import io.terminus.doctor.move.model.View_FarmMember;
-import io.terminus.doctor.msg.service.DoctorMessageRuleWriteService;
+import io.terminus.doctor.event.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dao.DoctorStaffDao;

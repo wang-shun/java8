@@ -3,9 +3,8 @@ package io.terminus.doctor.web.admin.listener;
 
 import com.google.common.eventbus.Subscribe;
 import io.terminus.doctor.common.event.EventListener;
-import io.terminus.doctor.msg.service.DoctorMessageRuleWriteService;
+import io.terminus.doctor.event.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.user.event.OpenDoctorServiceEvent;
-import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

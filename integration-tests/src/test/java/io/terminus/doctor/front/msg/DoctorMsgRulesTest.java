@@ -3,7 +3,7 @@ package io.terminus.doctor.front.msg;
 import com.google.common.collect.ImmutableList;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.doctor.front.BaseFrontWebTest;
-import io.terminus.doctor.msg.model.DoctorMessageRule;
+import io.terminus.doctor.event.model.DoctorMessageRule;
 import io.terminus.doctor.utils.HttpGetRequest;
 import io.terminus.doctor.utils.HttpPostRequest;
 import io.terminus.doctor.web.front.msg.controller.DoctorMsgRules;

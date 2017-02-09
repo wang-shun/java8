@@ -19,7 +19,7 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.msg.enums.SmsCodeType;
+import io.terminus.doctor.event.enums.SmsCodeType;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorRoleContent;
 import io.terminus.doctor.user.model.DoctorServiceReview;

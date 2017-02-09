@@ -2,12 +2,12 @@ package io.terminus.doctor.web.admin.job.msg;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
-import io.terminus.doctor.msg.dto.Rule;
-import io.terminus.doctor.msg.enums.Category;
-import io.terminus.doctor.msg.model.DoctorMessage;
-import io.terminus.doctor.msg.service.DoctorMessageReadService;
-import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
-import io.terminus.doctor.msg.service.DoctorMessageWriteService;
+import io.terminus.doctor.event.dto.msg.Rule;
+import io.terminus.doctor.event.enums.Category;
+import io.terminus.doctor.event.model.DoctorMessage;
+import io.terminus.doctor.event.service.DoctorMessageReadService;
+import io.terminus.doctor.event.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.event.service.DoctorMessageWriteService;
 import io.terminus.doctor.web.admin.job.msg.producer.AbstractJobProducer;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.parana.user.service.UserReadService;

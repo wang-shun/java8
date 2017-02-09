@@ -1,6 +1,6 @@
 package io.terminus.doctor.open.rest.message;
 
-import io.terminus.doctor.msg.service.DoctorMessageUserReadService;
+import io.terminus.doctor.event.service.DoctorMessageUserReadService;
 import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;

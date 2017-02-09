@@ -4,14 +4,8 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
-import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.common.event.DataEvent;
-import io.terminus.doctor.common.event.ZkGroupPublishDto;
-import io.terminus.doctor.common.event.ZkListenedGroupEvent;
-import io.terminus.doctor.common.event.ZkListenedPigEvent;
-import io.terminus.doctor.common.event.ZkPigPublishDto;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -23,6 +17,10 @@ import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.event.DoctorPigPublishDto;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.event.ListenedPigEvent;
+import io.terminus.doctor.event.event.MsgGroupPublishDto;
+import io.terminus.doctor.event.event.MsgListenedGroupEvent;
+import io.terminus.doctor.event.event.MsgListenedPigEvent;
+import io.terminus.doctor.event.event.MsgPigPublishDto;
 import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
@@ -152,18 +150,18 @@ public class DoctorPigEventManager {
         });
         //猪事件触发更新消息(zk)
         try {
-            List<ZkPigPublishDto> zkPigPublishDtoList = eventInfoList.stream()
+            List<MsgPigPublishDto> msgPigPublishDtoList = eventInfoList.stream()
                     .filter(doctorEventInfo -> PigEvent.NOTICE_MESSAGE_PIG_EVENT.contains(doctorEventInfo.getEventType()))
                     .map(doctorEventInfo -> {
-                        return ZkPigPublishDto.builder()
+                        return MsgPigPublishDto.builder()
                                 .pigId(doctorEventInfo.getBusinessId())
                                 .eventAt(doctorEventInfo.getEventAt())
                                 .eventId(doctorEventInfo.getEventId())
                                 .eventType(doctorEventInfo.getEventType())
                                 .build();
                     }).collect(Collectors.toList());
-            if (!Arguments.isNullOrEmpty(zkPigPublishDtoList)) {
-                publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new ZkListenedPigEvent(orgId, farmId, zkPigPublishDtoList)));
+            if (!Arguments.isNullOrEmpty(msgPigPublishDtoList)) {
+                coreEventDispatcher.publish(new MsgListenedPigEvent(orgId, farmId, msgPigPublishDtoList));
             }
         } catch (Exception e) {
             log.error("publish.pig.event.fail");
@@ -193,18 +191,18 @@ public class DoctorPigEventManager {
         });
         //猪群事件触发的消息更新(zk)
         try {
-            List<ZkGroupPublishDto> zkGroupPublishDtoList = eventInfoList.stream()
+            List<MsgGroupPublishDto> msgGroupPublishDtoList = eventInfoList.stream()
                     .filter(doctorEventInfo -> GroupEventType.NOTICE_MESSAGE_GROUP_EVENT.contains(doctorEventInfo.getEventType()))
                     .map(doctorEventInfo -> {
-                        return ZkGroupPublishDto.builder()
+                        return MsgGroupPublishDto.builder()
                                 .groupId(doctorEventInfo.getBusinessId())
                                 .eventAt(doctorEventInfo.getEventAt())
                                 .eventId(doctorEventInfo.getEventId())
                                 .eventType(doctorEventInfo.getEventType())
                                 .build();
                     }).collect(Collectors.toList());
-            if (!Arguments.isNullOrEmpty(zkGroupPublishDtoList)) {
-                publisher.publish(DataEvent.toBytes(DataEventType.GroupEventClose.getKey(), new ZkListenedGroupEvent(orgId, farmId, zkGroupPublishDtoList)));
+            if (!Arguments.isNullOrEmpty(msgGroupPublishDtoList)) {
+                coreEventDispatcher.publish(new MsgListenedGroupEvent(orgId, farmId, msgGroupPublishDtoList));
             }
         } catch (Exception e) {
             log.error("publish.pig.event.fail");

@@ -19,7 +19,7 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.msg.enums.SmsCodeType;
+import io.terminus.doctor.event.enums.SmsCodeType;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
@@ -135,7 +135,7 @@ public class DoctorCommonSessionBean {
      * 发送短信验证码
      * @param mobile
      * @param sessionId
-     * @param type 枚举 io.terminus.doctor.msg.enums.SmsCodeType.
+     * @param type 枚举 io.terminus.doctor.event.enums.SmsCodeType.
      *             允许type == null, 此时认为是注册场景
      * @return
      */

@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
@@ -53,8 +52,10 @@ import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
 import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
 import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
+import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
 import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
+import io.terminus.parana.msg.impl.MessageAutoConfig;
 import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
@@ -77,7 +78,7 @@ import java.util.Map;
 @ComponentScan(basePackages = {
         "io.terminus.doctor.event",
 })
-@Import({DoctorCommonConfiguration.class})
+@Import({MessageAutoConfig.class, DoctorCommonConfiguration.class})
 @AutoConfigureAfter({MybatisAutoConfiguration.class})
 public class  DoctorEventConfiguration {
 

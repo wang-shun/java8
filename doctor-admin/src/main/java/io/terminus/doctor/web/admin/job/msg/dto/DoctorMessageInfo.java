@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.admin.job.msg.dto;
 
+import io.terminus.doctor.event.model.DoctorMessageRuleTemplate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -68,7 +69,7 @@ public class DoctorMessageInfo implements Serializable{
 
     /**
      * 消息类型: 0->系统消息, 1->预警消息, 2->警报消息
-     * @see io.terminus.doctor.msg.model.DoctorMessageRuleTemplate.Type
+     * @see DoctorMessageRuleTemplate.Type
      */
     private Integer type;
 
