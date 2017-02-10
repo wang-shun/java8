@@ -375,7 +375,6 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/eventExport", method = RequestMethod.GET)
     public void pigEventExport(@RequestParam Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response){
         try {
-            String exportName;
             if (Strings.isNullOrEmpty(eventCriteria.get("kind"))) {
                 return;
             }
