@@ -41,6 +41,14 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+     * 根据查询这一事件之前的最新的一个type事件
+     */
+    public DoctorPigEvent findLastByTypeAndDate(Long pigId, Date eventAt, Integer type) {
+        return getSqlSession().selectOne(sqlId("findLastByTypeAndDate"), ImmutableMap.of("pigId", pigId, "eventAt", eventAt, "type", type));
+    }
+
+
+    /**
      *查询最新的手动事件
      * @param pigId 猪id
      * @return 最新事件

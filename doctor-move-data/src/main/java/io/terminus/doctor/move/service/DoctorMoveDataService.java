@@ -2368,8 +2368,8 @@ public class DoctorMoveDataService {
     public void updateFosterSowCode(DoctorFarm farm){
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.FOSTERS.getKey(), "kind", 1));
         List<List<DoctorPigEvent>> lists = Lists.partition(doctorPigEvensList, 1000);
-        lists.stream().forEach(list->{
-            list.stream().forEach(doctorPigEvent -> {
+        lists.forEach(list->{
+            list.forEach(doctorPigEvent -> {
                 Map<String, Object> extra = doctorPigEvent.getExtraMap();
                 if(extra.containsKey("fosterSowId") && !extra.containsKey("fosterSowCode")){
                     DoctorPig doctorPig = doctorPigDao.findById(Long.valueOf(Objects.toString(extra.get("fosterSowId"))));
@@ -2431,5 +2431,89 @@ public class DoctorMoveDataService {
             events.forEach(doctorPigEventDao::update);
         });
         log.info("flush npd ok! farmId:{}", farmId);
+    }
+
+    /**
+     * 刷分娩母猪track的group_id
+     */
+    @Transactional
+    public void flushFarrowSowTrackGroupId(Long farmId) {
+        log.info("flush farrrow sow track groupId, farmId:{}", farmId);
+
+        //查出所有的groupId = null 的哺乳母猪, 找到产房的猪群
+        doctorPigTrackDao.findByFarmIdAndStatus(farmId, PigStatus.FEED.getKey()).stream()
+                .filter(track -> track.getGroupId() == null)
+                .forEach(track -> {
+                    DoctorGroup group = doctorGroupDao.findCurrentFarrowByBarnId(track.getCurrentBarnId());
+                    if (group == null) {
+                        log.error("farrow group not found, piginfo:{}", track);
+                    } else {
+                        DoctorPigTrack updateTrack = new DoctorPigTrack();
+                        updateTrack.setId(track.getId());
+                        updateTrack.setGroupId(group.getId());
+                        doctorPigTrackDao.update(updateTrack);
+                    }
+                });
+    }
+
+    /**
+     * 刷分娩事件的group_id
+     */
+    @Transactional
+    public void flushFarrowEventGroupId(Long farmId) {
+        log.info("flush farrow event groupId, farmId:{}", farmId);
+
+        //查出所有的 groupId = null 的分娩事件, 更新一发
+        doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farmId,
+                DoctorPig.PigSex.SOW.getKey(), Lists.newArrayList(PigEvent.FARROWING.getKey())).stream()
+                .filter(event -> event.getGroupId() == null)
+                .forEach(event -> {
+                    DoctorGroup group;
+                    DoctorFarrowingDto farrow = JSON_MAPPER.fromJson(event.getExtra(), DoctorFarrowingDto.class);
+                    if (farrow != null && notEmpty(farrow.getGroupCode())) {
+                        group = doctorGroupDao.findByFarmIdAndGroupCode(farmId, farrow.getGroupCode());
+                    } else {
+                        group = doctorGroupDao.findByFarmIdAndBarnIdAndDate(farmId, event.getBarnId(), event.getEventAt());
+                    }
+
+                    //更新group_id
+                    updateEventGroupId(event, group);
+                });
+    }
+
+    /**
+     * 刷断奶事件的group_id
+     */
+    @Transactional
+    public void flushWeanEventGroupId(Long farmId) {
+        log.info("flush wean event groupId, farmId:{}", farmId);
+
+        //查出所有的 groupId = null 的断奶事件, 更新一发
+        doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farmId,
+                DoctorPig.PigSex.SOW.getKey(), Lists.newArrayList(PigEvent.WEAN.getKey())).stream()
+                .filter(event -> event.getGroupId() == null)
+                .forEach(event -> {
+                    DoctorGroup group = new DoctorGroup();
+                    DoctorPigEvent farrowEvent = doctorPigEventDao.findLastByTypeAndDate(event.getPigId(), event.getEventAt(), PigEvent.FARROWING.getKey());
+                    if (farrowEvent != null && farrowEvent.getGroupId() != null) {
+                        group.setId(farrowEvent.getGroupId());
+                    } else {
+                        group = doctorGroupDao.findByFarmIdAndBarnIdAndDate(farmId, event.getBarnId(), event.getEventAt());
+                    }
+
+                    //更新group_id
+                    updateEventGroupId(event, group);
+                });
+    }
+
+    private void updateEventGroupId(DoctorPigEvent event, DoctorGroup group) {
+        if (group == null || group.getId() == null) {
+            log.error("farrow event group not found, eventInfo:{}", event);
+        } else {
+            DoctorPigEvent updateEvent = new DoctorPigEvent();
+            updateEvent.setId(event.getId());
+            updateEvent.setGroupId(group.getId());
+            doctorPigEventDao.update(updateEvent);
+        }
     }
 }

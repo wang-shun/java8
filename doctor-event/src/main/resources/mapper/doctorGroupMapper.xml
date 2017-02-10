@@ -243,4 +243,11 @@
           AND (close_at &gt;= DATE(#{date}) OR close_at IS NULL)
         limit 1
     </select>
+
+    <select id="findCurrentFarrowByBarnId" parameterType="map" resultMap="DoctorGroupMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        WHERE current_barn_id = #{barnId}
+          AND `status` = #{status}
+        limit 1
+    </select>
 </mapper>

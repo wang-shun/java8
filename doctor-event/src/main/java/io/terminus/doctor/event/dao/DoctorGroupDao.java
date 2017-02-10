@@ -61,4 +61,13 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
         return getSqlSession().selectOne(sqlId("findByFarmIdAndBarnIdAndDate"), ImmutableMap.of("farmId", farmId, "barnId", barnId, "date", date));
 
     }
+
+    /**
+     * 查当前产房的唯一猪群
+     */
+    public DoctorGroup findCurrentFarrowByBarnId(Long barnId) {
+        return getSqlSession().selectOne(sqlId("findCurrentFarrowByBarnId"),
+                ImmutableMap.of("barnId", barnId, "status", DoctorGroup.Status.CREATED.getValue()));
+    }
+
 }
