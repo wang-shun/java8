@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -77,6 +78,9 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         }
         doctorPigEvent.setHealthCount(quaQty);    //额 这个字段存一下合格数吧
         doctorPigEvent.setWeakCount(doctorPigEvent.getWeanCount() - quaQty);
+
+        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+        doctorPigEvent.setGroupId(checkNotNull(pigTrack.getGroupId(), "groupId.not.null"));   //必须设置下断奶的groupId
         return doctorPigEvent;
     }
 

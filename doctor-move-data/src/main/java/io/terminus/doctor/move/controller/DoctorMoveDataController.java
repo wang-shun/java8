@@ -835,4 +835,63 @@ public class DoctorMoveDataController {
         return RespHelper.or500(doctorMoveDataService.refreshPigStatus());
     }
 
+    /**
+     * 刷分娩母猪track的group_id
+     */
+    @RequestMapping(value = "/flushFarrowGroupTrackGroupId", method = RequestMethod.GET)
+    public Boolean flushFarrowGroupTrackGroupId(@RequestParam(value = "farmId", required = false) Long farmId) {
+        try {
+            log.warn("flushFarrowGroupTrackGroupId start, farmId:{}", farmId);
+            if (farmId != null) {
+                doctorMoveDataService.flushFarrowSowTrackGroupId(farmId);
+            } else {
+                getAllFarmIds().forEach(doctorMoveDataService::flushFarrowSowTrackGroupId);
+            }
+            log.warn("flushFarrowGroupTrackGroupId end");
+            return true;
+        } catch (Exception e) {
+            log.error("flushFarrowGroupTrackGroupId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 刷分娩事件的group_id
+     */
+    @RequestMapping(value = "/flushFarrowEventGroupId", method = RequestMethod.GET)
+    public Boolean flushFarrowEventGroupId(@RequestParam(value = "farmId", required = false) Long farmId) {
+        try {
+            log.warn("flushFarrowEventGroupId start, farmId:{}", farmId);
+            if (farmId != null) {
+                doctorMoveDataService.flushFarrowEventGroupId(farmId);
+            } else {
+                getAllFarmIds().forEach(doctorMoveDataService::flushFarrowEventGroupId);
+            }
+            log.warn("flushFarrowEventGroupId end");
+            return true;
+        } catch (Exception e) {
+            log.error("flushFarrowEventGroupId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 刷断奶事件的group_id
+     */
+    @RequestMapping(value = "/flushWeanEventGroupId", method = RequestMethod.GET)
+    public Boolean flushWeanEventGroupId(@RequestParam(value = "farmId", required = false) Long farmId) {
+        try {
+            log.warn("flushWeanEventGroupId start, farmId:{}", farmId);
+            if (farmId != null) {
+                doctorMoveDataService.flushWeanEventGroupId(farmId);
+            } else {
+                getAllFarmIds().forEach(doctorMoveDataService::flushWeanEventGroupId);
+            }
+            log.warn("flushWeanEventGroupId end");
+            return true;
+        } catch (Exception e) {
+            log.error("flushWeanEventGroupId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }
