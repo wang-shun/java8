@@ -100,7 +100,7 @@ public class DefaultExporter implements Exporter{
                 if (Arguments.isNullOrEmpty(resp.getData())) {
                     break;
                 }
-                pageNo += pageNo;
+                pageNo ++;
                 criteria.put("pageNo", pageNo.toString());
                 //创建每一行
                 for (Object obj: resp.getData()) {
@@ -146,5 +146,4 @@ public class DefaultExporter implements Exporter{
         }
 
     }
-
 }
