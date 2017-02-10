@@ -658,6 +658,42 @@ public class DoctorImportDataService {
             boarTrack.setCurrentBarnType(barn.getPigType());
             boarTrack.setCurrentParity(1);      //配种次数置成1
             doctorPigTrackDao.create(boarTrack);
+
+            //公猪进场事件
+            DoctorPigEvent boarEntryEvent = DoctorPigEvent.builder()
+                    .orgId(boar.getOrgId())
+                    .orgName(boar.getOrgName())
+                    .farmId(boar.getFarmId())
+                    .farmName(boar.getFarmName())
+                    .pigId(boar.getId())
+                    .pigCode(boar.getPigCode())
+                    .type(PigEvent.ENTRY.getKey())
+                    .name(PigEvent.ENTRY.getName())
+                    .kind(DoctorPig.PigSex.BOAR.getKey())
+                    .isAuto(IsOrNot.YES.getValue())
+                    .eventAt(boar.getInFarmDate())
+                    .barnId(boar.getInitBarnId())
+                    .barnName(boar.getInitBarnName())
+                    .creatorId(boar.getCreatorId())
+                    .creatorName(boar.getCreatorName())
+                    .operatorId(boar.getCreatorId())
+                    .operatorName(boar.getCreatorName())
+                    .npd(0)
+                    .dpnpd(0)
+                    .pfnpd(0)
+                    .plnpd(0)
+                    .psnpd(0)
+                    .pynpd(0)
+                    .ptnpd(0)
+                    .jpnpd(0)
+                    .build();
+            Map<String, String> fieldMap = Maps.newHashMap();
+            if (!Strings.isNullOrEmpty(boar.getBreedName())) {
+                fieldMap.put("品种", boar.getBreedName());
+            }
+            String desc = Joiner.on("#").withKeyValueSeparator("：").join(fieldMap);
+            boarEntryEvent.setDesc(desc);
+            doctorPigEventDao.create(boarEntryEvent);
         }
     }
 
