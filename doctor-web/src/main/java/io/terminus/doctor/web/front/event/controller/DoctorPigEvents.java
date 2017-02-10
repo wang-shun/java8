@@ -241,12 +241,15 @@ public class DoctorPigEvents {
                     }
                     doctorPigEvent.setExtraMap(extraMap);
                     DoctorPigEventDetail detail = OBJECT_MAPPER.convertValue(doctorPigEvent, DoctorPigEventDetail.class);
+
+                    //设置事件能否回滚,若取事件是否可以回滚有错则默认不能回滚
                     Response<Boolean> isRollbackResponse = doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId());
                     boolean isRollback =false;
                     if (isRollbackResponse.isSuccess()) {
                         isRollback = isRollbackResponse.getResult();
                     }
                     detail.setIsRollback(isRollback);
+
                     return detail;
                 }).collect(toList());
         return new Paging<>(pigEventPagingResponse.getResult().getTotal(), pigEventDetailList);
