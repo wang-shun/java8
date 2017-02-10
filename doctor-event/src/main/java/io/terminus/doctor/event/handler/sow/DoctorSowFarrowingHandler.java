@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.DateUtil.stringToDate;
 
@@ -116,10 +117,6 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
     @Override
     protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        Map<String, Object> extraMap = doctorPigEvent.getExtraMap();
-        extraMap.put("farrowGroupId", doctorPigTrack.getGroupId());
-        doctorPigEvent.setGroupId(doctorPigTrack.getGroupId());
-        doctorPigEvent.setExtraMap(extraMap);
         super.specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
         //对应的最近一次的 周期配种的初陪 的 isDelivery 字段变成true
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
@@ -132,6 +129,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     @Override
     public void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
+        //触发断奶事件
         if (Objects.equals(farrowingDto.getFarrowingLiveCount(), 0)) {
             DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
                     .partWeanDate(farrowingDto.eventAt())
@@ -141,10 +139,18 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
             buildAutoEventCommonInfo(farrowingDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
             doctorSowWeanHandler.handle(doctorEventInfoList, partWeanDto, basic);
         }
-
+        //触发猪群事件
         Long groupId = buildPigGroupCountInfo(doctorEventInfoList, doctorPigTrack, doctorPigEvent, farrowingDto, basic);
+        checkState(notNull(groupId), "创建猪事件失败:猪号" + inputDto.getPigCode());
         doctorPigTrack.setGroupId(groupId);
         doctorPigTrackDao.update(doctorPigTrack);
+
+        //向分娩事件事件中放入groupId
+        Map<String, Object> extraMap = doctorPigEvent.getExtraMap();
+        extraMap.put("farrowGroupId", doctorPigTrack.getGroupId());
+        doctorPigEvent.setGroupId(doctorPigTrack.getGroupId());
+        doctorPigEvent.setExtraMap(extraMap);
+        doctorPigEventDao.update(doctorPigEvent);
 
     }
 
