@@ -241,7 +241,11 @@ public class DoctorPigEvents {
                     }
                     doctorPigEvent.setExtraMap(extraMap);
                     DoctorPigEventDetail detail = OBJECT_MAPPER.convertValue(doctorPigEvent, DoctorPigEventDetail.class);
-                    Boolean isRollback = RespHelper.or500(doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId()));
+                    Response<Boolean> isRollbackResponse = doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId());
+                    boolean isRollback =false;
+                    if (isRollbackResponse.isSuccess()) {
+                        isRollback = isRollbackResponse.getResult();
+                    }
                     detail.setIsRollback(isRollback);
                     return detail;
                 }).collect(toList());
