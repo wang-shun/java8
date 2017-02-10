@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2014 杭州端点网络科技有限公司
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <!-- msg services -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.ReceiverGroupReadService" ref="receiverGroupReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.ReceiverGroupWriteService" ref="receiverGroupWriteServiceImpl"/>
+
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.SubscriptionReadService" ref="subscriptionReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.SubscriptionWriteService" ref="subscriptionWriteServiceImpl"/>
+
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.MessageTemplateReadService" ref="messageTemplateReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.MessageTemplateWriteService" ref="messageTemplateWriteServiceImpl"/>
+
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.MessageReadService" ref="messageReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.MessageWriteService" ref="messageWriteServiceImpl"/>
+
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyReadService" ref="notifyReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyWriteService" ref="notifyWriteServiceImpl"/>
+</beans>
