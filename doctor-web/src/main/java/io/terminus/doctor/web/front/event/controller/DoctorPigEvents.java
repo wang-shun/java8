@@ -241,8 +241,15 @@ public class DoctorPigEvents {
                     }
                     doctorPigEvent.setExtraMap(extraMap);
                     DoctorPigEventDetail detail = OBJECT_MAPPER.convertValue(doctorPigEvent, DoctorPigEventDetail.class);
-                    Boolean isRollback = RespHelper.or500(doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId()));
+
+                    //设置事件能否回滚,若取事件是否可以回滚有错则默认不能回滚
+                    Response<Boolean> isRollbackResponse = doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId());
+                    boolean isRollback =false;
+                    if (isRollbackResponse.isSuccess()) {
+                        isRollback = isRollbackResponse.getResult();
+                    }
                     detail.setIsRollback(isRollback);
+
                     return detail;
                 }).collect(toList());
         return new Paging<>(pigEventPagingResponse.getResult().getTotal(), pigEventDetailList);
@@ -375,7 +382,6 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/eventExport", method = RequestMethod.GET)
     public void pigEventExport(@RequestParam Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response){
         try {
-            String exportName;
             if (Strings.isNullOrEmpty(eventCriteria.get("kind"))) {
                 return;
             }
