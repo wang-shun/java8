@@ -898,5 +898,7 @@
         WHERE pig_id = #{pigId}
           AND `type` = #{type}
           AND event_at &lt;= #{eventAt}
+        ORDER BY event_at DESC
+        limit 1
     </select>
 </mapper>
