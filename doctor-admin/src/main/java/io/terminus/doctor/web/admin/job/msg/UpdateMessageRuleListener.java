@@ -21,6 +21,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by xjn on 16/11/15.
@@ -71,11 +72,13 @@ public class UpdateMessageRuleListener implements EventListener {
                 createWarnMessage(messageRule);
             } else if (Objects.equals(DataEventType.UpdateMessageRules.getKey(), dataEvent.getEventType())){
                 Map<String, List<Integer>> map = DataEvent.analyseContent(dataEvent, Map.class);
-                map.get("messageRuleIds").forEach(messageRuleId -> {
-                    DoctorMessageRule messageRule = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRuleById(messageRuleId.longValue()));
-                    createWarnMessage(messageRule);
-                });
-
+                Map<Integer, DoctorMessageRule> ruleMap = Maps.newHashMap();
+                map.get("messageRuleIds").stream()
+                        .forEach(messageRuleId -> {
+                            DoctorMessageRule messageRule = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRuleById(messageRuleId.longValue()));
+                            ruleMap.put(messageRule.getCategory(), messageRule);
+                        });
+                ruleMap.values().forEach(this::createWarnMessage);
             }
         } catch (Exception e) {
             log.error("handle.update.message.rule.failed, cause by {}", Throwables.getStackTraceAsString(e));
