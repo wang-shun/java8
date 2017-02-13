@@ -16,6 +16,7 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
@@ -96,6 +97,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -120,6 +122,7 @@ import static io.terminus.doctor.event.enums.PregCheckResult.from;
 public class DoctorMoveDataService {
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    private static final JsonMapperUtil MAPPER = JsonMapperUtil.nonDefaultMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorGroupDao doctorGroupDao;
@@ -2468,11 +2471,12 @@ public class DoctorMoveDataService {
                 DoctorPig.PigSex.SOW.getKey(), Lists.newArrayList(PigEvent.FARROWING.getKey())).stream()
                 .filter(event -> event.getGroupId() == null)
                 .forEach(event -> {
-                    DoctorGroup group;
-                    DoctorFarrowingDto farrow = JSON_MAPPER.fromJson(event.getExtra(), DoctorFarrowingDto.class);
+                    DoctorGroup group = null;
+                    DoctorFarrowingDto farrow = MAPPER.fromJson(event.getExtra(), DoctorFarrowingDto.class);
                     if (farrow != null && notEmpty(farrow.getGroupCode())) {
                         group = doctorGroupDao.findByFarmIdAndGroupCode(farmId, farrow.getGroupCode());
-                    } else {
+                    }
+                    if (group == null) {
                         group = doctorGroupDao.findByFarmIdAndBarnIdAndDate(farmId, event.getBarnId(), event.getEventAt());
                     }
 
@@ -2493,12 +2497,13 @@ public class DoctorMoveDataService {
                 DoctorPig.PigSex.SOW.getKey(), Lists.newArrayList(PigEvent.WEAN.getKey())).stream()
                 .filter(event -> event.getGroupId() == null)
                 .forEach(event -> {
-                    DoctorGroup group = new DoctorGroup();
-                    DoctorPigEvent farrowEvent = doctorPigEventDao.findLastByTypeAndDate(event.getPigId(), event.getEventAt(), PigEvent.FARROWING.getKey());
-                    if (farrowEvent != null && farrowEvent.getGroupId() != null) {
-                        group.setId(farrowEvent.getGroupId());
-                    } else {
-                        group = doctorGroupDao.findByFarmIdAndBarnIdAndDate(farmId, event.getBarnId(), event.getEventAt());
+                    DoctorGroup group = doctorGroupDao.findByFarmIdAndBarnIdAndDate(farmId, event.getBarnId(), event.getEventAt());
+                    if (group == null) {
+                        DoctorPigEvent farrowEvent = doctorPigEventDao.findLastByTypeAndDate(event.getPigId(), event.getEventAt(), PigEvent.FARROWING.getKey());
+                        if (farrowEvent != null && farrowEvent.getGroupId() != null) {
+                            group = new DoctorGroup();
+                            group.setId(farrowEvent.getGroupId());
+                        }
                     }
 
                     //更新group_id
