@@ -891,4 +891,14 @@
         FROM <include refid="tb"/>
         WHERE group_id = #{groupId}
     </select>
+
+    <select id="findLastByTypeAndDate" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE pig_id = #{pigId}
+          AND `type` = #{type}
+          AND event_at &lt;= #{eventAt}
+        ORDER BY event_at DESC
+        limit 1
+    </select>
 </mapper>
