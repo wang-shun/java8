@@ -342,7 +342,7 @@ public class DoctorWareHouseQuery {
                     boolean isRollback = false;
                     Response<Boolean> isRollbackResponse = doctorMaterialConsumeProviderReadService.eventCanRollback(provider.getId());
                     if (isRollbackResponse.isSuccess()) {
-                        isRollback = true;
+                        isRollback = isRollbackResponse.getResult();
                     }
                     eventDto.setIsRollback(isRollback);
                     return eventDto;
