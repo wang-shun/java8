@@ -7,6 +7,7 @@ import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
+import io.terminus.doctor.event.dto.msg.DoctorMessageSearchDto;
 import io.terminus.doctor.event.model.DoctorMessage;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -74,7 +75,7 @@ public class DoctorPigManager {
         });
 
         //更新消息
-        DoctorMessage msgSearch = new DoctorMessage();
+        DoctorMessageSearchDto msgSearch = new DoctorMessageSearchDto();
         msgSearch.setBusinessId(pigId);
         doctorMessageDao.list(msgSearch).forEach(msg -> {
             DoctorMessage updateMsg = new DoctorMessage();
@@ -92,7 +93,7 @@ public class DoctorPigManager {
         if (pig == null) {
             throw new ServiceException("pig.not.found");
         }
-        if (doctorPigDao.findPigByFarmIdAndPigCodeAndSex(pig.getFarmId(), newCode, DoctorPig.PigSex.SOW.getKey()) == null) {
+        if (doctorPigDao.findPigByFarmIdAndPigCodeAndSex(pig.getFarmId(), newCode, DoctorPig.PigSex.SOW.getKey()) != null) {
             throw new ServiceException("新猪号" + newCode + "已存在");
         }
     }
