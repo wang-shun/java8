@@ -9,6 +9,7 @@ import io.terminus.doctor.basic.dto.MaterialEventReport;
 import io.terminus.doctor.basic.dto.WarehouseEventReport;
 import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +40,13 @@ public interface DoctorMaterialConsumeProviderReadService {
      */
     Response<Paging<DoctorMaterialConsumeProvider>> page(Long farmId, Long warehouseId, Long materialId, Integer eventType, List<Integer> eventTypes, Integer materilaType,
                                                           Long staffId, String startAt, String endAt, Integer pageNo, Integer size);
+
+    /**
+     * 仓库事件能否回滚
+     * @param eventId 事件id
+     * @return 能否回滚
+     */
+    Response<Boolean> eventCanRollback(@NotNull(message = "eventId.not.empty") Long eventId);
 
     Response<List<DoctorMaterialConsumeProvider>> list(Long farmId, Long warehouseId, Long materialId, String materialName,
                                                        Integer eventType, List<Integer> eventTypes, Integer materilaType,
