@@ -21,6 +21,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by xjn on 16/11/15.
@@ -71,11 +72,13 @@ public class UpdateMessageRuleListener implements EventListener {
                 createWarnMessage(messageRule);
             } else if (Objects.equals(DataEventType.UpdateMessageRules.getKey(), dataEvent.getEventType())){
                 Map<String, List<Integer>> map = DataEvent.analyseContent(dataEvent, Map.class);
-                map.get("messageRuleIds").forEach(messageRuleId -> {
-                    DoctorMessageRule messageRule = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRuleById(messageRuleId.longValue()));
-                    createWarnMessage(messageRule);
-                });
-
+                Map<Integer, DoctorMessageRule> ruleMap = Maps.newHashMap();
+                map.get("messageRuleIds").stream()
+                        .forEach(messageRuleId -> {
+                            DoctorMessageRule messageRule = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRuleById(messageRuleId.longValue()));
+                            ruleMap.put(messageRule.getCategory(), messageRule);
+                        });
+                ruleMap.values().forEach(this::createWarnMessage);
             }
         } catch (Exception e) {
             log.error("handle.update.message.rule.failed, cause by {}", Throwables.getStackTraceAsString(e));
@@ -83,20 +86,15 @@ public class UpdateMessageRuleListener implements EventListener {
     }
 
     private void createWarnMessage(DoctorMessageRule messageRule){
-        DoctorMessageRuleTemplate doctorMessageRuleTemplate = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(messageRule.getTemplateId()));
-        if (Objects.equals(doctorMessageRuleTemplate.getType(), DoctorMessageRuleTemplate.Type.ERROR.getValue())) {
-            Map<String, Object> criteria = Maps.newHashMap();
-            criteria.put("farmId", messageRule.getFarmId());
-            criteria.put("category", messageRule.getCategory());
-            criteria.put("type", DoctorMessageRuleTemplate.Type.WARNING.getValue());
-            DoctorMessageRule warningRule = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByCriteria(criteria)).get(0);
-            DoctorMessageRuleTemplate warningTemplate = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(warningRule.getTemplateId()));
-            if (producerMap.get(warningTemplate.getProducer()) != null){
-                producerMap.get(warningTemplate.getProducer()).createWarnMessageByMessageRule(warningRule);
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("farmId", messageRule.getFarmId());
+        criteria.put("category", messageRule.getCategory());
+        List<DoctorMessageRule> ruleList = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByCriteria(criteria));
+        ruleList.forEach(rule -> {
+            DoctorMessageRuleTemplate doctorMessageRuleTemplate = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(messageRule.getTemplateId()));
+            if (producerMap.get(doctorMessageRuleTemplate.getProducer()) != null){
+                producerMap.get(doctorMessageRuleTemplate.getProducer()).createWarnMessageByMessageRule(rule);
             }
-        }
-        if (producerMap.get(doctorMessageRuleTemplate.getProducer()) != null){
-            producerMap.get(doctorMessageRuleTemplate.getProducer()).createWarnMessageByMessageRule(messageRule);
-        }
+        });
     }
 }

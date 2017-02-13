@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.event.dao.DoctorMessageRuleDao;
@@ -141,10 +142,11 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
                 doctorMessageRuleDao.create(rule);
                 ids.add(rule.getId());
             }
-
-            Map<String, List<Long>> map = Maps.newHashMap();
-            map.put("messageRuleIds", ids);
-            publisher.publish(DataEvent.toBytes(DataEventType.UpdateMessageRules.getKey(), map));
+            if (!Arguments.isNullOrEmpty(ids)) {
+                Map<String, List<Long>> map = Maps.newHashMap();
+                map.put("messageRuleIds", ids);
+                publisher.publish(DataEvent.toBytes(DataEventType.UpdateMessageRules.getKey(), map));
+            }
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("init msg template to farm failed, farm id is {}, cause by {}", farmId, Throwables.getStackTraceAsString(e));
