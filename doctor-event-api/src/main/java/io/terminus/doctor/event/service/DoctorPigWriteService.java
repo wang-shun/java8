@@ -6,6 +6,8 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 
+import java.util.List;
+
 /**
  * Created by yaoqijun.
  * Date:2016-05-13
@@ -22,12 +24,7 @@ public interface DoctorPigWriteService {
 
 
     /**
-     * 修改猪的耳号
-     * @param pigId
-     * @param pigCode 新的耳号
-     * @return
-     * @deprecated 只更新了事件表中的冗余猪号，json 中的没有关注，所以更新并不完整
+     * 批量修改猪的耳号
      */
-    @Deprecated
-    Response<Boolean> updatePigCode(Long pigId, String pigCode);
+    Response<Boolean> updatePigCodes(List<DoctorPig> pigs);
 }

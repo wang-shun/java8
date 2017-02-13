@@ -17,7 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc:
@@ -112,11 +115,14 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
     }
 
     @Override
-    public Response<Boolean> updatePigCode(Long pigId, String pigCode){
+    public Response<Boolean> updatePigCodes(List<DoctorPig> pigs) {
         try{
-            return  Response.ok(doctorPigManager.updatePigCode(pigId, pigCode));
+            if (!notEmpty(pigs)) {
+                return Response.ok(Boolean.TRUE);
+            }
+            return Response.ok(doctorPigManager.updatePigCodes(pigs));
         }catch(Exception e){
-            log.error("update pig code failed, pigId={}, pigCode={}, cause:{}", pigId, pigCode, Throwables.getStackTraceAsString(e));
+            log.error("update pig code failed, pigs:{}, cause:{}", pigs, Throwables.getStackTraceAsString(e));
             return Response.fail("update.pig.code.fail");
         }
     }

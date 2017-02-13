@@ -5,7 +5,6 @@ import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
@@ -15,25 +14,25 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.msg.DoctorMessageSearchDto;
+import io.terminus.doctor.event.dto.msg.DoctorPigMessage;
+import io.terminus.doctor.event.dto.msg.RuleValue;
+import io.terminus.doctor.event.enums.Category;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorMessage;
+import io.terminus.doctor.event.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorPigReadService;
-import io.terminus.doctor.event.service.DoctorPigWriteService;
-import io.terminus.doctor.event.dto.msg.DoctorMessageSearchDto;
-import io.terminus.doctor.event.dto.msg.DoctorPigMessage;
-import io.terminus.doctor.event.dto.msg.RuleValue;
-import io.terminus.doctor.event.enums.Category;
-import io.terminus.doctor.event.model.DoctorMessage;
-import io.terminus.doctor.event.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.event.service.DoctorMessageReadService;
 import io.terminus.doctor.event.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBoarDetailDto;
 import io.terminus.doctor.web.front.event.dto.DoctorFosterDetail;
@@ -70,6 +69,8 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @Controller
 @RequestMapping("/api/doctor/pigs")
 public class DoctorPigs {
+
+    private static final JsonMapper MAPPER = JsonMapper.nonEmptyMapper();
 
     private final DoctorPigReadService doctorPigReadService;
     private final DoctorPigWriteService doctorPigWriteService;
@@ -368,34 +369,11 @@ public class DoctorPigs {
 
     /**
      * 修改猪的耳号
-     * @param pigId
-     * @param code
-     * @return
      */
-    @RequestMapping(value = "/updateCode", method = RequestMethod.PUT)
+    @RequestMapping(value = "/updateCodes", method = RequestMethod.GET)
     @ResponseBody
-    public boolean updatePigCode(@RequestParam Long pigId, @RequestParam String code){
-        DoctorPig pig = RespHelper.or500(doctorPigReadService.findPigById(pigId));
-        if(pig == null){
-            throw new JsonResponseException("pig.not.found");
-        }
-        if(Objects.equals(pig.getPigType(), DoctorPig.PigSex.BOAR.getKey())){
-            throw new JsonResponseException("boar.code.forbid.update");
-        }
-
-        boolean notExist = RespHelper.or500(doctorPigReadService.validatePigCodeByFarmId(pig.getFarmId(), code));
-        if(!notExist){
-            throw new JsonResponseException("validate.pigCode.fail");
-        }
-
-        try{
-            DoctorPigTrack track = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
-            doctorFarmAuthCenter.checkBarnAuth(track.getCurrentBarnId());
-        }catch(ServiceException e){
-            throw new JsonResponseException(e.getMessage());
-        }
-
-        RespHelper.or500(doctorPigWriteService.updatePigCode(pigId, code));
-        return true;
+    public boolean updatePigCodes(@RequestParam String pigCodeUpdates) {
+        List<DoctorPig> pigs = MAPPER.fromJson(pigCodeUpdates, MAPPER.createCollectionType(List.class, DoctorPig.class));
+        return RespHelper.or500(doctorPigWriteService.updatePigCodes(pigs));
     }
 }

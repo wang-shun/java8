@@ -4,6 +4,8 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Created by yaoqijun.
  * Date:2016-05-19
@@ -33,5 +35,9 @@ public class DoctorPigSnapshotDao extends MyBatisDao<DoctorPigSnapshot>{
      */
     public DoctorPigSnapshot queryLastByPigId(Long pigId){
         return getSqlSession().selectOne(sqlId("queryLastByPigId"), pigId);
+    }
+
+    public List<DoctorPigSnapshot> findByPigId(Long pigId){
+        return getSqlSession().selectList(sqlId("findByPigId"), pigId);
     }
 }
