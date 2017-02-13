@@ -6,6 +6,8 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.basic.dao.DoctorMaterialInWareHouseDao;
+import io.terminus.doctor.basic.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.basic.dao.DoctorMaterialConsumeProviderDao;
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +31,9 @@ import java.util.Map;
 public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMaterialConsumeProviderReadService {
 
     private final DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao;
+
+    @Autowired
+    private DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;
 
     @Autowired
     public DoctorMaterialConsumeProviderReadServiceImpl(DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao) {
@@ -63,6 +69,29 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
         }catch(Exception e){
             log.error("page DoctorMaterialConsumeProvider failed, cause :{}", Throwables.getStackTraceAsString(e));
             return Response.fail("page.DoctorMaterialConsumeProvider.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> eventCanRollback(@NotNull(message = "eventId.not.empty") Long eventId) {
+        try {
+            DoctorMaterialConsumeProvider materialConsumeProvider = doctorMaterialConsumeProviderDao.findById(eventId);
+            DoctorMaterialInWareHouse materialInWareHouse = doctorMaterialInWareHouseDao.queryByFarmHouseMaterial(materialConsumeProvider.getFarmId(), materialConsumeProvider.getWareHouseId(), materialConsumeProvider.getMaterialId());
+            DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(materialConsumeProvider.getEventType());
+            if (eventType.isIn()
+                    && materialConsumeProvider.getEventCount() != null
+                    && materialInWareHouse != null
+                    && materialConsumeProvider.getEventCount() <= materialInWareHouse.getLotNumber()) {
+                return Response.ok(Boolean.TRUE);
+            }
+            if (eventType.isOut() && materialInWareHouse != null) {
+                return Response.ok(Boolean.TRUE);
+            }
+            return Response.ok(Boolean.FALSE);
+
+        } catch (Exception e) {
+            log.error("event can rollback failed, eventId:{}, cause:{}", eventId, Throwables.getStackTraceAsString(e));
+            return Response.fail("event.can.rollback.failed");
         }
     }
 

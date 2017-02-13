@@ -27,7 +27,6 @@ import io.terminus.doctor.basic.service.DoctorMaterialPriceInWareHouseReadServic
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.basic.service.MaterialFactoryReadService;
-import io.terminus.doctor.web.front.warehouse.dto.DoctorMaterialDetailDto;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -36,9 +35,11 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.core.export.Exporter;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorMaterialDetailDto;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseCreateDto;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseEventCriteria;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseEventData;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseEventDto;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseUpdateDto;
 import io.terminus.doctor.web.front.warehouse.dto.MaterialReport;
 import io.terminus.doctor.web.front.warehouse.dto.WarehouseReport;
@@ -57,10 +58,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -313,7 +314,7 @@ public class DoctorWareHouseQuery {
      */
     @RequestMapping(value = "/pageConsumeProvideHistory", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorMaterialConsumeProvider> pageConsumeProvideHistory(
+    public Paging<DoctorWareHouseEventDto> pageConsumeProvideHistory(
             @RequestParam("farmId") Long farmId, // 此参数必须有
             @RequestParam(name = "warehouseId", required = false) Long warehouseId,
             @RequestParam(required = false) Long materialId,
@@ -329,8 +330,24 @@ public class DoctorWareHouseQuery {
         if(!Strings.isNullOrEmpty(eventTypes)){
             types = Splitters.splitToInteger(eventTypes, Splitters.UNDERSCORE);
         }
-        return RespHelper.or500(doctorMaterialConsumeProviderReadService.page(farmId, warehouseId, materialId, eventType, types,
-                materilaType, staffId, startAt, endAt, pageNo, size));
+        Response<Paging<DoctorMaterialConsumeProvider>> pagingResponse = doctorMaterialConsumeProviderReadService.page(farmId, warehouseId, materialId, eventType, types,
+                materilaType, staffId, startAt, endAt, pageNo, size);
+        if (!pagingResponse.isSuccess()) {
+            return Paging.empty();
+        }
+        List<DoctorWareHouseEventDto> eventDtoList = pagingResponse.getResult().getData().stream()
+                .map(provider -> {
+                    DoctorWareHouseEventDto eventDto = BeanMapper.map(provider, DoctorWareHouseEventDto.class);
+                    //设置仓库事件是否可回滚, 若获取事件是否可回滚错误则默认不可回滚
+                    boolean isRollback = false;
+                    Response<Boolean> isRollbackResponse = doctorMaterialConsumeProviderReadService.eventCanRollback(provider.getId());
+                    if (isRollbackResponse.isSuccess()) {
+                        isRollback = true;
+                    }
+                    eventDto.setIsRollback(isRollback);
+                    return eventDto;
+                }).collect(Collectors.toList());
+        return new Paging<>(pagingResponse.getResult().getTotal(), eventDtoList);
     }
 
     /**
