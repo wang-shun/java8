@@ -24,6 +24,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RpcProvider
@@ -84,7 +85,8 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
                     && materialConsumeProvider.getEventCount() <= materialInWareHouse.getLotNumber()) {
                 return Response.ok(Boolean.TRUE);
             }
-            if (eventType.isOut() && materialInWareHouse != null) {
+            if (eventType.isOut() && materialInWareHouse != null
+                    && !Objects.equals(materialConsumeProvider.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_RAW_MATERIAL.getValue())) {
                 return Response.ok(Boolean.TRUE);
             }
             return Response.ok(Boolean.FALSE);
