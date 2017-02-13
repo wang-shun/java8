@@ -5,6 +5,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -13,6 +14,7 @@ import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
@@ -31,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
@@ -51,6 +54,7 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @RestController
 @RequestMapping("/api/doctor/move/data")
 public class DoctorMoveDataController {
+    private static final JsonMapper MAPPER = JsonMapper.nonEmptyMapper();
 
     private final UserInitService userInitService;
     private final WareHouseInitService wareHouseInitService;
@@ -66,6 +70,7 @@ public class DoctorMoveDataController {
     private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
     private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
     private final DoctorImportDataService doctorImportDataService;
+    private final DoctorPigWriteService doctorPigWriteService;
 
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
@@ -81,7 +86,8 @@ public class DoctorMoveDataController {
                                     DoctorCommonReportWriteService doctorCommonReportWriteService,
                                     DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
                                     DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService,
-                                    DoctorImportDataService doctorImportDataService) {
+                                    DoctorImportDataService doctorImportDataService,
+                                    DoctorPigWriteService doctorPigWriteService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -96,6 +102,7 @@ public class DoctorMoveDataController {
         this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
         this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
         this.doctorImportDataService = doctorImportDataService;
+        this.doctorPigWriteService = doctorPigWriteService;
     }
 
     /**
@@ -893,5 +900,15 @@ public class DoctorMoveDataController {
             log.error("flushWeanEventGroupId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
+    }
+
+    /**
+     * 修改猪的耳号
+     */
+    @RequestMapping(value = "/updateCodes", method = RequestMethod.GET)
+    @ResponseBody
+    public boolean updatePigCodes(@RequestParam String pigCodeUpdates) {
+        List<DoctorPig> pigs = MAPPER.fromJson(pigCodeUpdates, MAPPER.createCollectionType(List.class, DoctorPig.class));
+        return RespHelper.or500(doctorPigWriteService.updatePigCodes(pigs));
     }
 }
