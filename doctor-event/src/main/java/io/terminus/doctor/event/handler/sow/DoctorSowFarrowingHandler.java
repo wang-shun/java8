@@ -129,16 +129,6 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     @Override
     public void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
-        //触发断奶事件
-        if (Objects.equals(farrowingDto.getFarrowingLiveCount(), 0)) {
-            DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
-                    .partWeanDate(farrowingDto.eventAt())
-                    .partWeanPigletsCount(0)
-                    .partWeanAvgWeight(0d)
-                    .build();
-            buildAutoEventCommonInfo(farrowingDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
-            doctorSowWeanHandler.handle(doctorEventInfoList, partWeanDto, basic);
-        }
         //触发猪群事件
         Long groupId = buildPigGroupCountInfo(doctorEventInfoList, doctorPigTrack, doctorPigEvent, farrowingDto, basic);
         checkState(notNull(groupId), "创建猪事件失败:猪号" + inputDto.getPigCode());
@@ -152,6 +142,16 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setExtraMap(extraMap);
         doctorPigEventDao.update(doctorPigEvent);
 
+        //触发断奶事件
+        if (Objects.equals(farrowingDto.getFarrowingLiveCount(), 0)) {
+            DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
+                    .partWeanDate(farrowingDto.eventAt())
+                    .partWeanPigletsCount(0)
+                    .partWeanAvgWeight(0d)
+                    .build();
+            buildAutoEventCommonInfo(farrowingDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
+            doctorSowWeanHandler.handle(doctorEventInfoList, partWeanDto, basic);
+        }
     }
 
     /**
