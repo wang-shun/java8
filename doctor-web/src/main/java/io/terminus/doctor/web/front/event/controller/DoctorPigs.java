@@ -269,6 +269,7 @@ public class DoctorPigs {
                 } else if (Objects.equals(doctorMessage.getCategory(), Category.SOW_BIRTHDATE.getKey())) {
                     pigMessage.setMessageCategory(Category.SOW_BIRTHDATE.getKey());
                     pigMessage.setMessageDescribe("怀孕天数");
+                    pigMessage.setTimeDiff(doctorMessage.getTimeDiff());
                 }
                 doctorPigMessageList.add(pigMessage);
             } catch (Exception e) {

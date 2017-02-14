@@ -4,16 +4,16 @@ import com.google.common.collect.Maps;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.dto.msg.Rule;
 import io.terminus.doctor.event.dto.msg.RuleValue;
 import io.terminus.doctor.event.dto.msg.SubUser;
 import io.terminus.doctor.event.enums.Category;
+import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorMessage;
 import io.terminus.doctor.event.model.DoctorMessageRuleRole;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.web.admin.job.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -78,17 +78,18 @@ public class SowBackFatProducer extends AbstractJobProducer {
                         RuleValue ruleValue = ruleValueMap.get(key);
                         timeDiff = getTimeDiff(new DateTime(matingPigEvent.getEventAt()));
                         if (key == 1){
-                            if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, new DateTime(matingPigEvent.getEventAt()), PigEvent.CONDITION)) {
+                            if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, matingPigEvent, PigEvent.CONDITION)) {
                                 isSend = true;
                             }
                         } else if (key == 2 || key == 3) {
-                            if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, new DateTime(matingPigEvent.getEventAt()).plusDays(ruleValue.getValue().intValue()), PigEvent.CONDITION)) {
+                            matingPigEvent.setEventAt(new DateTime(matingPigEvent.getEventAt()).plusDays(ruleValue.getValue().intValue()).toDate());
+                            if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, matingPigEvent, PigEvent.CONDITION)) {
                                 isSend = true;
                             }
                         } else {
                             DoctorPigEvent pigEvent = getPigEventByEventType(pigDto.getPigId(), PigEvent.WEAN.getKey());
-                            if (pigEvent != null && filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()), PigEvent.CONDITION)){
-                                if (!filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()), PigEvent.MATING) && checkRuleValue(ruleValueMap.get(1), timeDiff)){
+                            if (pigEvent != null && filterPigCondition(pigDto, pigEvent, PigEvent.CONDITION)){
+                                if (!filterPigCondition(pigDto, pigEvent, PigEvent.MATING) && checkRuleValue(ruleValueMap.get(1), timeDiff)){
                                     continue;
                                 } else{
                                     timeDiff = getTimeDiff(new DateTime(pigEvent.getEventAt()));
@@ -133,9 +134,13 @@ public class SowBackFatProducer extends AbstractJobProducer {
      * @param pigDto
      * @return Boolean
      */
-    private Boolean filterPigCondition(DoctorPigInfoDto pigDto, DateTime time, PigEvent pigEvent) {
+    private static Boolean filterPigCondition(DoctorPigInfoDto pigDto, DoctorPigEvent pigEvent, PigEvent event) {
         if (!Arguments.isNullOrEmpty(pigDto.getDoctorPigEvents())) {
-            List<DoctorPigEvent> list = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> new DateTime(doctorPigEvent.getEventAt()).isAfter(time) && (Objects.equals(doctorPigEvent.getType(), pigEvent.getKey()))).collect(Collectors.toList());
+            List<DoctorPigEvent> list = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> Objects.equals(doctorPigEvent.getType(), event.getKey())
+                     && (new DateTime(doctorPigEvent.getEventAt()).isAfter(new DateTime(pigEvent.getEventAt()))
+                     || (new DateTime(doctorPigEvent.getEventAt()).isEqual(new DateTime(pigEvent.getEventAt()))
+                     && doctorPigEvent.getId() > pigEvent.getId()))
+            ).collect(Collectors.toList());
             if (list.isEmpty()) {
                 return true;
             }
