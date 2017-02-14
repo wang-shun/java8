@@ -595,3 +595,8 @@ alter table doctor_messages add column ware_house_id bigint(20) default null com
 alter table doctor_messages add column ware_house_name VARCHAR(64) default null comment '仓库名' after ware_house_id;
 alter table doctor_messages add column lot_number double default null comment '物料剩余量' after ware_house_name;
 
+-- 2017-02-14
+alter table doctor_messages add column quantity  int(11) default null comment '猪只数' after lot_number;
+alter table doctor_messages add column avg_day_age  int(11) default null comment '猪群平均日龄' after quantity;
+
+
