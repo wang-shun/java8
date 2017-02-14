@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.rollback.sow;
 
 import com.google.common.collect.Lists;
-import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -80,7 +79,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
         toDto.setFarmId(pigEvent.getFarmId());
         toDto.setEventAt(pigEvent.getEventAt());
 
-        Long farrowGroupId = Params.getNullDefualt(pigEvent.getExtraMap(), "farrowGroupId", null);
+        Long farrowGroupId = pigEvent.getGroupId();
         if (farrowGroupId == null) {
             toDto.setEsBarnId(pigEvent.getBarnId());
             toDto.setRollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP));
