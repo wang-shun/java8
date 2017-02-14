@@ -58,22 +58,17 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        if (pigEvent.getLiveCount() > 0) {
-            //1.判断是否新建猪群
-            DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
-            if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
-                DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
-                doctorRollbackGroupMoveInHandler.rollback(moveInEvent, operatorId, operatorName);
-                doctorRollbackGroupNewHandler.rollback(toGroupEvent, operatorId, operatorName);
-            } else {
-                doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
-            }
-            //2.断奶事件
+        //1.判断是否新建猪群
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
+        if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
+            DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
+            doctorRollbackGroupMoveInHandler.rollback(moveInEvent, operatorId, operatorName);
+            doctorRollbackGroupNewHandler.rollback(toGroupEvent, operatorId, operatorName);
         } else {
-            DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
-            doctorRollbackSowWeanHandler.handleRollback(toPigEvent, operatorId, operatorName);
+            doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
         }
-        //3. 母猪分娩
+
+        //2. 母猪分娩
         handleRollbackWithStatus(pigEvent, operatorId, operatorName);
     }
 
