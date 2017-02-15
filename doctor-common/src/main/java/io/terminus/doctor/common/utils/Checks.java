@@ -1,6 +1,7 @@
 package io.terminus.doctor.common.utils;
 
 import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.common.Exception.InvalidException;
 
 import javax.annotation.Nullable;
 
@@ -18,5 +19,11 @@ public final class Checks {
             throw new ServiceException(String.valueOf(errorMessage));
         }
         return reference;
+    }
+
+    public static void expectTrue(boolean b, String errorMessage, Object... objects) {
+        if (!b) {
+            throw new InvalidException(errorMessage, objects);
+        }
     }
 }

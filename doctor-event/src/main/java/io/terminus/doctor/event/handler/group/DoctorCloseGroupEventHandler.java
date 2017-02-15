@@ -2,12 +2,10 @@ package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.Exception.InvalidException;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.DataEvent;
-import io.terminus.doctor.event.event.MsgGroupPublishDto;
-import io.terminus.doctor.event.event.MsgListenedGroupEvent;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -20,6 +18,8 @@ import io.terminus.doctor.event.dto.event.group.DoctorCloseGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.event.MsgGroupPublishDto;
+import io.terminus.doctor.event.event.MsgListenedGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -64,7 +64,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         input.setEventType(GroupEventType.CLOSE.getValue());
 
         //校验能否关闭
-        checkCanClose(groupTrack);
+        checkCanClose(groupTrack, group);
 
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorCloseGroupInput close = (DoctorCloseGroupInput) input;
@@ -76,7 +76,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         DoctorGroupEvent<DoctorCloseGroupEvent> event = dozerGroupEvent(group, GroupEventType.CLOSE, close);
 
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        int dayAge = getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays);
+        int dayAge = getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays, group.getGroupCode());
         event.setAvgDayAge(dayAge);  //重算日龄
         event.setExtraMap(closeEvent);
         doctorGroupEventDao.create(event);
@@ -107,9 +107,9 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
     }
 
     //猪群里还有猪不可关闭!
-    private void checkCanClose(DoctorGroupTrack groupTrack) {
+    private void checkCanClose(DoctorGroupTrack groupTrack, DoctorGroup group) {
         if (groupTrack.getQuantity() > 0) {
-            throw new ServiceException("group.not.empty.cannot.close");
+            throw new InvalidException("group.not.empty.cannot.close", group.getGroupCode());
         }
     }
 }

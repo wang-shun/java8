@@ -27,8 +27,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.common.utils.DateUtil.stringToDate;
 
 /**
@@ -50,10 +50,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
         Map<String, Object> extra = doctorPigEvent.getExtraMap();
-        // 助产 信息
-        extra.put("isHelp", 1);
 
-        // 校验 是否早产信息
         //分娩时间
         DateTime farrowingDate = new DateTime(farrowingDto.eventAt());
         doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
@@ -125,7 +122,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
         //触发猪群事件
         Long groupId = buildPigGroupCountInfo(doctorEventInfoList, doctorPigTrack, doctorPigEvent, farrowingDto, basic);
-        checkState(notNull(groupId), "创建猪事件失败:猪号" + inputDto.getPigCode());
+
+        expectTrue(notNull(groupId), "farrow.group.not.null", inputDto.getPigCode());
         doctorPigTrack.setGroupId(groupId);
         doctorPigTrackDao.update(doctorPigTrack);
 

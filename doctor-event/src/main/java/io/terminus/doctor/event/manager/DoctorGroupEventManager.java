@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.Exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -164,7 +165,7 @@ public class DoctorGroupEventManager {
         //判断此事件是否是自动生成
         if (Objects.equals(IsOrNot.YES.getValue(), event.getIsAuto())) {
             log.error("group event is auto event, can not rollback, event:{}", event);
-            throw new ServiceException("group.event.is.auto");
+            throw new InvalidException("group.event.is.auto");
         }
 
         //新建猪群事件不可回滚

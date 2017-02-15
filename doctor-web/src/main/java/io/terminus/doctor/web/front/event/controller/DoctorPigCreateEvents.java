@@ -462,6 +462,7 @@ public class DoctorPigCreateEvents {
      * @return
      */
     private BasePigEventInputDto buildEventInput(BasePigEventInputDto inputDto, Long pigId, PigEvent pigEvent){
+        //// TODO: 17/2/15 判断pigid 
         DoctorPigInfoDto pigDto = RespHelper.orServEx(this.doctorPigReadService.queryDoctorInfoDtoById(pigId));
         inputDto.setIsAuto(IsOrNot.NO.getValue());
         inputDto.setPigId(pigId);
@@ -504,7 +505,7 @@ public class DoctorPigCreateEvents {
      * @param pigType
      * @return
      */
-    private BasePigEventInputDto buildEventInput(PigEvent pigEvent, String eventInfoDtoJson, Long farmId, Integer pigType, Long pigId) {
+    private BasePigEventInputDto eventInput(PigEvent pigEvent, String eventInfoDtoJson, Long farmId, Integer pigType, Long pigId) {
         switch (pigEvent) {
                 case ENTRY:
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorFarmEntryDto.class);

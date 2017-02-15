@@ -60,7 +60,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         DoctorBarn toBarn = getBarnById(turnSeed.getToBarnId());
 
         //0. 校验数据
-        checkQuantity(groupTrack.getQuantity(), 1); // 确保 原数量 >= 1
+        checkQuantity(groupTrack.getQuantity(), 1, group.getGroupCode()); // 确保 原数量 >= 1
         checkTurnSeedData(group.getPigType(), toBarn.getPigType());
 
         //1. 转换转种猪事件
@@ -72,7 +72,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         event.setQuantity(1);
 
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays, group.getGroupCode()));  //重算日龄
 
         event.setWeight(turnSeed.getWeight());
         event.setAvgWeight(turnSeed.getWeight());

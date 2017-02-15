@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkState;
-
 /**
  * Created by yaoqijun.
  * Date:2016-05-27
@@ -32,7 +30,6 @@ public class DoctorConditionHandler extends DoctorAbstractEventHandler{
             }
         } else {
             DoctorBoarConditionDto boarConditionDto = (DoctorBoarConditionDto) inputDto;
-            checkState(boarConditionDto.getWeight() != null, "公猪体况重量不可为空,猪号:" + boarConditionDto.getPigCode());
             doctorPigTrack.setWeight(boarConditionDto.getWeight());
         }
 

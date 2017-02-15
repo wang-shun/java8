@@ -45,11 +45,6 @@ public class DoctorFarrowingDto extends BasePigEventInputDto implements Serializ
     @NotNull(message = "farrowing.type.not.null")
     private Integer farrowingType;  // 分娩类型
 
-    /**
-     * @see io.terminus.doctor.event.enums.IsOrNot
-     */
-    private Integer isHelp;     //  是否帮助
-
     @NotEmpty(message = "group.code.not.empty")
     private String groupCode;   // 仔猪猪群Code
 

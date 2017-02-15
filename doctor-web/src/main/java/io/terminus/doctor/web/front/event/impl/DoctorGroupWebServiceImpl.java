@@ -16,6 +16,7 @@ import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
+import io.terminus.doctor.common.Exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -525,7 +526,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     //校验是否是系统自动生成的事件, 自动事件不可编辑!
     private static void checkEventAuto(DoctorGroupEvent event) {
         if (Objects.equals(event.getIsAuto(), IsOrNot.YES.getValue())) {
-            throw new ServiceException("group.event.is.auto");
+            throw new InvalidException("group.event.is.auto", event.getId());
         }
     }
 
@@ -558,7 +559,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             if (new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime()) && eventAt.before(DateUtil.toDate(DateTime.now().plusDays(1).toString(DateTimeFormat.forPattern("yyyy-MM-dd"))))) {
                 return;
             } else {
-                throw new ServiceException("event.at.illegal");
+                throw new InvalidException("event.at.range.error", lastEvent.getEventAt(), eventAt, lastEvent.getGroupCode());
             }
         }
     }

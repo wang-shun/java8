@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.usual;
 
+import io.terminus.doctor.common.Exception.InvalidException;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -39,7 +40,7 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
         } else if (Objects.equals(DoctorPig.PigSex.SOW.getKey(), removalDto.getPigType())) {
             doctorPigTrack.setStatus(PigStatus.Removal.getKey());
         } else {
-            throw new IllegalStateException("猪性别错误,猪号:" + removalDto.getPigCode());
+            throw new InvalidException("pig.sex.error", removalDto.getPigType(),removalDto.getPigCode());
         }
         doctorPigTrack.setIsRemoval(IsOrNot.YES.getValue());
         return doctorPigTrack;

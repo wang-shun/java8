@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -36,8 +37,10 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
 //
 //    private String pigCode; // pig code 猪 编号
 
+    @NotNull(message = "birthday.not.null")
     private Date birthday; // 猪生日
 
+    @NotNull(message = "event.at.not.null")
     private Date inFarmDate; // 进厂时间
 
 //    private Long barnId;    // 进仓猪舍Id
@@ -48,8 +51,10 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
      * 不同的数据源方式
      * @see io.terminus.doctor.event.enums.PigSource
      */
+    @NotNull(message = "source.not.null")
     private Integer source;
 
+    @NotNull(message = "breed.not.null")
     private Long breed; //品种Id （basic Info）
 
     private String breedName;   //品种名称

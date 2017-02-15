@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static java.util.Objects.isNull;
 
 /**
@@ -44,7 +44,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         super.handleCheck(eventDto, basic);
         DoctorMatingDto matingDto = (DoctorMatingDto) eventDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(matingDto.getPigId());
-        checkState(doctorPigTrack.getCurrentMatingCount() < 3, "连续配种次数超过三次,猪号:" + eventDto.getPigCode());
+        expectTrue(doctorPigTrack.getCurrentMatingCount() < 3, "mate.count.over", eventDto.getPigCode());
     }
 
     @Override

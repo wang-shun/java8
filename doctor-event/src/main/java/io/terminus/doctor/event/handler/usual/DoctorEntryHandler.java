@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.usual;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.Exception.InvalidException;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -27,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static java.util.Objects.isNull;
 
 /**
@@ -45,7 +46,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
 
     @Override
     public void handleCheck(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        checkState(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(basic.getFarmId(), inputDto.getPigCode(), inputDto.getPigType()) == null, "猪号" + inputDto.getPigCode() + "已存在");
+        expectTrue(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(basic.getFarmId(), inputDto.getPigCode(), inputDto.getPigType()) == null, "pigCode.have.existed", inputDto.getPigCode());
     }
 
 
@@ -131,7 +132,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         } else if (Objects.equals(inputDto.getPigType(), DoctorPig.PigSex.BOAR.getKey())) {
             doctorPigTrack.setStatus(PigStatus.BOAR_ENTRY.getKey());
         } else {
-            throw new IllegalStateException("input.pigType.error");
+            throw new InvalidException("pig.sex.error", inputDto.getPigType(),inputDto.getPigCode());
         }
         //添加进场到配种标志位
         doctorPigTrack.addAllExtraMap(MapBuilder.<String, Object>of().put("enterToMate", true).map());

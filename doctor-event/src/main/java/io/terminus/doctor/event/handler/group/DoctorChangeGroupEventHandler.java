@@ -1,8 +1,8 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.Exception.InvalidException;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
@@ -59,16 +59,16 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
 
-        checkQuantity(groupTrack.getQuantity(), change.getQuantity());
-        checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
+        checkQuantity(groupTrack.getQuantity(), change.getQuantity(), group.getGroupCode());
+        checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty(), group.getGroupCode());
 
         //非母猪触发事件
         if (!input.isSowEvent()) {
-            checkUnweanTrans(group.getPigType(), null, groupTrack, change.getQuantity());
+            checkUnweanTrans(group.getPigType(), null, groupTrack, change.getQuantity(), group.getGroupCode());
         }
 
         if(Objects.equals(group.getPigType(), PigType.NURSERY_PIGLET.getValue())){
-            checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getBaseWeight(), change.getOverPrice());
+            checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getBaseWeight(), change.getOverPrice(), group.getGroupCode());
         }
 
         //1.转换猪群变动事件
@@ -79,7 +79,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setQuantity(change.getQuantity());
 
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays, group.getGroupCode()));  //重算日龄
 
         event.setWeight(change.getWeight());            //总重
         event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
@@ -125,13 +125,13 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     }
 
     //校验金额不能为空, 基础重量不能为空
-    private static void checkSalePrice(Long changeTypeId, Long price, Integer baseWeight, Long overPrice) {
+    private static void checkSalePrice(Long changeTypeId, Long price, Integer baseWeight, Long overPrice, String groupCode) {
         if (changeTypeId == DoctorBasicEnums.SALE.getId()) {
             if ((price == null || overPrice == null)) {
-                throw new ServiceException("money.not.null");
+                throw new InvalidException("sale.money.not.null", groupCode);
             }
             if (baseWeight == null) {
-                throw new ServiceException("weight.not.null");
+                throw new InvalidException("sale.weight.not.null", groupCode);
             }
         }
     }

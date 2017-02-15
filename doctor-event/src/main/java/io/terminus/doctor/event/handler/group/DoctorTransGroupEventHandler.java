@@ -1,9 +1,9 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.Exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -72,27 +72,27 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //同舍不可转群
         if (Objects.equals(group.getCurrentBarnId(), transGroup.getToBarnId())) {
-            throw new ServiceException("same.barn.can.not.trans");
+            throw new InvalidException("same.barn.can.not.trans", group.getGroupCode());
         }
 
         //校验能否转群, 数量, 日龄差, 转群总重
-        checkCanTransBarn(group.getPigType(), transGroup.getToBarnId());
+        checkCanTransBarn(group.getPigType(), transGroup.getToBarnId(), group.getGroupCode());
         checkCanTransGroup(transGroup.getToGroupId(), transGroup.getToBarnId(), transGroup.getIsCreateGroup());
-        checkFarrowGroupUnique(transGroup.getIsCreateGroup(), transGroup.getToBarnId());
-        checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
-        checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
+        checkFarrowGroupUnique(transGroup.getIsCreateGroup(), transGroup.getToBarnId(), group.getGroupCode());
+        checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity(), group.getGroupCode());
+        checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty(), group.getGroupCode());
         Double realWeight = transGroup.getAvgWeight() * transGroup.getQuantity();   //后台计算的总重
         //checkDayAge(groupTrack.getAvgDayAge(), transGroup);
 
         //转入猪舍
         DoctorBarn toBarn = getBarn(transGroup.getToBarnId());
         if (!input.isSowEvent()) {
-            checkUnweanTrans(group.getPigType(), toBarn.getPigType(), groupTrack, transGroup.getQuantity());
+            checkUnweanTrans(group.getPigType(), toBarn.getPigType(), groupTrack, transGroup.getQuantity(), group.getGroupCode());
         }
 
         //1.转换转群事件
         DoctorTransGroupEvent transGroupEvent = BeanMapper.map(transGroup, DoctorTransGroupEvent.class);
-        checkBreed(group.getBreedId(), transGroupEvent.getBreedId());
+        checkBreed(group.getBreedId(), transGroupEvent.getBreedId(), group.getGroupCode());
         transGroupEvent.setToBarnType(toBarn.getPigType());
 
         //2.创建转群事件
@@ -100,7 +100,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setQuantity(transGroup.getQuantity());
 
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays, group.getGroupCode()));  //重算日龄
 
         event.setAvgWeight(transGroup.getAvgWeight());  //均重
         event.setWeight(realWeight);                    //总重

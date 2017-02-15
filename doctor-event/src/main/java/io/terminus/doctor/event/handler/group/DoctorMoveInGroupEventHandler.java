@@ -56,11 +56,11 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorMoveInGroupInput moveIn = (DoctorMoveInGroupInput) input;
 
-        checkQuantityEqual(moveIn.getQuantity(), moveIn.getBoarQty(), moveIn.getSowQty());
+        checkQuantityEqual(moveIn.getQuantity(), moveIn.getBoarQty(), moveIn.getSowQty(), group.getGroupCode());
 
         //1.转换转入猪群事件
         DoctorMoveInGroupEvent moveInEvent = BeanMapper.map(moveIn, DoctorMoveInGroupEvent.class);
-        checkBreed(group.getBreedId(), moveInEvent.getBreedId());
+        checkBreed(group.getBreedId(), moveInEvent.getBreedId(), group.getGroupCode());
 
         //2.创建转入猪群事件
         DoctorGroupEvent<DoctorMoveInGroupEvent> event = dozerGroupEvent(group, GroupEventType.MOVE_IN, moveIn);
@@ -96,7 +96,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         //重新计算日龄, 按照事件录入日期计算
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()) + deltaDays);
+        groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays, group.getGroupCode()), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()) + deltaDays);
 
         //如果是母猪分娩转入或母猪转舍转入，窝数，分娩统计字段需要累加
         if (moveIn.isSowEvent()) {

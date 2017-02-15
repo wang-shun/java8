@@ -5,6 +5,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.Exception.InvalidException;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -86,7 +87,7 @@ public class DoctorGroupManager {
     @Transactional
     public Long createNewGroup(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorNewGroupInput newGroupInput) {
         newGroupInput.setEventType(GroupEventType.NEW.getValue());
-        checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId());
+        checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId(), group.getGroupCode());
 
         //0.校验猪群号是否重复
         checkGroupCodeExist(newGroupInput.getFarmId(), newGroupInput.getGroupCode());
@@ -165,13 +166,15 @@ public class DoctorGroupManager {
     }
 
     //产房只能有1个猪群
-    private void checkFarrowGroupUnique(Integer pigType, Long barnId) {
+    private void checkFarrowGroupUnique(Integer pigType, Long barnId, String groupCode) {
         if (!Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) {
             return;
         }
+
         List<DoctorGroup> groups = RespHelper.orServEx(doctorGroupReadService.findGroupByCurrentBarnId(barnId));
+        DoctorBarn doctorBarn = doctorBarnDao.findById(barnId);
         if (notEmpty(groups)) {
-            throw new ServiceException("farrow.group.exist");
+            throw new InvalidException("farrow.group.exist", doctorBarn.getName(), groupCode);
         }
     }
 

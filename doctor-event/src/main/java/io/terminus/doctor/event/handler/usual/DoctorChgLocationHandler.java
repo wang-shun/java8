@@ -37,6 +37,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
 import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by yaoqijun.
@@ -88,8 +89,8 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         //校验猪舍类型是否相同, 只有同类型才可以普通转舍
         DoctorBarn fromBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
-        checkState(checkBarnTypeEqual(fromBarn.getPigType(), doctorPigTrack.getStatus(), toBarn.getPigType()), "猪舍类型不可转,猪号:" + chgLocationDto.getPigCode());
-        checkState(!(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) && PigType.MATING_TYPES.contains(toBarn.getPigType())), "哺乳母猪只能转产房");
+        expectTrue(checkBarnTypeEqual(fromBarn.getPigType(), doctorPigTrack.getStatus(), toBarn.getPigType()), "not.trans.barn.type", new Object[]{chgLocationDto.getPigCode()});
+        //expectTrue(!(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) && PigType.MATING_TYPES.contains(toBarn.getPigType())), "", new Object[]{chgLocationDto.getPigCode()});
 
         if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
             doctorPigTrack.setStatus(PigStatus.Farrow.getKey());

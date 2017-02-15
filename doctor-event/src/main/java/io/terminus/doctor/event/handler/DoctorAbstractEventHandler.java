@@ -1,8 +1,8 @@
 package io.terminus.doctor.event.handler;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Dates;
+import io.terminus.doctor.common.Exception.InvalidException;
 import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -229,12 +229,9 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
             return;
         }
         Date eventAt = inputDto.eventAt();
-        if(eventAt == null){
-            throw new ServiceException("事件时间输入有误,猪号:" + inputDto.getPigCode());
-        }
         DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
         if (lastEvent != null && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt()))) {
-            throw new ServiceException("事件时间不能早于最近一次事件时间(" + DateUtil.toDateString(lastEvent.getEventAt()) + "), 猪号:" + inputDto.getPigCode());
+            throw new InvalidException("event.at.range.error", DateUtil.toDateString(lastEvent.getEventAt()), eventAt, inputDto.getPigCode());
         }
     }
 }

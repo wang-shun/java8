@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -28,6 +27,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by .
@@ -80,7 +81,8 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setWeakCount(doctorPigEvent.getWeanCount() - quaQty);
 
         DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
-        doctorPigEvent.setGroupId(Checks.checkNotNull(pigTrack.getGroupId(), "groupId.not.null"));   //必须设置下断奶的groupId
+        expectTrue(notNull(pigTrack.getGroupId()), "farrow.group.not.null", weanDto.getPigCode());
+        doctorPigEvent.setGroupId(pigTrack.getGroupId());   //必须设置下断奶的groupId
         return doctorPigEvent;
     }
 

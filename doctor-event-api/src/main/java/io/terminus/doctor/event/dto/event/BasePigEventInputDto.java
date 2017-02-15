@@ -4,7 +4,9 @@ package io.terminus.doctor.event.dto.event;
 import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.event.model.DoctorPig;
 import lombok.Data;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -39,10 +41,13 @@ public abstract class BasePigEventInputDto implements Serializable{
      * 对应的母猪类型（公猪，母猪）
      * @see DoctorPig.PigSex
      */
+    @NotNull(message = "sex.not.null")
     private Integer pigType;
 
+    @NotEmpty(message = "pig.code.not.empty")
     private String pigCode;
 
+    @NotNull(message = "barn.id.not.null")
     private Long barnId;
 
     private String barnName;
@@ -50,6 +55,7 @@ public abstract class BasePigEventInputDto implements Serializable{
     /**
      * @see io.terminus.doctor.event.enums.PigEvent
      */
+    @NotNull(message = "event.type.not.null")
     private Integer eventType;
 
     private String eventName;
