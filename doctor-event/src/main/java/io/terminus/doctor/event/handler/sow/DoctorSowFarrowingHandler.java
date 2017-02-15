@@ -10,9 +10,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.enums.FarrowingType;
-import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
@@ -28,7 +26,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notNull;
@@ -46,9 +43,6 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
     @Autowired
     private DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
-
-    @Autowired
-    private DoctorSowWeanHandler doctorSowWeanHandler;
 
     @Override
     protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
@@ -141,17 +135,6 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setGroupId(doctorPigTrack.getGroupId());
         doctorPigEvent.setExtraMap(extraMap);
         doctorPigEventDao.update(doctorPigEvent);
-
-        //触发断奶事件
-        if (Objects.equals(farrowingDto.getFarrowingLiveCount(), 0)) {
-            DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
-                    .partWeanDate(farrowingDto.eventAt())
-                    .partWeanPigletsCount(0)
-                    .partWeanAvgWeight(0d)
-                    .build();
-            buildAutoEventCommonInfo(farrowingDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
-            doctorSowWeanHandler.handle(doctorEventInfoList, partWeanDto, basic);
-        }
     }
 
     /**
