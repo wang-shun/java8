@@ -69,7 +69,7 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
                                 .barnName(doctorGroupDetail.getGroup().getCurrentBarnName())
                                 .businessType(DoctorMessage.BUSINESS_TYPE.GROUP.getValue())
                                 .ruleValueId(ruleValue.getId())
-                                .data(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(ImmutableMap.of("quantity", doctorGroupDetail.getGroupTrack().getQuantity())))
+                                .data(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(ImmutableMap.of("quantity", doctorGroupDetail.getGroupTrack().getQuantity(), "avgDayAge", doctorGroupDetail.getGroupTrack().getAvgDayAge())))
                                 .build();
                         createMessage(sUsers, ruleRole, messageInfo);
                     }
