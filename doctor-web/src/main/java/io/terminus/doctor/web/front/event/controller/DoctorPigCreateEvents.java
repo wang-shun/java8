@@ -18,7 +18,6 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
-import io.terminus.doctor.web.core.service.DoctorValidService;
 import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -26,7 +25,6 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
-import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFosterByDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
@@ -53,6 +51,7 @@ import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.web.core.service.DoctorValidService;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchPigEventDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
@@ -76,8 +75,12 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
-import static io.terminus.doctor.common.enums.PigType.*;
-import static io.terminus.doctor.event.enums.PigEvent.*;
+import static io.terminus.doctor.common.enums.PigType.DELIVER_SOW;
+import static io.terminus.doctor.common.enums.PigType.MATE_SOW;
+import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
+import static io.terminus.doctor.event.enums.PigEvent.CHG_FARM;
+import static io.terminus.doctor.event.enums.PigEvent.ENTRY;
+import static io.terminus.doctor.event.enums.PigEvent.REMOVAL;
 import static java.util.Objects.isNull;
 
 /**
