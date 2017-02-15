@@ -440,7 +440,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //获取猪群号
     private String getGroupCode(Long groupId) {
-        return orServEx(doctorGroupReadService.findGroupById(groupId)).getGroupCode();
+        DoctorGroup group = orServEx(doctorGroupReadService.findGroupById(groupId));
+        if (group == null) {
+            throw new ServiceException("group.not.found");
+        }
+        return group.getGroupCode();
     }
 
     //获取猪舍名称

@@ -51,6 +51,7 @@ import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.web.core.service.DoctorValidService;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchPigEventDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
@@ -74,8 +75,12 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
-import static io.terminus.doctor.common.enums.PigType.*;
-import static io.terminus.doctor.event.enums.PigEvent.*;
+import static io.terminus.doctor.common.enums.PigType.DELIVER_SOW;
+import static io.terminus.doctor.common.enums.PigType.MATE_SOW;
+import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
+import static io.terminus.doctor.event.enums.PigEvent.CHG_FARM;
+import static io.terminus.doctor.event.enums.PigEvent.ENTRY;
+import static io.terminus.doctor.event.enums.PigEvent.REMOVAL;
 import static java.util.Objects.isNull;
 
 /**
@@ -102,6 +107,8 @@ public class DoctorPigCreateEvents {
     private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorPigEventReadService doctorPigEventReadService;
     private final DoctorGroupWebService doctorGroupWebService;
+    private final DoctorValidService doctorValidService;
+
     @RpcConsumer
     private DoctorBasicWriteService doctorBasicWriteService;
     @RpcConsumer
@@ -118,7 +125,8 @@ public class DoctorPigCreateEvents {
                                  UserReadService userReadService,
                                  DoctorBarnReadService doctorBarnReadService,
                                  DoctorPigEventReadService doctorPigEventReadService,
-                                 DoctorGroupWebService doctorGroupWebService) {
+                                 DoctorGroupWebService doctorGroupWebService,
+                                 DoctorValidService doctorValidService) {
         this.doctorPigEventWriteService = doctorPigEventWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorPigReadService = doctorPigReadService;
@@ -126,6 +134,7 @@ public class DoctorPigCreateEvents {
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorPigEventReadService = doctorPigEventReadService;
         this.doctorGroupWebService = doctorGroupWebService;
+        this.doctorValidService = doctorValidService;
     }
 
     /**
@@ -380,13 +389,8 @@ public class DoctorPigCreateEvents {
     public Boolean createSowEventInfo(@RequestParam("farmId") Long farmId,
                                    @RequestParam("pigId") Long pigId, @RequestParam("eventType") Integer eventType,
                                    @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
-        try {
-            BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PigSex.SOW.getKey(), pigId);
-            return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(inputDto, pigId, PigEvent.from(eventType)), buildBasicInputInfoDto(farmId, PigEvent.from(eventType))));
-        } catch (Exception e) {
-            log.error("pig.event.create.failed, cause:{}", Throwables.getStackTraceAsString(e));
-            throw new JsonResponseException("pig.event.create.fail");
-        }
+        BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PigSex.SOW.getKey(), pigId);
+        return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(inputDto, pigId, PigEvent.from(eventType)), buildBasicInputInfoDto(farmId, PigEvent.from(eventType))));
     }
 
     @RequestMapping(value = "/createSowEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -486,6 +490,13 @@ public class DoctorPigCreateEvents {
     }
 
     /**
+     * 执行下校验方法
+     */
+    private BasePigEventInputDto eventInput(PigEvent pigEvent, String eventInfoDtoJson, Long farmId, Integer pigType, Long pigId) {
+        return doctorValidService.valid(buildEventInput(pigEvent, eventInfoDtoJson, farmId, pigType, pigId));
+    }
+
+    /**
      * 事件信息json转相应dto
      * @param pigEvent
      * @param eventInfoDtoJson
@@ -493,7 +504,7 @@ public class DoctorPigCreateEvents {
      * @param pigType
      * @return
      */
-    private BasePigEventInputDto eventInput(PigEvent pigEvent, String eventInfoDtoJson, Long farmId, Integer pigType, Long pigId) {
+    private BasePigEventInputDto buildEventInput(PigEvent pigEvent, String eventInfoDtoJson, Long farmId, Integer pigType, Long pigId) {
         switch (pigEvent) {
                 case ENTRY:
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorFarmEntryDto.class);
