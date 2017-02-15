@@ -380,13 +380,8 @@ public class DoctorPigCreateEvents {
     public Boolean createSowEventInfo(@RequestParam("farmId") Long farmId,
                                    @RequestParam("pigId") Long pigId, @RequestParam("eventType") Integer eventType,
                                    @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
-        try {
-            BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PigSex.SOW.getKey(), pigId);
-            return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(inputDto, pigId, PigEvent.from(eventType)), buildBasicInputInfoDto(farmId, PigEvent.from(eventType))));
-        } catch (Exception e) {
-            log.error("pig.event.create.failed, cause:{}", Throwables.getStackTraceAsString(e));
-            throw new JsonResponseException("pig.event.create.fail");
-        }
+        BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PigSex.SOW.getKey(), pigId);
+        return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(inputDto, pigId, PigEvent.from(eventType)), buildBasicInputInfoDto(farmId, PigEvent.from(eventType))));
     }
 
     @RequestMapping(value = "/createSowEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -494,6 +489,8 @@ public class DoctorPigCreateEvents {
      * @return
      */
     private BasePigEventInputDto eventInput(PigEvent pigEvent, String eventInfoDtoJson, Long farmId, Integer pigType, Long pigId) {
+        // TODO: 2017/2/15 加校验 @Valid
+
         switch (pigEvent) {
                 case ENTRY:
                     return jsonMapper.fromJson(eventInfoDtoJson, DoctorFarmEntryDto.class);

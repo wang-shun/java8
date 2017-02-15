@@ -106,10 +106,13 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
                 && Boolean.valueOf(trackExtraMap.get("hasWeanToMating").toString())) {
 
             //这里说明是断奶后的第一次配种,这个地方统计 dpNPD （断奶到配种的非生产天数）
+            DateTime partWeanDate = new DateTime(doctorPigEvent.getMattingDate());
+
             //查询最近一次导致断奶的事件
             DoctorPigEvent lastWean = doctorPigEventDao.queryLastWean(doctorPigTrack.getPigId());
-            //断奶时间
-            DateTime partWeanDate = new DateTime(lastWean.getEventAt());
+            if (lastWean != null) {
+                partWeanDate = new DateTime(lastWean.getEventAt());
+            }
 
             Integer dpNPD = Math.abs(Days.daysBetween(partWeanDate, new DateTime(doctorPigEvent.getEventAt())).getDays());
             doctorPigEvent.setDpnpd(doctorPigEvent.getDpnpd() + dpNPD);

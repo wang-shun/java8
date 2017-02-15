@@ -23,8 +23,11 @@ import io.terminus.doctor.web.core.service.DoctorStatisticReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc:
@@ -93,22 +96,23 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
     }
 
     @Override
-    public Response<DoctorBasicDto> getOrgStatisticByOrg(Long userId,Long orgId) {
+    public Response<DoctorBasicDto> getOrgStatisticByOrg(Long userId, Long orgId) {
         try {
             //校验orgId
-            Response<DoctorUserDataPermission> dataPermissionResponse=doctorUserDataPermissionReadService.findDataPermissionByUserId(userId);
-            DoctorUserDataPermission doctorUserDataPermission=RespHelper.orServEx(dataPermissionResponse);
-            if (!doctorUserDataPermission.getOrgIdsList().contains(orgId)){
+            DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
+            if (permission == null || !permission.getOrgIdsList().contains(orgId)) {
                 return Response.fail("user.not.permission.org");
             }
-            List<Long> farmList=doctorUserDataPermission.getFarmIdsList();
+            List<Long> farmList = permission.getFarmIdsList();
+
             //查询有权限的公司与猪场
             DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(orgId));
-            List<DoctorFarm> farms=RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(org.getId()));
-            if (farms!=null){
-                farms = farms.stream().filter(t-> farmList.contains(t.getId())).collect(Collectors.toList());
+            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(org.getId()));
+            if (!notEmpty(farms)) {
+                return Response.ok(new DoctorBasicDto(org, Collections.emptyList(), Collections.emptyList()));
             }
-//            List<DoctorFarm> farms = RespHelper.orServEx()(doctorFarmReadService.findFarmsByUserId(userId));
+
+            farms = farms.stream().filter(t-> farmList.contains(t.getId())).collect(Collectors.toList());
 
             //查询公司统计
             List<DoctorPigTypeStatistic> stats = RespHelper.orServEx(doctorPigTypeStatisticReadService.findPigTypeStatisticsByOrgId(org.getId()));
