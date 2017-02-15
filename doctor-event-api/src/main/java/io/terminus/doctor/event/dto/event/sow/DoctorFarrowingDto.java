@@ -7,7 +7,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -28,21 +31,18 @@ public class DoctorFarrowingDto extends BasePigEventInputDto implements Serializ
 
     private static final long serialVersionUID = 7823378636552520021L;
 
+    @NotNull(message = "event.at.not.null")
     private Date farrowingDate; // 分娩日期
 
+    @NotEmpty(message = "nest.code.not.empty")
     private String nestCode; // 窝号
-
-//    private String pigCode;
-//
-//    private Long barnId;   // 分娩猪舍
-//
-//    private String barnName;  //分娩猪舍名称
 
     private String bedCode; // 床号
 
     /**
      * @see io.terminus.doctor.event.enums.FarrowingType
      */
+    @NotNull(message = "farrowing.type.not.null")
     private Integer farrowingType;  // 分娩类型
 
     /**
@@ -50,20 +50,29 @@ public class DoctorFarrowingDto extends BasePigEventInputDto implements Serializ
      */
     private Integer isHelp;     //  是否帮助
 
+    @NotEmpty(message = "group.code.not.empty")
     private String groupCode;   // 仔猪猪群Code
 
+    @Min(value = 0, message = "birth.nest.avg.not.less.zero")
+    @NotNull(message = "birth.nest.avg.not.null")
     private double birthNestAvg;    //出生窝重
 
     private Integer dayAgeAvg;  // 平均日龄计算
 
+    @Min(value = 0, message = "farrowing.live.count.less.zero")
+    @NotNull(message = "farrowing.live.count.not.null")
     private Integer farrowingLiveCount; // 分娩猪的数量 = 活公猪 + 活母猪 = 健崽数量 + 弱仔数量 (拼窝后， 可能不相等， 差值 拼窝数量)
 
     private Integer liveSowCount;   //  活母猪数量
 
     private Integer liveBoarCount;  // 活公猪数量
 
+    @Min(value = 0, message = "health.count.not.less.zero")
+    @NotNull(message = "health.count.not.null")
     private Integer healthCount;    //健仔数量(断奶事件校验对应的母猪状态信息)
 
+    @Min(value = 0, message = "weak.count.not.less.zero")
+    @NotNull(message = "weak.count.not.null")
     private Integer weakCount;  //  弱崽数量
 
     private Integer mnyCount;   // 木乃伊数量

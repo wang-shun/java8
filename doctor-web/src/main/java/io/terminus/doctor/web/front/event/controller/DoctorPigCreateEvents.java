@@ -411,7 +411,7 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/batchCreateEvnet", method = RequestMethod.POST)
     public Boolean batchCreatePigEvent(@RequestBody DoctorBatchPigEventDto batchPigEventDto){
         if (Arguments.isNullOrEmpty(batchPigEventDto.getInputJsonList())) {
-            return false;
+            throw  new JsonResponseException("batch.event.input.empty");
         }
 
         PigEvent pigEvent = PigEvent.from(batchPigEventDto.getEventType());

@@ -8,6 +8,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,8 +30,11 @@ public class DoctorSemenDto extends BasePigEventInputDto implements Serializable
 
     private static final long serialVersionUID = 3227572350710428642L;
 
+    @NotNull(message = "event.at.not.null")
     private Date semenDate;     //采精日期
 
+    @Min(value = 0, message = "semen.weight.not.less.zero")
+    @NotNull(message = "semen.weight.not.null")
     private Double semenWeight; //采精重量
 
     private Double dilutionRatio;   // 稀释倍数

@@ -31,7 +31,7 @@ public class DoctorNewGroupInput extends BaseGroupInput implements Serializable 
     /**
      * 猪群号
      */
-    @NotEmpty(message = "groupCode.not.empty")
+    @NotEmpty(message = "group.code.not.empty")
     private String groupCode;
 
     /**

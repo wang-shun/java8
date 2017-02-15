@@ -155,7 +155,7 @@ public interface DoctorGroupReadService {
      * @return 猪群
      */
     Response<DoctorGroup> findGroupByFarmIdAndGroupCode(@NotNull(message = "farmId.not.null") Long farmId,
-                                                        @NotEmpty(message = "groupCode.not.empty") String groupCode);
+                                                        @NotEmpty(message = "group.code.not.empty") String groupCode);
 
 
     /**
