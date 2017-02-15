@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.dto.event;
 
 
-import io.terminus.doctor.common.util.JsonMapperUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.model.DoctorPig;
 import lombok.Data;
 

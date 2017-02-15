@@ -3,7 +3,7 @@ package io.terminus.doctor.web.admin.job.msg.producer;
 import com.google.api.client.util.Maps;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.util.JsonMapperUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;

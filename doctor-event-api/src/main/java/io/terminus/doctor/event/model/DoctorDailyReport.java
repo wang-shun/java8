@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.model;
 
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.util.JsonMapperUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import lombok.AccessLevel;
 import lombok.Data;
