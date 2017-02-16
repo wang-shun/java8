@@ -15,40 +15,6 @@ import java.util.List;
  */
 public interface PrimaryUserReadService {
 
-    /**
-     * 通过主键查主账号信息
-     *
-     * @param id 主账号表主键 ID
-     * @return 主账号信息
-     */
-    Response<PrimaryUser> findPrimaryUserById(Long id);
-
-    /**
-     * 通过用户 ID 查询主账号信息
-     *
-     * @param userId 用户 ID
-     * @return 主账号信息
-     */
-    Response<Optional<PrimaryUser>> findPrimaryUserByUserId(Long userId);
-
-    /**
-     * 分页主账号信息
-     *
-     * @param userId 主账号用户 ID
-     * @param status 主账号状态
-     * @param pageNo 页码
-     * @param size   查询数量
-     * @return 主账号分页
-     */
-    Response<Paging<PrimaryUser>> primaryUserPagination(Long userId, Integer status, Integer pageNo, Integer size);
-
-    /**
-     * 通过主键查主账号子账户
-     *
-     * @param id 子账号关联表主键
-     * @return 子账号信息
-     */
-    Response<Sub> findSubById(Long id);
 
     /**
      * 通过主账号 ID 和 子账户用户 ID 查询子账号关联
