@@ -37,7 +37,7 @@ public class DoctorRollbackSowFosterByHandler extends DoctorAbstractRollbackPigE
         DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
         DoctorPigTrack oldTrack = JSON_MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack();
 
-        //如果状态不是不如，说明状态有变化，调用状态回滚
+        //如果状态不是哺乳，说明状态有变化，调用状态回滚
         if (!Objects.equals(oldTrack.getStatus(), PigStatus.FEED.getKey())) {
             handleRollbackWithStatus(pigEvent, operatorId, operatorName);
         }

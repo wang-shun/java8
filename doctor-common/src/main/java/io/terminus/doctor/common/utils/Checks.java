@@ -1,7 +1,7 @@
 package io.terminus.doctor.common.utils;
 
 import io.terminus.common.exception.ServiceException;
-import io.terminus.doctor.common.Exception.InvalidException;
+import io.terminus.doctor.common.exception.InvalidException;
 
 import javax.annotation.Nullable;
 

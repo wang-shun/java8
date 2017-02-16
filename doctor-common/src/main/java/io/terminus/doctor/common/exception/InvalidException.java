@@ -2,7 +2,7 @@
  * Copyright (c) 2016. 杭州端点网络科技有限公司.  All rights reserved.
  */
 
-package io.terminus.doctor.common.Exception;
+package io.terminus.doctor.common.exception;
 
 import com.google.common.base.MoreObjects;
 import lombok.Getter;

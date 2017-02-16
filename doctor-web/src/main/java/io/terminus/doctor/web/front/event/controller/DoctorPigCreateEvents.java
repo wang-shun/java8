@@ -18,7 +18,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
-import io.terminus.doctor.common.util.JsonMapperUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -73,15 +73,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
-import static io.terminus.doctor.common.enums.PigType.DELIVER_SOW;
-import static io.terminus.doctor.common.enums.PigType.MATE_SOW;
-import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
-import static io.terminus.doctor.event.enums.PigEvent.CHG_FARM;
-import static io.terminus.doctor.event.enums.PigEvent.ENTRY;
-import static io.terminus.doctor.event.enums.PigEvent.REMOVAL;
-import static java.util.Objects.isNull;
+import static io.terminus.doctor.common.enums.PigType.*;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
+import static io.terminus.doctor.event.enums.PigEvent.*;
 
 /**
  * Created by yaoqijun.
@@ -415,7 +411,7 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/batchCreateEvnet", method = RequestMethod.POST)
     public Boolean batchCreatePigEvent(@RequestBody DoctorBatchPigEventDto batchPigEventDto){
         if (Arguments.isNullOrEmpty(batchPigEventDto.getInputJsonList())) {
-            throw  new JsonResponseException("batch.event.input.empty");
+            throw new JsonResponseException("batch.event.input.empty");
         }
 
         PigEvent pigEvent = PigEvent.from(batchPigEventDto.getEventType());
@@ -442,7 +438,6 @@ public class DoctorPigCreateEvents {
     private DoctorBasicInputInfoDto buildBasicInputInfoDto(Long farmId, PigEvent pigEvent) {
         try {
             DoctorFarm doctorFarm = RespHelper.orServEx(this.doctorFarmReadService.findFarmById(farmId));
-            checkState(!isNull(pigEvent), "input.eventType.error");
             Long userId = UserUtil.getUserId();
 
             return DoctorBasicInputInfoDto.builder()
@@ -461,8 +456,8 @@ public class DoctorPigCreateEvents {
      * @param pigId
      * @return
      */
-    private BasePigEventInputDto buildEventInput(BasePigEventInputDto inputDto, Long pigId, PigEvent pigEvent){
-        //// TODO: 17/2/15 判断pigid 
+    private BasePigEventInputDto validBuildEventInput(BasePigEventInputDto inputDto, Long pigId, PigEvent pigEvent){
+        expectTrue(notNull(pigId), "pig.id.not.null", inputDto.getPigCode());
         DoctorPigInfoDto pigDto = RespHelper.orServEx(this.doctorPigReadService.queryDoctorInfoDtoById(pigId));
         inputDto.setIsAuto(IsOrNot.NO.getValue());
         inputDto.setPigId(pigId);
@@ -482,7 +477,7 @@ public class DoctorPigCreateEvents {
      * @param pigEvent
      * @return
      */
-    private BasePigEventInputDto buildEntryEventInput(BasePigEventInputDto inputDto, PigEvent pigEvent) {
+    private BasePigEventInputDto validBuildEntryEventInput(BasePigEventInputDto inputDto, PigEvent pigEvent) {
         inputDto.setEventType(pigEvent.getKey());
         inputDto.setEventName(pigEvent.getName());
         inputDto.setEventDesc(pigEvent.getDesc());
@@ -493,8 +488,15 @@ public class DoctorPigCreateEvents {
     /**
      * 执行下校验方法
      */
-    private BasePigEventInputDto eventInput(PigEvent pigEvent, String eventInfoDtoJson, Long farmId, Integer pigType, Long pigId) {
-        return doctorValidService.valid(buildEventInput(pigEvent, eventInfoDtoJson, farmId, pigType, pigId));
+    private BasePigEventInputDto buildEventInput(BasePigEventInputDto inputDto, Long pigId, PigEvent pigEvent) {
+        return doctorValidService.valid(validBuildEventInput(inputDto, pigId, pigEvent));
+    }
+
+    /**
+     * 执行下校验方法
+     */
+    private BasePigEventInputDto buildEntryEventInput(BasePigEventInputDto inputDto, PigEvent pigEvent) {
+        return doctorValidService.valid(validBuildEntryEventInput(inputDto, pigEvent));
     }
 
     /**

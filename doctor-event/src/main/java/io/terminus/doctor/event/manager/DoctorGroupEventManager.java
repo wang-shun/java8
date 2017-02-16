@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.Exception.InvalidException;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -159,7 +159,7 @@ public class DoctorGroupEventManager {
         //判断此事件是否是最新事件
         if (!Objects.equals(event.getId(), groupTrack.getRelEventId())) {
             log.error("group event not the latest, can not rollback, event:{}", event);
-            throw new ServiceException("group.event.not.the.latest");
+            throw new InvalidException("group.event.not.the.latest", event.getId());
         }
 
         //判断此事件是否是自动生成
@@ -171,7 +171,7 @@ public class DoctorGroupEventManager {
         //新建猪群事件不可回滚
         if (Objects.equals(GroupEventType.NEW.getValue(), event.getType())) {
             log.error("new group event can not rollback, event:{}", event);
-            throw new ServiceException("group.event.new.not.rollback");
+            throw new InvalidException("group.event.new.not.rollback", event.getId());
         }
     }
 

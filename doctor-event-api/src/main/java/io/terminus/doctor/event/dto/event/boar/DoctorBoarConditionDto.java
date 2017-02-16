@@ -98,7 +98,7 @@ public class DoctorBoarConditionDto extends BasePigEventInputDto implements Seri
 //        Method method = null;
 //        try {
 //            method = dto.getClass().getMethod("setDto", DoctorBoarConditionDto.class);
-//        } catch (Exception e) {
+//        } catch (exception e) {
 //
 //        }
 //        Object[] objs= {dto};

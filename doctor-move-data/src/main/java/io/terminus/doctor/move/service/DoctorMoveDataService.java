@@ -16,7 +16,7 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.util.JsonMapperUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
@@ -1030,7 +1030,6 @@ public class DoctorMoveDataService {
         farrow.setBirthNestAvg(event.getEventWeight());    //出生窝重
         farrow.setFarrowStaff1(event.getStaffName());  //接生员1
         farrow.setFarrowStaff2(event.getStaffName());  //接生员2
-        farrow.setIsHelp(event.getNeedHelp());     //  是否帮助
         farrow.setFarrowIsSingleManager(event.getIsSingleManage());    //是否个体管理
         farrow.setGroupCode(event.getToGroupCode());   // 仔猪猪群Code
         farrow.setNestCode(event.getNestCode()); // 窝号

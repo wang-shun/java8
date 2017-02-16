@@ -15,12 +15,12 @@ public class DoctorMessageRuleRoleWriteServiceImplTest extends BaseServiceTest {
 //    private DoctorMessageRuleRoleWriteService doctorMessageRuleRoleWriteService;
 //
 //    @Test
-//    public void relateRuleRolesByRuleId() throws Exception {
+//    public void relateRuleRolesByRuleId() throws exception {
 //        doctorMessageRuleRoleWriteService.relateRuleRolesByRuleId(6L, ImmutableList.of(1L, 2L));
 //    }
 //
 //    @Test
-//    public void relateRuleRolesByRoleId() throws Exception {
+//    public void relateRuleRolesByRoleId() throws exception {
 //        doctorMessageRuleRoleWriteService.relateRuleRolesByRoleId(1L, ImmutableList.of(7L));
 //    }
 }

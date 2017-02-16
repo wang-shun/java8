@@ -5,7 +5,9 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -70,38 +72,42 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     }
 
     @Override
-    public Response<Boolean> rollbackGroupEvent(Long eventId, Long operatorId, String operatorName) {
+    public RespWithEx<Boolean> rollbackGroupEvent(Long eventId, Long operatorId, String operatorName) {
         try {
             DoctorGroupEvent groupEvent = doctorGroupEventDao.findById(eventId);
             if (groupEvent == null) {
-                return Response.fail("group.event.not.found");
+                throw  new InvalidException("group.event.not.found", eventId);
             }
             List<DoctorRollbackDto> dtos = doctorRollbackManager.rollbackGroup(groupEvent, operatorId, operatorName);
             doctorRollbackManager.checkAndPublishRollback(dtos);
-            return Response.ok(Boolean.TRUE);
+            return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
+            return RespWithEx.fail(e.getMessage());
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (Exception e) {
             log.error("rollack group event failed, eventId:{}, cause:{}", eventId, Throwables.getStackTraceAsString(e));
-            return Response.fail("rollback.event.failed");
+            return RespWithEx.fail("rollback.event.failed");
         }
     }
 
     @Override
-    public Response<Boolean> rollbackPigEvent(Long eventId, Long operatorId, String operatorName) {
+    public RespWithEx<Boolean> rollbackPigEvent(Long eventId, Long operatorId, String operatorName) {
         try {
             DoctorPigEvent pigEvent = doctorPigEventDao.findById(eventId);
             if (pigEvent == null) {
-                throw new ServiceException("pig.event.not.found");
+                throw new InvalidException("pig.event.not.found", eventId);
             }
             List<DoctorRollbackDto> dtos = doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
             doctorRollbackManager.checkAndPublishRollback(dtos);
-            return Response.ok(Boolean.TRUE);
+            return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
+            return RespWithEx.fail(e.getMessage());
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (Exception e) {
             log.error("rollack pig event failed, eventId:{}, cause:{}", eventId, Throwables.getStackTraceAsString(e));
-            return Response.fail("rollback.event.failed");
+            return RespWithEx.fail("rollback.event.failed");
         }
     }
 

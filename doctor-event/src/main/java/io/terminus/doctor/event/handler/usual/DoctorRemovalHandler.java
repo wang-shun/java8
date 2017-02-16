@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.handler.usual;
 
-import io.terminus.doctor.common.Exception.InvalidException;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;

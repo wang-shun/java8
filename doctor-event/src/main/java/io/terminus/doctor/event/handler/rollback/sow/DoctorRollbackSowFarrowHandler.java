@@ -18,6 +18,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
+
 /**
  * Desc: 母猪分娩回滚
  * Mail: yangzl@terminus.io
@@ -42,6 +45,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
 
         //母猪分娩会触发转入猪群事件，如果有新建猪群，还要校验最新事件(分娩)
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
+        expectTrue(notNull(toGroupEvent), "relate.group.event.not.null" , pigEvent.getId());
         return isRelLastGroupEvent(toGroupEvent);
     }
 
@@ -49,6 +53,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //1.判断是否新建猪群
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
+        expectTrue(notNull(toGroupEvent), "relate.group.event.not.null" , pigEvent.getId());
         if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
             DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
             doctorRollbackGroupMoveInHandler.rollback(moveInEvent, operatorId, operatorName);

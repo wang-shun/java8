@@ -5,6 +5,8 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -41,32 +43,36 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     private Publisher publisher;
 
     @Override
-    public Response<Boolean> pigEventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
+    public RespWithEx<Boolean> pigEventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         try {
             List<DoctorEventInfo> eventInfoList = doctorPigEventManager.eventHandle(inputDto, basic);
             checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
-            return Response.ok(Boolean.TRUE);
+            return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException | IllegalStateException e) {
             log.error("pig.event.handle.failed, input:{}, basic:{}, cause by :{}", inputDto, basic, Throwables.getStackTraceAsString(e));
-            return Response.fail(e.getMessage());
+            return RespWithEx.fail(e.getMessage());
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (Exception e) {
             log.error("pig.event.handle.failed, input:{}, basic:{}, cause by :{}", inputDto, basic, Throwables.getStackTraceAsString(e));
-            return Response.fail("pig.event.handle.failed");
+            return RespWithEx.fail("pig.event.handle.failed");
         }
     }
 
     @Override
-    public Response<Boolean> batchPigEventHandle(List<BasePigEventInputDto> inputDtos, DoctorBasicInputInfoDto basic) {
+    public RespWithEx<Boolean> batchPigEventHandle(List<BasePigEventInputDto> inputDtos, DoctorBasicInputInfoDto basic) {
         try {
             List<DoctorEventInfo> eventInfoList = doctorPigEventManager.batchEventsHandle(inputDtos, basic);
             checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
-            return Response.ok(Boolean.TRUE);
+            return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException | IllegalStateException e) {
             log.error("batch.pig.event.handle.failed, input:{}, basic:{}, cause by :{}", inputDtos, basic, Throwables.getStackTraceAsString(e));
-            return Response.fail(e.getMessage());
+            return RespWithEx.fail(e.getMessage());
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (Exception e) {
             log.error("batch.pig.event.handle.failed, input:{}, basic:{}, cause by :{}", inputDtos, basic, Throwables.getStackTraceAsString(e));
-            return Response.fail("batch.pig.event.handle.failed");
+            return RespWithEx.fail("batch.pig.event.handle.failed");
         }
     }
 
