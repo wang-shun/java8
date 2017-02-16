@@ -1,8 +1,7 @@
 package io.terminus.doctor.web.front.user.controller;
 
-import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
-import io.terminus.common.model.BaseUser;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.Params;
@@ -18,6 +17,7 @@ import io.terminus.doctor.web.core.dto.DoctorBasicDto;
 import io.terminus.doctor.web.core.dto.FarmStaff;
 import io.terminus.doctor.web.core.service.DoctorStatisticReadService;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -92,8 +91,7 @@ public class DoctorFarms {
         if (UserUtil.getUserId() == null) {
             throw new JsonResponseException("user.not.login");
         }
-        DoctorStaff staff = RespHelper.or500(doctorStaffReadService.findStaffByUserId(UserUtil.getUserId()));
-        return filterFarm(RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(staff.getOrgId())), farmIds, excludeFarmIds);
+        return filterFarm(RespHelper.or500(doctorFarmReadService.findFarmsByUserId(UserUtil.getUserId())), farmIds, excludeFarmIds);
     }
 
     private List<DoctorFarm> filterFarm(List<DoctorFarm> farms, String farmIds, String excludeFarmIds) {
@@ -113,37 +111,8 @@ public class DoctorFarms {
 
     @RequestMapping(value = "/find/{farmId}", method = RequestMethod.GET)
     public List<FarmStaff> findByFarmId(@PathVariable Long farmId){
-        BaseUser user = UserUtil.getCurrentUser();
-        if (user == null) {
-            throw new JsonResponseException(401, "user.not.login");
-        }
-        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
-        Map<Long, Long> userIdJoinStaffId = new HashMap<>(); // key = userId, value = staffId
-        RespHelper.or500(doctorStaffReadService.findStaffByOrgIdAndStatus(farm.getOrgId(), DoctorStaff.Status.PRESENT.value()))
-                .forEach(staff -> userIdJoinStaffId.put(staff.getUserId(), staff.getId()));
-        List<Long> matchUserIds = Lists.newArrayList();
-        RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserIds(userIdJoinStaffId.keySet().stream().collect(Collectors.toList())))
-                .forEach(permission -> {
-                    if (permission.getFarmIdsList().contains(farmId)) {
-                        matchUserIds.add(permission.getUserId());
-                    }
-                });
-        List<FarmStaff> result = RespHelper.or500(doctorUserReadService.findByIds(matchUserIds))
-                .stream()
-                .map(user1 -> {
-                    FarmStaff farmStaff = new FarmStaff();
-                    farmStaff.setUserId(user1.getId());
-                    farmStaff.setFarmId(farmId);
-                    farmStaff.setStaffId(userIdJoinStaffId.get(user1.getId()));
-                    if(Objects.equals(user1.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
-                        farmStaff.setRealName(user1.getName() == null ? user1.getMobile() : user1.getName());
-                    }else if(Objects.equals(user1.getType(), UserType.FARM_SUB.value())){
-                        farmStaff.setRealName(Params.get(user1.getExtra(), "realName"));
-                    }
-                    return farmStaff;
-                })
-                .collect(Collectors.toList());
-        return result;
+        List<DoctorStaff> staffs = RespHelper.or500(doctorStaffReadService.findStaffByFarmIdAndStatus(farmId, DoctorStaff.Status.PRESENT.value()));
+        return transformStaffs(staffs);
     }
 
     /**
@@ -153,30 +122,27 @@ public class DoctorFarms {
      */
     @RequestMapping(value = "/staff/{farmId}", method = RequestMethod.GET)
     public List<FarmStaff> findStaffByFarmId(@PathVariable Long farmId){
-        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
-        Map<Long, Long> userIdJoinStaffId = new HashMap<>(); // key = userId, value = staffId
+        List<DoctorStaff> staffs = RespHelper.or500(doctorStaffReadService.findStaffByFarmIdAndStatus(farmId, null));
+        return transformStaffs(staffs);
+    }
 
-        //查所有的staff
-        RespHelper.or500(doctorStaffReadService.findStaffByOrgIdAndStatus(farm.getOrgId(), null))
-                .forEach(staff -> userIdJoinStaffId.put(staff.getUserId(), staff.getId()));
-        List<Long> matchUserIds = Lists.newArrayList();
-        RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserIds(userIdJoinStaffId.keySet().stream().collect(Collectors.toList())))
-                .forEach(permission -> {
-                    if (permission.getFarmIdsList().contains(farmId)) {
-                        matchUserIds.add(permission.getUserId());
-                    }
-                });
-        return RespHelper.or500(doctorUserReadService.findByIds(matchUserIds))
-                .stream()
-                .map(user1 -> {
-                    FarmStaff farmStaff = new FarmStaff();
-                    farmStaff.setUserId(user1.getId());
-                    farmStaff.setFarmId(farmId);
-                    farmStaff.setStaffId(userIdJoinStaffId.get(user1.getId()));
-                    if(Objects.equals(user1.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
-                        farmStaff.setRealName(user1.getName() == null ? user1.getMobile() : user1.getName());
-                    }else if(Objects.equals(user1.getType(), UserType.FARM_SUB.value())){
-                        farmStaff.setRealName(Params.get(user1.getExtra(), "realName"));
+    //拼接一发数据
+    private List<FarmStaff> transformStaffs(List<DoctorStaff> staffs) {
+        List<User> users = RespHelper.or500(doctorUserReadService.findByIds(staffs.stream()
+                .map(DoctorStaff::getUserId).collect(Collectors.toList())));
+        Map<Long, User> userMap = users.stream().collect(Collectors.toMap(User::getId, u -> u));
+
+        return staffs.stream()
+                .map(staff -> {
+                    FarmStaff farmStaff = BeanMapper.map(staff, FarmStaff.class);
+
+                    User user = userMap.get(staff.getUserId());
+                    if (user != null) {
+                        if(Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
+                            farmStaff.setRealName(user.getName() == null ? user.getMobile() : user.getName());
+                        }else if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+                            farmStaff.setRealName(Params.get(user.getExtra(), "realName"));
+                        }
                     }
                     return farmStaff;
                 })

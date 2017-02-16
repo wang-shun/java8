@@ -10,6 +10,7 @@ import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.manager.DoctorServiceReviewManager;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,12 +69,12 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
         return response;
     }
     @Override
-    public Response<List<DoctorFarm>> openDoctorService(BaseUser user, Long userId, String loginName, List<DoctorFarm> farms){
+    public Response<List<DoctorFarm>> openDoctorService(BaseUser user, Long userId, String loginName, DoctorOrg org, List<DoctorFarm> farms){
         Response<List<DoctorFarm>> response = new Response<>();
         try{
             DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR);
             Preconditions.checkState(Objects.equals(DoctorServiceReview.Status.REVIEW.getValue(), review.getStatus()), "user.service.not.applied");
-            response.setResult(doctorServiceReviewManager.openDoctorService(user, userId, loginName, farms));
+            response.setResult(doctorServiceReviewManager.openDoctorService(user, userId, loginName, org, farms));
         }catch (ServiceException | IllegalStateException e){
             response.setError(e.getMessage());
         } catch(Exception e){
@@ -91,7 +92,7 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
             if (!Objects.equals(review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue())) {
                 return Response.fail("user.service.not.applied");
             }
-            doctorServiceReviewManager.updateServiceReviewStatus(user, userId, type, DoctorServiceReview.Status.REVIEW, DoctorServiceReview.Status.OK, null);
+            doctorServiceReviewManager.updateServiceReviewStatus(user, userId, type, DoctorServiceReview.Status.OK, null);
             response.setResult(true);
         } catch (Exception e) {
             log.error("update doctor service review failed, cause : {}", Throwables.getStackTraceAsString(e));
@@ -108,7 +109,7 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
             if (!Objects.equals(review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue())) {
                 return Response.fail("user.service.not.applied");
             }
-            doctorServiceReviewManager.updateServiceReviewStatus(user, userId, type, DoctorServiceReview.Status.REVIEW, DoctorServiceReview.Status.NOT_OK, reason);
+            doctorServiceReviewManager.updateServiceReviewStatus(user, userId, type, DoctorServiceReview.Status.NOT_OK, reason);
             response.setResult(true);
         } catch (Exception e) {
             log.error("update doctor service review failed, cause : {}", Throwables.getStackTraceAsString(e));
@@ -125,7 +126,7 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
             if (!Objects.equals(review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue())) {
                 return Response.fail("user.service.not.applied");
             }
-            doctorServiceReviewManager.updateServiceReviewStatus(user, userId, type, DoctorServiceReview.Status.from(review.getStatus()),
+            doctorServiceReviewManager.updateServiceReviewStatus(user, userId, type,
                     DoctorServiceReview.Status.FROZEN, reason);
             response.setResult(true);
         } catch (Exception e) {

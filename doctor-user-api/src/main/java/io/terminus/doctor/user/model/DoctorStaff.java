@@ -21,75 +21,20 @@ public class DoctorStaff implements Serializable {
     private Long id;
     
     /**
-     * 公司id
+     * 猪场id
      */
-    private Long orgId;
-    
-    /**
-     * 公司名称
-     */
-    private String orgName;
-    
+    private Long farmId;
+
     /**
      * 用户id
      */
     private Long userId;
-    
-    /**
-     * 角色id
-     */
-    private Long roleId;
-    
-    /**
-     * 角色名称(冗余)
-     */
-    private String roleName;
-    
+
     /**
      * 状态 1:在职，-1:不在职
      */
     private Integer status;
-    
-    /**
-     * 性别 1 男, 2 女
-     */
-    private Integer sex;
-    
-    /**
-     * 用户头像
-     */
-    private String avatar;
-    
-    /**
-     * 外部id
-     */
-    private String outId;
-    
-    /**
-     * 附加字段
-     */
-    private String extra;
-    
-    /**
-     * 创建人id
-     */
-    private Long creatorId;
-    
-    /**
-     * 创建人name
-     */
-    private String creatorName;
-    
-    /**
-     * 更新人id
-     */
-    private Long updatorId;
-    
-    /**
-     * 更新人name
-     */
-    private String updatorName;
-    
+
     /**
      * 创建时间
      */
@@ -121,35 +66,6 @@ public class DoctorStaff implements Serializable {
                     .findFirst()
                     .<ServiceException>orElseThrow(() -> {
                         throw new ServiceException("doctor.service.review.status.error");
-                    });
-        }
-
-        public int value(){
-            return this.value;
-        }
-        public String toString(){
-            return this.desc;
-        }
-    }
-
-    public enum Sex {
-        MALE(1, "男"),
-        FEFMALE(2, "女");
-
-        private int value;
-        private String desc;
-
-        Sex(int value, String desc) {
-            this.value = value;
-            this.desc = desc;
-        }
-
-        public static Sex from(int number) {
-            return Lists.newArrayList(Sex.values()).stream()
-                    .filter(s -> Objects.equal(s.value, number))
-                    .findFirst()
-                    .<ServiceException>orElseThrow(() -> {
-                        throw new ServiceException("staff.sex.error");
                     });
         }
 

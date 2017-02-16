@@ -22,31 +22,11 @@ public interface DoctorFarmWriteService {
     Response<Long> createFarm(DoctorFarm farm);
 
     /**
-     * 批量创建猪场
-     * @param farms
-     * @return
-     */
-    Response<Integer> createFarms(List<DoctorFarm> farms);
-
-    /**
-     * 更新猪场
-     * @param farm
-     * @return
-     */
-    Response<Boolean> updateFarm(DoctorFarm farm);
-
-    /**
-     * 删除猪场
-     * @param farmId
-     * @return
-     */
-    Response<Boolean> deleteFarm(Long farmId);
-
-    /**
      * 给已开通猪场软件的用户添加猪场, 内含事务控制
-     * @param userId
-     * @param farms
+     * @param userId 用户id
+     * @param orgId  给公司添加猪场
+     * @param farms  猪场
      * @return
      */
-    Response<List<DoctorFarm>> addFarms4PrimaryUser(Long userId, List<DoctorFarm> farms);
+    Response<List<DoctorFarm>> addFarms4PrimaryUser(Long userId, Long orgId, List<DoctorFarm> farms);
 }

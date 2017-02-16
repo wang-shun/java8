@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.core.dto;
 
+import io.terminus.doctor.user.model.DoctorStaff;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -9,11 +10,7 @@ import java.io.Serializable;
  */
 
 @Data
-public class FarmStaff implements Serializable{
+public class FarmStaff extends DoctorStaff implements Serializable{
     private static final long serialVersionUID = -691125151747762849L;
-
-    private Long userId;
-    private Long staffId;
-    private Long farmId;
     private String realName;
 }

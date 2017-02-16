@@ -3,8 +3,6 @@ package io.terminus.doctor.user.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.DoctorStaff;
 
-import java.util.List;
-
 public interface DoctorStaffWriteService {
 
     /**
@@ -27,11 +25,4 @@ public interface DoctorStaffWriteService {
      * @return
      */
     Response<Boolean> deleteDoctorStaff(Long staffId);
-
-    /**
-     * 清除下指定用户的缓存
-     * @param userId 用户id
-     * @return
-     */
-    Response clearUserCache(Long userId);
 }

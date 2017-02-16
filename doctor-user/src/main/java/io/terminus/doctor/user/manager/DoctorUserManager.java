@@ -1,6 +1,5 @@
 package io.terminus.doctor.user.manager;
 
-import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
@@ -11,8 +10,6 @@ import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.OperatorDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
-import io.terminus.doctor.user.dao.SubRoleDao;
-import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.Operator;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
@@ -136,14 +133,14 @@ public class DoctorUserManager {
             userProfile.setRealName(Params.get(user.getExtra(), "realName"));
             userProfileDao.create(userProfile);
 
-            DoctorStaff pstaff = doctorStaffDao.findByUserId(Long.valueOf(Params.get(user.getExtra(), "pid")));
-
-            DoctorStaff doctorStaff = new DoctorStaff();
-            doctorStaff.setUserId(userId);
-            doctorStaff.setOrgId(pstaff.getOrgId());
-            doctorStaff.setOrgName(pstaff.getOrgName());
-            doctorStaff.setStatus(pstaff.getStatus());
-            doctorStaffDao.create(doctorStaff);
+            // TODO: 2017/2/16 这里曾经要创建staff
+//            DoctorStaff pstaff = doctorStaffDao.findByUserId(Long.valueOf(Params.get(user.getExtra(), "pid")));
+//
+//            DoctorStaff doctorStaff = new DoctorStaff();
+//            doctorStaff.setUserId(userId);
+//            doctorStaff.setFarmId(pstaff.getOrgId());
+//            doctorStaff.setStatus(pstaff.getStatus());
+//            doctorStaffDao.create(doctorStaff);
 
         }
         return userId;

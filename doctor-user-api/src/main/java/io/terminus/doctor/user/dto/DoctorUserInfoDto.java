@@ -1,6 +1,5 @@
 package io.terminus.doctor.user.dto;
 
-import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import lombok.AllArgsConstructor;
@@ -37,11 +36,6 @@ public class DoctorUserInfoDto implements Serializable {
      * frontRoleType = 3 时, 可以取这个farmId, 再调用 get.farm.info 接口获取猪场概况
      */
     private Long farmId;
-
-    /**
-     * 职员信息
-     */
-    private DoctorStaff staff;
 
     /**
      * 权限JSON字符串

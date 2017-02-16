@@ -45,48 +45,13 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
         }
         return response;
     }
-    @Override
-    public Response<Integer> createFarms(List<DoctorFarm> farms){
-        Response<Integer> response = new Response<>();
-        try {
-            response.setResult(doctorFarmDao.creates(farms));
-        } catch (Exception e) {
-            log.error("create farm failed, cause : {}", Throwables.getStackTraceAsString(e));
-            response.setError("create.farm.failed");
-        }
-        return response;
-    }
 
     @Override
-    public Response<Boolean> updateFarm(DoctorFarm farm) {
-        Response<Boolean> response = new Response<>();
+    public Response<List<DoctorFarm>> addFarms4PrimaryUser(Long userId, Long orgId, List<DoctorFarm> farms) {
         try {
-            response.setResult(doctorFarmDao.update(farm));
+            return Response.ok(doctorFarmManager.addFarms4PrimaryUser(userId, orgId, farms));
         } catch (Exception e) {
-            log.error("update org farm, cause : {}", Throwables.getStackTraceAsString(e));
-            response.setError("update.farm.failed");
-        }
-        return response;
-    }
-
-    @Override
-    public Response<Boolean> deleteFarm(Long farmId) {
-        Response<Boolean> response = new Response<>();
-        try {
-            response.setResult(doctorFarmDao.delete(farmId));
-        } catch (Exception e) {
-            log.error("delete org farm, cause : {}", Throwables.getStackTraceAsString(e));
-            response.setError("delete.farm.failed");
-        }
-        return response;
-    }
-
-    @Override
-    public Response<List<DoctorFarm>> addFarms4PrimaryUser(Long userId, List<DoctorFarm> farms) {
-        try {
-            return Response.ok(doctorFarmManager.addFarms4PrimaryUser(userId, farms));
-        } catch (Exception e) {
-            log.error("create farm failed, cause : {}", Throwables.getStackTraceAsString(e));
+            log.error("create farm failed, userId:{}, orgId:{}, farms:{}, cause:{}", userId, orgId, farms, Throwables.getStackTraceAsString(e));
             return Response.fail("create.farm.failed");
         }
     }

@@ -101,8 +101,12 @@ public class FarmController {
             throw new JsonResponseException("farm.name.duplicate"); //猪场名称重复
         }
 
+        if (dto.getOrg() == null || dto.getOrg().getId() == null) {
+            throw new JsonResponseException("orgId.not.null");
+        }
+
         //终于可以添加猪场了...
-        List<DoctorFarm> newFarms = RespHelper.or500(doctorFarmWriteService.addFarms4PrimaryUser(primaryUser.getId(), dto.getFarms()));
+        List<DoctorFarm> newFarms = RespHelper.or500(doctorFarmWriteService.addFarms4PrimaryUser(primaryUser.getId(), dto.getOrg().getId(), dto.getFarms()));
 
         log.info("init barn start, userId:{}, farms:{}", dto.getUserId(), newFarms);
         //初始化猪舍

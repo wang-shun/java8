@@ -32,11 +32,4 @@ public interface DoctorUserDataPermissionWriteService {
      * @return 是否成功
      */
     Response<Boolean> deleteDataPermission(Long dataPermissionId);
-
-    /**
-     * 清除指定用户的缓存
-     * @param userId 用户id
-     * @return
-     */
-    Response clearUserCache(Long userId);
 }

@@ -595,3 +595,20 @@ alter table doctor_messages add column ware_house_id bigint(20) default null com
 alter table doctor_messages add column ware_house_name VARCHAR(64) default null comment '仓库名' after ware_house_id;
 alter table doctor_messages add column lot_number double default null comment '物料剩余量' after ware_house_name;
 
+-- 2017-02-16 用户相关重构
+drop table doctor_service_review_tracks;
+
+ALTER TABLE doctor_staffs
+  DROP COLUMN org_name,
+  DROP COLUMN role_id,
+  DROP COLUMN role_name,
+  DROP COLUMN sex,
+  DROP COLUMN avatar,
+  DROP COLUMN out_id,
+  DROP COLUMN extra,
+  DROP COLUMN creator_id,
+  DROP COLUMN creator_name,
+  DROP COLUMN updator_id,
+  DROP COLUMN updator_name;
+
+ALTER TABLE doctor_staffs CHANGE org_id farm_id BIGINT(20);
