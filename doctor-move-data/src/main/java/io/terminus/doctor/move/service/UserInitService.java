@@ -2,9 +2,11 @@ package io.terminus.doctor.move.service;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
@@ -106,7 +108,7 @@ public class UserInitService {
         for(View_FarmMember member : list){
             if(member.getLevels() == 0 && "admin".equals(member.getLoginName())){
                 // 主账号注册,内含事务
-                primaryUser= this.registerByMobile(mobile, "123456", loginName);
+                primaryUser = this.registerByMobile(mobile, "123456", loginName);
                 Long userId = primaryUser.getId();
                 //初始化服务状态
                 this.initDefaultServiceStatus(userId);
@@ -114,13 +116,18 @@ public class UserInitService {
                 this.initServiceReview(userId, mobile);
                 //创建org
                 DoctorOrg org = this.createOrg(member.getFarmName(), mobile, null, member.getFarmOID());
-                //创建staff
-                this.createStaff(member, primaryUser, org, member.getOID());
+
+
+
                 //创建猪场
                 for(DoctorFarm farm : farms){
                     farm.setOrgId(org.getId());
                     farm.setOrgName(org.getName());
                     doctorFarmDao.create(farm);
+
+                    //创建staff
+                    this.createStaff(member, primaryUser, farm, member.getOID());
+
                     RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
                     farmIds.add(farm.getId());
                 }
@@ -128,8 +135,13 @@ public class UserInitService {
                 DoctorUserDataPermission permission = new DoctorUserDataPermission();
                 permission.setUserId(userId);
                 permission.setFarmIds(Joiner.on(",").join(farmIds));
+                permission.setOrgIds(org.getId().toString());
                 doctorUserDataPermissionDao.create(permission);
             }
+        }
+
+        if (primaryUser == null) {
+            throw new ServiceException("primary.user.create.fail");
         }
 
         //创建子账号角色,后面创建子账号需要用到
@@ -228,21 +240,10 @@ public class UserInitService {
         return org;
     }
 
-    private void createStaff(View_FarmMember member, User user, DoctorOrg org, String outId){
+    private void createStaff(View_FarmMember member, User user, DoctorFarm farm, String outId){
         DoctorStaff staff = new DoctorStaff();
-        staff.setOrgName(org.getName());
-        staff.setOrgId(org.getId());
+        staff.setFarmId(farm.getId());
         staff.setUserId(user.getId());
-        staff.setOutId(outId);
-        staff.setCreatorId(user.getId());
-        staff.setCreatorName(user.getName());
-        staff.setUpdatorId(user.getId());
-        staff.setUpdatorName(user.getName());
-        if(Objects.equals(member.getSex(), "男")){
-            staff.setSex(DoctorStaff.Sex.MALE.value());
-        }else{
-            staff.setSex(DoctorStaff.Sex.FEFMALE.value());
-        }
         if(Objects.equals(member.getStatus(), "在职")){
             staff.setStatus(DoctorStaff.Status.PRESENT.value());
         }else{
@@ -254,13 +255,6 @@ public class UserInitService {
     private DoctorFarm makeFarm(View_FarmInfo farmInfo){
         DoctorFarm farm = new DoctorFarm();
         farm.setName(farmInfo.getFarmName());
-//        farm.setProvinceId();
-//        farm.setProvinceName();
-//        farm.setCityId();
-//        farm.setCityName();
-//        farm.setDistrictId();
-//        farm.setDistrictName();
-//        farm.setDetailAddress();
         farm.setOutId(farmInfo.getFarmOID());
         return farm;
     }
@@ -310,14 +304,6 @@ public class UserInitService {
                 .map());
         Long subUserId = RespHelper.or500(userWriteService.create(subUser));
 
-        // 给staff 设置下outId, 还要标记下是否在职. fuck...
-        DoctorStaff staff = doctorStaffDao.findByUserId(subUserId);
-        staff.setOutId(staffoutId);
-        if(Objects.equals(member.getIsStopUse(), "true")){
-            staff.setStatus(DoctorStaff.Status.ABSENT.value());
-        }
-        doctorStaffDao.update(staff);
-
         // 设置下子账号的状态
         if(Objects.equals(member.getIsStopUse(), "true")){
             Sub sub = subDao.findByUserId(subUserId);
@@ -349,15 +335,24 @@ public class UserInitService {
         // 主账号的id
         Long userId = user.getId();
 
-        Long orgId = doctorStaffDao.findByUserId(userId).getOrgId();
-        List<Long> barns = doctorBarnDao.findByOrgId(orgId).stream().map(DoctorBarn::getId).collect(Collectors.toList());
-        String barnIds = Joiner.on(",").join(barns);
+        DoctorUserDataPermission primaryPermission = doctorUserDataPermissionDao.findByUserId(userId);
 
-        //所有员工，包括主账号
-        for(DoctorStaff staff : doctorStaffDao.findByOrgId(orgId)){
-            DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(staff.getUserId());
-            permission.setBarnIds(barnIds);
-            doctorUserDataPermissionDao.update(permission);
+        if (primaryPermission == null || primaryPermission.getOrgIdsList() == null) {
+            log.error("this user do not have org permission, user:{}", user);
+            return;
         }
+
+        primaryPermission.getOrgIdsList().forEach(orgId -> {
+            List<Long> barns = doctorBarnDao.findByOrgId(orgId).stream().map(DoctorBarn::getId).collect(Collectors.toList());
+
+            //所有员工，包括主账号
+            List<DoctorUserDataPermission> permissions = doctorUserDataPermissionDao.findByOrgId(orgId);
+            permissions.forEach(permission -> {
+                List<Long> barnIds = permission.getBarnIdsList();
+                barnIds.addAll(barns);
+                permission.setBarnIds(Joiners.COMMA.join(Sets.newHashSet(barnIds)));
+                doctorUserDataPermissionDao.update(permission);
+            });
+        });
     }
 }

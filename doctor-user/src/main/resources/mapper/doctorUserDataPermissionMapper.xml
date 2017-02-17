@@ -91,4 +91,15 @@
         WHERE id = #{id}
     </delete>
 
+    <select id="findByOrgId" parameterType="long" resultMap="DoctorUserDataPermissionMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE find_in_set(#{orgId}, org_ids)
+    </select>
+
+    <select id="findByFarmId" parameterType="long" resultMap="DoctorUserDataPermissionMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE find_in_set(#{farmId}, farm_ids)
+    </select>
 </mapper>

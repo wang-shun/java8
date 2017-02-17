@@ -22,7 +22,7 @@ import io.terminus.doctor.move.model.B_ChangeReason;
 import io.terminus.doctor.move.model.B_Customer;
 import io.terminus.doctor.move.model.TB_FieldValue;
 import io.terminus.doctor.move.model.View_PigLocationList;
-import io.terminus.doctor.user.dao.DoctorStaffDao;
+import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.UserProfile;
@@ -54,7 +54,7 @@ public class DoctorMoveBasicService {
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorBasicMaterialDao doctorBasicMaterialDao;
     private final DoctorBarnDao doctorBarnDao;
-    private final DoctorStaffDao doctorStaffDao;
+    private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     private final UserProfileDao userProfileDao;
 
     @Autowired
@@ -64,7 +64,7 @@ public class DoctorMoveBasicService {
                                   DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
                                   DoctorBasicMaterialDao doctorBasicMaterialDao,
                                   DoctorBarnDao doctorBarnDao,
-                                  DoctorStaffDao doctorStaffDao,
+                                  DoctorUserDataPermissionDao doctorUserDataPermissionDao,
                                   UserProfileDao userProfileDao) {
         this.doctorCustomerDao = doctorCustomerDao;
         this.doctorChangeReasonDao = doctorChangeReasonDao;
@@ -72,7 +72,7 @@ public class DoctorMoveBasicService {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorBasicMaterialDao = doctorBasicMaterialDao;
         this.doctorBarnDao = doctorBarnDao;
-        this.doctorStaffDao = doctorStaffDao;
+        this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
         this.userProfileDao = userProfileDao;
     }
 
@@ -281,10 +281,10 @@ public class DoctorMoveBasicService {
     //拼接staff,  Map<真实姓名, userId>
     public Map<String, Long> getSubMap(Long orgId) {
         Map<String, Long> staffMap = Maps.newHashMap();
-        doctorStaffDao.findByOrgId(orgId).forEach(staff -> {
-            UserProfile profile = userProfileDao.findByUserId(staff.getUserId());
+        doctorUserDataPermissionDao.findByOrgId(orgId).forEach(permission -> {
+            UserProfile profile = userProfileDao.findByUserId(permission.getUserId());
             if (profile != null && notEmpty(profile.getRealName())) {
-                staffMap.put(profile.getRealName(), staff.getUserId());
+                staffMap.put(profile.getRealName(), permission.getUserId());
             }
         });
         return staffMap;
