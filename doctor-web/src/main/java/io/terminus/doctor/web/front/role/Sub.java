@@ -39,4 +39,7 @@ public class Sub {
 
     //员工关联的猪舍, 将存入数据权限表
     private List<Long> barnIds;
+
+    //是否作为猪场员工，默认true
+    private boolean asStaff = true;
 }

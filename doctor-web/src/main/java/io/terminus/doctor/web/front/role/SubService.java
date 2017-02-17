@@ -273,6 +273,9 @@ public class SubService {
                     .put("realName", sub.getRealName())
                     .map());
             Long subUserId = RespHelper.orServEx(userWriteService.create(subUser));
+
+            //create farm staff if necessary
+            createStaff(subUserId, sub);
             this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds(), permission.getOrgIdsList());
             return Response.ok(subUserId);
         } catch (ServiceException | JsonResponseException e) {
@@ -281,6 +284,22 @@ public class SubService {
             log.error("creat sub failed, user={}, sub={}, cause:{}", user, sub, Throwables.getStackTraceAsString(e));
             return Response.fail("sub.create.fail");
         }
+    }
+
+    //创建staff
+    private void createStaff(Long userId, Sub sub) {
+        if (!sub.isAsStaff()) {
+            log.info("this sub need not create staff, user:{}", sub);
+            return;
+        }
+        sub.getFarmIds().forEach(farmId -> {
+            DoctorStaff doctorStaff = new DoctorStaff();
+            doctorStaff.setUserId(userId);
+            doctorStaff.setFarmId(farmId);
+            doctorStaff.setStatus(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())
+                    ? DoctorStaff.Status.PRESENT.value() : DoctorStaff.Status.ABSENT.value());
+            RespHelper.orServEx(doctorStaffWriteService.createDoctorStaff(doctorStaff));
+        });
     }
 
     private void createPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds, List<Long> orgIds){

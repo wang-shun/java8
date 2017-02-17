@@ -132,16 +132,6 @@ public class DoctorUserManager {
             userProfile.setUserId(userId);
             userProfile.setRealName(Params.get(user.getExtra(), "realName"));
             userProfileDao.create(userProfile);
-
-            // TODO: 2017/2/16 这里曾经要创建staff
-//            DoctorStaff pstaff = doctorStaffDao.findByUserId(Long.valueOf(Params.get(user.getExtra(), "pid")));
-//
-//            DoctorStaff doctorStaff = new DoctorStaff();
-//            doctorStaff.setUserId(userId);
-//            doctorStaff.setFarmId(pstaff.getOrgId());
-//            doctorStaff.setStatus(pstaff.getStatus());
-//            doctorStaffDao.create(doctorStaff);
-
         }
         return userId;
     }
