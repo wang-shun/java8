@@ -11,6 +11,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -141,11 +142,11 @@ public class DoctorPigs {
     }
 
     private DoctorPigInfoDetailDto getPigDetail(Long pigId, Integer eventSize) {
-        Response<DoctorPigInfoDetailDto> response = doctorPigReadService.queryPigDetailInfoByPigId(pigId, eventSize);
-        if (!response.isSuccess()) {
-            return null;
-        }
-        DoctorPigInfoDetailDto pigDetail = response.getResult();
+        DoctorPigInfoDetailDto pigDetail = RespWithExHelper.orInvalid(doctorPigReadService.queryPigDetailInfoByPigId(pigId, eventSize));
+//        if (!response.isSuccess()) {
+//            return null;
+//        }
+//        DoctorPigInfoDetailDto pigDetail = response.getResult();
         doctorFarmAuthCenter.checkFarmAuthResponse(pigDetail.getDoctorPig().getFarmId());
         transFromUtil.transFromExtraMap(pigDetail.getDoctorPigEvents());
         return pigDetail;
@@ -153,36 +154,17 @@ public class DoctorPigs {
 
     @RequestMapping(value = "/getSowPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response<DoctorSowDetailDto> querySowPigDetailInfoDto(@RequestParam("pigId") Long pigId,
+    public DoctorSowDetailDto querySowPigDetailInfoDto(@RequestParam("pigId") Long pigId,
                                                                  @RequestParam(value = "eventSize", required = false) Integer eventSize){
-        try {
-            DoctorPigInfoDetailDto pigDetail = getPigDetail(pigId, eventSize);
-            if (pigDetail == null) {
-                return Response.ok();
-            }
-            return Response.ok(buildSowDetailDto(pigDetail));
-        } catch (JsonResponseException e) {
-            return Response.fail(e.getMessage());
-        } catch (Exception e) {
-            return Response.fail("query.pigDetailInfo.fail");
-        }
+            return buildSowDetailDto(getPigDetail(pigId, eventSize));
     }
 
     @RequestMapping(value = "/getBoarPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response<DoctorBoarDetailDto> queryBoarPigDetailInfoDto(@RequestParam("pigId") Long pigId,
+    public DoctorBoarDetailDto queryBoarPigDetailInfoDto(@RequestParam("pigId") Long pigId,
                                                                    @RequestParam(value = "eventSize", required = false) Integer eventSize){
-        try {
-            DoctorPigInfoDetailDto pigDetail = getPigDetail(pigId, eventSize);
-            if (pigDetail == null) {
-                return Response.ok();
-            }
-            return Response.ok(buildDoctorBoarDetailDto(pigDetail));
-        } catch (JsonResponseException e) {
-            return Response.fail(e.getMessage());
-        } catch (Exception e) {
-            return Response.fail("query.pigDetailInfo.fail");
-        }    }
+            return buildDoctorBoarDetailDto(getPigDetail(pigId, eventSize));
+          }
 
     private DoctorBoarDetailDto buildDoctorBoarDetailDto(DoctorPigInfoDetailDto dto){
         return DoctorBoarDetailDto.builder()

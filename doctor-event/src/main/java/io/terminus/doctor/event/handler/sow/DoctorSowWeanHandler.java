@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -51,7 +52,13 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
         super.handleCheck(eventDto, basic);
         DoctorWeanDto weanDto = (DoctorWeanDto) eventDto;
-        checkState(MoreObjects.firstNonNull(weanDto.getQualifiedCount(), 0) + MoreObjects.firstNonNull(weanDto.getNotQualifiedCount(), 0) <= weanDto.getFarrowingLiveCount(), "不合格数加合格数大于活仔数,猪号:" + weanDto.getPigCode());
+        expectTrue(MoreObjects.firstNonNull(weanDto.getQualifiedCount(), 0) + MoreObjects.firstNonNull(weanDto.getNotQualifiedCount(), 0) <= weanDto.getFarrowingLiveCount(), "qualified.add.noQualified.over.live", weanDto.getPigCode());
+        if (Objects.equals(weanDto.getFarrowingLiveCount(), 0) && !Objects.equals(weanDto.getPartWeanAvgWeight(), 0d)) {
+            throw new InvalidException("wean.avg.weight.not.zero", weanDto.getPigCode());
+        }
+        if (!Objects.equals(weanDto.getFarrowingLiveCount(), 0) && (weanDto.getPartWeanAvgWeight() < 3 || weanDto.getPartWeanAvgWeight() > 9)) {
+            throw new InvalidException("wean.avg.weight.range.error", weanDto.getPigCode());
+        }
     }
 
     @Override
@@ -111,19 +118,18 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         DoctorWeanDto partWeanDto = (DoctorWeanDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(partWeanDto.getPigId());
 
-        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "不是哺乳母猪,猪号:" + partWeanDto.getPigCode());
+        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", PigStatus.from(doctorPigTrack.getStatus()).getName(), partWeanDto.getPigCode());
 
         //未断奶数
         Integer unweanCount = doctorPigTrack.getUnweanQty();    //未断奶数量
         Integer weanCount = doctorPigTrack.getWeanQty();        //断奶数量
         Integer toWeanCount = partWeanDto.getPartWeanPigletsCount();
-        checkState(Objects.equals(toWeanCount,unweanCount), "必须全部断奶,猪号:" + partWeanDto.getPigCode());
+        expectTrue(Objects.equals(toWeanCount,unweanCount), "need.all.wean", partWeanDto.getPigCode());
         doctorPigTrack.setUnweanQty(unweanCount - toWeanCount); //未断奶数减
         doctorPigTrack.setWeanQty(weanCount + toWeanCount);     //断奶数加
 
         //断奶均重
         Double toWeanAvgWeight = partWeanDto.getPartWeanAvgWeight();
-        checkState(toWeanAvgWeight != null, "断奶均重不能为空,猪号:" + partWeanDto.getPigCode());
         Double weanAvgWeight = ((MoreObjects.firstNonNull(doctorPigTrack.getWeanAvgWeight(), 0D) * weanCount) + toWeanAvgWeight * toWeanCount ) / (weanCount + toWeanCount);
         doctorPigTrack.setWeanAvgWeight(weanAvgWeight);
 

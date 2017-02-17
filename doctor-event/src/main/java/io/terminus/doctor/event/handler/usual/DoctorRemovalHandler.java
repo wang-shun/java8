@@ -27,6 +27,12 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
+    @Override
+    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+        super.handleCheck(eventDto, basic);
+        DoctorRemovalDto removalDto = (DoctorRemovalDto) eventDto;
+        // TODO: 17/2/16 销售时价格不可为空
+    }
 
     @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {

@@ -6,6 +6,9 @@ package io.terminus.doctor.common.utils;
 
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.common.exception.InvalidException;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * @author Effet
@@ -34,6 +37,9 @@ public class RespWithExHelper {
         if (resp.isSuccess()) {
             return resp.getResult();
         }
-        throw resp.getException();
+        if (notNull(resp.getException())) {
+            throw resp.getException();
+        }
+        throw new InvalidException(500, resp.getError());
     }
 }

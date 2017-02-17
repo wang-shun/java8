@@ -36,7 +36,7 @@ public class InvalidException extends RuntimeException {
     }
 
     public InvalidException(String error, Object... param) {
-        this(400, error, param);
+        this(500, error, param);
     }
 
     @Override

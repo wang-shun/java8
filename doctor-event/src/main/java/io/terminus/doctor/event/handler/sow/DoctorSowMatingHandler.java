@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static java.util.Objects.isNull;
 
@@ -45,6 +46,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         DoctorMatingDto matingDto = (DoctorMatingDto) eventDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(matingDto.getPigId());
         expectTrue(doctorPigTrack.getCurrentMatingCount() < 3, "mate.count.over", eventDto.getPigCode());
+        expectTrue(notNull(matingDto.getOperatorId()), "mating.operator.not.null", eventDto.getPigCode());
     }
 
     @Override

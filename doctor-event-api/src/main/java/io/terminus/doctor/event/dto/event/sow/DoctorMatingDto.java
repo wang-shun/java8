@@ -46,6 +46,7 @@ public class DoctorMatingDto extends BasePigEventInputDto implements Serializabl
     /**
      * @see io.terminus.doctor.event.enums.MatingType
      */
+    @NotNull(message = "mating.type.not.null")
     private Integer matingType; // 配种类型
 
     private String mattingMark; // 配种mark

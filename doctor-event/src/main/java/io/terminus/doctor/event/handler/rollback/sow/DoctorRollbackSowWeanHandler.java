@@ -19,6 +19,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
+
 /**
  * Desc: 断奶事件回滚
  * Mail: yangzl@terminus.io
@@ -44,9 +47,7 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
         DoctorWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorWeanDto.class);
         if (weanDto.getChgLocationToBarnId() != null) {
             DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
-            if (toPigEvent == null) {
-                return false;
-            }
+            expectTrue(notNull(toPigEvent), "relate.pig.event.not.null", pigEvent.getId());
             DoctorBarn doctorBarn = doctorBarnDao.findById(weanDto.getChgLocationToBarnId());
             if (Objects.equals(doctorBarn.getPigType(), PigType.MATE_SOW.getValue()) || Objects.equals(doctorBarn.getPigType(), PigType.PREG_SOW.getValue())) {
                 return doctorRollbackSowToChgLocationEventHandler.handleCheck(toPigEvent);

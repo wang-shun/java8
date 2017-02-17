@@ -37,8 +37,10 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         super.handleCheck(eventDto, basic);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(eventDto.getPigId());
         DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) eventDto;
+        if (Objects.equals(pregChkResultDto.getCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
+            expectTrue(notNull(pregChkResultDto.getAbortionReasonId()), "liuchan.reason.not.null", pregChkResultDto.getPigCode());
+        }
         checkCanPregCheckResult(doctorPigTrack.getStatus(), pregChkResultDto.getCheckResult(), pregChkResultDto.getPigCode());
-
     }
 
     @Override
@@ -175,7 +177,6 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
             }
             return;
         }
-
         //如果不是 已配种, 妊娠检查结果状态, 不允许妊娠检查
         throw new InvalidException("sow.not.allow.preg.check", PigStatus.from(pigStatus).getName(), pigCode);
     }

@@ -106,6 +106,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
 
             return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
             log.error("groupEventAntiepidemic failed, groupDetail:{}, antiepidemic:{}, cause:{}", groupDetail, antiepidemic, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
@@ -122,6 +124,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
 
             return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
             log.error("groupEventChange failed, groupDetail:{}, change:{}, cause:{}", groupDetail, change, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
@@ -138,6 +142,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
 
             return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
             log.error("groupEventClose failed, groupDetail:{}, close:{}, cause:{}", groupDetail, close, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
@@ -154,6 +160,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
 
             return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
             log.error("groupEventDisease failed, groupDetail:{}, disease:{}, cause:{}", groupDetail, disease, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
@@ -170,6 +178,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
 
             return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
             log.error("groupEventLiveStock failed, groupDetail:{}, liveStock:{}, cause:{}", groupDetail, liveStock, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
@@ -186,6 +196,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
 
             return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
             log.error("groupEventMoveIn failed, groupDetail:{}, moveIn:{}, cause:{}", groupDetail, moveIn, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
@@ -202,6 +214,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
 
             return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
             log.error("groupEventTransFarm failed, groupDetail:{}, transFarm:{}, cause:{}", groupDetail, transFarm, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
@@ -222,6 +236,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
                 return RespWithEx.ok(toGroup.getId());
             }
             return RespWithEx.ok(transGroup.getToGroupId());
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
             log.error("groupEventTransGroup failed, groupDetail:{}, transGroup:{}, cause:{}", groupDetail, transGroup, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
@@ -238,6 +254,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
 
             return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
             log.error("groupEventTurnSeed failed, groupDetail:{}, turnSeed:{}, cause:{}", groupDetail, turnSeed, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
@@ -294,6 +312,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         try {
             doctorGroupEventManager.rollbackEvent(groupEvent, reveterId, reveterName);
             return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
             log.error("rollback group event failed, groupEvent:{}, reveterId:{}, reveterName:{}, cause:{}",
                     groupEvent, reveterId, reveterName, Throwables.getStackTraceAsString(e));

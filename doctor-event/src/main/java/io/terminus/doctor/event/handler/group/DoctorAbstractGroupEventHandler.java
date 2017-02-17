@@ -271,9 +271,10 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
         //产房 => 产房(分娩母猪舍)/保育舍
         if (Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) {
+            barnType = 4;
             if (!FARROW_ALLOW_TRANS.contains(barnType)) {
                 log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
-                throw new InvalidException("farrow.can.not.trans", PigType.from(barnType).getValue(), groupCode);
+                throw new InvalidException("farrow.can.not.trans", PigType.from(barnType).getDesc(), groupCode);
             }
             return;
         }
@@ -281,7 +282,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         if (Objects.equals(pigType, PigType.NURSERY_PIGLET.getValue())) {
             if (!NURSERY_ALLOW_TRANS.contains(barnType)) {
                 log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
-                throw new InvalidException("nursery.can.not.trans", PigType.from(barnType).getValue(), groupCode);
+                throw new InvalidException("nursery.can.not.trans", PigType.from(barnType).getDesc(), groupCode);
             }
             return;
         }
@@ -289,14 +290,14 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         if (Objects.equals(pigType, PigType.FATTEN_PIG.getValue())) {
             if (!FATTEN_ALLOW_TRANS.contains(barnType)) {
                 log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
-                throw new InvalidException("fatten.can.not.trans", PigType.from(barnType).getValue(), groupCode);
+                throw new InvalidException("fatten.can.not.trans", PigType.from(barnType).getDesc(), groupCode);
             }
             return;
         }
         // 后备群 => 育肥舍/后备舍
         if (Objects.equals(pigType, PigType.RESERVE.getValue())) {
             if(barnType != PigType.RESERVE.getValue() && barnType != PigType.FATTEN_PIG.getValue()){
-                throw new InvalidException("reserve.can.not.trans", PigType.from(barnType).getValue(), groupCode);
+                throw new InvalidException("reserve.can.not.trans", PigType.from(barnType).getDesc(), groupCode);
             }
             return;
         }
@@ -304,7 +305,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         //其他 => 同类型
         if(!Objects.equals(pigType, barnType)) {
             log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
-            throw new InvalidException("no.equal.type.can.not.trans", PigType.from(barnType).getValue(), groupCode);
+            throw new InvalidException("no.equal.type.can.not.trans", PigType.from(barnType).getDesc(), groupCode);
         }
     }
 
@@ -347,7 +348,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
         Integer unwean = MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0);
         if (eventQty > (groupTrack.getQuantity() - unwean)) {
-            throw new InvalidException("group.has.unwean", unwean, groupCode);
+            throw new InvalidException("group.has.unwean", eventQty, groupTrack.getQuantity() - unwean, groupCode);
         }
     }
     //获取事件发生时，猪群的日龄

@@ -44,10 +44,18 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
     private DoctorSowWeanHandler doctorSowWeanHandler;
 
     @Override
+    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+        super.handleCheck(eventDto, basic);
+        DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) eventDto;
+        // TODO: 17/2/16 变动类型为销售时单价,用户不可为空
+        //if (Objects.equals(pigletsChgDto.getPigletsChangeType(), ))
+    }
+
+    @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigletsChgDto.getPigId());
-        expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", pigletsChgDto.getPigCode());
+        expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", PigStatus.from(doctorPigTrack.getStatus()).getName(), pigletsChgDto.getPigCode());
 
         // 校验转出的数量信息
         Integer unweanCount = doctorPigTrack.getUnweanQty();        //未断奶数量

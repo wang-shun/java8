@@ -3,10 +3,10 @@ package io.terminus.doctor.event.dto.event;
 
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.model.DoctorPig;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotEmpty;
+import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -16,6 +16,8 @@ import java.util.Map;
  * 所有与猪相关的事件, 用户录入的数据 dto 的抽象父类
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public abstract class BasePigEventInputDto implements Serializable{
     private static final long serialVersionUID = 8608840545820959951L;
 
@@ -41,13 +43,10 @@ public abstract class BasePigEventInputDto implements Serializable{
      * 对应的母猪类型（公猪，母猪）
      * @see DoctorPig.PigSex
      */
-    @NotNull(message = "sex.not.null")
     private Integer pigType;
 
-    @NotEmpty(message = "pig.code.not.empty")
     private String pigCode;
 
-    @NotNull(message = "barn.id.not.null")
     private Long barnId;
 
     private String barnName;
@@ -55,7 +54,6 @@ public abstract class BasePigEventInputDto implements Serializable{
     /**
      * @see io.terminus.doctor.event.enums.PigEvent
      */
-    @NotNull(message = "event.type.not.null")
     private Integer eventType;
 
     private String eventName;

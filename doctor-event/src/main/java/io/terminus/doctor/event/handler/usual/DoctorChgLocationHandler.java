@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
 import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
@@ -61,7 +60,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     @Override
     public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
         DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) eventDto;
-        checkState(!Objects.equals(chgLocationDto.getChgLocationFromBarnId(), chgLocationDto.getChgLocationToBarnId()), "同舍不可转,猪号:" + eventDto.getPigCode());
+        expectTrue(!Objects.equals(chgLocationDto.getChgLocationFromBarnId(), chgLocationDto.getChgLocationToBarnId()), "same.barn.not.trans", eventDto.getPigCode());
     }
 
     @Override
@@ -89,7 +88,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         //校验猪舍类型是否相同, 只有同类型才可以普通转舍
         DoctorBarn fromBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
         DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
-        expectTrue(checkBarnTypeEqual(fromBarn.getPigType(), doctorPigTrack.getStatus(), toBarn.getPigType()), "not.trans.barn.type", new Object[]{chgLocationDto.getPigCode()});
+        expectTrue(checkBarnTypeEqual(fromBarn.getPigType(), doctorPigTrack.getStatus(), toBarn.getPigType()), "not.trans.barn.type", chgLocationDto.getPigCode());
         //expectTrue(!(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) && PigType.MATING_TYPES.contains(toBarn.getPigType())), "", new Object[]{chgLocationDto.getPigCode()});
 
         if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {

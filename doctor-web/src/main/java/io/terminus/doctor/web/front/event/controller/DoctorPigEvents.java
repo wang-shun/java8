@@ -15,6 +15,7 @@ import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
@@ -145,7 +146,7 @@ public class DoctorPigEvents {
                                                               @RequestParam(value = "startDate", required = false) String startDate,
                                                               @RequestParam(value = "endDate", required = false) String endDate) {
         Paging<DoctorPigEvent> doctorPigEventPaging = pagingDoctorPigEvent(farmId, pigId, pageNo, pageSize, startDate, endDate);
-        DoctorPigEvent doctorPigEvent = RespHelper.or500(doctorPigEventReadService.canRollbackEvent(pigId));
+        DoctorPigEvent doctorPigEvent = RespWithExHelper.orInvalid(doctorPigEventReadService.canRollbackEvent(pigId));
         Long canRollback = null;
         if (doctorPigEvent != null) {
             canRollback = doctorPigEvent.getId();
@@ -242,12 +243,7 @@ public class DoctorPigEvents {
                     doctorPigEvent.setExtraMap(extraMap);
                     DoctorPigEventDetail detail = OBJECT_MAPPER.convertValue(doctorPigEvent, DoctorPigEventDetail.class);
 
-                    //设置事件能否回滚,若取事件是否可以回滚有错则默认不能回滚
-                    Response<Boolean> isRollbackResponse = doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId());
-                    boolean isRollback =false;
-                    if (isRollbackResponse.isSuccess()) {
-                        isRollback = isRollbackResponse.getResult();
-                    }
+                    boolean isRollback = RespWithExHelper.orInvalid(doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId()));
                     detail.setIsRollback(isRollback);
 
                     return detail;
@@ -366,7 +362,7 @@ public class DoctorPigEvents {
         List<DoctorGroupEventDetail> groupEventDetailList = pagingResponse.getResult().getData().stream()
                 .map(doctorGroupEvent -> {
                     DoctorGroupEventDetail detail = OBJECT_MAPPER.convertValue(doctorGroupEvent, DoctorGroupEventDetail.class);
-                    Boolean isRollback = RespHelper.or500(doctorGroupReadService.eventCanRollback(doctorGroupEvent.getId()));
+                    Boolean isRollback = RespWithExHelper.orInvalid(doctorGroupReadService.eventCanRollback(doctorGroupEvent.getId()));
                     detail.setIsRollback(isRollback);
                     return detail;
                 }).collect(toList());

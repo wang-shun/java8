@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
@@ -155,7 +156,7 @@ public interface DoctorGroupReadService {
      * @return 猪群
      */
     Response<DoctorGroup> findGroupByFarmIdAndGroupCode(@NotNull(message = "farmId.not.null") Long farmId,
-                                                        @NotEmpty(message = "group.code.not.empty") String groupCode);
+                                                        @NotEmpty(message = "groupCode.not.empty") String groupCode);
 
 
     /**
@@ -187,14 +188,14 @@ public interface DoctorGroupReadService {
      * @param groupId
      * @return
      */
-    Response<DoctorGroupEvent> canRollbackEvent(@NotNull(message = "input.groupId.empty") Long groupId);
+    RespWithEx<DoctorGroupEvent> canRollbackEvent(@NotNull(message = "input.groupId.empty") Long groupId);
 
     /**
      * 事件能否回滚
      * @param eventId 事件id
      * @return 能否回滚
      */
-    Response<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId);
+    RespWithEx<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId);
 
     /**
      * 查询猪群的所有事件

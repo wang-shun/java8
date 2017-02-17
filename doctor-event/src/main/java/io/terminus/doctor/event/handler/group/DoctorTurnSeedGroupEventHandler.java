@@ -1,8 +1,8 @@
 package io.terminus.doctor.event.handler.group;
 
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -61,7 +61,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
         //0. 校验数据
         checkQuantity(groupTrack.getQuantity(), 1, group.getGroupCode()); // 确保 原数量 >= 1
-        checkTurnSeedData(group.getPigType(), toBarn.getPigType());
+        checkTurnSeedData(group.getPigType(), toBarn.getPigType(), group.getGroupCode());
 
         //1. 转换转种猪事件
         DoctorTurnSeedGroupEvent turnSeedEvent = BeanMapper.map(turnSeed, DoctorTurnSeedGroupEvent.class);
@@ -112,17 +112,16 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
     //后备舍又他妈不分公母了, 艹
     //后备猪 => 配种舍/妊娠舍/种公猪舍
-    private static PigType checkTurnSeedData(Integer groupType, Integer barnType){
+    private static PigType checkTurnSeedData(Integer groupType, Integer barnType, String groupCode){
         PigType type = PigType.from(groupType);
 
         //校验猪群类型: 后备群
         if(type == null || !PigType.HOUBEI_TYPES.contains(type.getValue())){
-            throw new ServiceException("group.can.not.turn.seed");
+            throw new InvalidException("group.can.not.turn.seed", type.getDesc(), groupCode);
         }
-
         //校验转入猪舍类型
         if (!PigType.MATING_TYPES.contains(barnType) && barnType != PigType.BOAR.getValue()) {
-            throw new ServiceException("barn.can.not.turn.seed");
+            throw new InvalidException("barn.can.not.turn.seed", PigType.from(barnType).getDesc(), groupCode);
 
         }
         return type;

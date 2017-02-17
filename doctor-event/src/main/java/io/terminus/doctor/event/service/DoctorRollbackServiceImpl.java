@@ -101,10 +101,10 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             List<DoctorRollbackDto> dtos = doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
             doctorRollbackManager.checkAndPublishRollback(dtos);
             return RespWithEx.ok(Boolean.TRUE);
-        } catch (ServiceException e) {
-            return RespWithEx.fail(e.getMessage());
         } catch (InvalidException e) {
             return RespWithEx.exception(e);
+        } catch (ServiceException e) {
+            return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
             log.error("rollack pig event failed, eventId:{}, cause:{}", eventId, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("rollback.event.failed");
