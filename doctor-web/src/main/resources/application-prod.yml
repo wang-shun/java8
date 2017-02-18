@@ -1,0 +1,76 @@
+server:
+  context-path: /
+  port: 8080
+
+pampas:
+  rootPath: /home/admin/assets
+  apps:
+    - key: MOBILE
+      assetsHome: pidgey
+  devMode: false
+  locale: zh_CN
+  mvc:
+    ignoreInterceptors:
+      - Login
+      - Auth
+    customInterceptors:
+      - loginInterceptor
+      - authInterceptor
+  redis:
+    host: 10.161.31.38
+    port: 6379
+  design:
+    enable: true
+
+session:
+  cookie-context-path: /
+  cookie-domain: xrnm.com
+  cookie-max-age: 3600
+  cookie-name: msid
+  source: redis
+  serialize-type: json
+  redis-host: 10.161.31.38
+  redis-port: 6379
+  redis-index: 0
+  redis-cluster: false
+  redis-test-on-borrow: true
+  redis-max-total: 50
+  redis-max-idle: 0
+  redis-prefix: afsession
+  max-inactive-interval: 3600
+  redis-auth: Xrnm8888
+
+# dubbo
+rpc.mode: true
+rpc.dubbo:
+    module: doctor-web
+    registryAddress: 10.161.31.38:2181
+    version: 1.0.0
+    timeout: 30000
+
+# zookeeper
+zookeeper:
+  host: 10.161.31.38
+  port: 2181
+
+logging:
+  file: /var/log/doctor/web.log
+  level.*: INFO
+
+image:
+  base:
+    url: https://img.xrnm.com
+
+oss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  appKey: n67jFjUcEjZxPOZf
+  appSecret: ZOPL1A33iQB52g60Dgvs3xT2FJqeaf
+  bucketName: pigmall
+
+parana:
+  config:
+    mode: server
+
+
+openApi.url: https://doctor.xrnm.com
+
