@@ -1,6 +1,6 @@
 server:
   context-path: /
-  port: 8080
+  port: 8081
 
 pampas:
   rootPath: /home/admin/assets
@@ -17,40 +17,38 @@ pampas:
       - loginInterceptor
       - authInterceptor
   redis:
-    host: 10.161.31.38
+    host: 101.201.44.35
     port: 6379
   design:
     enable: true
 
 session:
   cookie-context-path: /
-  cookie-domain: xrnm.com
+  cookie-domain: doctor.com
   cookie-max-age: 3600
   cookie-name: msid
   source: redis
   serialize-type: json
-  redis-host: 10.161.31.38
+  redis-host: 101.201.44.35
   redis-port: 6379
-  redis-index: 0
+  redis-index: 1
   redis-cluster: false
   redis-test-on-borrow: true
   redis-max-total: 10
   redis-max-idle: 0
   redis-prefix: afsession
   max-inactive-interval: 3600
-  redis-auth: Xrnm8888
 
 # dubbo
 rpc.mode: true
 rpc.dubbo:
     module: doctor-web
-    registryAddress: 10.161.31.38:2181
+    registryAddress: 101.201.44.35:2181
     version: 1.0.0
-    timeout: 30000
 
 # zookeeper
 zookeeper:
-  host: 10.161.31.38
+  host: 101.201.44.35
   port: 2181
 
 logging:
@@ -59,7 +57,7 @@ logging:
 
 image:
   base:
-    url: https://img.xrnm.com
+    url: http://pigmall.oss-cn-beijing.aliyuncs.com
 
 oss:
   endpoint: oss-cn-beijing.aliyuncs.com
@@ -111,5 +109,5 @@ msg:
       appKey: 574cecdce0f55a85f00028fe
       appSecret: ws685rsevimn8fgx6mmxzzgx7bs1y9pn
 
-openApi.url: https://doctor.xrnm.com
+openApi.url: http://doctor-test.xrnm.com
 
