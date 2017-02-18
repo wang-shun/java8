@@ -45,6 +45,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         super.handleCheck(eventDto, basic);
         DoctorMatingDto matingDto = (DoctorMatingDto) eventDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(matingDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", eventDto.getPigId());
         expectTrue(doctorPigTrack.getCurrentMatingCount() < 3, "mate.count.over", eventDto.getPigCode());
         expectTrue(notNull(matingDto.getOperatorId()), "mating.operator.not.null", eventDto.getPigCode());
     }
@@ -52,7 +53,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     @Override
     public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
         // validate extra 配种日期信息
         DateTime matingDate = new DateTime(inputDto.eventAt());
         Map<String, Object> extra = doctorPigTrack.getExtraMap();
@@ -88,6 +89,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         DoctorMatingDto matingDto = (DoctorMatingDto) inputDto;
         Long boarId = matingDto.getMatingBoarPigId();
         DoctorPigTrack boarPigTrack = this.doctorPigTrackDao.findByPigId(boarId);
+        expectTrue(notNull(boarPigTrack), "boar.track.not.null", boarId);
         Integer currentBoarParity = MoreObjects.firstNonNull(boarPigTrack.getCurrentParity(), 0) + 1;
         boarPigTrack.setCurrentParity(currentBoarParity);
         doctorPigTrackDao.update(boarPigTrack);
@@ -112,9 +114,8 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
 
             //查询最近一次导致断奶的事件
             DoctorPigEvent lastWean = doctorPigEventDao.queryLastWean(doctorPigTrack.getPigId());
-            if (lastWean != null) {
-                partWeanDate = new DateTime(lastWean.getEventAt());
-            }
+            expectTrue(notNull(lastWean), "mating.last.wean.not.null", doctorPigTrack.getPigId());
+            partWeanDate = new DateTime(lastWean.getEventAt());
 
             Integer dpNPD = Math.abs(Days.daysBetween(partWeanDate, new DateTime(doctorPigEvent.getEventAt())).getDays());
             doctorPigEvent.setDpnpd(doctorPigEvent.getDpnpd() + dpNPD);
@@ -130,6 +131,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
             //这里说明是进场后的第一次配种,这个地方统计 jpNPD （进场到配种非生产天数）
             //查询最近一次进场事件
             DoctorPigEvent lastEnter = doctorPigEventDao.queryLastEnter(doctorPigTrack.getPigId());
+            expectTrue(notNull(lastEnter), "mating.last.enter.not.null", doctorPigTrack.getPigId());
             //进场时间
             DateTime lastEnterTime = new DateTime(lastEnter.getEventAt());
 

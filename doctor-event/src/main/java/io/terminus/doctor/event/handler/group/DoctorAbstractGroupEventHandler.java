@@ -271,7 +271,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
         //产房 => 产房(分娩母猪舍)/保育舍
         if (Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) {
-            barnType = 4;
             if (!FARROW_ALLOW_TRANS.contains(barnType)) {
                 log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
                 throw new InvalidException("farrow.can.not.trans", PigType.from(barnType).getDesc(), groupCode);

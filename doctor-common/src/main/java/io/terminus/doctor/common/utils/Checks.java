@@ -22,8 +22,20 @@ public final class Checks {
     }
 
     public static void expectTrue(boolean b, String errorMessage, Object... objects) {
+        expectTrue(b, false, null, errorMessage, objects);
+    }
+
+    public static void expectTrue(boolean b, boolean isBatchEvent, String attach, String errorMessage, Object... objects) {
         if (!b) {
-            throw new InvalidException(errorMessage, objects);
+            throw new InvalidException(isBatchEvent, errorMessage, attach, objects);
+        }
+    }
+
+    public static <T> T expectNotNull(T reference, String errorMessage, Object... params) {
+        if(reference == null) {
+            throw new InvalidException(false, errorMessage, null, params);
+        } else {
+            return reference;
         }
     }
 }

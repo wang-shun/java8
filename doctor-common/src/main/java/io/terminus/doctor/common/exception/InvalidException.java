@@ -14,6 +14,18 @@ import lombok.Getter;
 public class InvalidException extends RuntimeException {
     private static final long serialVersionUID = -3978990660036533916L;
 
+    /**
+     * 是否是批量方法
+     */
+    @Getter
+    private boolean isBatchEvent = false;
+
+    /**
+     * 附加值(批量方法使用)
+     */
+    @Getter
+    private String attach;
+
     @Getter
     private final int status;
 
@@ -29,14 +41,20 @@ public class InvalidException extends RuntimeException {
     @Getter
     private final Object[] params;
 
-    public InvalidException(int status, String error, Object... params){
+    public InvalidException(int status, String error, boolean isBatchEvent, String attach, Object... params){
         this.status = status;
         this.error = error;
+        this.isBatchEvent = isBatchEvent;
+        this.attach = attach;
         this.params = params;
     }
 
+    public InvalidException(boolean isBatchEvent, String error, String attach, Object... params){
+        this(500, error, isBatchEvent, attach, params);
+    }
+
     public InvalidException(String error, Object... param) {
-        this(500, error, param);
+        this(500, error, false, null, param);
     }
 
     @Override

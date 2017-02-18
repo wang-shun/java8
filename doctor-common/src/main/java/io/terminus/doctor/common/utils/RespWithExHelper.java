@@ -40,6 +40,6 @@ public class RespWithExHelper {
         if (notNull(resp.getException())) {
             throw resp.getException();
         }
-        throw new InvalidException(500, resp.getError());
+        throw new InvalidException(resp.getError());
     }
 }

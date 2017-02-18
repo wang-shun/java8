@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
@@ -55,6 +57,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigletsChgDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
         expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", PigStatus.from(doctorPigTrack.getStatus()).getName(), pigletsChgDto.getPigCode());
 
         // 校验转出的数量信息
@@ -119,6 +122,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
     private DoctorChangeGroupInput buildInputInfo(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic, Long pigEventId) {
         DoctorPigletsChgDto dto = (DoctorPigletsChgDto) inputDto;
         DoctorChangeGroupInput doctorChangeGroupInput = new DoctorChangeGroupInput();
+        doctorChangeGroupInput.setEventType(GroupEventType.CHANGE.getValue());
         doctorChangeGroupInput.setEventAt(DateUtil.toDateString(dto.getPigletsChangeDate()));
         doctorChangeGroupInput.setChangeTypeId(dto.getPigletsChangeType());             //变动类型id
         doctorChangeGroupInput.setChangeTypeName(dto.getPigletsChangeTypeName());       //变动类型名称

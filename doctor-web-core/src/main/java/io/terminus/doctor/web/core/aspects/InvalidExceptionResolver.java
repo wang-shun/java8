@@ -26,10 +26,15 @@ import java.util.Set;
 public class InvalidExceptionResolver {
     @Autowired
     private MessageSource messageSource;
+    private final static String ATTACH = ",猪号/猪群号:";
 
     @AfterThrowing(value = "execution(* io.terminus.doctor.web.front.event.controller.*.*(..))", throwing = "ex")
     public void invalidException(final JoinPoint point, InvalidException ex) throws Exception {
+
         String errorMessage = messageSource.getMessage(ex.getError(), ex.getParams(), Locale.CHINA);
+        if (ex.isBatchEvent()) {
+            errorMessage = errorMessage.concat(ATTACH).concat(ex.getAttach());
+        }
         throw new JsonResponseException(errorMessage);
     }
 

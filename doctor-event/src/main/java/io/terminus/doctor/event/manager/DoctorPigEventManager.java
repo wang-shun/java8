@@ -6,6 +6,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -79,8 +80,12 @@ public class DoctorPigEventManager {
         DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(eventInputs.get(0).getEventType());
         final List<DoctorEventInfo> eventInfos = Lists.newArrayList();
         eventInputs.forEach(inputDto -> {
-            handler.handleCheck(inputDto, basic);
-            handler.handle(eventInfos, inputDto, basic);
+            try {
+                handler.handleCheck(inputDto, basic);
+                handler.handle(eventInfos, inputDto, basic);
+            } catch (InvalidException e) {
+               throw new InvalidException(true, e.getError(), inputDto.getPigCode(), e.getParams());
+            }
         });
         return eventInfos;
     }

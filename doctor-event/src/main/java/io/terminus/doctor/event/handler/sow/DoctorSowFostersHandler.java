@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
@@ -49,13 +50,14 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
     @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
         DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
         expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "foster.currentSowStatus.error", fostersDto.getPigCode());
 
         //添加当前母猪的健崽猪的数量信息
         Integer unweanCount = MoreObjects.firstNonNull(doctorPigTrack.getUnweanQty(), 0);
         Integer fosterCount = fostersDto.getFostersCount();
-        expectTrue(unweanCount >= fosterCount, "fosters.count.not.enough", fostersDto.getPigCode());
+        expectTrue(unweanCount >= fosterCount, "fosters.count.not.enough", fosterCount, unweanCount);
 
         doctorPigTrack.setUnweanQty(unweanCount - fosterCount);  //未断奶数
         doctorPigTrack.setWeanQty(MoreObjects.firstNonNull(doctorPigTrack.getWeanQty(), 0)); //断奶数不变

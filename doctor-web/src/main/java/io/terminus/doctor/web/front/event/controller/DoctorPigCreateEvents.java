@@ -1,14 +1,15 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.snakeyaml.serializer.SerializerException;
 import com.google.common.base.Joiner;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
@@ -18,6 +19,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
@@ -426,11 +428,23 @@ public class DoctorPigCreateEvents {
                     if (Objects.equals(pigEvent.getKey(), ENTRY.getKey())) {
                         DoctorFarmEntryDto farmEntryDto = jsonMapper.fromJson(inputJson, DoctorFarmEntryDto.class);
                         expectTrue(notEmpty(farmEntryDto.getPigCode()), "pig.code.not.empty");
-                        BasePigEventInputDto inputDto = doctorValidService.valid(farmEntryDto, farmEntryDto.getPigCode());
-                        return buildEntryEventInput(inputDto, pigEvent);
+                        try {
+                            BasePigEventInputDto inputDto = doctorValidService.valid(farmEntryDto, farmEntryDto.getPigCode());
+                            return buildEntryEventInput(inputDto, pigEvent);
+                        } catch (InvalidException e) {
+                            throw new InvalidException(true, e.getError(), farmEntryDto.getPigCode(), e.getParams());
+                        } catch (SerializerException e) {
+                            throw new InvalidException(true, e.getMessage(), farmEntryDto.getPigCode());
+                        }
                     } else {
-                        BasePigEventInputDto inputDto = eventInput(pigEvent, inputJson, batchPigEventDto.getFarmId(), batchPigEventDto.getPigType(), null);
-                        return buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
+                        try {
+                            BasePigEventInputDto inputDto = eventInput(pigEvent, inputJson, batchPigEventDto.getFarmId(), batchPigEventDto.getPigType(), null);
+                            return buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
+                        } catch (InvalidException e) {
+                            throw new InvalidException(true, e.getError(), getPigCode(inputJson), e.getParams());
+                        } catch (ServiceException e) {
+                            throw new InvalidException(true, e.getMessage(), getPigCode(inputJson));
+                        }
                     }
                 }).collect(Collectors.toList());
         return RespWithExHelper.orInvalid(doctorPigEventWriteService.batchPigEventHandle(inputDtoList, buildBasicInputInfoDto(batchPigEventDto.getFarmId(), pigEvent)));
@@ -466,7 +480,6 @@ public class DoctorPigCreateEvents {
      * @return
      */
     private BasePigEventInputDto buildEventInput(BasePigEventInputDto inputDto, Long pigId, PigEvent pigEvent){
-        expectTrue(notNull(pigId), "pig.id.not.null", inputDto.getPigCode());
         DoctorPigInfoDto pigDto = RespHelper.orServEx(this.doctorPigReadService.queryDoctorInfoDtoById(pigId));
         inputDto.setIsAuto(IsOrNot.NO.getValue());
         inputDto.setPigId(pigId);
@@ -503,39 +516,47 @@ public class DoctorPigCreateEvents {
      * @return
      */
     private BasePigEventInputDto eventInput(PigEvent pigEvent, String eventInfoDtoJson, Long farmId, Integer pigType, Long pigId) {
-        Map<String, Object> input;
+        Map<String, Object> map = Maps.newHashMap();
         try {
-            input = OBJECT_MAPPER.readValue(eventInfoDtoJson, Map.class);
+            map = OBJECT_MAPPER.readValue(eventInfoDtoJson, Map.class);
         } catch (Exception e) {
-            throw new JsonResponseException("json.to.map.error");
+            throw new InvalidException("json.to.map.error");
         }
-        Long realPigId = MoreObjects.firstNonNull(pigId, (Long) input.get("pidId"));
-        expectTrue(notNull(realPigId), "pig.id.not.null");
+        if (!notNull(pigId)) {
+            expectTrue(notEmpty((String) map.get("pigId")), "pig.id.not.null");
+        }
+        Long realPigId = pigId !=null?pigId:Long.parseLong((String) map.get("pigId"));
+
         DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(realPigId));
 
         switch (pigEvent) {
             case CHG_FARM:
                 DoctorChgFarmDto chgFarmDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorChgFarmDto.class);
-                chgFarmDto = doctorValidService.valid(chgFarmDto, doctorPig.getPigCode());
                 DoctorFarm fromFarm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+                expectTrue(notNull(fromFarm), "farm.not.null", farmId);
                 chgFarmDto.setFromFarmId(fromFarm.getId());
                 chgFarmDto.setFromFarmName(fromFarm.getName());
                 DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(realPigId));
+                expectTrue(notNull(doctorPigTrack), "pig.track.not.null", realPigId);
                 chgFarmDto.setFromBarnId(doctorPigTrack.getCurrentBarnId());
                 chgFarmDto.setFromBarnName(doctorPigTrack.getCurrentBarnName());
 
                 DoctorFarm toFarm = RespHelper.or500(doctorFarmReadService.findFarmById(chgFarmDto.getToFarmId()));
+                expectTrue(notNull(fromFarm), "farm.not.null", farmId);
                 DoctorBarn toBarn = RespHelper.or500(doctorBarnReadService.findBarnById(chgFarmDto.getToBarnId()));
+                expectTrue(notNull(toBarn), "barn.not.null", chgFarmDto.getToBarnId());
                 chgFarmDto.setToFarmName(toFarm.getName());
                 chgFarmDto.setToBarnName(toBarn.getName());
+                chgFarmDto = doctorValidService.valid(chgFarmDto, doctorPig.getPigCode());
+
                 return chgFarmDto;
             case CHG_LOCATION:
                 DoctorChgLocationDto doctorChgLocationDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorChgLocationDto.class);
-                doctorChgLocationDto = doctorValidService.valid(doctorChgLocationDto, doctorPig.getPigCode());
-
                 DoctorPigTrack doctorPigTrack1 = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(realPigId));
+                expectTrue(notNull(doctorPigTrack1), "pig.track.not.null", realPigId);
                 doctorChgLocationDto.setChgLocationFromBarnId(doctorPigTrack1.getCurrentBarnId());
                 doctorChgLocationDto.setChgLocationFromBarnName(doctorPigTrack1.getCurrentBarnName());
+                doctorChgLocationDto = doctorValidService.valid(doctorChgLocationDto, doctorPig.getPigCode());
                 return doctorChgLocationDto;
             case CONDITION:
                 if (Objects.equals(pigType, DoctorPig.PigSex.SOW.getKey())) {
@@ -549,26 +570,32 @@ public class DoctorPigCreateEvents {
                 DoctorDiseaseDto diseaseDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorDiseaseDto.class);
                 diseaseDto = doctorValidService.valid(diseaseDto, doctorPig.getPigCode());
                 DoctorBasic disease = RespHelper.or500(doctorBasicReadService.findBasicById(diseaseDto.getDiseaseId()));
+                expectTrue(notNull(disease), "basic.not.null", diseaseDto.getDiseaseId());
                 diseaseDto.setDiseaseName(disease.getName());
                 return diseaseDto;
             case VACCINATION:
                 DoctorVaccinationDto vaccinationDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorVaccinationDto.class);
                 vaccinationDto = doctorValidService.valid(vaccinationDto, vaccinationDto.getPigCode());
                 DoctorBasic vaccinationItem = RespHelper.or500(doctorBasicReadService.findBasicById(vaccinationDto.getVaccinationItemId()));
+                expectTrue(notNull(vaccinationItem), "basic.not.null", vaccinationDto.getVaccinationItemId());
                 vaccinationDto.setVaccinationItemName(vaccinationItem.getName());
                 DoctorBasicMaterial vaccination = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(vaccinationDto.getVaccinationId()));
+                expectTrue(notNull(vaccination), "basic.material.not.null", vaccinationDto.getVaccinationId());
                 vaccinationDto.setVaccinationName(vaccination.getName());
                 return vaccinationDto;
             case REMOVAL:
                 DoctorRemovalDto removalDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorRemovalDto.class);
                 removalDto = doctorValidService.valid(removalDto, doctorPig.getPigCode());
                 DoctorBasic chgType = RespHelper.or500(doctorBasicReadService.findBasicById(removalDto.getChgTypeId()));
+                expectTrue(notNull(chgType), "basic.not.null", removalDto.getChgTypeId());
                 removalDto.setChgTypeName(chgType.getName());
                 if (removalDto.getChgReasonId() != null) {
                     DoctorChangeReason changeReason = RespHelper.or500(doctorBasicReadService.findChangeReasonById(removalDto.getChgReasonId()));
+                    expectTrue(notNull(changeReason), "change.reason.not.null", removalDto.getChgReasonId());
                     removalDto.setChgReasonName(changeReason.getReason());
                 }
                 DoctorFarm doctorFarm2 = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+                expectTrue(notNull(doctorFarm2), "farm.not.null", farmId);
                 Long customerId1 = RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorFarm2.getId(),
                         doctorFarm2.getName(), removalDto.getCustomerId(), removalDto.getCustomerName(),
                         UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
@@ -605,9 +632,11 @@ public class DoctorPigCreateEvents {
                 pigletsChg = doctorValidService.valid(pigletsChg, doctorPig.getPigCode());
 
                 DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(pigletsChg.getPigletsChangeType()));
+                expectTrue(notNull(doctorBasic), "basic.not.null", pigletsChg.getPigletsChangeType());
                 pigletsChg.setPigletsChangeTypeName(doctorBasic.getName());
                 //新录入的客户要创建一把
                 DoctorFarm doctorFarm1 = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+                expectTrue(notNull(doctorFarm1), "farm.not.null", farmId);
                 Long customerId = RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorFarm1.getId(),
                         doctorFarm1.getName(), pigletsChg.getPigletsCustomerId(), pigletsChg.getPigletsCustomerName(),
                         UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
@@ -616,6 +645,23 @@ public class DoctorPigCreateEvents {
             default:
                 throw new JsonResponseException("eventType.error");
         }
+    }
+
+    /**
+     * 从json获取pidCode
+     * @param inputJson
+     * @return
+     */
+    private String getPigCode(String inputJson) {
+        Map<String, Object> map = Maps.newHashMap();
+        try {
+            map = OBJECT_MAPPER.readValue(inputJson, Map.class);
+        } catch (Exception e) {
+            throw new InvalidException("json.to.map.error");
+        }
+        expectTrue(notEmpty((String) map.get("pigId")), "pig.id.not.null");
+        DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(Long.parseLong((String) map.get("pigId"))));
+        return doctorPig.getPigCode();
     }
 
     /**
@@ -782,4 +828,5 @@ public class DoctorPigCreateEvents {
         }
         return true;
     }
+
 }

@@ -125,8 +125,14 @@ public class DoctorGroupEventManager {
     public List<DoctorEventInfo> batchHandleEvent(List<DoctorGroupInputInfo> inputInfoList, Integer eventType) {
         //eventRepeatCheck(inputInfoList); // TODO: 17/1/20 暂时移除猪群事件的重复性校验
         final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
-        inputInfoList.forEach(inputInfo -> getHandler(eventType)
-                .handle(eventInfoList, doctorGroupDao.findById(inputInfo.getGroupDetail().getGroup().getId()), doctorGroupTrackDao.findById(inputInfo.getGroupDetail().getGroupTrack().getId()), inputInfo.getInput()));
+        inputInfoList.forEach(inputInfo -> {
+            try {
+                getHandler(eventType)
+                        .handle(eventInfoList, doctorGroupDao.findById(inputInfo.getGroupDetail().getGroup().getId()), doctorGroupTrackDao.findById(inputInfo.getGroupDetail().getGroupTrack().getId()), inputInfo.getInput());
+            } catch (InvalidException e) {
+                throw new InvalidException(true, e.getError(), inputInfo.getGroupDetail().getGroup().getGroupCode(), e.getParams());
+            }
+        });
         return eventInfoList;
     }
 

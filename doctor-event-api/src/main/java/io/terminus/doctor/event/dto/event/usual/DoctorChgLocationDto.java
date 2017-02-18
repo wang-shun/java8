@@ -31,7 +31,7 @@ public class DoctorChgLocationDto extends BasePigEventInputDto implements Serial
     @NotNull(message = "event.at.not.null")
     private Date changeLocationDate; //转舍日期
 
-    //@NotNull(message = "from.barn.id.not.null")
+    @NotNull(message = "from.barn.id.not.null")
     private Long chgLocationFromBarnId; //源舍
 
     private String chgLocationFromBarnName; // 原舍名称

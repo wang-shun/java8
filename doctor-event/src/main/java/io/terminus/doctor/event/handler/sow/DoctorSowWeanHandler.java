@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
@@ -66,6 +65,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorWeanDto weanDto = (DoctorWeanDto) inputDto;
         DoctorPigEvent lastFarrow = doctorPigEventDao.queryLastFarrowing(weanDto.getPigId());
+        expectTrue(notNull(lastFarrow), "last.farrow.not.null", inputDto.getPigId());
         //分娩时间
         DateTime farrowingDate = new DateTime(lastFarrow.getEventAt());
 
@@ -88,7 +88,8 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setWeakCount(doctorPigEvent.getWeanCount() - quaQty);
 
         DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
-        expectTrue(notNull(pigTrack.getGroupId()), "farrow.group.not.null", weanDto.getPigCode());
+        expectTrue(notNull(pigTrack), "pig.track.not.null", inputDto.getPigId());
+        expectTrue(notNull(pigTrack.getGroupId()), "farrow.groupId.not.null", weanDto.getPigId());
         doctorPigEvent.setGroupId(pigTrack.getGroupId());   //必须设置下断奶的groupId
         return doctorPigEvent;
     }
@@ -117,14 +118,15 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorWeanDto partWeanDto = (DoctorWeanDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(partWeanDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
 
-        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", PigStatus.from(doctorPigTrack.getStatus()).getName(), partWeanDto.getPigCode());
+        expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", PigStatus.from(doctorPigTrack.getStatus()).getName());
 
         //未断奶数
         Integer unweanCount = doctorPigTrack.getUnweanQty();    //未断奶数量
         Integer weanCount = doctorPigTrack.getWeanQty();        //断奶数量
         Integer toWeanCount = partWeanDto.getPartWeanPigletsCount();
-        expectTrue(Objects.equals(toWeanCount,unweanCount), "need.all.wean", partWeanDto.getPigCode());
+        expectTrue(Objects.equals(toWeanCount,unweanCount), "need.all.wean", toWeanCount, unweanCount);
         doctorPigTrack.setUnweanQty(unweanCount - toWeanCount); //未断奶数减
         doctorPigTrack.setWeanQty(weanCount + toWeanCount);     //断奶数加
 
@@ -152,10 +154,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
 
         //触发一下修改猪群的事件
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(farrowGroupId);
-        if (groupTrack == null) {
-            log.error("this farrow pig track groupId({}) not found, please check!", farrowGroupId);
-            return;
-        }
+        expectTrue(notNull(groupTrack), "farrow.group.track.not.null", farrowGroupId);
         groupTrack.setQuaQty(EventUtil.plusInt(groupTrack.getQuaQty(), doctorPigEvent.getHealthCount()));
         groupTrack.setUnqQty(EventUtil.plusInt(groupTrack.getUnqQty(), doctorPigEvent.getWeakCount()));
         groupTrack.setWeanQty(EventUtil.plusInt(groupTrack.getWeanQty(), doctorPigEvent.getWeanCount()));

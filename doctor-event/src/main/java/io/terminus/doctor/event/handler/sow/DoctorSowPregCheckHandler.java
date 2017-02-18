@@ -36,6 +36,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
     public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
         super.handleCheck(eventDto, basic);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(eventDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", eventDto.getPigId());
         DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) eventDto;
         if (Objects.equals(pregChkResultDto.getCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
             expectTrue(notNull(pregChkResultDto.getAbortionReasonId()), "liuchan.reason.not.null", pregChkResultDto.getPigCode());
@@ -48,6 +49,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pregChkResultDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
         //妊娠检查结果，从extra中拆出来
         Integer pregCheckResult = pregChkResultDto.getCheckResult();
         doctorPigEvent.setPregCheckResult(pregCheckResult);
@@ -58,7 +60,8 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
 
         //查找最近一次配种事件
         DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-        if (notNull(lastMate) && !Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
+        expectTrue(notNull(doctorPigTrack), "preg.last.mate.not.null", inputDto.getPigId());
+        if (!Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
             DateTime mattingDate = new DateTime(lastMate.getEventAt());
             int npd = Math.abs(Days.daysBetween(checkDate, mattingDate).getDays());
 
@@ -81,7 +84,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         //根据猪类判断, 如果是逆向: 空怀 => 阳性, 需要删掉以前的空怀事件
         if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.KongHuai.getKey())) {
             DoctorPigEvent lastPregEvent = doctorPigEventDao.queryLastPregCheck(doctorPigTrack.getPigId());
-            expectTrue(notNull(lastPregEvent), "preg.check.event.not.null", pregChkResultDto.getPigCode());
+            expectTrue(notNull(lastPregEvent), "preg.check.event.not.null", pregChkResultDto.getPigId());
             expectTrue(PregCheckResult.KONGHUAI_RESULTS.contains(lastPregEvent.getPregCheckResult()), "preg.check.result.error", lastPregEvent.getPregCheckResult(), pregChkResultDto.getPigCode());
             log.info("remove old preg check event info:{}", lastPregEvent);
 
@@ -103,10 +106,9 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Pregnancy.getKey())) {
             //对应的最近一次的 周期配种的初陪 的 isImpregnation 字段变成true
             DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-            if (notNull(firstMate)) {
-                firstMate.setIsImpregnation(1);
-                doctorPigEventDao.update(firstMate);
-            }
+            expectTrue(notNull(firstMate), "first.mate.not.null", inputDto.getPigId());
+            firstMate.setIsImpregnation(1);
+            doctorPigEventDao.update(firstMate);
         }
     }
 

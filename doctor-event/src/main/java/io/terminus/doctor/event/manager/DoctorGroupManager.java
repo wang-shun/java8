@@ -161,7 +161,13 @@ public class DoctorGroupManager {
     @Transactional
     public List<DoctorEventInfo> batchNewGroupEventHandle(List<DoctorNewGroupInputInfo> inputInfoList) {
         List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
-        inputInfoList.forEach(newGroupInputInfo -> createNewGroup(eventInfoList, newGroupInputInfo.getGroup(), newGroupInputInfo.getNewGroupInput()));
+        inputInfoList.forEach(newGroupInputInfo -> {
+            try {
+                createNewGroup(eventInfoList, newGroupInputInfo.getGroup(), newGroupInputInfo.getNewGroupInput());
+            } catch (InvalidException e) {
+                throw new InvalidException(true, e.getError(), newGroupInputInfo.getGroup().getGroupCode(), e.getParams());
+            }
+        });
         return eventInfoList;
     }
 
@@ -238,7 +244,7 @@ public class DoctorGroupManager {
     private void checkGroupCodeExist(Long farmId, String groupCode) {
         List<DoctorGroup> groups = RespHelper.or500(doctorGroupReadService.findGroupsByFarmId(farmId));
         if (groups.stream().map(DoctorGroup::getGroupCode).collect(Collectors.toList()).contains(groupCode)) {
-            throw new ServiceException("group.code.exist");
+            throw new InvalidException("group.code.exist");
         }
     }
 

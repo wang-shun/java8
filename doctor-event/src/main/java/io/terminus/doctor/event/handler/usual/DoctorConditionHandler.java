@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
+
 /**
  * Created by yaoqijun.
  * Date:2016-05-27
@@ -23,6 +26,7 @@ public class DoctorConditionHandler extends DoctorAbstractEventHandler{
     @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
         if (Objects.equals(inputDto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
             DoctorConditionDto conditionDto = (DoctorConditionDto) inputDto;
             if (conditionDto.getConditionWeight() != null) {

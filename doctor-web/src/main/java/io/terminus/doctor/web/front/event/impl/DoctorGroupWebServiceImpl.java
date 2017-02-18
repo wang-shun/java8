@@ -70,7 +70,9 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.common.utils.BeanMapper.map;
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.common.utils.RespHelper.orServEx;
 import static io.terminus.doctor.common.utils.RespWithExHelper.orInvalid;
@@ -131,8 +133,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         try {
             //1.构造猪群信息
             expectTrue(notEmpty(newGroupInput.getGroupCode()), "groupCode.not.empty");
+            DoctorGroup doctorGroup = getNewGroup(newGroupInput);
             newGroupInput = doctorValidService.valid(newGroupInput, newGroupInput.getGroupCode());
-            return doctorGroupWriteService.createNewGroup(getNewGroup(newGroupInput), newGroupInput);
+            return doctorGroupWriteService.createNewGroup(doctorGroup, newGroupInput);
         } catch (InvalidException e) {
             return RespWithEx.exception(e);
         } catch (ServiceException e) {
@@ -153,8 +156,14 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             List<DoctorNewGroupInputInfo> newGroupInputInfoList = batchNewGroupEventDto.getNewGroupInputList().stream()
                     .map(doctorNewGroupInput ->{
                         expectTrue(notEmpty(doctorNewGroupInput.getGroupCode()), "groupCode.not.empty");
-                        doctorNewGroupInput = doctorValidService.valid(doctorNewGroupInput, doctorNewGroupInput.getGroupCode());
-                        return new DoctorNewGroupInputInfo(getNewGroup(doctorNewGroupInput), doctorNewGroupInput);
+                        try {
+                            doctorNewGroupInput = doctorValidService.valid(doctorNewGroupInput, doctorNewGroupInput.getGroupCode());
+                            return new DoctorNewGroupInputInfo(getNewGroup(doctorNewGroupInput), doctorNewGroupInput);
+                        } catch (InvalidException e) {
+                            throw new InvalidException(true, e.getError(), doctorNewGroupInput.getGroupCode(), e.getParams());
+                        } catch (ServiceException e) {
+                            throw new InvalidException(true, e.getMessage(),doctorNewGroupInput.getGroupCode());
+                        }
                     }).collect(Collectors.toList());
             return doctorGroupWriteService.batchNewGroupEventHandle(newGroupInputInfoList);
         } catch (InvalidException e) {
@@ -186,9 +195,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
         //设置猪场公司信息
         DoctorFarm farm = orServEx(doctorFarmReadService.findFarmById(group.getFarmId()));
+        expectTrue(notNull(farm), "farm.not.null", group.getFarmId());
         group.setFarmName(farm.getName());
 
         DoctorOrg org = orServEx(doctorOrgReadService.findOrgById(farm.getOrgId()));
+        expectTrue(notNull(org), "org.not.null", farm.getOrgId());
         group.setOrgId(org.getId());
         group.setOrgName(org.getName());
 
@@ -312,8 +323,15 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             }
             List<DoctorGroupInputInfo> groupInputInfoList = batchGroupEventDto.getInputList()
                     .stream().map(inputInfo -> {
-                        DoctorGroupInputInfo groupInputInfo = buildGroupEventInputInfo(inputInfo.getGroupId(), batchGroupEventDto.getEventType(), inputInfo.getInputJson());
-                        return doctorValidService.valid(groupInputInfo, groupInputInfo.getGroupDetail().getGroup().getGroupCode());
+                        String groupCode = getGroupCode(inputInfo.getGroupId());
+                        try {
+                            DoctorGroupInputInfo groupInputInfo = buildGroupEventInputInfo(inputInfo.getGroupId(), batchGroupEventDto.getEventType(), inputInfo.getInputJson());
+                            return doctorValidService.valid(groupInputInfo, groupInputInfo.getGroupDetail().getGroup().getGroupCode());
+                        } catch (InvalidException e) {
+                            throw new InvalidException(true, e.getError(),groupCode, e.getParams());
+                        } catch (ServiceException e) {
+                            throw new InvalidException(true, e.getMessage(), groupCode);
+                        }
                     }).collect(Collectors.toList());
             return doctorGroupWriteService.batchGroupEventHandle(groupInputInfoList, batchGroupEventDto.getEventType());
 
@@ -442,7 +460,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //校验猪群是否存在
     private DoctorGroupDetail checkGroupExist(Long groupId) {
-        DoctorGroupDetail groupDetail = checkNotNull(RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId)), "group.not.found");
+        DoctorGroupDetail groupDetail = expectNotNull(RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId)), "group.detail.not.found");
         if (!Objects.equals(groupDetail.getGroup().getStatus(), DoctorGroup.Status.CREATED.getValue())) {
             throw new InvalidException("group.is.closed", groupDetail.getGroup().getGroupCode());
         }
@@ -463,36 +481,33 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //获取猪场名称
     private String getFarmName(Long farmId) {
-        return farmId == null ? null : RespHelper.or(doctorFarmReadService.findFarmById(farmId), new DoctorFarm()).getName();
+        return expectNotNull(RespHelper.or(doctorFarmReadService.findFarmById(farmId), new DoctorFarm()).getName(), "farm.not.null", farmId);
     }
 
     //获取猪群号
     private String getGroupCode(Long groupId) {
-        DoctorGroup group = orServEx(doctorGroupReadService.findGroupById(groupId));
-        if (group == null) {
-            throw new ServiceException("group.not.found");
-        }
+        DoctorGroup group = expectNotNull(orServEx(doctorGroupReadService.findGroupById(groupId)), "event.group.not.found", groupId);
         return group.getGroupCode();
     }
 
     //获取猪舍名称
     private String getBarnName(Long barnId) {
-        return barnId == null ? null : RespHelper.or(doctorBarnReadService.findBarnById(barnId), new DoctorBarn()).getName();
+        return barnId == null ? null : expectNotNull(RespHelper.or(doctorBarnReadService.findBarnById(barnId), new DoctorBarn()), "barn.not.null", barnId).getName();
     }
 
     //获取基础数据名称
     private String getBasicName(Long basicId) {
-        return basicId == null ? null : RespHelper.or(doctorBasicReadService.findBasicById(basicId), new DoctorBasic()).getName();
+        return basicId == null ? null : expectNotNull(RespHelper.or(doctorBasicReadService.findBasicById(basicId), new DoctorBasic()), "basic.not.null", basicId).getName();
     }
 
     //获取疫苗名称
     private String getVaccinName(Long vaccinId) {
-        return vaccinId == null ? null : RespHelper.or(doctorBasicMaterialReadService.findBasicMaterialById(vaccinId), new DoctorBasicMaterial()).getName();
+        return vaccinId == null ? null : expectNotNull(RespHelper.or(doctorBasicMaterialReadService.findBasicMaterialById(vaccinId), new DoctorBasicMaterial()), "basic.material.not.null", vaccinId).getName();
     }
 
     //获取变动原因
     private String getChangeReasonName(Long changeReasonId) {
-        return changeReasonId == null ? null : RespHelper.or(doctorBasicReadService.findChangeReasonById(changeReasonId), new DoctorChangeReason()).getReason();
+        return changeReasonId == null ? null : expectNotNull(RespHelper.or(doctorBasicReadService.findChangeReasonById(changeReasonId), new DoctorChangeReason()), "change.reason.not.null", changeReasonId).getReason();
     }
 
     @Override
@@ -508,12 +523,12 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //获取防疫项目名称
     private String getVaccinItemName(Long vaccinItemId) {
-        return vaccinItemId == null ? null : RespHelper.or(doctorBasicReadService.findBasicById(vaccinItemId), new DoctorBasic()).getName();
+        return vaccinItemId == null ? null : expectNotNull(RespHelper.or(doctorBasicReadService.findBasicById(vaccinItemId), new DoctorBasic()), "basic.not.null", vaccinItemId).getName();
     }
 
     //获取客户名称
     private String getCustomerName(Long customerId) {
-        return customerId == null ? null : RespHelper.or(doctorBasicReadService.findCustomerById(customerId), new DoctorCustomer()).getName();
+        return customerId == null ? null : expectNotNull(RespHelper.or(doctorBasicReadService.findCustomerById(customerId), new DoctorCustomer()), "basic.not.null", customerId).getName();
     }
 
     //put一些关联字段

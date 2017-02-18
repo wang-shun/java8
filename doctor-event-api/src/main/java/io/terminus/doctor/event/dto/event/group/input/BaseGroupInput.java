@@ -31,7 +31,7 @@ public abstract class BaseGroupInput implements Serializable {
     /**
      * 事件类型
      */
-    @NotNull(message = "event.type.not.null")
+    //@NotNull(message = "event.type.not.null")
     private Integer eventType;
 
     /**

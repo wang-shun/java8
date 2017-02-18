@@ -27,6 +27,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
+
 /**
  * Desc:
  * Mail: yangzl@terminus.io
@@ -113,10 +115,10 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
     //后备舍又他妈不分公母了, 艹
     //后备猪 => 配种舍/妊娠舍/种公猪舍
     private static PigType checkTurnSeedData(Integer groupType, Integer barnType, String groupCode){
-        PigType type = PigType.from(groupType);
+        PigType type = expectNotNull(PigType.from(groupType), "pig.type.not.null");
 
         //校验猪群类型: 后备群
-        if(type == null || !PigType.HOUBEI_TYPES.contains(type.getValue())){
+        if(!PigType.HOUBEI_TYPES.contains(type.getValue())){
             throw new InvalidException("group.can.not.turn.seed", type.getDesc(), groupCode);
         }
         //校验转入猪舍类型
