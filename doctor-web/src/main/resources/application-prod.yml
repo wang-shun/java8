@@ -29,7 +29,7 @@ session:
   cookie-name: msid
   source: redis
   serialize-type: json
-  redis-host: 10.161.31.38
+  redis-host: b6b38c7f68f84c0f.redis.rds.aliyuncs.com
   redis-port: 6379
   redis-index: 0
   redis-cluster: false
