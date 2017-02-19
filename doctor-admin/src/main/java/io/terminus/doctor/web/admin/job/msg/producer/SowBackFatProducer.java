@@ -59,8 +59,8 @@ public class SowBackFatProducer extends AbstractJobProducer {
                     || Objects.equals(PigStatus.Pregnancy.getKey(), pigDto.getStatus())
                     || Objects.equals(PigStatus.Farrow.getKey(), pigDto.getStatus())
                     || Objects.equals(PigStatus.FEED.getKey(), pigDto.getStatus())
-                    || Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus())
-                    || Objects.equals(PigStatus.KongHuai.getKey(), pigDto.getStatus())).collect(Collectors.toList());
+                    || Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus()))
+                    .collect(Collectors.toList());
             // 处理每个猪
             for (int j = 0; pigs != null && j < pigs.size(); j++) {
                 try {
