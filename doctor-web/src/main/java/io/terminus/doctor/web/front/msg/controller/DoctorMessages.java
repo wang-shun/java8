@@ -49,6 +49,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 /**
  * Desc: 与消息和消息模板相关
  * Mail: chk@terminus.io
@@ -345,7 +347,7 @@ public class DoctorMessages {
                 List<DoctorMessageUser> messageUsers = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto));
                 List<Long> ids = messageUsers.stream().map(DoctorMessageUser::getMessageId).collect(Collectors.toList());
                 List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessagesByIds(ids));
-                pigCount = messages.stream().mapToInt(DoctorMessage::getQuantity).sum();
+                pigCount = messages.stream().filter(message -> notNull(message.getQuantity())).mapToInt(DoctorMessage::getQuantity).sum();
             } else {
                 pigCount = RespHelper.or500(doctorMessageUserReadService.findBusinessListByCriteria(doctorMessageUserDto)).size();
             }
