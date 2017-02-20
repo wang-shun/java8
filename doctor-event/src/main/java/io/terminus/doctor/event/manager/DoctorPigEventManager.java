@@ -59,6 +59,7 @@ public class DoctorPigEventManager {
      */
     @Transactional
     public List<DoctorEventInfo> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
+        log.info("pig event handle starting, inputDto:{}, basic:{}", inputDto, basic);
         DoctorPigEventHandler doctorEventCreateHandler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
         doctorEventCreateHandler.handleCheck(inputDto, basic);
         final List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
@@ -74,6 +75,7 @@ public class DoctorPigEventManager {
      */
     @Transactional
     public List<DoctorEventInfo> batchEventsHandle(List<BasePigEventInputDto> eventInputs, DoctorBasicInputInfoDto basic) {
+        log.info("batch pig event handle starting, event type:{}", eventInputs.get(0).getEventType());
         //校验输入数据的重复性
         eventRepeatCheck(eventInputs);
 
@@ -137,6 +139,7 @@ public class DoctorPigEventManager {
      * @param farmId 猪场id
      */
     private static void publishPigEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId, CoreEventDispatcher coreEventDispatcher, Publisher publisher){
+        log.info("publish pig event starting");
         //猪事件触发报表更新(eventBus)
         Map<Integer, List<DoctorEventInfo>> pigEventInfoMap = eventInfoList.stream()
                 .collect(Collectors.groupingBy(DoctorEventInfo::getEventType));
@@ -180,6 +183,7 @@ public class DoctorPigEventManager {
      * @param farmId 猪场id
      */
     private static void publishGroupEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId, CoreEventDispatcher coreEventDispatcher, Publisher publisher) {
+        log.info("publish group event starting");
         //猪群事件触发报表更新(eventBus)
         Map<Integer, List<DoctorEventInfo>> groupEventInfoMap = eventInfoList.stream()
                 .collect(Collectors.groupingBy(DoctorEventInfo::getEventType));

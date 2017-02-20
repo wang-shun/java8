@@ -79,6 +79,8 @@ public class DoctorPigs {
     private final TransFromUtil transFromUtil;
     private final DoctorFarmAuthCenter doctorFarmAuthCenter;
 
+    public static int count =0;
+
     @RpcConsumer
     private DoctorMessageReadService doctorMessageReadService;
     @RpcConsumer
@@ -359,4 +361,5 @@ public class DoctorPigs {
         List<DoctorPig> pigs = MAPPER.fromJson(pigCodeUpdates, MAPPER.createCollectionType(List.class, DoctorPig.class));
         return RespHelper.or500(doctorPigWriteService.updatePigCodes(pigs));
     }
+
 }

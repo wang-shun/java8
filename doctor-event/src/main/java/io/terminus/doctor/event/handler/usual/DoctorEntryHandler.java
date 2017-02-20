@@ -67,10 +67,8 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         DoctorPigTrack doctorPigTrack = createOrUpdatePigTrack(basic, inputDto);
         doctorPigTrackDao.create(doctorPigTrack);
 
-        //4.创建镜像//// TODO: 17/2/17 似乎不需要从新获取
-        DoctorPigTrack pigSnapshotTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-        DoctorPigEvent pigSnapshotEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
-        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(pigSnapshotTrack, pigSnapshotEvent, doctorPigEvent.getId());
+        //4.创建镜像////
+        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(doctorPigTrack, doctorPigEvent, doctorPigEvent.getId());
         doctorPigSnapshotDao.create(doctorPigSnapshot);
 
         //5.特殊处理

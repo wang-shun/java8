@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.handler.usual;
 
 import io.terminus.doctor.common.exception.InvalidException;
-import io.terminus.doctor.event.constants.DoctorBasicEnums;
+import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
@@ -30,13 +30,6 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
 @Component
 @Slf4j
 public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
-    @Override
-    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-        super.handleCheck(eventDto, basic);
-        DoctorRemovalDto removalDto = (DoctorRemovalDto) eventDto;
-        // TODO: 17/2/16 销售时价格不可为空
-    }
-
     @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());

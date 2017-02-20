@@ -110,6 +110,7 @@ public class DoctorGroupEventManager {
     @Transactional
     public <I extends BaseGroupInput>
     List<DoctorEventInfo> handleEvent(DoctorGroupDetail groupDetail, I input, Class<? extends DoctorGroupEventHandler> handlerClass) {
+        log.info("group event handle starting, handler class", handlerClass);
         final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
         getHandler(handlerClass).handle(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
         return eventInfoList;
@@ -124,6 +125,7 @@ public class DoctorGroupEventManager {
     @Transactional
     public List<DoctorEventInfo> batchHandleEvent(List<DoctorGroupInputInfo> inputInfoList, Integer eventType) {
         //eventRepeatCheck(inputInfoList); // TODO: 17/1/20 暂时移除猪群事件的重复性校验
+        log.info("batch group event handle starting, eventType:{}", eventType);
         final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
         inputInfoList.forEach(inputInfo -> {
             try {
@@ -142,6 +144,7 @@ public class DoctorGroupEventManager {
      */
     @Transactional
     public void rollbackEvent(DoctorGroupEvent groupEvent, Long reverterId, String reverterName) {
+        log.info("rollback group event starting, group event:{}", groupEvent);
         //校验能否回滚
         checkCanRollback(groupEvent);
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());

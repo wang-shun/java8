@@ -46,14 +46,6 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
     private DoctorSowWeanHandler doctorSowWeanHandler;
 
     @Override
-    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-        super.handleCheck(eventDto, basic);
-        DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) eventDto;
-        // TODO: 17/2/16 变动类型为销售时单价,用户不可为空
-        //if (Objects.equals(pigletsChgDto.getPigletsChangeType(), ))
-    }
-
-    @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigletsChgDto.getPigId());

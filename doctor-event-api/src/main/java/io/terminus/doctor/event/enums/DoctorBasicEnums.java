@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.constants;
+package io.terminus.doctor.event.enums;
 
 import com.google.common.base.Objects;
 import lombok.Getter;

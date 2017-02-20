@@ -131,14 +131,17 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     @Override
     public RespWithEx<Long> createNewGroup(DoctorNewGroupInput newGroupInput) {
         try {
+            log.info("web createNewGroup starting, input:{}", newGroupInput);
             //1.构造猪群信息
             expectTrue(notEmpty(newGroupInput.getGroupCode()), "groupCode.not.empty");
             DoctorGroup doctorGroup = getNewGroup(newGroupInput);
             newGroupInput = doctorValidService.valid(newGroupInput, newGroupInput.getGroupCode());
             return doctorGroupWriteService.createNewGroup(doctorGroup, newGroupInput);
         } catch (InvalidException e) {
+            log.error("create new group failed, input:{}, cause:{}", newGroupInput, Throwables.getStackTraceAsString(e));
             return RespWithEx.exception(e);
         } catch (ServiceException e) {
+            log.error("create new group failed, input:{}, cause:{}", newGroupInput, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create new group failed, input:{}, cause:{}", newGroupInput, Throwables.getStackTraceAsString(e));
@@ -150,7 +153,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     @Override
     public RespWithEx<Boolean> batchNewGroupEvent(DoctorBatchNewGroupEventDto batchNewGroupEventDto) {
         try {
+            log.info("web batch newGroupEvent starting");
             if (batchNewGroupEventDto == null || Arguments.isNullOrEmpty(batchNewGroupEventDto.getNewGroupInputList())) {
+                log.error("batch.event.input.empty");
                 return RespWithEx.fail("batch.event.input.empty");
             }
             List<DoctorNewGroupInputInfo> newGroupInputInfoList = batchNewGroupEventDto.getNewGroupInputList().stream()
@@ -167,11 +172,13 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     }).collect(Collectors.toList());
             return doctorGroupWriteService.batchNewGroupEventHandle(newGroupInputInfoList);
         } catch (InvalidException e) {
+            log.error("create new group failed, cause:{}", Throwables.getStackTraceAsString(e));
             return RespWithEx.exception(e);
         } catch (ServiceException e) {
+            log.error("create new group failed, cause:{}", Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
-            log.error("create new group failed, batchNewGroupEventDto:{}, cause:{}", batchNewGroupEventDto, Throwables.getStackTraceAsString(e));
+            log.error("create new group failed, cause:{}", Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.event.create.fail");
         }
     }
@@ -305,8 +312,10 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             }
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
+            log.error("create new group failed, cause:{}", Throwables.getStackTraceAsString(e));
             return RespWithEx.exception(e);
         } catch (ServiceException e) {
+            log.error("create new group failed, cause:{}", Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create group event failed, groupId:{}, eventType:{}, params:{}, cause:{}",
@@ -318,7 +327,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     @Override
     public RespWithEx<Boolean> batchGroupEvent(DoctorBatchGroupEventDto batchGroupEventDto) {
         try {
+            log.info("web batch group event starting");
             if (batchGroupEventDto == null || Arguments.isNullOrEmpty(batchGroupEventDto.getInputList())) {
+                log.error("batch group event input empty");
                 return RespWithEx.fail("batch.event.input.empty");
             }
             List<DoctorGroupInputInfo> groupInputInfoList = batchGroupEventDto.getInputList()
@@ -336,8 +347,10 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             return doctorGroupWriteService.batchGroupEventHandle(groupInputInfoList, batchGroupEventDto.getEventType());
 
         } catch (InvalidException e) {
+            log.error("batch group event failed, batchGroupEventDto:{}, cause:{}", batchGroupEventDto, Throwables.getStackTraceAsString(e));
             return RespWithEx.exception(e);
         } catch (ServiceException e) {
+            log.error("batch group event failed, batchGroupEventDto:{}, cause:{}", batchGroupEventDto, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
             log.error("batch group event failed, batchGroupEventDto:{}, cause:{}", batchGroupEventDto, Throwables.getStackTraceAsString(e));

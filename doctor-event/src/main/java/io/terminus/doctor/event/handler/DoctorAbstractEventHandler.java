@@ -62,7 +62,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-
         //获取镜像有关event和track
         DoctorPigTrack pigSnapshotTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         expectTrue(notNull(pigSnapshotTrack), "pig.track.not.null", inputDto.getPigId());

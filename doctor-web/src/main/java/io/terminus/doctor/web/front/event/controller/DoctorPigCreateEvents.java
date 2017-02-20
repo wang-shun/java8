@@ -42,6 +42,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
+import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -416,7 +417,9 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/batchCreateEvnet", method = RequestMethod.POST)
     public Boolean batchCreatePigEvent(@RequestBody DoctorBatchPigEventDto batchPigEventDto) {
+        // TODO: 17/2/20 log.info
         if (Arguments.isNullOrEmpty(batchPigEventDto.getInputJsonList())) {
+            // TODO: 17/2/20 log.error
             throw new JsonResponseException("batch.event.input.empty");
         }
         expectTrue(notNull(batchPigEventDto.getFarmId()), "farm.id.not.null");
@@ -432,8 +435,10 @@ public class DoctorPigCreateEvents {
                             BasePigEventInputDto inputDto = doctorValidService.valid(farmEntryDto, farmEntryDto.getPigCode());
                             return buildEntryEventInput(inputDto, pigEvent);
                         } catch (InvalidException e) {
+                            // TODO: 17/2/20 log.error
                             throw new InvalidException(true, e.getError(), farmEntryDto.getPigCode(), e.getParams());
                         } catch (SerializerException e) {
+                            // TODO: 17/2/20 log.error
                             throw new InvalidException(true, e.getMessage(), farmEntryDto.getPigCode());
                         }
                     } else {
@@ -441,8 +446,10 @@ public class DoctorPigCreateEvents {
                             BasePigEventInputDto inputDto = eventInput(pigEvent, inputJson, batchPigEventDto.getFarmId(), batchPigEventDto.getPigType(), null);
                             return buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
                         } catch (InvalidException e) {
+                            // TODO: 17/2/20 log.error
                             throw new InvalidException(true, e.getError(), getPigCode(inputJson), e.getParams());
                         } catch (ServiceException e) {
+                            // TODO: 17/2/20 log.error
                             throw new InvalidException(true, e.getMessage(), getPigCode(inputJson));
                         }
                     }
@@ -589,10 +596,15 @@ public class DoctorPigCreateEvents {
                 DoctorBasic chgType = RespHelper.or500(doctorBasicReadService.findBasicById(removalDto.getChgTypeId()));
                 expectTrue(notNull(chgType), "basic.not.null", removalDto.getChgTypeId());
                 removalDto.setChgTypeName(chgType.getName());
+                //变动原因
                 if (removalDto.getChgReasonId() != null) {
                     DoctorChangeReason changeReason = RespHelper.or500(doctorBasicReadService.findChangeReasonById(removalDto.getChgReasonId()));
                     expectTrue(notNull(changeReason), "change.reason.not.null", removalDto.getChgReasonId());
                     removalDto.setChgReasonName(changeReason.getReason());
+                }
+                //销售时 价格不可为空
+                if (Objects.equals(removalDto.getChgTypeId(), DoctorBasicEnums.SALE.getId())) {
+                    expectTrue(notNull(removalDto.getPrice()), "sale.price.not.null");
                 }
                 DoctorFarm doctorFarm2 = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
                 expectTrue(notNull(doctorFarm2), "farm.not.null", farmId);
@@ -629,6 +641,10 @@ public class DoctorPigCreateEvents {
                 return doctorValidService.valid(fostersDto, doctorPig.getPigCode());
             case PIGLETS_CHG:
                 DoctorPigletsChgDto pigletsChg = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(eventInfoDtoJson, DoctorPigletsChgDto.class);
+                if (Objects.equals(pigletsChg.getPigletsChangeType(), DoctorBasicEnums.SALE.getId())) {
+                    expectTrue(notNull(pigletsChg.getPigletsPrice()), "sale.price.not.null");
+                    expectTrue(notNull(pigletsChg.getPigletsCustomerId()), "sale.customer.not.null");
+                }
                 pigletsChg = doctorValidService.valid(pigletsChg, doctorPig.getPigCode());
 
                 DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(pigletsChg.getPigletsChangeType()));

@@ -93,6 +93,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     @Override
     public <I extends BaseGroupInput> void handle(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        log.info("event handle starting, eventType", input.getEventType());
         handleEvent(eventInfoList, group, groupTrack, input);
         DoctorEventInfo eventInfo = DoctorEventInfo.builder()
                 .businessId(group.getId())
