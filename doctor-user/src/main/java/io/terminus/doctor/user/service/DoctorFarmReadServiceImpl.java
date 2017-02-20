@@ -76,7 +76,7 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
         } catch (ServiceException e) {
             response.setError(e.getMessage());
         } catch (Exception e) {
-            log.error("find farms by userId failed, cause : {}", Throwables.getStackTraceAsString(e));
+            log.error("find farms by userId failed, userId:{},cause:{}", userId, Throwables.getStackTraceAsString(e));
             response.setError("find.farms.by.userId.failed");
         }
         return response;

@@ -264,7 +264,8 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/createDiseaseEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean createDiseaseEvent(@RequestParam("doctorDiseaseDtoJson") String doctorDiseaseDtoJson,
-                                   @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId) {
+                                      @RequestParam("pigId") Long pigId,
+                                      @RequestParam("farmId") Long farmId) {
         BasePigEventInputDto doctorDiseaseDto = eventInput(PigEvent.DISEASE, doctorDiseaseDtoJson, farmId, null, pigId);
         return RespHelper.or500(doctorPigEventWriteService.pigEventHandle(buildEventInput(doctorDiseaseDto, pigId, PigEvent.DISEASE), buildBasicInputInfoDto(farmId, PigEvent.DISEASE)));
     }
@@ -414,6 +415,7 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/batchCreateEvnet", method = RequestMethod.POST)
     public Boolean batchCreatePigEvent(@RequestBody DoctorBatchPigEventDto batchPigEventDto){
+        log.info("batch create pig event:{}", batchPigEventDto);
         if (Arguments.isNullOrEmpty(batchPigEventDto.getInputJsonList())) {
             return false;
         }
@@ -428,6 +430,7 @@ public class DoctorPigCreateEvents {
                         return buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
                     }
                 }).collect(Collectors.toList());
+        log.info("batch create pig event inputList:{}", inputDtoList);
         return RespHelper.or500(doctorPigEventWriteService.batchPigEventHandle(inputDtoList, buildBasicInputInfoDto(batchPigEventDto.getFarmId(), pigEvent)));
     }
 
@@ -513,6 +516,7 @@ public class DoctorPigCreateEvents {
                     DoctorFarm fromFarm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
                     chgFarmDto.setFromFarmId(fromFarm.getId());
                     chgFarmDto.setFromFarmName(fromFarm.getName());
+
                     Long realPigId = MoreObjects.firstNonNull(pigId, chgFarmDto.getPigId());
                     DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(realPigId));
                     chgFarmDto.setFromBarnId(doctorPigTrack.getCurrentBarnId());
