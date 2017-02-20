@@ -32,12 +32,6 @@ public class DoctorFarrowingDto extends BasePigEventInputDto implements Serializ
 
     private String nestCode; // 窝号
 
-//    private String pigCode;
-//
-//    private Long barnId;   // 分娩猪舍
-//
-//    private String barnName;  //分娩猪舍名称
-
     private String bedCode; // 床号
 
     /**
