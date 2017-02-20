@@ -72,7 +72,11 @@
         <where>
             <include refid="criteria"/>
         </where>
-        ORDER BY a.pig_code
+        ORDER BY
+        <if test="pigCode != null">
+            instr(pig_code, #{pigCode}) ASC, length(pig_code) ASC, pig_code ASC,
+        </if>
+        pig_code ASC
         LIMIT #{offset}, #{limit}
     </select>
 </mapper>

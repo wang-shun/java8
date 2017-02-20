@@ -13,6 +13,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.event.DoctorPigPublishDto;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -153,12 +155,17 @@ public class DoctorPigEventManager {
             List<MsgPigPublishDto> msgPigPublishDtoList = eventInfoList.stream()
                     .filter(doctorEventInfo -> PigEvent.NOTICE_MESSAGE_PIG_EVENT.contains(doctorEventInfo.getEventType()))
                     .map(doctorEventInfo -> {
-                        return MsgPigPublishDto.builder()
+
+                        MsgPigPublishDto msgPigPublishDto =  MsgPigPublishDto.builder()
                                 .pigId(doctorEventInfo.getBusinessId())
                                 .eventAt(doctorEventInfo.getEventAt())
                                 .eventId(doctorEventInfo.getEventId())
                                 .eventType(doctorEventInfo.getEventType())
                                 .build();
+                        if (Objects.equals(doctorEventInfo.getEventType(), PigEvent.PREG_CHECK.getKey()) && !Objects.equals(doctorEventInfo.getPregCheckResult(), PregCheckResult.YANG.getKey())) {
+                            msgPigPublishDto.setEventType(PigEvent.CONDITION.getKey());
+                        }
+                        return msgPigPublishDto;
                     }).collect(Collectors.toList());
             if (!Arguments.isNullOrEmpty(msgPigPublishDtoList)) {
                 coreEventDispatcher.publish(new MsgListenedPigEvent(orgId, farmId, msgPigPublishDtoList));

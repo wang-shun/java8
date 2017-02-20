@@ -350,9 +350,11 @@
                 #{i}
             </foreach>
         </if>
+        ORDER BY
         <if test="pigCode != null">
-            ORDER BY instr(pig_code, #{pigCode}) ASC, length(pig_code) ASC
+            instr(pig_code, #{pigCode}) ASC, length(pig_code) ASC, pig_code ASC,
         </if>
+        pig_code ASC
         limit 20;
     </select>
 </mapper>
