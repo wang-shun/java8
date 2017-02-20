@@ -10,8 +10,6 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -50,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 与消息和消息模板相关
@@ -344,18 +344,10 @@ public class DoctorMessages {
             doctorMessageUserDto.setUserId(UserUtil.getUserId());
             //统计育肥猪出栏消息头数
             if (Objects.equals(doctorMessageRule.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
-                try {
-                    List<DoctorMessageUser> messageUsers = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto));
-                    List<Long> ids = messageUsers.stream().map(DoctorMessageUser::getMessageId).collect(Collectors.toList());
-                    List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessagesByIds(ids));
-                    for (DoctorMessage doctorMessage : messages) {
-                        Map<String, Object> dataMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorMessage.getData(), JacksonType.MAP_OF_OBJECT);
-                        pigCount += (Integer) dataMap.get("quantity");
-                    }
-
-                } catch (Exception e) {
-                    log.error("get.rule.pig.count.failed");
-                }
+                List<DoctorMessageUser> messageUsers = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto));
+                List<Long> ids = messageUsers.stream().map(DoctorMessageUser::getMessageId).collect(Collectors.toList());
+                List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessagesByIds(ids));
+                pigCount = messages.stream().filter(message -> notNull(message.getQuantity())).mapToInt(DoctorMessage::getQuantity).sum();
             } else {
                 pigCount = RespHelper.or500(doctorMessageUserReadService.findBusinessListByCriteria(doctorMessageUserDto)).size();
             }

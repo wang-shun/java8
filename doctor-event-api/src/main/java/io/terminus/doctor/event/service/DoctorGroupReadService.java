@@ -214,4 +214,12 @@ public interface DoctorGroupReadService {
      * 获取事件操作人列表
      */
     Response<List<DoctorEventOperator>> queryOperators(Map<String, Object> criteria);
+
+    /**
+     * 查询猪群某一事件类型的最新事件
+     * @param groupId 猪群id
+     * @param type 事件类型
+     * @return 最新事件
+     */
+    Response<DoctorGroupEvent> findLastGroupEventByType(@NotNull(message = "groupId.not.null") Long groupId, @NotNull(message = "type.not.null") Integer type);
 }
