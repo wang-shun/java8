@@ -111,6 +111,16 @@ public class DoctorMessage implements Serializable {
      */
     private Double lotNumber;
 
+    /**
+     * 猪只数
+     */
+    private Integer quantity;
+
+    /**
+     * 平均日龄
+     */
+    private Integer avgDayAge;
+
     private Long barnId;
     private String barnName;
 

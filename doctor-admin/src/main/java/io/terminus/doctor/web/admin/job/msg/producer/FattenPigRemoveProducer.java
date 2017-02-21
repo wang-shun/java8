@@ -1,20 +1,18 @@
 package io.terminus.doctor.web.admin.job.msg.producer;
 
 import com.google.api.client.util.Maps;
-import com.google.common.collect.ImmutableMap;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.util.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
-import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.dto.msg.Rule;
 import io.terminus.doctor.event.dto.msg.RuleValue;
 import io.terminus.doctor.event.dto.msg.SubUser;
 import io.terminus.doctor.event.enums.Category;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorMessage;
 import io.terminus.doctor.event.model.DoctorMessageRuleRole;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.web.admin.job.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -69,7 +67,8 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
                                 .barnName(doctorGroupDetail.getGroup().getCurrentBarnName())
                                 .businessType(DoctorMessage.BUSINESS_TYPE.GROUP.getValue())
                                 .ruleValueId(ruleValue.getId())
-                                .data(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(ImmutableMap.of("quantity", doctorGroupDetail.getGroupTrack().getQuantity())))
+                                .quantity(doctorGroupDetail.getGroupTrack().getQuantity())
+                                .avgDayAge(doctorGroupDetail.getGroupTrack().getAvgDayAge())
                                 .build();
                         createMessage(sUsers, ruleRole, messageInfo);
                     }

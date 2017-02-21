@@ -18,6 +18,7 @@ import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -84,6 +85,8 @@ public abstract class AbstractJobProducer {
     protected DoctorPigReadService doctorPigReadService;
     @RpcConsumer
     protected DoctorPigEventReadService doctorPigEventReadService;
+    @RpcConsumer
+    protected DoctorGroupReadService doctorGroupReadService;
     @Autowired
     protected DoctorPigWriteService doctorPigWriteService;
     @Autowired
@@ -140,7 +143,7 @@ public abstract class AbstractJobProducer {
 
                 // > 记录对应每个用户的消息
                 List<DoctorMessageRule> messageRules = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByTplId(ruleTemplate.getId()));
-                messageRules.forEach(messageRule -> createWarnMessageByMessageRule(messageRule));
+                messageRules.forEach(this::createWarnMessageByMessageRule);
                 stopWatch.stop();
                 log.info("[AbstractJobProducer] {} -> 预警消息产生结束, 耗时 {}ms, ending......", ruleTemplate.getName(), stopWatch.elapsed(TimeUnit.MILLISECONDS));
             }
@@ -399,19 +402,13 @@ public abstract class AbstractJobProducer {
 
     /**
      * 获取最新的猪群事件
-     * @param events
+     * @param groupId
      * @param type
      * @return
      */
-    protected DoctorGroupEvent getLastGroupEventByEventType(List<DoctorGroupEvent> events, Integer type) {
+    protected DoctorGroupEvent getLastGroupEventByEventType(Long groupId, Integer type) {
         try {
-            if (Arguments.isNullOrEmpty(events)){
-                return null;
-            }
-            List<DoctorGroupEvent> eventList = events.stream().filter(doctorGroupEvent -> (doctorGroupEvent.getEventAt() != null) && Objects.equals(doctorGroupEvent.getType(), type)).collect(Collectors.toList());
-            if (!Arguments.isNullOrEmpty(events)) {
-                return eventList.stream().max(this::groupEventCompare).get();
-            }
+            return RespHelper.orServEx(doctorGroupReadService.findLastGroupEventByType(groupId, type));
         } catch (Exception e) {
             log.error("get.last.group.event.by.event.type.failed");
         }
