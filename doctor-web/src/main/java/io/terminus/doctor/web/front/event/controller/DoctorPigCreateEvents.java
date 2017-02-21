@@ -81,6 +81,7 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.PigType.*;
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.event.enums.PigEvent.*;
 
@@ -447,9 +448,8 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/batchCreateEvnet", method = RequestMethod.POST)
     public Boolean batchCreatePigEvent(@RequestBody DoctorBatchPigEventDto batchPigEventDto){
-        log.info("batch create pig event:{}", batchPigEventDto);
+        log.info("web batch create pig starting");
         if (Arguments.isNullOrEmpty(batchPigEventDto.getInputJsonList())) {
-            // TODO: 17/2/20 log.error
             throw new JsonResponseException("batch.event.input.empty");
         }
         expectTrue(notNull(batchPigEventDto.getFarmId()), "farm.id.not.null");
@@ -465,10 +465,10 @@ public class DoctorPigCreateEvents {
                             BasePigEventInputDto inputDto = doctorValidService.valid(farmEntryDto, farmEntryDto.getPigCode());
                             return buildEntryEventInput(inputDto, pigEvent);
                         } catch (InvalidException e) {
-                            // TODO: 17/2/20 log.error
+                            log.error("batch entry event fail inputJson:{}, cause:{}", inputJson, Throwables.getStackTraceAsString(e));
                             throw new InvalidException(true, e.getError(), farmEntryDto.getPigCode(), e.getParams());
                         } catch (SerializerException e) {
-                            // TODO: 17/2/20 log.error
+                            log.error("batch entry event fail inputJson:{}, cause:{}", inputJson, Throwables.getStackTraceAsString(e));
                             throw new InvalidException(true, e.getMessage(), farmEntryDto.getPigCode());
                         }
                     } else {
@@ -476,10 +476,10 @@ public class DoctorPigCreateEvents {
                             BasePigEventInputDto inputDto = eventInput(pigEvent, inputJson, batchPigEventDto.getFarmId(), batchPigEventDto.getPigType(), null);
                             return buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
                         } catch (InvalidException e) {
-                            // TODO: 17/2/20 log.error
+                            log.error("batch create event fail inputJson:{}, cause:{}", inputJson, Throwables.getStackTraceAsString(e));
                             throw new InvalidException(true, e.getError(), getPigCode(inputJson), e.getParams());
                         } catch (ServiceException e) {
-                            // TODO: 17/2/20 log.error
+                            log.error("batch create event fail inputJson:{}, cause:{}", inputJson, Throwables.getStackTraceAsString(e));
                             throw new InvalidException(true, e.getMessage(), getPigCode(inputJson));
                         }
                     }
@@ -648,6 +648,8 @@ public class DoctorPigCreateEvents {
                 return doctorValidService.valid(semenDto, doctorPig.getPigCode());
             case MATING:
                 DoctorMatingDto matingDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorMatingDto.class);
+                DoctorPig matingBoar = expectNotNull(RespHelper.or500(doctorPigReadService.findPigById(matingDto.getMatingBoarPigId())), "mating.boar.not.null", matingDto.getMatingBoarPigId());
+                matingDto.setMatingBoarPigCode(matingBoar.getPigCode());
                 return doctorValidService.valid(matingDto, doctorPig.getPigCode());
             case TO_PREG:
                 DoctorChgLocationDto chgLocationDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorChgLocationDto.class);
