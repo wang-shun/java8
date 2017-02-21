@@ -142,8 +142,13 @@ public class DoctorBarns {
     public List<DoctorBarn> findBarnsByfarmId(@RequestParam("farmId") Long farmId,
                                               @RequestParam(value = "status", required = false) Integer barnStatus,
                                               @RequestParam(value = "pigIds", required = false) String pigIds) {
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null,
+        List<DoctorBarn> barnList = filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null,
                 null, barnStatus, doctorFarmAuthCenter.getAuthBarnIds())), pigIds);
+        if (Arguments.isNullOrEmpty(barnList)) {
+            return Collections.emptyList();
+        }
+        return barnList.stream().sorted((barn1, barn2) -> PigType.compareTo(barn1.getPigType(), barn2.getPigType()))
+                .collect(Collectors.toList());
     }
 
     /**
