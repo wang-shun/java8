@@ -83,6 +83,11 @@ public interface DoctorGroupReadService {
     Response<Long> getGroupCount(@Valid DoctorGroupSearchDto groupSearchDto);
 
     /**
+     * 获取断奶仔猪数量
+     */
+    Response<Long> getWeanCount(@Valid DoctorGroupSearchDto groupSearchDto);
+
+    /**
      * 根据查询条件分页猪群
      * @param groupSearchDto 查询条件dto
      * @return 分页后的猪群列表

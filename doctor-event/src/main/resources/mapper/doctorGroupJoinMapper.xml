@@ -42,4 +42,13 @@
         </where>
     </select>
 
+
+    <select id="getWeanCount" parameterType="map" resultType="long">
+        SELECT ifnull(sum(b.wean_qty), 0) from doctor_groups a
+        left join doctor_group_tracks b on a.id = b.group_id
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
 </mapper>

@@ -17,4 +17,12 @@ public class DoctorGroupJoinDao extends MyBatisDao<SearchedGroup> {
     public Long getPigCount(DoctorGroupSearchDto groupSearchDto) {
         return getSqlSession().selectOne(sqlId("getPigCount"), groupSearchDto);
     }
+
+    /**获取断奶仔猪数
+     * @param groupSearchDto
+     * @return
+     */
+    public Long getWeanCount(DoctorGroupSearchDto groupSearchDto) {
+        return getSqlSession().selectOne(sqlId("getWeanCount"), groupSearchDto);
+    }
 }

@@ -211,8 +211,8 @@ public class DoctorGroupEvents {
      * @param farmId  猪场id
      * @param groupId 猪群id
      * @param type    事件类型
-     * @param pageNo  分页大小
-     * @param size    当前页码
+     * @param pageNo  当前页码
+     * @param size    分页大小
      * @return 分页结果
      */
     @RequestMapping(value = "/paging", method = RequestMethod.GET)
@@ -227,6 +227,15 @@ public class DoctorGroupEvents {
         return doctorGroupEventPaging;
     }
 
+    /**
+     * 分页查询猪群事件,同时带有可回滚事件id
+     * @param farmId 猪场id
+     * @param groupId 猪群id
+     * @param type 事件类型
+     * @param pageNo 当前页码
+     * @param size 分页大小
+     * @return 带有是否可回滚的分页结果
+     */
     @RequestMapping(value = "/pagingRollbackGroupEvent", method = RequestMethod.GET)
     public DoctorGroupEventPagingDto pagingGroupEventWithCanRollback(@RequestParam("farmId") Long farmId,
                                                       @RequestParam(value = "groupId", required = false) Long groupId,
