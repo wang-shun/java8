@@ -479,12 +479,13 @@ public class DoctorMoveDataController {
                 farmIds.forEach(fid -> {
                     doctorMoveReportService.moveMonthlyReport(fid, index);
                     doctorMoveReportService.moveWeeklyReport(fid, index);
-                    doctorMoveReportService.moveParityMonthlyReport(fid, index);
+                    // 周数用月数*5
+                    doctorMoveReportService.moveParityMonthlyReport(fid, index * 5);
                     doctorMoveReportService.moveBoarMonthlyReport(fid, index);
                 });
             } else {
                 doctorMoveReportService.moveMonthlyReport(farmId, index);
-                doctorMoveReportService.moveWeeklyReport(farmId, index);
+                doctorMoveReportService.moveWeeklyReport(farmId, index * 5);
                 doctorMoveReportService.moveParityMonthlyReport(farmId, index);
                 doctorMoveReportService.moveBoarMonthlyReport(farmId, index);
             }
