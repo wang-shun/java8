@@ -121,7 +121,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .eventAt(generateEventAt(inputDto.eventAt())).type(inputDto.getEventType())
                 .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName())
                 .kind(inputDto.getPigType()).relPigEventId(inputDto.getRelPigEventId()).relGroupEventId(inputDto.getRelGroupEventId())
-                .name(inputDto.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))//.relEventId(basic.getRelEventId())
+                .name(inputDto.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))
                 .operatorId(MoreObjects.firstNonNull(inputDto.getOperatorId(), basic.getStaffId()))
                 .operatorName(StringUtils.hasText(inputDto.getOperatorName()) ? inputDto.getOperatorName() : basic.getStaffName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
