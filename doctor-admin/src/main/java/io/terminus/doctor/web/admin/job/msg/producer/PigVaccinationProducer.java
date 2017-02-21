@@ -499,8 +499,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private DateTime getGroupVaccinationDate(DoctorGroupTrack track) {
         try {
-            List<DoctorGroupEvent> events = RespHelper.orServEx(doctorGroupReadService.queryAllGroupEventByGroupId(track.getGroupId()));
-            DoctorGroupEvent event = getLastGroupEventByEventType(events, GroupEventType.ANTIEPIDEMIC.getValue());
+            DoctorGroupEvent event = getLastGroupEventByEventType(track.getGroupId(), GroupEventType.ANTIEPIDEMIC.getValue());
             if (event != null){
                 return new DateTime(event.getEventAt());
             }
@@ -515,9 +514,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private DateTime getChangeGroupDate(DoctorGroupTrack track) {
         try {
-            List<DoctorGroupEvent> events = RespHelper.orServEx(doctorGroupReadService.queryAllGroupEventByGroupId(track.getGroupId()));
-
-            DoctorGroupEvent event = getLastGroupEventByEventType(events, GroupEventType.TRANS_GROUP.getValue());
+            DoctorGroupEvent event = getLastGroupEventByEventType(track.getGroupId(), GroupEventType.TRANS_GROUP.getValue());
             if (event != null){
                 return new DateTime(event.getEventAt());
             }

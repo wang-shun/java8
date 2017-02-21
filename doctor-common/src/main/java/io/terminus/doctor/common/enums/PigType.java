@@ -15,12 +15,12 @@ import java.util.List;
 
 public enum PigType {
 
-    NURSERY_PIGLET(2, "保育猪", "商品猪", 4),
-    FATTEN_PIG(3, "育肥猪", "商品猪", 5),
-    RESERVE(4, "后备猪", "种猪", 6),
-    MATE_SOW(5, "配种母猪", "种母猪", 1),
-    PREG_SOW(6, "妊娠母猪", "种母猪", 2),
-    DELIVER_SOW(7, "分娩母猪", "种母猪", 8),
+    NURSERY_PIGLET(2, "保育猪", "商品猪", 5),
+    FATTEN_PIG(3, "育肥猪", "商品猪", 6),
+    RESERVE(4, "后备猪", "种猪", 1),
+    MATE_SOW(5, "配种母猪", "种母猪", 2),
+    PREG_SOW(6, "妊娠母猪", "种母猪", 3),
+    DELIVER_SOW(7, "分娩母猪", "种母猪", 4),
     BOAR(9, "种公猪", "种公猪", 7);
 
     @Getter
@@ -107,4 +107,13 @@ public enum PigType {
             DELIVER_SOW.getValue(),
             BOAR.getValue()
     );
+
+    public static int compareTo(Integer type1, Integer type2) {
+        PigType pigType1 = PigType.from(type1);
+        PigType pigEvent2 = PigType.from(type2);
+        if (pigType1 == null || pigEvent2 == null) {
+            throw new NullPointerException();
+        }
+        return pigType1.getOrder() == pigEvent2.getOrder() ? 0 : pigType1.getOrder() > pigEvent2.getOrder() ? 1 : -1;
+    }
 }

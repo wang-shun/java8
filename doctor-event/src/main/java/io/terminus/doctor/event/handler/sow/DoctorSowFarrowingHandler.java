@@ -11,6 +11,7 @@ import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.enums.FarrowingType;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
@@ -21,6 +22,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,9 +48,12 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
     @Override
     protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
+
+        farrowingDto.setNestCode(generateNestCode(doctorPigTrack.getFarmId(), new DateTime(doctorPigEvent.getEventAt())));
+
         Map<String, Object> extra = doctorPigEvent.getExtraMap();
         // 助产 信息
         extra.put("isHelp", 1);
@@ -65,9 +70,9 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         //计算孕期
         doctorPigEvent.setPregDays(Math.abs(Days.daysBetween(farrowingDate, mattingDate).getDays()));
 
-
         //分娩窝重
         doctorPigEvent.setFarrowWeight(farrowingDto.getBirthNestAvg());
+
         //分娩仔猪只数信息
         doctorPigEvent.setLiveCount(CountUtil.getIntegerDefault0(farrowingDto.getFarrowingLiveCount()));
         doctorPigEvent.setHealthCount(CountUtil.getIntegerDefault0(farrowingDto.getHealthCount()));
@@ -84,6 +89,15 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         }
         doctorPigEvent.setExtraMap(extra);
         return doctorPigEvent;
+    }
+
+    private String generateNestCode(Long farmId, DateTime eventAt) {
+        Long farrowingCount =  doctorPigEventDao.countPigEventTypeDuration(
+                farmId,
+                PigEvent.FARROWING.getKey(),
+                eventAt.withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
+                eventAt.plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().toDate());
+        return eventAt.toString(DateTimeFormat.forPattern("yyyyMM")) + "-" + farrowingCount;
     }
 
     @Override
@@ -183,20 +197,4 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         input.setRelPigEventId(doctorPigEvent.getId());
         return doctorCommonGroupEventHandler.sowGroupEventMoveIn(eventInfoList, input);
     }
-
-    private DoctorGroupTrack.Sex judgePigSex(Integer sowCount, Integer boarCount) {
-        if (sowCount == 0 && boarCount == 0) {
-            return DoctorGroupTrack.Sex.MIX;
-        }
-
-        if (sowCount == 0) {
-            return DoctorGroupTrack.Sex.MALE;
-        }
-
-        if (boarCount == 0) {
-            return DoctorGroupTrack.Sex.FEMALE;
-        }
-        return DoctorGroupTrack.Sex.MIX;
-    }
-
 }

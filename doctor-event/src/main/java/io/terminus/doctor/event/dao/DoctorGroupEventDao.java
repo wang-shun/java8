@@ -123,4 +123,15 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public List<DoctorEventOperator> findOperators(Map<String, Object> criteria){
         return getSqlSession().selectList(sqlId("findOperators"), criteria);
     }
+
+
+    /**
+     * 查询猪群某一事件类型的最新事件
+     * @param groupId 猪群id
+     * @param type 事件类型
+     * @return 最新事件
+     */
+    public DoctorGroupEvent findLastGroupEventByType(Long groupId, Integer type) {
+        return sqlSession.selectOne(sqlId("findLastGroupEventByType"), ImmutableMap.of("groupId", groupId, "type", type));
+    }
 }
