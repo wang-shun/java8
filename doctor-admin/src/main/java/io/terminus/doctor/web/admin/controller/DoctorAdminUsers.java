@@ -7,7 +7,6 @@ import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.service.DoctorMessageUserWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
@@ -50,8 +49,6 @@ public class DoctorAdminUsers {
 
     @RpcConsumer
     private DoctorUserReadService doctorUserReadService;
-    @RpcConsumer
-    private DoctorMessageUserWriteService doctorMessageUserWriteService;
     @RpcConsumer
     private DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
     @RpcConsumer
@@ -132,7 +129,7 @@ public class DoctorAdminUsers {
         user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
         return user;
     }
-    
+
     /**
      * 设置集团用户权限(新建与编辑)
      */
