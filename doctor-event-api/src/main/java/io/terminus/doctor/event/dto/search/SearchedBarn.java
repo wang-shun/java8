@@ -75,6 +75,11 @@ public class SearchedBarn implements Serializable {
     private Integer pigCount;
 
     /**
+     * 断奶仔猪头数(产房有效)
+     */
+    private Integer pigWeanCount;
+
+    /**
      * 猪舍容量
      */
     private Integer capacity;
