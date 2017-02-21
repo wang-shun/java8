@@ -58,6 +58,7 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 猪舍表Controller
@@ -321,6 +322,9 @@ public class DoctorBarns {
         barn.setFarmName(farm.getName());
 
         if (barn.getId() == null) {
+            if (notNull(RespHelper.or500(doctorBarnReadService.findBarnByFarmAndBarnName(barn.getFarmId(), barn.getName())))) {
+                throw new JsonResponseException("barn.name.has.existed");
+            }
             barn.setStatus(DoctorBarn.Status.USING.getValue());     //初始猪舍状态: 在用
             barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());  //初始是否可建群: 可建群
             barnId = RespHelper.or500(doctorBarnWriteService.createBarn(barn));
