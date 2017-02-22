@@ -441,4 +441,14 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             return Response.fail("find last group event by type failed");
         }
     }
+
+    @Override
+    public Response<DoctorGroupEvent> findNewGroupEvent(@NotNull(message = "groupId.not.null") Long groupId) {
+        try {
+            return Response.ok(doctorGroupEventDao.findNewGroupEvent(groupId));
+        } catch (Exception e) {
+            log.error("find.new.group.event.by.groupId.failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find new group event by groupId failed");
+        }
+    }
 }
