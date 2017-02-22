@@ -64,7 +64,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         input.setEventType(GroupEventType.CLOSE.getValue());
 
         //校验能否关闭
-        checkCanClose(groupTrack, group);
+        checkCanClose(groupTrack);
 
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorCloseGroupInput close = (DoctorCloseGroupInput) input;
@@ -107,9 +107,9 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
     }
 
     //猪群里还有猪不可关闭!
-    private void checkCanClose(DoctorGroupTrack groupTrack, DoctorGroup group) {
+    private void checkCanClose(DoctorGroupTrack groupTrack) {
         if (groupTrack.getQuantity() > 0) {
-            throw new InvalidException("group.not.empty.cannot.close", group.getGroupCode());
+            throw new InvalidException("group.not.empty.cannot.close");
         }
     }
 }

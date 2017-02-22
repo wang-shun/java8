@@ -113,6 +113,7 @@ public class DoctorGroupEventManager {
         log.info("group event handle starting, handler class", handlerClass);
         final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
         getHandler(handlerClass).handle(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
+        log.info("group event handle ending, handler class", handlerClass);
         return eventInfoList;
     }
 
@@ -135,6 +136,7 @@ public class DoctorGroupEventManager {
                 throw new InvalidException(true, e.getError(), inputInfo.getGroupDetail().getGroup().getGroupCode(), e.getParams());
             }
         });
+        log.info("batch group event handle ending, eventType:{}", eventType);
         return eventInfoList;
     }
 

@@ -68,7 +68,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
 
         if(Objects.equals(group.getPigType(), PigType.NURSERY_PIGLET.getValue())){
-            checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getBaseWeight(), change.getOverPrice(), group.getGroupCode());
+            checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getBaseWeight(), change.getOverPrice());
         }
 
         //1.转换猪群变动事件
@@ -125,13 +125,13 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     }
 
     //校验金额不能为空, 基础重量不能为空
-    private static void checkSalePrice(Long changeTypeId, Long price, Integer baseWeight, Long overPrice, String groupCode) {
+    private static void checkSalePrice(Long changeTypeId, Long price, Integer baseWeight, Long overPrice) {
         if (changeTypeId == DoctorBasicEnums.SALE.getId()) {
             if ((price == null || overPrice == null)) {
-                throw new InvalidException("sale.money.not.null", groupCode);
+                throw new InvalidException("sale.money.not.null");
             }
             if (baseWeight == null) {
-                throw new InvalidException("sale.weight.not.null", groupCode);
+                throw new InvalidException("sale.weight.not.null");
             }
         }
     }

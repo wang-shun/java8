@@ -160,6 +160,7 @@ public class DoctorGroupManager {
      */
     @Transactional
     public List<DoctorEventInfo> batchNewGroupEventHandle(List<DoctorNewGroupInputInfo> inputInfoList) {
+        log.info("batch new group event handle starting");
         List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
         inputInfoList.forEach(newGroupInputInfo -> {
             try {
@@ -168,6 +169,7 @@ public class DoctorGroupManager {
                 throw new InvalidException(true, e.getError(), newGroupInputInfo.getGroup().getGroupCode(), e.getParams());
             }
         });
+        log.info("batch new group event handle ending");
         return eventInfoList;
     }
 

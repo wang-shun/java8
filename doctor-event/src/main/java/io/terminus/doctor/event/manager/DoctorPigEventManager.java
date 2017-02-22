@@ -66,6 +66,7 @@ public class DoctorPigEventManager {
         doctorEventCreateHandler.handleCheck(inputDto, basic);
         final List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
         doctorEventCreateHandler.handle(doctorEventInfoList, inputDto, basic);
+        log.info("pig event handle ending, inputDto:{}, basic:{}", inputDto, basic);
         return doctorEventInfoList;
     }
 
@@ -91,6 +92,7 @@ public class DoctorPigEventManager {
                throw new InvalidException(true, e.getError(), inputDto.getPigCode(), e.getParams());
             }
         });
+        log.info("batch pig event handle ending, event type:{}", eventInputs.get(0).getEventType());
         return eventInfos;
     }
 
