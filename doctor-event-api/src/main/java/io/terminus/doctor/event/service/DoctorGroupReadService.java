@@ -112,7 +112,7 @@ public interface DoctorGroupReadService {
      * @return  分页结果
      */
     Response<Paging<DoctorGroupEvent>> pagingGroupEvent(@NotNull(message = "farmId.not.null") Long farmId,
-                                                        Long groupId, Integer type, Integer pageNo, Integer size);
+                                                        Long groupId, Integer type, Integer pageNo, Integer size, String startDate, String endDate);
 
     /**
      * 根据事件id查询猪群事件

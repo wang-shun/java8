@@ -147,7 +147,7 @@
         <if test="groupId != null">AND group_id = #{groupId}</if>
         <if test="groupCode != null">AND group_code = #{groupCode}</if>
         <if test="eventAt != null">AND event_at = #{eventAt}</if>
-        <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
+        <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
         <if test="type != null">AND `type` = #{type}</if>
         <if test="name != null">AND `name` = #{name}</if>
@@ -360,8 +360,8 @@
         FROM
         <include refid="tb"/>
         where 1 = 1
-        <if test="beginDate != null">
-            <![CDATA[ and event_at >= #{beginDate} ]]>
+        <if test="startDate != null">
+            <![CDATA[ and event_at >= #{startDate} ]]>
         </if>
         <if test="endDate != null">
             <![CDATA[ and event_at < #{endDate} ]]>
