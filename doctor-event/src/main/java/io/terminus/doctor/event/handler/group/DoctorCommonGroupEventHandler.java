@@ -1,9 +1,10 @@
 package io.terminus.doctor.event.handler.group;
 
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -82,6 +83,9 @@ public class DoctorCommonGroupEventHandler {
 
     @Autowired
     private DoctorGroupTrackDao doctorGroupTrackDao;
+
+    @Autowired
+    private DoctorBarnDao doctorBarnDao;
 
     /**
      * 系统触发的自动关闭猪群事件(先生成一发批次总结)
@@ -173,7 +177,7 @@ public class DoctorCommonGroupEventHandler {
      */
     public Long sowGroupEventMoveIn(List<DoctorEventInfo> eventInfoList, @Valid DoctorSowMoveInGroupInput input) {
         List<DoctorGroup> groups = doctorGroupDao.findByCurrentBarnId(input.getToBarnId());
-
+        DoctorBarn doctorBarn = doctorBarnDao.findById(input.getToBarnId());
         //没有猪群, 新建
         if (!notEmpty(groups)) {
             return sowGroupEventMoveInWithNew(eventInfoList, input);
@@ -181,7 +185,7 @@ public class DoctorCommonGroupEventHandler {
 
         //多个猪群, 报错
         if (groups.size() > 1) {
-            throw new ServiceException("group.count.over.1");
+            throw new InvalidException("group.count.over.1", doctorBarn.getName(), input.getGroupCode());
         }
 
         //已有猪群, 转入

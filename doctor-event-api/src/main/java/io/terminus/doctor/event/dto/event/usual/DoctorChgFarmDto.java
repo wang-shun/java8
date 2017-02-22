@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,20 +28,25 @@ public class DoctorChgFarmDto extends BasePigEventInputDto implements Serializab
 
     private static final long serialVersionUID = -6702066337454157425L;
 
+    @NotNull(message = "event.at.not.null")
     private Date chgFarmDate;  // 转场日期
 
+    @NotNull(message = "from.farm.id.not.null")
     private Long fromFarmId;   // 原场Id
 
     private String fromFarmName;    // 原场名称
 
+    @NotNull(message = "from.barn.id.not.null")
     private Long fromBarnId;    // 原设Id
 
     private String fromBarnName; // 原舍名称
 
+    @NotNull(message = "to.farm.id.not.null")
     private Long toFarmId;  // 转场Id
 
     private String toFarmName;  // 转场名称
 
+    @NotNull(message = "to.barn.id.not.null")
     private Long toBarnId;  //  转舍Id
 
     private String toBarnName;  // 转舍名称

@@ -11,6 +11,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
+
 /**
  * Desc: 猪群转群事件录入信息
  * Mail: yangzl@terminus.io
@@ -65,14 +67,14 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
     @NotNull(message = "boarQty.not.null")
     private Integer boarQty;
 
-    @NotNull(message = "boarQty.not.null")
+    @NotNull(message = "sowQty.not.null")
     private Integer sowQty;
 
     /**
      * 均重(kg)
      * 转群以此字段为主, 转场已总重为主
      */
-    @NotNull(message = "weight.not.null")
+    @NotNull(message = "avgWeight.not.null")
     private Double avgWeight;
 
     /**
@@ -86,6 +88,11 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
      * @see io.terminus.doctor.event.enums.PigSource
      */
     private Integer source;
+
+    /**
+     * 触发猪群转群的母猪号
+     */
+    private String sowCode;
 
     @Override
     public Map<String, String> descMap() {
@@ -116,6 +123,11 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
             if(pigSource != null){
                 map.put("来源", pigSource.getDesc());
             }
+
+        }
+
+        if (notEmpty(sowCode)) {
+            map.put("母猪号", sowCode);
         }
         return map;
     }

@@ -12,6 +12,8 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
@@ -272,37 +274,41 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     }
 
     @Override
-    public Response<DoctorPigEvent> canRollbackEvent(@NotNull(message = "input.pigId.empty") Long pigId) {
+    public RespWithEx<DoctorPigEvent> canRollbackEvent(@NotNull(message = "input.pigId.empty") Long pigId) {
         try {
             DoctorPigEvent pigEvent = doctorPigEventDao.queryLastManualPigEventById(pigId);
             if (pigEvent == null) {
-                return Response.ok(null);
+                return RespWithEx.ok(null);
             }
             for (DoctorRollbackPigEventHandler handler : doctorRollbackHandlerChain.getRollbackPigEventHandlers()) {
                 if (handler.canRollback(pigEvent)) {
-                    return Response.ok(pigEvent);
+                    return RespWithEx.ok(pigEvent);
                 }
             }
-            return Response.ok(null);
+            return RespWithEx.ok(null);
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (Exception e) {
             log.error("can.rollback.event.failed, cause {}", Throwables.getStackTraceAsString(e));
-            return Response.fail("can.rollback.event.failed");
+            return RespWithEx.fail("can.rollback.event.failed");
         }
     }
 
     @Override
-    public Response<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId) {
+    public RespWithEx<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId) {
         try {
             DoctorPigEvent pigEvent = doctorPigEventDao.findById(eventId);
             for (DoctorRollbackPigEventHandler handler : doctorRollbackHandlerChain.getRollbackPigEventHandlers()) {
                 if (handler.canRollback(pigEvent)) {
-                    return Response.ok(Boolean.TRUE);
+                    return RespWithEx.ok(Boolean.TRUE);
                 }
             }
-            return Response.ok(Boolean.FALSE);
+            return RespWithEx.ok(Boolean.FALSE);
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
         } catch (Exception e) {
             log.error("event.can.rollback.failed, eventId:{}, cause:{}", eventId, Throwables.getStackTraceAsString(e));
-            return Response.fail("event can rollback failed");
+            return RespWithEx.fail("event can rollback failed");
         }
     }
 

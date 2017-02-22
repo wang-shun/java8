@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
@@ -223,6 +224,7 @@ public class DoctorGroupEvents {
                                                      @RequestParam(value = "size", required = false) Integer size,
                                                      @RequestParam(value = "startDate", required = false) String startDate,
                                                      @RequestParam(value = "endDate",required = false) String endDate) {
+
         Paging<DoctorGroupEvent> doctorGroupEventPaging = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(farmId, groupId, type, pageNo, size, startDate, endDate));
 
         transFromUtil.transFromGroupEvents(doctorGroupEventPaging.getData());
@@ -238,10 +240,10 @@ public class DoctorGroupEvents {
                                                       @RequestParam(value = "startDate", required = false) String startDate,
                                                       @RequestParam(value = "endDate",required = false) String endDate) {
         Paging<DoctorGroupEvent> doctorGroupEventPaging = pagingGroupEvent(farmId, groupId, type, pageNo, size, startDate, endDate);
-        DoctorGroupEvent doctorGroupEvent = RespHelper.or500(doctorGroupReadService.canRollbackEvent(groupId));
+        Response<DoctorGroupEvent> groupEventResponse = doctorGroupReadService.canRollbackEvent(groupId);
         Long canRollback = null;
-        if (doctorGroupEvent != null){
-            canRollback = doctorGroupEvent.getId();
+        if (groupEventResponse.isSuccess() && groupEventResponse.getResult() != null){
+            canRollback = groupEventResponse.getResult().getId();
         }
         return DoctorGroupEventPagingDto.builder().paging(doctorGroupEventPaging).canRollback(canRollback).build();
     }
@@ -304,7 +306,7 @@ public class DoctorGroupEvents {
      * @return 猪群镜像
      */
     @RequestMapping(value = "/rollback", method = RequestMethod.GET)
-    public Boolean rollbackGroupEvent(@RequestParam("eventId") Long eventId) {
+    public Boolean rolllbackGroupEvent(@RequestParam("eventId") Long eventId) {
         DoctorGroupEvent event = RespHelper.or500(doctorGroupReadService.findGroupEventById(eventId));
 
         //权限中心校验权限

@@ -29,7 +29,6 @@ rpc.dubbo:
 logging:
   file: /var/log/doctor/open.log
   level.*: INFO
-  level.io.terminus: DEBUG
 
 openplatform:
   mode: GATEWAY
@@ -117,4 +116,4 @@ service-domain:
   neverest: xxx
   pigtrade: xxx
 
-open.domain: http://www.xrnm.com
+open.domain: www.xrnm.com

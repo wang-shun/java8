@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by yaoqijun.
@@ -25,6 +26,7 @@ public class DoctorConditionHandler extends DoctorAbstractEventHandler{
     @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
         if (Objects.equals(inputDto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
             DoctorConditionDto conditionDto = (DoctorConditionDto) inputDto;
             if (conditionDto.getConditionWeight() != null) {
@@ -32,7 +34,6 @@ public class DoctorConditionHandler extends DoctorAbstractEventHandler{
             }
         } else {
             DoctorBoarConditionDto boarConditionDto = (DoctorBoarConditionDto) inputDto;
-            checkState(boarConditionDto.getWeight() != null, "公猪体况重量不可为空,猪号:" + boarConditionDto.getPigCode());
             doctorPigTrack.setWeight(boarConditionDto.getWeight());
         }
 

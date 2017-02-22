@@ -1,17 +1,15 @@
 package io.terminus.doctor.user.manager;
 
-import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.common.util.UserRoleUtil;
+import io.terminus.doctor.common.utils.UserRoleUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.OperatorDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
-import io.terminus.doctor.user.dao.SubRoleDao;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.Operator;
 import io.terminus.doctor.user.model.PrimaryUser;

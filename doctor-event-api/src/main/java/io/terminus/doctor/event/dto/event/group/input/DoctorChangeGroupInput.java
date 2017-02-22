@@ -9,6 +9,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
+
 /**
  * Desc: 猪群变动事件录入信息
  * Mail: yangzl@terminus.io
@@ -46,12 +48,13 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
      * 猪只数 公 + 母的和
      */
     @NotNull(message = "quantity.not.null")
+    @Min(value = 1L, message = "quantity.not.lt.1")
     private Integer quantity;
 
     @NotNull(message = "boarQty.not.null")
     private Integer boarQty;
 
-    @NotNull(message = "boarQty.not.null")
+    @NotNull(message = "sowQty.not.null")
     private Integer sowQty;
 
     /**
@@ -100,6 +103,10 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
    // @Min(value = 0L, message = "price.gt.0")
     private Long overPrice;
 
+    /**
+     * 触发猪群变动的母猪号
+     */
+    private String sowCode;
 
     @Override
     public Map<String, String> descMap() {
@@ -133,6 +140,9 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
         }
         if(overPrice != null){
             map.put("超出价格(元/kg)", Double.valueOf(overPrice / 100.0).toString());
+        }
+        if (notEmpty(sowCode)) {
+            map.put("母猪号", sowCode);
         }
         return map;
     }

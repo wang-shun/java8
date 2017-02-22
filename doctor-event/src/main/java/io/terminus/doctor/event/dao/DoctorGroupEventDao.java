@@ -134,4 +134,14 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public DoctorGroupEvent findLastGroupEventByType(Long groupId, Integer type) {
         return sqlSession.selectOne(sqlId("findLastGroupEventByType"), ImmutableMap.of("groupId", groupId, "type", type));
     }
+
+
+    /**
+     * 获取猪群新建事件
+     * @param groupId 猪群id
+     * @return 猪群新建事件
+     */
+    public DoctorGroupEvent findNewGroupEvent(Long groupId) {
+        return getSqlSession().selectOne(sqlId("findNewGroupEvent"), groupId);
+    }
 }

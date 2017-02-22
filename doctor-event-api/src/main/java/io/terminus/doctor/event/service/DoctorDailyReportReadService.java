@@ -25,7 +25,7 @@ public interface DoctorDailyReportReadService {
      * @param sumAt  统计日期
      * @return 猪场日报表
      */
-    Response<DoctorDailyReportDto> findDailyReportByFarmIdAndSumAtWithCache(@NotNull(message = "farmId.not.null") Long farmId,
+    Response<DoctorDailyReportDto> findDailyReportByFarmIdAndSumAt(@NotNull(message = "farmId.not.null") Long farmId,
                                                                             @NotEmpty(message = "date.not.null") String sumAt);
 
     /**
@@ -35,7 +35,7 @@ public interface DoctorDailyReportReadService {
      * @param endAt   结束时间 yyyy-MM-dd
      * @return 猪场日报表
      */
-    Response<List<DoctorDailyReportDto>> findDailyReportByFarmIdAndRangeWithCache(@NotNull(message = "farmId.not.null") Long farmId,
+    Response<List<DoctorDailyReportDto>> findDailyReportByFarmIdAndRange(@NotNull(message = "farmId.not.null") Long farmId,
                                                                                   String startAt, String endAt);
 
     /**

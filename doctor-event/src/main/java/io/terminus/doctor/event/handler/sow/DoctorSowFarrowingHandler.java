@@ -29,8 +29,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.common.utils.DateUtil.stringToDate;
 
 /**
@@ -50,21 +51,20 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
         DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
 
         farrowingDto.setNestCode(generateNestCode(doctorPigTrack.getFarmId(), new DateTime(doctorPigEvent.getEventAt())));
 
         Map<String, Object> extra = doctorPigEvent.getExtraMap();
-        // 助产 信息
-        extra.put("isHelp", 1);
 
-        // 校验 是否早产信息
         //分娩时间
         DateTime farrowingDate = new DateTime(farrowingDto.eventAt());
         doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
         //查找最近一次初配种事件
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-        DateTime pregJudgeDate = new DateTime(stringToDate(firstMate.getExtraMap().get("judgePregDate").toString()));
+        expectTrue(notNull(firstMate), "first.mate.not.null");
+        DateTime pregJudgeDate = new DateTime(stringToDate(expectNotNull(firstMate.getExtraMap().get("judgePregDate"), "judge.preg.date.not.null").toString()));
         DateTime mattingDate = new DateTime(firstMate.getEventAt());
 
         //计算孕期
@@ -103,6 +103,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     @Override
     public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
         DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
         Map<String, Object> extra = doctorPigTrack.getExtraMap();
         // 对应的 仔猪 猪舍的 信息
@@ -128,10 +129,9 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         super.specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
         //对应的最近一次的 周期配种的初陪 的 isDelivery 字段变成true
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-        if (notNull(firstMate)) {
-            firstMate.setIsDelivery(1);
-            doctorPigEventDao.update(firstMate);
-        }
+        expectTrue(notNull(firstMate), "first.mate.not.null", doctorPigTrack.getPigId());
+        firstMate.setIsDelivery(1);
+        doctorPigEventDao.update(firstMate);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
         //触发猪群事件
         Long groupId = buildPigGroupCountInfo(doctorEventInfoList, doctorPigTrack, doctorPigEvent, farrowingDto, basic);
-        checkState(notNull(groupId), "创建猪事件失败:猪号" + inputDto.getPigCode());
+        expectTrue(notNull(groupId), "farrow.group.not.null", inputDto.getPigCode());
         doctorPigTrack.setGroupId(groupId);
         doctorPigTrackDao.update(doctorPigTrack);
 
@@ -159,6 +159,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         // Build 新建猪群操作方式
         DoctorSowMoveInGroupInput input = new DoctorSowMoveInGroupInput();
+        input.setSowCode(farrowingDto.getPigCode());
         input.setOrgId(basic.getOrgId());
         input.setOrgName(basic.getOrgName());
         input.setFarmId(basic.getFarmId());

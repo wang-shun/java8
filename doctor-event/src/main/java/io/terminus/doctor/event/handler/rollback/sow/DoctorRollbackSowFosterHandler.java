@@ -18,6 +18,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
+
 /**
  * Desc: 拼窝事件回滚
  * Mail: yangzl@terminus.io
@@ -40,11 +43,12 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
             return false;
         }
         //判断母猪被拼窝事件是最新事件 && 判断仔猪转群事件之后的仔猪转入是否是最新事件
-        DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(pigEvent.getId());
-        if (toPigEvent != null && Objects.equals(toPigEvent.getType(), PigEvent.FOSTERS_BY.getKey())) {
-
+        DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
+        expectTrue(notNull(toPigEvent), "relate.pig.event.not.null" , pigEvent.getId());
+        if (Objects.equals(toPigEvent.getType(), PigEvent.FOSTERS_BY.getKey())) {
             //查找由被拼窝触发的转群事件及其关联事件
             DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(toPigEvent.getId());
+            expectTrue(notNull(toGroupEvent), "relate.group.event.not.null" , pigEvent.getId());
             return isRelLastGroupEvent(toGroupEvent);
         }
         return false;

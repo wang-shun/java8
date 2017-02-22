@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
@@ -36,7 +37,7 @@ public interface DoctorGroupWriteService {
      * 新建猪群
      * @return 主键id
      */
-    Response<Long> createNewGroup(DoctorGroup group, @Valid DoctorNewGroupInput newGroupInput);
+    RespWithEx<Long> createNewGroup(DoctorGroup group, @Valid DoctorNewGroupInput newGroupInput);
 
     /**
      * 录入防疫事件
@@ -44,7 +45,7 @@ public interface DoctorGroupWriteService {
      * @param antiepidemic 防疫信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventAntiepidemic(DoctorGroupDetail groupDetail, @Valid DoctorAntiepidemicGroupInput antiepidemic);
+    RespWithEx<Boolean> groupEventAntiepidemic(DoctorGroupDetail groupDetail, @Valid DoctorAntiepidemicGroupInput antiepidemic);
 
     /**
      * 录入猪群变动事件
@@ -52,7 +53,7 @@ public interface DoctorGroupWriteService {
      * @param change 猪群变动信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventChange(DoctorGroupDetail groupDetail, @Valid DoctorChangeGroupInput change);
+    RespWithEx<Boolean> groupEventChange(DoctorGroupDetail groupDetail, @Valid DoctorChangeGroupInput change);
 
     /**
      * 录入猪群关闭事件
@@ -60,7 +61,7 @@ public interface DoctorGroupWriteService {
      * @param close  猪群关闭信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventClose(DoctorGroupDetail groupDetail, @Valid DoctorCloseGroupInput close);
+    RespWithEx<Boolean> groupEventClose(DoctorGroupDetail groupDetail, @Valid DoctorCloseGroupInput close);
 
     /**
      * 录入疾病事件
@@ -68,7 +69,7 @@ public interface DoctorGroupWriteService {
      * @param disease 疾病信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventDisease(DoctorGroupDetail groupDetail, @Valid DoctorDiseaseGroupInput disease);
+    RespWithEx<Boolean> groupEventDisease(DoctorGroupDetail groupDetail, @Valid DoctorDiseaseGroupInput disease);
 
     /**
      * 录入猪只存栏事件
@@ -76,7 +77,7 @@ public interface DoctorGroupWriteService {
      * @param liveStock 猪只存栏信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventLiveStock(DoctorGroupDetail groupDetail, @Valid DoctorLiveStockGroupInput liveStock);
+    RespWithEx<Boolean> groupEventLiveStock(DoctorGroupDetail groupDetail, @Valid DoctorLiveStockGroupInput liveStock);
 
     /**
      * 录入转入猪群事件
@@ -84,7 +85,7 @@ public interface DoctorGroupWriteService {
      * @param moveIn 转入猪群信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventMoveIn(DoctorGroupDetail groupDetail, @Valid DoctorMoveInGroupInput moveIn);
+    RespWithEx<Boolean> groupEventMoveIn(DoctorGroupDetail groupDetail, @Valid DoctorMoveInGroupInput moveIn);
 
     /**
      * 录入转场事件
@@ -92,7 +93,7 @@ public interface DoctorGroupWriteService {
      * @param transFarm 转场信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventTransFarm(DoctorGroupDetail groupDetail, @Valid DoctorTransFarmGroupInput transFarm);
+    RespWithEx<Boolean> groupEventTransFarm(DoctorGroupDetail groupDetail, @Valid DoctorTransFarmGroupInput transFarm);
 
     /**
      * 录入猪群转群事件
@@ -100,7 +101,7 @@ public interface DoctorGroupWriteService {
      * @param transGroup 猪群转群信息
      * @return 转入猪群的id
      */
-    Response<Long> groupEventTransGroup(DoctorGroupDetail groupDetail, @Valid DoctorTransGroupInput transGroup);
+    RespWithEx<Long> groupEventTransGroup(DoctorGroupDetail groupDetail, @Valid DoctorTransGroupInput transGroup);
 
     /**
      * 录入商品猪转为种猪事件
@@ -108,7 +109,7 @@ public interface DoctorGroupWriteService {
      * @param turnSeed 商品猪转为种猪信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventTurnSeed(DoctorGroupDetail groupDetail, @Valid DoctorTurnSeedGroupInput turnSeed);
+    RespWithEx<Boolean> groupEventTurnSeed(DoctorGroupDetail groupDetail, @Valid DoctorTurnSeedGroupInput turnSeed);
 
     /**
      * 回滚猪群事件, 回滚规则: 自动生成的事件不可回滚, 不是最新录入的事件需要先回滚上层事件后再回滚
@@ -117,7 +118,7 @@ public interface DoctorGroupWriteService {
      * @param reveterName 回滚人姓名
      * @return 是否成功
      */
-    Response<Boolean> rollbackGroupEvent(@NotNull(message = "eventId.not.null") DoctorGroupEvent groupEvent,
+    RespWithEx<Boolean> rollbackGroupEvent(@NotNull(message = "eventId.not.null") DoctorGroupEvent groupEvent,
                                          @NotNull(message = "reveterId.not.null") Long reveterId,
                                          String reveterName);
 
@@ -145,12 +146,12 @@ public interface DoctorGroupWriteService {
      * @param inputInfoList 批量信息
      * @return
      */
-    Response<Boolean> batchNewGroupEventHandle(List<DoctorNewGroupInputInfo> inputInfoList);
+    RespWithEx<Boolean> batchNewGroupEventHandle(List<DoctorNewGroupInputInfo> inputInfoList);
     /**
      * 批量某一类型事件
      * @param inputInfoList 批量信息
      * @param eventType 事件类型
      * @return
      */
-    Response<Boolean> batchGroupEventHandle(List<DoctorGroupInputInfo> inputInfoList, Integer eventType);
+    RespWithEx<Boolean> batchGroupEventHandle(List<DoctorGroupInputInfo> inputInfoList, Integer eventType);
 }

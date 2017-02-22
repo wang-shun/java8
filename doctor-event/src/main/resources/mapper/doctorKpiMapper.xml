@@ -233,6 +233,17 @@
         <include refid="criteria"/>
     </select>
 
+    <!-- 销售情况: 后备猪 -->
+    <select id="getSaleHoubei" parameterType="map" resultType="int">
+        SELECT
+        ifnull(sum(quantity),0)
+        FROM doctor_group_events
+        WHERE
+        change_type_id = 109  -- 变动类型是销售
+        and pig_type = 4 -- 后备猪
+        <include refid="criteria"/>
+    </select>
+
     <!-- 死淘情况: 母猪 -->
     <select id="getDeadSow" parameterType="map" resultType="int">
         SELECT
@@ -437,6 +448,7 @@
         t1.`type` = 9
         and t1.kind = 1
         and t1.`doctor_mate_type` = 1
+        and t1.`current_mating_count` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
         <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
         <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
@@ -449,6 +461,7 @@
         t1.`type` = 9
         and t1.kind = 1
         and t1.`doctor_mate_type` in (2, 3)
+        and t1.`current_mating_count` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
         <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
         <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
@@ -461,6 +474,7 @@
         t1.`type` = 9
         and t1.kind = 1
         and t1.`doctor_mate_type` = 4
+        and t1.`current_mating_count` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
         <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
         <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
@@ -473,6 +487,7 @@
         t1.`type` = 9
         and t1.kind = 1
         and t1.`doctor_mate_type` = 5
+        and t1.`current_mating_count` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
         <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
         <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
@@ -485,6 +500,7 @@
         t1.`type` = 9
         and t1.kind = 1
         and t1.`doctor_mate_type` = 6
+        and t1.`current_mating_count` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
         <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
         <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>

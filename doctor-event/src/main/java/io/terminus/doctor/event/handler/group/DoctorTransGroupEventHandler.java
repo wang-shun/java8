@@ -1,9 +1,9 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -72,7 +72,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //同舍不可转群
         if (Objects.equals(group.getCurrentBarnId(), transGroup.getToBarnId())) {
-            throw new ServiceException("same.barn.can.not.trans");
+            throw new InvalidException("same.barn.can.not.trans");
         }
 
         //校验能否转群, 数量, 日龄差, 转群总重

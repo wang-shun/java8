@@ -15,6 +15,7 @@ import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
@@ -113,7 +114,9 @@ public class DoctorMoveDataController {
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public Boolean testMoveIdConnect(@RequestParam("moveId") Long moveId) {
         try {
-            return notEmpty(userInitService.getFarmMember(moveId));
+            List<View_FarmMember> farmMembers = userInitService.getFarmMember(moveId);
+            log.info("test connect info, farmMember:{}", farmMembers);
+            return notEmpty(farmMembers);
         } catch (Exception e) {
             log.error("move datasource connect failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Boolean.FALSE;
@@ -479,12 +482,13 @@ public class DoctorMoveDataController {
                 farmIds.forEach(fid -> {
                     doctorMoveReportService.moveMonthlyReport(fid, index);
                     doctorMoveReportService.moveWeeklyReport(fid, index);
-                    doctorMoveReportService.moveParityMonthlyReport(fid, index);
+                    // 周数用月数*5
+                    doctorMoveReportService.moveParityMonthlyReport(fid, index * 5);
                     doctorMoveReportService.moveBoarMonthlyReport(fid, index);
                 });
             } else {
                 doctorMoveReportService.moveMonthlyReport(farmId, index);
-                doctorMoveReportService.moveWeeklyReport(farmId, index);
+                doctorMoveReportService.moveWeeklyReport(farmId, index * 5);
                 doctorMoveReportService.moveParityMonthlyReport(farmId, index);
                 doctorMoveReportService.moveBoarMonthlyReport(farmId, index);
             }

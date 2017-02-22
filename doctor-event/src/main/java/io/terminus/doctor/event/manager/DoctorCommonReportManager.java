@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -72,19 +73,22 @@ public class DoctorCommonReportManager {
     public DoctorWeeklyReport createWeeklyReport(Long farmId, Date sumAt) {
         Date startAt = new DateTime(sumAt).withDayOfWeek(1).withTimeAtStartOfDay().toDate();  //本周周一: 2016-08-01 00:00:00
         Date endAt = new DateTime(Dates.endOfDay(sumAt)).plusSeconds(-1).toDate();            //天末: 2016-08-12 23:59:59
-        sumAt = Dates.startOfDay(sumAt);
+        // sumAt不是当前日期,已那一周最后一天为准
+        if(!DateUtil.inSameDate(sumAt, new Date())){
+            endAt = new DateTime(sumAt).withDayOfWeek(7).plusDays(1).withTimeAtStartOfDay().plusSeconds(-1).toDate();
+        }
 
-        DoctorWeeklyReport weeklyReport = getWeeklyReport(farmId, startAt, endAt, sumAt);
-        doctorWeeklyReportDao.deleteByFarmIdAndSumAt(farmId, sumAt);
+        DoctorWeeklyReport weeklyReport = getWeeklyReport(farmId, startAt, endAt);
+        doctorWeeklyReportDao.deleteByFarmIdAndSumAt(farmId, endAt);
         doctorWeeklyReportDao.create(weeklyReport);
         return weeklyReport;
     }
 
     //周报
-    private DoctorWeeklyReport getWeeklyReport(Long farmId, Date startAt, Date endAt, Date sumAt) {
+    private DoctorWeeklyReport getWeeklyReport(Long farmId, Date startAt, Date endAt) {
         DoctorWeeklyReport report = new DoctorWeeklyReport();
         report.setFarmId(farmId);
-        report.setSumAt(sumAt);
+        report.setSumAt(endAt);
         report.setReportDto(getCommonReportDto(farmId, startAt, endAt));
         return report;
     }
@@ -388,6 +392,7 @@ public class DoctorCommonReportManager {
         dto.setSaleBoar(doctorKpiDao.getSaleBoar(farmId, startAt, endAt));                //公猪
         dto.setSaleNursery(doctorKpiDao.getSaleNursery(farmId, startAt, endAt));          //保育猪（产房+保育）
         dto.setSaleFatten(doctorKpiDao.getSaleFatten(farmId, startAt, endAt));            //育肥猪
+        dto.setSaleHoubei(doctorKpiDao.getSaleHoubei(farmId, startAt, endAt));            //后备猪
 
         dto.setDeadSow(doctorKpiDao.getDeadSow(farmId, startAt, endAt));                  //母猪
         dto.setDeadBoar(doctorKpiDao.getDeadBoar(farmId, startAt, endAt));                //公猪
