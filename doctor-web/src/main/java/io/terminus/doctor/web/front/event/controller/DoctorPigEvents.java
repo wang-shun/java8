@@ -15,7 +15,6 @@ import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
@@ -59,6 +58,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.notNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -146,10 +146,10 @@ public class DoctorPigEvents {
                                                               @RequestParam(value = "startDate", required = false) String startDate,
                                                               @RequestParam(value = "endDate", required = false) String endDate) {
         Paging<DoctorPigEvent> doctorPigEventPaging = pagingDoctorPigEvent(farmId, pigId, pageNo, pageSize, startDate, endDate);
-        DoctorPigEvent doctorPigEvent = RespWithExHelper.orInvalid(doctorPigEventReadService.canRollbackEvent(pigId));
+        Response<DoctorPigEvent> pigEventResponse = doctorPigEventReadService.canRollbackEvent(pigId);
         Long canRollback = null;
-        if (doctorPigEvent != null) {
-            canRollback = doctorPigEvent.getId();
+        if (pigEventResponse.isSuccess() && notNull(pigEventResponse.getResult())) {
+            canRollback = pigEventResponse.getResult().getId();
         }
         return DoctorPigEventPagingDto.builder().paging(doctorPigEventPaging).canRollback(canRollback).build();
     }
@@ -175,6 +175,7 @@ public class DoctorPigEvents {
         return RespHelper.or500(doctorPigEventReadService.queryPigEventById(eventId));
     }
 
+
     @RequestMapping(value = "/queryPigEvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<Integer> queryPigExecuteEvent(@RequestParam("ids") String ids) {
@@ -188,6 +189,11 @@ public class DoctorPigEvents {
         return RespHelper.or500(doctorPigEventReadService.queryPigEvents(pigIds));
     }
 
+    /**
+     * 母猪胎次查询
+     * @param pigId 母猪id
+     * @return 胎次信息列表
+     */
     @RequestMapping(value = "/queryDoctorSowParityCount", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<DoctorSowParityCount> queryDoctorSowParityCount(@RequestParam("pigId") Long pigId) {
@@ -233,20 +239,23 @@ public class DoctorPigEvents {
         }
         List<DoctorPigEventDetail> pigEventDetailList = pigEventPagingResponse.getResult().getData().stream()
                 .map(doctorPigEvent -> {
-                    Map<String, Object> extraMap = MoreObjects.firstNonNull(doctorPigEvent.getExtraMap(), Maps.newHashMap());
-                    if (Objects.equals(doctorPigEvent.getType(), PigEvent.MATING.getKey()) && doctorPigEvent.getExtraMap().containsKey("matingType")) {
-                        extraMap.put("matingType", MatingType.from((Integer) extraMap.get("matingType")).getDesc());
-                    }
-                    if (Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK.getKey()) && doctorPigEvent.getPregCheckResult() != null) {
-                        extraMap.put("checkResult", PregCheckResult.from(doctorPigEvent.getPregCheckResult()).getDesc());
-                    }
-                    doctorPigEvent.setExtraMap(extraMap);
-                    DoctorPigEventDetail detail = OBJECT_MAPPER.convertValue(doctorPigEvent, DoctorPigEventDetail.class);
+                        Map<String, Object> extraMap = MoreObjects.firstNonNull(doctorPigEvent.getExtraMap(), Maps.newHashMap());
+                        if (Objects.equals(doctorPigEvent.getType(), PigEvent.MATING.getKey()) && doctorPigEvent.getExtraMap().containsKey("matingType")) {
+                            extraMap.put("matingType", MatingType.from((Integer) extraMap.get("matingType")).getDesc());
+                        }
+                        if (Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK.getKey()) && doctorPigEvent.getPregCheckResult() != null) {
+                            extraMap.put("checkResult", PregCheckResult.from(doctorPigEvent.getPregCheckResult()).getDesc());
+                        }
+                        doctorPigEvent.setExtraMap(extraMap);
+                        DoctorPigEventDetail detail = OBJECT_MAPPER.convertValue(doctorPigEvent, DoctorPigEventDetail.class);
 
-                    boolean isRollback = RespWithExHelper.orInvalid(doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId()));
-                    detail.setIsRollback(isRollback);
-
-                    return detail;
+                        Boolean isRollback = false;
+                        Response<Boolean> booleanResponse = doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId());
+                        if (booleanResponse.isSuccess()) {
+                            isRollback = booleanResponse.getResult();
+                        }
+                        detail.setIsRollback(isRollback);
+                        return detail;
                 }).collect(toList());
         return new Paging<>(pigEventPagingResponse.getResult().getTotal(), pigEventDetailList);
     }
@@ -362,7 +371,11 @@ public class DoctorPigEvents {
         List<DoctorGroupEventDetail> groupEventDetailList = pagingResponse.getResult().getData().stream()
                 .map(doctorGroupEvent -> {
                     DoctorGroupEventDetail detail = OBJECT_MAPPER.convertValue(doctorGroupEvent, DoctorGroupEventDetail.class);
-                    Boolean isRollback = RespWithExHelper.orInvalid(doctorGroupReadService.eventCanRollback(doctorGroupEvent.getId()));
+                    Boolean isRollback = false;
+                    Response<Boolean> booleanResponse = doctorGroupReadService.eventCanRollback(doctorGroupEvent.getId());
+                    if (booleanResponse.isSuccess()) {
+                        isRollback = booleanResponse.getResult();
+                    }
                     detail.setIsRollback(isRollback);
                     return detail;
                 }).collect(toList());

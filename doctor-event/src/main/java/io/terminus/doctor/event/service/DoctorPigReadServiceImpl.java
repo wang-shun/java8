@@ -15,7 +15,6 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithEx;
-import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -123,9 +122,9 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
                     doctorPigEventReadService.queryPigDoctorEvents(doctorPig.getFarmId(), doctorPig.getId(), null, null, null, null)).getData();
             Long canRollback = null;
-            DoctorPigEvent rollbackEvent = RespWithExHelper.orInvalid(doctorPigEventReadService.canRollbackEvent(doctorPig.getId()));
-            if (rollbackEvent != null) {
-                canRollback = rollbackEvent.getId();
+            Response<DoctorPigEvent> pigEventResponse = doctorPigEventReadService.canRollbackEvent(doctorPig.getId());
+            if (pigEventResponse.isSuccess() && pigEventResponse.getResult() != null) {
+                canRollback = pigEventResponse.getResult().getId();
             }
             Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
             targetEventSize = targetEventSize > doctorPigEvents.size() ? doctorPigEvents.size() : targetEventSize;

@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
@@ -198,10 +199,10 @@ public class DoctorGroupEvents {
                 groupDetail.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3))).getData();
 
         transFromUtil.transFromGroupEvents(groupEvents);
-        DoctorGroupEvent rollbackEvent = RespWithExHelper.orInvalid(doctorGroupReadService.canRollbackEvent(groupId));
+        Response<DoctorGroupEvent> groupEventResponse = doctorGroupReadService.canRollbackEvent(groupId);
         Long canRollback = null;
-        if (rollbackEvent != null){
-            canRollback = rollbackEvent.getId();
+        if (groupEventResponse.isSuccess() && groupEventResponse.getResult() != null){
+            canRollback = groupEventResponse.getResult().getId();
         }
         return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents, canRollback);
     }
@@ -244,10 +245,10 @@ public class DoctorGroupEvents {
                                                       @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                       @RequestParam(value = "size", required = false) Integer size) {
         Paging<DoctorGroupEvent> doctorGroupEventPaging = pagingGroupEvent(farmId, groupId, type, pageNo, size);
-        DoctorGroupEvent doctorGroupEvent = RespWithExHelper.orInvalid(doctorGroupReadService.canRollbackEvent(groupId));
+        Response<DoctorGroupEvent> groupEventResponse = doctorGroupReadService.canRollbackEvent(groupId);
         Long canRollback = null;
-        if (doctorGroupEvent != null){
-            canRollback = doctorGroupEvent.getId();
+        if (groupEventResponse.isSuccess() && groupEventResponse.getResult() != null){
+            canRollback = groupEventResponse.getResult().getId();
         }
         return DoctorGroupEventPagingDto.builder().paging(doctorGroupEventPaging).canRollback(canRollback).build();
     }
