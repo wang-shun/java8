@@ -381,6 +381,16 @@ public class DoctorGroupEvents {
     }
 
     /**
+     * 获取猪群新建事件
+     * @param groupId 猪群id
+     * @return 新建事件
+     */
+    @RequestMapping(value = "/find/newGroupEvent", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public DoctorGroupEvent findNewGroupEvent(@RequestParam Long groupId) {
+        return RespHelper.or500(doctorGroupReadService.findNewGroupEvent(groupId));
+    }
+
+    /**
      * 猪群转群事件的extra中添加groupid(暂时)
      * @return
      */
