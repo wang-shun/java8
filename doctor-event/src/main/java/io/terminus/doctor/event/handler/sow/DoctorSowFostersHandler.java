@@ -72,17 +72,6 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
     protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
 
-        //被拼窝事件
-        DoctorFosterByDto fosterByDto = DoctorFosterByDto.builder()
-                .fromSowId(fostersDto.getPigId())
-                .fosterByDate(DateUtil.toDate(fostersDto.getFostersDate()))
-                .fosterByCount(fostersDto.getFostersCount())
-                .boarFostersByCount(fostersDto.getBoarFostersCount())
-                .sowFostersByCount(fostersDto.getSowFostersCount())
-                .fosterByTotalWeight(fostersDto.getFosterTotalWeight())
-                .fromGroupId(doctorPigTrack.getGroupId())
-                .build();
-
         //断奶事件
         if (doctorPigTrack.getUnweanQty() == 0) {
             DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
@@ -93,6 +82,17 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
             buildAutoEventCommonInfo(fostersDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
             doctorSowWeanHandler.handle(doctorEventInfoList, partWeanDto, basic);
         }
+        //被拼窝事件
+        DoctorFosterByDto fosterByDto = DoctorFosterByDto.builder()
+                .fromSowId(fostersDto.getPigId())
+                .fromSowCode(fostersDto.getPigCode())
+                .fosterByDate(DateUtil.toDate(fostersDto.getFostersDate()))
+                .fosterByCount(fostersDto.getFostersCount())
+                .boarFostersByCount(fostersDto.getBoarFostersCount())
+                .sowFostersByCount(fostersDto.getSowFostersCount())
+                .fosterByTotalWeight(fostersDto.getFosterTotalWeight())
+                .fromGroupId(doctorPigTrack.getGroupId())
+                .build();
 
         DoctorPigTrack fosterByTrack = doctorPigTrackDao.findByPigId(fostersDto.getFosterSowId());
         DoctorPig fosterByPig = doctorPigDao.findById(fostersDto.getFosterSowId());

@@ -9,6 +9,8 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Map;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
+
 /**
  * Desc: 母猪事件触发的转入猪群事件
  * Mail: yangzl@terminus.io
@@ -88,6 +90,11 @@ public class DoctorSowMoveInGroupInput extends DoctorMoveInGroupInput implements
      */
     private Integer weakQty;
 
+    /**
+     * 触发转入事件的母猪号
+     */
+    private String sowCode;
+
     @Override
     public Map<String, String> descMap() {
         Map<String, String> map = super.descMap();
@@ -111,6 +118,9 @@ public class DoctorSowMoveInGroupInput extends DoctorMoveInGroupInput implements
         }
         if(geneticName != null){
             map.put("品系", geneticName);
+        }
+        if (notEmpty(sowCode)) {
+            map.put("母猪号", sowCode);
         }
         return map;
     }

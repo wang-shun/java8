@@ -87,6 +87,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
     private Long groupSowEventCreate(List<DoctorEventInfo> eventInfoList, DoctorPigTrack pigTrack, DoctorFosterByDto fosterByDto, DoctorBasicInputInfoDto basic, Long pigEventId, Date eventAt) {
         //未断奶仔猪id
         DoctorTransGroupInput input = new DoctorTransGroupInput();
+        input.setSowCode(fosterByDto.getFromSowCode());
         input.setToBarnId(pigTrack.getCurrentBarnId());
         input.setToBarnName(pigTrack.getCurrentBarnName());
         List<DoctorGroup> groupList = doctorGroupDao.findByCurrentBarnId(pigTrack.getCurrentBarnId());
