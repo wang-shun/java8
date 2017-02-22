@@ -20,6 +20,7 @@ rpc.dubbo:
 logging:
   file: /var/log/doctor/user.log
   level.*: INFO
+  path: /var/log/doctor
 
 # zookeeper
 zookeeper:

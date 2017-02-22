@@ -54,6 +54,7 @@ zookeeper:
 logging:
   file: /var/log/doctor/web.log
   level.*: INFO
+  path: /var/log/doctor
 
 image:
   base:

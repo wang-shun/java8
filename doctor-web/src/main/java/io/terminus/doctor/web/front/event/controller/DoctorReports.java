@@ -71,6 +71,9 @@ public class DoctorReports {
     @RequestMapping(value = "/daily", method = RequestMethod.GET)
     public DoctorDailyReportDto findDailyReportByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
                                                                 @RequestParam("date") String date) {
+        for (int i = 0; i < 10; i++) {
+            log.info("hehehehehh：{}", i);
+        }
         return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndSumAt(farmId, date));
     }
 
