@@ -71,6 +71,5 @@ parana:
   config:
     mode: server
 
-
 openApi.url: https://doctor.xrnm.com
 

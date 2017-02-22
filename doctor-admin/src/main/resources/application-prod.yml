@@ -1,0 +1,119 @@
+server:
+  context-path: /
+  port: 8081
+
+pampas:
+  rootPath: /home/admin/assets/pidgeotto
+  apps:
+    - key: PC
+  devMode: false
+  mvc:
+    ignoreInterceptors:
+      - Login
+      - Auth
+    customInterceptors:
+      - loginInterceptor
+      - authInterceptor
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  design:
+    enable: false
+  locale: zh_CN
+
+session:
+  cookie-context-path: /
+  cookie-domain: xrnm.com
+  cookie-max-age: 1800
+  cookie-name: msid
+  source: redis
+  serialize-type: json
+  redis-host: 127.0.0.1
+  redis-port: 6379
+  redis-index: 1
+  redis-cluster: false
+  redis-test-on-borrow: true
+  redis-max-total: 10
+  redis-max-idle: 0
+  redis-prefix: afsession
+
+# Dubbo
+rpc.mode: true
+rpc.dubbo:
+    module: doctor-admin
+    registryAddress: 127.0.0.1:2181
+    version: 1.0.0
+    timeout: 60000
+    check: false
+
+# zookeeper
+zookeeper:
+  host: 101.201.44.35
+  port: 2181
+  zkTopic: pig.doctor.topic
+
+logging:
+  path: /var/log/doctor
+
+image:
+  base:
+    url: https://img.xrnm.com
+
+oss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  appKey: n67jFjUcEjZxPOZf
+  appSecret: ZOPL1A33iQB52g60Dgvs3xT2FJqeaf
+  bucketName: pigmall
+
+msg:
+  test.enabled: true
+  gateway:
+    version: simple
+    sms: #包含的短信网关实现bean
+      luoSiMaoSmsService:
+    email: #包含的邮件网关实现bean
+      commonEmailService:
+    apppush: #包含的app消息推送实现bean
+      umengAppPushServiceIos:
+      umengAppPushServiceAndroid:
+  current:
+    smsService: luoSiMaoSmsService
+    emailService: commonEmailService
+    appPushService: umengAppPushService #当前的app消息推送网关服务
+  webservice:
+    version: db
+    channel: #WEB层开启的消息服务, 在Controller中可以用@Qualifier("smsWebService")方式指明注入的MsgWebService
+      sms:  #开启WEB层短信服务 SmsWebService, 使用时@Qualifier("smsWebService")
+      email:  #开启WEB层邮件服务 EmailWebService, 使用时@Qualifier("emailWebService")
+      notify:  #开启WEB层站内信服务 NotifyWebService, 使用时@Qualifier("notifyWebService")
+      apppush:  #开启WEB层APP消息推送服务 AppPushWebService, 使用时@Qualifier("appPushWebService")
+  luosimao:
+    sendUrl: http://sms-api.luosimao.com/v1/http_get/send/json
+    statusUrl: http://sms-api.luosimao.com/v1/http_get/status/json
+    apiKey: 35dec4a658e7a3fe96af38a62540cacc
+    companyName: 【新融农牧】
+  email:
+    host: smtp.mxhichina.com
+    port: 25
+    account: no-reply@xrnm.com
+    password: 123456Pigmall
+    protocol: 2
+  umeng: #友盟APP消息推送网关配置
+    android: #Android应用配置
+      appKey: 574ced4267e58eef570035c7
+      appSecret: jmaegca1mvlzpxewuufcn6kbxhebpzeo
+    ios: #IOS应用配置
+      appKey: 574cecdce0f55a85f00028fe
+      appSecret: ws685rsevimn8fgx6mmxzzgx7bs1y9pn
+  jumpUrl:
+    pig:
+      sow: /sow/detail
+      boar: /boar/detail
+    group: /group/detail
+
+# File size limit
+# Total request size for a multipart/form-data
+multipart:
+  max-file-size: 10Mb
+  max-request-size: 20Mb
+  enabled: true
