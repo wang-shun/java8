@@ -1,7 +1,7 @@
 package io.terminus.doctor.open.rest.crm;
 
+import com.github.kevinsawicki.http.HttpRequest;
 import com.google.common.base.Throwables;
-import com.thoughtworks.xstream.mapper.Mapper;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
@@ -27,11 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -143,36 +139,20 @@ public class PhoenixCrmReports {
         return MAPPER.toJson(liveStockDetailOpenList);
     }
 
+    /**
+     * 电商商品销售
+     * @return
+     */
     @OpenMethod(key = "get.shop.item.sale")
     public String getShopItemSale(){
         BufferedReader reader = null;
         HttpURLConnection urlConnection = null;
         try {
             String url = "http://"+ domain + "/api/queryShopItemSaleOpen";
-            urlConnection = (HttpURLConnection) new URL(url).openConnection();
-            urlConnection.connect();
-            InputStream in = urlConnection.getInputStream();
-            reader = new BufferedReader(new InputStreamReader(in));
-            StringBuilder builder = new StringBuilder();
-            String line ;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-            }
-            return MAPPER.toJson(builder.toString());
+            return HttpRequest.get(url).body();
         } catch (Exception e) {
             log.error("get.shop.item.sale.failed, cause:{}", Throwables.getStackTraceAsString(e));
-        } finally {
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-            } catch (IOException e) {
-                log.error("get.shop.item.sale.failed");
-            }
         }
         return "";
-   }
+    }
 }

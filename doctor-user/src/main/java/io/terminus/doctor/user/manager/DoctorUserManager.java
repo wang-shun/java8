@@ -3,7 +3,7 @@ package io.terminus.doctor.user.manager;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.common.util.UserRoleUtil;
+import io.terminus.doctor.common.utils.UserRoleUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
@@ -49,22 +49,19 @@ public class DoctorUserManager {
 
     private final SubRoleReadService subRoleReadService;
 
-    private final DoctorStaffDao doctorStaffDao;
-
-    private final DoctorStaffWriteService doctorStaffWriteService;
-
     @Autowired
-    public DoctorUserManager(UserDao userDao, UserProfileDao userProfileDao, OperatorDao operatorDao, PrimaryUserDao primaryUserDao, SubDao subDao,
-                             SubRoleReadService subRoleReadService, DoctorStaffDao doctorStaffDao,
-                             DoctorStaffWriteService doctorStaffWriteService) {
+    public DoctorUserManager(UserDao userDao,
+                             UserProfileDao userProfileDao,
+                             OperatorDao operatorDao,
+                             PrimaryUserDao primaryUserDao,
+                             SubDao subDao,
+                             SubRoleReadService subRoleReadService) {
         this.userDao = userDao;
         this.userProfileDao = userProfileDao;
         this.operatorDao = operatorDao;
         this.primaryUserDao = primaryUserDao;
         this.subDao = subDao;
         this.subRoleReadService = subRoleReadService;
-        this.doctorStaffDao = doctorStaffDao;
-        this.doctorStaffWriteService = doctorStaffWriteService;
     }
 
     @Transactional

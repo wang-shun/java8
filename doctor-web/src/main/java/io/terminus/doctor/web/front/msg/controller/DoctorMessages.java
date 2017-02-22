@@ -10,7 +10,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.util.JsonMapperUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.msg.DoctorMessageSearchDto;

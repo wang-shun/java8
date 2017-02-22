@@ -11,8 +11,10 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -103,16 +105,16 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
-    public Response<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(Long pigId, Integer eventSize) {
-        try{
+    public RespWithEx<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(Long pigId, Integer eventSize) {
+        try {
             Integer dayAge = null;
             DoctorPig doctorPig = doctorPigDao.findById(pigId);
             if (doctorPig == null) {
-                return Response.fail("pig.not.found");
+                return RespWithEx.fail("pig.not.found");
             }
 
             if (doctorPig.getBirthDate() != null) {
-                dayAge = (int)(DateTime.now()
+                dayAge = (int) (DateTime.now()
                         .minus(doctorPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1);
             }
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
@@ -120,18 +122,20 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
                     doctorPigEventReadService.queryPigDoctorEvents(doctorPig.getFarmId(), doctorPig.getId(), null, null, null, null)).getData();
             Long canRollback = null;
-            DoctorPigEvent rollbackEvent = RespHelper.orServEx(doctorPigEventReadService.canRollbackEvent(doctorPig.getId()));
-            if (rollbackEvent != null){
-                canRollback = rollbackEvent.getId();
+            Response<DoctorPigEvent> pigEventResponse = doctorPigEventReadService.canRollbackEvent(doctorPig.getId());
+            if (pigEventResponse.isSuccess() && pigEventResponse.getResult() != null) {
+                canRollback = pigEventResponse.getResult().getId();
             }
             Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
             targetEventSize = targetEventSize > doctorPigEvents.size() ? doctorPigEvents.size() : targetEventSize;
 
-            return Response.ok(DoctorPigInfoDetailDto.builder().doctorPig(doctorPig).doctorPigTrack(doctorPigTrack)
+            return RespWithEx.ok(DoctorPigInfoDetailDto.builder().doctorPig(doctorPig).doctorPigTrack(doctorPigTrack)
                     .doctorPigEvents(doctorPigEvents.subList(0, targetEventSize)).dayAge(dayAge).canRollback(canRollback).build());
-        }catch (Exception e){
+        } catch (InvalidException e) {
+            return RespWithEx.exception(e);
+        } catch (Exception e){
             log.error("query pig detail info fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("query.pigDetailInfo.fail");
+            return RespWithEx.fail("query.pigDetailInfo.fail");
         }
     }
 

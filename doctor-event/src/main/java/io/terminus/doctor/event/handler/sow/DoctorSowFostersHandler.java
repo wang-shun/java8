@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by yaoqijun.
@@ -43,21 +44,20 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
     public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
         super.handleCheck(eventDto, basic);
         DoctorFostersDto fostersDto = (DoctorFostersDto) eventDto;
-        checkState(!Objects.equals(fostersDto.getPigId(), fostersDto.getFosterSowId()), "不能拼自己猪号:" + fostersDto.getPigCode());
-        checkState(fostersDto.getFosterTotalWeight() != null,  "拼窝总重不能为空");
-        checkState(fostersDto.getFosterTotalWeight() >= 0,  "拼窝总重不能小于0");
+        expectTrue(!Objects.equals(fostersDto.getPigId(), fostersDto.getFosterSowId()), "not.foster.userself", fostersDto.getPigCode());
     }
 
     @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
         DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
-        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "拼窝母猪状态错误,猪号:" + fostersDto.getPigCode());
+        expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "foster.currentSowStatus.error", fostersDto.getPigCode());
 
         //添加当前母猪的健崽猪的数量信息
         Integer unweanCount = MoreObjects.firstNonNull(doctorPigTrack.getUnweanQty(), 0);
         Integer fosterCount = fostersDto.getFostersCount();
-        checkState(unweanCount >= fosterCount, "拼窝数量大于未断奶数,猪号:" + fostersDto.getPigCode());
+        expectTrue(unweanCount >= fosterCount, "fosters.count.not.enough", fosterCount, unweanCount);
 
         doctorPigTrack.setUnweanQty(unweanCount - fosterCount);  //未断奶数
         doctorPigTrack.setWeanQty(MoreObjects.firstNonNull(doctorPigTrack.getWeanQty(), 0)); //断奶数不变

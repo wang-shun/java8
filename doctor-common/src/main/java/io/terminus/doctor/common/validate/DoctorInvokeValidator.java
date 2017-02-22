@@ -45,4 +45,6 @@ public class DoctorInvokeValidator {
             throw new ServiceException(violations.iterator().next().getMessage());
         }
     }
+
+
 }

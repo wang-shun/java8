@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,8 +29,10 @@ public class DoctorRemovalDto extends BasePigEventInputDto implements Serializab
 
     private static final long serialVersionUID = -5166658905616894350L;
 
+    @NotNull(message = "event.at.not.null")
     private Date removalDate; // 离场时间
 
+    @NotNull(message = "chg.type.id.not.null")
     private Long chgTypeId; // 变动类型Id basic 数据信息
 
     private String chgTypeName;   // 变动名称

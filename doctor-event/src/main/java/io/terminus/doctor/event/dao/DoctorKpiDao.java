@@ -224,6 +224,13 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 销售情况: 后备猪
+     */
+    public int getSaleHoubei(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSaleHoubei"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 死淘情况: 母猪
      */
     public int getDeadSow(Long farmId, Date startAt, Date endAt) {

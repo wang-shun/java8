@@ -86,4 +86,13 @@ public interface DoctorBarnReadService {
      * @return 猪舍表分页查询结果
      */
     Response<Paging<DoctorBarn>> pagingBarn(DoctorBarnDto barnDto, Integer pageNo, Integer size);
+
+    /**
+     * 根据猪舍名和猪场id查询猪舍
+     * @param farmId 猪场id
+     * @param barnName 猪舍名
+     * @return 猪舍
+     */
+    Response<DoctorBarn> findBarnByFarmAndBarnName(@NotNull(message = "farmId.can.not.be.null") Long farmId,
+                                                   @NotNull(message = "barn.name.not.empty") String barnName);
 }

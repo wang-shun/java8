@@ -26,11 +26,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static io.terminus.doctor.common.util.UserRoleUtil.isAdmin;
-import static io.terminus.doctor.common.util.UserRoleUtil.isNormal;
-import static io.terminus.doctor.common.util.UserRoleUtil.isOperator;
-import static io.terminus.doctor.common.util.UserRoleUtil.isPrimary;
-import static io.terminus.doctor.common.util.UserRoleUtil.isSub;
+import static io.terminus.doctor.common.utils.UserRoleUtil.isAdmin;
+import static io.terminus.doctor.common.utils.UserRoleUtil.isNormal;
+import static io.terminus.doctor.common.utils.UserRoleUtil.isOperator;
+import static io.terminus.doctor.common.utils.UserRoleUtil.isPrimary;
+import static io.terminus.doctor.common.utils.UserRoleUtil.isSub;
 
 /**
  * @author Effet

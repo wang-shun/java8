@@ -1302,7 +1302,6 @@ public class DoctorImportDataService {
         farrow.setBarnName(sow.getInitBarnName());
         farrow.setBedCode(info.getBed());
         farrow.setFarrowingType(FarrowingType.USUAL.getKey());
-        farrow.setIsHelp(IsOrNot.NO.getValue());
         farrow.setGroupCode(getGroup(event.getBarnId()).getGroupCode());
         farrow.setBirthNestAvg(info.getNestWeight());
         farrow.setFarrowingLiveCount(event.getLiveCount());

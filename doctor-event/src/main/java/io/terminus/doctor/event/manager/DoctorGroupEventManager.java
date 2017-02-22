@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -109,8 +110,10 @@ public class DoctorGroupEventManager {
     @Transactional
     public <I extends BaseGroupInput>
     List<DoctorEventInfo> handleEvent(DoctorGroupDetail groupDetail, I input, Class<? extends DoctorGroupEventHandler> handlerClass) {
+        log.info("group event handle starting, handler class", handlerClass);
         final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
         getHandler(handlerClass).handle(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
+        log.info("group event handle ending, handler class", handlerClass);
         return eventInfoList;
     }
 
@@ -123,9 +126,17 @@ public class DoctorGroupEventManager {
     @Transactional
     public List<DoctorEventInfo> batchHandleEvent(List<DoctorGroupInputInfo> inputInfoList, Integer eventType) {
         //eventRepeatCheck(inputInfoList); // TODO: 17/1/20 暂时移除猪群事件的重复性校验
+        log.info("batch group event handle starting, eventType:{}", eventType);
         final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
-        inputInfoList.forEach(inputInfo -> getHandler(eventType)
-                .handle(eventInfoList, doctorGroupDao.findById(inputInfo.getGroupDetail().getGroup().getId()), doctorGroupTrackDao.findById(inputInfo.getGroupDetail().getGroupTrack().getId()), inputInfo.getInput()));
+        inputInfoList.forEach(inputInfo -> {
+            try {
+                getHandler(eventType)
+                        .handle(eventInfoList, doctorGroupDao.findById(inputInfo.getGroupDetail().getGroup().getId()), doctorGroupTrackDao.findById(inputInfo.getGroupDetail().getGroupTrack().getId()), inputInfo.getInput());
+            } catch (InvalidException e) {
+                throw new InvalidException(true, e.getError(), inputInfo.getGroupDetail().getGroup().getGroupCode(), e.getParams());
+            }
+        });
+        log.info("batch group event handle ending, eventType:{}", eventType);
         return eventInfoList;
     }
 
@@ -135,6 +146,7 @@ public class DoctorGroupEventManager {
      */
     @Transactional
     public void rollbackEvent(DoctorGroupEvent groupEvent, Long reverterId, String reverterName) {
+        log.info("rollback group event starting, group event:{}", groupEvent);
         //校验能否回滚
         checkCanRollback(groupEvent);
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
@@ -158,19 +170,19 @@ public class DoctorGroupEventManager {
         //判断此事件是否是最新事件
         if (!Objects.equals(event.getId(), groupTrack.getRelEventId())) {
             log.error("group event not the latest, can not rollback, event:{}", event);
-            throw new ServiceException("group.event.not.the.latest");
+            throw new InvalidException("group.event.not.the.latest", event.getId());
         }
 
         //判断此事件是否是自动生成
         if (Objects.equals(IsOrNot.YES.getValue(), event.getIsAuto())) {
             log.error("group event is auto event, can not rollback, event:{}", event);
-            throw new ServiceException("group.event.is.auto");
+            throw new InvalidException("group.event.is.auto");
         }
 
         //新建猪群事件不可回滚
         if (Objects.equals(GroupEventType.NEW.getValue(), event.getType())) {
             log.error("new group event can not rollback, event:{}", event);
-            throw new ServiceException("group.event.new.not.rollback");
+            throw new InvalidException("group.event.new.not.rollback", event.getId());
         }
     }
 
