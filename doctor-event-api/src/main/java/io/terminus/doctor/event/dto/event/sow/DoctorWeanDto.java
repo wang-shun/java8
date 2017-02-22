@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,10 +30,15 @@ public class DoctorWeanDto extends BasePigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 252972605944533095L;
 
+    @NotNull(message = "event.at.not.null")
     private Date partWeanDate; //断奶日期
 
+    @Min(value = 0, message = "part.wean.piglets.count.not.less.zero")
+    @NotNull(message = "part.wean.piglets.count.not.null")
     private Integer partWeanPigletsCount; //部分断奶数量
 
+    @Min(value = 0, message = "part.wean.avg.weight.not.less.zero")
+    @NotNull(message = "part.wean.avg.weight.not.null")
     private Double partWeanAvgWeight;   //断奶平均重量
 
     private String partWeanRemark;  //部分断奶标识
@@ -40,10 +47,14 @@ public class DoctorWeanDto extends BasePigEventInputDto implements Serializable{
 
     private Integer notQualifiedCount; //不合格的数量
 
+    @Min(value = 0, message = "farrowing.live.count.less.zero")
+    @NotNull(message = "farrowing.live.count.not.null")
     private Integer farrowingLiveCount; //分娩存活数
 
     private Long chgLocationToBarnId;   // 转舍Id
 
+    @Min(value = 0, message = "wean.piglets.count.not.less.zero")
+    @NotNull(message = "wean.piglets.count.not.null")
     private Integer weanPigletsCount; //已断奶数
 
     @Override

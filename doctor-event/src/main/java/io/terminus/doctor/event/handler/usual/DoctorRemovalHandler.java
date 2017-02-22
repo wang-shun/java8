@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.usual;
 
-import io.terminus.doctor.event.constants.DoctorBasicEnums;
+import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
+
 /**
  * Created by yaoqijun.
  * Date:2016-05-27
@@ -26,12 +30,13 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
-
     @Override
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
+        expectTrue(!Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "removal.status.not.feed");
         DoctorRemovalDto removalDto = (DoctorRemovalDto) inputDto;
-       doctorPigTrack.setGroupId(-1L);
+        doctorPigTrack.setGroupId(-1L);
         doctorPigTrack.addAllExtraMap(removalDto.toMap());
         //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         if (Objects.equals(DoctorPig.PigSex.BOAR.getKey(), removalDto.getPigType())) {
@@ -39,7 +44,7 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
         } else if (Objects.equals(DoctorPig.PigSex.SOW.getKey(), removalDto.getPigType())) {
             doctorPigTrack.setStatus(PigStatus.Removal.getKey());
         } else {
-            throw new IllegalStateException("猪性别错误,猪号:" + removalDto.getPigCode());
+            throw new InvalidException("pig.sex.error", removalDto.getPigType(),removalDto.getPigCode());
         }
         doctorPigTrack.setIsRemoval(IsOrNot.YES.getValue());
         return doctorPigTrack;
@@ -50,6 +55,7 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
         super.specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
        // 离场 事件 修改Pig 状态信息
         DoctorPig doctorPig = doctorPigDao.findById(inputDto.getPigId());
+        expectTrue(notNull(doctorPig), "pig.not.null", inputDto.getPigId());
         doctorPigDao.removalPig(doctorPig.getId());
     }
 
@@ -57,6 +63,7 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
     protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
         DoctorRemovalDto removalDto = (DoctorRemovalDto) inputDto;
 
         doctorPigEvent.setChangeTypeId(removalDto.getChgTypeId());   //变动类型id

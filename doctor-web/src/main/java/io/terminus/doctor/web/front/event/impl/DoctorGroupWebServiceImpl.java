@@ -16,9 +16,11 @@ import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
@@ -47,6 +49,7 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
+import io.terminus.doctor.web.core.aspects.DoctorValidService;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchGroupEventDto;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchNewGroupEventDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
@@ -67,8 +70,12 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.common.utils.BeanMapper.map;
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.common.utils.RespHelper.orServEx;
+import static io.terminus.doctor.common.utils.RespWithExHelper.orInvalid;
 
 /**
  * Desc:
@@ -87,6 +94,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorBasicWriteService doctorBasicWriteService;
+    private final DoctorValidService doctorValidService;
 
     @RpcConsumer
     private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
@@ -104,7 +112,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                                      DoctorBarnReadService doctorBarnReadService,
                                      DoctorGroupReadService doctorGroupReadService,
                                      DoctorOrgReadService doctorOrgReadService,
-                                     DoctorBasicWriteService doctorBasicWriteService) {
+                                     DoctorBasicWriteService doctorBasicWriteService,
+                                     DoctorValidService doctorValidService) {
         this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorBasicReadService = doctorBasicReadService;
@@ -112,6 +121,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorBasicWriteService = doctorBasicWriteService;
+        this.doctorValidService = doctorValidService;
     }
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
@@ -119,33 +129,57 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private static final Long CHANGE_TYPE_SALE = 109L;
 
     @Override
-    public Response<Long> createNewGroup(DoctorNewGroupInput newGroupInput) {
+    public RespWithEx<Long> createNewGroup(DoctorNewGroupInput newGroupInput) {
         try {
+            log.info("web createNewGroup starting, input:{}", newGroupInput);
             //1.构造猪群信息
-            return doctorGroupWriteService.createNewGroup(getNewGroup(newGroupInput), newGroupInput);
+            expectTrue(notEmpty(newGroupInput.getGroupCode()), "groupCode.not.empty");
+            DoctorGroup doctorGroup = getNewGroup(newGroupInput);
+            newGroupInput = doctorValidService.valid(newGroupInput, newGroupInput.getGroupCode());
+            return doctorGroupWriteService.createNewGroup(doctorGroup, newGroupInput);
+        } catch (InvalidException e) {
+            log.error("create new group failed, input:{}, cause:{}", newGroupInput, Throwables.getStackTraceAsString(e));
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
+            log.error("create new group failed, input:{}, cause:{}", newGroupInput, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
-            log.error("create new group failed, newGroupInput:{}, cause:{}", newGroupInput, Throwables.getStackTraceAsString(e));
-            return Response.fail("group.event.create.fail");
+            log.error("create new group failed, input:{}, cause:{}", newGroupInput, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail("group.event.create.fail");
         }
+
     }
 
     @Override
-    public Response<Boolean> batchNewGroupEvent(DoctorBatchNewGroupEventDto batchNewGroupEventDto) {
+    public RespWithEx<Boolean> batchNewGroupEvent(DoctorBatchNewGroupEventDto batchNewGroupEventDto) {
         try {
+            log.info("web batch newGroupEvent starting");
             if (batchNewGroupEventDto == null || Arguments.isNullOrEmpty(batchNewGroupEventDto.getNewGroupInputList())) {
-                return Response.fail("group.event.create.fail");
+                log.error("batch.event.input.empty");
+                return RespWithEx.fail("batch.event.input.empty");
             }
             List<DoctorNewGroupInputInfo> newGroupInputInfoList = batchNewGroupEventDto.getNewGroupInputList().stream()
-                    .map(doctorNewGroupInput -> new DoctorNewGroupInputInfo(getNewGroup(doctorNewGroupInput), doctorNewGroupInput))
-                    .collect(Collectors.toList());
+                    .map(doctorNewGroupInput ->{
+                        expectTrue(notEmpty(doctorNewGroupInput.getGroupCode()), "groupCode.not.empty");
+                        try {
+                            doctorNewGroupInput = doctorValidService.valid(doctorNewGroupInput, doctorNewGroupInput.getGroupCode());
+                            return new DoctorNewGroupInputInfo(getNewGroup(doctorNewGroupInput), doctorNewGroupInput);
+                        } catch (InvalidException e) {
+                            throw new InvalidException(true, e.getError(), doctorNewGroupInput.getGroupCode(), e.getParams());
+                        } catch (ServiceException e) {
+                            throw new InvalidException(true, e.getMessage(),doctorNewGroupInput.getGroupCode());
+                        }
+                    }).collect(Collectors.toList());
             return doctorGroupWriteService.batchNewGroupEventHandle(newGroupInputInfoList);
+        } catch (InvalidException e) {
+            log.error("create new group failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
+            log.error("create new group failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
-            log.error("create new group failed, batchNewGroupEventDto:{}, cause:{}", batchNewGroupEventDto, Throwables.getStackTraceAsString(e));
-            return Response.fail("group.event.create.fail");
+            log.error("create new group failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail("group.event.create.fail");
         }
     }
 
@@ -168,9 +202,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
         //设置猪场公司信息
         DoctorFarm farm = orServEx(doctorFarmReadService.findFarmById(group.getFarmId()));
+        expectTrue(notNull(farm), "farm.not.null", group.getFarmId());
         group.setFarmName(farm.getName());
 
         DoctorOrg org = orServEx(doctorOrgReadService.findOrgById(farm.getOrgId()));
+        expectTrue(notNull(org), "org.not.null", farm.getOrgId());
         group.setOrgId(org.getId());
         group.setOrgName(org.getName());
 
@@ -178,7 +214,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     }
 
     @Override
-    public Response<Boolean> createGroupEvent(Long groupId, Integer eventType, String data) {
+    public RespWithEx<Boolean> createGroupEvent(Long groupId, Integer eventType, String data) {
         try {
             log.info("create group event, groupId:{}, eventType:{}, data:{}", groupId, eventType, data);
 
@@ -194,6 +230,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             Date eventAt = DateUtil.toDate((String) params.get("eventAt"));
             checkEventAt(groupId, eventType, eventAt);
 
+            String groupCode = getGroupCode(groupId);
             //4.根据不同的事件类型调用不同的录入接口
             GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
             params.put("eventType", eventType);
@@ -202,10 +239,10 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     params.put("breedName", getBasicName(getLong(params, "breedId")));
                     params.put("inTypeName", DoctorMoveInGroupEvent.InType.from(getInteger(params, "inType")).getDesc());
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
-                    orServEx(doctorGroupWriteService.groupEventMoveIn(groupDetail, map(putBasicFields(params), DoctorMoveInGroupInput.class)));
+                    orInvalid(doctorGroupWriteService.groupEventMoveIn(groupDetail, doctorValidService.valid(map(putBasicFields(params), DoctorMoveInGroupInput.class), groupCode)));
                     break;
                 case CHANGE:
-                    checkParam(params);
+                    checkParam(params, groupDetail.getGroup().getGroupCode());
                     params.put("changeTypeName", getBasicName(getLong(params, "changeTypeId")));
                     params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
                     if (params.get("customerName") == null || params.get("customerName") == "") {
@@ -219,7 +256,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
                     params.put("customerId", customerId);
                     params.put("fcrFeed", RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, groupId, null, null), 0D));
-                    orServEx(doctorGroupWriteService.groupEventChange(groupDetail, changeInput));
+                    orInvalid(doctorGroupWriteService.groupEventChange(groupDetail, doctorValidService.valid(changeInput, groupCode)));
                     break;
                 case TRANS_GROUP:
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
@@ -230,28 +267,28 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                         params.put("toGroupCode", getGroupCode(getLong(params, "toGroupId")));
                     }
                     params.put("fcrFeed", RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, groupId, null, null), 0D));
-                    orServEx(doctorGroupWriteService.groupEventTransGroup(groupDetail, map(putBasicFields(params), DoctorTransGroupInput.class)));
+                    orInvalid(doctorGroupWriteService.groupEventTransGroup(groupDetail, doctorValidService.valid(map(putBasicFields(params), DoctorTransGroupInput.class), groupCode)));
                     break;
                 case TURN_SEED:
                     params.put("breedName", getBasicName(getLong(params, "breedId")));
                     params.put("geneticName", getBasicName(getLong(params, "geneticId")));
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                     params.put("fcrFeed", RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, groupId, null, null), 0D));
-                    orServEx(doctorGroupWriteService.groupEventTurnSeed(groupDetail, map(putBasicFields(params), DoctorTurnSeedGroupInput.class)));
+                    orInvalid(doctorGroupWriteService.groupEventTurnSeed(groupDetail, doctorValidService.valid(map(putBasicFields(params), DoctorTurnSeedGroupInput.class), groupCode)));
                     break;
                 case LIVE_STOCK:
-                    orServEx(doctorGroupWriteService.groupEventLiveStock(groupDetail, map(putBasicFields(params), DoctorLiveStockGroupInput.class)));
+                    orInvalid(doctorGroupWriteService.groupEventLiveStock(groupDetail, doctorValidService.valid(map(putBasicFields(params), DoctorLiveStockGroupInput.class), groupCode)));
                     break;
                 case DISEASE:
                     params.put("diseaseName", getBasicName(getLong(params, "diseaseId")));
                     params.put("doctorName", orServEx(this.findRealName(getLong(params, "doctorId"))));
-                    orServEx(doctorGroupWriteService.groupEventDisease(groupDetail, map(putBasicFields(params), DoctorDiseaseGroupInput.class)));
+                    orInvalid(doctorGroupWriteService.groupEventDisease(groupDetail, doctorValidService.valid(map(putBasicFields(params), DoctorDiseaseGroupInput.class), groupCode)));
                     break;
                 case ANTIEPIDEMIC:
                     params.put("vaccinName", getVaccinName(getLong(params, "vaccinId")));
                     params.put("vaccinStaffName", orServEx(this.findRealName(getLong(params, "vaccinStaffId"))));
                     params.put("vaccinItemName", getVaccinItemName(getLong(params, "vaccinItemId")));
-                    orServEx(doctorGroupWriteService.groupEventAntiepidemic(groupDetail, map(putBasicFields(params), DoctorAntiepidemicGroupInput.class)));
+                    orInvalid(doctorGroupWriteService.groupEventAntiepidemic(groupDetail, doctorValidService.valid(map(putBasicFields(params), DoctorAntiepidemicGroupInput.class), groupCode)));
                     break;
                 case TRANS_FARM:
                     params.put("toFarmName", getFarmName(getLong(params, "toFarmId")));
@@ -263,39 +300,61 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                         params.put("toGroupCode", getGroupCode(getLong(params, "toGroupId")));
                     }
                     params.put("fcrFeed", RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, groupId, null, null), 0D));
-                    DoctorTransFarmGroupInput input = map(putBasicFields(params), DoctorTransFarmGroupInput.class);
+                    DoctorTransFarmGroupInput input = doctorValidService.valid(map(putBasicFields(params), DoctorTransFarmGroupInput.class), groupCode);
                     input.setAvgWeight(input.getWeight() / input.getQuantity());
-                    orServEx(doctorGroupWriteService.groupEventTransFarm(groupDetail, input));
+                    orInvalid(doctorGroupWriteService.groupEventTransFarm(groupDetail, input));
                     break;
                 case CLOSE:
-                    orServEx(doctorGroupWriteService.groupEventClose(groupDetail, map(putBasicFields(params), DoctorCloseGroupInput.class)));
+                    orInvalid(doctorGroupWriteService.groupEventClose(groupDetail, doctorValidService.valid(map(putBasicFields(params), DoctorCloseGroupInput.class), groupCode)));
                     break;
                 default:
-                    return Response.fail("event.type.error");
+                    throw new InvalidException("event.type.illegal", groupEventType, groupDetail.getGroup().getGroupCode());
             }
-            return Response.ok(Boolean.TRUE);
+            return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            log.error("create new group failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return RespWithEx.exception(e);
         } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
+            log.error("create new group failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create group event failed, groupId:{}, eventType:{}, params:{}, cause:{}",
                     groupId, eventType, data, Throwables.getStackTraceAsString(e));
-            return Response.fail("create.group.event.fail");
+            return RespWithEx.fail("create.group.event.fail");
         }
     }
 
     @Override
-    public Response<Boolean> batchGroupEvent(DoctorBatchGroupEventDto batchGroupEventDto) {
+    public RespWithEx<Boolean> batchGroupEvent(DoctorBatchGroupEventDto batchGroupEventDto) {
         try {
+            log.info("web batch group event starting");
             if (batchGroupEventDto == null || Arguments.isNullOrEmpty(batchGroupEventDto.getInputList())) {
-                return Response.fail("group.event.create.fail");
+                log.error("batch group event input empty");
+                return RespWithEx.fail("batch.event.input.empty");
             }
             List<DoctorGroupInputInfo> groupInputInfoList = batchGroupEventDto.getInputList()
-                    .stream().map(inputInfo -> buildGroupEventInputInfo(inputInfo.getGroupId(), batchGroupEventDto.getEventType(), inputInfo.getInputJson()))
-                    .collect(Collectors.toList());
+                    .stream().map(inputInfo -> {
+                        String groupCode = getGroupCode(inputInfo.getGroupId());
+                        try {
+                            DoctorGroupInputInfo groupInputInfo = buildGroupEventInputInfo(inputInfo.getGroupId(), batchGroupEventDto.getEventType(), inputInfo.getInputJson());
+                            return doctorValidService.valid(groupInputInfo, groupInputInfo.getGroupDetail().getGroup().getGroupCode());
+                        } catch (InvalidException e) {
+                            throw new InvalidException(true, e.getError(),groupCode, e.getParams());
+                        } catch (ServiceException e) {
+                            throw new InvalidException(true, e.getMessage(), groupCode);
+                        }
+                    }).collect(Collectors.toList());
             return doctorGroupWriteService.batchGroupEventHandle(groupInputInfoList, batchGroupEventDto.getEventType());
+
+        } catch (InvalidException e) {
+            log.error("batch group event failed, batchGroupEventDto:{}, cause:{}", batchGroupEventDto, Throwables.getStackTraceAsString(e));
+            return RespWithEx.exception(e);
+        } catch (ServiceException e) {
+            log.error("batch group event failed, batchGroupEventDto:{}, cause:{}", batchGroupEventDto, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
             log.error("batch group event failed, batchGroupEventDto:{}, cause:{}", batchGroupEventDto, Throwables.getStackTraceAsString(e));
-            return Response.fail("group.event.create.fail");
+            return RespWithEx.fail("group.event.create.fail");
         }
     }
 
@@ -329,7 +388,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                 params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                 return new DoctorGroupInputInfo(groupDetail, map(putBasicFields(params), DoctorMoveInGroupInput.class));
             case CHANGE:
-                checkParam(params);
+                checkParam(params, groupDetail.getGroup().getGroupCode());
                 params.put("changeTypeName", getBasicName(getLong(params, "changeTypeId")));
                 params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
                 if (params.get("customerName") == null || params.get("customerName") == "") {
@@ -387,7 +446,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             case CLOSE:
                 return new DoctorGroupInputInfo(groupDetail, map(putBasicFields(params), DoctorCloseGroupInput.class));
             default:
-                throw new ServiceException("event.type.error");
+                throw new InvalidException("event.type.illegal", groupEventType, groupDetail.getGroup().getGroupCode());
         }
     }
     @Override
@@ -414,9 +473,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //校验猪群是否存在
     private DoctorGroupDetail checkGroupExist(Long groupId) {
-        DoctorGroupDetail groupDetail = checkNotNull(RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId)), "group.not.exist");
+        DoctorGroupDetail groupDetail = expectNotNull(RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId)), "group.detail.not.found");
         if (!Objects.equals(groupDetail.getGroup().getStatus(), DoctorGroup.Status.CREATED.getValue())) {
-            throw new ServiceException("group.is.closed");
+            throw new InvalidException("group.is.closed", groupDetail.getGroup().getGroupCode());
         }
         return groupDetail;
     }
@@ -425,46 +484,43 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private void checkEventTypeIllegal(DoctorGroupDetail groupDetail, Integer eventType) {
         List<Integer> eventTypes = RespHelper.or500(doctorGroupReadService.findEventTypesByGroupIds(Lists.newArrayList(groupDetail.getGroup().getId())));
         if (!eventTypes.contains(eventType)) {
-            throw new ServiceException("event.type.illegal");
+            throw new InvalidException("event.type.illegal", checkNotNull(GroupEventType.from(eventType)), groupDetail.getGroup().getGroupCode());
         }
         //若当前没有猪只,不能变动, 转群, 转种猪, 存栏,疾病, 防疫, 转场等等
         if (groupDetail.getGroupTrack().getQuantity() <= 0 && GroupEventType.EMPTY_GROUPS.contains(eventType)) {
-            throw new ServiceException("empty.group.can.not.event");
+            throw new InvalidException("empty.group.can.not.event", groupDetail.getGroup().getGroupCode());
         }
     }
 
     //获取猪场名称
     private String getFarmName(Long farmId) {
-        return farmId == null ? null : RespHelper.or(doctorFarmReadService.findFarmById(farmId), new DoctorFarm()).getName();
+        return expectNotNull(RespHelper.or(doctorFarmReadService.findFarmById(farmId), new DoctorFarm()).getName(), "farm.not.null", farmId);
     }
 
     //获取猪群号
     private String getGroupCode(Long groupId) {
-        DoctorGroup group = orServEx(doctorGroupReadService.findGroupById(groupId));
-        if (group == null) {
-            throw new ServiceException("group.not.found");
-        }
+        DoctorGroup group = expectNotNull(orServEx(doctorGroupReadService.findGroupById(groupId)), "event.group.not.found", groupId);
         return group.getGroupCode();
     }
 
     //获取猪舍名称
     private String getBarnName(Long barnId) {
-        return barnId == null ? null : RespHelper.or(doctorBarnReadService.findBarnById(barnId), new DoctorBarn()).getName();
+        return barnId == null ? null : expectNotNull(RespHelper.or(doctorBarnReadService.findBarnById(barnId), new DoctorBarn()), "barn.not.null", barnId).getName();
     }
 
     //获取基础数据名称
     private String getBasicName(Long basicId) {
-        return basicId == null ? null : RespHelper.or(doctorBasicReadService.findBasicById(basicId), new DoctorBasic()).getName();
+        return basicId == null ? null : expectNotNull(RespHelper.or(doctorBasicReadService.findBasicById(basicId), new DoctorBasic()), "basic.not.null", basicId).getName();
     }
 
     //获取疫苗名称
     private String getVaccinName(Long vaccinId) {
-        return vaccinId == null ? null : RespHelper.or(doctorBasicMaterialReadService.findBasicMaterialById(vaccinId), new DoctorBasicMaterial()).getName();
+        return vaccinId == null ? null : expectNotNull(RespHelper.or(doctorBasicMaterialReadService.findBasicMaterialById(vaccinId), new DoctorBasicMaterial()), "basic.material.not.null", vaccinId).getName();
     }
 
     //获取变动原因
     private String getChangeReasonName(Long changeReasonId) {
-        return changeReasonId == null ? null : RespHelper.or(doctorBasicReadService.findChangeReasonById(changeReasonId), new DoctorChangeReason()).getReason();
+        return changeReasonId == null ? null : expectNotNull(RespHelper.or(doctorBasicReadService.findChangeReasonById(changeReasonId), new DoctorChangeReason()), "change.reason.not.null", changeReasonId).getReason();
     }
 
     @Override
@@ -480,12 +536,12 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //获取防疫项目名称
     private String getVaccinItemName(Long vaccinItemId) {
-        return vaccinItemId == null ? null : RespHelper.or(doctorBasicReadService.findBasicById(vaccinItemId), new DoctorBasic()).getName();
+        return vaccinItemId == null ? null : expectNotNull(RespHelper.or(doctorBasicReadService.findBasicById(vaccinItemId), new DoctorBasic()), "basic.not.null", vaccinItemId).getName();
     }
 
     //获取客户名称
     private String getCustomerName(Long customerId) {
-        return customerId == null ? null : RespHelper.or(doctorBasicReadService.findCustomerById(customerId), new DoctorCustomer()).getName();
+        return customerId == null ? null : expectNotNull(RespHelper.or(doctorBasicReadService.findCustomerById(customerId), new DoctorCustomer()), "basic.not.null", customerId).getName();
     }
 
     //put一些关联字段
@@ -525,20 +581,20 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     //校验是否是系统自动生成的事件, 自动事件不可编辑!
     private static void checkEventAuto(DoctorGroupEvent event) {
         if (Objects.equals(event.getIsAuto(), IsOrNot.YES.getValue())) {
-            throw new ServiceException("group.event.is.auto");
+            throw new InvalidException("group.event.is.auto", event.getId());
         }
     }
 
     //检验参数是否为空
-    private void checkParam(Map<String, Object> params) {
+    private void checkParam(Map<String, Object> params, String groupCode) {
         if (params.get("changeTypeId") == null || params.get("sowQty") == null
                 || params.get("boarQty") == null || params.get("weight") == null) {
-            throw new ServiceException("some.param.is.null");
+            throw new InvalidException("some.param.is.null", groupCode);
         }
         Boolean isSaleType = Objects.equals(getLong(params, "changeTypeId"), CHANGE_TYPE_SALE);
         Boolean canGetCustomer = getLong(params, "customerId") != null || params.get("customerName") != null;
         if (isSaleType && (!canGetCustomer || getLong(params, "price") == null)) {
-            throw new ServiceException("price.or.customer.info.is.null.when.sale");
+            throw new InvalidException("price.or.customer.info.is.null.when.sale", groupCode);
         }
     }
 
@@ -558,7 +614,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             if (new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime()) && eventAt.before(DateUtil.toDate(DateTime.now().plusDays(1).toString(DateTimeFormat.forPattern("yyyy-MM-dd"))))) {
                 return;
             } else {
-                throw new ServiceException("event.at.illegal");
+                throw new InvalidException("event.at.range.error", lastEvent.getEventAt(), eventAt, lastEvent.getGroupCode());
             }
         }
     }

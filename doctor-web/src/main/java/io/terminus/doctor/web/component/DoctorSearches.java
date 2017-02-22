@@ -393,6 +393,7 @@ public class DoctorSearches {
                         pigCount = pigTracks.size();
                         groupCount = getGroupCount(barn);
                         barnStatus = addPigBarnStatus(barnStatus, pigTracks);
+                        barn.setPigWeanCount(getGroupWeanCount(barn));
                         barn.setType(PigSearchType.SOW_GROUP.getValue());
                     }
                     else if (JUST_GROUPS.contains(pigType)) {
@@ -422,6 +423,15 @@ public class DoctorSearches {
         searchDto.setCurrentBarnId(barn.getId());
         searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
         return RespHelper.or500(doctorGroupReadService.getGroupCount(searchDto)).intValue();
+    }
+
+    //获取猪群断奶仔猪数
+    private int getGroupWeanCount(SearchedBarn barn) {
+        DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+        searchDto.setFarmId(barn.getFarmId());
+        searchDto.setCurrentBarnId(barn.getId());
+        searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
+        return RespHelper.or500(doctorGroupReadService.getWeanCount(searchDto)).intValue();
     }
 
     //获取猪舍中猪的状态聚合

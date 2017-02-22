@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
-import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by yaoqijun.
@@ -35,9 +36,12 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
     public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
         super.handleCheck(eventDto, basic);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(eventDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", eventDto.getPigId());
         DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) eventDto;
+        if (Objects.equals(pregChkResultDto.getCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
+            expectTrue(notNull(pregChkResultDto.getAbortionReasonId()), "liuchan.reason.not.null", pregChkResultDto.getPigCode());
+        }
         checkCanPregCheckResult(doctorPigTrack.getStatus(), pregChkResultDto.getCheckResult(), pregChkResultDto.getPigCode());
-
     }
 
     @Override
@@ -45,6 +49,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pregChkResultDto.getPigId());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
         //妊娠检查结果，从extra中拆出来
         Integer pregCheckResult = pregChkResultDto.getCheckResult();
         doctorPigEvent.setPregCheckResult(pregCheckResult);
@@ -55,7 +60,8 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
 
         //查找最近一次配种事件
         DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-        if (notNull(lastMate) && !Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
+        expectTrue(notNull(doctorPigTrack), "preg.last.mate.not.null", inputDto.getPigId());
+        if (!Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
             DateTime mattingDate = new DateTime(lastMate.getEventAt());
             int npd = Math.abs(Days.daysBetween(checkDate, mattingDate).getDays());
 
@@ -76,13 +82,12 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         }
 
         //根据猪类判断, 如果是逆向: 空怀 => 阳性, 需要删掉以前的空怀事件
-        if ((Objects.equals(doctorPigTrack.getStatus(), PigStatus.KongHuai.getKey()))) {
+        if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.KongHuai.getKey())) {
             DoctorPigEvent lastPregEvent = doctorPigEventDao.queryLastPregCheck(doctorPigTrack.getPigId());
-            if (lastPregEvent == null || !PregCheckResult.KONGHUAI_RESULTS.contains(lastPregEvent.getPregCheckResult())) {
-                throw new ServiceException("不允许妊娠检查,猪号:" + pregChkResultDto.getPigCode());
-            }
-
+            expectTrue(notNull(lastPregEvent), "preg.check.event.not.null", pregChkResultDto.getPigId());
+            expectTrue(PregCheckResult.KONGHUAI_RESULTS.contains(lastPregEvent.getPregCheckResult()), "preg.check.result.error", lastPregEvent.getPregCheckResult(), pregChkResultDto.getPigCode());
             log.info("remove old preg check event info:{}", lastPregEvent);
+
             doctorPigEvent.setId(lastPregEvent.getId());    //把id放进去, 用于更新数据
             doctorPigEvent.setRelEventId(lastPregEvent.getRelEventId()); //重新覆盖下relEventId
 
@@ -101,10 +106,9 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Pregnancy.getKey())) {
             //对应的最近一次的 周期配种的初陪 的 isImpregnation 字段变成true
             DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-            if (notNull(firstMate)) {
-                firstMate.setIsImpregnation(1);
-                doctorPigEventDao.update(firstMate);
-            }
+            expectTrue(notNull(firstMate), "first.mate.not.null", inputDto.getPigId());
+            firstMate.setIsImpregnation(1);
+            doctorPigEventDao.update(firstMate);
         }
     }
 
@@ -163,7 +167,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         //阳性(待分娩)只能到空怀状态
         if (Objects.equals(pigStatus, PigStatus.Pregnancy.getKey()) || Objects.equals(pigStatus, PigStatus.Farrow.getKey())) {
             if (!PregCheckResult.KONGHUAI_RESULTS.contains(checkResult)) {
-                throw new ServiceException("检查结果阳性只能到空怀，猪号:" + pigCode);
+                throw new InvalidException("pregnancy.only.to.konghuai", PregCheckResult.from(checkResult).getDesc(), pigCode);
             }
             return;
         }
@@ -171,12 +175,11 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         //空怀或流程只能到阳性状态
         if (Objects.equals(pigStatus, PigStatus.KongHuai.getKey())) {
             if (!Objects.equals(checkResult, PregCheckResult.YANG.getKey())) {
-                throw new ServiceException("检查结果空怀只能到阳性, 猪号:" + pigCode);
+                throw new InvalidException("konghuai.only.to.pregnancy", PregCheckResult.from(checkResult).getDesc(), pigCode);
             }
             return;
         }
-
         //如果不是 已配种, 妊娠检查结果状态, 不允许妊娠检查
-        throw new ServiceException("不允许妊娠检查,猪号:" + pigCode);
+        throw new InvalidException("sow.not.allow.preg.check", PigStatus.from(pigStatus).getName(), pigCode);
     }
 }

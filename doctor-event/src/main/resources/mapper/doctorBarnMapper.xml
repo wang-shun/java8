@@ -257,4 +257,12 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <select id="findBarnByFarmAndBarnName" parameterType="map" resultType="DoctorBarn" >
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            farm_id=#{farmId} AND `name` = #{name}
+        </where>
+
+    </select>
+
 </mapper>

@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.handler.rollback.group;
 
 import com.google.common.collect.Lists;
-import io.terminus.doctor.event.constants.DoctorBasicEnums;
+import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.RollbackType;

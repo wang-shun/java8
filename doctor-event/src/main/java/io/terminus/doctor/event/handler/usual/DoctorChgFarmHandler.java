@@ -19,9 +19,10 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.enums.PigType.MATING_FARROW_TYPES;
 import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by yaoqijun.
@@ -40,14 +41,16 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorChgFarmDto chgFarmDto = (DoctorChgFarmDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(chgFarmDto.getPigId());
-
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
         // 当前状态为哺乳状态的母猪不允许转
-        checkState(!Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "哺乳母猪不能转场,猪号:" + chgFarmDto.getPigCode());
+        expectTrue(!Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "feed.sow.not.chg.farm", chgFarmDto.getPigCode());
 
         // 校验转相同的猪舍
         DoctorBarn doctorCurrentBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
+        expectTrue(notNull(doctorCurrentBarn), "barn.not.null", doctorPigTrack.getCurrentBarnId());
         DoctorBarn doctorToBarn = doctorBarnDao.findById(chgFarmDto.getToBarnId());
-        checkState(checkBarnTypeEqual(doctorCurrentBarn, doctorToBarn, doctorPigTrack.getStatus()), "转舍类型错误,猪号:" + chgFarmDto.getPigCode());
+        expectTrue(notNull(doctorToBarn), "barn.not.null", chgFarmDto.getToBarnId());
+        expectTrue(checkBarnTypeEqual(doctorCurrentBarn, doctorToBarn, doctorPigTrack.getStatus()), "not.trans.barn.type", PigType.from(doctorCurrentBarn.getPigType()).getDesc(), PigType.from(doctorToBarn.getPigType()).getDesc());
 
         // update barn info
         doctorPigTrack.setFarmId(chgFarmDto.getToFarmId());
