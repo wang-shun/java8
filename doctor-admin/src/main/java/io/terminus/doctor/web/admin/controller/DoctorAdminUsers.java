@@ -1,10 +1,12 @@
 package io.terminus.doctor.web.admin.controller;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Joiners;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -19,13 +21,11 @@ import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.web.admin.dto.DoctorGroupUserAuth;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -135,30 +135,27 @@ public class DoctorAdminUsers {
      * 设置集团用户权限(新建与编辑)
      */
     @RequestMapping(value = "/auth", method = RequestMethod.POST)
-    public Boolean groupUserAuth(@RequestBody DoctorGroupUserAuth groupUser) {
-        if (groupUser == null || groupUser.getUserId() == null) {
-            throw new JsonResponseException("group.user.not.null");
-        }
-        User user = RespHelper.or500(doctorUserReadService.findById(groupUser.getUserId()));
+    public Boolean groupUserAuth(@RequestParam Long userId,
+                                 @RequestParam String farmIds) {
+        User user = RespHelper.or500(doctorUserReadService.findById(userId));
         if (user == null) {
-            log.error("admin add user auth, userId:({}) not found", groupUser.getUserId());
+            log.error("admin add user auth, userId:({}) not found", userId);
             throw new JsonResponseException("user.not.found");
         }
 
-        DoctorUserDataPermission permission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(groupUser.getUserId()));
+        DoctorUserDataPermission permission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
         if (permission == null) {
-            permission = getPermission(new DoctorUserDataPermission(), groupUser);
+            permission = getPermission(new DoctorUserDataPermission(), userId, farmIds);
             RespHelper.or500(doctorUserDataPermissionWriteService.createDataPermission(permission));
             return true;
         }
-        return RespHelper.or500(doctorUserDataPermissionWriteService.updateDataPermission(getPermission(permission, groupUser)));
+        return RespHelper.or500(doctorUserDataPermissionWriteService.updateDataPermission(getPermission(permission, userId, farmIds)));
     }
 
-    private DoctorUserDataPermission getPermission(DoctorUserDataPermission permission, DoctorGroupUserAuth groupUser) {
-        permission.setUserId(groupUser.getUserId());
-        permission.setFarmIds(groupUser.getFarmIds() == null ? "" : Joiners.COMMA.join(groupUser.getFarmIds()));
-        permission.setOrgIds(getOrgIds(groupUser.getFarmIds()));
-        permission.setBarnIds(groupUser.getBarnIds() == null ? "" : Joiners.COMMA.join(groupUser.getBarnIds()));
+    private DoctorUserDataPermission getPermission(DoctorUserDataPermission permission, Long userId, String farmIds) {
+        permission.setUserId(userId);
+        permission.setFarmIds(MoreObjects.firstNonNull(farmIds, ""));
+        permission.setOrgIds(getOrgIds(Splitters.splitToLong(farmIds, Splitters.COMMA)));
         return permission;
     }
 
