@@ -158,11 +158,6 @@ public class DoctorMessages {
                               HttpServletRequest request,
                               HttpServletResponse response) {
 
-//        DoctorMessageSearchDto messageSearchDto = buildMessageSearchDto(criteria);
-//        if (messageSearchDto == null) {
-//            return;
-//        }
-//        Map<String, String> criMap = MAPPER.convertValue(messageSearchDto, JacksonType.MAP_OF_STRING);
         String exportName = buildExportNameMap().get(Integer.parseInt(criteria.get("category")));
         if (!notEmpty(exportName)) {
             return;
