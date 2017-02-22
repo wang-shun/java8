@@ -84,6 +84,11 @@ public interface DoctorGroupReadService {
     Response<Long> getGroupCount(@Valid DoctorGroupSearchDto groupSearchDto);
 
     /**
+     * 获取断奶仔猪数量
+     */
+    Response<Long> getWeanCount(@Valid DoctorGroupSearchDto groupSearchDto);
+
+    /**
      * 根据查询条件分页猪群
      * @param groupSearchDto 查询条件dto
      * @return 分页后的猪群列表
@@ -223,4 +228,11 @@ public interface DoctorGroupReadService {
      * @return 最新事件
      */
     Response<DoctorGroupEvent> findLastGroupEventByType(@NotNull(message = "groupId.not.null") Long groupId, @NotNull(message = "type.not.null") Integer type);
+
+    /**
+     * 获取新建猪群事件
+     * @param groupId 猪群id
+     * @return 新建猪群事件
+     */
+    Response<DoctorGroupEvent> findNewGroupEvent(@NotNull(message = "groupId.not.null") Long groupId);
 }

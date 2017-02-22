@@ -79,4 +79,8 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
     public DoctorBarnCountForPigTypeDto countForTypes(Map<String, Object> criteria){
         return getSqlSession().selectOne("countForTypes", criteria);
     }
+
+    public DoctorBarn findBarnByFarmAndBarnName(Map<String, Object> criteria) {
+        return getSqlSession().selectOne("findBarnByFarmAndBarnName", criteria);
+    }
 }

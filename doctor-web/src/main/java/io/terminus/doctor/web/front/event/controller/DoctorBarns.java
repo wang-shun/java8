@@ -58,6 +58,7 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 猪舍表Controller
@@ -142,8 +143,13 @@ public class DoctorBarns {
     public List<DoctorBarn> findBarnsByfarmId(@RequestParam("farmId") Long farmId,
                                               @RequestParam(value = "status", required = false) Integer barnStatus,
                                               @RequestParam(value = "pigIds", required = false) String pigIds) {
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null,
+        List<DoctorBarn> barnList = filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null,
                 null, barnStatus, doctorFarmAuthCenter.getAuthBarnIds())), pigIds);
+        if (Arguments.isNullOrEmpty(barnList)) {
+            return Collections.emptyList();
+        }
+        return barnList.stream().sorted((barn1, barn2) -> PigType.compareTo(barn1.getPigType(), barn2.getPigType()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -316,6 +322,9 @@ public class DoctorBarns {
         barn.setFarmName(farm.getName());
 
         if (barn.getId() == null) {
+            if (notNull(RespHelper.or500(doctorBarnReadService.findBarnByFarmAndBarnName(barn.getFarmId(), barn.getName())))) {
+                throw new JsonResponseException("barn.name.has.existed");
+            }
             barn.setStatus(DoctorBarn.Status.USING.getValue());     //初始猪舍状态: 在用
             barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());  //初始是否可建群: 可建群
             barnId = RespHelper.or500(doctorBarnWriteService.createBarn(barn));

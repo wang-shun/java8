@@ -174,6 +174,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Response<Long> getWeanCount(@Valid DoctorGroupSearchDto groupSearchDto) {
+        try {
+            return Response.ok(doctorGroupJoinDao.getWeanCount(groupSearchDto));
+        } catch (Exception e) {
+            log.error("get wean count failed, data:{} cause:{}", groupSearchDto, Throwables.getStackTraceAsString(e));
+            return Response.fail("get.wean.count");
+        }
+    }
+
+    @Override
     public Response<List<DoctorGroupDetail>> findGroupDetail(DoctorGroupSearchDto groupSearchDto) {
         try {
             return Response.ok(doctorGroupDao.findBySearchDto(groupSearchDto).stream()
@@ -435,6 +445,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("find.last.group.event.by.type.failed, groupId:{}, type:{}, cause:{}", groupId, type, Throwables.getStackTraceAsString(e));
             return Response.fail("find last group event by type failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorGroupEvent> findNewGroupEvent(@NotNull(message = "groupId.not.null") Long groupId) {
+        try {
+            return Response.ok(doctorGroupEventDao.findNewGroupEvent(groupId));
+        } catch (Exception e) {
+            log.error("find.new.group.event.by.groupId.failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find new group event by groupId failed");
         }
     }
 }
