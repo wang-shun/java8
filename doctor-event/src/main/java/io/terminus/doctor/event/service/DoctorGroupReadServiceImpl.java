@@ -220,7 +220,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             PageInfo pageInfo = PageInfo.of(pageNo, size);
 
             Paging<DoctorGroupEvent> paging = doctorGroupEventDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
-                    MapBuilder.<String, Object>of().put("farmId", farmId).put("groupId", groupId).put("type", type).put("startDate",startDate).put("endDate",endDate).map());
+                    MapBuilder.<String, Object>of().put("farmId", farmId).put("groupId", groupId).put("type", type).put("beginDate",startDate).put("endDate",endDate).map());
             paging.setData(setExtraData(paging.getData()));
             return Response.ok(paging);
         } catch (Exception e) {
