@@ -1,8 +1,8 @@
 package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.collect.Maps;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.isNull;
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by yaoqijun.
@@ -45,7 +45,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
 
     @Override
     public void handleCheck(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        checkState(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(basic.getFarmId(), inputDto.getPigCode(), inputDto.getPigType()) == null, "猪号" + inputDto.getPigCode() + "已存在");
+        expectTrue(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(basic.getFarmId(), inputDto.getPigCode(), inputDto.getPigType()) == null, "pigCode.have.existed");
     }
 
 
@@ -67,10 +67,8 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         DoctorPigTrack doctorPigTrack = createOrUpdatePigTrack(basic, inputDto);
         doctorPigTrackDao.create(doctorPigTrack);
 
-        //4.创建镜像
-        DoctorPigTrack pigSnapshotTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-        DoctorPigEvent pigSnapshotEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
-        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(pigSnapshotTrack, pigSnapshotEvent, doctorPigEvent.getId());
+        //4.创建镜像////
+        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(doctorPigTrack, doctorPigEvent, doctorPigEvent.getId());
         doctorPigSnapshotDao.create(doctorPigSnapshot);
 
         //5.特殊处理
@@ -118,6 +116,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorFarmEntryDto dto = (DoctorFarmEntryDto) inputDto;
         DoctorBarn doctorBarn = doctorBarnDao.findById(dto.getBarnId());
+        expectTrue(notNull(doctorBarn), "barn.not.null", dto.getBarnId());
         DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId()).pigType(inputDto.getPigType())
                 .isRemoval(IsOrNot.NO.getValue()).currentMatingCount(0)
                 .pigId(inputDto.getPigId()).pigType(inputDto.getPigType())
@@ -131,7 +130,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         } else if (Objects.equals(inputDto.getPigType(), DoctorPig.PigSex.BOAR.getKey())) {
             doctorPigTrack.setStatus(PigStatus.BOAR_ENTRY.getKey());
         } else {
-            throw new IllegalStateException("input.pigType.error");
+            throw new InvalidException("pig.sex.error", inputDto.getPigType(),inputDto.getPigCode());
         }
         //添加进场到配种标志位
         doctorPigTrack.addAllExtraMap(MapBuilder.<String, Object>of().put("enterToMate", true).map());
@@ -146,10 +145,6 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
      * @return
      */
     private DoctorPig buildDoctorPig(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic) {
-
-        if (isNull(basic.getFarmId()) || isNull(dto.getPigCode())) {
-            throw new ServiceException("input.farmIdPigCode.empty");
-        }
 
         DoctorPig doctorPig = DoctorPig.builder()
                 .farmId(basic.getFarmId())

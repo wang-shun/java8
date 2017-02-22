@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -42,7 +43,7 @@ public interface DoctorPigEventWriteService {
      * @param basic
      * @return
      */
-    Response<Boolean> pigEventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic);
+    RespWithEx<Boolean> pigEventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic);
 
     /**
      * 批量猪事件接口
@@ -50,5 +51,5 @@ public interface DoctorPigEventWriteService {
      * @param basic
      * @return
      */
-    Response<Boolean> batchPigEventHandle(List<BasePigEventInputDto> inputDtos, DoctorBasicInputInfoDto basic);
+    RespWithEx<Boolean> batchPigEventHandle(List<BasePigEventInputDto> inputDtos, DoctorBasicInputInfoDto basic);
 }

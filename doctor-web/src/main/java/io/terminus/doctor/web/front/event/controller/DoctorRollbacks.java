@@ -1,7 +1,7 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
-import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.service.DoctorRollbackService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class DoctorRollbacks {
      */
     @RequestMapping(value = "/group", method = RequestMethod.GET)
     public Boolean rollbackGroupEvent(@RequestParam("eventId") Long eventId) {
-        return RespHelper.or500(doctorRollbackService.rollbackGroupEvent(eventId, UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+        return RespWithExHelper.orInvalid(doctorRollbackService.rollbackGroupEvent(eventId, UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
     }
 
     /**
@@ -41,6 +41,6 @@ public class DoctorRollbacks {
      */
     @RequestMapping(value = "/pig", method = RequestMethod.GET)
     public Boolean rollbackPigEvent(@RequestParam("eventId") Long eventId) {
-        return RespHelper.or500(doctorRollbackService.rollbackPigEvent(eventId, UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+        return RespWithExHelper.orInvalid(doctorRollbackService.rollbackPigEvent(eventId, UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
     }
 }

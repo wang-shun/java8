@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchGroupEventDto;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchNewGroupEventDto;
@@ -22,7 +23,7 @@ public interface DoctorGroupWebService {
      * @param newGroupDto 新建猪群所需字段
      * @return 猪群id
      */
-    Response<Long> createNewGroup(DoctorNewGroupInput newGroupDto);
+    RespWithEx<Long> createNewGroup(DoctorNewGroupInput newGroupDto);
 
     /**
      * 录入猪群事件
@@ -32,7 +33,7 @@ public interface DoctorGroupWebService {
      * @see io.terminus.doctor.event.dto.event.group.input.BaseGroupInput
      * @return 是否成功
      */
-    Response<Boolean> createGroupEvent(@NotNull(message = "groupId.not.null") Long groupId,
+    RespWithEx<Boolean> createGroupEvent(@NotNull(message = "groupId.not.null") Long groupId,
                                        @NotNull(message = "eventType.not.null") Integer eventType,
                                        @NotEmpty(message = "data.not.empty") String data);
     /**
@@ -61,14 +62,14 @@ public interface DoctorGroupWebService {
      * @param batchNewGroupEventDto 批量新建信息
      * @return
      */
-    Response<Boolean> batchNewGroupEvent(DoctorBatchNewGroupEventDto batchNewGroupEventDto);
+    RespWithEx<Boolean> batchNewGroupEvent(DoctorBatchNewGroupEventDto batchNewGroupEventDto);
 
     /**
      * 批量事件(出去新建猪群)
      * @param batchGroupEventDto 批量事件信息
      * @return
      */
-    Response<Boolean> batchGroupEvent(DoctorBatchGroupEventDto batchGroupEventDto);
+    RespWithEx<Boolean> batchGroupEvent(DoctorBatchGroupEventDto batchGroupEventDto);
 
 
 }

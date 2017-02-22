@@ -65,14 +65,14 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
     @NotNull(message = "boarQty.not.null")
     private Integer boarQty;
 
-    @NotNull(message = "boarQty.not.null")
+    @NotNull(message = "sowQty.not.null")
     private Integer sowQty;
 
     /**
      * 均重(kg)
      * 转群以此字段为主, 转场已总重为主
      */
-    @NotNull(message = "weight.not.null")
+    @NotNull(message = "avgWeight.not.null")
     private Double avgWeight;
 
     /**

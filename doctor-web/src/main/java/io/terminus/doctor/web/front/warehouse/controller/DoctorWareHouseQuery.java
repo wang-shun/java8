@@ -28,7 +28,7 @@ import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.basic.service.MaterialFactoryReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
-import io.terminus.doctor.common.util.JsonMapperUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;

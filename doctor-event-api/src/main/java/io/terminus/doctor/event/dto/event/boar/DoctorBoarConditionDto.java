@@ -1,9 +1,13 @@
 package io.terminus.doctor.event.dto.event.boar;
 
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,12 +21,15 @@ import java.util.Map;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorBoarConditionDto extends BasePigEventInputDto implements Serializable{
     private static final long serialVersionUID = -8382360464209200834L;
 
     /**
      * 检查日期
      */
+    @NotNull(message = "event.at.not.null")
     private Date checkAt;
 
     /**
@@ -48,6 +55,8 @@ public class DoctorBoarConditionDto extends BasePigEventInputDto implements Seri
     /**
      * 重量(必填)
      */
+    @Min(value = 0, message = "weight.not.less.zero")
+    @NotNull(message = "weight.not.null")
     private Double weight;
 
     /**

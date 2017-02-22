@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.isNull;
@@ -193,21 +192,21 @@ public class DoctorPigTrack implements Serializable {
 //    }
 
 
-    /**
-     * 通过当前胎次信息添加猪 关联事件信息内容
-     *
-     * @param pigType
-     * @param relEventId
-     */
-    public void addPigEvent(Integer pigType, Long relEventId) {
-        if (Objects.equals(pigType, DoctorPig.PigSex.BOAR.getKey())) {
-            addBoarPigRelEvent(relEventId);
-        } else if (Objects.equals(pigType, DoctorPig.PigSex.SOW.getKey())) {
-            addSowPigRelEvent(relEventId);
-        } else {
-            throw new IllegalStateException("input.pigType.notFund");
-        }
-    }
+//    /**
+//     * 通过当前胎次信息添加猪 关联事件信息内容
+//     *
+//     * @param pigType
+//     * @param relEventId
+//     */
+//    public void addPigEvent(Integer pigType, Long relEventId) {
+//        if (Objects.equals(pigType, DoctorPig.PigSex.BOAR.getKey())) {
+//            addBoarPigRelEvent(relEventId);
+//        } else if (Objects.equals(pigType, DoctorPig.PigSex.SOW.getKey())) {
+//            addSowPigRelEvent(relEventId);
+//        } else {
+//            throw new IllegalStateException("input.pigType.notFund");
+//        }
+//    }
 
     /**
      * 添加母猪关联胎次信息

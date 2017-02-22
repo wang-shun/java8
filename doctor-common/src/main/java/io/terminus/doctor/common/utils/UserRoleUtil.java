@@ -1,4 +1,4 @@
-package io.terminus.doctor.common.util;
+package io.terminus.doctor.common.utils;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;

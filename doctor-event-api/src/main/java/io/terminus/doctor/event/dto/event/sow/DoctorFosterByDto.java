@@ -8,6 +8,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -25,11 +27,14 @@ public class DoctorFosterByDto extends BasePigEventInputDto implements Serializa
     /**
      * 被拼窝时间
      */
+    @NotNull(message = "event.at.not.null")
     private Date fosterByDate;
 
     /**
      * 被拼窝数量
      */
+    @Min(value = 0, message = "fosters.count.not.less.zero")
+    @NotNull(message = "fosters.count.not.null")
     private Integer fosterByCount;
 
     private Integer sowFostersByCount;    // 拼窝母猪数量

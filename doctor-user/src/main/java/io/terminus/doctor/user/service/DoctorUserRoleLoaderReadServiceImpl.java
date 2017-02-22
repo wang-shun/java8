@@ -4,11 +4,8 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.user.dao.*;
 import io.terminus.doctor.user.model.*;
-import io.terminus.doctor.user.service.DoctorUserRoleLoader;
-import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static io.terminus.doctor.common.util.UserRoleUtil.*;
-import static io.terminus.doctor.common.util.UserRoleUtil.isNormal;
+import static io.terminus.doctor.common.utils.UserRoleUtil.*;
+import static io.terminus.doctor.common.utils.UserRoleUtil.isNormal;
 
 /**
  * Created by yudi on 2016/12/7.
