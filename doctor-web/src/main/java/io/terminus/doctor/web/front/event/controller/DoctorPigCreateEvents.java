@@ -565,6 +565,7 @@ public class DoctorPigCreateEvents {
         Long realPigId = pigId !=null?pigId:Long.parseLong((String) map.get("pigId"));
 
         DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(realPigId));
+        expectTrue(notNull(doctorPig), "pig.not.null", realPigId);
 
         switch (pigEvent) {
             case CHG_FARM:
@@ -709,6 +710,7 @@ public class DoctorPigCreateEvents {
         }
         expectTrue(notEmpty((String) map.get("pigId")), "pig.id.not.null");
         DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(Long.parseLong((String) map.get("pigId"))));
+        expectTrue(notNull(doctorPig), "pig.not.null", Long.parseLong((String) map.get("pigId")));
         return doctorPig.getPigCode();
     }
 
