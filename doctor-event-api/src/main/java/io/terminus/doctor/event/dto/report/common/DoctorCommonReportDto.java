@@ -76,6 +76,7 @@ public class DoctorCommonReportDto implements Serializable {
     private int saleBoar;                     //公猪
     private int saleNursery;                  //保育猪（产房+保育）
     private int saleFatten;                   //育肥猪
+    private int saleHoubei;                   //后备猪
 
     /**
      * 死淘情况

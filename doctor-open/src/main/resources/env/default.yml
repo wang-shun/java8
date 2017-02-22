@@ -29,7 +29,6 @@ rpc.dubbo:
 logging:
   file: /var/log/doctor/open.log
   level.*: INFO
-  level.io.terminus: DEBUG
 
 openplatform:
   mode: GATEWAY
