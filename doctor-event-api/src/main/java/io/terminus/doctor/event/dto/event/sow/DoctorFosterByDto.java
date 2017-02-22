@@ -49,6 +49,11 @@ public class DoctorFosterByDto extends BasePigEventInputDto implements Serializa
     private Long fromSowId;
 
     /**
+     * 原母猪号
+     */
+    private String fromSowCode;
+
+    /**
      * 源猪群id
      */
     private Long fromGroupId;

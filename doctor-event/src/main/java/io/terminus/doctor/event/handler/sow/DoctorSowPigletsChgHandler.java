@@ -114,6 +114,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
     private DoctorChangeGroupInput buildInputInfo(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic, Long pigEventId) {
         DoctorPigletsChgDto dto = (DoctorPigletsChgDto) inputDto;
         DoctorChangeGroupInput doctorChangeGroupInput = new DoctorChangeGroupInput();
+        doctorChangeGroupInput.setSowCode(inputDto.getPigCode());
         doctorChangeGroupInput.setEventType(GroupEventType.CHANGE.getValue());
         doctorChangeGroupInput.setEventAt(DateUtil.toDateString(dto.getPigletsChangeDate()));
         doctorChangeGroupInput.setChangeTypeId(dto.getPigletsChangeType());             //变动类型id
