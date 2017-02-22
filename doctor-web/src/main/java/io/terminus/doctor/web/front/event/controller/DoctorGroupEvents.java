@@ -194,7 +194,7 @@ public class DoctorGroupEvents {
 
         //查询猪群的事件, 默认3条
         List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(
-                groupDetail.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3))).getData();
+                groupDetail.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3), null, null)).getData();
 
         transFromUtil.transFromGroupEvents(groupEvents);
         DoctorGroupEvent rollbackEvent = RespHelper.or500(doctorGroupReadService.canRollbackEvent(groupId));
@@ -220,8 +220,10 @@ public class DoctorGroupEvents {
                                                      @RequestParam(value = "groupId", required = false) Long groupId,
                                                      @RequestParam(value = "type", required = false) Integer type,
                                                      @RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                                     @RequestParam(value = "size", required = false) Integer size) {
-        Paging<DoctorGroupEvent> doctorGroupEventPaging = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(farmId, groupId, type, pageNo, size));
+                                                     @RequestParam(value = "size", required = false) Integer size,
+                                                     @RequestParam(value = "startDate", required = false) String startDate,
+                                                     @RequestParam(value = "endDate",required = false) String endDate) {
+        Paging<DoctorGroupEvent> doctorGroupEventPaging = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(farmId, groupId, type, pageNo, size, startDate, endDate));
 
         transFromUtil.transFromGroupEvents(doctorGroupEventPaging.getData());
         return doctorGroupEventPaging;
@@ -232,8 +234,10 @@ public class DoctorGroupEvents {
                                                       @RequestParam(value = "groupId", required = false) Long groupId,
                                                       @RequestParam(value = "type", required = false) Integer type,
                                                       @RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                                      @RequestParam(value = "size", required = false) Integer size) {
-        Paging<DoctorGroupEvent> doctorGroupEventPaging = pagingGroupEvent(farmId, groupId, type, pageNo, size);
+                                                      @RequestParam(value = "size", required = false) Integer size,
+                                                      @RequestParam(value = "startDate", required = false) String startDate,
+                                                      @RequestParam(value = "endDate",required = false) String endDate) {
+        Paging<DoctorGroupEvent> doctorGroupEventPaging = pagingGroupEvent(farmId, groupId, type, pageNo, size, startDate, endDate);
         DoctorGroupEvent doctorGroupEvent = RespHelper.or500(doctorGroupReadService.canRollbackEvent(groupId));
         Long canRollback = null;
         if (doctorGroupEvent != null){
@@ -300,7 +304,7 @@ public class DoctorGroupEvents {
      * @return 猪群镜像
      */
     @RequestMapping(value = "/rollback", method = RequestMethod.GET)
-    public Boolean rolllbackGroupEvent(@RequestParam("eventId") Long eventId) {
+    public Boolean rollbackGroupEvent(@RequestParam("eventId") Long eventId) {
         DoctorGroupEvent event = RespHelper.or500(doctorGroupReadService.findGroupEventById(eventId));
 
         //权限中心校验权限

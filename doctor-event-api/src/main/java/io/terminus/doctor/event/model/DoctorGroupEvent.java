@@ -224,6 +224,16 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
 
     private Map<String, Object> extraData;
 
+    /**
+     * 开始时间
+     */
+    private String startDate;
+
+    /**
+     * 结束时间
+     */
+    private String endDate;
+
     @SneakyThrows
     public void setExtraMap(T extraMap){
         this.extraMap = extraMap;

@@ -8,7 +8,6 @@ import io.terminus.doctor.basic.DoctorBasicConfiguration;
 import io.terminus.doctor.converter.JsonMessageConverter;
 import io.terminus.doctor.event.DoctorEventConfiguration;
 import io.terminus.doctor.interceptor.MockPrimaryLoginInterceptor;
-import io.terminus.doctor.msg.DoctorMsgConfig;
 import io.terminus.doctor.user.DoctorUserConfiguration;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.component.DoctorHbsHelpers;
@@ -47,7 +46,6 @@ import java.util.List;
 @Import({
         DoctorEventConfiguration.class,
         DoctorBasicConfiguration.class,
-        DoctorMsgConfig.class,
         DoctorUserConfiguration.class,
         DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,
