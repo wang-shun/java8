@@ -2271,7 +2271,9 @@ public class DoctorMoveDataService {
             statusAfter = PigStatus.Entry.getKey();
             quantity = 1000; //一个胎次中分娩的活仔数, 默认1000,为了与quantityChange 不相等
             quantityChange = 0; //在一个胎次中仔猪变化的数量
-            lists.forEach(doctorPigEvent1 -> {
+            lists.stream()
+                    .filter(doctorPigEvent1 -> doctorPigEvent1 != null && doctorPigEvent1.getType() != null)
+                    .forEach(doctorPigEvent1 -> {
                 statusAfter = statusBefore;
                 switch (doctorPigEvent1.getType()){
                     case 6:
