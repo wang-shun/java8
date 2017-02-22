@@ -45,3 +45,130 @@ export.tables:
         format: priceFormatter
       - name: providerFactoryName
         display: 供应商
+  web-message-breeding:
+    display: 待配种消息导出
+    columns:
+      - name: code
+        display: 母猪号
+      - name: barnName
+        display: 所属猪舍
+      - name: statusName
+        display: 当前状态
+      - name: timeDiff
+        display: 间隔天数
+      - name: operatorName
+        display: 饲养员
+      - name: eventAt
+        display: 发生日期
+        formatter: isoDateFormatter
+  web-message-pregCheck:
+    display: 妊娠检查消息导出
+    columns:
+      - name: code
+        display: 母猪号
+      - name: barnName
+        display: 所属猪舍
+      - name: statusName
+        display: 当前状态
+      - name: eventAt
+        display: 配种日期
+        formatter: isoDateFormatter
+      - name: timeDiff
+        display: 已配种天数
+      - name: operatorName
+        display: 配种员
+  web-message-birthDate:
+    display: 预产消息导出
+    columns:
+      - name: code
+        display: 母猪号
+      - name: barnName
+        display: 所属猪舍
+      - name: eventAt
+        display: 配种日期
+        formatter: isoDateFormatter
+      - name: timeDiff
+        display: 怀孕天数
+      - name: otherAt
+        display: 预产日期
+        formatter: isoDateFormatter
+      - name: operatorName
+        display: 配种员
+  web-message-needWean:
+    display: 断奶消息导出
+    columns:
+      - name: code
+        display: 母猪号
+      - name: barnName
+        display: 所属猪舍
+      - name: otherAt
+        display: 配种日期
+        formatter: isoDateFormatter
+      - name: eventAt
+        display: 分娩日期
+        formatter: isoDateFormatter
+      - name: timeDiff
+        display: 哺乳天数
+  web-message-sowEliminate:
+    display: 母猪淘汰消息导出
+    columns:
+      - name: code
+        display: 母猪号
+      - name: barnName
+        display: 所属猪舍
+      - name: statusName
+        display: 当前状态
+      - name: parity
+        display: 胎次
+      - name: reason
+        display: 原因
+  web-message-boarEliminate:
+    display: 公猪淘汰消息导出
+    columns:
+      - name: code
+        display: 公猪号
+      - name: barnName
+        display: 所属猪舍
+      - name: statusName
+        display: 当前状态
+      - name: reason
+        display: 原因
+  web-message-fattenPigRemove:
+    display: 育肥猪出栏消息导出
+    columns:
+      - name: code
+        display: 猪群号
+      - name: barnName
+        display: 所属猪舍
+      - name: avgDayAge
+        display: 日龄
+      - name: quantity
+        display: 猪只数
+  web-message-backFat:
+    display: 背膘消息导出
+    columns:
+      - name: code
+        display: 母猪号
+      - name: barnName
+        display: 所属猪舍
+      - name: eventAt
+        display: 配种日期
+        formatter: isoDateFormatter
+      - name: timeDiff
+        display: 已配种天数
+      - name: operatorName
+        display: 配种员
+  web-message-storageShortage:
+    display: 库存消息导出
+    columns:
+      - name: wareHouseName
+        display: 所属仓库
+      - name: code
+        display: 物料名称
+      - name: timeDiff
+        display: 剩余天数
+      - name: lotNumber
+        display: 剩余量
+      - name: operatorName
+        display: 管理员
+
