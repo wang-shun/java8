@@ -67,21 +67,21 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         DoctorTransFarmGroupInput transFarm = (DoctorTransFarmGroupInput) input;
 
         //校验能否转群, 数量, 日龄差, 转群总重
-        checkCanTransBarn(group.getPigType(), transFarm.getToBarnId(), group.getGroupCode());
+        checkCanTransBarn(group.getPigType(), transFarm.getToBarnId());
         checkCanTransGroup(transFarm.getToGroupId(), transFarm.getToBarnId(), transFarm.getIsCreateGroup());
-        checkFarrowGroupUnique(transFarm.getIsCreateGroup(), transFarm.getToBarnId(), group.getGroupCode());
-        checkQuantity(groupTrack.getQuantity(), transFarm.getQuantity(), group.getGroupCode());
-        checkQuantityEqual(transFarm.getQuantity(), transFarm.getBoarQty(), transFarm.getSowQty(), group.getGroupCode());
+        checkFarrowGroupUnique(transFarm.getIsCreateGroup(), transFarm.getToBarnId());
+        checkQuantity(groupTrack.getQuantity(), transFarm.getQuantity());
+        checkQuantityEqual(transFarm.getQuantity(), transFarm.getBoarQty(), transFarm.getSowQty());
 
         //转入猪舍
         DoctorBarn toBarn = getBarn(transFarm.getToBarnId());
         if (!input.isSowEvent()) {
-            checkUnweanTrans(group.getPigType(), toBarn.getPigType(), groupTrack, transFarm.getQuantity(), group.getGroupCode());
+            checkUnweanTrans(group.getPigType(), toBarn.getPigType(), groupTrack, transFarm.getQuantity());
         }
 
         //1.转换转场事件
         DoctorTransFarmGroupEvent transFarmEvent = BeanMapper.map(transFarm, DoctorTransFarmGroupEvent.class);
-        checkBreed(group.getBreedId(), transFarmEvent.getBreedId(), group.getGroupCode());
+        checkBreed(group.getBreedId(), transFarmEvent.getBreedId());
         transFarmEvent.setToBarnType(toBarn.getPigType());
 
         //2.创建转场事件
@@ -89,7 +89,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setQuantity(transFarm.getQuantity());
 
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays, group.getGroupCode()));  //重算日龄
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
 
         event.setWeight(transFarm.getWeight());
         event.setAvgWeight(EventUtil.getAvgWeight(transFarm.getWeight(), transFarm.getQuantity()));

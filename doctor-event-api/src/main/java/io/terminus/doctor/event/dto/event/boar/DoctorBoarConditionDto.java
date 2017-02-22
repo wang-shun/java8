@@ -89,23 +89,4 @@ public class DoctorBoarConditionDto extends BasePigEventInputDto implements Seri
     public Date eventAt() {
         return this.checkAt;
     }
-
-
-//    public static void main(String[] args) {
-//        DoctorBoarConditionDto dto = new DoctorBoarConditionDto();
-//        dto.setCheckAt(new Date());
-//        dto.setWeight(-1d);
-//        Method method = null;
-//        try {
-//            method = dto.getClass().getMethod("setDto", DoctorBoarConditionDto.class);
-//        } catch (exception e) {
-//
-//        }
-//        Object[] objs= {dto};
-//        DoctorInvokeValidator.instance().validateParams(dto, method, objs);
-//    }
-//
-//    public void setDto(@Valid DoctorBoarConditionDto dto) {
-//
-//    }
 }

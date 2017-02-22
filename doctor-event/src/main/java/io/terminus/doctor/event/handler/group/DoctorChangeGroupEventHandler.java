@@ -59,12 +59,12 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
 
-        checkQuantity(groupTrack.getQuantity(), change.getQuantity(), group.getGroupCode());
-        checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty(), group.getGroupCode());
+        checkQuantity(groupTrack.getQuantity(), change.getQuantity());
+        checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
 
         //非母猪触发事件
         if (!input.isSowEvent()) {
-            checkUnweanTrans(group.getPigType(), null, groupTrack, change.getQuantity(), group.getGroupCode());
+            checkUnweanTrans(group.getPigType(), null, groupTrack, change.getQuantity());
         }
 
         if(Objects.equals(group.getPigType(), PigType.NURSERY_PIGLET.getValue())){
@@ -79,7 +79,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setQuantity(change.getQuantity());
 
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays, group.getGroupCode()));  //重算日龄
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
 
         event.setWeight(change.getWeight());            //总重
         event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));

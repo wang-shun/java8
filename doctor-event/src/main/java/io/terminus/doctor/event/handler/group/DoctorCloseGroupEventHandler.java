@@ -76,7 +76,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         DoctorGroupEvent<DoctorCloseGroupEvent> event = dozerGroupEvent(group, GroupEventType.CLOSE, close);
 
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        int dayAge = getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays, group.getGroupCode());
+        int dayAge = getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays);
         event.setAvgDayAge(dayAge);  //重算日龄
         event.setExtraMap(closeEvent);
         doctorGroupEventDao.create(event);

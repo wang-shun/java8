@@ -50,7 +50,7 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorAntiepidemicGroupInput antiepidemic = (DoctorAntiepidemicGroupInput) input;
 
-        checkQuantity(groupTrack.getQuantity(), antiepidemic.getQuantity(), group.getGroupCode());
+        checkQuantity(groupTrack.getQuantity(), antiepidemic.getQuantity());
         //1.转换下防疫信息
         DoctorAntiepidemicGroupEvent antiEvent = BeanMapper.map(antiepidemic, DoctorAntiepidemicGroupEvent.class);
 
@@ -58,7 +58,7 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
         DoctorGroupEvent<DoctorAntiepidemicGroupEvent> event = dozerGroupEvent(group, GroupEventType.ANTIEPIDEMIC, antiepidemic);
 
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays, group.getGroupCode()));  //重算日龄
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
 
         event.setQuantity(antiepidemic.getQuantity());
         event.setExtraMap(antiEvent);

@@ -51,7 +51,7 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
 
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorDiseaseGroupInput disease = (DoctorDiseaseGroupInput) input;
-        checkQuantity(groupTrack.getQuantity(), disease.getQuantity(), group.getGroupCode());
+        checkQuantity(groupTrack.getQuantity(), disease.getQuantity());
 
         //1.转换下疾病信息
         DoctorDiseaseGroupEvent diseaseEvent = BeanMapper.map(disease, DoctorDiseaseGroupEvent.class);
@@ -60,7 +60,7 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         DoctorGroupEvent<DoctorDiseaseGroupEvent> event = dozerGroupEvent(group, GroupEventType.DISEASE, disease);
 
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays, group.getGroupCode()));  //重算日龄
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
 
         event.setQuantity(disease.getQuantity());
         event.setExtraMap(diseaseEvent);

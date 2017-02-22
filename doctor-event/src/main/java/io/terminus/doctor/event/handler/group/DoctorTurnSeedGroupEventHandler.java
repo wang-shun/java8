@@ -62,8 +62,8 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         DoctorBarn toBarn = getBarnById(turnSeed.getToBarnId());
 
         //0. 校验数据
-        checkQuantity(groupTrack.getQuantity(), 1, group.getGroupCode()); // 确保 原数量 >= 1
-        checkTurnSeedData(group.getPigType(), toBarn.getPigType(), group.getGroupCode());
+        checkQuantity(groupTrack.getQuantity(), 1); // 确保 原数量 >= 1
+        checkTurnSeedData(group.getPigType(), toBarn.getPigType());
 
         //1. 转换转种猪事件
         DoctorTurnSeedGroupEvent turnSeedEvent = BeanMapper.map(turnSeed, DoctorTurnSeedGroupEvent.class);
@@ -74,7 +74,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         event.setQuantity(1);
 
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays, group.getGroupCode()));  //重算日龄
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
 
         event.setWeight(turnSeed.getWeight());
         event.setAvgWeight(turnSeed.getWeight());
@@ -114,16 +114,16 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
     //后备舍又他妈不分公母了, 艹
     //后备猪 => 配种舍/妊娠舍/种公猪舍
-    private static PigType checkTurnSeedData(Integer groupType, Integer barnType, String groupCode){
+    private static PigType checkTurnSeedData(Integer groupType, Integer barnType){
         PigType type = expectNotNull(PigType.from(groupType), "pig.type.not.null");
 
         //校验猪群类型: 后备群
         if(!PigType.HOUBEI_TYPES.contains(type.getValue())){
-            throw new InvalidException("group.can.not.turn.seed", type.getDesc(), groupCode);
+            throw new InvalidException("group.can.not.turn.seed", type.getDesc());
         }
         //校验转入猪舍类型
         if (!PigType.MATING_TYPES.contains(barnType) && barnType != PigType.BOAR.getValue()) {
-            throw new InvalidException("barn.can.not.turn.seed", PigType.from(barnType).getDesc(), groupCode);
+            throw new InvalidException("barn.can.not.turn.seed", PigType.from(barnType).getDesc());
 
         }
         return type;
