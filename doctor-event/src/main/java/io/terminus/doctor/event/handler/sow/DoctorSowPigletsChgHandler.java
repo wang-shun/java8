@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -23,7 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by yaoqijun.
@@ -47,7 +49,8 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
     protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigletsChgDto.getPigId());
-        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "仔猪变动母猪状态错误,猪号:" + pigletsChgDto.getPigCode());
+        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
+        expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", PigStatus.from(doctorPigTrack.getStatus()).getName(), pigletsChgDto.getPigCode());
 
         // 校验转出的数量信息
         Integer unweanCount = doctorPigTrack.getUnweanQty();        //未断奶数量
@@ -55,14 +58,12 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
 
         //变动数量
         Integer changeCount = pigletsChgDto.getPigletsCount();
-        checkState(changeCount != null, "变动数量不能为空,猪号:", pigletsChgDto.getPigCode());
-        checkState(changeCount <= unweanCount, "变动数量大于未断奶数,猪号:" + pigletsChgDto.getPigCode());
+        expectTrue(changeCount <= unweanCount, "change.count.not.enough", pigletsChgDto.getPigCode());
         doctorPigTrack.setUnweanQty(unweanCount - changeCount);  //未断奶数量 - 变动数量, 已断奶数量不用变
 
         //变动重量
         Double changeWeight = pigletsChgDto.getPigletsWeight();
-        checkState(changeWeight != null, "变动重量不能为空,猪号:" + pigletsChgDto.getPigCode());
-        //checkState(changeWeight <= unweanCount, "wean.countInput.error");
+        //expectTrue(changeWeight <= unweanCount, "wean.countInput.error");
 
         doctorPigTrack.setCurrentMatingCount(0);
 
@@ -113,6 +114,8 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
     private DoctorChangeGroupInput buildInputInfo(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic, Long pigEventId) {
         DoctorPigletsChgDto dto = (DoctorPigletsChgDto) inputDto;
         DoctorChangeGroupInput doctorChangeGroupInput = new DoctorChangeGroupInput();
+        doctorChangeGroupInput.setSowCode(inputDto.getPigCode());
+        doctorChangeGroupInput.setEventType(GroupEventType.CHANGE.getValue());
         doctorChangeGroupInput.setEventAt(DateUtil.toDateString(dto.getPigletsChangeDate()));
         doctorChangeGroupInput.setChangeTypeId(dto.getPigletsChangeType());             //变动类型id
         doctorChangeGroupInput.setChangeTypeName(dto.getPigletsChangeTypeName());       //变动类型名称

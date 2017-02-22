@@ -1,4 +1,4 @@
-package io.terminus.doctor.common.util;
+package io.terminus.doctor.common.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;

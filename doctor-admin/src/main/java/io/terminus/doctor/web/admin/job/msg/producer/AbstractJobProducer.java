@@ -244,7 +244,7 @@ public abstract class AbstractJobProducer {
 //            Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, JacksonType.MAP_OF_STRING);
 //            String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
 //            message.setContent(content != null ? content.trim() : "");
-//        } catch (Exception e) {
+//        } catch (exception e) {
 //            log.error("compile message template failed,cause by {}, template name is {}, json map is {}", Throwables.getStackTraceAsString(e), message.getMessageTemplate(), jsonData);
 //        }
         Long messageId = RespHelper.orServEx(doctorMessageWriteService.createMessage(message));

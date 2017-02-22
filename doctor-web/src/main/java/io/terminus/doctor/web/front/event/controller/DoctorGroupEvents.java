@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
@@ -194,7 +195,7 @@ public class DoctorGroupEvents {
 
         //查询猪群的事件, 默认3条
         List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(
-                groupDetail.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3))).getData();
+                groupDetail.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3), null, null)).getData();
 
         transFromUtil.transFromGroupEvents(groupEvents);
         DoctorGroupEvent rollbackEvent = RespHelper.or500(doctorGroupReadService.canRollbackEvent(groupId));
@@ -220,8 +221,11 @@ public class DoctorGroupEvents {
                                                      @RequestParam(value = "groupId", required = false) Long groupId,
                                                      @RequestParam(value = "type", required = false) Integer type,
                                                      @RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                                     @RequestParam(value = "size", required = false) Integer size) {
-        Paging<DoctorGroupEvent> doctorGroupEventPaging = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(farmId, groupId, type, pageNo, size));
+                                                     @RequestParam(value = "size", required = false) Integer size,
+                                                     @RequestParam(value = "startDate", required = false) String startDate,
+                                                     @RequestParam(value = "endDate",required = false) String endDate) {
+
+        Paging<DoctorGroupEvent> doctorGroupEventPaging = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(farmId, groupId, type, pageNo, size, startDate, endDate));
 
         transFromUtil.transFromGroupEvents(doctorGroupEventPaging.getData());
         return doctorGroupEventPaging;
@@ -232,12 +236,14 @@ public class DoctorGroupEvents {
                                                       @RequestParam(value = "groupId", required = false) Long groupId,
                                                       @RequestParam(value = "type", required = false) Integer type,
                                                       @RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                                      @RequestParam(value = "size", required = false) Integer size) {
-        Paging<DoctorGroupEvent> doctorGroupEventPaging = pagingGroupEvent(farmId, groupId, type, pageNo, size);
-        DoctorGroupEvent doctorGroupEvent = RespHelper.or500(doctorGroupReadService.canRollbackEvent(groupId));
+                                                      @RequestParam(value = "size", required = false) Integer size,
+                                                      @RequestParam(value = "startDate", required = false) String startDate,
+                                                      @RequestParam(value = "endDate",required = false) String endDate) {
+        Paging<DoctorGroupEvent> doctorGroupEventPaging = pagingGroupEvent(farmId, groupId, type, pageNo, size, startDate, endDate);
+        Response<DoctorGroupEvent> groupEventResponse = doctorGroupReadService.canRollbackEvent(groupId);
         Long canRollback = null;
-        if (doctorGroupEvent != null){
-            canRollback = doctorGroupEvent.getId();
+        if (groupEventResponse.isSuccess() && groupEventResponse.getResult() != null){
+            canRollback = groupEventResponse.getResult().getId();
         }
         return DoctorGroupEventPagingDto.builder().paging(doctorGroupEventPaging).canRollback(canRollback).build();
     }

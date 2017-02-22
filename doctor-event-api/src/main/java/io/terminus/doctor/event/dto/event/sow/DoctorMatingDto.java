@@ -8,7 +8,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,26 +31,25 @@ public class DoctorMatingDto extends BasePigEventInputDto implements Serializabl
 
     private static final long serialVersionUID = 2732269011148894160L;
 
+    @NotNull(message = "event.at.not.null")
     private Date matingDate; // 配种日期
 
+    @NotNull(message = "mating.boar.id.not.null")
     private Long matingBoarPigId;   //配种公猪Id
 
+    @NotEmpty(message = "mating.boar.code.not.empty")
     private String matingBoarPigCode; //配种公猪号
 
+    @NotNull(message = "judge.preg.date.not.null")
     private Date judgePregDate; //预产日期
 
     /**
      * @see io.terminus.doctor.event.enums.MatingType
      */
+    @NotNull(message = "mating.type.not.null")
     private Integer matingType; // 配种类型
 
     private String mattingMark; // 配种mark
-
-//    private String pigCode;
-//
-//    private Long barnId;
-//
-//    private String barnName;
 
     @Override
     public Map<String, String> descMap(){

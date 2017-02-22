@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
@@ -83,6 +84,11 @@ public interface DoctorGroupReadService {
     Response<Long> getGroupCount(@Valid DoctorGroupSearchDto groupSearchDto);
 
     /**
+     * 获取断奶仔猪数量
+     */
+    Response<Long> getWeanCount(@Valid DoctorGroupSearchDto groupSearchDto);
+
+    /**
      * 根据查询条件分页猪群
      * @param groupSearchDto 查询条件dto
      * @return 分页后的猪群列表
@@ -106,7 +112,7 @@ public interface DoctorGroupReadService {
      * @return  分页结果
      */
     Response<Paging<DoctorGroupEvent>> pagingGroupEvent(@NotNull(message = "farmId.not.null") Long farmId,
-                                                        Long groupId, Integer type, Integer pageNo, Integer size);
+                                                        Long groupId, Integer type, Integer pageNo, Integer size, String startDate, String endDate);
 
     /**
      * 根据事件id查询猪群事件
@@ -187,14 +193,14 @@ public interface DoctorGroupReadService {
      * @param groupId
      * @return
      */
-    Response<DoctorGroupEvent> canRollbackEvent(@NotNull(message = "input.groupId.empty") Long groupId);
+    RespWithEx<DoctorGroupEvent> canRollbackEvent(@NotNull(message = "input.groupId.empty") Long groupId);
 
     /**
      * 事件能否回滚
      * @param eventId 事件id
      * @return 能否回滚
      */
-    Response<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId);
+    RespWithEx<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId);
 
     /**
      * 查询猪群的所有事件
@@ -222,4 +228,11 @@ public interface DoctorGroupReadService {
      * @return 最新事件
      */
     Response<DoctorGroupEvent> findLastGroupEventByType(@NotNull(message = "groupId.not.null") Long groupId, @NotNull(message = "type.not.null") Integer type);
+
+    /**
+     * 获取新建猪群事件
+     * @param groupId 猪群id
+     * @return 新建猪群事件
+     */
+    Response<DoctorGroupEvent> findNewGroupEvent(@NotNull(message = "groupId.not.null") Long groupId);
 }

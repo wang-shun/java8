@@ -7,7 +7,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,8 +31,11 @@ public class DoctorFostersDto extends BasePigEventInputDto implements Serializab
 
     private static final long serialVersionUID = 2998287596879859648L;
 
+    @NotNull(message = "event.at.not.null")
     private String fostersDate;   // 拼窝日期
 
+    @Min(value = 0, message = "fosters.count.not.less.zero")
+    @NotNull(message = "fosters.count.not.null")
     private Integer fostersCount;   //  拼窝数量
 
     private Integer sowFostersCount;    // 拼窝母猪数量
@@ -42,8 +48,10 @@ public class DoctorFostersDto extends BasePigEventInputDto implements Serializab
 
     private String fosterReasonName;  //寄养原因名称
 
+    @NotNull(message = "fosters.sow.id.not.null")
     private Long fosterSowId;   // 拼窝母猪Id
 
+    @NotEmpty(message = "fosters.sow.code.not.empty")
     private String fosterSowCode; // 拼窝母猪code
 
     private String fosterSowOutId; // 拼窝母猪outId(做关联用)
@@ -53,23 +61,12 @@ public class DoctorFostersDto extends BasePigEventInputDto implements Serializab
     @Override
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();
-        if(fostersCount != null){
-            map.put("拼窝数量", fostersCount.toString());
-        }
-        if(sowFostersCount != null && sowFostersCount > 0){
-            map.put("拼窝母猪数量", sowFostersCount.toString());
-        }
-        if(boarFostersCount != null && boarFostersCount > 0){
-            map.put("拼窝公猪数量", boarFostersCount.toString());
-        }
-        if(fosterTotalWeight != null && fosterTotalWeight > 0){
-            map.put("拼窝总重量", fosterTotalWeight.toString());
-        }
-        if(fosterReasonName != null){
-            map.put("寄养原因", fosterReasonName);
-        }
+
         if(fosterSowCode != null){
             map.put("被拼窝母猪", fosterSowCode);
+        }
+        if(fostersCount != null){
+            map.put("拼窝仔猪数", fostersCount.toString()+"头");
         }
         return map;
     }

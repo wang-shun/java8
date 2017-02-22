@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,11 +29,12 @@ public class DoctorPregChkResultDto extends BasePigEventInputDto implements Seri
 
     private static final long serialVersionUID = 2879901632920960216L;
 
+    @NotNull(message = "event.at.not.null")
     private Date checkDate; //妊娠检查日期
-
     /**
      * @see io.terminus.doctor.event.enums.PregCheckResult
      */
+    @NotNull(message = "check.result.not.null")
     private Integer checkResult;    // 妊娠检查结果
 
     private Long abortionReasonId;  // 流产原因

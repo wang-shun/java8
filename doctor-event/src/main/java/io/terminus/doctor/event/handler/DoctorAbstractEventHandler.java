@@ -1,10 +1,10 @@
 package io.terminus.doctor.event.handler;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Dates;
-import io.terminus.doctor.common.util.JsonMapperUtil;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -29,6 +29,9 @@ import org.springframework.util.StringUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by xjn.
@@ -59,10 +62,12 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-
         //获取镜像有关event和track
         DoctorPigTrack pigSnapshotTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        expectTrue(notNull(pigSnapshotTrack), "pig.track.not.null", inputDto.getPigId());
         DoctorPigEvent pigSnapshotEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
+        expectTrue(notNull(pigSnapshotEvent), "pig.last.event.not.null", inputDto.getPigId());
+
 
         //1.创建事件
         DoctorPigEvent doctorPigEvent = buildPigEvent(basic, inputDto);
@@ -142,6 +147,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     //创建猪跟踪和镜像表
     protected DoctorPigSnapshot createPigSnapshot(DoctorPigTrack doctorPigTrack, DoctorPigEvent doctorPigEvent, Long currentEventId) {
         DoctorPig snapshotPig = doctorPigDao.findById(doctorPigEvent.getPigId());
+        expectTrue(notNull(snapshotPig), "pig.not.null", doctorPigEvent.getPigId());
+
 
         //创建猪镜像
         return DoctorPigSnapshot.builder()
@@ -229,12 +236,9 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
             return;
         }
         Date eventAt = inputDto.eventAt();
-        if(eventAt == null){
-            throw new ServiceException("事件时间输入有误,猪号:" + inputDto.getPigCode());
-        }
         DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
         if (lastEvent != null && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt()))) {
-            throw new ServiceException("事件时间不能早于最近一次事件时间(" + DateUtil.toDateString(lastEvent.getEventAt()) + "), 猪号:" + inputDto.getPigCode());
+            throw new InvalidException("event.at.range.error", DateUtil.toDateString(lastEvent.getEventAt()), DateUtil.toDateString(eventAt), inputDto.getPigCode());
         }
     }
 }

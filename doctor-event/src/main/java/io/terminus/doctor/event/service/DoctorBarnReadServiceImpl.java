@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -176,6 +178,16 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         } catch (Exception e) {
             log.error("paging barn failed, barnDto:{}, pageNo:{}, size:{}, cause:{}", barnDto, pageNo, size, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.find.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorBarn> findBarnByFarmAndBarnName(@NotNull(message = "farmId.can.not.be.null") Long farmId, @NotNull(message = "barn.name.not.empty") String barnName) {
+        try {
+            return Response.ok(doctorBarnDao.findBarnByFarmAndBarnName(ImmutableMap.of("farmId", farmId, "name", barnName)));
+        } catch (Exception e) {
+            log.error("find barn by farm and barn name failed, farmId:{}, barnName:{}, cause:{}", farmId, barnName, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.barn.by.farm.and.barn.name.failed");
         }
     }
 }

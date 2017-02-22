@@ -1,11 +1,11 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.event.constants.DoctorBasicEnums;
+import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -128,10 +128,10 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     private static void checkSalePrice(Long changeTypeId, Long price, Integer baseWeight, Long overPrice) {
         if (changeTypeId == DoctorBasicEnums.SALE.getId()) {
             if ((price == null || overPrice == null)) {
-                throw new ServiceException("money.not.null");
+                throw new InvalidException("sale.money.not.null");
             }
             if (baseWeight == null) {
-                throw new ServiceException("weight.not.null");
+                throw new InvalidException("sale.weight.not.null");
             }
         }
     }

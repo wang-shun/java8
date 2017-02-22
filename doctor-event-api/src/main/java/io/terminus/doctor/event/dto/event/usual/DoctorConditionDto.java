@@ -1,12 +1,13 @@
 package io.terminus.doctor.event.dto.event.usual;
 
-import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,16 +24,18 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorConditionDto extends DoctorBoarConditionDto implements Serializable{
+public class DoctorConditionDto extends BasePigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 2731040792952612479L;
 
+    @NotNull(message = "event.at.not.null")
     private Date conditionDate; //体况日期
 
     private Double conditionJudgeScore;    //体况评分
 
     private Double conditionWeight; // 体况重量
 
+    @NotNull(message = "condition.back.weight.not.null")
     private Double conditionBackWeight; // 背膘
 
     private String conditionRemark; //体况注解
