@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.handler.rollback;
 
-import io.terminus.doctor.common.util.JsonMapperUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;

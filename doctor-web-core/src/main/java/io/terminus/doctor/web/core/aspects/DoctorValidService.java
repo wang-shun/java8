@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.core.service;
+package io.terminus.doctor.web.core.aspects;
 
 import io.terminus.doctor.common.validate.DoctorServiceInvokeValidator;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class DoctorValidService {
      * 由于 {@link DoctorServiceInvokeValidator#validate} 里的 point cut 配置的扫service包
      * 所以这个方法要在service包内
      */
-    public <T> T valid(@Valid T t) {
+    public <T> T valid(@Valid T t, String code) {
         return t;
     }
 }

@@ -69,9 +69,9 @@ public class DoctorReports {
      * @return 猪场日报表
      */
     @RequestMapping(value = "/daily", method = RequestMethod.GET)
-    public DoctorDailyReportDto findDailyReportByFarmIdAndSumAtWithCache(@RequestParam("farmId") Long farmId,
-                                                                         @RequestParam("date") String date) {
-        return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndSumAtWithCache(farmId, date));
+    public DoctorDailyReportDto findDailyReportByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
+                                                                @RequestParam("date") String date) {
+        return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndSumAt(farmId, date));
     }
 
     /**
@@ -82,10 +82,10 @@ public class DoctorReports {
      * @return 猪场日报表
      */
     @RequestMapping(value = "/daily/range", method = RequestMethod.GET)
-    public List<DoctorDailyReportDto> findDailyReportByFarmIdAndRangeWithCache(@RequestParam("farmId") Long farmId,
-                                                                               @RequestParam(value = "startAt", required = false) String startAt,
-                                                                               @RequestParam(value = "endAt", required = false) String endAt) {
-        return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndRangeWithCache(farmId, startAt, endAt));
+    public List<DoctorDailyReportDto> findDailyReportByFarmIdAndRange(@RequestParam("farmId") Long farmId,
+                                                                      @RequestParam(value = "startAt", required = false) String startAt,
+                                                                      @RequestParam(value = "endAt", required = false) String endAt) {
+        return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndRange(farmId, startAt, endAt));
     }
 
     /**

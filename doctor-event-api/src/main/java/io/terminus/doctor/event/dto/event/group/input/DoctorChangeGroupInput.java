@@ -46,12 +46,13 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
      * 猪只数 公 + 母的和
      */
     @NotNull(message = "quantity.not.null")
+    @Min(value = 1L, message = "quantity.not.lt.1")
     private Integer quantity;
 
     @NotNull(message = "boarQty.not.null")
     private Integer boarQty;
 
-    @NotNull(message = "boarQty.not.null")
+    @NotNull(message = "sowQty.not.null")
     private Integer sowQty;
 
     /**

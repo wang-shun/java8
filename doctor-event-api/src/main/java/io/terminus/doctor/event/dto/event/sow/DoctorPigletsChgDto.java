@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,14 +29,18 @@ public class DoctorPigletsChgDto extends BasePigEventInputDto implements Seriali
 
     private static final long serialVersionUID = 2032098840987088160L;
 
+    @NotNull(message = "event.at.not.null")
     private Date pigletsChangeDate; // 仔猪变动日期
 
+    @Min(value = 0, message = "piglets.count.not.less.zero")
+    @NotNull(message = "piglets.count.not.null")
     private Integer pigletsCount;   // 仔猪数量
 
     private Integer sowPigletsCount;    // 仔母猪数量
 
     private Integer boarPigletsCount;   // 崽公猪数量
 
+    @NotNull(message = "piglets.change.type.not.null")
     private Long pigletsChangeType;   // 仔猪变动类型
 
     private String pigletsChangeTypeName;   // 仔猪变动类型内容
@@ -43,6 +49,8 @@ public class DoctorPigletsChgDto extends BasePigEventInputDto implements Seriali
 
     private String pigletsChangeReasonName;   // 仔猪变动原因内容
 
+    @Min(value = 0, message = "piglets.weight.not.less.zero")
+    @NotNull(message = "piglets.weight.not.null")
     private Double pigletsWeight;  // 变动重量 (必填)
 
     private Long pigletsPrice;   // 变动价格(分) （非必填）

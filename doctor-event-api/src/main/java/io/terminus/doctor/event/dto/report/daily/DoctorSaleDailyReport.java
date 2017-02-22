@@ -35,6 +35,11 @@ public class DoctorSaleDailyReport implements Serializable {
     private double fatten;
 
     /**
+     * 后备猪
+     */
+    private double houbei;
+
+    /**
      * 10kg基础价格
      */
     private long basePrice10;

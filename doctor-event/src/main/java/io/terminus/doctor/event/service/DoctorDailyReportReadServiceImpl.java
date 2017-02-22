@@ -61,33 +61,17 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     }
 
     @Override
-    public Response<DoctorDailyReportDto> findDailyReportByFarmIdAndSumAtWithCache(Long farmId, String sumAt) {
+    public Response<DoctorDailyReportDto> findDailyReportByFarmIdAndSumAt(Long farmId, String sumAt) {
         try {
             Date date = DateUtil.toDate(sumAt);
             if(date == null){
                 return Response.ok(failReport(sumAt));
             }
             DoctorDailyReport report = doctorDailyReportCache.getDailyReport(farmId, date);
-            if(report == null || report.getReportData() == null){
-                // 如果查当天的日报, 查不到就直接计算并存入redis, 如果查未来，返回失败查询
-                if(!date.after(Dates.startOfDay(new Date()))){
-                    DoctorDailyReportDto reportDto = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, date);
-                    report = new DoctorDailyReport();
-                    report.setFarmId(farmId);
-                    report.setSumAt(date);
-                    report.setReportData(reportDto);
-                    report.setSowCount(reportDto.getSowCount());
-                    report.setFarrowCount(reportDto.getLiveStock().getFarrow());
-                    report.setNurseryCount(reportDto.getLiveStock().getNursery());
-                    report.setFattenCount(reportDto.getLiveStock().getFatten());
-                    doctorDailyReportDao.create(report);
-                    return Response.ok(reportDto);
-                }else{
-                    return Response.ok(failReport(sumAt));
-                }
-            }else{
-                return Response.ok(report.getReportData());
+            if(report == null || report.getReportData() == null) {
+                return Response.ok(failReport(sumAt));
             }
+            return Response.ok(report.getReportData());
         } catch (Exception e) {
             log.error("find dailyReport by farm id and sumat fail, farmId:{}, sumat:{}, cause:{}",
                     farmId, sumAt, Throwables.getStackTraceAsString(e));
@@ -96,14 +80,14 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     }
 
     @Override
-    public Response<List<DoctorDailyReportDto>> findDailyReportByFarmIdAndRangeWithCache(Long farmId, String startAt, String endAt) {
+    public Response<List<DoctorDailyReportDto>> findDailyReportByFarmIdAndRange(Long farmId, String startAt, String endAt) {
         try {
             Date end = isEmpty(endAt) ? new Date() : DateUtil.toDate(endAt);
             Date start = isEmpty(startAt) ? new DateTime(end).plusDays(-30).toDate() : DateUtil.toDate(startAt);
 
             List<DoctorDailyReportDto> report = Lists.newArrayList();
             while (!Dates.startOfDay(start).after(Dates.startOfDay(end))) {
-                report.add(findDailyReportByFarmIdAndSumAtWithCache(farmId, DateUtil.toDateString(start)).getResult());
+                report.add(findDailyReportByFarmIdAndSumAt(farmId, DateUtil.toDateString(start)).getResult());
                 start = new DateTime(start).plusDays(1).toDate();
             }
             return Response.ok(report);

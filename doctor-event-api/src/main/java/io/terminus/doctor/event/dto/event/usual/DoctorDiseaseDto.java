@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,8 +28,10 @@ public class DoctorDiseaseDto extends BasePigEventInputDto implements Serializab
 
     private static final long serialVersionUID = 7557956788545103933L;
 
+    @NotNull(message = "event.at.not.null")
     private Date diseaseDate;   // 疾病日期
 
+    @NotNull(message = "disease.id.not.null")
     private Long diseaseId; // 疾病Id
 
     private String diseaseName; // 疾病名称

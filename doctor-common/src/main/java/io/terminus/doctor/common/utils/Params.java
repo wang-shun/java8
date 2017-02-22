@@ -7,7 +7,6 @@
 package io.terminus.doctor.common.utils;
 
 import com.google.common.base.Strings;
-import io.terminus.doctor.common.util.JsonMapperUtil;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Nullable;

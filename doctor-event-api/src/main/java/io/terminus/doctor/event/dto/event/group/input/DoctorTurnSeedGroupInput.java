@@ -24,7 +24,7 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
     /**
      * 转种猪后的猪号
      */
-    @NotNull(message = "pig.code.not.null")
+    @NotEmpty(message = "pig.code.not.null")
     private String pigCode;
 
     /**
@@ -63,7 +63,7 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
     /**
      * 重量(kg)
      */
-    @Min(value = 0, message = "weight.gt.0")
+    @Min(value = 0, message = "weight.not.less.zero")
     private Double weight;
 
     @Override

@@ -26,7 +26,7 @@ rpc.dubbo:
     version: 1.0.0
 
 logging:
-  file: /var/log/doctor/event.log
+  file: /var/log/doctor/move-data.log
   level.*: INFO
 
 # zookeeper
@@ -43,37 +43,6 @@ redis:
   max-total: 10
   max-idle: 2
   test-on-borrow: true
-
-# search
-search:
-  host: 127.0.0.1
-  port: 9200
-
-flow:
-  definition:
-    key:
-      sow: sow
-      boar: boar
-
-esearch:
-  pig:
-    index-name: pigs
-    index-type: pig
-    mapping-path: search/pig_mapping.json
-    full-dump-range: 3
-    batch-size: 100
-  group:
-    index-name: groups
-    index-type: group
-    mapping-path: search/group_mapping.json
-    full-dump-range: 3
-    batch-size: 100
-  barn:
-    index-name: barns
-    index-type: barn
-    mapping-path: search/barn_mapping.json
-    full-dump-range: 3
-    batch-size: 100
 
 # 用户中心的 zk topic，每个子系统保持一致
 user.center.topic: user-center-topic

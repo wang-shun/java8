@@ -138,7 +138,7 @@ public class MsgManager {
 //                        message.setSendedAt(new Date());
 //                        message.setStatus(DoctorMessage.Status.SENDED.getValue());
 //                    }
-//                } catch (Exception e) {
+//                } catch (exception e) {
 //                    log.error("msg message send error, cause by {}", Throwables.getStackTraceAsString(e));
 //                    message.setFailedBy("msg message send error, context is " + map + ", cause by " + e.getMessage());
 //                    message.setStatus(DoctorMessage.Status.FAILED.getValue());
@@ -171,7 +171,7 @@ public class MsgManager {
 //                    message.setSendedAt(new Date());
 //                    message.setStatus(DoctorMessage.Status.SENDED.getValue());
 //                }
-//            } catch (Exception e) {
+//            } catch (exception e) {
 //                log.error("email message send error, cause by {}", Throwables.getStackTraceAsString(e));
 //                message.setFailedBy("email message send error, context is " + map + ", cause by " + e.getMessage());
 //                message.setStatus(DoctorMessage.Status.FAILED.getValue());
@@ -203,7 +203,7 @@ public class MsgManager {
 //                    message.setSendedAt(new Date());
 //                    message.setStatus(DoctorMessage.Status.SENDED.getValue());
 //                }
-//            } catch (Exception e) {
+//            } catch (exception e) {
 //                log.error("app push message send error, cause by {}", Throwables.getStackTraceAsString(e));
 //                message.setFailedBy("app push message send error, context is " + map + ", cause by " + e.getMessage());
 //                message.setStatus(DoctorMessage.Status.FAILED.getValue());
@@ -246,7 +246,7 @@ public class MsgManager {
 ////                });
 ////            });
 ////
-////        }  catch (Exception e) {
+////        }  catch (exception e) {
 ////            log.error("app push message send error, cause by {}", Throwables.getStackTraceAsString(e));
 ////            updateMessages.forEach(doctorMessage -> {
 ////                doctorMessageWriteService.updateMessage(doctorMessage);
