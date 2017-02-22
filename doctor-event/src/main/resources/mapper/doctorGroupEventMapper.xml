@@ -430,7 +430,7 @@
         ORDER BY event_at DESC, id DESC limit 1
     </select>
 
-    <select id="findNewGroupEvent" parameterType="long" resultType="DoctorGroupEvent" >
+    <select id="findNewGroupEvent" parameterType="long" resultMap="DoctorGroupEventMap" >
         SELECT
         <include refid="cols_all"/>
         FROM
