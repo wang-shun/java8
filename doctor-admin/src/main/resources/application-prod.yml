@@ -48,7 +48,7 @@ rpc.dubbo:
 
 # zookeeper
 zookeeper:
-  host: 101.201.44.35
+  host: 127.0.0.1
   port: 2181
   zkTopic: pig.doctor.topic
 
