@@ -28,7 +28,7 @@ rpc.dubbo:
     check: false
 
 logging:
-  path: /var/log/doctor
+  file: /var/log/doctor/move-data.log
 
 # zookeeper
 zookeeper:

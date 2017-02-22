@@ -20,7 +20,7 @@ rpc.dubbo:
     check: false
 
 logging:
-  path: /var/log/doctor
+  file: /var/log/doctor/basic.log
 
 # zookeeper
 zookeeper:

@@ -53,7 +53,7 @@ zookeeper:
   zkTopic: pig.doctor.topic
 
 logging:
-  path: /var/log/doctor
+  file: /var/log/doctor/admin.log
 
 image:
   base:

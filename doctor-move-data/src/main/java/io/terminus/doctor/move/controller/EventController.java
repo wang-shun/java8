@@ -4,6 +4,9 @@ import com.google.common.base.Throwables;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.basic.dao.DoctorMaterialConsumeProviderDao;
+import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
+import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -15,11 +18,9 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.basic.dao.DoctorMaterialConsumeProviderDao;
-import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
-import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,6 +52,14 @@ public class EventController {
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorMaterialConsumeProviderReadService = doctorMaterialConsumeProviderReadService;
         this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
+    }
+
+    @Autowired
+    private Environment env;
+
+    @RequestMapping(value = "/get", method = RequestMethod.GET)
+    public String getConfig(@RequestParam String key) {
+        return env.getProperty(key);
     }
 
     @RequestMapping(value = "/refreshDesc", method = RequestMethod.GET)

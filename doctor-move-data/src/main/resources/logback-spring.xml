@@ -9,10 +9,10 @@
         <encoder>
             <pattern>${FILE_LOG_PATTERN}</pattern>
         </encoder>
-        <!--在application.yml里配置 logging.path-->
-        <file>${LOG_PATH}/move-data.log</file>
+        <!--在application.yml里配置 logging.file-->
+        <file>${LOG_FILE}</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/move-data-%d{yyyy-MM-dd_HH-mm}.log</fileNamePattern>
+            <fileNamePattern>${LOG_FILE}-%d{yyyy-MM-dd}</fileNamePattern>
             <maxHistory>7</maxHistory>
         </rollingPolicy>
     </appender>

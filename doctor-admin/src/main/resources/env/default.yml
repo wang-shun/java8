@@ -53,8 +53,6 @@ zookeeper:
 
 logging:
   file: /var/log/doctor/admin.log
-  level.*: DEBUG
-  path: /var/log/doctor
 
 image:
   base:

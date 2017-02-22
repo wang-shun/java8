@@ -29,7 +29,7 @@ rpc.dubbo:
     check: false
 
 logging:
-  path: /var/log/doctor
+  file: /var/log/doctor/open.log
 
 openplatform:
   mode: GATEWAY
