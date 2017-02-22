@@ -3,6 +3,7 @@ package io.terminus.doctor.web.admin.controller;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
@@ -113,12 +114,12 @@ public class DoctorAdminUsers {
 
     //拼接集团用户数据
     private User checkGroupUser(String mobile, String name, String password) {
-        User user = RespHelper.or500(doctorUserReadService.findBy(mobile, LoginType.MOBILE));
-        if (user != null) {
-            log.error("user existed, user:{}", user);
+        Response<User> userResponse = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
+        if (userResponse.isSuccess()) {
+            log.error("user existed, user:{}", userResponse.getResult());
             throw new JsonResponseException("user.is.existed");
         }
-        user = new User();
+        User user = new User();
         user.setMobile(mobile);
         user.setName(name);
 
