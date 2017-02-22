@@ -489,7 +489,7 @@ public class DoctorImportDataService {
     }
 
     //admin的数据权限
-    private void createOrUpdateAdminPermission() {
+    public void createOrUpdateAdminPermission() {
         User user = userDaoExt.findById(xrnmId);
         if (user == null) {
             return;

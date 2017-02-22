@@ -234,6 +234,10 @@ public class DoctorMoveDataController {
         log.warn("move farmBasic start, mobile:{}, moveId:{}", mobile, moveId);
         doctorImportDataService.importFarmBasics(farm.getId());
         log.warn("move farmBasic end");
+
+        log.warn("move xrnm permission, mobile:{}, moveId:{}", mobile, moveId);
+        doctorImportDataService.createOrUpdateAdminPermission();
+        log.warn("move xrmm permission end");
     }
 
     //统计下首页数据
