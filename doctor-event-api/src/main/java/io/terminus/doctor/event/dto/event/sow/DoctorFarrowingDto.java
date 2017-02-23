@@ -34,7 +34,7 @@ public class DoctorFarrowingDto extends BasePigEventInputDto implements Serializ
     @NotNull(message = "event.at.not.null")
     private Date farrowingDate; // 分娩日期
 
-    @NotEmpty(message = "nest.code.not.empty")
+    //@NotEmpty(message = "nest.code.not.empty")
     private String nestCode; // 窝号
 
     private String bedCode; // 床号
