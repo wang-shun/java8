@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.msg.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
@@ -11,7 +12,6 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.constants.JacksonType;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -31,6 +31,7 @@ import io.terminus.doctor.event.service.DoctorMessageRuleTemplateWriteService;
 import io.terminus.doctor.event.service.DoctorMessageUserReadService;
 import io.terminus.doctor.event.service.DoctorMessageUserWriteService;
 import io.terminus.doctor.event.service.DoctorMessageWriteService;
+import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.msg.dto.BackFatMessageDto;
 import io.terminus.doctor.web.front.msg.dto.DoctorMessageDto;
 import io.terminus.doctor.web.front.msg.dto.DoctorMessageWithUserDto;
@@ -45,12 +46,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -71,6 +75,10 @@ public class DoctorMessages {
     private final DoctorMessageRuleReadService doctorMessageRuleReadService;
     private final DoctorMessageUserReadService doctorMessageUserReadService;
     private final DoctorMessageUserWriteService doctorMessageUserWriteService;
+    @Autowired
+    private Exporter exporter;
+
+    private final ObjectMapper MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     @Autowired
     public DoctorMessages(DoctorMessageReadService doctorMessageReadService,
@@ -102,44 +110,29 @@ public class DoctorMessages {
      */
     @RequestMapping(value = "/warn/messages", method = RequestMethod.GET)
     public DoctorMessageDto pagingWarnDoctorMessages(@RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                                                     @RequestParam(value = "pageSize", required = false) Integer pageSize,
-                                                                     @RequestParam Map<String, Object> criteria) {
-        criteria = Params.filterNullOrEmpty(criteria);
-        if (!isUserLogin()) {
+                                                     @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                                     @RequestParam Map<String, Object> criteria) {
+        //构建消息查询条件
+        DoctorMessageSearchDto messageSearchDto = buildMessageSearchDto(criteria);
+        if (messageSearchDto == null) {
             return new DoctorMessageDto(new Paging<>(0L, Collections.emptyList()),null);
         }
-        DoctorMessageUserDto doctorMessageUserDto = JsonMapperUtil.JSON_NON_EMPTY_MAPPER.getMapper().convertValue(criteria, DoctorMessageUserDto.class);
-        doctorMessageUserDto.setUserId(UserUtil.getUserId());
-        List<DoctorMessageUser> messageUserList = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto));
-        if (Arguments.isNullOrEmpty(messageUserList)) {
-            return new DoctorMessageDto(new Paging<>(0L, Collections.emptyList()), null);
-        }
-
-        List<Long> messageIds = messageUserList.stream().map(DoctorMessageUser::getMessageId).collect(Collectors.toList());
-        DoctorMessageSearchDto messageSearchDto = JsonMapperUtil.JSON_NON_EMPTY_MAPPER.getMapper().convertValue(criteria, DoctorMessageSearchDto.class);
-        messageSearchDto.setIds(messageIds);
-        if (Strings.isNullOrEmpty(messageSearchDto.getSortBy())) {
-            messageSearchDto.setSortBy("time_diff");
-        }
-        if (Strings.isNullOrEmpty(messageSearchDto.getDesc())) {
-            messageSearchDto.setDesc("desc");
-        }
-        messageSearchDto.setTemplateName(null);
-
         Paging<DoctorMessage> messagePaging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(messageSearchDto, pageNo, pageSize));
+
         DoctorMessageDto msgDto = new DoctorMessageDto();
-        DoctorMessageRuleTemplate template = RespHelper.or500(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(doctorMessageUserDto.getTemplateId()));
+        DoctorMessageRuleTemplate template = RespHelper.or500(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(messageSearchDto.getTemplateId()));
+        //添加跳转url
         if (Objects.equals(template.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
-            msgDto.setListUrl("/group/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
+            msgDto.setListUrl("/group/list?farmId=" + messageSearchDto.getFarmId() + "&searchFrom=MESSAGE");
         } else if (Objects.equals(template.getCategory(), Category.STORAGE_SHORTAGE.getKey())) {
             msgDto.setListUrl("");
         } else if (Objects.equals(template.getCategory(), Category.PIG_VACCINATION.getKey())) {
             msgDto.setListUrl("");
         } else {
             if (Objects.equals(template.getCategory(), Category.BOAR_ELIMINATE.getKey())) {
-                msgDto.setListUrl("/boar/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
+                msgDto.setListUrl("/boar/list?farmId=" + messageSearchDto.getFarmId() + "&searchFrom=MESSAGE");
             } else {
-                msgDto.setListUrl("/sow/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
+                msgDto.setListUrl("/sow/list?farmId=" + messageSearchDto.getFarmId() + "&searchFrom=MESSAGE");
             }
         }
         List<DoctorMessageWithUserDto> list = messagePaging.getData().stream().map(doctorMessage -> {
@@ -151,6 +144,89 @@ public class DoctorMessages {
         }).collect(Collectors.toList());
         msgDto.setPaging(new Paging<>(messagePaging.getTotal(), list));
         return msgDto;
+    }
+
+
+    /**
+     * 消息导出
+     * @param criteria 查询条件
+     * @param request
+     * @param response
+     */
+    @RequestMapping(value = "/export", method = RequestMethod.GET)
+    public void exportMessage(@RequestParam Map<String, String> criteria,
+                              HttpServletRequest request,
+                              HttpServletResponse response) {
+
+        String exportName = buildExportNameMap().get(Integer.parseInt(criteria.get("category")));
+        if (!notEmpty(exportName)) {
+            return;
+        }
+        exporter.export(exportName, criteria, 1, 500, this::pagingWarnMessage, request, response);
+
+    }
+
+    /**
+     * 构建category与exportName 映射
+     * @return
+     */
+    private Map<Integer, String> buildExportNameMap() {
+        Map<Integer, String> exportNameMap = Maps.newHashMap();
+        exportNameMap.put(Category.SOW_BREEDING.getKey(), "web-message-breeding");
+        exportNameMap.put(Category.SOW_PREGCHECK.getKey(), "web-message-pregCheck");
+        exportNameMap.put(Category.SOW_BIRTHDATE.getKey(), "web-message-birthDate");
+        exportNameMap.put(Category.SOW_NEEDWEAN.getKey(), "web-message-needWean");
+        exportNameMap.put(Category.SOW_ELIMINATE.getKey(), "web-message-sowEliminate");
+        exportNameMap.put(Category.BOAR_ELIMINATE.getKey(), "web-message-boarEliminate");
+        exportNameMap.put(Category.FATTEN_PIG_REMOVE.getKey(), "web-message-fattenPigRemove");
+        exportNameMap.put(Category.SOW_BACK_FAT.getKey(), "web-message-backFat");
+        exportNameMap.put(Category.STORAGE_SHORTAGE.getKey(), "web-message-storageShortage");
+        return exportNameMap;
+    }
+
+    /**
+     * 构建消息查询条件
+     * @param criteria 前台传过来条件
+     * @return 查询条件dto
+     */
+    private DoctorMessageSearchDto buildMessageSearchDto(Map<String, Object> criteria) {
+        criteria = Params.filterNullOrEmpty(criteria);
+        //校验是否登陆
+        if (!isUserLogin()) {
+            return null;
+        }
+        //查询用户
+        DoctorMessageUserDto doctorMessageUserDto = MAPPER.convertValue(criteria, DoctorMessageUserDto.class);
+        doctorMessageUserDto.setUserId(UserUtil.getUserId());
+        List<DoctorMessageUser> messageUserList = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto));
+        if (Arguments.isNullOrEmpty(messageUserList)) {
+            return null;
+        }
+        List<Long> messageIds = messageUserList.stream().map(DoctorMessageUser::getMessageId).collect(Collectors.toList());
+        //查询用户拥有的消息
+        DoctorMessageSearchDto messageSearchDto = MAPPER.convertValue(criteria, DoctorMessageSearchDto.class);
+        messageSearchDto.setIds(messageIds);
+        if (Strings.isNullOrEmpty(messageSearchDto.getSortBy())) {
+            messageSearchDto.setSortBy("time_diff");
+        }
+        if (Strings.isNullOrEmpty(messageSearchDto.getDesc())) {
+            messageSearchDto.setDesc("desc");
+        }
+        messageSearchDto.setTemplateName(null);
+        return messageSearchDto;
+    }
+
+    /**
+     * 分页查询预警消息(导出数据使用)
+     * @param messageSearchDtoMap 查询条件
+     * @return
+     */
+    private Paging<DoctorMessage> pagingWarnMessage(Map<String, String> messageSearchDtoMap) {
+        DoctorMessageSearchDto messageSearchDto = buildMessageSearchDto(MAPPER.convertValue(messageSearchDtoMap, JacksonType.MAP_OF_STRING));
+        if (messageSearchDto == null) {
+            return Paging.empty();
+        }
+        return RespHelper.or500(doctorMessageReadService.pagingWarnMessages(messageSearchDto, Integer.parseInt(messageSearchDtoMap.get("pageNo")), Integer.parseInt(messageSearchDtoMap.get("size"))));
     }
 
     /**
@@ -395,5 +471,4 @@ public class DoctorMessages {
     private boolean isUserLogin() {
         return UserUtil.getCurrentUser() != null;
     }
-
 }
