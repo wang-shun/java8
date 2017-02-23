@@ -8,7 +8,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
@@ -83,9 +82,9 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
 
     // sow
     private String earCode; // 耳缺号
-
-    @Min(value = 0, message = "parity.not.less.zero")
-    @NotNull(message = "parity.not.null")
+//
+//    @Min(value = 0, message = "parity.not.less.zero")
+//    @NotNull(message = "parity.not.null")
     private Integer parity; // 当前胎次
 
     private Integer left;   //左乳头的数量
