@@ -183,6 +183,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
      */
     private Long autoTransGroupEventNew(List<DoctorEventInfo> eventInfoList, DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup, DoctorBarn toBarn) {
         DoctorNewGroupInput newGroupInput = new DoctorNewGroupInput();
+        newGroupInput.setSowCode(transGroup.getSowCode());
         newGroupInput.setFarmId(fromGroup.getFarmId());
         newGroupInput.setGroupCode(transGroup.getToGroupCode());    //录入猪群号
         newGroupInput.setEventAt(transGroup.getEventAt());          //事件发生日期

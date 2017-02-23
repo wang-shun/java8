@@ -149,6 +149,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
             input.setToGroupCode(toGroup.getGroupCode());
         } else {
             input.setIsCreateGroup(IsOrNot.YES.getValue());
+            input.setToGroupCode(grateGroupCode(doctorToBarn.getName()));
         }
 
         DoctorGroup group = doctorGroupDao.findById(pigTrack.getGroupId());
@@ -174,8 +175,8 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
         transGroupEventHandler.handle(eventInfoList, group, groupTrack, input);
         if (Objects.equals(input.getIsCreateGroup(), IsOrNot.YES.getValue())) {
-            DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(group.getFarmId(), input.getToGroupCode());
-            return toGroup.getId();
+            //DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(group.getFarmId(), input.getToGroupCode());
+            return input.getToGroupId();
         }
         return input.getToGroupId();
     }

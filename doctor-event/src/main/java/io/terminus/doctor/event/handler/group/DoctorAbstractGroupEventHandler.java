@@ -4,10 +4,9 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -93,7 +92,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     @Override
     public <I extends BaseGroupInput> void handle(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
-        log.info("event handle starting, eventType", input.getEventType());
         handleEvent(eventInfoList, group, groupTrack, input);
         DoctorEventInfo eventInfo = DoctorEventInfo.builder()
                 .businessId(group.getId())
@@ -358,19 +356,5 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             throw new InvalidException("day.age.error");
         }
         return eventAge;
-    }
-
-    protected Date generateEventAt(Date eventAt){
-        if(eventAt != null){
-            Date now = new Date();
-            if(DateUtil.inSameDate(eventAt, now)){
-                // 如果处在今天, 则使用此刻瞬间
-                return now;
-            } else {
-                // 如果不在今天, 则将时间置为0, 只保留日期
-                return Dates.startOfDay(eventAt);
-            }
-        }
-        return null;
     }
 }

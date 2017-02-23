@@ -110,10 +110,10 @@ public class DoctorGroupEventManager {
     @Transactional
     public <I extends BaseGroupInput>
     List<DoctorEventInfo> handleEvent(DoctorGroupDetail groupDetail, I input, Class<? extends DoctorGroupEventHandler> handlerClass) {
-        log.info("group event handle starting, handler class", handlerClass);
+        log.info("group event handle starting, handler class:{}", handlerClass);
         final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
         getHandler(handlerClass).handle(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
-        log.info("group event handle ending, handler class", handlerClass);
+        log.info("group event handle ending, handler class:{}", handlerClass);
         return eventInfoList;
     }
 
@@ -146,7 +146,7 @@ public class DoctorGroupEventManager {
      */
     @Transactional
     public void rollbackEvent(DoctorGroupEvent groupEvent, Long reverterId, String reverterName) {
-        log.info("rollback group event starting, group event:{}", groupEvent);
+        log.info("rollback group event starting, group event id:{}", groupEvent.getId());
         //校验能否回滚
         checkCanRollback(groupEvent);
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
@@ -161,6 +161,7 @@ public class DoctorGroupEventManager {
         doctorGroupTrackDao.update(info.getGroupTrack());
         doctorGroupDao.update(info.getGroup());
         doctorGroupSnapshotDao.delete(snapshot.getId());
+        log.info("rollback group event ending, group event id:{}", groupEvent.getId());
     }
 
     //校验能否回滚

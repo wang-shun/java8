@@ -198,10 +198,10 @@ public class DoctorGroupEvents {
                 groupDetail.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3), null, null)).getData();
 
         transFromUtil.transFromGroupEvents(groupEvents);
-        DoctorGroupEvent rollbackEvent = RespHelper.or500(doctorGroupReadService.canRollbackEvent(groupId));
+        Response<DoctorGroupEvent> groupEventResponse = doctorGroupReadService.canRollbackEvent(groupId);
         Long canRollback = null;
-        if (rollbackEvent != null){
-            canRollback = rollbackEvent.getId();
+        if (groupEventResponse.isSuccess() && groupEventResponse.getResult() != null){
+            canRollback = groupEventResponse.getResult().getId();
         }
         return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents, canRollback);
     }

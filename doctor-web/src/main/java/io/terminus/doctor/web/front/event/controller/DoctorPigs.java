@@ -79,8 +79,6 @@ public class DoctorPigs {
     private final TransFromUtil transFromUtil;
     private final DoctorFarmAuthCenter doctorFarmAuthCenter;
 
-    public static int count =0;
-
     @RpcConsumer
     private DoctorMessageReadService doctorMessageReadService;
     @RpcConsumer
