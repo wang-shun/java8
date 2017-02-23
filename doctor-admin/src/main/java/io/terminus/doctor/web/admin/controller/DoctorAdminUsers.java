@@ -1,10 +1,10 @@
 package io.terminus.doctor.web.admin.controller;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -32,10 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc: admin分配权限的api
@@ -136,7 +133,8 @@ public class DoctorAdminUsers {
      */
     @RequestMapping(value = "/auth", method = RequestMethod.POST)
     public Boolean groupUserAuth(@RequestParam Long userId,
-                                 @RequestParam String farmIds) {
+                                 @RequestParam String orgIds,
+                                 @RequestParam(required = false) String farmIds) {
         User user = RespHelper.or500(doctorUserReadService.findById(userId));
         if (user == null) {
             log.error("admin add user auth, userId:({}) not found", userId);
@@ -145,34 +143,26 @@ public class DoctorAdminUsers {
 
         DoctorUserDataPermission permission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
         if (permission == null) {
-            permission = getPermission(new DoctorUserDataPermission(), userId, farmIds);
+            permission = getPermission(new DoctorUserDataPermission(), userId, orgIds, farmIds);
             RespHelper.or500(doctorUserDataPermissionWriteService.createDataPermission(permission));
             return true;
         }
-        return RespHelper.or500(doctorUserDataPermissionWriteService.updateDataPermission(getPermission(permission, userId, farmIds)));
+        return RespHelper.or500(doctorUserDataPermissionWriteService.updateDataPermission(getPermission(permission, userId, orgIds, farmIds)));
     }
 
-    private DoctorUserDataPermission getPermission(DoctorUserDataPermission permission, Long userId, String farmIds) {
+    private DoctorUserDataPermission getPermission(DoctorUserDataPermission permission, Long userId, String orgIds, String farmIds) {
         permission.setUserId(userId);
-        permission.setFarmIds(MoreObjects.firstNonNull(farmIds, ""));
-        permission.setOrgIds(getOrgIds(Splitters.splitToLong(farmIds, Splitters.COMMA)));
+        permission.setOrgIds(orgIds);
+        permission.setFarmIds(Arguments.notEmpty(farmIds) ? farmIds : getFarmIds(Splitters.splitToLong(orgIds, Splitters.COMMA)));
         return permission;
     }
 
-    private String getOrgIds(List<Long> farmIds) {
-        if (!notEmpty(farmIds)) {
-            return "";
+    private String getFarmIds(List<Long> orgIds) {
+        List<Long> farmIds = Lists.newArrayList();
+        for (Long orgId : orgIds) {
+            List<DoctorFarm> farms = RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(orgId));
+            farmIds.addAll(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()));
         }
-        Set<Long> orgIds = farmIds.stream()
-                .map(farmId -> {
-                    DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
-                    if (farm == null) {
-                        log.error("get farm by id not found, farmId:{}", farmId);
-                        throw new JsonResponseException("farm.not.found");
-                    }
-                    return farm.getOrgId();
-                })
-                .collect(Collectors.toSet());
-        return Joiners.COMMA.join(orgIds);
+        return Joiners.COMMA.join(farmIds);
     }
 }
