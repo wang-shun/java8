@@ -105,6 +105,7 @@ public class DoctorCommonGroupEventHandler {
      */
     public void autoTransEventMoveIn(List<DoctorEventInfo> eventInfoList, DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup) {
         DoctorMoveInGroupInput moveIn = new DoctorMoveInGroupInput();
+        moveIn.setSowCode(transGroup.getSowCode());
         moveIn.setEventAt(transGroup.getEventAt());
         moveIn.setEventType(GroupEventType.MOVE_IN.getValue());
         moveIn.setIsAuto(IsOrNot.YES.getValue());
