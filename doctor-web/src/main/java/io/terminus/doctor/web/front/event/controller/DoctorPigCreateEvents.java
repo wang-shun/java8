@@ -463,6 +463,9 @@ public class DoctorPigCreateEvents {
                         expectTrue(notEmpty(farmEntryDto.getPigCode()), "pig.code.not.empty");
                         try {
                             BasePigEventInputDto inputDto = doctorValidService.valid(farmEntryDto, farmEntryDto.getPigCode());
+                            if (Objects.equals(batchPigEventDto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
+                                expectTrue(notNull(farmEntryDto.getParity()) && farmEntryDto.getParity() > 0, "sow.entry.farm.parity.input.fail");
+                            }
                             return buildEntryEventInput(inputDto, pigEvent);
                         } catch (InvalidException e) {
                             log.error("batch entry event fail inputJson:{}, cause:{}", inputJson, Throwables.getStackTraceAsString(e));
