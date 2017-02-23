@@ -230,9 +230,9 @@ public interface DoctorGroupReadService {
     Response<DoctorGroupEvent> findLastGroupEventByType(@NotNull(message = "groupId.not.null") Long groupId, @NotNull(message = "type.not.null") Integer type);
 
     /**
-     * 获取新建猪群事件
+     * 获取初始猪群事件
      * @param groupId 猪群id
      * @return 新建猪群事件
      */
-    Response<DoctorGroupEvent> findNewGroupEvent(@NotNull(message = "groupId.not.null") Long groupId);
+    Response<DoctorGroupEvent> findInitGroupEvent(@NotNull(message = "groupId.not.null") Long groupId);
 }

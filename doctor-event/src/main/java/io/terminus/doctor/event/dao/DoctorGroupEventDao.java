@@ -137,11 +137,11 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
 
 
     /**
-     * 获取猪群新建事件
+     * 获取猪群初始事件
      * @param groupId 猪群id
      * @return 猪群新建事件
      */
-    public DoctorGroupEvent findNewGroupEvent(Long groupId) {
-        return getSqlSession().selectOne(sqlId("findNewGroupEvent"), groupId);
+    public DoctorGroupEvent findInitGroupEvent(Long groupId) {
+        return getSqlSession().selectOne(sqlId("findInitGroupEvent"), groupId);
     }
 }

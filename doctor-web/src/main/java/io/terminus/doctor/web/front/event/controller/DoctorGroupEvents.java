@@ -198,10 +198,10 @@ public class DoctorGroupEvents {
                 groupDetail.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3), null, null)).getData();
 
         transFromUtil.transFromGroupEvents(groupEvents);
-        DoctorGroupEvent rollbackEvent = RespHelper.or500(doctorGroupReadService.canRollbackEvent(groupId));
+        Response<DoctorGroupEvent> groupEventResponse = doctorGroupReadService.canRollbackEvent(groupId);
         Long canRollback = null;
-        if (rollbackEvent != null){
-            canRollback = rollbackEvent.getId();
+        if (groupEventResponse.isSuccess() && groupEventResponse.getResult() != null){
+            canRollback = groupEventResponse.getResult().getId();
         }
         return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents, canRollback);
     }
@@ -378,13 +378,13 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * 获取猪群新建事件
+     * 获取猪群初始事件
      * @param groupId 猪群id
      * @return 新建事件
      */
     @RequestMapping(value = "/find/newGroupEvent", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public DoctorGroupEvent findNewGroupEvent(@RequestParam Long groupId) {
-        return RespHelper.or500(doctorGroupReadService.findNewGroupEvent(groupId));
+        return RespHelper.or500(doctorGroupReadService.findInitGroupEvent(groupId));
     }
 
     /**

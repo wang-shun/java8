@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 /**
  * Desc: 猪群卡片表读服务实现类
  * Mail: yangzl@terminus.io
@@ -218,9 +220,12 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     public Response<Paging<DoctorGroupEvent>> pagingGroupEvent(Long farmId, Long groupId, Integer type, Integer pageNo, Integer size, String startDate, String endDate) {
         try {
             PageInfo pageInfo = PageInfo.of(pageNo, size);
-
+            Date endAt = DateUtil.toDate(endDate);
+            if (notNull(endDate)) {
+                endAt = new DateTime(endAt).plusDays(1).minusMillis(1).toDate();
+            }
             Paging<DoctorGroupEvent> paging = doctorGroupEventDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
-                    MapBuilder.<String, Object>of().put("farmId", farmId).put("groupId", groupId).put("type", type).put("beginDate",startDate).put("endDate",endDate).map());
+                    MapBuilder.<String, Object>of().put("farmId", farmId).put("groupId", groupId).put("type", type).put("beginDate", startDate).put("endDate", endAt).map());
             paging.setData(setExtraData(paging.getData()));
             return Response.ok(paging);
         } catch (Exception e) {
@@ -449,9 +454,9 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Response<DoctorGroupEvent> findNewGroupEvent(@NotNull(message = "groupId.not.null") Long groupId) {
+    public Response<DoctorGroupEvent> findInitGroupEvent(@NotNull(message = "groupId.not.null") Long groupId) {
         try {
-            return Response.ok(doctorGroupEventDao.findNewGroupEvent(groupId));
+            return Response.ok(doctorGroupEventDao.findInitGroupEvent(groupId));
         } catch (Exception e) {
             log.error("find.new.group.event.by.groupId.failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
             return Response.fail("find new group event by groupId failed");
