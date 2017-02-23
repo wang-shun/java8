@@ -264,6 +264,7 @@
         FROM <include refid="tb"/>
         WHERE
         1=1
+        AND barn_id IS NOT NULL AND barn_name IS NOT NULL
         <if test="barnName != null">AND barn_name LIKE concat('%', #{barnName}, '%') </if>
         <if test="ids != null &amp;&amp; ids.size() > 0">
             AND `id` IN
