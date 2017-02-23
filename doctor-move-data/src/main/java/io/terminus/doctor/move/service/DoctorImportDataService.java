@@ -729,8 +729,13 @@ public class DoctorImportDataService {
             }else{
                 existGroupCode.add(code);
             }
-            Integer dayAge = MoreObjects.firstNonNull(ImportExcelUtils.getInt(row, 4), 1);
-            group.setOpenAt(DateTime.now().minusDays(dayAge).toDate());  //建群时间 = 当前时间 - 日龄
+
+            Date openAt = ImportExcelUtils.getDate(row, 6);
+            if (openAt == null) {
+                throw new JsonResponseException("猪群号（" + code + "）建群日期不能为空");
+            }
+
+            group.setOpenAt(openAt);  //建群时间
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
             group.setInitBarnName(ImportExcelUtils.getString(row, 1));
 
@@ -758,6 +763,9 @@ public class DoctorImportDataService {
             groupTrack.setQuantity(ImportExcelUtils.getInt(row, 3));
             groupTrack.setBoarQty(0);
             groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
+
+            //excel日龄是转入时的日龄，所以要重新算一发
+            Integer dayAge = MoreObjects.firstNonNull(ImportExcelUtils.getInt(row, 4), 1) + DateUtil.getDeltaDaysAbs(openAt, new Date());
             groupTrack.setAvgDayAge(dayAge);
             groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge()).toDate());
             groupTrack.setBirthWeight(ImportExcelUtils.getDoubleOrDefault(row, 5, 0) * groupTrack.getQuantity());
