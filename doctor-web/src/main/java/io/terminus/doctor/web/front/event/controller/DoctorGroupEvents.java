@@ -378,13 +378,13 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * 获取猪群新建事件
+     * 获取猪群初始事件
      * @param groupId 猪群id
      * @return 新建事件
      */
     @RequestMapping(value = "/find/newGroupEvent", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public DoctorGroupEvent findNewGroupEvent(@RequestParam Long groupId) {
-        return RespHelper.or500(doctorGroupReadService.findNewGroupEvent(groupId));
+        return RespHelper.or500(doctorGroupReadService.findInitGroupEvent(groupId));
     }
 
     /**

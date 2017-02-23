@@ -430,12 +430,12 @@
         ORDER BY event_at DESC, id DESC limit 1
     </select>
 
-    <select id="findNewGroupEvent" parameterType="long" resultMap="DoctorGroupEventMap" >
+    <select id="findInitGroupEvent" parameterType="long" resultMap="DoctorGroupEventMap" >
         SELECT
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
         WHERE group_id = #{groupId}
-        AND `type` =1
+        ORDER BY event_at ASC , id ASC limit 1
     </select>
 </mapper>
