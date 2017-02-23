@@ -1575,6 +1575,7 @@ public class DoctorMoveDataService {
                     DoctorFarmEntryConstants.BOAR_TYPE_NAME, boarType.getDesc()
             ));
         }
+        boar.setBoarType(boarType.getKey());
         return boar;
     }
 
