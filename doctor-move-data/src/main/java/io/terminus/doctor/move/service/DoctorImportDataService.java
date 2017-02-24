@@ -648,7 +648,10 @@ public class DoctorImportDataService {
                     throw new JsonResponseException("公猪品种错误：" + boar.getBreedName() + "，row " + (row.getRowNum() + 1) + "column" + 7);
                 }
             }
-            boar.setBoarType(BoarEntryType.HGZ.getKey()); //进场默认活公猪
+
+            //进场默认活公猪
+            BoarEntryType entryType = BoarEntryType.from(ImportExcelUtils.getString(row, 9));
+            boar.setBoarType(entryType == null ? BoarEntryType.HGZ.getKey() : entryType.getKey());
             doctorPigDao.create(boar);
 
             //公猪跟踪
