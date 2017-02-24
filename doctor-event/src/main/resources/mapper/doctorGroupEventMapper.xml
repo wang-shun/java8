@@ -282,7 +282,7 @@
         <where>
             <include refid="criteria"/>
         </where>
-        ORDER BY event_at DESC, created_at DESC
+        ORDER BY event_at DESC, id DESC
         LIMIT #{offset}, #{limit}
     </select>
 
