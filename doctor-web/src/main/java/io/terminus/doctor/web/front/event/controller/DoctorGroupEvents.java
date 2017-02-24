@@ -13,6 +13,7 @@ import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
@@ -104,7 +105,7 @@ public class DoctorGroupEvents {
      */
     @RequestMapping(value = "/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Long createNewGroup(@RequestBody DoctorNewGroupInput newGroupDto) {
-        return RespHelper.or500(doctorGroupWebService.createNewGroup(newGroupDto));
+        return RespWithExHelper.orInvalid(doctorGroupWebService.createNewGroup(newGroupDto));
     }
 
     /**
@@ -114,7 +115,7 @@ public class DoctorGroupEvents {
      */
     @RequestMapping(value = "/batchNew", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean batchCreateNewGroup(@RequestBody DoctorBatchNewGroupEventDto batchNewGroupEventDto) {
-        return RespHelper.or500(doctorGroupWebService.batchNewGroupEvent(batchNewGroupEventDto));
+        return RespWithExHelper.orInvalid(doctorGroupWebService.batchNewGroupEvent(batchNewGroupEventDto));
     }
 
     /**
@@ -131,7 +132,7 @@ public class DoctorGroupEvents {
     public Boolean createGroupEvent(@RequestParam("groupId") Long groupId,
                                     @RequestParam("eventType") Integer eventType,
                                     @RequestParam("data") String data) {
-        return RespHelper.or500(doctorGroupWebService.createGroupEvent(groupId, eventType, data));
+        return RespWithExHelper.orInvalid(doctorGroupWebService.createGroupEvent(groupId, eventType, data));
     }
 
     /**
@@ -141,7 +142,7 @@ public class DoctorGroupEvents {
      */
     @RequestMapping(value = "/batchOther", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean batchCreateGroupEvent(@RequestBody DoctorBatchGroupEventDto batchGroupEventDto) {
-        return RespHelper.or500(doctorGroupWebService.batchGroupEvent(batchGroupEventDto));
+        return RespWithExHelper.orInvalid(doctorGroupWebService.batchGroupEvent(batchGroupEventDto));
     }
     /**
      * 根据猪群id查询可以操作的事件类型
