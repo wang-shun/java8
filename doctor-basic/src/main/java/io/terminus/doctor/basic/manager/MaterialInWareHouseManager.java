@@ -4,12 +4,11 @@ import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.NumberUtils;
-import io.terminus.doctor.basic.dto.DoctorMoveMaterialDto;
-import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.basic.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.basic.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.basic.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.basic.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.basic.dto.DoctorMoveMaterialDto;
 import io.terminus.doctor.basic.dto.DoctorWareHouseBasicDto;
 import io.terminus.doctor.basic.dto.EventHandlerContext;
 import io.terminus.doctor.basic.handler.DoctorWareHouseHandlerInvocation;
@@ -18,6 +17,7 @@ import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.basic.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.FeedFormula;
+import io.terminus.doctor.common.enums.WareHouseType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notNull;
 import static java.util.Objects.isNull;
 
 /**
@@ -288,8 +289,11 @@ public class MaterialInWareHouseManager {
         // delete consum avg
         DoctorMaterialConsumeAvg doctorMaterialConsumeAvg = doctorMaterialConsumeAvgDao.queryByIds(
                 doctorMaterialInWareHouse.getFarmId(), doctorMaterialInWareHouse.getWareHouseId(), doctorMaterialInWareHouse.getMaterialId());
-        checkState(!isNull(doctorMaterialConsumeAvg), "query.materialInWareHouse.empty");
-        doctorMaterialConsumeAvgDao.delete(doctorMaterialConsumeAvg.getId());
+//        checkState(!isNull(doctorMaterialConsumeAvg), "query.materialInWareHouse.empty");
+        //不太清楚逻辑,只能先改为存在就删除,不存在就忽略
+        if (notNull(doctorMaterialConsumeAvg)) {
+            doctorMaterialConsumeAvgDao.delete(doctorMaterialConsumeAvg.getId());
+        }
         return Boolean.TRUE;
     }
 
