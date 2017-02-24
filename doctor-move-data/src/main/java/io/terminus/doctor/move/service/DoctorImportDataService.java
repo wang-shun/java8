@@ -631,6 +631,11 @@ public class DoctorImportDataService {
             }
             boar.setBirthDate(ImportExcelUtils.getDate(row, 3));
             boar.setInFarmDate(ImportExcelUtils.getDate(row, 2));
+
+            if (boar.getBirthDate() == null || boar.getInFarmDate() == null) {
+                throw new JsonResponseException("公猪号：" + boar.getPigCode() + " 的日期不能为空，行数：" + (row.getRowNum() + 1));
+            }
+
             boar.setInitBarnName(ImportExcelUtils.getString(row, 0));
             DoctorBarn barn = barnMap.get(boar.getInitBarnName());
             if (barn != null) {
