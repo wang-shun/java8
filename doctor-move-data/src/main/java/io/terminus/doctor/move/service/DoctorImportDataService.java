@@ -1056,7 +1056,14 @@ public class DoctorImportDataService {
         sow.setPigMotherCode(last.getMotherCode());
         sow.setSource(PigSource.LOCAL.getKey());
         sow.setBirthWeight(0D);
-        sow.setInFarmDate(new DateTime(first.getMateDate()).plusDays(-1).toDate()); //进场时间取第一次配种时间减一天
+
+        //设置进场日期
+        if (first.getMateDate() != null) {
+            sow.setInFarmDate(new DateTime(first.getMateDate()).plusDays(-1).toDate()); //进场时间取第一次配种时间减一天
+        } else {
+            sow.setInFarmDate(DateTime.now().plusDays(-7).toDate()); //进场时间取当前日期减7天
+        }
+        
         sow.setInitBarnName(last.getBarnName());
         sow.setPigType(DoctorPig.PigSex.SOW.getKey());   //猪类
         if(last.getBirthDate() != null){
