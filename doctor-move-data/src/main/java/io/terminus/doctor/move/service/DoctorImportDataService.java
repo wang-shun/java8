@@ -765,8 +765,8 @@ public class DoctorImportDataService {
             groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
 
             //excel日龄是转入时的日龄，所以要重新算一发
-            Integer dayAge = MoreObjects.firstNonNull(ImportExcelUtils.getInt(row, 4), 1) + DateUtil.getDeltaDaysAbs(openAt, new Date());
-            groupTrack.setAvgDayAge(dayAge);
+            Integer dayAge = MoreObjects.firstNonNull(ImportExcelUtils.getInt(row, 4), 1);
+            groupTrack.setAvgDayAge(dayAge + DateUtil.getDeltaDaysAbs(openAt, new Date()));
             groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge()).toDate());
             groupTrack.setBirthWeight(ImportExcelUtils.getDoubleOrDefault(row, 5, 0) * groupTrack.getQuantity());
 
@@ -783,14 +783,14 @@ public class DoctorImportDataService {
                 groupTrack.setQuaQty(groupTrack.getQuantity());
             }
             doctorGroupTrackDao.create(groupTrack);
-            createMoveInGroupEvent(group, groupTrack);
+            createMoveInGroupEvent(group, groupTrack, dayAge);
         }
     }
 
     /**
      * 创建默认的转入事件
      */
-    private void createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack) {
+    private void createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, Integer dayAge) {
         DoctorGroupEvent event = new DoctorGroupEvent();
         event.setOrgId(group.getOrgId());
         event.setOrgName(group.getOrgName());
@@ -808,7 +808,7 @@ public class DoctorImportDataService {
         event.setQuantity(groupTrack.getQuantity());
         event.setAvgWeight(groupTrack.getBirthWeight());
         event.setWeight(event.getQuantity() * MoreObjects.firstNonNull(event.getAvgWeight(), 0D));
-        event.setAvgDayAge(groupTrack.getAvgDayAge());
+        event.setAvgDayAge(dayAge);
         event.setIsAuto(IsOrNot.YES.getValue());
         event.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
         doctorGroupEventDao.create(event);
@@ -872,7 +872,7 @@ public class DoctorImportDataService {
             groupTrack.setQuaQty(0);
 
             doctorGroupTrackDao.create(groupTrack);
-            createMoveInGroupEvent(group, groupTrack);
+            createMoveInGroupEvent(group, groupTrack, 1);
 
             // 把 产房仔猪群 的groupId 存入相应猪舍的所有母猪
             List<DoctorPigTrack> feedTracks = feedMap.get(group.getInitBarnId());
