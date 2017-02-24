@@ -231,7 +231,7 @@ public class DoctorPigEvents {
             params.remove("eventTypes");
         }
         if (StringUtils.isNotBlank((String) params.get("endDate"))) {
-            params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusSeconds(1).toDate());
+            params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusMillis(1).toDate());
         }
         Response<Paging<DoctorPigEvent>> pigEventPagingResponse = doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize);
         if (!pigEventPagingResponse.isSuccess()) {
@@ -364,6 +364,9 @@ public class DoctorPigEvents {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
+        if (StringUtils.isNotBlank((String) params.get("endDate"))) {
+            params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusMillis(1).toDate());
+        }
         Response<Paging<DoctorGroupEvent>> pagingResponse = doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize);
         if (!pagingResponse.isSuccess()) {
             return Paging.empty();
@@ -384,13 +387,14 @@ public class DoctorPigEvents {
 
     /**
      * 事件导出
-     * @param eventCriteria
-     * @param request
-     * @param response
+     * @param eventCriteria 查询条件
+     * @param request HttpRequest
+     * @param response HttpResponse
      */
     @RequestMapping(value = "/eventExport", method = RequestMethod.GET)
     public void pigEventExport(@RequestParam Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response){
         try {
+            log.info("event.export.starting");
             if (Strings.isNullOrEmpty(eventCriteria.get("kind"))) {
                 return;
             }
@@ -400,6 +404,7 @@ public class DoctorPigEvents {
                 eventCriteria.put("ordered","0");
                 exporter.export("web-pig-event", eventCriteria, 1, 500, this::pagingPigEvent, request, response);
             }
+            log.info("event.export.ending");
         } catch (Exception e) {
             log.error("event.export.failed");
         }
@@ -407,8 +412,8 @@ public class DoctorPigEvents {
 
     /**
      * 分页猪事件
-     * @param pigEventCriteria
-     * @return
+     * @param pigEventCriteria 查询猪事件条件
+     * @return 分页导出猪事件数据
      */
     private Paging<DoctorPigEventExportData> pagingPigEvent(Map<String, String> pigEventCriteria) {
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
@@ -420,8 +425,8 @@ public class DoctorPigEvents {
 
     /**
      * 分页猪群事件
-     * @param groupEventCriteria
-     * @return
+     * @param groupEventCriteria 查询猪群事件条件
+     * @return 分页导出猪群事件数据
      */
     private Paging<DoctorGroupEventExportData> pagingGroupEvent(Map<String, String> groupEventCriteria) {
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(groupEventCriteria, Map.class);
