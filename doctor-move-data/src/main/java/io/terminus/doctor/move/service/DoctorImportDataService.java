@@ -650,7 +650,7 @@ public class DoctorImportDataService {
             }
 
             //进场默认活公猪
-            BoarEntryType entryType = BoarEntryType.from(ImportExcelUtils.getString(row, 9));
+            BoarEntryType entryType = BoarEntryType.from(ImportExcelUtils.getString(row, 8));
             boar.setBoarType(entryType == null ? BoarEntryType.HGZ.getKey() : entryType.getKey());
             doctorPigDao.create(boar);
 
