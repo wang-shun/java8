@@ -768,7 +768,10 @@ public class DoctorImportDataService {
             Integer dayAge = MoreObjects.firstNonNull(ImportExcelUtils.getInt(row, 4), 1);
             groupTrack.setAvgDayAge(dayAge + DateUtil.getDeltaDaysAbs(openAt, new Date()));
             groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge()).toDate());
-            groupTrack.setBirthWeight(ImportExcelUtils.getDoubleOrDefault(row, 5, 0) * groupTrack.getQuantity());
+
+            Double avgWeight = ImportExcelUtils.getDoubleOrDefault(row, 5, 0);
+
+            groupTrack.setBirthWeight(avgWeight * groupTrack.getQuantity());
 
             //产房仔猪的批次总结字段
             if (PigType.FARROW_TYPES.contains(group.getPigType())) {
@@ -783,14 +786,14 @@ public class DoctorImportDataService {
                 groupTrack.setQuaQty(groupTrack.getQuantity());
             }
             doctorGroupTrackDao.create(groupTrack);
-            createMoveInGroupEvent(group, groupTrack, dayAge);
+            createMoveInGroupEvent(group, groupTrack, dayAge, avgWeight);
         }
     }
 
     /**
      * 创建默认的转入事件
      */
-    private void createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, Integer dayAge) {
+    private void createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, Integer dayAge, Double avgWeight) {
         DoctorGroupEvent event = new DoctorGroupEvent();
         event.setOrgId(group.getOrgId());
         event.setOrgName(group.getOrgName());
@@ -801,13 +804,13 @@ public class DoctorImportDataService {
         event.setEventAt(group.getOpenAt());
         event.setType(GroupEventType.MOVE_IN.getValue());
         event.setName(GroupEventType.MOVE_IN.getDesc());
-        event.setDesc("转移类型：仔猪转入#猪只数：" + groupTrack.getQuantity() + "#平均日龄：" + groupTrack.getAvgDayAge() + "");
         event.setBarnId(group.getInitBarnId());
         event.setBarnName(group.getInitBarnName());
         event.setPigType(group.getPigType());
         event.setQuantity(groupTrack.getQuantity());
-        event.setAvgWeight(groupTrack.getBirthWeight());
-        event.setWeight(event.getQuantity() * MoreObjects.firstNonNull(event.getAvgWeight(), 0D));
+        event.setAvgWeight(avgWeight);
+        event.setWeight(event.getQuantity() * avgWeight);
+        event.setDesc("转移类型：仔猪转入#猪只数：" + groupTrack.getQuantity() + "#平均日龄：" + groupTrack.getAvgDayAge() + "#均重：" + avgWeight);
         event.setAvgDayAge(dayAge);
         event.setIsAuto(IsOrNot.YES.getValue());
         event.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
@@ -872,7 +875,7 @@ public class DoctorImportDataService {
             groupTrack.setQuaQty(0);
 
             doctorGroupTrackDao.create(groupTrack);
-            createMoveInGroupEvent(group, groupTrack, 1);
+            createMoveInGroupEvent(group, groupTrack, 1, groupTrack.getBirthWeight() / groupTrack.getQuantity());
 
             // 把 产房仔猪群 的groupId 存入相应猪舍的所有母猪
             List<DoctorPigTrack> feedTracks = feedMap.get(group.getInitBarnId());
