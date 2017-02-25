@@ -882,8 +882,12 @@ public class DoctorImportDataService {
             groupTrack.setWeanQty(0);    //默认全部未断奶
             groupTrack.setQuaQty(0);
 
+            if (groupTrack.getQuantity() == null) {
+                throw new JsonResponseException("分娩转入猪群数量不能为空，猪群号：" + group.getGroupCode());
+            }
+
             doctorGroupTrackDao.create(groupTrack);
-            createMoveInGroupEvent(group, groupTrack, 1, groupTrack.getBirthWeight() / groupTrack.getQuantity());
+            createMoveInGroupEvent(group, groupTrack, 1, MoreObjects.firstNonNull(groupTrack.getBirthWeight(), 7D) / groupTrack.getQuantity());
 
             // 把 产房仔猪群 的groupId 存入相应猪舍的所有母猪
             List<DoctorPigTrack> feedTracks = feedMap.get(group.getInitBarnId());
