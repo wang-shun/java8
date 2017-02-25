@@ -942,6 +942,7 @@ public class DoctorImportDataService {
                     .put(first.getParity(), Lists.newArrayList(entryEvent.getId())).map();
 
             int delta = 0;
+            boolean notPreg = false;
             for (int i = 0; i < size; i++) {
                 DoctorImportSow is = importSows.get(i);
 
@@ -950,11 +951,13 @@ public class DoctorImportDataService {
                     delta = is.getParity();
                 } else {
                     if ((is.getParity() - i) != delta) {
-                        if (isEmpty(is.getRemark()) || !is.getRemark().contains("检查：")) {
+                        if (!notPreg) {
                             throw new JsonResponseException("母猪号(" + sow.getPigCode() + ")的胎次( " + is.getParity() + " )不连续, 请检查");
                         }
                     }
+                    notPreg = false;
                     if (notEmpty(is.getRemark()) && is.getRemark().contains("检查：")) {
+                        notPreg = true;
                         delta -= 1;
                     }
                 }
