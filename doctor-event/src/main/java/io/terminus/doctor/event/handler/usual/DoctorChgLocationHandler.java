@@ -60,6 +60,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
     @Override
     public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+        super.handleCheck(eventDto, basic);
         DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) eventDto;
         expectTrue(!Objects.equals(chgLocationDto.getChgLocationFromBarnId(), chgLocationDto.getChgLocationToBarnId()), "same.barn.not.trans");
     }
