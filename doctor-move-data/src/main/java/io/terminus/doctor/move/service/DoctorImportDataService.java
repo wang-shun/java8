@@ -950,9 +950,11 @@ public class DoctorImportDataService {
                     delta = is.getParity();
                 } else {
                     if ((is.getParity() - i) != delta) {
-                        throw new JsonResponseException("母猪号(" + sow.getPigCode() + ")的胎次( " + is.getParity() + " )不连续, 请检查");
+                        if (isEmpty(is.getRemark()) || !is.getRemark().contains("检查：")) {
+                            throw new JsonResponseException("母猪号(" + sow.getPigCode() + ")的胎次( " + is.getParity() + " )不连续, 请检查");
+                        }
                     }
-                    if (notEmpty(is.getRemark())  && is.getRemark().contains("检查：")) {
+                    if (notEmpty(is.getRemark()) && is.getRemark().contains("检查：")) {
                         delta -= 1;
                     }
                 }
