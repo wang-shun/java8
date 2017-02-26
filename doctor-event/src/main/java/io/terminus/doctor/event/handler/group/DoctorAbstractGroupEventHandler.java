@@ -39,7 +39,7 @@ import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
-import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
+import static io.terminus.doctor.common.enums.PigType.*;
 
 /**
  * Desc:
@@ -52,21 +52,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
-    //产房仔猪允许转入的猪舍: 产房(分娩母猪舍)/保育舍
-    private static final List<Integer> FARROW_ALLOW_TRANS = Lists.newArrayList(
-            PigType.NURSERY_PIGLET.getValue(),
-            PigType.DELIVER_SOW.getValue());
 
-    //保育猪猪允许转入的猪舍: 保育舍/育肥舍/育种舍/后备舍(公母)
-    private static final List<Integer> NURSERY_ALLOW_TRANS = Lists.newArrayList(
-            PigType.NURSERY_PIGLET.getValue(),
-            PigType.FATTEN_PIG.getValue(),
-            PigType.RESERVE.getValue());
-
-    //育肥猪允许转入的猪舍: 育肥舍/后备舍(公母)
-    private static final List<Integer> FATTEN_ALLOW_TRANS = Lists.newArrayList(
-            PigType.FATTEN_PIG.getValue(),
-            PigType.RESERVE.getValue());
 
     protected final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
