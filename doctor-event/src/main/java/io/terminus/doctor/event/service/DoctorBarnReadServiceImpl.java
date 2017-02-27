@@ -3,7 +3,6 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
@@ -26,6 +25,9 @@ import org.springframework.stereotype.Service;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static io.terminus.doctor.common.enums.PigType.*;
 
 /**
  * Desc: 猪舍表读服务实现类
@@ -134,22 +136,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
              * 要转入猪场的猪舍
              */
             List<DoctorBarn> doctorBarns = doctorBarnDao.findByFarmId(farmId);
-            List<DoctorBarn> availableBarns = Lists.newArrayList();
-
-            for (DoctorBarn doctorBarn : doctorBarns) {
-                if (Objects.equal(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue()) &&
-                        !(Objects.equal(barnType, PigType.NURSERY_PIGLET.getValue()) || Objects.equal(barnType, PigType.DELIVER_SOW.getValue()))) {
-                    continue;
-                }
-
-                if (Objects.equal(doctorBarn.getPigType(), PigType.NURSERY_PIGLET.getValue()) &&
-                        !(Objects.equal(barnType, PigType.FATTEN_PIG.getValue()) || Objects.equal(barnType, PigType.NURSERY_PIGLET.getValue()))) {
-                    continue;
-                }
-                availableBarns.add(doctorBarn);
-            }
-
-            return Response.ok(availableBarns);
+            return Response.ok(doctorBarns.stream().filter(doctorBarn -> doctorBarn != null && checkCanTransBarn(barnType, doctorBarn.getPigType())).collect(Collectors.toList()));
         } catch (Exception e) {
             log.error("fail to find available barns,current group id:{},farm id:{},cause:{}",
                     groupId, farmId, Throwables.getStackTraceAsString(e));
@@ -189,5 +176,23 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             log.error("find barn by farm and barn name failed, farmId:{}, barnName:{}, cause:{}", farmId, barnName, Throwables.getStackTraceAsString(e));
             return Response.fail("find.barn.by.farm.and.barn.name.failed");
         }
+    }
+
+
+
+    //校验能否转入此舍(产房 => 产房(分娩母猪舍)/保育舍，保育舍 => 保育舍/育肥舍/育种舍，同类型可以互转)
+    private Boolean checkCanTransBarn(Integer pigType, Integer barnType) {
+
+        //产房 => 产房(分娩母猪舍)/保育舍
+        return (Objects.equal(pigType, PigType.DELIVER_SOW.getValue()) && FARROW_ALLOW_TRANS.contains(barnType))
+                //保育舍 => 保育舍/育肥舍/育种舍/后备舍(公母)
+                || (Objects.equal(pigType, PigType.NURSERY_PIGLET.getValue()) && NURSERY_ALLOW_TRANS.contains(barnType))
+                //育肥舍 => 育肥舍/后备舍(公母)
+                || (Objects.equal(pigType, PigType.FATTEN_PIG.getValue()) && FATTEN_ALLOW_TRANS.contains(barnType))
+                // 后备群 => 育肥舍/后备舍
+                || (Objects.equal(pigType, PigType.RESERVE.getValue()) && (Objects.equal(barnType, PigType.RESERVE.getValue()) || Objects.equal(barnType, PigType.FATTEN_PIG.getValue())))
+                //其他 => 同类型
+                || (Objects.equal(pigType, barnType));
+
     }
 }
