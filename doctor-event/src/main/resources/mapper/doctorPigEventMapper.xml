@@ -510,6 +510,15 @@
         order by event_at DESC , id DESC
     </select>
 
+    <select id="queryAllEventsByPigIdForASC" parameterType="long" resultMap="DoctorPigEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE pig_id = #{pigId}
+        order by event_at ASC , id ASC
+    </select>
+
     <select id="count" parameterType="map" resultType="long">
         SELECT count(1) from
         <include refid="tb"/>
