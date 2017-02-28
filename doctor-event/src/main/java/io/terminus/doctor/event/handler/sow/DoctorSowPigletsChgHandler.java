@@ -7,10 +7,8 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -72,37 +70,27 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
         extra.put("partWeanPigletsCount", weanCount);
         extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         doctorPigTrack.setExtraMap(extra);
-        //Long groupId = doctorPigTrack.getGroupId();
-        //全部断奶后, 初始化所有本次哺乳的信息
-        //Long pigEventId = (Long) context.get("doctorPigEventId");
-//        //全部断奶后, 初始化所有本次哺乳的信息
-//        if (doctorPigTrack.getUnweanQty() == 0) {
-//            doctorPigTrack.setStatus(PigStatus.Wean.getKey());
-//            doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
-//            doctorPigTrack.setFarrowQty(0);  //分娩数 0
-//            doctorPigTrack.setFarrowAvgWeight(0D);
-//            doctorPigTrack.setWeanAvgWeight(0D);
-//
-//        }
-       // doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
 
         // 调用对应的猪猪群事件,对应的操作方式
         return doctorPigTrack;
     }
 
+
     @Override
     protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        if (Objects.equals(doctorPigTrack.getUnweanQty(), 0)) {
-            DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) inputDto;
-            DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
-                    .partWeanDate(doctorPigEvent.getEventAt())
-                    .partWeanPigletsCount(0)
-                    .partWeanAvgWeight(0d)
-                    .build();
-            buildAutoEventCommonInfo(pigletsChgDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
-            doctorSowWeanHandler.handle(doctorEventInfoList, partWeanDto, basic);
-        }
-
+        // TODO: 17/2/28 业务变动, 全部仔猪变动不触发断奶事件 先注释
+//        if (Objects.equals(doctorPigTrack.getUnweanQty(), 0)) {
+//            DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) inputDto;
+//            DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
+//                    .partWeanDate(doctorPigEvent.getEventAt())
+//                    .partWeanPigletsCount(0)
+//                    .partWeanAvgWeight(0d)
+//                    .build();
+//            buildAutoEventCommonInfo(pigletsChgDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
+//            doctorSowWeanHandler.handle(doctorEventInfoList, partWeanDto, basic);
+//        }
+//
+        //触发猪群变动事件
         changePigletsChangeInfo(doctorPigTrack.getGroupId(), inputDto, basic, doctorPigEvent.getId());
     }
 
