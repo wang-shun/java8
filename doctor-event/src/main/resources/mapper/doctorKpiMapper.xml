@@ -1575,19 +1575,49 @@
 
     <!-- 断奶七天配种率-->
     <select id="getMateInSeven" parameterType="map" resultType="double">
-        select
-        case (
+        select case (ifnull(t1.count,0) - ifnull(t2.count,0) + ifnull(t3.count,0)) when 0 then 0  else ifnull(t4.count, 0)/(ifnull(t1.count,0) - ifnull(t2.count,0) + ifnull(t3.count,0)) end
+        from (
         -- 断奶母猪数
-        select  count(1)
+        select  count(1) as count
         from doctor_pig_events
         where
         pig_status_after = 9
         and type in (16,17,18)
         <include refid="criteria"/>
-        ) when 0 then 0 else
+        ) t1,
         (
-        -- 本月7天内断奶配种数
-        select count(1)
+        -- 7天内断奶的
+        select count(1) as count
+        from  doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        and farm_id = #{farmId}
+        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
+        and event_at &lt;= #{endAt}
+        ) t2,
+        (
+        -- 断奶七天内配种
+        select count(1) as count
+        from doctor_pig_events
+        where
+        type = 9
+        and farm_id = #{farmId}
+        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
+        and event_at &lt;= #{endAt}
+        and pig_id in(
+        select pig_id
+        from  doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        and farm_id = #{farmId}
+        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
+        and event_at &lt;= #{endAt}
+        )
+        )  t3,
+        (-- 本月7天内断奶配种数
+        select count(1) as count
         from
         (
         select  pig_id, event_at, parity
@@ -1601,8 +1631,7 @@
         select  pig_id, event_at, parity
         from doctor_pig_events
         where type = 9
-        and farm_id = 1
-        <include refid="criteria"/>
+        and farm_id = 92
         and current_mating_count = 1
         and pig_id in(
         select  pig_id
@@ -1614,49 +1643,7 @@
         )
         ) t2 on t1.pig_id = t2.pig_id and t1.parity + 1 = t2.parity
         where t1.event_at > date_add(t2.event_at, interval -7 day)
-        )/
-        (
-        (
-        -- 断奶母猪数
-        select  count(1)
-        from doctor_pig_events
-        where
-        pig_status_after = 9
-        and type in (16,17,18)
-        <include refid="criteria"/>
-        ) -
-        (
-        -- 7天内断奶的
-        select count(1)
-        from  doctor_pig_events
-        where
-        pig_status_after = 9
-        and type in (16,17,18)
-        and farm_id = 1
-        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
-        and event_at &lt;= #{endAt}
-        ) +
-        (
-        -- 断奶七天内配种
-        select count(1)
-        from doctor_pig_events
-        where
-        type = 9
-        and farm_id = 1
-        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
-        and event_at &lt;= #{endAt}
-        and pig_id in(
-        select pig_id
-        from  doctor_pig_events
-        where
-        pig_status_after = 9
-        and type in (16,17,18)
-        and farm_id = 1
-        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
-        and event_at &lt;= #{endAt}
-        )
-        )
-        ) end from dual
+        ) t4;
     </select>
 
     <!--根据日期获取当时猪群的情况-->
