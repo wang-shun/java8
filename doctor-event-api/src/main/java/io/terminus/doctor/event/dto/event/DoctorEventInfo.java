@@ -23,6 +23,9 @@ public class DoctorEventInfo {
     private Integer status;
     private Date eventAt;
     private Integer eventType;
+    /**
+     * @see io.terminus.doctor.event.model.DoctorMessage.BUSINESS_TYPE
+     */
     private Integer businessType;
     /**
      * 猪舍类型
