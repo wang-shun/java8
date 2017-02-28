@@ -28,4 +28,10 @@ public interface DoctorOrgReadService {
      * @return 公司列表
      */
     Response<List<DoctorOrg>> findOrgsByUserId(@NotNull(message = "userId.not.null") Long userId);
+
+    /**
+     * 查询所有公司
+     * @return 所有公司
+     */
+    Response<List<DoctorOrg>> findAllOrgs();
 }

@@ -67,4 +67,14 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
             return Response.fail("org.find.fail");
         }
     }
+
+    @Override
+    public Response<List<DoctorOrg>> findAllOrgs() {
+        try {
+            return Response.ok(doctorOrgDao.findAll());
+        } catch (Exception e) {
+            log.error("find all orgs failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("org.find.fail");
+        }
+    }
 }

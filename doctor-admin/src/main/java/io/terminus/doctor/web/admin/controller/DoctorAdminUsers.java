@@ -3,36 +3,45 @@ package io.terminus.doctor.web.admin.controller;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.web.admin.dto.DoctorGroupUserWithOrgAndFarm;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc: admin分配权限的api
@@ -61,6 +70,8 @@ public class DoctorAdminUsers {
     private DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     @RpcConsumer
     private DoctorServiceReviewReadService doctorServiceReviewReadService;
+    @RpcConsumer
+    private DoctorOrgReadService doctorOrgReadService;
 
     /**
      * 新增集团用户
@@ -153,7 +164,7 @@ public class DoctorAdminUsers {
     private DoctorUserDataPermission getPermission(DoctorUserDataPermission permission, Long userId, String orgIds, String farmIds) {
         permission.setUserId(userId);
         permission.setOrgIds(orgIds);
-        permission.setFarmIds(Arguments.notEmpty(farmIds) ? farmIds : getFarmIds(Splitters.splitToLong(orgIds, Splitters.COMMA)));
+        permission.setFarmIds(notEmpty(farmIds) ? farmIds : getFarmIds(Splitters.splitToLong(orgIds, Splitters.COMMA)));
         return permission;
     }
 
@@ -164,5 +175,64 @@ public class DoctorAdminUsers {
             farmIds.addAll(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()));
         }
         return Joiners.COMMA.join(farmIds);
+    }
+
+
+    /**
+     * 分页集团用户搭配权限
+     *
+     * @param id          用户的id
+     * @param name        用户的名字
+     * @param email       用户邮箱
+     * @param mobile      用户手机号
+     * @param status      用户状态
+     * @param type        用户类型
+     * @param pageNo      当前页码
+     * @param pageSize    每页大小
+     * @return 分页结果
+     */
+    @RequestMapping(value = "/paging", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Paging<DoctorGroupUserWithOrgAndFarm> pagingGroupUser(@RequestParam(required = false) Long id,
+                                                                 @RequestParam(required = false) String name,
+                                                                 @RequestParam(required = false) String email,
+                                                                 @RequestParam(required = false) String mobile,
+                                                                 @RequestParam(required = false) Integer status,
+                                                                 @RequestParam(required = false) Integer type,
+                                                                 @RequestParam(required = false) Integer pageNo,
+                                                                 @RequestParam(required = false) Integer pageSize) {
+        Paging<User> userPaging = RespHelper.or500(doctorUserReadService.paging(id, name, email, mobile, status, type, pageNo, pageSize));
+        return new Paging<>(userPaging.getTotal(), withOrgAndFarm(userPaging.getData()));
+    }
+
+    //带上用户权限公司和猪场的分页
+    private List<DoctorGroupUserWithOrgAndFarm> withOrgAndFarm(List<User> users) {
+        Map<Long, DoctorOrg> orgMap = RespHelper.or500(doctorOrgReadService.findAllOrgs()).stream()
+                .collect(Collectors.toMap(DoctorOrg::getId, o -> o));
+
+        Map<Long, DoctorFarm> farmMap = RespHelper.or500(doctorFarmReadService.findAllFarms()).stream()
+                .collect(Collectors.toMap(DoctorFarm::getId, f -> f));
+
+        return users.stream()
+                .map(user -> {
+                    DoctorGroupUserWithOrgAndFarm groupUser = BeanMapper.map(user, DoctorGroupUserWithOrgAndFarm.class);
+                    Response<DoctorUserDataPermission> permissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId());
+
+                    if (permissionResponse.isSuccess() && permissionResponse.getResult() != null) {
+                        DoctorUserDataPermission permission = permissionResponse.getResult();
+
+                        //设置一下权限
+                        groupUser.setOrgs(mapIdToList(permission.getOrgIdsList(), orgMap));
+                        groupUser.setFarms(mapIdToList(permission.getFarmIdsList(), farmMap));
+                    }
+                    return groupUser;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private <T> List<T> mapIdToList(List<Long> ids, Map<Long, T> map) {
+        if (!notEmpty(ids)) {
+            return Collections.emptyList();
+        }
+        return ids.stream().map(map::get).collect(Collectors.toList());
     }
 }
