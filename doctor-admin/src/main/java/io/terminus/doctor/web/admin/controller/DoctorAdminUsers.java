@@ -201,6 +201,9 @@ public class DoctorAdminUsers {
                                                                  @RequestParam(required = false) Integer pageNo,
                                                                  @RequestParam(required = false) Integer pageSize) {
         Paging<User> userPaging = RespHelper.or500(doctorUserReadService.paging(id, name, email, mobile, status, type, pageNo, pageSize));
+        if (userPaging.getTotal() == 0L) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
         return new Paging<>(userPaging.getTotal(), withOrgAndFarm(userPaging.getData()));
     }
 
