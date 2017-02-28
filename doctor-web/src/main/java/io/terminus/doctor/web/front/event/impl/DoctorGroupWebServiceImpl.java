@@ -602,8 +602,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
      */
     private void checkEventAt(Long groupId, Date eventAt){
         DoctorGroupEvent lastEvent = RespHelper.orServEx(doctorGroupReadService.findLastEventByGroupId(groupId));
-        if (notNull(lastEvent) && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt()))) {
-                throw new InvalidException("event.at.range.error", DateUtil.toDateString(lastEvent.getEventAt()), DateUtil.toDateString(eventAt));
+        if (notNull(lastEvent) && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt())) || Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date()))) {
+                throw new InvalidException("event.at.range.error", DateUtil.toDateString(lastEvent.getEventAt()), DateUtil.toDateString(new Date()), DateUtil.toDateString(eventAt));
             }
         }
 }
