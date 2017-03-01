@@ -317,9 +317,10 @@ public class DoctorBarns {
         barn.setOrgId(farm.getOrgId());
         barn.setOrgName(farm.getOrgName());
         barn.setFarmName(farm.getName());
+        DoctorBarn doctorBarn = RespHelper.or500(doctorBarnReadService.findBarnByFarmAndBarnName(barn.getFarmId(), barn.getName()));
 
         if (barn.getId() == null) {
-            if (notNull(RespHelper.or500(doctorBarnReadService.findBarnByFarmAndBarnName(barn.getFarmId(), barn.getName())))) {
+            if (notNull(doctorBarn)) {
                 throw new JsonResponseException("barn.name.has.existed");
             }
             barn.setStatus(DoctorBarn.Status.USING.getValue());     //初始猪舍状态: 在用
@@ -332,6 +333,9 @@ public class DoctorBarns {
                 this.addBarnId2DataPermission(barnId, RespHelper.or500(primaryUserReadService.findSubByUserId(user.getId())).getParentUserId());
             }
         } else {
+            if (notNull(doctorBarn) && !Objects.equals(doctorBarn.getId(), barn.getId())) {
+                throw new JsonResponseException("barn.name.has.existed");
+            }
             barnId = barn.getId();
             DoctorBarn oldBarn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
             //判断猪舍是否能够停用
