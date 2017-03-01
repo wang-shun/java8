@@ -66,10 +66,10 @@ public class DoctorRemovalDto extends BasePigEventInputDto implements Serializab
             map.put("重量", weight.toString());
         }
         if(price != null){
-            map.put("价格", NumberUtils.divide(price, Long.valueOf(100), 2));
+            map.put("价格", NumberUtils.divide(price, 100L, 2));
         }
         if(sum != null){
-            map.put("总量", sum.toString());
+            map.put("总金额", NumberUtils.divide(sum, 100L, 2));
         }
         return map;
     }

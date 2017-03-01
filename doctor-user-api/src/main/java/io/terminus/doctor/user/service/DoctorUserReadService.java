@@ -2,11 +2,9 @@ package io.terminus.doctor.user.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
-import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -33,13 +31,6 @@ public interface DoctorUserReadService extends UserReadService<User>{
      * @return 用户信息
      */
     Response<DoctorUserInfoDto> findUserInfoByUserId(Long userId);
-
-    /**
-     * 查询猪场职员基本信息
-     * @param userId 用户id
-     * @return 猪场职员信息
-     */
-    Response<DoctorStaff> findStaffByUserId(@NotNull(message = "userId.not.null") Long userId);
 
     /**
      * 检查子账号是否存在

@@ -98,8 +98,14 @@ public class DoctorServiceReviewController {
                 || dto.getLoginName().contains("@") || mobilePattern.getPattern().matcher(dto.getLoginName()).matches()){
             throw new JsonResponseException("login.name.invalid");
         }
+
+        // TODO: 2017/2/16 前端天每天？
+        if (dto.getOrg() == null || dto.getOrg().getId() == null) {
+            throw new JsonResponseException("orgId.not.null");
+        }
+        
         List<DoctorFarm> newFarms = RespHelper.or500(
-                doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getLoginName(), dto.getFarms())
+                doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getLoginName(), dto.getOrg(), dto.getFarms())
         );
 
         //分发猪场软件已开通的事件
@@ -244,10 +250,10 @@ public class DoctorServiceReviewController {
     public UserApplyServiceDetailDto findUserApplyDetail(@PathVariable Long userId){
         UserApplyServiceDetailDto dto = new UserApplyServiceDetailDto();
         List<DoctorFarm> farms = RespHelper.or500(doctorFarmReadService.findFarmsByUserId(userId));
-        DoctorOrg org = RespHelper.or500(doctorOrgReadService.findOrgByUserId(userId));
+        List<DoctorOrg> orgs = RespHelper.or500(doctorOrgReadService.findOrgsByUserId(userId));
         dto.setFarms(farms);
         dto.setUserId(userId);
-        dto.setOrg(org);
+        dto.setOrg(orgs.get(0)); // TODO: 2017/2/16 暂时取第一个
         return dto;
     }
 

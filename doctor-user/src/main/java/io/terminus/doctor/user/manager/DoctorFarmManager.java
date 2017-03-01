@@ -47,12 +47,10 @@ public class DoctorFarmManager {
 
     /**
      * 给已开通猪场软件的用户添加猪场
-     * @param userId
-     * @param farms
      */
     @Transactional
-    public List<DoctorFarm> addFarms4PrimaryUser(Long userId, List<DoctorFarm> farms){
-        DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgByUserId(userId));
+    public List<DoctorFarm> addFarms4PrimaryUser(Long userId, Long orgId, List<DoctorFarm> farms){
+        DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(orgId));
         List<DoctorFarm> newFarms = Lists.newArrayList(); //将被保存下来的新猪场
         farms.forEach(farm -> {
             farm.setOrgName(org.getName());

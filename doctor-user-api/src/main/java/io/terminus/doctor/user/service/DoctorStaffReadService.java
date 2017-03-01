@@ -9,21 +9,18 @@ import java.util.List;
 
 public interface DoctorStaffReadService {
 
-    Response<DoctorStaff> findStaffByUserId(Long userId);
+    /**
+     * 根据猪场id和用户id，唯一确定一个猪场员工
+     */
+    Response<DoctorStaff> findStaffByFarmIdAndUserId(@NotNull(message = "farmId.not.null") Long farmId,
+                                                     @NotNull(message = "userId.not.null") Long userId);
 
     /**
-     * 查询员工
-     * @param orgId  公司id
+     * 查询猪场员工
+     * @param farmId  公司id
      * @param status 员工状态
-     * @return
+     * @return 猪场员工列表
      */
-    Response<List<DoctorStaff>> findStaffByOrgIdAndStatus(@NotNull(message = "orgId.not.null") Long orgId,
-                                                          @Nullable Integer status);
-
-    /**
-     * 根据id查询员工表
-     * @param staffId  员工id
-     * @return  员工
-     */
-    Response<DoctorStaff> findStaffById(@NotNull(message = "id.not.null") Long staffId);
+    Response<List<DoctorStaff>> findStaffByFarmIdAndStatus(@NotNull(message = "farmId.not.null") Long farmId,
+                                                           @Nullable Integer status);
 }

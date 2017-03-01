@@ -273,15 +273,16 @@ public class DoctorImportDataService {
 
     private void deleteUser(DoctorFarm farm){
         if(farm != null && farm.getOrgId() != null){
-            for(DoctorStaff staff : doctorStaffDao.findByOrgId(farm.getOrgId())){
+            List<DoctorUserDataPermission> permissions = doctorUserDataPermissionDao.findByOrgId(farm.getOrgId());
+            permissions.forEach(permission -> {
                 // 向用户中心专用 zk 发送删除用户的消息
                 try {
-                    UserDto dto = new UserDto(staff.getUserId());
+                    UserDto dto = new UserDto(permission.getUserId());
                     userInterfaceManager.pulishZkEvent(dto, EventType.DELETE, DoctorSystemCode.PIG_DOCTOR);
                 } catch (Exception e) {
-                    log.error("导入猪场失败，且无法向用户中心专用 zk 发送删除用户的消息，请务必手动处理，farm={}, userId={}", farm, staff.getUserId());
+                    log.error("导入猪场失败，且无法向用户中心专用 zk 发送删除用户的消息，请务必手动处理，farm={}, userId={}", farm, permission.getUserId());
                 }
-            }
+            });
         }
     }
 
@@ -289,11 +290,12 @@ public class DoctorImportDataService {
     private Object[] importOrgFarmUser(Sheet farmShit, Sheet staffShit) {
         Object[] result = this.importOrgFarm(farmShit);
         User primaryUser = (User) result[0];
-        this.importStaff(staffShit, primaryUser);
+        DoctorFarm farm = (DoctorFarm) result[1];
+        this.importStaff(staffShit, primaryUser, farm);
         return result;
     }
 
-    private void importStaff(Sheet staffShit, User primaryUser){
+    private void importStaff(Sheet staffShit, User primaryUser, DoctorFarm farm) {
         final String appKey = "MOBILE";
         List<SubRole> existRoles = subRoleDao.findByUserIdAndStatus(appKey, primaryUser.getId(), 1);
         if(existRoles.isEmpty()){
@@ -306,8 +308,7 @@ public class DoctorImportDataService {
         List<String> existSubName = subDao.findByParentUserId(primaryUser.getId()).stream().map(Sub::getRealName).collect(Collectors.toList());
 
         // 主账号的 staff 信息
-        DoctorStaff priStaff = doctorStaffDao.findByUserId(primaryUser.getId());
-        String farmIds = Joiner.on(",").join(doctorFarmDao.findByOrgId(priStaff.getOrgId()).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
+        String farmIds = Joiner.on(",").join(doctorFarmDao.findByOrgId(farm.getOrgId()).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
 
         for(Row row : staffShit){
             if(canImport(row)){
@@ -354,7 +355,7 @@ public class DoctorImportDataService {
                 DoctorUserDataPermission permission = new DoctorUserDataPermission();
                 permission.setUserId(subUserId);
                 permission.setFarmIds(farmIds);
-                permission.setOrgIds(priStaff.getOrgId().toString());
+                permission.setOrgIds(farm.getOrgId().toString());
                 doctorUserDataPermissionDao.create(permission);
             }
         }
@@ -462,9 +463,9 @@ public class DoctorImportDataService {
         //集团账号的数据权限
         createOrUpdateMultiPermission(companyMobile, org.getId(), farm.getId());
 
-        if(doctorStaffDao.findByUserId(userId) == null){
+        if(doctorStaffDao.findByFarmIdAndUserId(farm.getId(), userId) == null){
             // 主账号的staff
-            this.createStaff(user, org, DoctorStaff.Sex.MALE);
+            this.createStaff(user, farm);
         }
 
         DoctorServiceStatus serviceStatus = doctorServiceStatusDao.findByUserId(userId);
@@ -532,16 +533,10 @@ public class DoctorImportDataService {
     }
 
 
-    private void createStaff(User user, DoctorOrg org, DoctorStaff.Sex sex){
+    private void createStaff(User user, DoctorFarm farm) {
         DoctorStaff staff = new DoctorStaff();
-        staff.setOrgName(org.getName());
-        staff.setOrgId(org.getId());
+        staff.setFarmId(farm.getId());
         staff.setUserId(user.getId());
-        staff.setCreatorId(user.getId());
-        staff.setCreatorName(user.getName());
-        staff.setUpdatorId(user.getId());
-        staff.setUpdatorName(user.getName());
-        staff.setSex(sex != null ? sex.value() : null);
         staff.setStatus(DoctorStaff.Status.PRESENT.value());
         doctorStaffDao.create(staff);
     }

@@ -26,4 +26,12 @@ public class DoctorUserDataPermissionDao extends MyBatisDao<DoctorUserDataPermis
         }
         return sqlSession.selectList(sqlId("findByUserIds"), userIds);
     }
+
+    public List<DoctorUserDataPermission> findByOrgId(Long orgId) {
+        return sqlSession.selectList(sqlId("findByOrgId"), orgId);
+    }
+
+    public List<DoctorUserDataPermission> findByFarmId(Long farmId) {
+        return sqlSession.selectList(sqlId("findByFarmId"), farmId);
+    }
 }

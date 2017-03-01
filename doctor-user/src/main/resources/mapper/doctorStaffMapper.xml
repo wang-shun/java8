@@ -7,23 +7,11 @@
 <mapper namespace="DoctorStaff">
     <resultMap id="DoctorStaffMap" type="DoctorStaff">
         <id column="id" property="id"/>
-        <result column="org_id" property="orgId"/>
-        <result column="org_name" property="orgName"/>
+        <result column="farm_id" property="farmId"/>
         <result column="user_id" property="userId"/>
-        <result column="role_id" property="roleId"/>
-        <result column="role_name" property="roleName"/>
         <result column="status" property="status"/>
-        <result column="sex" property="sex"/>
-        <result column="avatar" property="avatar"/>
-        <result column="out_id" property="outId"/>
-        <result column="extra" property="extra"/>
-        <result column="creator_id" property="creatorId"/>
-        <result column="creator_name" property="creatorName"/>
-        <result column="updator_id" property="updatorId"/>
-        <result column="updator_name" property="updatorName"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
-        
     </resultMap>
 
     <sql id="tb">
@@ -35,11 +23,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        org_id, org_name, user_id, role_id, role_name, status, sex, avatar, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
+        farm_id, user_id, status, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{orgId}, #{orgName}, #{userId}, #{roleId}, #{roleName}, #{status}, #{sex}, #{avatar}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{farmId}, #{userId}, #{status}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorStaff" keyProperty="id" useGeneratedKeys="true">
@@ -54,24 +42,21 @@
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id = #{id}
+        limit 1
     </select>
 
-    <select id="findByUserId" parameterType="long" resultMap="DoctorStaffMap" >
+    <select id="findByFarmIdAndUserId" parameterType="map" resultMap="DoctorStaffMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE user_id = #{userId}
+        WHERE farm_id = #{farmId}
+          AND user_id = #{userId}
+        limit 1
     </select>
 
-    <select id="findByOrgId" parameterType="long" resultMap="DoctorStaffMap" >
+    <select id="findByFarmIdAndStatus" parameterType="map" resultMap="DoctorStaffMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE org_id = #{orgId}
-    </select>
-
-    <select id="findByOrgIdAndStatus" parameterType="long" resultMap="DoctorStaffMap" >
-        SELECT <include refid="cols_all" />
-        FROM <include refid="tb" />
-        WHERE org_id = #{orgId}
+        WHERE farm_id = #{farmId}
         <if test="status != null">AND status = #{status}</if>
     </select>
 
@@ -79,20 +64,9 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="orgId != null">org_id = #{orgId},</if>
-            <if test="orgName != null">org_name = #{orgName},</if>
+            <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="userId != null">user_id = #{userId},</if>
-            <if test="roleId != null">role_id = #{roleId},</if>
-            <if test="roleName != null">role_name = #{roleName},</if>
             <if test="status != null">status = #{status},</if>
-            <if test="sex != null">sex = #{sex},</if>
-            <if test="avatar != null">avatar = #{avatar},</if>
-            <if test="outId != null">out_id = #{outId},</if>
-            <if test="extra != null">extra = #{extra},</if>
-            <if test="creatorId != null">creator_id = #{creatorId},</if>
-            <if test="creatorName != null">creator_name = #{creatorName},</if>
-            <if test="updatorId != null">updator_id = #{updatorId},</if>
-            <if test="updatorName != null">updator_name = #{updatorName},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
