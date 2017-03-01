@@ -317,6 +317,9 @@ public class DoctorBarns {
         barn.setOrgId(farm.getOrgId());
         barn.setOrgName(farm.getOrgName());
         barn.setFarmName(farm.getName());
+        if (isEmpty(barn.getName())) {
+            throw new JsonResponseException("barn.name.not.empty");
+        }
         DoctorBarn doctorBarn = RespHelper.or500(doctorBarnReadService.findBarnByFarmAndBarnName(barn.getFarmId(), barn.getName()));
 
         if (barn.getId() == null) {
