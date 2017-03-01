@@ -39,7 +39,6 @@ import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnSelect;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,9 +55,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.terminus.common.utils.Arguments.isEmpty;
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 
 /**
  * Desc: 猪舍表Controller
@@ -337,14 +334,6 @@ public class DoctorBarns {
         } else {
             barnId = barn.getId();
             DoctorBarn oldBarn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
-            //是否容许修改猪舍名字
-            if (StringUtils.isNotBlank(barn.getName()) && !barn.getName().equals(oldBarn.getName())) {
-                Long groupEvent = RespHelper.or500(doctorGroupReadService.countByBarnId(barnId));
-                Long pigEvent = RespHelper.or500(doctorPigEventReadService.countByBarnId(barnId));
-                if (groupEvent + pigEvent > 0L) {
-                    throw new JsonResponseException("barn.has.event.forbid.update.name");
-                }
-            }
             //判断猪舍是否能够停用
             if (Objects.equals(barn.getStatus(), DoctorBarn.Status.NOUSE.getValue())){
                 if (RespHelper.or500(doctorBarnReadService.countPigByBarnId(barn.getId())) > 0){
