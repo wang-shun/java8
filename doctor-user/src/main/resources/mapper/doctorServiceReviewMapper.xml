@@ -102,7 +102,7 @@
     </select>
 
     <select id="paging" resultType="io.terminus.doctor.user.model.DoctorServiceReviewExt">
-        SELECT <include refid="cols_all" />
+        SELECT id, user_id as userId, user_mobile as userMobile, real_name as realName, `type`, status, reviewer_id as reviewerId, created_at as createdAt, updated_at as updatedAt
         FROM <include refid="tb" />
         <include refid="criteria" />
         order by `status` desc, updated_at desc
