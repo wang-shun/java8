@@ -10,7 +10,6 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.enums.RoleType;
-import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.impl.service.UserReadServiceImpl;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -177,9 +175,6 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
             //用户个人信息
             UserProfile userProfile = RespHelper.orServEx(userProfileReadService.findProfileByUserId(userId));
 
-            //员工信息
-            DoctorStaff doctorStaff = RespHelper.orServEx(this.findStaffByUserId(userId));
-
             //角色类型
             Integer roleType = RespHelper.orServEx(findUserRoleTypeByUserId(userId));
 
@@ -193,7 +188,6 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
                     DoctorUserInfoDto.builder()
                             .user(user)
                             .userProfile(userProfile)
-                            .staff(doctorStaff)
                             .frontRoleType(roleType)
                             .farmId(farmId)
                             .build()
@@ -207,10 +201,6 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
         return response;
     }
 
-    @Override
-    public Response<DoctorStaff> findStaffByUserId(@NotNull(message = "userId.not.null") Long userId) {
-        return doctorStaffReadService.findStaffByUserId(userId);
-    }
 
     @Override
     public Response<List<User>> listCreatedUserSince(Date since){

@@ -10,22 +10,33 @@ import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
-import io.terminus.doctor.user.service.*;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
+import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
+import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
+import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
 import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
-import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 @Slf4j
 @RestController
@@ -144,7 +155,9 @@ public class ServiceReviews {
     @RequestMapping(value = "/getOrgInfo", method = RequestMethod.GET)
     @ResponseBody
     public DoctorOrg getOrgInfo() {
-        return RespHelper.or500(doctorOrgReadService.findOrgByUserId(UserUtil.getUserId()));
+        List<DoctorOrg> orgs = RespHelper.or500(doctorOrgReadService.findOrgsByUserId(UserUtil.getUserId()));
+        // TODO: 2017/2/16 多公司，暂时先返回第一个
+        return notEmpty(orgs) ? orgs.get(0) : null;
     }
 
     @RequestMapping(value = "/getUserLevelOneMenu", method = RequestMethod.GET)

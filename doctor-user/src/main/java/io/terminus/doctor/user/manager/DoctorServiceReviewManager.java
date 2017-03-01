@@ -10,16 +10,13 @@ import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.dao.DoctorServiceStatusDao;
-import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
-import io.terminus.doctor.user.dao.ServiceReviewTrackDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
-import io.terminus.doctor.user.model.ServiceReviewTrack;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
@@ -44,34 +41,29 @@ import java.util.stream.Collectors;
 public class DoctorServiceReviewManager {
 
     private final DoctorOrgDao doctorOrgDao;
-    private final DoctorStaffDao doctorStaffDao;
     private final DoctorStaffWriteService doctorStaffWriteService;
     private final DoctorServiceReviewDao doctorServiceReviewDao;
     private final DoctorFarmDao doctorFarmDao;
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     private final DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService;
-    private final ServiceReviewTrackDao serviceReviewTrackDao;
     private final DoctorServiceStatusDao doctorServiceStatusDao;
     private final AddressReadService addressReadService;
     private final UserDao userDao;
     private final SubRoleWriteService subRoleWriteService;
 
     @Autowired
-    public DoctorServiceReviewManager(DoctorOrgDao doctorOrgDao, DoctorStaffDao doctorStaffDao,
+    public DoctorServiceReviewManager(DoctorOrgDao doctorOrgDao,
                                       DoctorServiceReviewDao doctorServiceReviewDao,
                                       DoctorFarmDao doctorFarmDao, DoctorServiceStatusDao doctorServiceStatusDao,
                                       DoctorUserDataPermissionDao doctorUserDataPermissionDao,
-                                      ServiceReviewTrackDao serviceReviewTrackDao,
                                       AddressReadService addressReadService,
                                       DoctorStaffWriteService doctorStaffWriteService,
                                       DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService,
                                       UserDao userDao, SubRoleWriteService subRoleWriteService) {
         this.doctorOrgDao = doctorOrgDao;
-        this.doctorStaffDao = doctorStaffDao;
         this.doctorServiceReviewDao = doctorServiceReviewDao;
         this.doctorFarmDao = doctorFarmDao;
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
-        this.serviceReviewTrackDao = serviceReviewTrackDao;
         this.doctorServiceStatusDao = doctorServiceStatusDao;
         this.addressReadService = addressReadService;
         this.doctorStaffWriteService = doctorStaffWriteService;
@@ -84,56 +76,32 @@ public class DoctorServiceReviewManager {
     public void applyOpenService(BaseUser user, DoctorOrg org, DoctorServiceReview.Type type, DoctorServiceReview  review, String realName){
         //校验入参
         Preconditions.checkArgument(org != null, "required.org.info.missing");
-        //保存org
-        DoctorStaff staff = doctorStaffDao.findByUserId(user.getId());
-        if (staff == null || staff.getOrgId() == null) {
-            doctorOrgDao.create(org);
-            //插入staff
-            this.createDoctorStaff(user, org.getId(), org.getName());
-        } else {
-            org.setId(staff.getOrgId());
-            doctorOrgDao.update(org);
 
-            staff.setUpdatorName(user.getName());
-            staff.setUpdatorId(user.getId());
-            staff.setOrgName(org.getName());
-            RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
+        DoctorOrg exist = doctorOrgDao.findByName(org.getName());
+        if (exist == null) {
+            doctorOrgDao.create(org);
+        } else {
+            org.setId(exist.getId());
+            doctorOrgDao.update(org);
         }
 
         //添加状态变更记录
-        this.createServiceReviewTrack(null, user.getId(), review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue(), type, null);
+        this.createServiceReviewTrack(user.getId(), DoctorServiceReview.Status.REVIEW.getValue(), type, null);
 
         //更新状态为已提交,待审核
         review.setStatus(DoctorServiceReview.Status.REVIEW.getValue());
         review.setRealName(realName);
         doctorServiceReviewDao.update(review);
     }
-    private void createDoctorStaff(BaseUser user, Long orgId, String orgName){
+    private void createDoctorStaff(Long userId, Long farmId) {
         DoctorStaff staff = new DoctorStaff();
-        staff.setOrgId(orgId);
-        staff.setOrgName(orgName);
-        staff.setUserId(user.getId());
+        staff.setFarmId(farmId);
+        staff.setUserId(userId);
         staff.setStatus(DoctorStaff.Status.PRESENT.value());
-        staff.setCreatorId(user.getId());
-        staff.setCreatorName(user.getName());
-        staff.setUpdatorId(user.getId());
-        staff.setUpdatorName(user.getName());
         doctorStaffWriteService.createDoctorStaff(staff);
     }
-    private void createServiceReviewTrack(BaseUser user, Long userId, Integer oldStatus, Integer newStatus,
+    private void createServiceReviewTrack(Long userId, Integer newStatus,
                                           DoctorServiceReview.Type type, String reason){
-        ServiceReviewTrack track = new ServiceReviewTrack();
-        track.setUserId(userId);
-        track.setType(type.getValue());
-        track.setOldStatus(oldStatus);
-        track.setNewStatus(newStatus);
-        if(user != null){
-            track.setReviewerId(user.getId());
-            track.setReviewerName(user.getName());
-        }
-        track.setReason(reason);
-        serviceReviewTrackDao.create(track);
-
         DoctorServiceStatus status = doctorServiceStatusDao.findByUserId(userId);
         switch (type) {
             case PIG_DOCTOR:
@@ -181,7 +149,11 @@ public class DoctorServiceReviewManager {
     }
 
     @Transactional
-    public List<DoctorFarm> openDoctorService(BaseUser user, Long userId, String loginName, List<DoctorFarm> farms){
+    public List<DoctorFarm> openDoctorService(BaseUser user, Long userId, String loginName, DoctorOrg org, List<DoctorFarm> farms){
+        if (org == null || org.getId() == null) {
+            throw new ServiceException("orgId.not.null");
+        }
+
         User exist = userDao.findByName(loginName);
         if(exist != null && !exist.getId().equals(userId)){
             throw new ServiceException("duplicated.name"); // 用户名已存在
@@ -190,7 +162,6 @@ public class DoctorServiceReviewManager {
         primaryUser.setName(loginName);
         userDao.update(primaryUser);
 
-        DoctorOrg org = doctorOrgDao.findById(doctorStaffDao.findByUserId(userId).getOrgId());
         List<DoctorFarm> newFarms = Lists.newArrayList(); //将被保存下来的猪场
         //保存猪场信息
         if(farms != null){
@@ -245,7 +216,7 @@ public class DoctorServiceReviewManager {
         }
 
         //更新审批状态, 记录track, 更新服务状态
-        this.updateServiceReviewStatus(user, userId, DoctorServiceReview.Type.PIG_DOCTOR, DoctorServiceReview.Status.REVIEW,
+        this.updateServiceReviewStatus(user, userId, DoctorServiceReview.Type.PIG_DOCTOR,
                 DoctorServiceReview.Status.OK, null);
 
         // 初始化内置子账号角色权限
@@ -255,14 +226,14 @@ public class DoctorServiceReviewManager {
     }
 
     @Transactional
-    public void updateServiceReviewStatus(BaseUser user, Long userId, DoctorServiceReview.Type type, DoctorServiceReview.Status oldStatus,
+    public void updateServiceReviewStatus(BaseUser user, Long userId, DoctorServiceReview.Type type,
                                           DoctorServiceReview.Status newStatus, String reason){
         if (Objects.equals(newStatus.getValue(), DoctorServiceReview.Status.REVIEW.getValue())) {
             doctorServiceReviewDao.updateStatus(userId, type, newStatus);
-            this.createServiceReviewTrack(null, userId, oldStatus.getValue(), newStatus.getValue(), type, reason);
+            this.createServiceReviewTrack(userId, newStatus.getValue(), type, reason);
         } else {
             doctorServiceReviewDao.updateStatus(userId, user.getId(), type, newStatus);
-            this.createServiceReviewTrack(user, userId, oldStatus.getValue(), newStatus.getValue(), type, reason);
+            this.createServiceReviewTrack(userId, newStatus.getValue(), type, reason);
         }
     }
 

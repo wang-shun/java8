@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.admin.controller;
 
+import com.google.api.client.util.Lists;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
@@ -7,15 +8,13 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorBarnWriteService;
 import io.terminus.doctor.user.event.OpenDoctorServiceEvent;
-import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorOrg;
-import io.terminus.doctor.user.model.DoctorServiceReview;
-import io.terminus.doctor.user.model.DoctorServiceReviewExt;
+import io.terminus.doctor.user.model.*;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
@@ -26,6 +25,8 @@ import io.terminus.doctor.web.admin.service.DoctorInitBarnService;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,7 @@ public class DoctorServiceReviewController {
     private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorInitBarnService doctorInitBarnService;
     private final MobilePattern mobilePattern;
+    private final UserReadService userReadService;
 
     @RpcConsumer
     private DoctorBarnWriteService doctorBarnWriteService;
@@ -70,7 +72,8 @@ public class DoctorServiceReviewController {
                                          DoctorFarmReadService doctorFarmReadService,
                                          CoreEventDispatcher coreEventDispatcher,
                                          DoctorInitBarnService doctorInitBarnService,
-                                         MobilePattern mobilePattern){
+                                         MobilePattern mobilePattern,
+                                         UserReadService userReadService){
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorOrgReadService = doctorOrgReadService;
@@ -78,6 +81,7 @@ public class DoctorServiceReviewController {
         this.coreEventDispatcher = coreEventDispatcher;
         this.doctorInitBarnService = doctorInitBarnService;
         this.mobilePattern = mobilePattern;
+        this.userReadService = userReadService;
     }
 
     /**
@@ -98,8 +102,14 @@ public class DoctorServiceReviewController {
                 || dto.getLoginName().contains("@") || mobilePattern.getPattern().matcher(dto.getLoginName()).matches()){
             throw new JsonResponseException("login.name.invalid");
         }
+
+        // TODO: 2017/2/16 前端天每天？
+        if (dto.getOrg() == null || dto.getOrg().getId() == null) {
+            throw new JsonResponseException("orgId.not.null");
+        }
+        
         List<DoctorFarm> newFarms = RespHelper.or500(
-                doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getLoginName(), dto.getFarms())
+                doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getLoginName(), dto.getOrg(), dto.getFarms())
         );
 
         //分发猪场软件已开通的事件
@@ -213,9 +223,21 @@ public class DoctorServiceReviewController {
             if(status != null){
                 statusEnum = DoctorServiceReview.Status.from(status);
             }
-            return RespHelper.or500(
+            Paging<DoctorServiceReviewExt> doctorServiceReviewExtPaging = RespHelper.or500(
                     doctorServiceReviewReadService.page(pageNo, pageSize, userId, userMobile, realName, servicetype, statusEnum, orgName)
             );
+            List<DoctorServiceReviewExt> result = Lists.newArrayList();
+            if(doctorServiceReviewExtPaging.getTotal() > 0){
+                doctorServiceReviewExtPaging.getData().stream().forEach(doctorServiceReviewExt -> {
+
+                    List<DoctorOrg> orgs = RespHelper.or500(doctorOrgReadService.findOrgsByUserId(doctorServiceReviewExt.getUserId()));
+                    if(!Arguments.isNullOrEmpty(orgs)){
+                        doctorServiceReviewExt.setOrgs(orgs);
+                    }
+
+                });
+            }
+            return doctorServiceReviewExtPaging;
         } catch (ServiceException e) {
             log.error("pageServiceApplies failed, cause : {}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(500, e.getMessage());
@@ -231,7 +253,23 @@ public class DoctorServiceReviewController {
             @RequestParam(value = "orgName", required = false) String orgName,
             @RequestParam(required = false) Integer pageNo,
             @RequestParam(required = false) Integer pageSize){
-        return RespHelper.or500(serviceStatusReadService.page(userId, type, userMobile, orgName, pageNo, pageSize));
+        DoctorServiceReview.Type typeEnum = DoctorServiceReview.Type.from(type);
+        DoctorServiceReview.Status statusEnum = DoctorServiceReview.Status.from(1);
+        Paging<DoctorServiceReviewExt> doctorServiceReviewExtPaging = RespHelper.or500(
+                doctorServiceReviewReadService.page(pageNo, pageSize, userId, userMobile, null, typeEnum, statusEnum, orgName)
+        );
+        List<DoctorServiceReviewExt> result = Lists.newArrayList();
+        if(doctorServiceReviewExtPaging.getTotal() > 0){
+            doctorServiceReviewExtPaging.getData().stream().forEach(doctorServiceReviewExt -> {
+
+                List<DoctorOrg> orgs = RespHelper.or500(doctorOrgReadService.findOrgsByUserId(doctorServiceReviewExt.getUserId()));
+                if(!Arguments.isNullOrEmpty(orgs)){
+                    doctorServiceReviewExt.setOrgs(orgs);
+                }
+
+            });
+        }
+        return doctorServiceReviewExtPaging;
     }
 
     /**
@@ -244,10 +282,10 @@ public class DoctorServiceReviewController {
     public UserApplyServiceDetailDto findUserApplyDetail(@PathVariable Long userId){
         UserApplyServiceDetailDto dto = new UserApplyServiceDetailDto();
         List<DoctorFarm> farms = RespHelper.or500(doctorFarmReadService.findFarmsByUserId(userId));
-        DoctorOrg org = RespHelper.or500(doctorOrgReadService.findOrgByUserId(userId));
+        List<DoctorOrg> orgs = RespHelper.or500(doctorOrgReadService.findOrgsByUserId(userId));
         dto.setFarms(farms);
         dto.setUserId(userId);
-        dto.setOrg(org);
+        dto.setOrg(orgs.get(0)); // TODO: 2017/2/16 暂时取第一个
         return dto;
     }
 

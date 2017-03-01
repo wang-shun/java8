@@ -118,27 +118,25 @@
     </insert>
 
     <select id="count" parameterType="map" resultType="long">
-        select count(1) from
-        doctor_service_status a join doctor_staffs b on a.`user_id` = b.`user_id` join parana_users c on a.user_id = c.id
+        SELECT count(1)
+        FROM <include refid="tb" />
         <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultType="io.terminus.doctor.user.model.DoctorServiceReviewExt">
-        select a.user_id as userId, c.mobile as userMobile, ${type} as type, b.org_name as orgName, c.name as realName
-        from doctor_service_status a join doctor_staffs b on a.`user_id` = b.`user_id` join parana_users c on a.user_id = c.id
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
         <include refid="criteria"/>
-        ORDER BY a.updated_at desc
+        ORDER BY updated_at desc
         limit #{offset}, #{limit}
     </select>
 
     <sql id="criteria">
         where 1 = 1
-        <if test="type == 1"> and a.pigdoctor_status = 1 </if>
-        <if test="type == 2"> and a.pigmall_status = 1 </if>
-        <if test="type == 3"> and a.neverest_status = 1 </if>
-        <if test="type == 4"> and a.pigtrade_status = 1 </if>
-        <if test="userId != null"> and a.user_id = #{userId} </if>
-        <if test="userMobile != null"> and c.mobile = #{userMobile} </if>
-        <if test="orgName != null"> and b.org_name like concat('%', #{orgName}, '%') </if>
+        <if test="type == 1"> and pigdoctor_status = 1 </if>
+        <if test="type == 2"> and pigmall_status = 1 </if>
+        <if test="type == 3"> and neverest_status = 1 </if>
+        <if test="type == 4"> and pigtrade_status = 1 </if>
+        <if test="userId != null"> and user_id = #{userId} </if>
     </sql>
 </mapper>

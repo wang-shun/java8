@@ -1,5 +1,6 @@
 package io.terminus.doctor.user.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.user.model.DoctorStaff;
@@ -16,15 +17,11 @@ import java.util.List;
 @Repository
 public class DoctorStaffDao extends MyBatisDao<DoctorStaff> {
 
-    public DoctorStaff findByUserId(Long userId){
-        return sqlSession.selectOne(sqlId("findByUserId"), userId);
+    public DoctorStaff findByFarmIdAndUserId(Long farmId, Long userId){
+        return sqlSession.selectOne(sqlId("findByFarmIdAndUserId"), ImmutableMap.of("farmId", farmId, "userId", userId));
     }
 
-    public List<DoctorStaff> findByOrgId(Long orgId){
-        return sqlSession.selectList(sqlId("findByOrgId"), orgId);
-    }
-
-    public List<DoctorStaff> findByOrgIdAndStatus(Long orgId, Integer status){
-        return sqlSession.selectList(sqlId("findByOrgIdAndStatus"), MapBuilder.newHashMap().put("orgId", orgId).put("status", status).map());
+    public List<DoctorStaff> findByFarmIdAndStatus(Long farmId, Integer status){
+        return sqlSession.selectList(sqlId("findByFarmIdAndStatus"), MapBuilder.newHashMap().put("farmId", farmId, "status", status).map());
     }
 }

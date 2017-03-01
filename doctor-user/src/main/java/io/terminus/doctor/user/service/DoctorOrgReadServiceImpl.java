@@ -2,17 +2,19 @@ package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
+import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.model.DoctorOrg;
-import io.terminus.doctor.user.model.DoctorStaff;
-import io.terminus.parana.common.utils.RespHelper;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 @Slf4j
 @Service
@@ -20,12 +22,13 @@ import java.util.List;
 public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
 
     private final DoctorOrgDao doctorOrgDao;
-    private final DoctorStaffReadService doctorStaffReadService;
+    private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
 
     @Autowired
-    public DoctorOrgReadServiceImpl(DoctorOrgDao doctorOrgDao, DoctorStaffReadService doctorStaffReadService){
+    public DoctorOrgReadServiceImpl(DoctorOrgDao doctorOrgDao,
+                                    DoctorUserDataPermissionDao doctorUserDataPermissionDao) {
         this.doctorOrgDao = doctorOrgDao;
-        this.doctorStaffReadService = doctorStaffReadService;
+        this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
     }
 
     @Override
@@ -34,7 +37,7 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
         try {
             response.setResult(doctorOrgDao.findById(orgId));
         } catch (Exception e) {
-            log.error("find org by id failed, cause : {}", Throwables.getStackTraceAsString(e));
+            log.error("find org by id failed, orgId:{}, cause:{}", orgId, Throwables.getStackTraceAsString(e));
             response.setError("find.org.by.id.failed");
         }
         return response;
@@ -45,28 +48,33 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
         try {
             response.setResult(doctorOrgDao.findByIds(orgIds));
         } catch (Exception e) {
-            log.error("find org by id failed, cause : {}", Throwables.getStackTraceAsString(e));
+            log.error("find org by id failed, orgIds:{}, cause:{}", orgIds, Throwables.getStackTraceAsString(e));
             response.setError("find.org.by.id.failed");
         }
         return response;
     }
 
     @Override
-    public Response<DoctorOrg> findOrgByUserId(Long userId) {
-        Response<DoctorOrg> response = new Response<>();
+    public Response<List<DoctorOrg>> findOrgsByUserId(Long userId) {
         try {
-            DoctorStaff staff = RespHelper.orServEx(doctorStaffReadService.findStaffByUserId(userId));
-            if (staff != null && staff.getOrgId() != null) {
-                response.setResult(doctorOrgDao.findById(staff.getOrgId()));
-            } else {
-                response.setResult(null);
+            DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
+            if (permission == null || !notEmpty(permission.getOrgIdsList())) {
+                return Response.ok(Collections.emptyList());
             }
-        } catch (ServiceException e) {
-            response.setError(e.getMessage());
+            return Response.ok(doctorOrgDao.findByIds(permission.getOrgIdsList()));
         } catch (Exception e) {
-            log.error("find org by userId failed, cause : {}", Throwables.getStackTraceAsString(e));
-            response.setError("find.org.by.userId.failed");
+            log.error("find orgs by userId failed, userId:{}, cause:{}", userId, Throwables.getStackTraceAsString(e));
+            return Response.fail("org.find.fail");
         }
-        return response;
+    }
+
+    @Override
+    public Response<List<DoctorOrg>> findAllOrgs() {
+        try {
+            return Response.ok(doctorOrgDao.findAll());
+        } catch (Exception e) {
+            log.error("find all orgs failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("org.find.fail");
+        }
     }
 }

@@ -155,7 +155,7 @@ public class SubService {
                 subUser.setMobile(sub.getContact());
             }
 
-            this.updateSubStaffStatus(subUser, io.terminus.doctor.user.model.Sub.Status.from(sub.getStatus()));
+            this.updateSubStaffStatus(sub.getFarmIds(), subUser, io.terminus.doctor.user.model.Sub.Status.from(sub.getStatus()));
             // TODO: 自定义角色冗余进 user 表
             List<String> roles = Lists.newArrayList("SUB");
             if (sub.getRoleId() != null) {
@@ -179,22 +179,32 @@ public class SubService {
         }
     }
 
-    private void updateSubStaffStatus(User subUser, io.terminus.doctor.user.model.Sub.Status status){
-        DoctorStaff staff = RespHelper.orServEx(doctorStaffReadService.findStaffByUserId(subUser.getId()));
+    //如果sub的状态变更，职工的状态也要相应变更
+    private void updateSubStaffStatus(List<Long> farmIds, User subUser, io.terminus.doctor.user.model.Sub.Status status){
         io.terminus.doctor.user.model.Sub sub = RespHelper.orServEx(primaryUserReadService.findSubByUserId(subUser.getId()));
         sub.setStatus(status.value());
 
         if(Objects.equals(status.value(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())){
             subUser.setStatus(UserStatus.NORMAL.value());
-            staff.setStatus(DoctorStaff.Status.PRESENT.value());
+            updateStaffStatus(farmIds, subUser.getId(), DoctorStaff.Status.PRESENT);
         }else if(Objects.equals(status.value(), io.terminus.doctor.user.model.Sub.Status.ABSENT.value())){
             subUser.setStatus(UserStatus.LOCKED.value());
-            staff.setStatus(DoctorStaff.Status.ABSENT.value());
+            updateStaffStatus(farmIds, subUser.getId(), DoctorStaff.Status.ABSENT);
         }else{
             throw new ServiceException("sub.user.status.error");
         }
         RespHelper.orServEx(primaryUserWriteService.updateSub(sub));
-        RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
+    }
+
+    //更新职工状态
+    private void updateStaffStatus(List<Long> farmIds, Long userId, DoctorStaff.Status status) {
+        if (farmIds != null) {
+            farmIds.forEach(farmId -> {
+                DoctorStaff staff = RespHelper.orServEx(doctorStaffReadService.findStaffByFarmIdAndUserId(farmId, userId));
+                staff.setStatus(status.value());
+                RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
+            });
+        }
     }
 
     private void updateSubPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds){
@@ -263,6 +273,9 @@ public class SubService {
                     .put("realName", sub.getRealName())
                     .map());
             Long subUserId = RespHelper.orServEx(userWriteService.create(subUser));
+
+            //create farm staff if necessary
+            createStaff(subUserId, sub);
             this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds(), permission.getOrgIdsList());
             return Response.ok(subUserId);
         } catch (ServiceException | JsonResponseException e) {
@@ -271,6 +284,22 @@ public class SubService {
             log.error("creat sub failed, user={}, sub={}, cause:{}", user, sub, Throwables.getStackTraceAsString(e));
             return Response.fail("sub.create.fail");
         }
+    }
+
+    //创建staff
+    private void createStaff(Long userId, Sub sub) {
+        if (!sub.isAsStaff()) {
+            log.info("this sub need not create staff, user:{}", sub);
+            return;
+        }
+        sub.getFarmIds().forEach(farmId -> {
+            DoctorStaff doctorStaff = new DoctorStaff();
+            doctorStaff.setUserId(userId);
+            doctorStaff.setFarmId(farmId);
+            doctorStaff.setStatus(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())
+                    ? DoctorStaff.Status.PRESENT.value() : DoctorStaff.Status.ABSENT.value());
+            RespHelper.orServEx(doctorStaffWriteService.createDoctorStaff(doctorStaff));
+        });
     }
 
     private void createPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds, List<Long> orgIds){

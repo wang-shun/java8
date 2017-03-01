@@ -39,6 +39,8 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
+
 /**
  * Desc: 用户相关
  * Mail: yangzl@terminus.io
@@ -220,7 +222,9 @@ public class OPDoctorUsers {
      */
     @OpenMethod(key = "get.org.info")
     public DoctorOrg getOrgInfo() {
-        return OPRespHelper.orOPEx(doctorOrgReadService.findOrgByUserId(UserUtil.getUserId()));
+        List<DoctorOrg> orgs = OPRespHelper.orOPEx(doctorOrgReadService.findOrgsByUserId(UserUtil.getUserId()));
+        // TODO: 2017/2/16 多公司，暂时先返回第一个
+        return notEmpty(orgs) ? orgs.get(0) : null;
     }
 
     /**

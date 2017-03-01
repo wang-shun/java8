@@ -4,6 +4,7 @@ import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public interface DoctorServiceReviewService {
      * @param farms 猪场名称
      * @return
      */
-    Response<List<DoctorFarm>> openDoctorService(BaseUser user, Long userId, String loginName, List<DoctorFarm> farms);
+    Response<List<DoctorFarm>> openDoctorService(BaseUser user, Long userId, String loginName, DoctorOrg org, List<DoctorFarm> farms);
 
     /**
      * 开通服务, 更新服务状态并保存状态变更历史记录

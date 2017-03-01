@@ -71,8 +71,10 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
     @Override
     public Response<DoctorBasicDto> getOrgStatistic(Long userId) {
         try {
-            //查询有权限的公司与猪场
-            DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgByUserId(userId));
+            //查询有权限的公司与猪场 // TODO: 2017/2/16 多公司 暂时先返回第一个
+            List<DoctorOrg> orgs = RespHelper.orServEx(doctorOrgReadService.findOrgsByUserId(userId));
+            DoctorOrg org = orgs.get(0);
+            
             List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByUserId(userId));
 
             //查询公司统计

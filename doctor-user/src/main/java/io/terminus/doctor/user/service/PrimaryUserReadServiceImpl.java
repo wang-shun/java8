@@ -36,64 +36,6 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
         this.subDao = subDao;
     }
 
-
-    @Override
-    public Response<PrimaryUser> findPrimaryUserById(Long id) {
-        try {
-            PrimaryUser primaryUser = primaryUserDao.findById(id);
-            if (primaryUser == null) {
-                log.warn("primaryUser not found, id={}", id);
-                return Response.fail("primaryUser.not.found");
-            }
-            return Response.ok(primaryUser);
-        } catch (Exception e) {
-            log.error("find primaryUser failed, id={}, cause:{}", id, Throwables.getStackTraceAsString(e));
-            return Response.fail("primaryUser.find.fail");
-        }
-    }
-
-    @Override
-    public Response<Optional<PrimaryUser>> findPrimaryUserByUserId(Long userId) {
-        try {
-            PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
-            return Response.ok(Optional.fromNullable(primaryUser));
-        } catch (Exception e) {
-            log.error("find primaryUser by userId={} failed, cause:{}", userId, Throwables.getStackTraceAsString(e));
-            return Response.fail("primaryUser.find.fail");
-        }
-    }
-
-    @Override
-    public Response<Paging<PrimaryUser>> primaryUserPagination(Long userId, Integer status, Integer pageNo, Integer size) {
-        try {
-            PageInfo page = new PageInfo(pageNo, size);
-            PrimaryUser criteria = new PrimaryUser();
-            criteria.setUserId(userId);
-            criteria.setStatus(status);
-            return Response.ok(primaryUserDao.paging(page.getOffset(), page.getLimit(), criteria));
-        } catch (Exception e) {
-            log.error("paging seller failed, userId={}, status={}, pageNo={}, size={}, cause:{}",
-                    userId, status, pageNo, size, Throwables.getStackTraceAsString(e));
-            return Response.fail("primaryUser.paging.fail");
-        }
-    }
-
-    @Override
-    public Response<Sub> findSubById(Long id) {
-        try {
-            Sub sub = subDao.findById(id);
-            if (sub == null) {
-                log.warn("sub not found, id={}", id);
-                return Response.fail("sub.not.found");
-            }
-            return Response.ok(sub);
-        } catch (Exception e) {
-            log.error("find sub by id={} failed, cause:{}",
-                    id, Throwables.getStackTraceAsString(e));
-            return Response.fail("sub.find.fail");
-        }
-    }
-
     @Override
     public Response<Optional<Sub>> findSubSellerByParentUserIdAndUserId(Long parentUserId, Long userId) {
         try {
