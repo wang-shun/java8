@@ -97,6 +97,24 @@ public enum PigType {
 
     //配种与分娩
     public static final List<Integer> MATING_FARROW_TYPES = Lists.newArrayList(MATE_SOW.getValue(), PREG_SOW.getValue(), DELIVER_SOW.getValue());
+
+
+    //产房仔猪允许转入的猪舍: 产房(分娩母猪舍)/保育舍
+    public static final List<Integer> FARROW_ALLOW_TRANS = Lists.newArrayList(
+            PigType.NURSERY_PIGLET.getValue(),
+            PigType.DELIVER_SOW.getValue());
+
+    //保育猪猪允许转入的猪舍: 保育舍/育肥舍/育种舍/后备舍(公母)
+    public static final List<Integer> NURSERY_ALLOW_TRANS = Lists.newArrayList(
+            PigType.NURSERY_PIGLET.getValue(),
+            PigType.FATTEN_PIG.getValue(),
+            PigType.RESERVE.getValue());
+
+    //育肥猪允许转入的猪舍: 育肥舍/后备舍(公母)
+    public static final List<Integer> FATTEN_ALLOW_TRANS = Lists.newArrayList(
+            PigType.FATTEN_PIG.getValue(),
+            PigType.RESERVE.getValue());
+
     //所有类型
     public static final List<Integer> ALL_TYPES = Lists.newArrayList(
             NURSERY_PIGLET.getValue(),

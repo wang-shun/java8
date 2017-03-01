@@ -87,6 +87,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
     private Long groupSowEventCreate(List<DoctorEventInfo> eventInfoList, DoctorPigTrack pigTrack, DoctorFosterByDto fosterByDto, DoctorBasicInputInfoDto basic, Long pigEventId, Date eventAt) {
         //未断奶仔猪id
         DoctorTransGroupInput input = new DoctorTransGroupInput();
+        input.setSowCode(fosterByDto.getFromSowCode());
         input.setToBarnId(pigTrack.getCurrentBarnId());
         input.setToBarnName(pigTrack.getCurrentBarnName());
         List<DoctorGroup> groupList = doctorGroupDao.findByCurrentBarnId(pigTrack.getCurrentBarnId());
@@ -97,6 +98,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
             input.setToGroupId(toGroup.getId());
         } else {
             input.setIsCreateGroup(IsOrNot.YES.getValue());
+            input.setToGroupCode(grateGroupCode(pigTrack.getCurrentBarnName()));
         }
 
         //来源猪舍的信息，转群事件应该是来源猪群触发
@@ -122,8 +124,8 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
 
         doctorTransGroupEventHandler.handle(eventInfoList, fromGroup, fromGroupTrack, input);
         if (Objects.equals(input.getIsCreateGroup(), IsOrNot.YES.getValue())) {
-            DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(fromGroup.getFarmId(), input.getToGroupCode());
-            return toGroup.getId();
+            //DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(fromGroup.getFarmId(), input.getToGroupCode());
+            return input.getToGroupId();
         }
         return input.getToGroupId();
     }

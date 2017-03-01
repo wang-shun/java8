@@ -310,7 +310,7 @@ public class DoctorMoveDataService {
         doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(), DoctorPig.PigSex.SOW.getKey(), Lists.newArrayList(PigEvent.MATING.getKey())).stream()
                 .filter(e -> isNull(e.getDoctorMateType()) && e.getCurrentMatingCount() == 1)  //只改初配
                 .forEach(event -> {
-                    List<DoctorPigEvent> pigEvents = doctorPigEventDao.queryAllEventsByPigId(event.getPigId());
+                    List<DoctorPigEvent> pigEvents = doctorPigEventDao.queryAllEventsByPigIdForASC(event.getPigId());
                     DoctorMatingType mateType = DoctorSowMatingHandler.getPigMateType(pigEvents, event.getEventAt());
 
                     DoctorPigEvent updateEvent = new DoctorPigEvent();
@@ -500,7 +500,7 @@ public class DoctorMoveDataService {
                 .pigType(DoctorPig.PigSex.SOW.getKey())
                 .isRemoval(IsOrNot.NO.getValue()).build())
                 .forEach(track -> {
-                    List<DoctorPigEvent> events = doctorPigEventDao.queryAllEventsByPigId(track.getPigId()).stream()
+                    List<DoctorPigEvent> events = doctorPigEventDao.queryAllEventsByPigIdForASC(track.getPigId()).stream()
                             .sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt()))
                             .collect(Collectors.toList());
 
@@ -1575,6 +1575,7 @@ public class DoctorMoveDataService {
                     DoctorFarmEntryConstants.BOAR_TYPE_NAME, boarType.getDesc()
             ));
         }
+        boar.setBoarType(boarType.getKey());
         return boar;
     }
 
@@ -2262,7 +2263,7 @@ public class DoctorMoveDataService {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1));
         doctorPigEvensList.forEach(doctorPigEvent -> {
             //log.info("update doctor_pig_events start: {}", doctorPigEvent);
-            List<DoctorPigEvent> lists = doctorPigEventDao.queryAllEventsByPigId(doctorPigEvent.getPigId());
+            List<DoctorPigEvent> lists = doctorPigEventDao.queryAllEventsByPigIdForASC(doctorPigEvent.getPigId());
             parity = 1;
             boarCode = null;
             isFirst = true;  //判断是否是进场之后第一次配种,第一次配种,胎次不加1
@@ -2270,7 +2271,9 @@ public class DoctorMoveDataService {
             statusAfter = PigStatus.Entry.getKey();
             quantity = 1000; //一个胎次中分娩的活仔数, 默认1000,为了与quantityChange 不相等
             quantityChange = 0; //在一个胎次中仔猪变化的数量
-            lists.forEach(doctorPigEvent1 -> {
+            lists.stream()
+                    .filter(doctorPigEvent1 -> doctorPigEvent1 != null && doctorPigEvent1.getType() != null)
+                    .forEach(doctorPigEvent1 -> {
                 statusAfter = statusBefore;
                 switch (doctorPigEvent1.getType()){
                     case 6:

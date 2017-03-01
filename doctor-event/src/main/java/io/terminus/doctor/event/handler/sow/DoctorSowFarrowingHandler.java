@@ -159,6 +159,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         // Build 新建猪群操作方式
         DoctorSowMoveInGroupInput input = new DoctorSowMoveInGroupInput();
+        input.setSowCode(farrowingDto.getPigCode());
         input.setOrgId(basic.getOrgId());
         input.setOrgName(basic.getOrgName());
         input.setFarmId(basic.getFarmId());

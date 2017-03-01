@@ -463,6 +463,9 @@ public class DoctorPigCreateEvents {
                         expectTrue(notEmpty(farmEntryDto.getPigCode()), "pig.code.not.empty");
                         try {
                             BasePigEventInputDto inputDto = doctorValidService.valid(farmEntryDto, farmEntryDto.getPigCode());
+                            if (Objects.equals(batchPigEventDto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
+                                expectTrue(notNull(farmEntryDto.getParity()) && farmEntryDto.getParity() > 0, "sow.entry.farm.parity.input.fail");
+                            }
                             return buildEntryEventInput(inputDto, pigEvent);
                         } catch (InvalidException e) {
                             log.error("batch entry event fail inputJson:{}, cause:{}", inputJson, Throwables.getStackTraceAsString(e));
@@ -572,13 +575,14 @@ public class DoctorPigCreateEvents {
                 DoctorChgFarmDto chgFarmDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorChgFarmDto.class);
                 DoctorFarm fromFarm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
                 expectTrue(notNull(fromFarm), "farm.not.null", farmId);
+                //构建来源场信息
                 chgFarmDto.setFromFarmId(fromFarm.getId());
                 chgFarmDto.setFromFarmName(fromFarm.getName());
                 DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(realPigId));
                 expectTrue(notNull(doctorPigTrack), "pig.track.not.null", realPigId);
                 chgFarmDto.setFromBarnId(doctorPigTrack.getCurrentBarnId());
                 chgFarmDto.setFromBarnName(doctorPigTrack.getCurrentBarnName());
-
+                //构建转入场信息
                 DoctorFarm toFarm = RespHelper.or500(doctorFarmReadService.findFarmById(chgFarmDto.getToFarmId()));
                 expectTrue(notNull(fromFarm), "farm.not.null", farmId);
                 DoctorBarn toBarn = RespHelper.or500(doctorBarnReadService.findBarnById(chgFarmDto.getToBarnId()));

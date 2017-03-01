@@ -1,15 +1,12 @@
 package io.terminus.doctor.event.handler.rollback.sow;
 
 import com.google.common.collect.Lists;
-import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -34,13 +31,13 @@ public class DoctorRollbackSowFosterByHandler extends DoctorAbstractRollbackPigE
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
-        DoctorPigTrack oldTrack = JSON_MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack();
-
-        //如果状态不是哺乳，说明状态有变化，调用状态回滚
-        if (!Objects.equals(oldTrack.getStatus(), PigStatus.FEED.getKey())) {
-            handleRollbackWithStatus(pigEvent, operatorId, operatorName);
-        }
+//        DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
+//        DoctorPigTrack oldTrack = JSON_MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack();
+//
+//        //如果状态不是哺乳，说明状态有变化，调用状态回滚
+//        if (!Objects.equals(oldTrack.getStatus(), PigStatus.FEED.getKey())) {
+//            handleRollbackWithStatus(pigEvent, operatorId, operatorName);
+//        }
         handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
     }
 

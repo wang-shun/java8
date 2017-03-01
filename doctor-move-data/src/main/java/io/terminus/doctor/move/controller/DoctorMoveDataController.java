@@ -15,6 +15,7 @@ import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
@@ -113,7 +114,9 @@ public class DoctorMoveDataController {
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public Boolean testMoveIdConnect(@RequestParam("moveId") Long moveId) {
         try {
-            return notEmpty(userInitService.getFarmMember(moveId));
+            List<View_FarmMember> farmMembers = userInitService.getFarmMember(moveId);
+            log.info("test connect info, farmMember:{}", farmMembers);
+            return notEmpty(farmMembers);
         } catch (Exception e) {
             log.error("move datasource connect failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Boolean.FALSE;
@@ -231,6 +234,10 @@ public class DoctorMoveDataController {
         log.warn("move farmBasic start, mobile:{}, moveId:{}", mobile, moveId);
         doctorImportDataService.importFarmBasics(farm.getId());
         log.warn("move farmBasic end");
+
+        log.warn("move xrnm permission, mobile:{}, moveId:{}", mobile, moveId);
+        doctorImportDataService.createOrUpdateAdminPermission();
+        log.warn("move xrmm permission end");
     }
 
     //统计下首页数据

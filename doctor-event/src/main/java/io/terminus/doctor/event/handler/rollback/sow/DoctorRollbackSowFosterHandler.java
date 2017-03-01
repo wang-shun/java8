@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransHandler;
@@ -45,35 +44,31 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
         //判断母猪被拼窝事件是最新事件 && 判断仔猪转群事件之后的仔猪转入是否是最新事件
         DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
         expectTrue(notNull(toPigEvent), "relate.pig.event.not.null" , pigEvent.getId());
-        if (Objects.equals(toPigEvent.getType(), PigEvent.FOSTERS_BY.getKey())) {
+        if (!Objects.equals(pigEvent.getBarnId(), toPigEvent.getBarnId())) {
             //查找由被拼窝触发的转群事件及其关联事件
             DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(toPigEvent.getId());
             expectTrue(notNull(toGroupEvent), "relate.group.event.not.null" , pigEvent.getId());
             return isRelLastGroupEvent(toGroupEvent);
         }
-        return false;
+        return true;
     }
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(pigEvent.getId());
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(toPigEvent.getId());
+        DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
 
-        //1. 仔猪转群
-        doctorRollbackGroupTransHandler.rollback(toGroupEvent, operatorId, operatorName);
+
+        //1. 不同猪舍是回滚仔猪转群
+        if (!Objects.equals(pigEvent.getBarnId(), toPigEvent.getBarnId())) {
+            DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(toPigEvent.getId());
+            doctorRollbackGroupTransHandler.rollback(toGroupEvent, operatorId, operatorName);
+        }
 
         //2. 被拼窝
         doctorRollbackSowFosterByHandler.rollback(toPigEvent, operatorId, operatorName);
 
         //3. 拼窝
-        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
-
-        //如果不是哺乳状态，说明已经断奶，要触发状态回滚
-        if (!Objects.equals(pigTrack.getStatus(), PigStatus.FEED.getKey())) {
-            handleRollbackWithoutStatus(toPigEvent, operatorId, operatorName);
-        } else {
-            handleRollbackWithStatus(toPigEvent, operatorId, operatorName);
-        }
+        handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
     }
 
     @Override

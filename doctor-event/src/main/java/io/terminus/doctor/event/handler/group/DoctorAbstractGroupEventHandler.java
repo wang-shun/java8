@@ -4,10 +4,9 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -40,7 +39,7 @@ import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
-import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
+import static io.terminus.doctor.common.enums.PigType.*;
 
 /**
  * Desc:
@@ -53,21 +52,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
-    //产房仔猪允许转入的猪舍: 产房(分娩母猪舍)/保育舍
-    private static final List<Integer> FARROW_ALLOW_TRANS = Lists.newArrayList(
-            PigType.NURSERY_PIGLET.getValue(),
-            PigType.DELIVER_SOW.getValue());
 
-    //保育猪猪允许转入的猪舍: 保育舍/育肥舍/育种舍/后备舍(公母)
-    private static final List<Integer> NURSERY_ALLOW_TRANS = Lists.newArrayList(
-            PigType.NURSERY_PIGLET.getValue(),
-            PigType.FATTEN_PIG.getValue(),
-            PigType.RESERVE.getValue());
-
-    //育肥猪允许转入的猪舍: 育肥舍/后备舍(公母)
-    private static final List<Integer> FATTEN_ALLOW_TRANS = Lists.newArrayList(
-            PigType.FATTEN_PIG.getValue(),
-            PigType.RESERVE.getValue());
 
     protected final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
@@ -93,7 +78,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     @Override
     public <I extends BaseGroupInput> void handle(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
-        log.info("event handle starting, eventType", input.getEventType());
         handleEvent(eventInfoList, group, groupTrack, input);
         DoctorEventInfo eventInfo = DoctorEventInfo.builder()
                 .businessId(group.getId())
@@ -358,19 +342,5 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             throw new InvalidException("day.age.error");
         }
         return eventAge;
-    }
-
-    protected Date generateEventAt(Date eventAt){
-        if(eventAt != null){
-            Date now = new Date();
-            if(DateUtil.inSameDate(eventAt, now)){
-                // 如果处在今天, 则使用此刻瞬间
-                return now;
-            } else {
-                // 如果不在今天, 则将时间置为0, 只保留日期
-                return Dates.startOfDay(eventAt);
-            }
-        }
-        return null;
     }
 }

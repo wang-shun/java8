@@ -7,6 +7,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
@@ -56,8 +57,6 @@ import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -68,9 +67,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.terminus.common.utils.Arguments.isEmpty;
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 import static io.terminus.common.utils.BeanMapper.map;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
@@ -228,7 +225,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
             //3.校验事件的时间
             Date eventAt = DateUtil.toDate((String) params.get("eventAt"));
-            checkEventAt(groupId, eventType, eventAt);
+            checkEventAt(groupId, eventAt);
 
             String groupCode = getGroupCode(groupId);
             //4.根据不同的事件类型调用不同的录入接口
@@ -376,7 +373,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
         //3.校验事件的时间
         Date eventAt = DateUtil.toDate((String) params.get("eventAt"));
-        checkEventAt(groupId, eventType, eventAt);
+        checkEventAt(groupId, eventAt);
 
         //4.根据不同的事件类型调用不同的录入接口
         GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
@@ -600,22 +597,13 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     /**
      * 猪群事件时间限制
-     * @param groupId
-     * @param eventType
      * @param eventAt
      * @return
      */
-    private void checkEventAt(Long groupId, Integer eventType, Date eventAt){
-        if (Objects.equals(eventType, GroupEventType.NEW.getValue())){
-            return;
-        }
-        DoctorGroupEvent lastEvent = RespHelper.or500(doctorGroupReadService.findLastEventByGroupId(groupId));
-        if (lastEvent != null ) {
-            if (new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime()) && eventAt.before(DateUtil.toDate(DateTime.now().plusDays(1).toString(DateTimeFormat.forPattern("yyyy-MM-dd"))))) {
-                return;
-            } else {
-                throw new InvalidException("event.at.range.error", lastEvent.getEventAt(), eventAt, lastEvent.getGroupCode());
+    private void checkEventAt(Long groupId, Date eventAt){
+        DoctorGroupEvent lastEvent = RespHelper.orServEx(doctorGroupReadService.findLastEventByGroupId(groupId));
+        if (notNull(lastEvent) && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt())) || Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date()))) {
+                throw new InvalidException("event.at.range.error", DateUtil.toDateString(lastEvent.getEventAt()), DateUtil.toDateString(new Date()), DateUtil.toDateString(eventAt));
             }
         }
-    }
 }

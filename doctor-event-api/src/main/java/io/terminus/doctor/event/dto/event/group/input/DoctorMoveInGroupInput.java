@@ -12,6 +12,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
+
 /**
  * Desc: 转入猪群事件录入信息
  * Mail: yangzl@terminus.io
@@ -112,6 +114,11 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
      */
     private Integer weakQty;
 
+    /**
+     * 触发转入事件的母猪号
+     */
+    private String sowCode;
+
     @Override
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
@@ -150,6 +157,9 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
         }
         if(amount != null){
             map.put("总价值", Double.valueOf(amount / 100.0).toString());
+        }
+        if (notEmpty(sowCode)) {
+            map.put("母猪号", sowCode);
         }
         return map;
     }

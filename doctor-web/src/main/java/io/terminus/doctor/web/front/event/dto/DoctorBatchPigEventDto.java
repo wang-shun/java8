@@ -15,6 +15,10 @@ public class DoctorBatchPigEventDto implements Serializable{
 
     private Long farmId;
 
+    /**
+     * 事件类型
+     * @see io.terminus.doctor.event.enums.PigEvent
+     */
     private Integer eventType;
 
     /**

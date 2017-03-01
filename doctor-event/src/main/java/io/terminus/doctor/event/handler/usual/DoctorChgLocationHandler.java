@@ -60,6 +60,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
     @Override
     public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
+        super.handleCheck(eventDto, basic);
         DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) eventDto;
         expectTrue(!Objects.equals(chgLocationDto.getChgLocationFromBarnId(), chgLocationDto.getChgLocationToBarnId()), "same.barn.not.trans");
     }
@@ -138,6 +139,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         expectTrue(notNull(pigTrack.getGroupId()), "farrow.groupId.not.null", pigTrack.getPigId());
         //未断奶仔猪id
         DoctorTransGroupInput input = new DoctorTransGroupInput();
+        input.setSowCode(chgLocationDto.getPigCode());
         input.setToBarnId(doctorToBarn.getId());
         input.setToBarnName(doctorToBarn.getName());
         List<DoctorGroup> groupList = doctorGroupDao.findByCurrentBarnId(doctorToBarn.getId());
@@ -148,6 +150,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
             input.setToGroupCode(toGroup.getGroupCode());
         } else {
             input.setIsCreateGroup(IsOrNot.YES.getValue());
+            input.setToGroupCode(grateGroupCode(doctorToBarn.getName()));
         }
 
         DoctorGroup group = doctorGroupDao.findById(pigTrack.getGroupId());
@@ -173,8 +176,8 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
         transGroupEventHandler.handle(eventInfoList, group, groupTrack, input);
         if (Objects.equals(input.getIsCreateGroup(), IsOrNot.YES.getValue())) {
-            DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(group.getFarmId(), input.getToGroupCode());
-            return toGroup.getId();
+            //DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(group.getFarmId(), input.getToGroupCode());
+            return input.getToGroupId();
         }
         return input.getToGroupId();
     }

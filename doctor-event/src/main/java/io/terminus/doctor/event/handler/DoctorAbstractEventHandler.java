@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
@@ -237,8 +238,18 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         }
         Date eventAt = inputDto.eventAt();
         DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
-        if (lastEvent != null && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt()))) {
-            throw new InvalidException("event.at.range.error", DateUtil.toDateString(lastEvent.getEventAt()), DateUtil.toDateString(eventAt), inputDto.getPigCode());
+        if (notNull(lastEvent) && (Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt())) || Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date())))) {
+            throw new InvalidException("event.at.range.error", DateUtil.toDateString(lastEvent.getEventAt()), DateUtil.toDateString(new Date()), DateUtil.toDateString(eventAt));
         }
+    }
+
+    /**
+     * 新建猪群时自动生成猪群号
+     * @param barnName 猪舍名
+     * @return 猪群号
+     */
+    protected String grateGroupCode(String barnName) {
+        expectTrue(notEmpty(barnName), "generate.code.barn.name.not.null");
+        return barnName + "(" +DateUtil.toDateString(new Date()) + ")";
     }
 }

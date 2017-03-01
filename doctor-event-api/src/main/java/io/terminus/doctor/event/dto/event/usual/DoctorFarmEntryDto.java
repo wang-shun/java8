@@ -8,7 +8,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
@@ -30,23 +29,12 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
 
     private static final long serialVersionUID = -3221757737932679045L;
 
-    /**
-     * 公猪 & 母猪
-     * @see DoctorPig.PigSex
-     */
-//    private Integer pigType;
-//
-//    private String pigCode; // pig code 猪 编号
 
     @NotNull(message = "birthday.not.null")
     private Date birthday; // 猪生日
 
     @NotNull(message = "event.at.not.null")
     private Date inFarmDate; // 进厂时间
-
-//    private Long barnId;    // 进仓猪舍Id
-//
-//    private String barnName;    // 进仓猪舍名称
 
     /**
      * 不同的数据源方式
@@ -70,9 +58,8 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
 
     private String entryMark;   // 非必填
 
-    // boar (公猪进厂字段)
     /**
-     *
+     * 公猪进场事件类型
      * @see io.terminus.doctor.event.enums.BoarEntryType
      */
     private Integer boarType;
@@ -81,11 +68,8 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
 
     private Double weight;
 
-    // sow
     private String earCode; // 耳缺号
 
-    @Min(value = 0, message = "parity.not.less.zero")
-    @NotNull(message = "parity.not.null")
     private Integer parity; // 当前胎次
 
     private Integer left;   //左乳头的数量
@@ -95,45 +79,12 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
     @Override
     public Map<String, String> descMap() {
         Map<String, String> map = new LinkedHashMap<>();
-//        if(pigType != null){
-//            DoctorPig.PigSex pig = DoctorPig.PigSex.from(pigType);
-//            if(pig != null){
-//                map.put("猪类型", pig.getDesc());
-//            }
-//        }
-//        if(pigCode != null){
-//            map.put("猪编号", pigCode);
-//        }
-//        if(barnName != null){
-//            map.put("进场猪舍", barnName);
-//        }
-//        if(source != null){
-//            PigSource pigSource = PigSource.from(source);
-//            if(pigSource != null){
-//                map.put("来源", pigSource.getDesc());
-//            }
-//        }
         if(breedName != null){
             map.put("品种", breedName);
         }
         if(breedTypeName != null){
             map.put("品系", breedTypeName);
         }
-//        if(boarTypeName != null){
-//            map.put("公猪进场类型", boarTypeName);
-//        }
-//        if(earCode != null){
-//            map.put("耳缺号", earCode);
-//        }
-//        if(parity != null){
-//            map.put("胎次", parity.toString());
-//        }
-//        if(left != null){
-//            map.put("左乳头数", left.toString());
-//        }
-//        if(right != null){
-//            map.put("右乳头数", right.toString());
-//        }
         return map;
     }
 

@@ -145,6 +145,16 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+     * 获取PigId 对应的 所有事件 正序排列
+     *
+     * @param pigId 猪id
+     * @return 正序列表
+     */
+    public List<DoctorPigEvent> queryAllEventsByPigIdForASC(Long pigId) {
+        return this.getSqlSession().selectList(sqlId("queryAllEventsByPigIdForASC"), pigId);
+    }
+
+    /**
      * 通过pigId 修改Event相关事件信息
      *
      * @param params 修改对应的参数

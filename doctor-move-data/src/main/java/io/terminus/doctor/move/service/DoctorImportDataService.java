@@ -490,7 +490,7 @@ public class DoctorImportDataService {
     }
 
     //admin的数据权限
-    private void createOrUpdateAdminPermission() {
+    public void createOrUpdateAdminPermission() {
         User user = userDaoExt.findById(xrnmId);
         if (user == null) {
             return;
@@ -626,6 +626,11 @@ public class DoctorImportDataService {
             }
             boar.setBirthDate(ImportExcelUtils.getDate(row, 3));
             boar.setInFarmDate(ImportExcelUtils.getDate(row, 2));
+
+            if (boar.getBirthDate() == null || boar.getInFarmDate() == null) {
+                throw new JsonResponseException("公猪号：" + boar.getPigCode() + " 的日期不能为空，行数：" + (row.getRowNum() + 1));
+            }
+
             boar.setInitBarnName(ImportExcelUtils.getString(row, 0));
             DoctorBarn barn = barnMap.get(boar.getInitBarnName());
             if (barn != null) {
@@ -638,7 +643,10 @@ public class DoctorImportDataService {
                     throw new JsonResponseException("公猪品种错误：" + boar.getBreedName() + "，row " + (row.getRowNum() + 1) + "column" + 7);
                 }
             }
-            boar.setBoarType(BoarEntryType.HGZ.getKey()); //进场默认活公猪
+
+            //进场默认活公猪
+            BoarEntryType entryType = BoarEntryType.from(ImportExcelUtils.getString(row, 8));
+            boar.setBoarType(entryType == null ? BoarEntryType.HGZ.getKey() : entryType.getKey());
             doctorPigDao.create(boar);
 
             //公猪跟踪
@@ -724,8 +732,13 @@ public class DoctorImportDataService {
             }else{
                 existGroupCode.add(code);
             }
-            Integer dayAge = MoreObjects.firstNonNull(ImportExcelUtils.getInt(row, 4), 1);
-            group.setOpenAt(DateTime.now().minusDays(dayAge).toDate());  //建群时间 = 当前时间 - 日龄
+
+            Date openAt = ImportExcelUtils.getDate(row, 6);
+            if (openAt == null) {
+                throw new JsonResponseException("猪群号（" + code + "）建群日期不能为空");
+            }
+
+            group.setOpenAt(openAt);  //建群时间
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
             group.setInitBarnName(ImportExcelUtils.getString(row, 1));
 
@@ -753,9 +766,15 @@ public class DoctorImportDataService {
             groupTrack.setQuantity(ImportExcelUtils.getInt(row, 3));
             groupTrack.setBoarQty(0);
             groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
-            groupTrack.setAvgDayAge(dayAge);
+
+            //excel日龄是转入时的日龄，所以要重新算一发
+            Integer dayAge = MoreObjects.firstNonNull(ImportExcelUtils.getInt(row, 4), 1);
+            groupTrack.setAvgDayAge(dayAge + DateUtil.getDeltaDaysAbs(openAt, new Date()));
             groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge()).toDate());
-            groupTrack.setBirthWeight(ImportExcelUtils.getDoubleOrDefault(row, 5, 0) * groupTrack.getQuantity());
+
+            Double avgWeight = ImportExcelUtils.getDoubleOrDefault(row, 5, 0);
+
+            groupTrack.setBirthWeight(avgWeight * groupTrack.getQuantity());
 
             //产房仔猪的批次总结字段
             if (PigType.FARROW_TYPES.contains(group.getPigType())) {
@@ -770,14 +789,14 @@ public class DoctorImportDataService {
                 groupTrack.setQuaQty(groupTrack.getQuantity());
             }
             doctorGroupTrackDao.create(groupTrack);
-            createMoveInGroupEvent(group, groupTrack);
+            createMoveInGroupEvent(group, groupTrack, dayAge, avgWeight);
         }
     }
 
     /**
      * 创建默认的转入事件
      */
-    private void createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack) {
+    private void createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, Integer dayAge, Double avgWeight) {
         DoctorGroupEvent event = new DoctorGroupEvent();
         event.setOrgId(group.getOrgId());
         event.setOrgName(group.getOrgName());
@@ -788,14 +807,14 @@ public class DoctorImportDataService {
         event.setEventAt(group.getOpenAt());
         event.setType(GroupEventType.MOVE_IN.getValue());
         event.setName(GroupEventType.MOVE_IN.getDesc());
-        event.setDesc("转移类型：仔猪转入#猪只数：" + groupTrack.getQuantity() + "#平均日龄：" + groupTrack.getAvgDayAge() + "");
         event.setBarnId(group.getInitBarnId());
         event.setBarnName(group.getInitBarnName());
         event.setPigType(group.getPigType());
         event.setQuantity(groupTrack.getQuantity());
-        event.setAvgWeight(groupTrack.getBirthWeight());
-        event.setWeight(event.getQuantity() * MoreObjects.firstNonNull(event.getAvgWeight(), 0D));
-        event.setAvgDayAge(groupTrack.getAvgDayAge());
+        event.setAvgWeight(avgWeight);
+        event.setWeight(event.getQuantity() * avgWeight);
+        event.setDesc("转移类型：仔猪转入#猪只数：" + groupTrack.getQuantity() + "#平均日龄：" + groupTrack.getAvgDayAge() + "#均重：" + avgWeight);
+        event.setAvgDayAge(dayAge);
         event.setIsAuto(IsOrNot.YES.getValue());
         event.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
         doctorGroupEventDao.create(event);
@@ -858,8 +877,12 @@ public class DoctorImportDataService {
             groupTrack.setWeanQty(0);    //默认全部未断奶
             groupTrack.setQuaQty(0);
 
+            if (groupTrack.getQuantity() == null) {
+                throw new JsonResponseException("分娩转入猪群数量不能为空，猪群号：" + group.getGroupCode());
+            }
+
             doctorGroupTrackDao.create(groupTrack);
-            createMoveInGroupEvent(group, groupTrack);
+            createMoveInGroupEvent(group, groupTrack, 1, MoreObjects.firstNonNull(groupTrack.getBirthWeight(), 7D) / groupTrack.getQuantity());
 
             // 把 产房仔猪群 的groupId 存入相应猪舍的所有母猪
             List<DoctorPigTrack> feedTracks = feedMap.get(group.getInitBarnId());
@@ -913,21 +936,26 @@ public class DoctorImportDataService {
             Map<Integer, List<Long>> parityMap = MapBuilder.<Integer, List<Long>>of()
                     .put(first.getParity(), Lists.newArrayList(entryEvent.getId())).map();
 
-            int delta = 0;
+//            int delta = 0;
+//            boolean isPreg = true;
             for (int i = 0; i < size; i++) {
                 DoctorImportSow is = importSows.get(i);
 
                 //这个判断是为了保证胎次连续的
-                if (i == 0) {
-                    delta = is.getParity();
-                } else {
-                    if ((is.getParity() - i) != delta) {
-                        throw new JsonResponseException("母猪号(" + sow.getPigCode() + ")的胎次( " + is.getParity() + " )不连续, 请检查");
-                    }
-                    if (notEmpty(is.getRemark())  && is.getRemark().contains("检查：")) {
-                        delta -= 1;
-                    }
-                }
+//                if (i == 0) {
+//                    delta = is.getParity();
+//                } else {
+//                    if ((is.getParity() - i) != delta) {
+//                        if (!isPreg) {
+//                            throw new JsonResponseException("母猪号(" + sow.getPigCode() + ")的胎次( " + is.getParity() + " )不连续, 请检查");
+//                        }
+//                    }
+//                    isPreg = true;
+//                    if (notEmpty(is.getRemark()) && is.getRemark().contains("检查：")) {
+//                        isPreg = false;
+//                        delta -= 1;
+//                    }
+//                }
 
                 //如果是最后一个元素，要根据当前状态生成事件
                 if (i == size - 1) {
@@ -1043,7 +1071,14 @@ public class DoctorImportDataService {
         sow.setPigMotherCode(last.getMotherCode());
         sow.setSource(PigSource.LOCAL.getKey());
         sow.setBirthWeight(0D);
-        sow.setInFarmDate(new DateTime(first.getMateDate()).plusDays(-1).toDate()); //进场时间取第一次配种时间减一天
+
+        //设置进场日期
+        if (first.getMateDate() != null) {
+            sow.setInFarmDate(new DateTime(first.getMateDate()).plusDays(-1).toDate()); //进场时间取第一次配种时间减一天
+        } else {
+            sow.setInFarmDate(DateTime.now().plusDays(-7).toDate()); //进场时间取当前日期减7天
+        }
+        
         sow.setInitBarnName(last.getBarnName());
         sow.setPigType(DoctorPig.PigSex.SOW.getKey());   //猪类
         if(last.getBirthDate() != null){

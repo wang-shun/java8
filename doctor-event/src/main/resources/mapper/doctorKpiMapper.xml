@@ -448,9 +448,10 @@
         t1.`type` = 9
         and t1.kind = 1
         and t1.`doctor_mate_type` = 1
+        and t1.`current_mating_count` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
     </select>
 
     <!-- 配流产-->
@@ -460,9 +461,10 @@
         t1.`type` = 9
         and t1.kind = 1
         and t1.`doctor_mate_type` in (2, 3)
+        and t1.`current_mating_count` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
     </select>
 
     <!-- 配断奶-->
@@ -472,9 +474,10 @@
         t1.`type` = 9
         and t1.kind = 1
         and t1.`doctor_mate_type` = 4
+        and t1.`current_mating_count` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
     </select>
 
     <!-- 配阴性-->
@@ -484,9 +487,10 @@
         t1.`type` = 9
         and t1.kind = 1
         and t1.`doctor_mate_type` = 5
+        and t1.`current_mating_count` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
     </select>
 
     <!-- 配返情-->
@@ -496,9 +500,10 @@
         t1.`type` = 9
         and t1.kind = 1
         and t1.`doctor_mate_type` = 6
+        and t1.`current_mating_count` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
     </select>
 
 
@@ -510,8 +515,8 @@
         and t1.kind = 1
         and t1.`preg_check_result` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
     </select>
 
     <!-- 返情-->
@@ -522,8 +527,8 @@
         and t1.kind = 1
         and t1.`preg_check_result` = 4
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
     </select>
 
     <!-- 妊娠检查阴性-->
@@ -534,8 +539,8 @@
         and t1.kind = 1
         and t1.`preg_check_result` = 2
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
     </select>
 
     <!-- 流产-->
@@ -547,8 +552,8 @@
         t1.`type` = 11
         and t1.kind = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
         and t1.`preg_check_result` = 3
         )
         +
@@ -558,8 +563,8 @@
         t1.`type` = 13
         and t1.kind = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`abortion_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`abortion_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
         ) from dual
     </select>
 
@@ -574,8 +579,8 @@
         and t1.kind = 1
         and t1.`preg_check_result` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
         )
         /
         (
@@ -586,8 +591,8 @@
         and t1.kind = 1
         and t1.current_mating_count = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= DATE_SUB(#{startAt}, INTERVAL 28 DAY)</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= DATE_SUB(#{endAt}, INTERVAL 28 DAY)</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= DATE_SUB(#{startAt}, INTERVAL 28 DAY)</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= DATE_SUB(#{endAt}, INTERVAL 28 DAY)</if>
         ) from dual
     </select>
 
@@ -603,8 +608,8 @@
         and t1.current_mating_count = 1
         and t1.`is_impregnation` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
         ) /
         (
         select case ifnull(count(1),0) when 0 then 1 else count(1) end
@@ -614,8 +619,8 @@
         and t1.kind = 1
         and t1.current_mating_count = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
         ) from dual
     </select>
 
@@ -628,8 +633,8 @@
         t1.`type` = 15
         and t1.kind = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`farrowing_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`farrowing_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
         ) /
         (
         select case ifnull(count(1),0) when 0 then 1 else count(1) end from doctor_pig_events t1
@@ -637,8 +642,8 @@
         t1.`type` = 9
         and t1.kind = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= DATE_SUB(#{startAt}, INTERVAL 114 DAY)</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= DATE_SUB(#{endAt}, INTERVAL 114 DAY)</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= DATE_SUB(#{startAt}, INTERVAL 114 DAY)</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= DATE_SUB(#{endAt}, INTERVAL 114 DAY)</if>
         and t1.current_mating_count = 1
         ) from dual
     </select>
@@ -655,8 +660,8 @@
         and t1.current_mating_count = 1
         and t1.`is_delivery` = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
         ) /
         (
         select case ifnull(count(1),0) when 0 then 1 else count(1) end
@@ -666,8 +671,8 @@
         and t1.kind = 1
         and t1.current_mating_count = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
         ) from dual
     </select>
 
@@ -724,8 +729,8 @@
         t1.`type` = 15
         AND t1.kind = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.farrowing_date &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.farrowing_date &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.event_at &lt;= #{endAt}</if>
         ) +
         (SELECT ifnull(sum(feed_days), 0) / (CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
         FROM doctor_pig_events t1
@@ -733,8 +738,8 @@
         t1.`type` = 16
         AND t1.kind = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.partwean_date &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.partwean_date &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.event_at &lt;= #{endAt}</if>
         ))
         WHEN 0 THEN 1
         ELSE (
@@ -744,8 +749,8 @@
         t1.`type` = 15
         AND t1.kind = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.farrowing_date &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.farrowing_date &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.event_at &lt;= #{endAt}</if>
         ) +
         (SELECT ifnull(sum(feed_days), 0) / (CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
         FROM doctor_pig_events t1
@@ -753,8 +758,8 @@
         t1.`type` = 16
         AND t1.kind = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.partwean_date &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.partwean_date &lt;= #{endAt}</if>
+        <if test="startAt != null">and t1.event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.event_at &lt;= #{endAt}</if>
         ))
         END) * (
         select ifnull(sum(wean_count)/count(1),0) from doctor_pig_events

@@ -7,7 +7,6 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.sow.DoctorFosterByDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -71,10 +70,21 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
     @Override
     protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
-
+        // TODO: 17/2/28 业务逻辑修改,全部拼窝不触发断奶,先注释掉
+//        //断奶事件
+//        if (doctorPigTrack.getUnweanQty() == 0) {
+//            DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
+//                    .partWeanDate(DateUtil.toDate(fostersDto.getFostersDate()))
+//                    .partWeanPigletsCount(0)
+//                    .partWeanAvgWeight(0d)
+//                    .build();
+//            buildAutoEventCommonInfo(fostersDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
+//            doctorSowWeanHandler.handle(doctorEventInfoList, partWeanDto, basic);
+//        }
         //被拼窝事件
         DoctorFosterByDto fosterByDto = DoctorFosterByDto.builder()
                 .fromSowId(fostersDto.getPigId())
+                .fromSowCode(fostersDto.getPigCode())
                 .fosterByDate(DateUtil.toDate(fostersDto.getFostersDate()))
                 .fosterByCount(fostersDto.getFostersCount())
                 .boarFostersByCount(fostersDto.getBoarFostersCount())
@@ -82,17 +92,6 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
                 .fosterByTotalWeight(fostersDto.getFosterTotalWeight())
                 .fromGroupId(doctorPigTrack.getGroupId())
                 .build();
-
-        //断奶事件
-        if (doctorPigTrack.getUnweanQty() == 0) {
-            DoctorWeanDto partWeanDto = DoctorWeanDto.builder()
-                    .partWeanDate(DateUtil.toDate(fostersDto.getFostersDate()))
-                    .partWeanPigletsCount(0)
-                    .partWeanAvgWeight(0d)
-                    .build();
-            buildAutoEventCommonInfo(fostersDto, partWeanDto, basic, PigEvent.WEAN, doctorPigEvent.getId());
-            doctorSowWeanHandler.handle(doctorEventInfoList, partWeanDto, basic);
-        }
 
         DoctorPigTrack fosterByTrack = doctorPigTrackDao.findByPigId(fostersDto.getFosterSowId());
         DoctorPig fosterByPig = doctorPigDao.findById(fostersDto.getFosterSowId());

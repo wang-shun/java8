@@ -112,7 +112,7 @@ public interface DoctorGroupReadService {
      * @return  分页结果
      */
     Response<Paging<DoctorGroupEvent>> pagingGroupEvent(@NotNull(message = "farmId.not.null") Long farmId,
-                                                        Long groupId, Integer type, Integer pageNo, Integer size);
+                                                        Long groupId, Integer type, Integer pageNo, Integer size, String startDate, String endDate);
 
     /**
      * 根据事件id查询猪群事件
@@ -230,9 +230,9 @@ public interface DoctorGroupReadService {
     Response<DoctorGroupEvent> findLastGroupEventByType(@NotNull(message = "groupId.not.null") Long groupId, @NotNull(message = "type.not.null") Integer type);
 
     /**
-     * 获取新建猪群事件
+     * 获取初始猪群事件
      * @param groupId 猪群id
      * @return 新建猪群事件
      */
-    Response<DoctorGroupEvent> findNewGroupEvent(@NotNull(message = "groupId.not.null") Long groupId);
+    Response<DoctorGroupEvent> findInitGroupEvent(@NotNull(message = "groupId.not.null") Long groupId);
 }
