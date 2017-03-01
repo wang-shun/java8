@@ -1099,7 +1099,7 @@ public class DoctorImportDataService {
             sow.setBreedName(last.getBreed());
             sow.setBreedId(breedMap.get(last.getBreed()));
             if(sow.getBreedId() == null){
-                throw new JsonResponseException("母猪品种错误:" + sow.getBreedName());
+                throw new JsonResponseException("母猪号:"+ sow.getPigCode() +" 母猪品种错误:" + sow.getBreedName());
             }
         }
         doctorPigDao.create(sow);
