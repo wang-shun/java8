@@ -5,6 +5,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.Splitters;
@@ -16,14 +17,7 @@ import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
-import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.user.service.DoctorOrgReadService;
-import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
-import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
-import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
-import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.web.admin.dto.DoctorGroupUserWithOrgAndFarm;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
@@ -65,6 +59,8 @@ public class DoctorAdminUsers {
     @RpcConsumer
     private UserWriteService<User> userUserWriteService;
     @RpcConsumer
+    private DoctorServiceStatusReadService doctorServiceStatusReadService;
+    @RpcConsumer
     private DoctorServiceStatusWriteService doctorServiceStatusWriteService;
     @RpcConsumer
     private DoctorServiceReviewWriteService doctorServiceReviewWriteService;
@@ -92,31 +88,40 @@ public class DoctorAdminUsers {
 
     //初始化审核服务
     private void initDefaultServiceStatus(Long userId, String mobile, String realName) {
-        DoctorServiceStatus status = new DoctorServiceStatus();
-        status.setUserId(userId);
-        //猪场软件初始状态
-        status.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
-        status.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
-        //电商初始状态
-        status.setPigmallStatus(DoctorServiceStatus.Status.BETA.value());
-        status.setPigmallReason("敬请期待");
-        status.setPigmallReviewStatus(DoctorServiceReview.Status.INIT.getValue());
-        //大数据初始状态
-        status.setNeverestStatus(DoctorServiceStatus.Status.BETA.value());
-        status.setNeverestReason("敬请期待");
-        status.setNeverestReviewStatus(DoctorServiceReview.Status.INIT.getValue());
-        //生猪交易初始状态
-        status.setPigtradeStatus(DoctorServiceStatus.Status.BETA.value());
-        status.setPigtradeReason("敬请期待");
-        status.setPigtradeReviewStatus(DoctorServiceReview.Status.INIT.getValue());
-        RespHelper.or500(doctorServiceStatusWriteService.createServiceStatus(status));
+        DoctorServiceStatus doctorServiceStatus = RespHelper.or500(doctorServiceStatusReadService.findByUserId(userId));
+        if(Arguments.isNull(doctorServiceStatus)) {
+            DoctorServiceStatus status = new DoctorServiceStatus();
+            status.setUserId(userId);
+            //猪场软件初始状态
+            status.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
+            status.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
+            //电商初始状态
+            status.setPigmallStatus(DoctorServiceStatus.Status.BETA.value());
+            status.setPigmallReason("敬请期待");
+            status.setPigmallReviewStatus(DoctorServiceReview.Status.INIT.getValue());
+            //大数据初始状态
+            status.setNeverestStatus(DoctorServiceStatus.Status.BETA.value());
+            status.setNeverestReason("敬请期待");
+            status.setNeverestReviewStatus(DoctorServiceReview.Status.INIT.getValue());
+            //生猪交易初始状态
+            status.setPigtradeStatus(DoctorServiceStatus.Status.BETA.value());
+            status.setPigtradeReason("敬请期待");
+            status.setPigtradeReviewStatus(DoctorServiceReview.Status.INIT.getValue());
+            RespHelper.or500(doctorServiceStatusWriteService.createServiceStatus(status));
+        }else {
+            doctorServiceStatus.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
+            doctorServiceStatus.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
+            RespHelper.or500(doctorServiceStatusWriteService.updateServiceStatus(doctorServiceStatus));
+        }
 
-        //初始化一些数据
-        RespHelper.or500(doctorServiceReviewWriteService.initServiceReview(userId, mobile, realName));
         DoctorServiceReview doctorReview = RespHelper.or500(doctorServiceReviewReadService.findServiceReviewByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR));
-        if (doctorReview != null) {
-            doctorReview.setStatus(DoctorServiceReview.Status.OK.getValue());
-            RespHelper.or500(doctorServiceReviewWriteService.updateReview(doctorReview));
+        if( doctorReview == null) {
+            RespHelper.or500(doctorServiceReviewWriteService.initServiceReview(userId, mobile, realName));
+        }
+        DoctorServiceReview doctorReviewNew = RespHelper.or500(doctorServiceReviewReadService.findServiceReviewByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR));
+        if (doctorReviewNew != null) {
+            doctorReviewNew.setStatus(DoctorServiceReview.Status.OK.getValue());
+            RespHelper.or500(doctorServiceReviewWriteService.updateReview(doctorReviewNew));
         }
     }
 
@@ -151,7 +156,7 @@ public class DoctorAdminUsers {
             log.error("admin add user auth, userId:({}) not found", userId);
             throw new JsonResponseException("user.not.found");
         }
-
+        initDefaultServiceStatus(userId, user.getMobile(), user.getName());
         DoctorUserDataPermission permission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
         if (permission == null) {
             permission = getPermission(new DoctorUserDataPermission(), userId, orgIds, farmIds);
