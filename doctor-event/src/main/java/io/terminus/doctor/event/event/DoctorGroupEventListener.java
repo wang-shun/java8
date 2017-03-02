@@ -191,26 +191,34 @@ public class DoctorGroupEventListener implements EventListener {
         switch (pigType) {
             case NURSERY_PIGLET:
                 int nursery = doctorKpiDao.getDeadNursery(farmId, startAt, endAt);
+                int weedOutNursery = doctorKpiDao.getWeedOutNursery(farmId, startAt, endAt);
                 DoctorDailyReportDto reportDtoNursery = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
                 reportDtoNursery.getDead().setNursery(nursery);
+                reportDtoNursery.getDead().setWeedOutNursery(weedOutNursery);
                 doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoNursery);
                 break;
             case FATTEN_PIG:
                 int fatten = doctorKpiDao.getDeadFatten(farmId, startAt, endAt);
+                int weedOutFatten = doctorKpiDao.getWeedOutFatten(farmId, startAt, endAt);
                 DoctorDailyReportDto reportDtoFatten = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
                 reportDtoFatten.getDead().setFatten(fatten);
+                reportDtoFatten.getDead().setWeedOutFatten(weedOutFatten);
                 doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFatten);
                 break;
             case RESERVE:
                 int houbei = doctorKpiDao.getDeadHoubei(farmId, startAt, endAt);
+                int weedOutHoubei = doctorKpiDao.getWeedOutHoubei(farmId, startAt, endAt);
                 DoctorDailyReportDto reportDtoHoubei = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
                 reportDtoHoubei.getDead().setHoubei(houbei);
+                reportDtoHoubei.getDead().setWeedOutHoubei(weedOutHoubei);
                 doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoHoubei);
                 break;
             case DELIVER_SOW:
                 int farrow = doctorKpiDao.getDeadFarrow(farmId, startAt, endAt);
+                int weedOutFarrow = doctorKpiDao.getWeedOutFarrow(farmId, startAt, endAt);
                 DoctorDailyReportDto reportDtoFarrow = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
                 reportDtoFarrow.getDead().setFarrow(farrow);
+                reportDtoFarrow.getDead().setWeedOutFarrow(weedOutFarrow);
                 doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFarrow);
                 break;
             default:
