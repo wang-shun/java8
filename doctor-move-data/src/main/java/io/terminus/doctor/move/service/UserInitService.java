@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -349,6 +350,9 @@ public class UserInitService {
             List<DoctorUserDataPermission> permissions = doctorUserDataPermissionDao.findByOrgId(orgId);
             permissions.forEach(permission -> {
                 List<Long> barnIds = permission.getBarnIdsList();
+                if(Arguments.isNull(barnIds)) {
+                    barnIds = Lists.newArrayList();
+                }
                 barnIds.addAll(barns);
                 permission.setBarnIds(Joiners.COMMA.join(Sets.newHashSet(barnIds)));
                 doctorUserDataPermissionDao.update(permission);
