@@ -34,4 +34,9 @@ public class DoctorBasicDto implements Serializable {
      * 猪场概况
      */
     private List<DoctorFarmBasicDto> farmsBasic;
+
+    /**
+     * 所有可以查看的公司
+     */
+    private List<DoctorOrg>  doctorOrgs;
 }

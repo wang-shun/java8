@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPigTypeStatistic;
@@ -73,9 +74,21 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
         try {
             //查询有权限的公司与猪场 // TODO: 2017/2/16 多公司 暂时先返回第一个
             List<DoctorOrg> orgs = RespHelper.orServEx(doctorOrgReadService.findOrgsByUserId(userId));
+            if (!notEmpty(orgs)) {
+                log.info("no orgs find ,userId = {}", userId);
+                return Response.ok(new DoctorBasicDto(new DoctorOrg(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+            }
             DoctorOrg org = orgs.get(0);
-            
-            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByUserId(userId));
+
+            DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
+            List<Long> farmList = permission.getFarmIdsList();
+
+            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(org.getId()));
+            if (!notEmpty(farms)) {
+                return Response.ok(new DoctorBasicDto(org, Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+            }
+
+            farms = farms.stream().filter(t-> farmList.contains(t.getId())).collect(Collectors.toList());
 
             //查询公司统计
             List<DoctorPigTypeStatistic> stats = RespHelper.orServEx(doctorPigTypeStatisticReadService.findPigTypeStatisticsByOrgId(org.getId()));
@@ -88,7 +101,7 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
                     })
                     .collect(Collectors.toList());
 
-            return Response.ok(new DoctorBasicDto(org, getStatistics(stats), farmBasicDtos));
+            return Response.ok(new DoctorBasicDto(org, getStatistics(stats), farmBasicDtos, orgs));
         } catch (ServiceException e) {
                 return Response.fail(e.getMessage());
         } catch (Exception e) {
@@ -100,18 +113,29 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
     @Override
     public Response<DoctorBasicDto> getOrgStatisticByOrg(Long userId, Long orgId) {
         try {
+            //查询有权限的公司
+            List<DoctorOrg> orgs = RespHelper.orServEx(doctorOrgReadService.findOrgsByUserId(userId));
+            if (!notEmpty(orgs)) {
+                log.info("no orgs find ,userId = {}", userId);
+                return Response.ok(new DoctorBasicDto(new DoctorOrg(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+            }
+            if(Arguments.isNull(orgId)){
+                orgId = orgs.get(0).getId();
+            }
             //校验orgId
             DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
             if (permission == null || !permission.getOrgIdsList().contains(orgId)) {
                 return Response.fail("user.not.permission.org");
             }
+
+
             List<Long> farmList = permission.getFarmIdsList();
 
             //查询有权限的公司与猪场
             DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(orgId));
             List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(org.getId()));
             if (!notEmpty(farms)) {
-                return Response.ok(new DoctorBasicDto(org, Collections.emptyList(), Collections.emptyList()));
+                return Response.ok(new DoctorBasicDto(org, Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
             }
 
             farms = farms.stream().filter(t-> farmList.contains(t.getId())).collect(Collectors.toList());
@@ -132,7 +156,7 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
                     })
                     .collect(Collectors.toList());
 
-            return Response.ok(new DoctorBasicDto(org, getStatistics(stats), farmBasicDtos));
+            return Response.ok(new DoctorBasicDto(org, getStatistics(stats), farmBasicDtos, orgs));
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
