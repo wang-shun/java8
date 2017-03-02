@@ -47,7 +47,7 @@ public class ServiceReviewTest extends BaseFrontWebTest {
         org.setMobile("12345678901");
         org.setName("orgname");
         serviceApplyDto.setOrg(org);
-        doctorServiceReviewWriteService.initServiceReview(2L, "44444444444");
+        doctorServiceReviewWriteService.initServiceReview(2L, "44444444444", "444");
         serviceBetaStatusHandler.initDefaultServiceStatus(2L);
         Boolean result = restTemplate.postForObject(url, serviceApplyDto, Boolean.class, ImmutableMap.of("port", port));
         Assert.assertTrue(result);

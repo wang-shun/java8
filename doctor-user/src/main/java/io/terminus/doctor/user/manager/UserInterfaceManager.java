@@ -160,7 +160,7 @@ public class UserInterfaceManager {
         status.setPigtradeReason("敬请期待");
 
         doctorServiceStatusWriteService.createServiceStatus(status);
-        doctorServiceReviewWriteService.initServiceReview(user.getId(), user.getMobile());
+        doctorServiceReviewWriteService.initServiceReview(user.getId(), user.getMobile(), user.getName());
     }
 
     // 检测手机号是否已存在

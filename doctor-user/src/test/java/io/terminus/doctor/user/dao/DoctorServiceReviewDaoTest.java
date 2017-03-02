@@ -33,7 +33,7 @@ public class DoctorServiceReviewDaoTest extends BaseDaoTest {
 
     @Test
     public void testInitData(){
-        boolean b = doctorServiceReviewDao.initData(11L, "11111111");
+        boolean b = doctorServiceReviewDao.initData(11L, "11111111", "aaaa");
         Assert.assertTrue(b);
     }
 

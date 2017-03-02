@@ -480,7 +480,7 @@ public class DoctorImportDataService {
         DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR);
         if(review == null){
             //初始化服务的申请审批状态
-            userInitService.initServiceReview(userId, mobile);
+            userInitService.initServiceReview(userId, mobile, user.getName());
         }else{
             review.setStatus(DoctorServiceReview.Status.OK.getValue());
             doctorServiceReviewDao.update(review);

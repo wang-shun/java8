@@ -86,12 +86,12 @@ public class DoctorAdminUsers {
                              @RequestParam(required = false) String password) {
         User user = checkGroupUser(mobile, name, password);
         Long userId = RespHelper.or500(userUserWriteService.create(user));
-        initDefaultServiceStatus(userId, user.getMobile());
+        initDefaultServiceStatus(userId, user.getMobile(), user.getName());
         return userId;
     }
 
     //初始化审核服务
-    private void initDefaultServiceStatus(Long userId, String mobile) {
+    private void initDefaultServiceStatus(Long userId, String mobile, String realName) {
         DoctorServiceStatus status = new DoctorServiceStatus();
         status.setUserId(userId);
         //猪场软件初始状态
@@ -112,7 +112,7 @@ public class DoctorAdminUsers {
         RespHelper.or500(doctorServiceStatusWriteService.createServiceStatus(status));
 
         //初始化一些数据
-        RespHelper.or500(doctorServiceReviewWriteService.initServiceReview(userId, mobile));
+        RespHelper.or500(doctorServiceReviewWriteService.initServiceReview(userId, mobile, realName));
         DoctorServiceReview doctorReview = RespHelper.or500(doctorServiceReviewReadService.findServiceReviewByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR));
         if (doctorReview != null) {
             doctorReview.setStatus(DoctorServiceReview.Status.OK.getValue());

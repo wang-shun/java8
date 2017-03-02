@@ -42,5 +42,5 @@ public interface DoctorServiceReviewWriteService {
      * @param userMobile 用户手机号,冗余字段,可以为空
      * @return 是否成功
      */
-    Response<Boolean> initServiceReview(Long userId, String userMobile);
+    Response<Boolean> initServiceReview(Long userId, String userMobile, String realName);
 }

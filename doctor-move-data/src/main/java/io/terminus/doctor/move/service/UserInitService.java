@@ -113,7 +113,7 @@ public class UserInitService {
                 //初始化服务状态
                 this.initDefaultServiceStatus(userId);
                 //初始化服务的申请审批状态
-                this.initServiceReview(userId, mobile);
+                this.initServiceReview(userId, mobile, primaryUser.getName());
                 //创建org
                 DoctorOrg org = this.createOrg(member.getFarmName(), mobile, null, member.getFarmOID());
 
@@ -318,8 +318,8 @@ public class UserInitService {
         doctorUserDataPermissionDao.create(permission);
     }
 
-    public void initServiceReview(Long userId, String mobile){
-        RespHelper.or500(doctorServiceReviewWriteService.initServiceReview(userId, mobile));
+    public void initServiceReview(Long userId, String mobile, String realName){
+        RespHelper.or500(doctorServiceReviewWriteService.initServiceReview(userId, mobile, realName));
         DoctorServiceReview review = RespHelper.or500(doctorServiceReviewReadService.findServiceReviewByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR));
         review.setStatus(DoctorServiceReview.Status.OK.getValue());
         RespHelper.or500(doctorServiceReviewWriteService.updateReview(review));

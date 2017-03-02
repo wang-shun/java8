@@ -53,7 +53,7 @@ public class UserServiceInit {
                 Long userId = user.getId();
                 Response<List<DoctorServiceReview>> reviewRes = doctorServiceReviewReadService.findServiceReviewsByUserId(userId);
                 if(reviewRes.isSuccess() && reviewRes.getResult().isEmpty()){
-                    doctorServiceReviewWriteService.initServiceReview(userId, user.getMobile());
+                    doctorServiceReviewWriteService.initServiceReview(userId, user.getMobile(), user.getName());
                 }
                 Response<DoctorServiceStatus> statusResponse = doctorServiceStatusReadService.findByUserId(userId);
                 if(statusResponse.isSuccess() && statusResponse.getResult() == null){

@@ -53,7 +53,7 @@ public class WebUserEventListener implements EventListener {
         //当注册用户是猪场管理员(主账号)
         if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), user.getType())){
             serviceBetaStatusHandler.initDefaultServiceStatus(userId);
-            doctorServiceReviewWriteService.initServiceReview(userId, user.getMobile());
+            doctorServiceReviewWriteService.initServiceReview(userId, user.getMobile(), user.getName());
         }
     }
 }

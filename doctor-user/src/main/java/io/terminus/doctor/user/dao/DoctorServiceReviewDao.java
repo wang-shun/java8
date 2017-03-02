@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceReviewExt;
 import org.springframework.stereotype.Repository;
@@ -42,14 +43,9 @@ public class DoctorServiceReviewDao extends MyBatisDao<DoctorServiceReview> {
      * @param userMobile 用户手机号,冗余字段,可以为空
      * @return 插入的数据的行数, 理论上应该等于枚举 ServiceReview.Type 的数量
      */
-    public boolean initData(Long userId, String userMobile){
+    public boolean initData(Long userId, String userMobile, String realName){
         int[] types = Stream.of(DoctorServiceReview.Type.values()).mapToInt(DoctorServiceReview.Type::getValue).toArray();
-        ImmutableMap<String, Object> param;
-        if(userMobile == null){
-            param = ImmutableMap.of("userId", userId, "types", types);
-        }else{
-            param = ImmutableMap.of("userId", userId, "types", types, "userMobile", userMobile);
-        }
+        Map<Object, Object> param = MapBuilder.newHashMap().put("userId", userId, "types", types, "userMobile", userMobile, "realName", realName).map();
         return sqlSession.insert(sqlId("initData"), param) == types.length;
     }
 

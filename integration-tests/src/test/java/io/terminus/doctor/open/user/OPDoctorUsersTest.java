@@ -50,7 +50,7 @@ public class OPDoctorUsersTest extends BaseOpenWebTest {
     @Test
     public void getUserServiceStatusTest(){
         this.login(sid, userId, deviceId);
-        doctorServiceReviewWriteService.initServiceReview(1L, "44444444444");
+        doctorServiceReviewWriteService.initServiceReview(1L, "44444444444", "444");
         serviceBetaStatusHandler.initDefaultServiceStatus(1L);
         String pampasCall = "get.user.service.status";
         ResponseEntity<Object> result = restTemplate.getForEntity("http://localhost:{port}/api/gateway" +
@@ -66,7 +66,7 @@ public class OPDoctorUsersTest extends BaseOpenWebTest {
     @Test
     public void applyOpenServiceTest(){
         this.login(sid, userId, deviceId);
-        doctorServiceReviewWriteService.initServiceReview(1L, "44444444444");
+        doctorServiceReviewWriteService.initServiceReview(1L, "44444444444", "444");
         serviceBetaStatusHandler.initDefaultServiceStatus(1L);
         String pampasCall = "apply.open.service";
         DoctorServiceApplyDto dto = new DoctorServiceApplyDto();
