@@ -19,4 +19,5 @@ public class WarehouseEventReport implements Serializable {
     private Integer eventType;
     private Double count;
     private Double amount;
+
 }

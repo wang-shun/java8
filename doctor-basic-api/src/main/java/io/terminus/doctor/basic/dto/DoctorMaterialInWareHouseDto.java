@@ -24,6 +24,8 @@ public class DoctorMaterialInWareHouseDto implements Serializable{
 
     private Long materialInWareHouseId; //对应的仓库原料的Id
 
+    private String providerFactoryName; //生产厂家
+
     private Long materialId;    // 原料Id
 
     private String materialName;    // 原料名称

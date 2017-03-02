@@ -171,4 +171,33 @@ export.tables:
         display: 剩余量
       - name: operatorName
         display: 管理员
+  web-matirail-export:
+    display: 仓库物料导出导出
+    columns:
+      - name: materialName
+        display: 名称
+      - name: providerFactoryName
+        display: 生产厂家
+      - name: unitName
+        display: 计量单位
+      - name: monthBeginNumber
+        display: 月初数量
+      - name: monthBeginAmount
+        display: 月初金额
+        format: priceFormatter
+      - name: inCount
+        display: 本月入库数量
+      - name: inAmount
+        display: 本月入库金额
+        format: priceFormatter
+      - name: outCount
+        display: 本月出库数量
+      - name: outAmount
+        display: 本月出库金额
+        format: priceFormatter
+      - name: lotNumber
+        display: 月末数量
+      - name: currentAmount
+        display: 月末金额
+        format: priceFormatter
 
