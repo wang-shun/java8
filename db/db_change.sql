@@ -616,3 +616,7 @@ ALTER TABLE doctor_staffs CHANGE org_id farm_id BIGINT(20);
 -- 2017-02-14
 alter table doctor_messages add column quantity  int(11) default null comment '猪只数' after lot_number;
 alter table doctor_messages add column avg_day_age  int(11) default null comment '猪群平均日龄' after quantity;
+
+-- 2017-03-03
+alter table doctor_user_subs add column farm_id BIGINT(20) default null comment '猪场id' after parent_user_id;
+alter table doctor_user_primarys add column rel_farm_id BIGINT(20) default null comment '此账号关联猪场id' after user_name;

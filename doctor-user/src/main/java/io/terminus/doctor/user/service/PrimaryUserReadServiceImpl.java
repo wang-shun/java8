@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +50,13 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
     }
 
     @Override
-    public Response<Paging<Sub>> subPagination(Long parentUserId, Long roleId, String roleName, String userName,
+    public Response<Paging<Sub>> subPagination(Long farmId, Long roleId, String roleName, String userName,
                                                String realName, Integer status, Integer pageNo, Integer size) {
         try {
             PageInfo page = new PageInfo(pageNo, size);
             Sub criteria = new Sub();
-            criteria.setParentUserId(parentUserId);
+            //criteria.setParentUserId(parentUserId);
+            criteria.setFarmId(farmId);
             criteria.setStatus(status);
             criteria.setRoleId(roleId);
             criteria.setRoleName(roleName);
@@ -62,8 +64,8 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
             criteria.setRealName(realName);
             return Response.ok(subDao.paging(page.getOffset(), page.getLimit(), criteria));
         } catch (Exception e) {
-            log.error("paging sub seller failed, parentUserId={}, status={}, pageNo={}, size={}, cause:{}",
-                    parentUserId, status, pageNo, size, Throwables.getStackTraceAsString(e));
+            log.error("paging sub seller failed, farmId={}, status={}, pageNo={}, size={}, cause:{}",
+                    farmId, status, pageNo, size, Throwables.getStackTraceAsString(e));
             return Response.fail("sub.paging.fail");
         }
     }
@@ -114,6 +116,45 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
             log.error("find.all.primary.user.failed, cause{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.all.primary.user.failed");
         }
+    }
 
+    @Override
+    public Response<Sub> findSubById(@NotNull(message = "subId.not.null") Long subId) {
+        try {
+            return Response.ok(subDao.findById(subId));
+        } catch (Exception e) {
+            log.error("find sub by id failed, subId:{}, cause:{}", subId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.sub.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> updateSub(Sub sub) {
+        try {
+            return Response.ok(subDao.update(sub));
+        } catch (Exception e) {
+            log.error("update sub failed, sub:{}, cause:{}", sub, Throwables.getStackTraceAsString(e));
+            return Response.fail("update.sub.failed");
+        }
+    }
+
+    @Override
+    public Response<List<Sub>> findSubsByFarmId(@NotNull(message = "farm.id.not.null") Long farmId) {
+        try {
+            return Response.ok(subDao.findSubsByFarmId(farmId));
+        } catch (Exception e) {
+            log.error("find subs by farmId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.subs.by.farmId.failed");
+        }
+    }
+
+    @Override
+    public Response<PrimaryUser> findPrimaryByFarmId(@NotNull(message = "farm.id.not.null") Long farmId) {
+        try {
+            return Response.ok(primaryUserDao.findPrimaryByFarmId(farmId));
+        } catch (Exception e) {
+            log.error("find primary by farmId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.primary.by.farmId.failed");
+        }
     }
 }

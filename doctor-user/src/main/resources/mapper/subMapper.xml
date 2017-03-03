@@ -14,6 +14,7 @@
         <result column="real_name" property="realName"/>
         <result column="parent_user_id" property="parentUserId"/>
         <result column="parent_user_name" property="parentUserName"/>
+        <result column="farm_id" property="farmId"/>
         <result column="role_id" property="roleId"/>
         <result column="role_name" property="roleName"/>
         <result column="contact" property="contact"/>
@@ -33,11 +34,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-      user_id, `user_name`, real_name, parent_user_id, parent_user_name, role_id, role_name, contact, status, extra_json, created_at, updated_at
+      user_id, user_name, real_name, parent_user_id, parent_user_name, farm_id, role_id, role_name, contact, status, extra_json, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{userId}, #{userName}, #{realName}, #{parentUserId}, #{parentUserName}, #{roleId}, #{roleName}, #{contact}, #{status}, #{extraJson}, now(), now()
+        #{userId}, #{userName}, #{realName}, #{parentUserId}, #{parentUserName}, #{farmId}, #{roleId}, #{roleName}, #{contact}, #{status}, #{extraJson}, now(), now()
     </sql>
 
     <sql id="criteria">
@@ -46,6 +47,7 @@
         <if test="realName != null">AND real_name like concat('%', #{realName}, '%')</if>
         <if test="userName != null">AND user_name like concat('%', #{userName}, '%')</if>
         <if test="parentUserId != null">AND parent_user_id = #{parentUserId}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="status != null">AND status = #{status}</if>
         <if test="roleId != null">AND role_id = #{roleId}</if>
         <if test="roleName != null">AND role_name like concat('%', #{roleName}, '%')</if>
@@ -69,6 +71,7 @@
         <if test="realName != null">real_name = #{realName},</if>
         <if test="parentUserId != null">parent_user_id = #{parentUserId},</if>
         <if test="parentUserName != null">parent_user_name = #{parentUserName},</if>
+        <if test="farmId != null">farm_id = #{farmId},</if>
         <if test="roleId != null">role_id = #{roleId},</if>
         <if test="roleName != null">role_name = #{roleName},</if>
         <if test="contact != null">contact = #{contact},</if>
@@ -157,6 +160,14 @@
         <if test="limit != null">
             LIMIT #{limit}
         </if>
+    </select>
+
+    <select id="findSubsByFarmId" parameterType="long" resultMap="SubMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            farm_id = #{farmId}
+        </where>
     </select>
 
     <update id="updateRoleName" parameterType="map">

@@ -57,4 +57,13 @@ public class SubDao extends MyBatisDao<Sub> {
     public void updateRoleName(Long subRoleId, String newRoleName){
         getSqlSession().update(sqlId("updateRoleName"), ImmutableMap.of("roleId", subRoleId, "roleName", newRoleName));
     }
+
+    /**
+     * 获取子账号列表
+     * @param farmId 猪场id
+     * @return 子账号列表
+     */
+    public List<Sub> findSubsByFarmId(Long farmId) {
+        return getSqlSession().selectList(sqlId("findSubsByFarmId"), farmId);
+    }
 }

@@ -13,4 +13,13 @@ public class PrimaryUserDao extends MyBatisDao<PrimaryUser> {
     public PrimaryUser findByUserId(Long userId) {
         return getSqlSession().selectOne(sqlId("findByUserId"), userId);
     }
+
+    /**
+     * 获取关联猪场主账号列表
+     * @param farmId 猪场id
+     * @return 主账号
+     */
+    public PrimaryUser findPrimaryByFarmId(Long farmId) {
+        return getSqlSession().selectOne(sqlId("findPrimaryByFarmId"), farmId);
+    }
 }

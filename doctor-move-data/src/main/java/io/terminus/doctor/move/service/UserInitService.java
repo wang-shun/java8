@@ -2,6 +2,7 @@ package io.terminus.doctor.move.service;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
@@ -13,16 +14,17 @@ import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.RoleTemplate;
 import io.terminus.doctor.move.model.View_FarmInfo;
 import io.terminus.doctor.move.model.View_FarmMember;
-import io.terminus.doctor.event.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
+import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.SubRoleDao;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -31,6 +33,7 @@ import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
@@ -86,6 +89,8 @@ public class UserInitService {
     @Autowired
     private SubDao subDao;
     @Autowired
+    private PrimaryUserDao primaryUserDao;
+    @Autowired
     private DoctorMessageRuleWriteService doctorMessageRuleWriteService;
     @Autowired
     private DoctorBarnDao doctorBarnDao;
@@ -105,7 +110,7 @@ public class UserInitService {
         });
 
         User primaryUser = null;
-        List<Long> farmIds = Lists.newArrayList();
+        Map<String, Long> farmIdMap = Maps.newHashMap();
         for(View_FarmMember member : list){
             if(member.getLevels() == 0 && "admin".equals(member.getLoginName())){
                 // 主账号注册,内含事务
@@ -118,8 +123,6 @@ public class UserInitService {
                 //创建org
                 DoctorOrg org = this.createOrg(member.getFarmName(), mobile, null, member.getFarmOID());
 
-
-
                 //创建猪场
                 for(DoctorFarm farm : farms){
                     farm.setOrgId(org.getId());
@@ -130,12 +133,20 @@ public class UserInitService {
                     this.createStaff(member, primaryUser, farm, member.getOID());
 
                     RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
-                    farmIds.add(farm.getId());
+                    farmIdMap.put(farm.getOutId(), farm.getId());
                 }
+
+                //主账户关联猪场id
+                PrimaryUser primary = primaryUserDao.findByUserId(userId);
+                PrimaryUser updatePrimary = new PrimaryUser();
+                updatePrimary.setId(primary.getId());
+                updatePrimary.setRelFarmId(farmIdMap.get(member.getFarmOID()));
+                primaryUserDao.update(updatePrimary);
+
                 //创建数据权限
                 DoctorUserDataPermission permission = new DoctorUserDataPermission();
                 permission.setUserId(userId);
-                permission.setFarmIds(Joiner.on(",").join(farmIds));
+                permission.setFarmIds(Joiner.on(",").join(farmIdMap.values()));
                 permission.setOrgIds(org.getId().toString());
                 doctorUserDataPermissionDao.create(permission);
             }
@@ -151,7 +162,7 @@ public class UserInitService {
         //现在轮到子账号了
         for(View_FarmMember member : list) {
             if(member.getLevels() == 1){
-                this.createSubUser(member, roleId, primaryUser.getId(), loginName, farmIds, member.getOID());
+                this.createSubUser(member, roleId, primaryUser.getId(), loginName, farmIdMap.get(member.getFarmOID()), member.getOID());
             }
         }
     }
@@ -284,7 +295,7 @@ public class UserInitService {
         return existRole;
     }
 
-    private void createSubUser(View_FarmMember member, Map<String, Long> roleIdMap, Long primaryUserId, String primaryUserMobile, List<Long> farmIds, String staffoutId){
+    private void createSubUser(View_FarmMember member, Map<String, Long> roleIdMap, Long primaryUserId, String primaryUserMobile, Long farmId, String staffoutId){
         User subUser = new User();
         subUser.setName(member.getLoginName() + "@" + primaryUserMobile);
         subUser.setPassword("123456");
@@ -315,7 +326,7 @@ public class UserInitService {
         //现在是数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
         permission.setUserId(subUserId);
-        permission.setFarmIds(Joiner.on(",").join(farmIds));
+        permission.setFarmIds(Joiner.on(",").join(Lists.newArrayList(farmId)));
         doctorUserDataPermissionDao.create(permission);
     }
 

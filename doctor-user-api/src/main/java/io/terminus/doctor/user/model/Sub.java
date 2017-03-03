@@ -61,6 +61,11 @@ public class Sub implements Serializable {
     private String parentUserName;
 
     /**
+     *所属猪场id
+     */
+    private Long farmId;
+
+    /**
      * 角色 ID
      */
     private Long roleId;
