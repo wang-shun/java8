@@ -230,11 +230,17 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     private DoctorDeadDailyReport getDeadDailyReport(Long farmId, Date startAt, Date endAt) {
         DoctorDeadDailyReport dead = new DoctorDeadDailyReport();
         dead.setBoar(doctorKpiDao.getDeadBoar(farmId, startAt, endAt));
+        dead.setWeedOutBoar(doctorKpiDao.getWeedOutBoar(farmId, startAt, endAt));
         dead.setSow(doctorKpiDao.getDeadSow(farmId, startAt, endAt));
+        dead.setWeedOutSow(doctorKpiDao.getWeedOutSow(farmId, startAt, endAt));
         dead.setFarrow(doctorKpiDao.getDeadFarrow(farmId, startAt, endAt));
+        dead.setWeedOutFarrow(doctorKpiDao.getWeedOutFarrow(farmId, startAt, endAt));
         dead.setNursery(doctorKpiDao.getDeadNursery(farmId, startAt, endAt));
+        dead.setWeedOutNursery(doctorKpiDao.getWeedOutNursery(farmId, startAt, endAt));
         dead.setFatten(doctorKpiDao.getDeadFatten(farmId, startAt, endAt));
+        dead.setWeedOutFatten(doctorKpiDao.getWeedOutFatten(farmId, startAt, endAt));
         dead.setHoubei(doctorKpiDao.getDeadHoubei(farmId, startAt, endAt));
+        dead.setWeedOutHoubei(doctorKpiDao.getWeedOutHoubei(farmId, startAt, endAt));
         return dead;
     }
 

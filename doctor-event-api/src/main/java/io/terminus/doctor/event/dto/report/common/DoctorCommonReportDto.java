@@ -82,11 +82,17 @@ public class DoctorCommonReportDto implements Serializable {
      * 死淘情况
      */
     private int deadSow;                      //母猪
+    private int weedOutSow;                   //母猪
     private int deadBoar;                     //公猪
+    private int weedOutBoar;                  //公猪
     private int deadFarrow;                   //产房仔猪
+    private int weedOutFarrow;                //产房仔猪
     private int deadNursery;                  //保育猪
+    private int weedOutNursery;               //保育猪
     private int deadFatten;                   //育肥猪
+    private int weedOutFatten;                //育肥猪
     private int deadHoubei;                   //后备猪
+    private int weedOutHoubei;                //后备猪
     private double deadFarrowRate;            //产房死淘率
     private double deadNurseryRate;           //保育死淘率
     private double deadFattenRate;            //育肥死淘率
