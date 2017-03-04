@@ -619,4 +619,5 @@ alter table doctor_messages add column avg_day_age  int(11) default null comment
 
 -- 2017-03-03
 alter table doctor_user_subs add column farm_id BIGINT(20) default null comment '猪场id' after parent_user_id;
+alter table doctor_sub_roles add column farm_id BIGINT(20) default null comment '关联猪场id,猪场拥有的角色' after user_id;
 alter table doctor_user_primarys add column rel_farm_id BIGINT(20) default null comment '此账号关联猪场id' after user_name;

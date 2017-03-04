@@ -12,6 +12,7 @@
         <result column="name" property="name"/>
         <result column="desc" property="desc"/>
         <result column="user_id" property="userId"/>
+        <result column="farm_id" property="farmId"/>
         <result column="app_key" property="appKey"/>
         <result column="status" property="status"/>
         <result column="allow_json" property="allowJson"/>
@@ -30,11 +31,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`,`desc`, user_id, app_key, status, allow_json, extra_json, created_at, updated_at
+        `name`,`desc`, user_id, farm_id, app_key, status, allow_json, extra_json, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{desc}, #{userId}, #{appKey}, #{status}, #{allowJson}, #{extraJson}, now(), now()
+        #{name}, #{desc}, #{userId}, #{farmId}, #{appKey}, #{status}, #{allowJson}, #{extraJson}, now(), now()
     </sql>
 
     <insert id="create" parameterType="SubRole" keyProperty="id" useGeneratedKeys="true">
@@ -71,6 +72,7 @@
             <if test="name!=null">`name` = #{name},</if>
             <if test="desc!=null">`desc` = #{desc},</if>
             <if test="userId!=null">user_id = #{userId},</if>
+            <if test="farmId!=null">farm_id = #{farmId},</if>
             <if test="appKey != null">app_key = #{appKey},</if>
             <if test="status!=null">status = #{status},</if>
             <if test="allowJson!=null">allow_json = #{allowJson},</if>

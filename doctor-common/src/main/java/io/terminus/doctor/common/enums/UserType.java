@@ -37,7 +37,17 @@ public enum UserType {
     /**
      * 猪场子账号
      */
-    FARM_SUB(6)
+    FARM_SUB(6),
+
+    /**
+     * 集团账户
+     */
+    CLIQUE(7),
+
+    /**
+     * 公司账号
+     */
+    COMPANY(8)
     ;
 
     private final int value;
