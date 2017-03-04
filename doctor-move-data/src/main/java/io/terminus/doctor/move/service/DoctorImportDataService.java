@@ -63,11 +63,11 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.dto.DoctorImportSow;
 import io.terminus.doctor.move.util.ImportExcelUtils;
-import io.terminus.doctor.event.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.user.dao.DoctorAddressDao;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
@@ -75,6 +75,7 @@ import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.dao.DoctorServiceStatusDao;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
+import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.SubRoleDao;
 import io.terminus.doctor.user.dao.UserDaoExt;
@@ -88,6 +89,7 @@ import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.DoctorUserReadService;
@@ -175,6 +177,8 @@ public class DoctorImportDataService {
     private SubRoleDao subRoleDao;
     @Autowired
     private SubDao subDao;
+    @Autowired
+    private PrimaryUserDao primaryUserDao;
     @Autowired
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     @Autowired
@@ -334,6 +338,7 @@ public class DoctorImportDataService {
                     SubRole subRole = new SubRole();
                     subRole.setName(roleName);
                     subRole.setUserId(primaryUser.getId());
+                    subRole.setFarmId(farm.getId());
                     subRole.setAppKey(appKey);
                     subRole.setStatus(1);
                     subRole.setAllowJson("[]");
@@ -350,6 +355,15 @@ public class DoctorImportDataService {
                         .put("realName", realName)
                         .map());
                 Long subUserId = RespHelper.or500(userWriteService.create(subUser));
+                //设置子账号关联猪场
+                io.terminus.doctor.user.model.Sub sub = subDao.findByUserId(subUserId);
+                io.terminus.doctor.user.model.Sub updateSub = new io.terminus.doctor.user.model.Sub();
+                updateSub.setId(sub.getId());
+                updateSub.setFarmId(farm.getId());
+                subDao.update(updateSub);
+
+                // 创建子账号员工
+                this.createStaff(subUser, farm);
 
                 //现在是数据权限
                 DoctorUserDataPermission permission = new DoctorUserDataPermission();
@@ -437,6 +451,13 @@ public class DoctorImportDataService {
             user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
             userId = RespHelper.or500(userWriteService.create(user));
             user.setId(userId);
+
+            //主账户关联猪场id
+            PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
+            PrimaryUser updatePrimary = new PrimaryUser();
+            updatePrimary.setId(primaryUser.getId());
+            updatePrimary.setRelFarmId(farm.getId());
+            primaryUserDao.update(updatePrimary);
 
             // 把真实姓名存进 user profile
             UserProfile userProfile = userProfileDao.findByUserId(userId);

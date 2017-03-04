@@ -108,9 +108,9 @@ public class SubRoles {
      * @return 角色列表
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
-    public List<SubRole> findAllRoles() {
+    public List<SubRole> findAllRoles(@RequestParam Long farmId) {
         checkAuth();
-        return RespHelper.or500(subRoleReadService.findByUserIdAndStatus(ThreadVars.getAppKey(), subService.getPrimaryUserId(UserUtil.getCurrentUser()), 1));
+        return RespHelper.or500(subRoleReadService.findByFarmIdAndStatus(ThreadVars.getAppKey(), farmId, 1));
     }
 
     /**

@@ -41,6 +41,16 @@ public interface SubRoleReadService extends CustomRoleReadService<SubRole> {
     Response<List<SubRole>> findByUserIdAndStatus(String appKey, Long userId, Integer status);
 
     /**
+     * 通过猪场 ID 查询
+     *
+     * @param appKey 角色使用场景
+     * @param farmId 猪场 ID
+     * @param status 角色状态
+     * @return 自定义角色列表
+     */
+    Response<List<SubRole>> findByFarmIdAndStatus(String appKey, Long farmId, Integer status);
+
+    /**
      * 分页查询
      *
      * @param appKey 角色使用场景
