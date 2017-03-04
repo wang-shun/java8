@@ -81,7 +81,7 @@ public class DoctorFarms {
      * @return 公司信息
      */
     @RequestMapping(value = "/companyInfo", method = RequestMethod.GET)
-    public DoctorBasicDto getCompanyInfo(@RequestParam("orgId") Long orgId) {
+    public DoctorBasicDto getCompanyInfo(@RequestParam(value = "orgId", required = false) Long orgId){
         return RespHelper.or500(doctorStatisticReadService.getOrgStatisticByOrg(UserUtil.getUserId(), orgId));
     }
 

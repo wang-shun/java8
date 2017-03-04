@@ -395,11 +395,17 @@ public class DoctorCommonReportManager {
         dto.setSaleHoubei(doctorKpiDao.getSaleHoubei(farmId, startAt, endAt));            //后备猪
 
         dto.setDeadSow(doctorKpiDao.getDeadSow(farmId, startAt, endAt));                  //母猪
+        dto.setWeedOutSow(doctorKpiDao.getWeedOutSow(farmId, startAt, endAt));                  //母猪
         dto.setDeadBoar(doctorKpiDao.getDeadBoar(farmId, startAt, endAt));                //公猪
+        dto.setWeedOutBoar(doctorKpiDao.getWeedOutBoar(farmId, startAt, endAt));                //公猪
         dto.setDeadFarrow(doctorKpiDao.getDeadFarrow(farmId, startAt, endAt));            //产房仔猪
+        dto.setWeedOutFarrow(doctorKpiDao.getWeedOutFarrow(farmId, startAt, endAt));            //产房仔猪
         dto.setDeadNursery(doctorKpiDao.getDeadNursery(farmId, startAt, endAt));          //保育猪
+        dto.setWeedOutNursery(doctorKpiDao.getWeedOutNursery(farmId, startAt, endAt));          //保育猪
         dto.setDeadFatten(doctorKpiDao.getDeadFatten(farmId, startAt, endAt));            //育肥猪
+        dto.setWeedOutFatten(doctorKpiDao.getWeedOutFatten(farmId, startAt, endAt));            //育肥猪
         dto.setDeadHoubei(doctorKpiDao.getDeadHoubei(farmId, startAt, endAt));            //后备猪
+        dto.setWeedOutHoubei(doctorKpiDao.getWeedOutHoubei(farmId, startAt, endAt));            //后备猪
         dto.setDeadFarrowRate(doctorKpiDao.getDeadFarrowRate(farmId, startAt, endAt));    //产房死淘率
         dto.setDeadNurseryRate(doctorKpiDao.getDeadNurseryRate(farmId, startAt, endAt));  //保育死淘率
         dto.setDeadFattenRate(doctorKpiDao.getDeadFattenRate(farmId, startAt, endAt));    //育肥死淘率

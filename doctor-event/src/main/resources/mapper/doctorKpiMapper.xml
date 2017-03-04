@@ -244,70 +244,138 @@
         <include refid="criteria"/>
     </select>
 
-    <!-- 死淘情况: 母猪 -->
+    <!-- 死亡情况: 母猪 -->
     <select id="getDeadSow" parameterType="map" resultType="int">
         SELECT
         count(1)
         FROM doctor_pig_events
         WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        change_type_id = 110 AND -- 变动类型是死亡和淘汰
         type = 6 AND -- 事件类型是离场
         kind = 1 -- 猪类母猪
         <include refid="criteria"/>
     </select>
 
-    <!-- 死淘情况: 公猪 -->
+    <!-- 淘汰情况: 母猪 -->
+    <select id="getWeedOutSow" parameterType="map" resultType="int">
+        SELECT
+        count(1)
+        FROM doctor_pig_events
+        WHERE
+        change_type_id = 111 AND -- 变动类型是死亡和淘汰
+        type = 6 AND -- 事件类型是离场
+        kind = 1 -- 猪类母猪
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死亡情况: 公猪 -->
     <select id="getDeadBoar" parameterType="map" resultType="int">
         SELECT
         count(1)
         FROM doctor_pig_events
         WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        change_type_id = 110 AND -- 变动类型是死亡和淘汰
         type = 6 AND -- 事件类型是离场
         kind = 2 -- 猪类公猪
         <include refid="criteria"/>
     </select>
 
-    <!-- 死淘情况: 产房仔猪 -->
+    <!-- 死亡情况: 公猪 -->
+    <select id="getWeedOutBoar" parameterType="map" resultType="int">
+        SELECT
+        count(1)
+        FROM doctor_pig_events
+        WHERE
+        change_type_id = 111 AND -- 变动类型是死亡和淘汰
+        type = 6 AND -- 事件类型是离场
+        kind = 2 -- 猪类公猪
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死亡情况: 产房仔猪 -->
     <select id="getDeadFarrow" parameterType="map" resultType="int">
         SELECT
         ifnull(sum(quantity),0)
         FROM doctor_group_events
         WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        change_type_id = 110 AND -- 变动类型是死亡和淘汰
         pig_type IN (1, 7) -- 产房仔猪
         <include refid="criteria"/>
     </select>
 
-    <!-- 死淘情况: 保育猪 -->
+    <!-- 淘汰情况: 产房仔猪 -->
+    <select id="getWeedOutFarrow" parameterType="map" resultType="int">
+        SELECT
+        ifnull(sum(quantity),0)
+        FROM doctor_group_events
+        WHERE
+        change_type_id = 111 AND -- 变动类型是死亡和淘汰
+        pig_type IN (1, 7) -- 产房仔猪
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死亡情况: 保育猪 -->
     <select id="getDeadNursery" parameterType="map" resultType="int">
         SELECT
         ifnull(sum(quantity),0)
         FROM doctor_group_events
         WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        change_type_id = 110 AND -- 变动类型是死亡和淘汰
         pig_type = 2 -- 保育猪
         <include refid="criteria"/>
     </select>
 
-    <!-- 死淘情况: 育肥猪 -->
+    <!-- 淘汰情况: 保育猪 -->
+    <select id="getWeedOutNursery" parameterType="map" resultType="int">
+        SELECT
+        ifnull(sum(quantity),0)
+        FROM doctor_group_events
+        WHERE
+        change_type_id = 111 AND -- 变动类型是死亡和淘汰
+        pig_type = 2 -- 保育猪
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死亡情况: 育肥猪 -->
     <select id="getDeadFatten" parameterType="map" resultType="int">
         SELECT
         ifnull(sum(quantity),0)
         FROM doctor_group_events
         WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        change_type_id = 110 AND -- 变动类型是死亡和淘汰
         pig_type = 3 -- 育肥猪
         <include refid="criteria"/>
     </select>
 
-    <!-- 死淘情况: 后备猪 -->
+    <!-- 淘汰情况: 育肥猪 -->
+    <select id="getWeedOutFatten" parameterType="map" resultType="int">
+        SELECT
+        ifnull(sum(quantity),0)
+        FROM doctor_group_events
+        WHERE
+        change_type_id = 111 AND -- 变动类型是死亡和淘汰
+        pig_type = 3 -- 育肥猪
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死亡情况: 后备猪 -->
     <select id="getDeadHoubei" parameterType="map" resultType="int">
         SELECT
         ifnull(sum(quantity),0)
         FROM doctor_group_events
         WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        change_type_id = 110 AND -- 变动类型是死亡和淘汰
+        pig_type IN (4, 8) -- 后备猪
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 淘汰情况: 后备猪 -->
+    <select id="getWeedOutHoubei" parameterType="map" resultType="int">
+        SELECT
+        ifnull(sum(quantity),0)
+        FROM doctor_group_events
+        WHERE
+        change_type_id = 111 AND -- 变动类型是死亡和淘汰
         pig_type IN (4, 8) -- 后备猪
         <include refid="criteria"/>
     </select>
