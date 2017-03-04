@@ -42,6 +42,11 @@ public class PrimaryUser implements Serializable{
     private String userName;
 
     /**
+     * 关联的猪场id,表明此账号为猪场主账号
+     */
+    private Long relFarmId;
+
+    /**
      * 0: 未生效(待审核), 1: 生效(审核通过), -1: 审核不通过, -2: 冻结, -3: 删除
      */
     private Integer status;

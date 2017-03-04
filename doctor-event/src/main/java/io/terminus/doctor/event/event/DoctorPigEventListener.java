@@ -418,13 +418,17 @@ public class DoctorPigEventListener implements EventListener {
         Date endAt = DateUtil.getDateEnd(new DateTime(eventAt)).toDate();
 
         int deadSow = doctorKpiDao.getDeadSow(farmId, startAt, endAt);
+        int weedOutSow = doctorKpiDao.getWeedOutSow(farmId, startAt, endAt);
         int deadBoar = doctorKpiDao.getDeadBoar(farmId, startAt, endAt);
+        int weedOutBoar = doctorKpiDao.getWeedOutBoar(farmId, startAt, endAt);
         int saleSow = doctorKpiDao.getSaleSow(farmId, startAt, endAt);
         int saleBoar = doctorKpiDao.getSaleBoar(farmId, startAt, endAt);
 
         DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
         reportDto.getDead().setSow(deadSow);
+        reportDto.getDead().setWeedOutSow(weedOutSow);
         reportDto.getDead().setBoar(deadBoar);
+        reportDto.getDead().setWeedOutBoar(weedOutBoar);
         reportDto.getSale().setSow(saleSow);
         reportDto.getSale().setBoar(saleBoar);
         doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);

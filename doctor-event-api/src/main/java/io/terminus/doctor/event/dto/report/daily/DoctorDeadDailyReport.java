@@ -20,9 +20,19 @@ public class DoctorDeadDailyReport implements Serializable {
     private int boar;
 
     /**
+     * 公猪淘汰
+     */
+    private int weedOutBoar;
+
+    /**
      * 母猪
      */
     private int sow;
+
+    /**
+     * 母猪淘汰
+     */
+    private int weedOutSow;
 
     /**
      * 产房仔猪
@@ -30,9 +40,19 @@ public class DoctorDeadDailyReport implements Serializable {
     private int farrow;
 
     /**
+     * 产房仔猪淘汰
+     */
+    private int weedOutFarrow;
+
+    /**
      * 保育猪
      */
     private int nursery;
+
+    /**
+     * 保育猪淘汰
+     */
+    private int WeedOutNursery;
 
     /**
      * 育肥猪
@@ -40,7 +60,17 @@ public class DoctorDeadDailyReport implements Serializable {
     private int fatten;
 
     /**
+     * 育肥猪淘汰
+     */
+    private int weedOutFatten;
+
+    /**
      * 后备猪
      */
     private int houbei;
+
+    /**
+     * 后备猪淘汰
+     */
+    private int weedOutHoubei;
 }

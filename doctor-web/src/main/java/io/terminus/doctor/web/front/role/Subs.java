@@ -100,7 +100,8 @@ public class Subs {
      * @return
      */
     @RequestMapping(value = "/pagination", method = RequestMethod.GET)
-    public Paging<Sub> pagingSubs(@RequestParam(required = false) Long roleId,
+    public Paging<Sub> pagingSubs(@RequestParam Long farmId,
+                                  @RequestParam(required = false) Long roleId,
                                   @RequestParam(required = false) String roleName,
                                   @RequestParam(required = false) String username,
                                   @RequestParam(required = false) String realName,
@@ -108,7 +109,7 @@ public class Subs {
                                   @RequestParam(required = false) Integer pageNo,
                                   @RequestParam(required = false) Integer pageSize) {
         checkAuth();
-        return RespHelper.or500(subService.pagingSubs(UserUtil.getCurrentUser(), roleId, roleName, username, realName, status, pageNo, pageSize));
+        return RespHelper.or500(subService.pagingSubs(farmId, UserUtil.getCurrentUser(), roleId, roleName, username, realName, status, pageNo, pageSize));
     }
 
     /**

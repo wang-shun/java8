@@ -26,4 +26,18 @@ public class SubRoleDao extends MyBatisDao<SubRole> {
                 ImmutableMap.of("appKey", appKey, "userId", userId, "status", status));
     }
 
+
+    /**
+     *查询角色信息
+     *
+     * @param appKey 角色使用场景
+     * @param farmId 猪场id
+     * @param status 角色状态
+     * @return 用户信息
+     */
+    public List<SubRole> findByFarmIdAndStatus(String appKey, Long farmId, Integer status) {
+        return getSqlSession().selectList(sqlId("findByFarmIdAndStatus"),
+                ImmutableMap.of("appKey", appKey, "farmId", farmId, "status", status));
+    }
+
 }

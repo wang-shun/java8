@@ -11,6 +11,7 @@
         <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
         <result column="user_name" property="userName"/>
+        <result column="rel_farm_id" property="relFarmId"/>
         <result column="status" property="status"/>
         <result column="extra_json" property="extraJson"/>
         <result column="created_at" property="createdAt"/>
@@ -27,15 +28,16 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        user_id, `user_name`,status, extra_json, created_at, updated_at
+        user_id, `user_name`, rel_farm_id, status, extra_json, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{userId}, #{userName}, #{status}, #{extraJson}, now(), now()
+        #{userId}, #{userName}, #{relFarmId}, #{status}, #{extraJson}, now(), now()
     </sql>
 
     <sql id="criteria">
         <if test="userId != null">AND user_id = #{userId}</if>
+        <if test="relFarmId != null">AND rel_farm_id = #{relFarmId}</if>
         <if test="status != null">AND status = #{status}</if>
     </sql>
 
@@ -53,6 +55,7 @@
         SET
         <if test="userId != null">user_id = #{userId},</if>
         <if test="userName != null">user_name = #{userName},</if>
+        <if test="relFarmId != null">rel_farm_id = #{relFarmId},</if>
         <if test="status != null">status = #{status},</if>
         <if test="extraJson != null">extra_json = #{extraJson},</if>
         updated_at = now()
@@ -113,6 +116,16 @@
         <include refid="tb"/>
         <where>
             <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="findPrimaryByFarmId" parameterType="long" resultMap="PrimaryUserMap">
+        SELECT id,
+        <include refid="cols_exclude_id"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            rel_farm_id = #{farmId}
         </where>
     </select>
 </mapper>

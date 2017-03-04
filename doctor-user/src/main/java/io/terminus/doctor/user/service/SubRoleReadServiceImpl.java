@@ -61,6 +61,17 @@ public class SubRoleReadServiceImpl implements SubRoleReadService {
     }
 
     @Override
+    public Response<List<SubRole>> findByFarmIdAndStatus(String appKey, Long farmId, Integer status) {
+        try {
+            return Response.ok(subRoleDao.findByFarmIdAndStatus(appKey, farmId, status));
+        } catch (Exception e) {
+            log.error("find farm roles by farmId={} failed, cause:{}",
+                    farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("farm.role.find.fail");
+        }
+    }
+
+    @Override
     public Response<Paging<SubRole>> pagination(String appKey, Long userId, Integer status, String roleName, Integer pageNo, Integer size) {
         try {
             PageInfo page = new PageInfo(pageNo, size);

@@ -28,5 +28,5 @@ public interface DoctorStatisticReadService {
      * @return 猪场信息list
      */
     Response<DoctorBasicDto> getOrgStatistic(@NotNull(message = "userId.not.null") Long userId);
-    Response<DoctorBasicDto> getOrgStatisticByOrg(@NotNull(message = "userId.not.null") Long userId, @NotNull(message = "orgId.not.null")Long orgId);
+    Response<DoctorBasicDto> getOrgStatisticByOrg(@NotNull(message = "userId.not.null") Long userId, Long orgId);
 }

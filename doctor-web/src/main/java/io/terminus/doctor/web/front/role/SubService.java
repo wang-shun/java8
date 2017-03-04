@@ -273,6 +273,12 @@ public class SubService {
                     .put("realName", sub.getRealName())
                     .map());
             Long subUserId = RespHelper.orServEx(userWriteService.create(subUser));
+            //设置子账号关联猪场
+            io.terminus.doctor.user.model.Sub sub1 = RespHelper.orServEx(primaryUserReadService.findSubByUserId(subUserId));
+            io.terminus.doctor.user.model.Sub updateSub = new io.terminus.doctor.user.model.Sub();
+            updateSub.setId(sub1.getId());
+            updateSub.setFarmId(sub.getFarmIds().get(0));
+            primaryUserWriteService.updateSub(updateSub);
 
             //create farm staff if necessary
             createStaff(subUserId, sub);
@@ -335,13 +341,11 @@ public class SubService {
     }
 
     @Export(paramNames = {"user", "roleId", "pageNo", "pageSize"})
-    public Response<Paging<Sub>> pagingSubs(BaseUser user, Long roleId,String roleName, String userName,
+    public Response<Paging<Sub>> pagingSubs(Long farmId, BaseUser user, Long roleId,String roleName, String userName,
                                             String realName, Integer status, Integer pageNo, Integer pageSize) {
         try {
-            Long parentUserId = this.getPrimaryUserId(user);
-
             Paging<io.terminus.doctor.user.model.Sub> paging = RespHelper.orServEx(
-                    primaryUserReadService.subPagination(parentUserId, roleId, roleName, userName, realName,
+                    primaryUserReadService.subPagination(farmId, roleId, roleName, userName, realName,
                             status, pageNo, pageSize)
             );
 

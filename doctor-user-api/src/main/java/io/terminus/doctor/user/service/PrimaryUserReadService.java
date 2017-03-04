@@ -6,6 +6,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -28,14 +29,14 @@ public interface PrimaryUserReadService {
     /**
      * 分页子账户信息
      *
-     * @param parentUserId 主账号用户 ID
+     * @param farmId 猪场id
      * @param roleId 角色ID ID
      * @param status 子账户绑定状态
      * @param pageNo 页号
      * @param size   查询数量
      * @return 子账户分页
      */
-    Response<Paging<Sub>> subPagination(Long parentUserId, Long roleId, String roleName, String userName,
+    Response<Paging<Sub>> subPagination(Long farmId, Long roleId, String roleName, String userName,
                                         String realName, Integer status, Integer pageNo, Integer size);
 
     /**
@@ -70,5 +71,33 @@ public interface PrimaryUserReadService {
      * @return
      */
     Response<List<PrimaryUser>> findAllPrimaryUser();
+
+    /**
+     * 根据id 获取子账号
+     * @param subId 子账号id
+     * @return 子账号
+     */
+    Response<Sub> findSubById(@NotNull(message = "subId.not.null") Long subId);
+
+    /**
+     * 更新sub
+     * @param sub 需要更新的sub
+     * @return
+     */
+    Response<Boolean> updateSub(Sub sub);
+
+    /**
+     * 根据猪场id获取子账号列表
+     * @param farmId 猪场id
+     * @return 子账号列表
+     */
+    Response<List<Sub>> findSubsByFarmId(@NotNull(message = "farm.id.not.null") Long farmId);
+
+    /**
+     * 获取关联猪场主账号列表
+     * @param farmId 猪场id
+     * @return 主账号
+     */
+    Response<PrimaryUser> findPrimaryByFarmId(@NotNull(message = "farm.id.not.null") Long farmId);
 
 }

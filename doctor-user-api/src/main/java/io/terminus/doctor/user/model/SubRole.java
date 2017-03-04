@@ -56,6 +56,11 @@ public class SubRole implements Serializable, CustomRole {
      */
     private Long userId;
 
+    /**
+     * 猪场 ID
+     */
+    private Long farmId;
+
 
     /**
      * 角色所属 (PC / MOBILE)
