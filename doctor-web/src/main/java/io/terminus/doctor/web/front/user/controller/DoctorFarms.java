@@ -21,6 +21,7 @@ import io.terminus.doctor.web.core.service.DoctorStatisticReadService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -202,6 +203,16 @@ public class DoctorFarms {
             doctorFarms = doctorFarms.stream().filter(t -> doctorFarmIds.contains(t.getId())).collect(Collectors.toList());
         }
         return doctorFarms;
+    }
+
+    /**
+     * 根据猪场id查询猪场信息
+     * @param farmId 猪场id
+     * @return 猪场信息
+     */
+    @RequestMapping(value = "/{farmId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public DoctorFarm findFarmById(@PathVariable Long farmId) {
+        return RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
     }
 
 }
