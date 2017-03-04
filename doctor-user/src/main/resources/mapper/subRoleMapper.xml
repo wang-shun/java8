@@ -96,6 +96,14 @@
         WHERE app_key = #{appKey} AND user_id = #{userId} AND `status` = #{status}
     </select>
 
+    <select id="findByFarmIdAndStatus" parameterType="map" resultMap="SubRoleMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE app_key = #{appKey} AND farm_id = #{farmId} AND `status` = #{status}
+    </select>
+
     <sql id="criteria">
         app_key = #{appKey}
         <if test="name != null">AND `name` like CONCAT('%', #{name}, '%')</if>
