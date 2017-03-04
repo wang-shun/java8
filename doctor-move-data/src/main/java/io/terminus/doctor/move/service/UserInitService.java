@@ -110,7 +110,10 @@ public class UserInitService {
         });
 
         User primaryUser = null;
-        Map<String, Long> farmIdMap = Maps.newHashMap();
+        //outId 与 farmId 映射
+        Map<String, Long> outIdFarmIdMap = Maps.newHashMap();
+        //primaryUserId 与farmId映射
+        Map<Long, Long> userIdFarmIdMap = Maps.newHashMap();
         for(View_FarmMember member : list){
             if(member.getLevels() == 0 && "admin".equals(member.getLoginName())){
                 // 主账号注册,内含事务
@@ -133,20 +136,21 @@ public class UserInitService {
                     this.createStaff(member, primaryUser, farm, member.getOID());
 
                     RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
-                    farmIdMap.put(farm.getOutId(), farm.getId());
+                    outIdFarmIdMap.put(farm.getOutId(), farm.getId());
                 }
 
                 //主账户关联猪场id
                 PrimaryUser primary = primaryUserDao.findByUserId(userId);
                 PrimaryUser updatePrimary = new PrimaryUser();
                 updatePrimary.setId(primary.getId());
-                updatePrimary.setRelFarmId(farmIdMap.get(member.getFarmOID()));
+                updatePrimary.setRelFarmId(outIdFarmIdMap.get(member.getFarmOID()));
                 primaryUserDao.update(updatePrimary);
+                userIdFarmIdMap.put(userId, outIdFarmIdMap.get(member.getFarmOID()));
 
                 //创建数据权限
                 DoctorUserDataPermission permission = new DoctorUserDataPermission();
                 permission.setUserId(userId);
-                permission.setFarmIds(Joiner.on(",").join(farmIdMap.values()));
+                permission.setFarmIds(Joiner.on(",").join(outIdFarmIdMap.values()));
                 permission.setOrgIds(org.getId().toString());
                 doctorUserDataPermissionDao.create(permission);
             }
@@ -157,12 +161,12 @@ public class UserInitService {
         }
 
         //创建子账号角色,后面创建子账号需要用到
-        Map<String, Long> roleId = this.createSubRole(primaryUser.getId(), dataSourceId);
+        Map<String, Long> roleId = this.createSubRole(userIdFarmIdMap.get(primaryUser.getId()), primaryUser.getId(), dataSourceId);
 
         //现在轮到子账号了
         for(View_FarmMember member : list) {
             if(member.getLevels() == 1){
-                this.createSubUser(member, roleId, primaryUser.getId(), loginName, farmIdMap.get(member.getFarmOID()), member.getOID());
+                this.createSubUser(member, roleId, primaryUser.getId(), loginName, outIdFarmIdMap.get(member.getFarmOID()), member.getOID());
             }
         }
     }
@@ -271,7 +275,7 @@ public class UserInitService {
         return farm;
     }
 
-    private Map<String, Long> createSubRole(Long primaryUserId, Long dataSourceId){
+    private Map<String, Long> createSubRole(Long farmId, Long primaryUserId, Long dataSourceId){
         final String appKey = "MOBILE";
         RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUserId));
         // key = roleName, value = roleId
@@ -287,6 +291,7 @@ public class UserInitService {
         for(RoleTemplate roleTemplate : roleTemplates){
             if(!existRole.containsKey(roleTemplate.getRoleName())){
                 role.setName(roleTemplate.getRoleName());
+                role.setFarmId(farmId);
                 subRoleDao.create(role);
                 existRole.put(roleTemplate.getRoleName(), role.getId());
             }

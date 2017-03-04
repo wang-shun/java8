@@ -338,6 +338,7 @@ public class DoctorImportDataService {
                     SubRole subRole = new SubRole();
                     subRole.setName(roleName);
                     subRole.setUserId(primaryUser.getId());
+                    subRole.setFarmId(farm.getId());
                     subRole.setAppKey(appKey);
                     subRole.setStatus(1);
                     subRole.setAllowJson("[]");
