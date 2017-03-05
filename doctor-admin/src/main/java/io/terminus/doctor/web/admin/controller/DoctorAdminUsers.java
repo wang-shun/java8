@@ -79,8 +79,9 @@ public class DoctorAdminUsers {
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public Long addGroupUser(@RequestParam String mobile,
                              @RequestParam(required = false) String name,
+                             @RequestParam(required = false) String realName,
                              @RequestParam(required = false) String password) {
-        User user = checkGroupUser(mobile, name, password);
+        User user = checkGroupUser(mobile, name, realName, password);
         Long userId = RespHelper.or500(userUserWriteService.create(user));
         initDefaultServiceStatus(userId, user.getMobile(), user.getName());
         return userId;
@@ -126,7 +127,7 @@ public class DoctorAdminUsers {
     }
 
     //拼接集团用户数据
-    private User checkGroupUser(String mobile, String name, String password) {
+    private User checkGroupUser(String mobile, String name, String realName, String password) {
         Response<User> userResponse = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
         if (userResponse.isSuccess()) {
             log.error("user existed, user:{}", userResponse.getResult());
@@ -135,6 +136,7 @@ public class DoctorAdminUsers {
         User user = new User();
         user.setMobile(mobile);
         user.setName(name);
+        user.getExtra().put("realName", realName);
 
         //密码默认为手机号
         user.setPassword(StringUtils.hasText(password) ? password : mobile);

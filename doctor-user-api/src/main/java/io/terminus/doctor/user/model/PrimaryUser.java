@@ -42,6 +42,11 @@ public class PrimaryUser implements Serializable{
     private String userName;
 
     /**
+     * 主账号真实用户名
+     */
+    private String realName;
+
+    /**
      * 关联的猪场id,表明此账号为猪场主账号
      */
     private Long relFarmId;
