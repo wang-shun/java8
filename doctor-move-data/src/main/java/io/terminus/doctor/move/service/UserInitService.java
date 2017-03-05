@@ -128,6 +128,7 @@ public class UserInitService {
 
                 //创建猪场
                 for(DoctorFarm farm : farms){
+                    farm.setFarmCode(member.getLoginName());
                     farm.setOrgId(org.getId());
                     farm.setOrgName(org.getName());
                     doctorFarmDao.create(farm);
@@ -302,7 +303,8 @@ public class UserInitService {
 
     private void createSubUser(View_FarmMember member, Map<String, Long> roleIdMap, Long primaryUserId, String primaryUserMobile, Long farmId, String staffoutId){
         User subUser = new User();
-        subUser.setName(member.getLoginName() + "@" + primaryUserMobile);
+        DoctorFarm farm = doctorFarmDao.findById(farmId);
+        subUser.setName(member.getLoginName() + "@" + farm.getFarmCode());
         subUser.setPassword("123456");
         subUser.setType(UserType.FARM_SUB.value());
         if(Objects.equals(member.getIsStopUse(), "true")){
