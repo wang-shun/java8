@@ -621,3 +621,7 @@ alter table doctor_messages add column avg_day_age  int(11) default null comment
 alter table doctor_user_subs add column farm_id BIGINT(20) default null comment '猪场id' after parent_user_id;
 alter table doctor_sub_roles add column farm_id BIGINT(20) default null comment '关联猪场id,猪场拥有的角色' after user_id;
 alter table doctor_user_primarys add column rel_farm_id BIGINT(20) default null comment '此账号关联猪场id' after user_name;
+
+-- 2017-03-05
+alter table doctor_user_primarys add column `real_name` VARCHAR(64) DEFAULT NULL COMMENT '真实姓名 (冗余),跟随 user_profile 表的 real_name 字段' after `user_name`;
+alter table doctor_farms add column `farm_code` VARCHAR(64) DEFAULT NULL COMMENT '猪场号' after `name`;

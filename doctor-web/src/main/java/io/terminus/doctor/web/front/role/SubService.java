@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
@@ -12,8 +13,10 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorStaffReadService;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
@@ -65,6 +68,9 @@ public class SubService {
 
     private final DoctorStaffWriteService doctorStaffWriteService;
     private final DoctorStaffReadService doctorStaffReadService;
+
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
 
     @Autowired
     public SubService(DoctorUserReadService doctorUserReadService, UserWriteService<User> userWriteService,
@@ -433,7 +439,9 @@ public class SubService {
         }else{
             primaryUser = RespHelper.orServEx(doctorUserReadService.findById(user.getId()));
         }
-        return AT.join(sub.getUsername(), primaryUser.getName() == null ? primaryUser.getMobile() : primaryUser.getName());
+        DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(sub.getFarmIds().get(0)));
+
+        return AT.join(sub.getUsername(), farm.getFarmCode() == null ? primaryUser.getMobile() : farm.getFarmCode());
     }
 
     /**

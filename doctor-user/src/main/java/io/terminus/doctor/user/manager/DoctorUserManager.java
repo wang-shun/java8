@@ -3,10 +3,9 @@ package io.terminus.doctor.user.manager;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.common.utils.UserRoleUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.user.dao.DoctorStaffDao;
+import io.terminus.doctor.common.utils.UserRoleUtil;
 import io.terminus.doctor.user.dao.OperatorDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
@@ -14,7 +13,6 @@ import io.terminus.doctor.user.model.Operator;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
-import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.impl.dao.UserDao;
@@ -96,6 +94,7 @@ public class DoctorUserManager {
             primaryUser.setUserId(userId);
             //暂时暂定手机号
             primaryUser.setUserName(user.getMobile());
+            primaryUser.setRealName(Params.get(user.getExtra(), "realName"));
             primaryUser.setStatus(UserStatus.NORMAL.value());
             primaryUserDao.create(primaryUser);
 

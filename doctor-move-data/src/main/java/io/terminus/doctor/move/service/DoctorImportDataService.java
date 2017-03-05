@@ -328,7 +328,7 @@ public class DoctorImportDataService {
                 }
 
                 User subUser = new User();
-                subUser.setName(loginName + "@" + primaryUser.getName());
+                subUser.setName(loginName + "@" + farm.getFarmCode());
                 subUser.setMobile(contact);
                 subUser.setPassword("123456");
                 subUser.setType(UserType.FARM_SUB.value());
@@ -419,6 +419,7 @@ public class DoctorImportDataService {
             farm.setOrgId(org.getId());
             farm.setOrgName(org.getName());
             farm.setName(farmName);
+            farm.setFarmCode(loginName);
             farm.setProvinceId(getAddressId(province, 1));
             farm.setProvinceName(province);
             farm.setCityId(getAddressId(city, farm.getProvinceId()));
@@ -457,6 +458,7 @@ public class DoctorImportDataService {
             PrimaryUser updatePrimary = new PrimaryUser();
             updatePrimary.setId(primaryUser.getId());
             updatePrimary.setRelFarmId(farm.getId());
+            updatePrimary.setRealName(realName);
             primaryUserDao.update(updatePrimary);
 
             // 把真实姓名存进 user profile

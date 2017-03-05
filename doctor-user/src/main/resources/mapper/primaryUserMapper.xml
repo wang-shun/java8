@@ -11,6 +11,7 @@
         <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
         <result column="user_name" property="userName"/>
+        <result column="real_name" property="realName"/>
         <result column="rel_farm_id" property="relFarmId"/>
         <result column="status" property="status"/>
         <result column="extra_json" property="extraJson"/>
@@ -28,11 +29,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        user_id, `user_name`, rel_farm_id, status, extra_json, created_at, updated_at
+        user_id, `user_name`, real_name, rel_farm_id, status, extra_json, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{userId}, #{userName}, #{relFarmId}, #{status}, #{extraJson}, now(), now()
+        #{userId}, #{userName}, #{realName}, #{relFarmId}, #{status}, #{extraJson}, now(), now()
     </sql>
 
     <sql id="criteria">
@@ -55,6 +56,7 @@
         SET
         <if test="userId != null">user_id = #{userId},</if>
         <if test="userName != null">user_name = #{userName},</if>
+        <if test="realName != null">real_name = #{realName},</if>
         <if test="relFarmId != null">rel_farm_id = #{relFarmId},</if>
         <if test="status != null">status = #{status},</if>
         <if test="extraJson != null">extra_json = #{extraJson},</if>

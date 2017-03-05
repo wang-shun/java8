@@ -21,6 +21,11 @@ public class DoctorFarm implements Serializable {
      * 猪场名称
      */
     private String name;
+
+    /**
+     * 猪场号
+     */
+    private String farmCode;
     
     /**
      * 公司id
