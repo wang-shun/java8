@@ -174,7 +174,7 @@ public class DoctorFarms {
         farmStaff.setFarmId(primaryUser.getRelFarmId());
         farmStaff.setUserId(primaryUser.getUserId());
         farmStaff.setStatus(primaryUser.getStatus());
-        farmStaff.setRealName(primaryUser.getUserName());
+        farmStaff.setRealName(primaryUser.getRealName());
         staffList.add(farmStaff);
         return staffList;
     }
