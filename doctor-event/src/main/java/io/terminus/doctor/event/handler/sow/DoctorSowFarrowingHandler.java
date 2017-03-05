@@ -138,7 +138,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     public void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
         //触发猪群事件
-        Long groupId = createNewFarrowGroup(doctorEventInfoList, doctorPigTrack, doctorPigEvent, farrowingDto, basic);
+        Long groupId = createNewFarrowGroup(doctorEventInfoList, doctorPigEvent, farrowingDto, basic);
         expectTrue(notNull(groupId), "farrow.group.not.null", inputDto.getPigCode());
         doctorPigTrack.setGroupId(groupId);
         doctorPigTrackDao.update(doctorPigTrack);
@@ -155,7 +155,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
      * 创建对应的猪群
      *
      */
-    protected Long createNewFarrowGroup(List<DoctorEventInfo> eventInfoList, DoctorPigTrack doctorPigTrack, DoctorPigEvent doctorPigEvent, DoctorFarrowingDto farrowingDto, DoctorBasicInputInfoDto basic) {
+    protected Long createNewFarrowGroup(List<DoctorEventInfo> eventInfoList, DoctorPigEvent doctorPigEvent, DoctorFarrowingDto farrowingDto, DoctorBasicInputInfoDto basic) {
 
         // Build 新建猪群操作方式
         DoctorSowMoveInGroupInput input = new DoctorSowMoveInGroupInput();
@@ -185,7 +185,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         input.setSowQty(sowCount);
         input.setBoarQty(boarCount);
         input.setAvgDayAge(1);
-        input.setAvgWeight(farrowingDto.getBirthNestAvg());
+        input.setAvgWeight(farrowingLiveCount == 0 ? 0d : farrowingDto.getBirthNestAvg() / farrowingLiveCount);
         input.setEventAt(DateUtil.toDateString(doctorPigEvent.getEventAt()));
         input.setIsAuto(1);
         input.setCreatorId(doctorPigEvent.getCreatorId());
