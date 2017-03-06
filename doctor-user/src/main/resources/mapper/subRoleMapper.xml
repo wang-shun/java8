@@ -109,6 +109,7 @@
         <if test="name != null">AND `name` like CONCAT('%', #{name}, '%')</if>
         <if test="status != null">AND status = #{status}</if>
         <if test="userId != null">AND user_id = #{userId}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
     </sql>
 
 

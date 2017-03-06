@@ -62,4 +62,17 @@ public interface SubRoleReadService extends CustomRoleReadService<SubRole> {
      * @return 自定义角色分页
      */
     Response<Paging<SubRole>> pagination(String appKey, Long userId, Integer status, String roleName, Integer pageNo, Integer size);
+
+    /**
+     * 分页role查询
+     *
+     * @param appKey 角色使用场景
+     * @param farmId 主账号 ID
+     * @param status 角色状态
+     * @param roleName 角色名称
+     * @param pageNo 页码
+     * @param size   查询个数
+     * @return 自定义角色分页
+     */
+    Response<Paging<SubRole>> pagingRole(String appKey, Long farmId, Integer status, String roleName, Integer pageNo, Integer size);
 }
