@@ -74,6 +74,42 @@ public class SubRoleService {
     }
 
     /**
+     * 子账号角色分页
+     *
+     * @param farmId   猪场id
+     * @param id       角色 ID
+     * @param status   角色状态
+     * @param pageNo   页码
+     * @param pageSize 查询数量
+     * @return 分页结果
+     */
+    @Export(paramNames = {"farmId", "id", "status", "roleName", "pageNo", "pageSize"})
+    public Response<Paging<SubRole>> pagingRole(Long farmId, Long id, Integer status, String roleName, Integer pageNo, Integer pageSize) {
+        try {
+            if (id != null) {
+                SubRole role = RespHelper.orServEx(subRoleReadService.findById(id));
+                if(role == null){
+                    return Response.ok(Paging.empty());
+                }
+                if(pageNo > 1){
+                    //当按照主键id查询时,只应该有一页
+                    return Response.ok(new Paging<>(1L, Lists.newArrayList()));
+                }
+                return Response.ok(new Paging<>(1L, Lists.newArrayList(role)));
+            }
+            return subRoleReadService.pagingRole(ThreadVars.getAppKey(), farmId, status, roleName, pageNo, pageSize);
+        } catch (ServiceException e) {
+            log.warn("paging sub roles failed, farmId={}, id={}, status={}, pageNo={}, pageSize={}, error={}",
+                    farmId, id, status, pageNo, pageSize, e.getMessage());
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("paging sub roles failed, farmId={}, id={}, status={}, pageNo={}, pageSize={}, cause:{}",
+                    farmId, id, status, pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("sub.role.paging.fail");
+        }
+    }
+
+    /**
      * 提供给更新角色页面
      *
      * 通过 ID 查询角色
