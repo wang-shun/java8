@@ -171,8 +171,8 @@ export.tables:
         display: 剩余量
       - name: operatorName
         display: 管理员
-  web-matirail-export:
-    display: 仓库物料导出导出
+  web-material-export:
+    display: 仓库物料导出
     columns:
       - name: materialName
         display: 名称

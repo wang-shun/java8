@@ -161,7 +161,7 @@ public class DoctorWareHouseEvents {
                                         HttpServletRequest request,
                                         HttpServletResponse response) {
         try {
-            exporter.export("web-matirail-export", params, 1, 500, this::pagingMaterialExportData, request, response);
+            exporter.export("web-material-export", params, 1, 500, this::pagingMaterialExportData, request, response);
         } catch (Exception e) {
             log.error("ware.house.event.export.failed, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException("ware.house.material.export.fail");
