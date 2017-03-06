@@ -48,10 +48,11 @@ public class SubRoleWriteServiceImpl implements SubRoleWriteService {
     }
 
     @Override
-    public Response<Boolean> initDefaultRoles(String appKey, Long userId){
+    public Response<Boolean> initDefaultRoles(String appKey, Long userId, Long farmId){
         try {
             subRoleDao.findByUserIdAndStatus(appKey, 0L, 1).forEach(subRole -> {
                 subRole.setUserId(userId);
+                subRole.setFarmId(farmId);
                 subRoleDao.create(subRole);
             });
             return Response.ok(true);

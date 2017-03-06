@@ -1,7 +1,6 @@
 package io.terminus.doctor.user.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.user.model.SellerRole;
 import io.terminus.doctor.user.model.SubRole;
 
 /**
@@ -30,7 +29,9 @@ public interface SubRoleWriteService {
     /**
      * 初始化内置子账号角色权限
      * @param userId 主账号id
+     * @param farmId 猪场id
      * @return
      */
-    Response<Boolean> initDefaultRoles(String appKey, Long userId);
+    Response<Boolean> initDefaultRoles(String appKey, Long userId, Long farmId);
+
 }

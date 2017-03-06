@@ -301,10 +301,10 @@ public class DoctorImportDataService {
 
     private void importStaff(Sheet staffShit, User primaryUser, DoctorFarm farm) {
         final String appKey = "MOBILE";
-        List<SubRole> existRoles = subRoleDao.findByUserIdAndStatus(appKey, primaryUser.getId(), 1);
+        List<SubRole> existRoles = subRoleDao.findByFarmIdAndStatus(appKey, farm.getId(), 1);
         if(existRoles.isEmpty()){
-            RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUser.getId()));
-            existRoles = subRoleDao.findByUserIdAndStatus(appKey, primaryUser.getId(), 1);
+            RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUser.getId(), farm.getId()));
+            existRoles = subRoleDao.findByFarmIdAndStatus(appKey, farm.getId(), 1);
         }
         // key = roleName, value = roleId
         Map<String, Long> existRole = existRoles.stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));

@@ -281,7 +281,7 @@ public class UserInitService {
 
     private Map<String, Long> createSubRole(Long farmId, Long primaryUserId, Long dataSourceId){
         final String appKey = "MOBILE";
-        RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUserId));
+        RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUserId, farmId));
         // key = roleName, value = roleId
         Map<String, Long> existRole = subRoleDao.findByUserIdAndStatus(appKey, primaryUserId, 1).stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
 

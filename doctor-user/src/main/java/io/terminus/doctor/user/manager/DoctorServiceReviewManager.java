@@ -220,8 +220,9 @@ public class DoctorServiceReviewManager {
                 DoctorServiceReview.Status.OK, null);
 
         // 初始化内置子账号角色权限
-        RespHelper.orServEx(subRoleWriteService.initDefaultRoles("MOBILE", userId));
-
+        newFarmIds.forEach(farmId -> {
+            RespHelper.orServEx(subRoleWriteService.initDefaultRoles("MOBILE", userId, farmId));
+        });
         return newFarms;
     }
 
