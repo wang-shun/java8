@@ -205,7 +205,9 @@ public class UserInitService {
         user.setMobile(mobile);
         user.setPassword(password);
         user.setName(userName);
-        user.getExtra().put("realName", realName);
+        Map<String, String> userExtraMap = Maps.newHashMap();
+        userExtraMap.put("realName", realName);
+        user.setExtra(userExtraMap);
 
         // 用户状态 0: 未激活, 1: 正常, -1: 锁定, -2: 冻结, -3: 删除
         user.setStatus(UserStatus.NORMAL.value());

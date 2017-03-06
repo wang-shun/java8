@@ -450,7 +450,9 @@ public class DoctorImportDataService {
             user.setStatus(UserStatus.NORMAL.value());
             user.setType(UserType.FARM_ADMIN_PRIMARY.value());
             user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
-            user.getExtra().put("realName", realName);
+            Map<String, String> userExtraMap = Maps.newHashMap();
+            userExtraMap.put("realName", realName);
+            user.setExtra(userExtraMap);
             userId = RespHelper.or500(userWriteService.create(user));
             user.setId(userId);
 
