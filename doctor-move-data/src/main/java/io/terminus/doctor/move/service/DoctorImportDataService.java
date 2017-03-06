@@ -450,6 +450,7 @@ public class DoctorImportDataService {
             user.setStatus(UserStatus.NORMAL.value());
             user.setType(UserType.FARM_ADMIN_PRIMARY.value());
             user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
+            user.getExtra().put("realName", realName);
             userId = RespHelper.or500(userWriteService.create(user));
             user.setId(userId);
 
@@ -458,7 +459,6 @@ public class DoctorImportDataService {
             PrimaryUser updatePrimary = new PrimaryUser();
             updatePrimary.setId(primaryUser.getId());
             updatePrimary.setRelFarmId(farm.getId());
-            updatePrimary.setRealName(realName);
             primaryUserDao.update(updatePrimary);
 
             // 把真实姓名存进 user profile
