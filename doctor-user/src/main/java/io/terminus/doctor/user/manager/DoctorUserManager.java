@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * @author Effet
@@ -94,7 +95,11 @@ public class DoctorUserManager {
             primaryUser.setUserId(userId);
             //暂时暂定手机号
             primaryUser.setUserName(user.getMobile());
-            primaryUser.setRealName(Params.get(user.getExtra(), "realName"));
+            String realName = user.getName();
+            if (notNull(user.getExtra()) && user.getExtra().containsKey("realName")) {
+                realName = Params.get(user.getExtra(), "realName");
+            }
+            primaryUser.setRealName(realName);
             primaryUser.setStatus(UserStatus.NORMAL.value());
             primaryUserDao.create(primaryUser);
 
