@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.warehouse.controller;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
@@ -13,11 +14,7 @@ import io.terminus.doctor.basic.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.basic.dto.DoctorMaterialInWareHouseDto;
 import io.terminus.doctor.basic.dto.DoctorMoveMaterialDto;
 import io.terminus.doctor.basic.dto.DoctorWareHouseDto;
-import io.terminus.doctor.basic.model.DoctorBasic;
-import io.terminus.doctor.basic.model.DoctorBasicMaterial;
-import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
-import io.terminus.doctor.basic.model.DoctorMaterialInWareHouse;
-import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.*;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
@@ -50,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import sun.tools.jconsole.inspector.Utils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -106,7 +104,8 @@ public class DoctorWareHouseEvents {
                                  DoctorWareHouseReadService doctorWareHouseReadService,
                                  DoctorFarmReadService doctorFarmReadService,
                                  DoctorBasicReadService doctorBasicReadService,
-                                 DoctorGroupWebService doctorGroupWebService){
+                                 DoctorGroupWebService doctorGroupWebService,
+                                 DoctorMaterialPriceInWareHouseReadService doctorMaterialPriceInWareHouseReadService){
         this.doctorMaterialInWareHouseWriteService = doctorMaterialInWareHouseWriteService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
         this.userReadService = userReadService;
@@ -161,7 +160,7 @@ public class DoctorWareHouseEvents {
                                         HttpServletRequest request,
                                         HttpServletResponse response) {
         try {
-            exporter.export("web-material-export", params, 1, 500, this::pagingMaterialExportData, request, response);
+            exporter.export(materialExportData(params), "web-material-export", request, response);
         } catch (Exception e) {
             log.error("ware.house.event.export.failed, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException("ware.house.material.export.fail");
@@ -546,33 +545,88 @@ public class DoctorWareHouseEvents {
     }
 
     /**
-     * 分页查询构建导出数据
+     * 查询构建导出数据
      * @param criteriaMap 查询条件
      * @return 导出数据集
      */
-    public Paging<DoctorWareHouseMaterialData> pagingMaterialExportData(Map<String, String> criteriaMap) {
+    public List<DoctorWareHouseMaterialData> materialExportData(Map<String, String> criteriaMap) {
         DoctorWareHouseMaterialCriteria criteria = BeanMapper.map(criteriaMap, DoctorWareHouseMaterialCriteria.class);
-        Paging<DoctorMaterialInWareHouseDto> dtoPaging = pagingWareHouseMaterial(criteria.getFarmId(), criteria.getWareHouseId(),
-                criteria.getMaterialId(), criteria.getMaterialName(), criteria.getPageNo(), criteria.getSize());
-        if (Arguments.isNullOrEmpty(dtoPaging.getData())) {
-            return Paging.empty();
+        Map<String, Object> map = Maps.newHashMap();
+        double numbersOut = 0;
+        double priceOut = 0;
+        double numberIn = 0;
+        double priceIn = 0;
+        List<DoctorMaterialConsumeProvider> list = RespHelper.or500(materialConsumeProviderReadService.findMaterialConsume(criteria.getFarmId(), criteria.getWareHouseId(), criteria.getMaterialId(),
+                criteria.getMaterialName(), DateUtil.stringToDate(criteria.getStartDate()), DateUtil.stringToDate(criteria.getEndDate()), criteria.getPageNo(), criteria.getSize()));
+        for (int i = 0; i < list.size()-1; i++) {
+            if (list.get(i).getMaterialId().equals(list.get(i+1).getMaterialId())) {
+                list.get(i).setExtra(list.get(i).getExtra());
+                if (list.get(i).getExtraMap().get("consumePrice") != null) {
+
+                    if (list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER) || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU)
+                            || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI)) {
+
+
+                    } else {
+
+                    }
+
+                } else {
+                    if (list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER) || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU)
+                            || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI)) {
+
+                        numbersOut += list.get(i).getEventCount();
+                        priceOut += list.get(i).getUnitPrice() * list.get(i).getEventCount();
+
+                    } else {
+
+                        numberIn += list.get(i).getEventCount();
+                        priceIn += list.get(i).getUnitPrice() * list.get(i).getEventCount();
+
+                    }
+                }
+            } else{
+                //最后一次数据处理
+                list.get(i).setExtra(list.get(i+1).getExtra());
+                if (list.get(i+1).getExtraMap().get("consumePrice") != null) {
+
+                    if (list.get(i+1).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER) || list.get(i+1).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU)
+                            || list.get(i+1).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI)) {
+
+
+                    } else {
+
+                    }
+
+                } else {
+                    if (list.get(i+1).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER) || list.get(i+1).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU)
+                            || list.get(i+1).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI)) {
+
+                        numbersOut += list.get(i+1).getEventCount();
+                        priceOut += list.get(i+1).getUnitPrice() * list.get(i+1).getEventCount();
+
+                    } else {
+
+                        numberIn += list.get(i+1).getEventCount();
+                        priceIn += list.get(i+1).getUnitPrice() * list.get(i+1).getEventCount();
+
+                    }
+                }
+
+                //数据塞入
+
+                DoctorMaterialPriceInWareHouse doctorMaterialPriceInWareHouse = RespHelper.or500(materialPriceInWareHouseReadService.findMaterialData(criteria.getFarmId(),criteria.getWareHouseId(),
+                        criteria.getMaterialId(),
+                        DateUtil.stringToDate(criteria.getEndDate())));
+
+                numbersOut = 0;
+                priceOut = 0;
+                numberIn = 0;
+                priceIn = 0;
+            }
         }
-        List<DoctorWareHouseMaterialData> dataList = dtoPaging.getData().stream().map(dto -> {
-            DoctorWareHouseMaterialData data = new DoctorWareHouseMaterialData();
-            data.setMaterialName(dto.getMaterialName());
-            //data.setProviderFactoryName();
-            data.setUnitName(dto.getUnitName());
-            data.setInCount(dto.getInCount() + dto.getDiaoruCount());
-            data.setInAmount(dto.getInAmount() + dto.getDiaoruAmount());
-            data.setOutCount(dto.getOutCount() + dto.getDiaochuCount());
-            data.setOutAmount(dto.getOutAmount()+ dto.getDiaochuAmount());
-            data.setLotNumber(dto.getLotNumber());
-            data.setCurrentAmount(dto.getCurrentAmount());
-            data.setMonthBeginNumber(data.getLotNumber() - data.getInCount() + data.getOutCount());
-            data.setMonthBeginAmount(data.getCurrentAmount() - data.getInAmount() + data.getOutAmount());
-            return data;
-        }).collect(Collectors.toList());
-        return new Paging<>(dtoPaging.getTotal(), dataList);
+
+        return null;
     }
 
     /**

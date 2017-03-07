@@ -4,6 +4,8 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.basic.model.DoctorMaterialPriceInWareHouse;
 
+import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -37,5 +39,14 @@ public interface DoctorMaterialPriceInWareHouseReadService {
      * @return key = warehouseId, value = 价值(分)
      */
      Response<Map<Long, Double>> stockAmount(Long farmId, Long warehouseId, WareHouseType type);
+
+    /**
+     * 查询对应Material in warehouse中物料的在用户需求时间段里的物料剩余量和价格
+     * @param farmId
+     * @param materialId 物料Id
+     * @param wareHouseId 仓库Id
+     * @param endDate 用户提供的查询时间段的末时间
+     */
+    Response<DoctorMaterialPriceInWareHouse> findMaterialData(@NotNull(message = "inpuy.farmId.empty") Long farmId, Long materialId, Long wareHouseId, Date endDate);
 
 }

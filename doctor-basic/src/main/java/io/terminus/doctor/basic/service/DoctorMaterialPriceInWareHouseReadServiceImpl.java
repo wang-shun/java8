@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +59,15 @@ public class DoctorMaterialPriceInWareHouseReadServiceImpl implements DoctorMate
         }catch(Exception e){
             log.error("stockAmount fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("stockAmount.fail");
+        }
+    }
+    @Override
+    public Response<DoctorMaterialPriceInWareHouse> findMaterialData(@NotNull(message = "inpuy.farmId.empty") Long farmId, Long materialId, Long wareHouseId, Date endDate) {
+        try {
+            return Response.ok(doctorMaterialPriceInWareHouseDao.findMaterialDatas(farmId, materialId, wareHouseId, endDate));
+        }catch (Exception e) {
+            log.error("find material date fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find material fail");
         }
     }
 }
