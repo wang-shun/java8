@@ -563,17 +563,24 @@ public class DoctorWareHouseEvents {
                 list.get(i).setExtra(list.get(i).getExtra());
                 if (list.get(i).getExtraMap().get("consumePrice") != null) {
 
-                    if (list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER) || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU)
-                            || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI)) {
+                    if (list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)
+                            || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU)
+                            || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI)
+                            || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_RAW_MATERIAL)) {
+
 
 
                     } else {
 
+
+
                     }
 
                 } else {
-                    if (list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER) || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU)
-                            || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI)) {
+                    if (list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)
+                            || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU)
+                            || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI)
+                            || list.get(i).getEventType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_FEED)) {
 
                         numbersOut += list.get(i).getEventCount();
                         priceOut += list.get(i).getUnitPrice() * list.get(i).getEventCount();
@@ -615,9 +622,12 @@ public class DoctorWareHouseEvents {
 
                 //数据塞入
 
-                DoctorMaterialPriceInWareHouse doctorMaterialPriceInWareHouse = RespHelper.or500(materialPriceInWareHouseReadService.findMaterialData(criteria.getFarmId(),criteria.getWareHouseId(),
-                        criteria.getMaterialId(),
+                DoctorMaterialPriceInWareHouse doctorMaterialPriceInWareHouse = RespHelper.or500(materialPriceInWareHouseReadService.findMaterialData(criteria.getFarmId(), list.get(i+1).getMaterialId(),
+                        criteria.getWareHouseId(),
                         DateUtil.stringToDate(criteria.getEndDate())));
+
+                DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.findMaterialUnits(criteria.getFarmId(), list.get(i+1).getMaterialId(),
+                        criteria.getWareHouseId()));
 
                 numbersOut = 0;
                 priceOut = 0;

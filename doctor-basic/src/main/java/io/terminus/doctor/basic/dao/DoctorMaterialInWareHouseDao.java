@@ -59,4 +59,15 @@ public class DoctorMaterialInWareHouseDao extends MyBatisDao<DoctorMaterialInWar
     public boolean updateMaterialInfoByMaterialId(Map<String, Object> params){
         return this.getSqlSession().update(sqlId("updateMaterialInfoByMaterialId"), params) >= 0;
     }
+
+    /**
+     * 查找仓库ID和物料Id所对应的物料计量单位
+     * @param farmId
+     * @param materialId 物料ID
+     * @param wareHouseId 仓库ID
+     * @return
+     */
+    public DoctorMaterialInWareHouse findMaterialUnit(Long farmId, Long materialId, Long wareHouseId ) {
+        return this.getSqlSession().selectOne(sqlId("findMaterialUnit"), ImmutableMap.of("farmId", farmId, "materialId", materialId, "wareHouseId", wareHouseId));
+    }
 }
