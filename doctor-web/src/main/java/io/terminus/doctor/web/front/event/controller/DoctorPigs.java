@@ -174,6 +174,7 @@ public class DoctorPigs {
                 .doctorPigEvents(dto.getDoctorPigEvents())
                 .dayAge(dto.getDayAge())
                 .weight(dto.getDoctorPigTrack().getWeight())
+                .boarType(dto.getDoctorPig().getBoarType())
                 .canRollback(dto.getCanRollback())
                 .build();
     }

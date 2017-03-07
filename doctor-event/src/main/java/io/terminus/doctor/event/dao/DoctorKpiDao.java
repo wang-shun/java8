@@ -196,6 +196,27 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 产房仔猪转场
+     */
+    public int getFarrowChgFarmCount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getFarrowChgFarmCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产房仔猪转保育
+     */
+    public int getFarrowToNursery(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getFarrowToNurseyCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产房仔猪销售
+     */
+    public int getFarrowSaleCount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getFarrowSaleCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 销售情况: 母猪
      */
     public int getSaleSow(Long farmId, Date startAt, Date endAt) {

@@ -33,4 +33,19 @@ public class DoctorWeanDailyReport implements Serializable {
      * 断奶均日龄
      */
     private double avgDayAge;
+
+    /**
+     * 产房仔猪转场
+     */
+    private int farrowChgFarm;
+
+    /**
+     * 产房仔猪转保育
+     */
+    private int farrowToNursery;
+
+    /**
+     * 产房仔猪销售
+     */
+    private int farrowSale;
 }

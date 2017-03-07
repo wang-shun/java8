@@ -68,6 +68,10 @@ public class DoctorCommonReportDto implements Serializable {
     private double weanAvgWeight;             //断奶均重(kg)
     private double weanAvgCount;              //窝均断奶数
     private double weanAvgDayAge;             //断奶均日龄
+    private int farrowChgFarm;                //产房仔猪转场
+    private int farrowToNursery;              //产房仔猪转保育
+    private int farrowSale;                   //产房仔猪销售
+
 
     /**
      * 销售情况

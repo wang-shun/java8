@@ -145,7 +145,7 @@ public class DateUtil {
         DateTime start = todayEnd.withDayOfMonth(1);
         for (int i = 1; i < index; i++) {
             months.add(start.plusDays(-1).toDate());
-            start = start.plusMonths(-1);
+            start = start.plusMonths(-1).withDayOfMonth(1);
         }
         return months;
     }

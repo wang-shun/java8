@@ -149,6 +149,9 @@ public class DoctorDailyReportCache {
         wean.setWeight(doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt));
         wean.setNest(doctorKpiDao.getWeanSow(farmId, startAt, endAt));
         wean.setAvgDayAge(doctorKpiDao.getWeanDayAgeAvg(farmId, startAt, endAt));
+        wean.setFarrowChgFarm(doctorKpiDao.getFarrowChgFarmCount(farmId, startAt, endAt));
+        wean.setFarrowToNursery(doctorKpiDao.getFarrowToNursery(farmId, startAt, endAt));
+        wean.setFarrowSale(doctorKpiDao.getFarrowSaleCount(farmId, startAt, endAt));
 
         //个体管理母猪总存栏
         report.setSowCount(doctorKpiDao.realTimeLiveStockSow(farmId, startAt));
