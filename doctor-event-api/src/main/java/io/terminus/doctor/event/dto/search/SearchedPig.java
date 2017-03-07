@@ -98,6 +98,11 @@ public class SearchedPig implements Serializable {
     private Integer currentParity;
 
     /**
+     * 猪类型
+     */
+    private Integer boarType;
+
+    /**
      * 扩展字段:
      *      1. Date checkDate : 妊娠检查的时间
      */

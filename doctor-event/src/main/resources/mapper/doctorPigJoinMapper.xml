@@ -35,6 +35,7 @@
         </if>
         <if test="pigType != null">AND a.pig_type = #{pigType}</if>
         <if test="pigCode != null">AND a.pig_code like concat('%', #{pigCode}, '%')</if>
+        <if test="boarType != null">AND a.boar_type = #{boarType}</if>
     </sql>
 
     <select id="count" parameterType="map" resultType="long" >
@@ -65,7 +66,8 @@
             a.birth_date AS birthDate,
             b.weight AS weight,
             a.in_farm_day_age AS dayAge,
-            b.current_parity AS currentParity
+            b.current_parity AS currentParity,
+            a.boar_type as boarType
         FROM doctor_pigs a
         LEFT JOIN doctor_pig_tracks b
           ON a.id = b.pig_id
