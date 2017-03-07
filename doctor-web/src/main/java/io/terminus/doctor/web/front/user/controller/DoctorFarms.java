@@ -170,12 +170,14 @@ public class DoctorFarms {
             }).collect(Collectors.toList()));
         }
         PrimaryUser primaryUser = RespHelper.or500(primaryUserReadService.findPrimaryByFarmId(farmId));
-        FarmStaff farmStaff = new FarmStaff();
-        farmStaff.setFarmId(primaryUser.getRelFarmId());
-        farmStaff.setUserId(primaryUser.getUserId());
-        farmStaff.setStatus(primaryUser.getStatus());
-        farmStaff.setRealName(primaryUser.getRealName());
-        staffList.add(farmStaff);
+        if(primaryUser !=null){
+            FarmStaff farmStaff = new FarmStaff();
+            farmStaff.setFarmId(primaryUser.getRelFarmId());
+            farmStaff.setUserId(primaryUser.getUserId());
+            farmStaff.setStatus(primaryUser.getStatus());
+            farmStaff.setRealName(primaryUser.getRealName());
+            staffList.add(farmStaff);
+        }
         return staffList;
     }
 
