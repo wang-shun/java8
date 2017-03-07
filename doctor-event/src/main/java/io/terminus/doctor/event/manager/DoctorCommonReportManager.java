@@ -478,6 +478,9 @@ public class DoctorCommonReportManager {
         dto.setWeanAvgWeight(doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt));       //断奶均重
         dto.setWeanAvgCount(doctorKpiDao.getWeanPigletCountsAvg(farmId, startAt, endAt));        //窝均断奶数
         dto.setWeanAvgDayAge(doctorKpiDao.getWeanDayAgeAvg(farmId, startAt, endAt));             //断奶均日龄
+        dto.setFarrowChgFarm(doctorKpiDao.getFarrowChgFarmCount(farmId, startAt, endAt));             //断奶均日龄
+        dto.setFarrowToNursery(doctorKpiDao.getFarrowToNursery(farmId, startAt, endAt));             //断奶均日龄
+        dto.setFarrowSale(doctorKpiDao.getFarrowSaleCount(farmId, startAt, endAt));             //断奶均日龄
         return dto;
     }
 

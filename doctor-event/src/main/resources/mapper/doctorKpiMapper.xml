@@ -187,6 +187,34 @@
         <include refid="criteria"/>
     </select>
 
+    <!-- 产房仔猪转场-->
+    <select id="getFarrowChgFarmCount" parameterType="map" resultType="int">
+        select ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where type = 9
+          and pig_type = 7
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 产房仔猪转保育-->
+    <select id="getFarrowToNurseyCount" parameterType="map" resultType="int">
+        select ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where type = 4
+          and pig_type = 7
+          and other_barn_type = 2
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 产房仔猪销售-->
+    <select id="getFarrowSaleCount" parameterType="map" resultType="int">
+        select ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where pig_type = 7
+          and change_type_id = 109
+        <include refid="criteria"/>
+    </select>
+
     <!-- 销售情况: 母猪 -->
     <select id="getSaleSow" parameterType="map" resultType="int">
         SELECT

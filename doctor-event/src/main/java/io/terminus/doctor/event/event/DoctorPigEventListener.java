@@ -362,12 +362,18 @@ public class DoctorPigEventListener implements EventListener {
         double weight = doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt);
         int nest = doctorKpiDao.getWeanSow(farmId, startAt, endAt);
         double age = doctorKpiDao.getWeanDayAgeAvg(farmId, startAt, endAt);
+        int farrowChgFarm = doctorKpiDao.getFarrowChgFarmCount(farmId, startAt, endAt);
+        int farrowToNursery = doctorKpiDao.getFarrowToNursery(farmId, startAt, endAt);
+        int farrowSale = doctorKpiDao.getFarrowSaleCount(farmId, startAt, endAt);
 
         DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
         reportDto.getWean().setCount(count);
         reportDto.getWean().setWeight(weight);
         reportDto.getWean().setNest(nest);
         reportDto.getWean().setAvgDayAge(age);
+        reportDto.getWean().setFarrowChgFarm(farrowChgFarm);
+        reportDto.getWean().setFarrowToNursery(farrowToNursery);
+        reportDto.getWean().setFarrowSale(farrowSale);
         doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
     }
 
