@@ -545,16 +545,14 @@ public class DoctorWareHouseEvents {
         List<DoctorWareHouseMaterialData> listDate = Lists.newArrayList();
         List<DoctorMaterialConsumeProvider> listOverride = Lists.newArrayList();
 
-
         double numbersOut = 0;
         double priceOut = 0;
         double numberIn = 0;
         double priceIn = 0;
         double monthEndAmount = 0;
         double monthEndNumber = 0;
-
-
         List<DoctorMaterialConsumeProvider> list = RespHelper.or500(materialConsumeProviderReadService.findMaterialConsume(
+
                 criteria.getFarmId(),
                 criteria.getWareHouseId(),
                 criteria.getMaterialId(),
@@ -598,19 +596,19 @@ public class DoctorWareHouseEvents {
             if (i != (listOverride.size()-1) && listOverride.get(i).getMaterialId().equals(listOverride.get(i+1).getMaterialId())) {
                 if (DoctorMaterialConsumeProvider.EVENT_TYPE.from(listOverride.get(i+1).getEventType()).isOut()) {
                     numbersOut += listOverride.get(i).getEventCount();
-                    priceOut += listOverride.get(i).getUnitPrice() * listOverride.get(i).getEventCount();
+                    priceOut += listOverride.get(i).getUnitPrice() / 100 * listOverride.get(i).getEventCount();
                 } else {
                     numberIn += listOverride.get(i).getEventCount();
-                    priceIn += listOverride.get(i).getUnitPrice() * listOverride.get(i).getEventCount();
+                    priceIn += listOverride.get(i).getUnitPrice() / 100 * listOverride.get(i).getEventCount();
                 }
             } else{
                 //最后一次数据处理
                 if (DoctorMaterialConsumeProvider.EVENT_TYPE.from(listOverride.get(i).getEventType()).isOut()) {
                     numbersOut += listOverride.get(i).getEventCount();
-                    priceOut += listOverride.get(i).getUnitPrice() * listOverride.get(i).getEventCount();
+                    priceOut += listOverride.get(i).getUnitPrice() / 100 * listOverride.get(i).getEventCount();
                 } else {
                     numberIn += listOverride.get(i).getEventCount();
-                    priceIn += listOverride.get(i).getUnitPrice() * listOverride.get(i).getEventCount();
+                    priceIn += listOverride.get(i).getUnitPrice() /100 * listOverride.get(i).getEventCount();
                 }
                 //数据塞入
                 List<DoctorMaterialPriceInWareHouse> doctorMaterialPriceInWareHouses = RespHelper.or500(materialPriceInWareHouseReadService.findMaterialData(
@@ -618,15 +616,13 @@ public class DoctorWareHouseEvents {
                         listOverride.get(i).getMaterialId(),
                         criteria.getWareHouseId(),
                         DateUtil.stringToDate(criteria.getEndDate())));
-
                 if (doctorMaterialPriceInWareHouses == null) {
                     monthEndNumber = 0;
                     monthEndAmount = 0;
                 }else {
                     for (DoctorMaterialPriceInWareHouse doctorMaterialPriceInWareHouse : doctorMaterialPriceInWareHouses) {
                         monthEndNumber += doctorMaterialPriceInWareHouse.getRemainder();
-
-                        monthEndAmount += doctorMaterialPriceInWareHouse.getRemainder() * doctorMaterialPriceInWareHouse.getUnitPrice();
+                        monthEndAmount += doctorMaterialPriceInWareHouse.getRemainder() * doctorMaterialPriceInWareHouse.getUnitPrice() / 100;
                     }
                 }
                 DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.findMaterialUnits(
