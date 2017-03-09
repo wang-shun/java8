@@ -253,7 +253,7 @@ public class DoctorCommonGroupEventHandler {
         farmEntryDto.setWeight(input.getWeight());
 
         doctorEntryHandler.handleCheck(farmEntryDto, basicDto);
-        doctorEntryHandler.handle(eventInfoList, farmEntryDto, basicDto);
+        doctorEntryHandler.handle(eventInfoList, doctorEntryHandler.buildPigEvent(basicDto, farmEntryDto), null);
     }
 
     /**

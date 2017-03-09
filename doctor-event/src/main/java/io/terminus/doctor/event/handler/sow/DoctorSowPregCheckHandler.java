@@ -45,7 +45,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pregChkResultDto.getPigId());
@@ -101,22 +101,20 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
-        super.specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
+    protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack){
+        super.specialHandle(doctorPigEvent, doctorPigTrack);
         if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Pregnancy.getKey())) {
             //对应的最近一次的 周期配种的初陪 的 isImpregnation 字段变成true
             DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-            expectTrue(notNull(firstMate), "first.mate.not.null", inputDto.getPigId());
+            expectTrue(notNull(firstMate), "first.mate.not.null", doctorPigEvent.getPigId());
             firstMate.setIsImpregnation(1);
             doctorPigEventDao.update(firstMate);
         }
     }
 
     @Override
-    public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) inputDto;
-        Integer pregCheckResult = pregChkResultDto.getCheckResult();
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pregChkResultDto.getPigId());
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
+        Integer pregCheckResult = inputEvent.getPregCheckResult();
 
         //如果妊娠检查非阳性, 置当前配种数为0
         doctorPigTrack.setCurrentMatingCount(0);

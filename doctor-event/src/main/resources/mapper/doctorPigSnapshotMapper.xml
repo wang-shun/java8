@@ -10,11 +10,10 @@
     <resultMap id="DoctorPigSnapshotMap" type="DoctorPigSnapshot">
 
         <result column="id" property="id"/>
-        <result column="org_id" property="orgId"/>
-        <result column="farm_id" property="farmId"/>
         <result column="pig_id" property="pigId"/>
-        <result column="event_id" property="eventId"/>
-        <result column="pig_info" property="pigInfo"/>
+        <result column="from_event_id" property="fromEventId"/>
+        <result column="to_event_id" property="toEventId"/>
+        <result column="to_pig_info" property="toPigInfo"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     
@@ -27,18 +26,17 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `org_id`,`farm_id`,`pig_id`,`event_id`,`pig_info`,`created_at`,`updated_at`
+       `pig_id`, `from_event_id`, `to_event_id`, `to_pig_info`, `created_at`, `updated_at`
     </sql>
 
     <sql id="vals">
-        #{orgId},#{farmId},#{pigId},#{eventId},#{pigInfo},now(),now()
+        #{pigId}, #{fromEventId}, #{toEventId}, #{toPigInfo}, now(), now()
     </sql>
 
     <sql id="criteria">
-        <if test="orgId != null" > AND `org_id` = #{orgId}</if>
-        <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
         <if test="pigId != null" > AND `pig_id` = #{pigId}</if>
-        <if test="eventId != null" > AND `event_id` = #{eventId}</if>
+        <if test="fromEventId != null" > AND `from_event_id` = #{fromEventId}</if>
+        <if test="toEventId != null" > AND `to_event_id` = #{toEventId}</if>
     </sql>
 
     <insert id="create" parameterType="DoctorPigSnapshot" keyProperty="id" useGeneratedKeys="true">
@@ -52,7 +50,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.orgId},#{i.farmId},#{i.pigId},#{i.eventId},#{i.pigInfo},now(),now())
+        (#{i.pigId},#{fromEventId},#{i.toEventId},#{i.toPigInfo},now(),now())
         </foreach>
     </insert>
 
@@ -63,7 +61,7 @@
 
     <delete id="deleteByEventId" parameterType="long">
         DELETE FROM <include refid="tb"/> WHERE
-        event_id = #{eventId};
+        to_event_id = #{eventId};
     </delete>
 
     <select id="findById" parameterType="long" resultMap="DoctorPigSnapshotMap" >
@@ -74,7 +72,11 @@
 
     <select id="queryByEventId" parameterType="long" resultMap="DoctorPigSnapshotMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
-        WHERE event_id = #{eventId}
+        WHERE to_event_id = (
+        SELECT from_event_id
+        FROM <include refid="tb"/>
+        WHERE to_event_id = #{eventId}
+        )
     </select>
 
     <select id="list" resultMap="DoctorPigSnapshotMap">
@@ -85,15 +87,15 @@
     </select>
 
     <update id="update" parameterType="DoctorPigSnapshot">
-        UPDATE <include refid="tb"/>
+        UPDATE
+        <include refid="tb"/>
         <set>
-        updated_at = now()
-        <if test="orgId != null" > ,`org_id` = #{orgId}</if>
-        <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
-        <if test="pigId != null" > ,`pig_id` = #{pigId}</if>
-        <if test="eventId != null" > ,`event_id` = #{eventId}</if>
-        <if test="pigInfo != null" > ,`pig_info` = #{pigInfo}</if>
-        <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
+            updated_at = now()
+            <if test="pigId != null">,`pig_id` = #{pigId}</if>
+            <if test="fromEventId != null">,`from_event_id` = #{fromEventId}</if>
+            <if test="toEventId != null">,`to_event_id` = #{toEventId}</if>
+            <if test="toPigInfo != null">,`to_pig_info` = #{toPigInfo}</if>
+            <if test="createdAt != null">,`created_at` = #{createdAt}</if>
         </set>
         WHERE id=#{id}
     </update>

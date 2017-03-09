@@ -20,9 +20,9 @@ public class DoctorPigSnapshotDao extends MyBatisDao<DoctorPigSnapshot>{
     }
 
     /**
-     * 通过EventId 获取对应的事件信息
-     * @param eventId
-     * @return
+     * 通过EventId 获取事件发生前的镜像
+     * @param eventId 事件id
+     * @return 镜像
      */
     public DoctorPigSnapshot queryByEventId(Long eventId){
         return this.getSqlSession().selectOne(sqlId("queryByEventId"), eventId);

@@ -3,6 +3,8 @@ package io.terminus.doctor.event.handler;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 
 import java.util.List;
 
@@ -18,7 +20,17 @@ public interface DoctorPigEventHandler {
     void handleCheck(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic);
 
     /**
-     * 事件信息处理
+     * 构建需要执行的猪事件
+     * @param basic 基础数据
+     * @param inputDto 输入信息
+     * @return 猪事件
      */
-    void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic);
+    DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto);
+
+    /**
+     * 事件信息处理
+     * @param executeEvent 需要执行的事件
+     * @param fromTrack 原状态
+     */
+    void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack);
 }

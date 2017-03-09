@@ -7,6 +7,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -27,6 +28,7 @@ import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.DoctorPigsByEventSelector;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,8 @@ public class DoctorPigEventManager {
 
     @Autowired
     private DoctorPigEventHandlers pigEventHandlers;
+    @Autowired
+    private DoctorPigTrackDao doctorPigTrackDao;
 
     /**
      * 事件处理
@@ -62,10 +66,11 @@ public class DoctorPigEventManager {
     @Transactional
     public List<DoctorEventInfo> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
         log.info("pig event handle starting, inputDto:{}, basic:{}", inputDto, basic);
-        DoctorPigEventHandler doctorEventCreateHandler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
-        doctorEventCreateHandler.handleCheck(inputDto, basic);
+        DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
+        handler.handleCheck(inputDto, basic);
         final List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
-        doctorEventCreateHandler.handle(doctorEventInfoList, inputDto, basic);
+        DoctorPigTrack inputTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        handler.handle(doctorEventInfoList, handler.buildPigEvent(basic, inputDto), inputTrack);
         log.info("pig event handle ending, inputDto:{}, basic:{}", inputDto, basic);
         return doctorEventInfoList;
     }
@@ -87,7 +92,8 @@ public class DoctorPigEventManager {
         eventInputs.forEach(inputDto -> {
             try {
                 handler.handleCheck(inputDto, basic);
-                handler.handle(eventInfos, inputDto, basic);
+                DoctorPigTrack inputTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+                handler.handle(eventInfos, handler.buildPigEvent(basic, inputDto), inputTrack);
             } catch (InvalidException e) {
                throw new InvalidException(true, e.getError(), inputDto.getPigCode(), e.getParams());
             }
