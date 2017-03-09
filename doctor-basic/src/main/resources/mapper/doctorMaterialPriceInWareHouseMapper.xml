@@ -121,7 +121,6 @@
         <if test="farmId != null"> AND farm_id = #{farmId}</if>
         <if test="materialId != null"> AND material_id = #{materialId}</if>
         <if test="wareHouseId != null"> AND ware_house_id = #{wareHouseId}</if>
-        <if test="providerId != null"> AND provider_id = #{providerId}</if>
     </select>
 
 </mapper>

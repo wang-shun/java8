@@ -1,7 +1,6 @@
 package io.terminus.doctor.basic.dao;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -79,14 +78,9 @@ public class DoctorMaterialPriceInWareHouseDao extends MyBatisDao<DoctorMaterial
         return map;
     }
 
-    public DoctorMaterialPriceInWareHouse findMaterialDatas(Long farmId, Long materialId, Long wareHouseId, Long providerId, Date endDate) {
-        Map<String,Object> map = Maps.newHashMap();
-        map.put("farmId", farmId);
-        map.put("materialId", materialId);
-        map.put("wareHouseId", wareHouseId);
-        map.put("providerId", providerId);
-        map.put("endDate", endDate);
-        return sqlSession.selectOne(sqlId("findMaterialData"), map);
+    public List<DoctorMaterialPriceInWareHouse> findMaterialDatas(Long farmId, Long materialId, Long wareHouseId, Date endDate) {
+
+        return sqlSession.selectList(sqlId("findMaterialData"), ImmutableMap.of("farmId", farmId, "materialId", materialId, "wareHouseId", wareHouseId, "endDate", endDate));
     }
 
 }

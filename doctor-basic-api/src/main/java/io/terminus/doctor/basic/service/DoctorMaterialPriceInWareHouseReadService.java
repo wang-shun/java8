@@ -47,10 +47,9 @@ public interface DoctorMaterialPriceInWareHouseReadService {
      * @param wareHouseId 仓库Id
      * @param endDate 用户提供的查询时间段的末时间
      */
-    Response<DoctorMaterialPriceInWareHouse> findMaterialData(@NotNull(message = "input.farmId.empty") Long farmId,
+    Response<List<DoctorMaterialPriceInWareHouse>> findMaterialData(@NotNull(message = "input.farmId.empty") Long farmId,
                                                               @NotNull(message = "input.materialId.empty") Long materialId,
                                                               @NotNull(message = "input.wareHouseId.empty")Long wareHouseId,
-                                                              Long providerId,
                                                               Date endDate);
 
 }
