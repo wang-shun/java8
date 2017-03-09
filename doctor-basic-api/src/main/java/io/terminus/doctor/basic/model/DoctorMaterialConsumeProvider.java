@@ -81,6 +81,8 @@ public class DoctorMaterialConsumeProvider implements Serializable{
     private Long providerFactoryId;
     private String providerFactoryName;
 
+    private Long provider;
+
     @Setter(AccessLevel.NONE)
     private Map<String, Object> extraMap;
 

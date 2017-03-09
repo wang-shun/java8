@@ -62,9 +62,13 @@ public class DoctorMaterialPriceInWareHouseReadServiceImpl implements DoctorMate
         }
     }
     @Override
-    public Response<DoctorMaterialPriceInWareHouse> findMaterialData(@NotNull(message = "inpuy.farmId.empty") Long farmId, Long materialId, Long wareHouseId, Date endDate) {
+    public Response<DoctorMaterialPriceInWareHouse> findMaterialData(@NotNull(message = "input.farmId.empty") Long farmId,
+                                                                     @NotNull(message = "input.materialId.empty") Long materialId,
+                                                                     @NotNull(message = "input.wareHouseId.empty") Long wareHouseId,
+                                                                     Long providerId,
+                                                                     Date endDate) {
         try {
-            return Response.ok(doctorMaterialPriceInWareHouseDao.findMaterialDatas(farmId, materialId, wareHouseId, endDate));
+            return Response.ok(doctorMaterialPriceInWareHouseDao.findMaterialDatas(farmId, materialId, wareHouseId, providerId, endDate));
         }catch (Exception e) {
             log.error("find material date fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find material fail");
