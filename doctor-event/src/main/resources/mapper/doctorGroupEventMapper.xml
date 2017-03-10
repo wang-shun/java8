@@ -141,7 +141,6 @@
     </sql>
 
     <sql id="criteria">
-        1=1
         <if test="id != null">AND id = #{id}</if>
         <if test="orgId != null">AND org_id = #{orgId}</if>
         <if test="orgName != null">AND org_name = #{orgName}</if>

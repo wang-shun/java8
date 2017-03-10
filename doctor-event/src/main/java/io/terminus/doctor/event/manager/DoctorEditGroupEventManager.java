@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.manager;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.editHandler.group.DoctorEditGroupEventHandlers;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -26,12 +26,15 @@ public class DoctorEditGroupEventManager {
 
     private DoctorEditGroupEventHandlers doctorEditGroupEventHandlers;
     private DoctorGroupEventDao doctorGroupEventDao;
+    private DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
     public DoctorEditGroupEventManager(DoctorEditGroupEventHandlers doctorEditGroupEventHandlers,
-                                       DoctorGroupEventDao doctorGroupEventDao){
+                                       DoctorGroupEventDao doctorGroupEventDao,
+                                       DoctorGroupTrackDao doctorGroupTrackDao){
         this.doctorEditGroupEventHandlers = doctorEditGroupEventHandlers;
         this.doctorGroupEventDao = doctorGroupEventDao;
+        this.doctorGroupTrackDao = doctorGroupTrackDao;
     }
 
     @Transactional
@@ -41,8 +44,19 @@ public class DoctorEditGroupEventManager {
     }
 
     @Transactional
-    public DoctorGroupTrack elicitDoctorGroupTrack(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
-        return doctorEditGroupEventHandlers.getEventHandlerMap().get(doctorGroupEvent.getType()).handle(doctorGroupTrack, doctorGroupEvent);
+    public DoctorGroupTrack elicitDoctorGroupTrack(List<DoctorGroupEvent> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
+        return doctorEditGroupEventHandlers.getEventHandlerMap().get(doctorGroupEvent.getType()).handle(doctorGroupEventList, doctorGroupTrack, doctorGroupEvent);
     }
 
+
+    @Transactional
+    public Boolean rollbackElicitEvents(List<DoctorGroupTrack> doctorGroupTrackList, List<DoctorGroupEvent> newDoctorGroupEvents, List<DoctorGroupEvent> oldDoctorGroupEvents) {
+        Boolean status = true;
+        List<Long> oldEventIds = oldDoctorGroupEvents.stream().map(DoctorGroupEvent::getId).collect(Collectors.toList());
+        status = status && doctorGroupEventDao.updateGroupEventStatus(oldEventIds, EventStatus.VALID.getValue());
+        List<Long> newEventIds = newDoctorGroupEvents.stream().map(DoctorGroupEvent::getId).collect(Collectors.toList());
+        status = status && doctorGroupEventDao.updateGroupEventStatus(oldEventIds, EventStatus.INVALID.getValue());
+        doctorGroupTrackList.stream().forEach(doctorGroupTrack -> doctorGroupTrackDao.update(doctorGroupTrack));
+        return status;
+    }
 }

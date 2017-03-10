@@ -1,19 +1,15 @@
 package io.terminus.doctor.event.editHandler.group;
 
-import io.terminus.common.utils.JsonMapper;
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -30,10 +26,19 @@ import java.util.Objects;
 public class DoctorEditMoveInGroupEventHandler extends DoctorAbstractEditGroupEventHandler{
 
     @Override
+    protected boolean checkDoctorGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent) {
+        return true;
+    }
+
+    @Override
     protected void handlerGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent, DoctorGroupEvent preDoctorGroupEvent) {
 
 
         DoctorMoveInGroupEvent doctorMoveInGroupEvent = JSON_MAPPER.fromJson(doctorGroupEvent.getExtra(), DoctorMoveInGroupEvent.class);
+        if(Arguments.isNull(doctorMoveInGroupEvent)) {
+            log.error("parse doctorMoveInGroupEvent faild, doctorGroupEvent = {}", doctorGroupEvent);
+            throw new JsonResponseException("group.event.info.broken");
+        }
         //1.更新猪群跟踪
         Integer oldQty = doctorGroupTrack.getQuantity();
         doctorGroupTrack.setQuantity(EventUtil.plusInt(doctorGroupTrack.getQuantity(), doctorGroupEvent.getQuantity()));
@@ -65,10 +70,7 @@ public class DoctorEditMoveInGroupEventHandler extends DoctorAbstractEditGroupEv
         }
 
 
-        doctorGroupTrack.setUpdatorId(doctorGroupEvent.getCreatorId());
-        doctorGroupTrack.setUpdatorName(doctorGroupEvent.getCreatorName());
         doctorGroupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
-        doctorGroupTrack.setBirthDate(new DateTime(doctorGroupEvent.getEventAt()).plusDays(1 - doctorGroupTrack.getAvgDayAge()).toDate());
 
     }
 }

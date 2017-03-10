@@ -3,6 +3,8 @@ package io.terminus.doctor.event.editHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 
+import java.util.List;
+
 /**
  * Created by IntelliJ IDEA.
  * Author: luoys
@@ -17,5 +19,5 @@ public interface DoctorEditGroupEventHandler {
      * @param doctorGroupEvent
      * @return
      */
-    DoctorGroupTrack handle(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent);
+    DoctorGroupTrack handle(List<DoctorGroupEvent> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent);
 }
