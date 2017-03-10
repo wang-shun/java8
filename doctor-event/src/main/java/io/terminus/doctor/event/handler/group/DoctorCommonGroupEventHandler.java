@@ -26,7 +26,12 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -248,8 +253,8 @@ public class DoctorCommonGroupEventHandler {
         farmEntryDto.setEarCode(input.getEarCode());
         farmEntryDto.setWeight(input.getWeight());
 
-        DoctorPigEvent doctorPigEvent = doctorEntryHandler.buildPigEvent(basicDto, farmEntryDto);
-        doctorEntryHandler.handleCheck(doctorPigEvent, null);
+        DoctorPigEvent pigEvent = doctorEntryHandler.buildPigEvent(basicDto, farmEntryDto);
+        doctorEntryHandler.handleCheck(pigEvent, null);
         doctorEntryHandler.handle(eventInfoList, doctorEntryHandler.buildPigEvent(basicDto, farmEntryDto), null);
     }
 

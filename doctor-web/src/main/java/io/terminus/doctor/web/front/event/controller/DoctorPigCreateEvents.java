@@ -46,6 +46,7 @@ import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -72,6 +73,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -488,6 +490,21 @@ public class DoctorPigCreateEvents {
                     }
                 }).collect(Collectors.toList());
         return RespWithExHelper.orInvalid(doctorPigEventWriteService.batchPigEventHandle(inputDtoList, buildBasicInputInfoDto(batchPigEventDto.getFarmId(), pigEvent)));
+    }
+
+    /**
+     * 修改猪事件
+     */
+    @RequestMapping(value = "/modifyPigEvent", method = RequestMethod.GET)
+    public void modifyPigEvent(@RequestParam Long eventId) {
+        DoctorPigEvent modifyEvent = RespHelper.or500(doctorPigEventReadService.queryPigEventById(eventId));
+        DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest.builder()
+                .farmId(modifyEvent.getFarmId())
+                .createdAt(new Date())
+                .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .content(JSON_NON_DEFAULT_MAPPER.toJson(modifyEvent))
+                .build();
+        doctorPigEventWriteService.modifyPigEventHandle(modifyRequest);
     }
 
     /**

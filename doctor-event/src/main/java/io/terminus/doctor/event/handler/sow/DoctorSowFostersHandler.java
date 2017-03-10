@@ -45,22 +45,23 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
-        DoctorFostersDto fostersDto = JSON_MAPPER.fromJson(inputEvent.getExtra(), DoctorFostersDto.class);
-        expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "foster.currentSowStatus.error");
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
+        DoctorFostersDto fostersDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFostersDto.class);
+        expectTrue(Objects.equals(toTrack.getStatus(), PigStatus.FEED.getKey()), "foster.currentSowStatus.error");
 
         //添加当前母猪的健崽猪的数量信息
-        Integer unweanCount = MoreObjects.firstNonNull(doctorPigTrack.getUnweanQty(), 0);
+        Integer unweanCount = MoreObjects.firstNonNull(toTrack.getUnweanQty(), 0);
         Integer fosterCount = fostersDto.getFostersCount();
         expectTrue(unweanCount >= fosterCount, "fosters.count.not.enough", fosterCount, unweanCount);
 
-        doctorPigTrack.setUnweanQty(unweanCount - fosterCount);  //未断奶数
-        doctorPigTrack.setWeanQty(MoreObjects.firstNonNull(doctorPigTrack.getWeanQty(), 0)); //断奶数不变
-        Map<String, Object> extra = doctorPigTrack.getExtraMap();
-        extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
-        doctorPigTrack.setExtraMap(extra);
-        doctorPigTrack.setStatus(PigStatus.FEED.getKey());
-        return doctorPigTrack;
+        toTrack.setUnweanQty(unweanCount - fosterCount);  //未断奶数
+        toTrack.setWeanQty(MoreObjects.firstNonNull(toTrack.getWeanQty(), 0)); //断奶数不变
+        Map<String, Object> extra = toTrack.getExtraMap();
+        extra.put("farrowingLiveCount", toTrack.getUnweanQty());
+        toTrack.setExtraMap(extra);
+        toTrack.setStatus(PigStatus.FEED.getKey());
+        return toTrack;
     }
 
     @Override

@@ -49,6 +49,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
 
     @Override
     public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         DoctorFosterByDto fosterByDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFosterByDto.class);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(fosterByDto.getPigId());
         DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());

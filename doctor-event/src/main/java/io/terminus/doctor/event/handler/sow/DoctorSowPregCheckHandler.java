@@ -35,6 +35,10 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         super.handleCheck(executeEvent, fromTrack);
+        expectTrue(Objects.equals(fromTrack.getStatus(), PigStatus.Mate.getKey())
+                        || Objects.equals(fromTrack.getStatus(), PigStatus.KongHuai.getKey())
+                        || Objects.equals(fromTrack.getStatus(), PigStatus.Pregnancy.getKey())
+                ,"pig.status.failed", PigStatus.from(fromTrack.getStatus()).getName());
         DoctorPregChkResultDto pregChkResultDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorPregChkResultDto.class);
         if (Objects.equals(executeEvent.getPregCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
             expectTrue(notNull(pregChkResultDto.getAbortionReasonId()), "liuchan.reason.not.null", pregChkResultDto.getPigCode());
@@ -111,13 +115,15 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
-        Integer pregCheckResult = inputEvent.getPregCheckResult();
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
+
+        Integer pregCheckResult = executeEvent.getPregCheckResult();
 
         //如果妊娠检查非阳性, 置当前配种数为0
-        doctorPigTrack.setCurrentMatingCount(0);
+        toTrack.setCurrentMatingCount(0);
 
-        Map<String, Object> extra = doctorPigTrack.getExtraMap();
+        Map<String, Object> extra = toTrack.getExtraMap();
         //往extra增加一些特殊标志位用来表明配种类型
         if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
             extra.put("fanqingToMate", true);
@@ -132,25 +138,25 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
             extra.put("pregCheckResult", PigStatus.Pregnancy.getKey());
         }
 
-        doctorPigTrack.setExtraMap(extra);
+        toTrack.setExtraMap(extra);
 
         if (Objects.equals(pregCheckResult, PregCheckResult.UNSURE.getKey())) {
             // 不修改状态
         } else if (Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
             // 阳性
-            doctorPigTrack.setStatus(PigStatus.Pregnancy.getKey());
+            toTrack.setStatus(PigStatus.Pregnancy.getKey());
 
             // 阳性在产房，设置为待分娩
-            if (Objects.equals(doctorPigTrack.getCurrentBarnType(), PigType.DELIVER_SOW.getValue())) {
-                doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
+            if (Objects.equals(toTrack.getCurrentBarnType(), PigType.DELIVER_SOW.getValue())) {
+                toTrack.setStatus(PigStatus.Farrow.getKey());
             }
 
         } else {
             // 其余默认 没有怀孕
-            doctorPigTrack.setStatus(PigStatus.KongHuai.getKey());
+            toTrack.setStatus(PigStatus.KongHuai.getKey());
         }
         //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
-        return doctorPigTrack;
+        return toTrack;
     }
 
     //校验能否置成此妊娠检查状态

@@ -937,4 +937,14 @@
         WHERE pig_id = #{pigId} AND status = 1 AND id > #{eventId}
         ORDER BY id ASC
     </select>
+
+    <update id="updateEventsStatus" parameterType="map">
+        UPDATE <include refid="tb" />
+        SET status = #{status}
+        WHERE
+       `id` IN
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
 </mapper>

@@ -347,4 +347,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<DoctorPigEvent> findFollowEvents(Long pigId, Long eventId) {
         return getSqlSession().selectList(sqlId("findFollowEvents"), ImmutableMap.of("eventId", eventId, "pigId", pigId));
     }
+
+    /**
+     * 批量更改事件状态
+     * @param ids 事件id列表
+     * @param status 需要更改的状态
+     */
+    public void updateEventsStatus(List<Long> ids, Integer status) {
+        getSqlSession().update(sqlId("updateEventsStatus"), ImmutableMap.of("ids", ids, "status", status));
+    }
 }

@@ -15,7 +15,6 @@ import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -45,7 +44,6 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
-//        expectTrue(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(basic.getFarmId(), inputDto.getPigCode(), inputDto.getPigType()) == null, "pigCode.have.existed");
     }
 
     @Override
@@ -59,8 +57,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         doctorPigTrackDao.create(toTrack);
 
         //3.创建镜像
-        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(toTrack, executeEvent, 0L);
-        doctorPigSnapshotDao.create(doctorPigSnapshot);
+        createPigSnapshot(toTrack, executeEvent, 0L);
 
         //4.特殊处理
         specialHandle(executeEvent, toTrack);
@@ -83,10 +80,50 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         doctorEventInfoList.add(doctorEventInfo);
     }
 
-    @Override
-    protected void specialHandle(DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
-        super.specialHandle(executeEvent, toTrack);
-        doctorPigInfoCache.addPigCodeToFarm(executeEvent.getFarmId(), executeEvent.getPigCode());
+    /**
+     * 构建DoctorPig
+     *
+     * @param dto 进场信息
+     * @param basic 基础数据
+     * @return 猪
+     */
+    private DoctorPig buildDoctorPig(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic) {
+        expectTrue(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(basic.getFarmId(), dto.getPigCode(), dto.getPigType()) == null, "pigCode.have.existed");
+        DoctorPig doctorPig = DoctorPig.builder()
+                .farmId(basic.getFarmId())
+                .farmName(basic.getFarmName())
+                .orgId(basic.getOrgId())
+                .orgName(basic.getOrgName())
+                .pigCode(dto.getPigCode())
+                .pigType(dto.getPigType())
+                .isRemoval(IsOrNot.NO.getValue())
+                .pigFatherCode(dto.getFatherCode())
+                .pigMotherCode(dto.getMotherCode())
+                .source(dto.getSource())
+                .birthDate(generateEventAt(dto.getBirthday()))
+                .inFarmDate(generateEventAt(dto.getInFarmDate()))
+                .inFarmDayAge(Years.yearsBetween(new DateTime(dto.getBirthday()), DateTime.now()).getYears())
+                .initBarnId(dto.getBarnId())
+                .initBarnName(dto.getBarnName())
+                .breedId(dto.getBreed())
+                .breedName(dto.getBreedName())
+                .geneticId(dto.getBreedType())
+                .geneticName(dto.getBreedTypeName())
+                .boarType(dto.getBoarType())
+                .remark(dto.getEntryMark())
+                .creatorId(basic.getStaffId())
+                .creatorName(basic.getStaffName())
+                .build();
+        if (Objects.equals(dto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
+            // add sow pig info
+            Map<String, Object> extraMapInfo = Maps.newHashMap();
+            extraMapInfo.put(DoctorFarmEntryConstants.EAR_CODE, dto.getEarCode());
+            extraMapInfo.put(DoctorFarmEntryConstants.FIRST_PARITY, dto.getParity());
+            extraMapInfo.put(DoctorFarmEntryConstants.LEFT_COUNT, dto.getLeft());
+            extraMapInfo.put(DoctorFarmEntryConstants.RIGHT_COUNT, dto.getRight());
+            doctorPig.setExtraMap(extraMapInfo);
+        }
+        return doctorPig;
     }
 
     @Override
@@ -132,50 +169,10 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         return doctorPigTrack;
     }
 
-    /**
-     * 构建DoctorPig
-     *
-     * @param dto 进场信息
-     * @param basic 基础数据
-     * @return 猪
-     */
-    private DoctorPig buildDoctorPig(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic) {
 
-        DoctorPig doctorPig = DoctorPig.builder()
-                .farmId(basic.getFarmId())
-                .farmName(basic.getFarmName())
-                .orgId(basic.getOrgId())
-                .orgName(basic.getOrgName())
-                .pigCode(dto.getPigCode())
-                .pigType(dto.getPigType())
-                .isRemoval(IsOrNot.NO.getValue())
-                .pigFatherCode(dto.getFatherCode())
-                .pigMotherCode(dto.getMotherCode())
-                .source(dto.getSource())
-                .birthDate(generateEventAt(dto.getBirthday()))
-                .inFarmDate(generateEventAt(dto.getInFarmDate()))
-                .inFarmDayAge(Years.yearsBetween(new DateTime(dto.getBirthday()), DateTime.now()).getYears())
-                .initBarnId(dto.getBarnId())
-                .initBarnName(dto.getBarnName())
-                .breedId(dto.getBreed())
-                .breedName(dto.getBreedName())
-                .geneticId(dto.getBreedType())
-                .geneticName(dto.getBreedTypeName())
-                .boarType(dto.getBoarType())
-                .remark(dto.getEntryMark())
-                .creatorId(basic.getStaffId())
-                .creatorName(basic.getStaffName())
-                .build();
-        if (Objects.equals(dto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
-            // add sow pig info
-            Map<String, Object> extraMapInfo = Maps.newHashMap();
-            extraMapInfo.put(DoctorFarmEntryConstants.EAR_CODE, dto.getEarCode());
-            extraMapInfo.put(DoctorFarmEntryConstants.FIRST_PARITY, dto.getParity());
-            extraMapInfo.put(DoctorFarmEntryConstants.LEFT_COUNT, dto.getLeft());
-            extraMapInfo.put(DoctorFarmEntryConstants.RIGHT_COUNT, dto.getRight());
-            doctorPig.setExtraMap(extraMapInfo);
-        }
-        return doctorPig;
+    @Override
+    protected void specialHandle(DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
+        super.specialHandle(executeEvent, toTrack);
+        doctorPigInfoCache.addPigCodeToFarm(executeEvent.getFarmId(), executeEvent.getPigCode());
     }
-
 }

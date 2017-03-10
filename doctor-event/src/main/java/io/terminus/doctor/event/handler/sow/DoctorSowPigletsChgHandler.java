@@ -41,33 +41,39 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
     private DoctorSowWeanHandler doctorSowWeanHandler;
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
-        DoctorPigletsChgDto pigletsChgDto = JSON_MAPPER.fromJson(inputEvent.getExtra(), DoctorPigletsChgDto.class);
-        expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", PigStatus.from(doctorPigTrack.getStatus()).getName(), pigletsChgDto.getPigCode());
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        expectTrue(Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", PigStatus.from(fromTrack.getStatus()).getName());
+    }
+
+    @Override
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
+        DoctorPigletsChgDto pigletsChgDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorPigletsChgDto.class);
 
         // 校验转出的数量信息
-        Integer unweanCount = doctorPigTrack.getUnweanQty();        //未断奶数量
-        Integer weanCount = doctorPigTrack.getWeanQty();            //已断奶数量
+        Integer unweanCount = toTrack.getUnweanQty();        //未断奶数量
+        Integer weanCount = toTrack.getWeanQty();            //已断奶数量
 
         //变动数量
         Integer changeCount = pigletsChgDto.getPigletsCount();
         expectTrue(changeCount <= unweanCount, "change.count.not.enough", pigletsChgDto.getPigCode());
-        doctorPigTrack.setUnweanQty(unweanCount - changeCount);  //未断奶数量 - 变动数量, 已断奶数量不用变
+        toTrack.setUnweanQty(unweanCount - changeCount);  //未断奶数量 - 变动数量, 已断奶数量不用变
 
         //变动重量
         Double changeWeight = pigletsChgDto.getPigletsWeight();
         //expectTrue(changeWeight <= unweanCount, "wean.countInput.error");
 
-        doctorPigTrack.setCurrentMatingCount(0);
+        toTrack.setCurrentMatingCount(0);
 
-        Map<String, Object> extra = doctorPigTrack.getExtraMap();
+        Map<String, Object> extra = toTrack.getExtraMap();
         //更新extra字段
         extra.put("partWeanPigletsCount", weanCount);
-        extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
-        doctorPigTrack.setExtraMap(extra);
+        extra.put("farrowingLiveCount", toTrack.getUnweanQty());
+        toTrack.setExtraMap(extra);
 
         // 调用对应的猪猪群事件,对应的操作方式
-        return doctorPigTrack;
+        return toTrack;
     }
 
 

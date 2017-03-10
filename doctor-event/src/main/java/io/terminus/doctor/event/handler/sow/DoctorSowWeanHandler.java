@@ -50,6 +50,8 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         super.handleCheck(executeEvent, fromTrack);
+        expectTrue(Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey())
+                ,"pig.status.failed", PigStatus.from(fromTrack.getStatus()).getName());
         DoctorWeanDto weanDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorWeanDto.class);
         expectTrue(MoreObjects.firstNonNull(weanDto.getQualifiedCount(), 0) + MoreObjects.firstNonNull(weanDto.getNotQualifiedCount(), 0) <= weanDto.getFarrowingLiveCount(), "qualified.add.noQualified.over.live", weanDto.getPigCode());
         if (Objects.equals(weanDto.getFarrowingLiveCount(), 0) && !Objects.equals(weanDto.getPartWeanAvgWeight(), 0d)) {
@@ -95,35 +97,35 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
-
-        expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", PigStatus.from(doctorPigTrack.getStatus()).getName());
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
+        expectTrue(Objects.equals(toTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", PigStatus.from(toTrack.getStatus()).getName());
 
         //未断奶数
-        Integer unweanCount = doctorPigTrack.getUnweanQty();    //未断奶数量
-        Integer weanCount = doctorPigTrack.getWeanQty();        //断奶数量
-        Integer toWeanCount = inputEvent.getWeanCount();
+        Integer unweanCount = toTrack.getUnweanQty();    //未断奶数量
+        Integer weanCount = toTrack.getWeanQty();        //断奶数量
+        Integer toWeanCount = executeEvent.getWeanCount();
         expectTrue(Objects.equals(toWeanCount,unweanCount), "need.all.wean", toWeanCount, unweanCount);
-        doctorPigTrack.setUnweanQty(unweanCount - toWeanCount); //未断奶数减
-        doctorPigTrack.setWeanQty(weanCount + toWeanCount);     //断奶数加
+        toTrack.setUnweanQty(unweanCount - toWeanCount); //未断奶数减
+        toTrack.setWeanQty(weanCount + toWeanCount);     //断奶数加
 
         //断奶均重
-        Double toWeanAvgWeight = inputEvent.getWeanAvgWeight();
-        Double weanAvgWeight = ((MoreObjects.firstNonNull(doctorPigTrack.getWeanAvgWeight(), 0D) * weanCount) + toWeanAvgWeight * toWeanCount ) / (weanCount + toWeanCount);
-        doctorPigTrack.setWeanAvgWeight(weanAvgWeight);
+        Double toWeanAvgWeight = executeEvent.getWeanAvgWeight();
+        Double weanAvgWeight = ((MoreObjects.firstNonNull(toTrack.getWeanAvgWeight(), 0D) * weanCount) + toWeanAvgWeight * toWeanCount ) / (weanCount + toWeanCount);
+        toTrack.setWeanAvgWeight(weanAvgWeight);
 
         //设置下此时的猪群id，下面肯能会把它刷掉
         //basic.setWeanGroupId(doctorPigTrack.getGroupId());
 
         //全部断奶后, 初始化所有本次哺乳的信息
-        if (doctorPigTrack.getUnweanQty() == 0) {
-            doctorPigTrack.setStatus(PigStatus.Wean.getKey());
-            doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
-            doctorPigTrack.setFarrowAvgWeight(0D);
-            doctorPigTrack.setFarrowQty(0);  //分娩数 0
-            doctorPigTrack.setWeanAvgWeight(0D);
+        if (toTrack.getUnweanQty() == 0) {
+            toTrack.setStatus(PigStatus.Wean.getKey());
+            toTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
+            toTrack.setFarrowAvgWeight(0D);
+            toTrack.setFarrowQty(0);  //分娩数 0
+            toTrack.setWeanAvgWeight(0D);
         }
-        return doctorPigTrack;
+        return toTrack;
     }
 
     @Override

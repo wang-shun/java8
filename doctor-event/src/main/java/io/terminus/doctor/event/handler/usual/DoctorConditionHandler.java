@@ -20,17 +20,18 @@ import java.util.Objects;
 public class DoctorConditionHandler extends DoctorAbstractEventHandler{
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
-        if (Objects.equals(doctorPigTrack.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
-            DoctorConditionDto conditionDto = JSON_MAPPER.fromJson(inputEvent.getExtra(), DoctorConditionDto.class);
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
+        if (Objects.equals(toTrack.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
+            DoctorConditionDto conditionDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorConditionDto.class);
             if (conditionDto.getConditionWeight() != null) {
-                doctorPigTrack.setWeight(conditionDto.getConditionWeight());
+                toTrack.setWeight(conditionDto.getConditionWeight());
             }
         } else {
-            DoctorBoarConditionDto boarConditionDto = JSON_MAPPER.fromJson(inputEvent.getExtra(), DoctorBoarConditionDto.class);
-            doctorPigTrack.setWeight(boarConditionDto.getWeight());
+            DoctorBoarConditionDto boarConditionDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorBoarConditionDto.class);
+            toTrack.setWeight(boarConditionDto.getWeight());
         }
 
-        return doctorPigTrack;
+        return toTrack;
     }
 }

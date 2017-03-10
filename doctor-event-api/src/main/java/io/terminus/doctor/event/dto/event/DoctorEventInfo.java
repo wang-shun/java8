@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.dto.event;
 
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Builder;
@@ -25,19 +24,9 @@ public class DoctorEventInfo {
     private Long eventId;
 
     /**
-     * 原事件id,事件编辑时记录编辑前的事件id(仅编辑可用)
+     * 原事件id,事件编辑时记录编辑前的事件id(仅编辑事件可用)
      */
     private Long oldEventId;
-
-    /**
-     * 事件编辑前猪track(仅编辑可用)
-     */
-    private DoctorPigTrack fromPigTrack;
-
-    /**
-     * 事件编辑前猪群track(仅编辑可用)
-     */
-    private DoctorPigTrack fromGroupTrack;
 
     /**
      * 目标号
