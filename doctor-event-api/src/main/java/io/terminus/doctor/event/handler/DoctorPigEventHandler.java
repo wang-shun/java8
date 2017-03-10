@@ -15,17 +15,19 @@ import java.util.List;
 public interface DoctorPigEventHandler {
 
     /**
-     * 校验输入数据
-     */
-    void handleCheck(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic);
-
-    /**
      * 构建需要执行的猪事件
      * @param basic 基础数据
      * @param inputDto 输入信息
      * @return 猪事件
      */
     DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto);
+
+    /**
+     * 校验输入数据
+     * @param executeEvent 需要执行的事件
+     * @param fromTrack 原状态
+     */
+    void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack);
 
     /**
      * 事件信息处理

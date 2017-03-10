@@ -38,7 +38,8 @@ public class DoctorEventModifyRequest implements Serializable{
      */
     private Integer type;
     /**
-     *  事件内容
+     *  事件Json
+     *  @see DoctorPigEvent
      */
     private String content;
 

@@ -59,9 +59,9 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     private DoctorTransGroupEventHandler transGroupEventHandler;
 
     @Override
-    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-        super.handleCheck(eventDto, basic);
-        DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) eventDto;
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        DoctorChgLocationDto chgLocationDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorChgLocationDto.class);
         expectTrue(!Objects.equals(chgLocationDto.getChgLocationFromBarnId(), chgLocationDto.getChgLocationToBarnId()), "same.barn.not.trans");
     }
 

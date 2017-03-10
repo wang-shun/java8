@@ -41,13 +41,10 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     public static final Integer MATING_PREG_DAYS = 114;
 
     @Override
-    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-        super.handleCheck(eventDto, basic);
-        DoctorMatingDto matingDto = (DoctorMatingDto) eventDto;
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(matingDto.getPigId());
-        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", eventDto.getPigId());
-        expectTrue(doctorPigTrack.getCurrentMatingCount() < 3, "mate.count.over", eventDto.getPigCode());
-        expectTrue(notNull(matingDto.getOperatorId()), "mating.operator.not.null", eventDto.getPigCode());
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        expectTrue(fromTrack.getCurrentMatingCount() < 3, "mate.count.over");
+        expectTrue(notNull(executeEvent.getOperatorId()), "mating.operator.not.null");
     }
 
     @Override

@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
-import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
@@ -33,15 +33,13 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
 public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
 
     @Override
-    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-        super.handleCheck(eventDto, basic);
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(eventDto.getPigId());
-        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", eventDto.getPigId());
-        DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) eventDto;
-        if (Objects.equals(pregChkResultDto.getCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        DoctorPregChkResultDto pregChkResultDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorPregChkResultDto.class);
+        if (Objects.equals(executeEvent.getPregCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
             expectTrue(notNull(pregChkResultDto.getAbortionReasonId()), "liuchan.reason.not.null", pregChkResultDto.getPigCode());
         }
-        checkCanPregCheckResult(doctorPigTrack.getStatus(), pregChkResultDto.getCheckResult(), pregChkResultDto.getPigCode());
+        checkCanPregCheckResult(fromTrack.getStatus(), pregChkResultDto.getCheckResult(), pregChkResultDto.getPigCode());
     }
 
     @Override

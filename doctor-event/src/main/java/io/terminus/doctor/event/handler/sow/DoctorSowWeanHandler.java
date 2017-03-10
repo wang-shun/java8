@@ -48,9 +48,9 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     private DoctorBarnDao doctorBarnDao;
 
     @Override
-    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-        super.handleCheck(eventDto, basic);
-        DoctorWeanDto weanDto = (DoctorWeanDto) eventDto;
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        DoctorWeanDto weanDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorWeanDto.class);
         expectTrue(MoreObjects.firstNonNull(weanDto.getQualifiedCount(), 0) + MoreObjects.firstNonNull(weanDto.getNotQualifiedCount(), 0) <= weanDto.getFarrowingLiveCount(), "qualified.add.noQualified.over.live", weanDto.getPigCode());
         if (Objects.equals(weanDto.getFarrowingLiveCount(), 0) && !Objects.equals(weanDto.getPartWeanAvgWeight(), 0d)) {
             throw new InvalidException("wean.avg.weight.not.zero", weanDto.getPigCode());

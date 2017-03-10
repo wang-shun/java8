@@ -58,24 +58,18 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
     @Override
-    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-        checkEventAt(eventDto);
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigEvent lastEvent = doctorPigEventDao.findById(fromTrack.getCurrentEventId());
+        checkEventAt(executeEvent, lastEvent);
     }
 
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
-//        //获取镜像有关event和track
-//        DoctorPigTrack pigSnapshotTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-//        expectTrue(notNull(pigSnapshotTrack), "pig.track.not.null", inputDto.getPigId());
-//        DoctorPigEvent pigSnapshotEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
-//        expectTrue(notNull(pigSnapshotEvent), "pig.last.event.not.null", inputDto.getPigId());
-
 
         //1.创建事件
-        //DoctorPigEvent doctorPigEvent = buildPigEvent(basic, inputDto);
         doctorPigEventDao.create(executeEvent);
 
-        //2.创建或更新track
+        //2.更新track
         DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
         doctorPigTrackDao.update(toTrack);
 
@@ -235,14 +229,13 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     /**
      * 事件日期校验
-     * @param inputDto
+     * @param executeEvent 需要执行的事件
      */
-    private void checkEventAt(BasePigEventInputDto inputDto) {
-        if (Objects.equals(inputDto.getPigType(), PigEvent.ENTRY.getKey())) {
+    private void checkEventAt(DoctorPigEvent executeEvent, DoctorPigEvent lastEvent) {
+        if (Objects.equals(executeEvent.getType(), PigEvent.ENTRY.getKey())) {
             return;
         }
-        Date eventAt = inputDto.eventAt();
-        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(inputDto.getPigId());
+        Date eventAt = executeEvent.getEventAt();
         if (notNull(lastEvent) && (Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt())) || Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date())))) {
             throw new InvalidException("event.at.range.error", DateUtil.toDateString(lastEvent.getEventAt()), DateUtil.toDateString(new Date()), DateUtil.toDateString(eventAt));
         }
