@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -57,6 +58,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
+    private static final List<Integer> IgnoreEventList = Lists.newArrayList(PigEvent.VACCINATION.getKey(), PigEvent.DISEASE.getKey());
+
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigEvent lastEvent = doctorPigEventDao.findById(fromTrack.getCurrentEventId());
@@ -69,13 +72,14 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         //1.创建事件
         doctorPigEventDao.create(executeEvent);
 
-        //2.更新track
+        //事件是否需要更新track和生成镜像
         DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
-        doctorPigTrackDao.update(toTrack);
-
-        //3.创建镜像
-        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(toTrack, executeEvent, fromTrack.getCurrentEventId());
-        doctorPigSnapshotDao.create(doctorPigSnapshot);
+        if (!IgnoreEventList.contains(executeEvent.getType())) {
+            //2.更新track
+            doctorPigTrackDao.update(toTrack);
+            //3.创建镜像
+            createPigSnapshot(toTrack, executeEvent, fromTrack.getCurrentEventId());
+        }
 
         //4.特殊处理
         specialHandle(executeEvent, toTrack);
@@ -100,7 +104,9 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         doctorEventInfoList.add(doctorEventInfo);
 
         //6.触发事件
-        triggerEvent(doctorEventInfoList, executeEvent, toTrack);
+        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
+            triggerEvent(doctorEventInfoList, executeEvent, toTrack);
+        }
     }
 
     /**
@@ -123,7 +129,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .operatorName(StringUtils.hasText(inputDto.getOperatorName()) ? inputDto.getOperatorName() : basic.getStaffName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .isAuto(MoreObjects.firstNonNull(inputDto.getIsAuto(), IsOrNot.NO.getValue()))
-                .status(EventStatus.VALID.getValue())
+                .status(EventStatus.VALID.getValue()).isModify(IsOrNot.NO.getValue())
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)
@@ -149,6 +155,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
      * @return 事件发生后track
      */
     protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        fromTrack.setCurrentEventId(executeEvent.getId());
         return fromTrack;
     }
 
@@ -159,19 +166,20 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
      *  @param lastEventId 上一次事件
      *
      */
-    protected DoctorPigSnapshot createPigSnapshot(DoctorPigTrack toTrack, DoctorPigEvent executeEvent, Long lastEventId) {
+    protected void createPigSnapshot(DoctorPigTrack toTrack, DoctorPigEvent executeEvent, Long lastEventId) {
         DoctorPig snapshotPig = doctorPigDao.findById(toTrack.getPigId());
         expectTrue(notNull(snapshotPig), "pig.not.null", toTrack.getPigId());
 
 
         //创建猪镜像
-        return DoctorPigSnapshot.builder()
+        DoctorPigSnapshot snapshot = DoctorPigSnapshot.builder()
                 .pigId(snapshotPig.getId())
                 .fromEventId(lastEventId)
                 .toEventId(executeEvent.getId())
                 .toPigInfo(JSON_MAPPER.toJson(
                         DoctorPigSnapShotInfo.builder().pig(snapshotPig).pigTrack(toTrack).build()))
                 .build();
+        doctorPigSnapshotDao.create(snapshot);
     }
 
     /**

@@ -7,7 +7,6 @@ import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
-import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -15,7 +14,6 @@ import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -23,7 +21,6 @@ import org.joda.time.Years;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -44,44 +41,43 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
     private  DoctorPigInfoCache doctorPigInfoCache;
 
     @Override
-    public void handleCheck(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        expectTrue(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(basic.getFarmId(), inputDto.getPigCode(), inputDto.getPigType()) == null, "pigCode.have.existed");
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        expectTrue(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(executeEvent.getFarmId(), executeEvent.getPigCode(), executeEvent.getKind()) == null, "pigCode.have.existed");
     }
 
-    @Override
-    public void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
-
-        //1.创建事件
-        doctorPigEventDao.create(executeEvent);
-
-        //2.创建或更新track
-        DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
-        doctorPigTrackDao.create(toTrack);
-
-        //3.创建镜像
-        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(toTrack, executeEvent, 0L);
-        doctorPigSnapshotDao.create(doctorPigSnapshot);
-
-        //4.特殊处理
-        specialHandle(executeEvent, toTrack);
-
-        //5.记录发生的事件信息
-        DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
-                .orgId(executeEvent.getOrgId())
-                .farmId(executeEvent.getFarmId())
-                .eventId(executeEvent.getId())
-                .eventAt(executeEvent.getEventAt())
-                .kind(executeEvent.getKind())
-                .mateType(executeEvent.getDoctorMateType())
-                .pregCheckResult(executeEvent.getPregCheckResult())
-                .businessId(executeEvent.getPigId())
-                .code(executeEvent.getPigCode())
-                .status(toTrack.getStatus())
-                .businessType(DoctorEventInfo.Business_Type.PIG.getValue())
-                .eventType(executeEvent.getType())
-                .build();
-        doctorEventInfoList.add(doctorEventInfo);
-    }
+//    @Override
+//    public void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+//
+//        //1.创建事件
+//        doctorPigEventDao.create(executeEvent);
+//
+//        //2.创建或更新track
+//        DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
+//        doctorPigTrackDao.create(toTrack);
+//
+//        //3.创建镜像
+//        createPigSnapshot(toTrack, executeEvent, 0L);
+//
+//        //4.特殊处理
+//        specialHandle(executeEvent, toTrack);
+//
+//        //5.记录发生的事件信息
+//        DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
+//                .orgId(executeEvent.getOrgId())
+//                .farmId(executeEvent.getFarmId())
+//                .eventId(executeEvent.getId())
+//                .eventAt(executeEvent.getEventAt())
+//                .kind(executeEvent.getKind())
+//                .mateType(executeEvent.getDoctorMateType())
+//                .pregCheckResult(executeEvent.getPregCheckResult())
+//                .businessId(executeEvent.getPigId())
+//                .code(executeEvent.getPigCode())
+//                .status(toTrack.getStatus())
+//                .businessType(DoctorEventInfo.Business_Type.PIG.getValue())
+//                .eventType(executeEvent.getType())
+//                .build();
+//        doctorEventInfoList.add(doctorEventInfo);
+//    }
 
     @Override
     protected void specialHandle(DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {

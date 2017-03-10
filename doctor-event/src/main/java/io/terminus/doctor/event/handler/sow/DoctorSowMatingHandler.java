@@ -43,23 +43,28 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         super.handleCheck(executeEvent, fromTrack);
+        expectTrue(Objects.equals(fromTrack.getStatus(), PigStatus.Entry.getKey())
+                || Objects.equals(fromTrack.getStatus(), PigStatus.KongHuai.getKey())
+                || Objects.equals(fromTrack.getStatus(), PigStatus.Wean.getKey())
+                ,"pig.status.failed", PigStatus.from(fromTrack.getStatus()).getName());
         expectTrue(fromTrack.getCurrentMatingCount() < 3, "mate.count.over");
         expectTrue(notNull(executeEvent.getOperatorId()), "mating.operator.not.null");
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         // validate extra 配种日期信息
-        DateTime matingDate = new DateTime(inputEvent.getEventAt());
-        Map<String, Object> extra = doctorPigTrack.getExtraMap();
-        if (doctorPigTrack.getCurrentMatingCount() == 0) {
+        DateTime matingDate = new DateTime(executeEvent.getEventAt());
+        Map<String, Object> extra = toTrack.getExtraMap();
+        if (toTrack.getCurrentMatingCount() == 0) {
             extra.put("judgePregDate", matingDate.plusDays(MATING_PREG_DAYS).toDate());
         }
         if (!isNull(extra) &&
                 extra.containsKey("hasWeanToMating")
                 && Boolean.valueOf(extra.get("hasWeanToMating").toString())) {
             extra.put("hasWeanToMating", false);
-            doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
+            toTrack.setCurrentParity(toTrack.getCurrentParity() + 1);
         }
         if (!isNull(extra) &&
                 extra.containsKey("enterToMate")
@@ -67,12 +72,12 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
             extra.put("enterToMate", false);
         }
         //重复配种就加次数
-        doctorPigTrack.setCurrentMatingCount(doctorPigTrack.getCurrentMatingCount() + 1);
+        toTrack.setCurrentMatingCount(toTrack.getCurrentMatingCount() + 1);
         // 构建母猪配种信息
-        doctorPigTrack.setExtraMap(extra);
-        doctorPigTrack.setStatus(PigStatus.Mate.getKey());
+        toTrack.setExtraMap(extra);
+        toTrack.setStatus(PigStatus.Mate.getKey());
         //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
-        return doctorPigTrack;
+        return toTrack;
     }
 
     @Override

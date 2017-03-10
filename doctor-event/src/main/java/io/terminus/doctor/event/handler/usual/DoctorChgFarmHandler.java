@@ -36,15 +36,21 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
     private DoctorBarnDao doctorBarnDao;
 
     @Override
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        expectTrue(!Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey()), "feed.sow.not.chg.farm");
+    }
+
+    @Override
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         return super.buildPigEvent(basic, inputDto);
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         DoctorChgFarmDto chgFarmDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorChgFarmDto.class);
         // 当前状态为哺乳状态的母猪不允许转
-        expectTrue(!Objects.equals(toTrack.getStatus(), PigStatus.FEED.getKey()), "feed.sow.not.chg.farm", chgFarmDto.getPigCode());
 
         // 校验转相同的猪舍
         DoctorBarn doctorCurrentBarn = doctorBarnDao.findById(toTrack.getCurrentBarnId());

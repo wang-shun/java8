@@ -310,6 +310,12 @@ public class DoctorPigEvent implements Serializable {
 
     private Date updatedAt;
 
+    /**
+     * 事件来源(不存到数据库中,只在事件处理时有效)
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    private Integer isModify;
+
     @SneakyThrows
     public void setExtra(String extra) {
         this.extra = extra;

@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
@@ -46,6 +47,12 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
     @Autowired
     private DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
+
+    @Override
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        expectTrue(Objects.equals(fromTrack.getStatus(), PigStatus.Farrow.getKey()), "pig.status.failed", PigStatus.from(fromTrack.getStatus()).getName());
+    }
 
     @Override
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
@@ -92,24 +99,25 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
-        Map<String, Object> extra = doctorPigTrack.getExtraMap();
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
+        Map<String, Object> extra = toTrack.getExtraMap();
         // 对应的 仔猪 猪舍的 信息
-        extra.put("toBarnId", doctorPigTrack.getCurrentBarnId());
-        extra.put("toBarnName", doctorPigTrack.getCurrentBarnName());
+        extra.put("toBarnId", toTrack.getCurrentBarnId());
+        extra.put("toBarnName", toTrack.getCurrentBarnName());
         //Long pigEventId = (Long) context.get("doctorPigEventId");
 
         //分娩时记录下 分娩数量
-        doctorPigTrack.setFarrowQty(inputEvent.getLiveCount());
-        doctorPigTrack.setUnweanQty(inputEvent.getLiveCount());
-        doctorPigTrack.setWeanQty(0);  //分娩时 断奶数为0
-        doctorPigTrack.setFarrowAvgWeight(inputEvent.getFarrowWeight());
-        doctorPigTrack.setWeanAvgWeight(0D); //分娩时, 断奶均重置成0
+        toTrack.setFarrowQty(executeEvent.getLiveCount());
+        toTrack.setUnweanQty(executeEvent.getLiveCount());
+        toTrack.setWeanQty(0);  //分娩时 断奶数为0
+        toTrack.setFarrowAvgWeight(executeEvent.getFarrowWeight());
+        toTrack.setWeanAvgWeight(0D); //分娩时, 断奶均重置成0
 
-        doctorPigTrack.setExtraMap(extra);
-        doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
+        toTrack.setExtraMap(extra);
+        toTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
 
-        return doctorPigTrack;
+        return toTrack;
     }
 
     @Override

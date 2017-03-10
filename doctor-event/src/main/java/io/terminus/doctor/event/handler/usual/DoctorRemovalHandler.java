@@ -31,21 +31,27 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
 @Slf4j
 public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
-        expectTrue(!Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "removal.status.not.feed");
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        expectTrue(!Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey()), "removal.status.not.feed");
+    }
+
+    @Override
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         //DoctorRemovalDto removalDto = (DoctorRemovalDto) inputDto;
-        doctorPigTrack.setGroupId(-1L);
+        toTrack.setGroupId(-1L);
         //doctorPigTrack.addAllExtraMap(removalDto.toMap());
         //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
-        if (Objects.equals(DoctorPig.PigSex.BOAR.getKey(), doctorPigTrack.getPigType())) {
-            doctorPigTrack.setStatus(PigStatus.BOAR_LEAVE.getKey());
-        } else if (Objects.equals(DoctorPig.PigSex.SOW.getKey(), doctorPigTrack.getPigType())) {
-            doctorPigTrack.setStatus(PigStatus.Removal.getKey());
+        if (Objects.equals(DoctorPig.PigSex.BOAR.getKey(), toTrack.getPigType())) {
+            toTrack.setStatus(PigStatus.BOAR_LEAVE.getKey());
+        } else if (Objects.equals(DoctorPig.PigSex.SOW.getKey(), toTrack.getPigType())) {
+            toTrack.setStatus(PigStatus.Removal.getKey());
         } else {
-            throw new InvalidException("pig.sex.error", doctorPigTrack.getPigType(),inputEvent.getPigCode());
+            throw new InvalidException("pig.sex.error", toTrack.getPigType(),executeEvent.getPigCode());
         }
-        doctorPigTrack.setIsRemoval(IsOrNot.YES.getValue());
-        return doctorPigTrack;
+        toTrack.setIsRemoval(IsOrNot.YES.getValue());
+        return toTrack;
     }
 
     @Override

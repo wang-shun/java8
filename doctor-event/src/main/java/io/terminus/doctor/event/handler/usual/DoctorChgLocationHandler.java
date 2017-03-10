@@ -84,33 +84,34 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
-        DoctorChgLocationDto chgLocationDto = JSON_MAPPER.fromJson(inputEvent.getExtra(), DoctorChgLocationDto.class);
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
+        DoctorChgLocationDto chgLocationDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorChgLocationDto.class);
         Long toBarnId = chgLocationDto.getChgLocationToBarnId();
 
         //校验猪舍类型是否相同, 只有同类型才可以普通转舍
-        DoctorBarn fromBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
+        DoctorBarn fromBarn = doctorBarnDao.findById(toTrack.getCurrentBarnId());
         expectTrue(notNull(fromBarn), "barn.not.null", chgLocationDto.getChgLocationFromBarnId());
         DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
         expectTrue(notNull(toBarn), "barn.not.null", chgLocationDto.getChgLocationToBarnId());
-        expectTrue(checkBarnTypeEqual(fromBarn.getPigType(), doctorPigTrack.getStatus(), toBarn.getPigType()), "not.trans.barn.type", PigType.from(fromBarn.getPigType()).getDesc(), PigType.from(toBarn.getPigType()).getDesc());
+        expectTrue(checkBarnTypeEqual(fromBarn.getPigType(), toTrack.getStatus(), toBarn.getPigType()), "not.trans.barn.type", PigType.from(fromBarn.getPigType()).getDesc(), PigType.from(toBarn.getPigType()).getDesc());
         //expectTrue(!(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) && PigType.MATING_TYPES.contains(toBarn.getPigType())), "", new Object[]{chgLocationDto.getPigCode()});
 
         if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
-            doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
-        } else if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()) && Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
+            toTrack.setStatus(PigStatus.Farrow.getKey());
+        } else if (Objects.equals(toTrack.getStatus(), PigStatus.Wean.getKey()) && Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
             // 设置断奶到配置舍标志
             Map<String, Object> newExtraMap = Maps.newHashMap();
             newExtraMap.put("hasWeanToMating", true);
             //清空对应的Map 信息内容 （有一次生产过程）
-            doctorPigTrack.setExtraMap(newExtraMap);
+            toTrack.setExtraMap(newExtraMap);
             //设置当前配种次数为零
-            doctorPigTrack.setCurrentMatingCount(0);
+            toTrack.setCurrentMatingCount(0);
         }
-        doctorPigTrack.setCurrentBarnId(toBarnId);
-        doctorPigTrack.setCurrentBarnName(toBarn.getName());
-        doctorPigTrack.setCurrentBarnType(toBarn.getPigType());
-        return doctorPigTrack;
+        toTrack.setCurrentBarnId(toBarnId);
+        toTrack.setCurrentBarnName(toBarn.getName());
+        toTrack.setCurrentBarnType(toBarn.getPigType());
+        return toTrack;
     }
 
     @Override
