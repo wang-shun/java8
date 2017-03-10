@@ -8,10 +8,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -143,5 +140,19 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      */
     public DoctorGroupEvent findInitGroupEvent(Long groupId) {
         return getSqlSession().selectOne(sqlId("findInitGroupEvent"), groupId);
+    }
+
+
+    /**
+     * 获取猪群的所有事件,按发生事件升序排序
+     * @param groupId
+     * @return
+     */
+    public List<DoctorGroupEvent> findLinkedGroupEventsByGroupId(Long groupId){
+        return getSqlSession().selectList(sqlId("findLinkedGroupEventsByGroupId"), groupId);
+    }
+
+    public Boolean updateGroupEventStatus(List<Long> ids, Integer status) {
+        return Boolean.valueOf(getSqlSession().update(sqlId("updateGroupEventStatus"), MapBuilder.newHashMap().put("ids", ids, "status", status).map()) == 1);
     }
 }

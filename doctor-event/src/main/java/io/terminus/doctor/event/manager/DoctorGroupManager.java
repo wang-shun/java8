@@ -128,8 +128,8 @@ public class DoctorGroupManager {
 
         //4. 创建猪群镜像
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-        groupSnapshot.setEventType(GroupEventType.NEW.getValue());  //猪群事件类型
-        groupSnapshot.setToGroupId(group.getId());
+        groupSnapshot.setGroupId(groupEvent.getGroupId());
+        groupSnapshot.setFromEventId(0L);
         groupSnapshot.setToEventId(groupEvent.getId());
         groupSnapshot.setToInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
                 .group(group)

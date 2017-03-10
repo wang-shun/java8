@@ -23,6 +23,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorEditGroupEventService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -69,6 +70,9 @@ public class DoctorGroupEvents {
     private final TransFromUtil transFromUtil;
 
     @RpcConsumer
+    private DoctorEditGroupEventService doctorEditGroupEventService;
+
+    @RpcConsumer
     private DoctorPigReadService doctorPigReadService;
 
     @Autowired
@@ -76,7 +80,8 @@ public class DoctorGroupEvents {
                              DoctorGroupReadService doctorGroupReadService,
                              DoctorFarmAuthCenter doctorFarmAuthCenter,
                              DoctorGroupWriteService doctorGroupWriteService,
-                             DoctorBasicReadService doctorBasicReadService, TransFromUtil transFromUtil) {
+                             DoctorBasicReadService doctorBasicReadService, TransFromUtil transFromUtil
+                             ) {
         this.doctorGroupWebService = doctorGroupWebService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorFarmAuthCenter = doctorFarmAuthCenter;
@@ -421,5 +426,15 @@ public class DoctorGroupEvents {
             return Boolean.FALSE;
         }
 
+    }
+
+
+    @RequestMapping(value="/edit", method = RequestMethod.GET)
+    public Boolean editGroupEvent(@RequestParam Long id){
+        DoctorGroupEvent doctorGroupEvent = RespHelper.or500(doctorGroupReadService.findGroupEventById(id));
+        doctorGroupEvent.setQuantity(doctorGroupEvent.getQuantity() + 2);
+        doctorGroupEvent.setWeight(doctorGroupEvent.getWeight() + 10);
+        doctorEditGroupEventService.elicitDoctorGroupTrack(doctorGroupEvent);
+        return true;
     }
 }

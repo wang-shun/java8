@@ -86,7 +86,9 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
     protected void sampleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
 
-        DoctorGroupSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getFromInfo(), DoctorGroupSnapShotInfo.class);
+        DoctorGroupSnapshot oldSnapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(snapshot.getFromEventId());
+
+        DoctorGroupSnapShotInfo info = JSON_MAPPER.fromJson(oldSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
 
         //删除此事件 -> 回滚猪群跟踪 -> 回滚猪群 -> 删除镜像
         doctorGroupEventDao.delete(groupEvent.getId());
@@ -95,15 +97,15 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
         doctorGroupSnapshotDao.delete(snapshot.getId());
 
         //创建回滚日志
-        createRevertLog(groupEvent, snapshot, operatorId, operatorName);
+        createRevertLog(groupEvent, snapshot, oldSnapshot, operatorId, operatorName);
     }
 
-    protected void createRevertLog(DoctorGroupEvent groupEvent, DoctorGroupSnapshot snapshot, Long operatorId, String operatorName) {
+    protected void createRevertLog(DoctorGroupEvent groupEvent, DoctorGroupSnapshot snapshot, DoctorGroupSnapshot oldSnapshot, Long operatorId, String operatorName) {
         DoctorRevertLog revertLog = new  DoctorRevertLog();
         revertLog.setFarmId(groupEvent.getFarmId());
         revertLog.setGroupId(groupEvent.getGroupId());
-        revertLog.setFromInfo(snapshot.getToInfo());
-        revertLog.setToInfo(snapshot.getFromInfo());
+        revertLog.setFromInfo(oldSnapshot.getToInfo());
+        revertLog.setToInfo(snapshot.getToInfo());
         revertLog.setType(DoctorRevertLog.Type.GROUP.getValue());
         revertLog.setReverterId(operatorId);
         revertLog.setReverterName(operatorName);
