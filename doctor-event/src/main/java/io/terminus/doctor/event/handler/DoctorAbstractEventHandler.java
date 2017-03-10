@@ -58,7 +58,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
-    private static final List<Integer> IgnoreEventList = Lists.newArrayList(PigEvent.VACCINATION.getKey(), PigEvent.DISEASE.getKey());
+    private static final List<Integer> IgnoreEventList = Lists.newArrayList(PigEvent.VACCINATION.getKey(), PigEvent.DISEASE.getKey(), PigEvent.SEMEN.getKey());
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -68,7 +68,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
-
+        Long currentEventId = fromTrack.getCurrentEventId();
         //1.创建事件
         doctorPigEventDao.create(executeEvent);
 
@@ -78,7 +78,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
             //2.更新track
             doctorPigTrackDao.update(toTrack);
             //3.创建镜像
-            createPigSnapshot(toTrack, executeEvent, fromTrack.getCurrentEventId());
+            createPigSnapshot(toTrack, executeEvent, currentEventId);
         }
 
         //4.特殊处理
@@ -163,13 +163,12 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
      *  创建猪跟踪和镜像表
      *  @param toTrack 事件发生导致track
      *  @param executeEvent 发生事件
-     *  @param lastEventId 上一次事件
+     *  @param lastEventId 上一次事件id
      *
      */
     protected void createPigSnapshot(DoctorPigTrack toTrack, DoctorPigEvent executeEvent, Long lastEventId) {
         DoctorPig snapshotPig = doctorPigDao.findById(toTrack.getPigId());
         expectTrue(notNull(snapshotPig), "pig.not.null", toTrack.getPigId());
-
 
         //创建猪镜像
         DoctorPigSnapshot snapshot = DoctorPigSnapshot.builder()

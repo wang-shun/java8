@@ -4,6 +4,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
 import java.util.List;
@@ -52,4 +53,11 @@ public interface DoctorPigEventWriteService {
      * @return
      */
     RespWithEx<Boolean> batchPigEventHandle(List<BasePigEventInputDto> inputDtos, DoctorBasicInputInfoDto basic);
+
+    /**
+     * 猪事件编辑处理
+     * @param modifyRequest 事件编辑处理
+     * @return
+     */
+    RespWithEx<Boolean> modifyPigEventHandle(DoctorEventModifyRequest modifyRequest);
 }

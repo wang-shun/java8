@@ -12,6 +12,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
@@ -75,6 +76,23 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         } catch (Exception e) {
             log.error("batch.pig.event.handle.failed, input:{}, basic:{}, cause by :{}", inputDtos, basic, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("batch.pig.event.handle.failed");
+        }
+    }
+
+    @Override
+    public RespWithEx<Boolean> modifyPigEventHandle(DoctorEventModifyRequest modifyRequest) {
+        try {
+            doctorPigEventManager.modifyPigEventRequestHandle(modifyRequest);
+            return RespWithEx.ok(Boolean.TRUE);
+        } catch (ServiceException | IllegalStateException e) {
+            log.error("modify.pig.event.handle.failed, modifyRequest, cause by :{}", modifyRequest, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail(e.getMessage());
+        } catch (InvalidException e) {
+            log.error("modify.pig.event.handle.failed, modifyRequest, cause by :{}", modifyRequest, Throwables.getStackTraceAsString(e));
+            return RespWithEx.exception(e);
+        } catch (Exception e) {
+            log.error("modify.pig.event.handle.failed, modifyRequest, cause by :{}", modifyRequest, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail("pig.event.modify.failed");
         }
     }
 
