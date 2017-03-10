@@ -26,6 +26,7 @@
         <result column="wean_avg_weight" property="weanAvgWeight"/>
         <result column="out_farm_date" property="outFarmDate"/>
         <result column="rel_event_ids" property="relEventIds"/>
+        <result column="current_event_id" property="currentEventId"/>
         <result column="extra" property="extra"/>
         <result column="extra_message" property="extraMessage"/>
         <result column="current_parity" property="currentParity"/>
@@ -68,6 +69,7 @@
         wean_avg_weight,
         out_farm_date,
         rel_event_ids,
+        current_event_id,
         extra,
         extra_message,
         current_parity,
@@ -100,6 +102,7 @@
         #{weanAvgWeight},
         #{outFarmDate},
         #{relEventIds},
+        #{currentEventId},
         #{extra},
         #{extraMessage},
         #{currentParity},
@@ -125,6 +128,7 @@
         <if test="currentBarnType != null" > AND `current_barn_type` = #{currentBarnType}</if>
         <if test="weight != null" > AND `weight` = #{weight}</if>
         <if test="relEventIds != null" > AND `rel_event_ids` = #{relEventIds}</if>
+        <if test="currentEventId != null" > AND `current_event_id` = #{currentEventId}</if>
         <if test="currentParity != null" > AND `current_parity` = #{currentParity}</if>
         <if test="currentMatingCount != null"> AND `current_mating_count` = #{currentMatingCount}</if>
     </sql>
@@ -158,6 +162,7 @@
             #{item.weanAvgWeight},
             #{item.outFarmDate},
             #{item.relEventIds},
+            #{item.currentEventId},
             #{item.extra},
             #{item.extraMessage},
             #{item.currentParity},
@@ -247,6 +252,7 @@
             <if test="weanAvgWeight != null">wean_avg_weight = #{weanAvgWeight},</if>
             <if test="outFarmDate != null">out_farm_date = #{outFarmDate},</if>
             <if test="relEventIds != null">rel_event_ids = #{relEventIds},</if>
+            <if test="currentEventId != null">current_event_id = #{currentEventId},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="extraMessage != null">extra_message = #{extraMessage},</if>
             <if test="currentParity != null">current_parity = #{currentParity},</if>

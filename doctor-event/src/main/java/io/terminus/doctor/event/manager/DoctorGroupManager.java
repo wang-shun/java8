@@ -20,6 +20,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInputInfo;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
@@ -239,6 +240,7 @@ public class DoctorGroupManager {
         DoctorNewGroupEvent newGroupEvent = new DoctorNewGroupEvent();
         newGroupEvent.setSource(newGroupInput.getSource());
         groupEvent.setExtraMap(newGroupEvent);
+        groupEvent.setStatus(EventStatus.VALID.getValue());
         return groupEvent;
     }
 

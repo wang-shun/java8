@@ -59,14 +59,14 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     private DoctorTransGroupEventHandler transGroupEventHandler;
 
     @Override
-    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-        super.handleCheck(eventDto, basic);
-        DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) eventDto;
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        DoctorChgLocationDto chgLocationDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorChgLocationDto.class);
         expectTrue(!Objects.equals(chgLocationDto.getChgLocationFromBarnId(), chgLocationDto.getChgLocationToBarnId()), "same.barn.not.trans");
     }
 
     @Override
-    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent =  super.buildPigEvent(basic, inputDto);
         DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) inputDto;
         DoctorBarn fromBarn = doctorBarnDao.findById(chgLocationDto.getChgLocationFromBarnId());
@@ -84,10 +84,8 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     }
 
     @Override
-    protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
-        DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) inputDto;
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
+        DoctorChgLocationDto chgLocationDto = JSON_MAPPER.fromJson(inputEvent.getExtra(), DoctorChgLocationDto.class);
         Long toBarnId = chgLocationDto.getChgLocationToBarnId();
 
         //校验猪舍类型是否相同, 只有同类型才可以普通转舍
@@ -116,26 +114,26 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     }
 
     @Override
-    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        DoctorChgLocationDto chgLocationDto = (DoctorChgLocationDto) inputDto;
+    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
+        DoctorChgLocationDto chgLocationDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorChgLocationDto.class);
         DoctorBarn fromBarn = doctorBarnDao.findById(chgLocationDto.getChgLocationFromBarnId());
         DoctorBarn toBarn = doctorBarnDao.findById(chgLocationDto.getChgLocationToBarnId());
-        Map<String, Object> extraMap = doctorPigTrack.getExtraMap();
+        Map<String, Object> extraMap = toTrack.getExtraMap();
 
         // 来源和前往都是 1 和 7 时, 仔猪也要跟着转群
         if(PigType.FARROW_TYPES.contains(fromBarn.getPigType())
                 && PigType.FARROW_TYPES.contains(toBarn.getPigType())
-                && doctorPigTrack.getGroupId() != null){
-            Long groupId = pigletTrans(doctorEventInfoList, doctorPigTrack, basic, chgLocationDto, toBarn, doctorPigEvent.getId());
+                && toTrack.getGroupId() != null){
+            Long groupId = pigletTrans(doctorEventInfoList, executeEvent, toTrack, chgLocationDto, toBarn);
 
-            doctorPigTrack.setExtraMap(extraMap);
-            doctorPigTrack.setGroupId(groupId);  //更新猪群id
-            doctorPigTrackDao.update(doctorPigTrack);
+            toTrack.setExtraMap(extraMap);
+            toTrack.setGroupId(groupId);  //更新猪群id
+            doctorPigTrackDao.update(toTrack);
         }
     }
 
     //未断奶仔猪转群
-    private Long pigletTrans(List<DoctorEventInfo> eventInfoList, DoctorPigTrack pigTrack, DoctorBasicInputInfoDto basic, DoctorChgLocationDto chgLocationDto, DoctorBarn doctorToBarn, Long pigEventId) {
+    private Long pigletTrans(List<DoctorEventInfo> eventInfoList,DoctorPigEvent executeEvent, DoctorPigTrack pigTrack, DoctorChgLocationDto chgLocationDto, DoctorBarn doctorToBarn) {
         expectTrue(notNull(pigTrack.getGroupId()), "farrow.groupId.not.null", pigTrack.getPigId());
         //未断奶仔猪id
         DoctorTransGroupInput input = new DoctorTransGroupInput();
@@ -159,8 +157,8 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         expectTrue(notNull(groupTrack), "farrow.group.track.not.null", pigTrack.getGroupId());
         input.setEventAt(DateUtil.toDateString(chgLocationDto.eventAt()));
         input.setIsAuto(IsOrNot.YES.getValue());
-        input.setCreatorId(basic.getStaffId());
-        input.setCreatorName(basic.getStaffName());
+        input.setCreatorId(executeEvent.getOperatorId());
+        input.setCreatorName(executeEvent.getOperatorName());
         input.setBreedId(group.getBreedId());
         input.setBreedName(group.getBreedName());
         input.setSource(PigSource.LOCAL.getKey());
@@ -172,7 +170,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         input.setSowQty(input.getQuantity() - input.getBoarQty());
         input.setAvgWeight((MoreObjects.firstNonNull(pigTrack.getFarrowAvgWeight(), 0D)));
         input.setWeight(input.getAvgWeight() * input.getQuantity());
-        input.setRelPigEventId(pigEventId);
+        input.setRelPigEventId(executeEvent.getId());
 
         transGroupEventHandler.handle(eventInfoList, group, groupTrack, input);
         if (Objects.equals(input.getIsCreateGroup(), IsOrNot.YES.getValue())) {

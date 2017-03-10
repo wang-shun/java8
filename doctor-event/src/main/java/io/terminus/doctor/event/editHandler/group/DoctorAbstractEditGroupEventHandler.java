@@ -1,10 +1,13 @@
 package io.terminus.doctor.event.editHandler.group;
 
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.editHandler.DoctorEditGroupEventHandler;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -30,6 +33,8 @@ public abstract class DoctorAbstractEditGroupEventHandler implements DoctorEditG
     private DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired
     private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    @Autowired
+    private DoctorGroupDao doctorGroupDao;
 
     @Override
     public DoctorGroupTrack handle(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
@@ -51,7 +56,13 @@ public abstract class DoctorAbstractEditGroupEventHandler implements DoctorEditG
         doctorGroupSnapshot.setGroupId(doctorGroupEvent.getGroupId());
         doctorGroupSnapshot.setFromEventId(preDoctorGroupEvent.getId());
         doctorGroupSnapshot.setToEventId(doctorGroupEvent.getId());
-        doctorGroupSnapshot.setToInfo(JSON_MAPPER.toJson(doctorGroupTrack));
+
+        DoctorGroupSnapShotInfo doctorGroupSnapShotInfo = new DoctorGroupSnapShotInfo();
+        DoctorGroup doctorGroup = doctorGroupDao.findById(doctorGroupEvent.getGroupId());
+        doctorGroupSnapShotInfo.setGroupEvent(doctorGroupEvent);
+        doctorGroupSnapShotInfo.setGroupTrack(doctorGroupTrack);
+        doctorGroupSnapShotInfo.setGroup(doctorGroup);
+        doctorGroupSnapshot.setToInfo(JSON_MAPPER.toJson(doctorGroupSnapShotInfo));
         doctorGroupSnapshotDao.create(doctorGroupSnapshot);
 
         return doctorGroupTrack;

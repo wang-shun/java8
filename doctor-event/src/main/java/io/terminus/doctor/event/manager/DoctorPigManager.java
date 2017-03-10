@@ -67,10 +67,10 @@ public class DoctorPigManager {
 
         List<DoctorPigSnapshot> snapshots = doctorPigSnapshotDao.findByPigId(pigId);
         snapshots.forEach(snapshot -> {
-            DoctorPigSnapShotInfo info = MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
+            DoctorPigSnapShotInfo info = MAPPER.fromJson(snapshot.getToPigInfo(), DoctorPigSnapShotInfo.class);
             info.getPig().setPigCode(pigCode);
-            info.getPigEvent().setPigCode(pigCode);
-            snapshot.setPigInfo(MAPPER.toJson(info));
+            //info.getPigEvent().setPigCode(pigCode);
+            snapshot.setToPigInfo(MAPPER.toJson(info));
             doctorPigSnapshotDao.update(snapshot);
         });
 

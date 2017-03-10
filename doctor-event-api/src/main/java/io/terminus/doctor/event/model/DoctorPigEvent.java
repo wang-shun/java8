@@ -274,6 +274,12 @@ public class DoctorPigEvent implements Serializable {
 
     private String outId;
 
+    /**
+     * 事件状态
+     * @see io.terminus.doctor.event.enums.EventStatus
+     */
+    private Integer status;
+
     @Setter(AccessLevel.NONE)
     private Map<String, Object> extraMap;
 

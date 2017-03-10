@@ -48,9 +48,9 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     private DoctorBarnDao doctorBarnDao;
 
     @Override
-    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-        super.handleCheck(eventDto, basic);
-        DoctorWeanDto weanDto = (DoctorWeanDto) eventDto;
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        DoctorWeanDto weanDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorWeanDto.class);
         expectTrue(MoreObjects.firstNonNull(weanDto.getQualifiedCount(), 0) + MoreObjects.firstNonNull(weanDto.getNotQualifiedCount(), 0) <= weanDto.getFarrowingLiveCount(), "qualified.add.noQualified.over.live", weanDto.getPigCode());
         if (Objects.equals(weanDto.getFarrowingLiveCount(), 0) && !Objects.equals(weanDto.getPartWeanAvgWeight(), 0d)) {
             throw new InvalidException("wean.avg.weight.not.zero", weanDto.getPigCode());
@@ -61,7 +61,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorWeanDto weanDto = (DoctorWeanDto) inputDto;
         DoctorPigEvent lastFarrow = doctorPigEventDao.queryLastFarrowing(weanDto.getPigId());
@@ -95,48 +95,25 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        DoctorWeanDto partWeanDto = (DoctorWeanDto) inputDto;
-
-        if (Objects.equals(partWeanDto.getPartWeanPigletsCount(), partWeanDto.getFarrowingLiveCount()) && partWeanDto.getChgLocationToBarnId() != null) {
-            DoctorBarn doctorBarn = doctorBarnDao.findById(partWeanDto.getChgLocationToBarnId());
-            DoctorChgLocationDto chgLocationDto = DoctorChgLocationDto.builder()
-                    .changeLocationDate(partWeanDto.getPartWeanDate())
-                    .chgLocationFromBarnId(partWeanDto.getBarnId())
-                    .chgLocationFromBarnName(partWeanDto.getBarnName())
-                    .chgLocationToBarnId(partWeanDto.getChgLocationToBarnId())
-                    .chgLocationToBarnName(doctorBarn.getName())
-                    .build();
-            buildAutoEventCommonInfo(partWeanDto, chgLocationDto, basic, PigEvent.CHG_LOCATION, doctorPigEvent.getId());
-            chgLocationHandler.handle(doctorEventInfoList, chgLocationDto, basic);
-        }
-
-        updateGroupInfo(doctorPigEvent, basic.getWeanGroupId());
-    }
-
-    @Override
-    protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorWeanDto partWeanDto = (DoctorWeanDto) inputDto;
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(partWeanDto.getPigId());
-        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
 
         expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", PigStatus.from(doctorPigTrack.getStatus()).getName());
 
         //未断奶数
         Integer unweanCount = doctorPigTrack.getUnweanQty();    //未断奶数量
         Integer weanCount = doctorPigTrack.getWeanQty();        //断奶数量
-        Integer toWeanCount = partWeanDto.getPartWeanPigletsCount();
+        Integer toWeanCount = inputEvent.getWeanCount();
         expectTrue(Objects.equals(toWeanCount,unweanCount), "need.all.wean", toWeanCount, unweanCount);
         doctorPigTrack.setUnweanQty(unweanCount - toWeanCount); //未断奶数减
         doctorPigTrack.setWeanQty(weanCount + toWeanCount);     //断奶数加
 
         //断奶均重
-        Double toWeanAvgWeight = partWeanDto.getPartWeanAvgWeight();
+        Double toWeanAvgWeight = inputEvent.getWeanAvgWeight();
         Double weanAvgWeight = ((MoreObjects.firstNonNull(doctorPigTrack.getWeanAvgWeight(), 0D) * weanCount) + toWeanAvgWeight * toWeanCount ) / (weanCount + toWeanCount);
         doctorPigTrack.setWeanAvgWeight(weanAvgWeight);
 
         //设置下此时的猪群id，下面肯能会把它刷掉
-        basic.setWeanGroupId(doctorPigTrack.getGroupId());
+        //basic.setWeanGroupId(doctorPigTrack.getGroupId());
 
         //全部断奶后, 初始化所有本次哺乳的信息
         if (doctorPigTrack.getUnweanQty() == 0) {
@@ -149,7 +126,37 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         return doctorPigTrack;
     }
 
-    private void updateGroupInfo(DoctorPigEvent doctorPigEvent, Long farrowGroupId) {
+    @Override
+    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack) {
+        DoctorWeanDto partWeanDto = JSON_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorWeanDto.class);
+        //触发转舍事件
+        if (Objects.equals(partWeanDto.getPartWeanPigletsCount(), partWeanDto.getFarrowingLiveCount()) && partWeanDto.getChgLocationToBarnId() != null) {
+            DoctorBarn doctorBarn = doctorBarnDao.findById(partWeanDto.getChgLocationToBarnId());
+            DoctorChgLocationDto chgLocationDto = DoctorChgLocationDto.builder()
+                    .changeLocationDate(partWeanDto.getPartWeanDate())
+                    .chgLocationFromBarnId(partWeanDto.getBarnId())
+                    .chgLocationFromBarnName(partWeanDto.getBarnName())
+                    .chgLocationToBarnId(partWeanDto.getChgLocationToBarnId())
+                    .chgLocationToBarnName(doctorBarn.getName())
+                    .build();
+            buildAutoEventCommonInfo(partWeanDto, chgLocationDto, PigEvent.CHG_LOCATION, doctorPigEvent.getId());
+            //构建basic
+            DoctorBasicInputInfoDto basic = DoctorBasicInputInfoDto.builder()
+                    .orgId(doctorPigEvent.getOrgId())
+                    .orgName(doctorPigEvent.getOrgName())
+                    .farmId(doctorPigEvent.getFarmId())
+                    .farmName(doctorPigEvent.getFarmName())
+                    .staffId(doctorPigEvent.getOperatorId())
+                    .staffName(doctorPigEvent.getOperatorName())
+                    .build();
+            chgLocationHandler.handle(doctorEventInfoList, buildPigEvent(basic, chgLocationDto), doctorPigTrack);
+        }
+        //更新猪群信息
+        updateGroupInfo(doctorPigEvent);
+    }
+
+    private void updateGroupInfo(DoctorPigEvent doctorPigEvent) {
+        Long farrowGroupId = doctorPigEvent.getGroupId();
         log.info("updateGroupInfo farrow group track, groupId:{}, event:{}", farrowGroupId, doctorPigEvent);
 
         //触发一下修改猪群的事件

@@ -18,6 +18,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.event.DoctorGroupEventListener;
@@ -125,6 +126,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setRemark(baseInput.getRemark());
         event.setRelGroupEventId(baseInput.getRelGroupEventId());
         event.setRelPigEventId(baseInput.getRelPigEventId());
+        event.setStatus(EventStatus.VALID.getValue());
         return event;
     }
 

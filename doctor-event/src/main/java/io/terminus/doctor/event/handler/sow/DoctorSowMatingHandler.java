@@ -41,21 +41,16 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     public static final Integer MATING_PREG_DAYS = 114;
 
     @Override
-    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-        super.handleCheck(eventDto, basic);
-        DoctorMatingDto matingDto = (DoctorMatingDto) eventDto;
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(matingDto.getPigId());
-        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", eventDto.getPigId());
-        expectTrue(doctorPigTrack.getCurrentMatingCount() < 3, "mate.count.over", eventDto.getPigCode());
-        expectTrue(notNull(matingDto.getOperatorId()), "mating.operator.not.null", eventDto.getPigCode());
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        expectTrue(fromTrack.getCurrentMatingCount() < 3, "mate.count.over");
+        expectTrue(notNull(executeEvent.getOperatorId()), "mating.operator.not.null");
     }
 
     @Override
-    public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
         // validate extra 配种日期信息
-        DateTime matingDate = new DateTime(inputDto.eventAt());
+        DateTime matingDate = new DateTime(inputEvent.getEventAt());
         Map<String, Object> extra = doctorPigTrack.getExtraMap();
         if (doctorPigTrack.getCurrentMatingCount() == 0) {
             extra.put("judgePregDate", matingDate.plusDays(MATING_PREG_DAYS).toDate());
@@ -81,13 +76,12 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    public void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
+    public void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack) {
         doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
         doctorPigEvent.setCurrentMatingCount(doctorPigTrack.getCurrentMatingCount());
-        super.specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
+        super.specialHandle(doctorPigEvent, doctorPigTrack);
 
-        DoctorMatingDto matingDto = (DoctorMatingDto) inputDto;
-        Long boarId = matingDto.getMatingBoarPigId();
+        Long boarId = JSON_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorMatingDto.class).getMatingBoarPigId();
         DoctorPigTrack boarPigTrack = this.doctorPigTrackDao.findByPigId(boarId);
         expectTrue(notNull(boarPigTrack), "boar.track.not.null", boarId);
         Integer currentBoarParity = MoreObjects.firstNonNull(boarPigTrack.getCurrentParity(), 0) + 1;
@@ -97,7 +91,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorMatingDto matingDto = (DoctorMatingDto) inputDto;
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());

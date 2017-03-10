@@ -3,7 +3,6 @@ package io.terminus.doctor.event.handler.sow;
 import com.google.common.base.MoreObjects;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.sow.DoctorFosterByDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
@@ -40,18 +38,16 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
     private DoctorSowFostersByHandler doctorSowFostersByHandler;
 
     @Override
-    public void handleCheck(BasePigEventInputDto eventDto, DoctorBasicInputInfoDto basic) {
-        super.handleCheck(eventDto, basic);
-        DoctorFostersDto fostersDto = (DoctorFostersDto) eventDto;
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        DoctorFostersDto fostersDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFostersDto.class);
         expectTrue(!Objects.equals(fostersDto.getPigId(), fostersDto.getFosterSowId()), "not.foster.userself", fostersDto.getPigCode());
     }
 
     @Override
-    protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
-        DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
-        expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "foster.currentSowStatus.error", fostersDto.getPigCode());
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent inputEvent, DoctorPigTrack doctorPigTrack) {
+        DoctorFostersDto fostersDto = JSON_MAPPER.fromJson(inputEvent.getExtra(), DoctorFostersDto.class);
+        expectTrue(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "foster.currentSowStatus.error");
 
         //添加当前母猪的健崽猪的数量信息
         Integer unweanCount = MoreObjects.firstNonNull(doctorPigTrack.getUnweanQty(), 0);
@@ -68,8 +64,8 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
+    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack) {
+        DoctorFostersDto fostersDto = JSON_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorFostersDto.class);
         // TODO: 17/2/28 业务逻辑修改,全部拼窝不触发断奶,先注释掉
 //        //断奶事件
 //        if (doctorPigTrack.getUnweanQty() == 0) {
@@ -105,6 +101,16 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
         fosterByDto.setEventName(PigEvent.FOSTERS_BY.getName());
         fosterByDto.setEventType(PigEvent.FOSTERS_BY.getKey());
         fosterByDto.setEventDesc(PigEvent.FOSTERS_BY.getDesc());
-        doctorSowFostersByHandler.handle(doctorEventInfoList, fosterByDto, basic);
+
+        //构建basic
+        DoctorBasicInputInfoDto basic = DoctorBasicInputInfoDto.builder()
+                .orgId(doctorPigEvent.getOrgId())
+                .orgName(doctorPigEvent.getOrgName())
+                .farmId(doctorPigEvent.getFarmId())
+                .farmName(doctorPigEvent.getFarmName())
+                .staffId(doctorPigEvent.getOperatorId())
+                .staffName(doctorPigEvent.getOperatorName())
+                .build();
+        doctorSowFostersByHandler.handle(doctorEventInfoList, buildPigEvent(basic, fosterByDto), doctorPigTrack);
     }
 }

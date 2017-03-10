@@ -106,11 +106,11 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         DoctorPig doctorPig = doctorPigDao.findById(pigEvent.getPigId());
         DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
         JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-        DoctorPigSnapShotInfo info = jsonMapperUtil.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
+        DoctorPigSnapShotInfo info = jsonMapperUtil.fromJson(snapshot.getToPigInfo(), DoctorPigSnapShotInfo.class);
         doctorPigEventDao.delete(pigEvent.getId());
         doctorPigTrackDao.update(info.getPigTrack());
         doctorPigDao.update(info.getPig());
-        doctorPigSnapshotDao.delete(snapshot.getId());
+        doctorPigSnapshotDao.deleteByEventId(pigEvent.getId());
         createDoctorRevertLog(pigEvent, doctorPigTrack, doctorPig, operatorId, operatorName);
     }
 
@@ -131,7 +131,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
      */
     protected void createDoctorRevertLog(DoctorPigEvent fromPigEvent, DoctorPigTrack fromPigTrack, DoctorPig fromPig, Long operatorId, String operatorName) {
         DoctorPigSnapShotInfo fromInfo = DoctorPigSnapShotInfo.builder()
-                .pigEvent(fromPigEvent)
+                //.pigEvent(fromPigEvent)
                 .pigTrack(fromPigTrack)
                 .pig(fromPig)
                 .build();
@@ -140,7 +140,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         DoctorPigTrack toPigTrack = doctorPigTrackDao.findByPigId(fromPigEvent.getPigId());
         DoctorPig toPig = doctorPigDao.findById(fromPigEvent.getPigId());
         DoctorPigSnapShotInfo toInfo = DoctorPigSnapShotInfo.builder()
-                .pigEvent(toPigEvent)
+                //.pigEvent(toPigEvent)
                 .pigTrack(toPigTrack)
                 .pig(toPig)
                 .build();

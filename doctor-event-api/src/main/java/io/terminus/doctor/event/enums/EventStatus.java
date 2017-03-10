@@ -1,33 +1,31 @@
 package io.terminus.doctor.event.enums;
 
+import com.google.common.base.Objects;
 import lombok.Getter;
 
 /**
- * Created by IntelliJ IDEA.
- * Author: luoys
- * Date: 09:36 17/3/9
+ * Created by xjn on 17/3/9.
+ * 事件状态
  */
-
 public enum EventStatus {
-    NORMAL(1, "有效"),
-    HANDLING(0, "处理中"),
-    DISABLED(-1, "无效");
+    VALID(1, "有效"),
+    HANDLING(0, "正在处理"),
+    INVALID(-1, "无效");
 
     @Getter
-    private Integer key;
-
+    private Integer value;
     @Getter
     private String desc;
 
-    EventStatus(Integer key, String desc){
-        this.key = key;
+    EventStatus(Integer value, String desc){
+        this.value = value;
         this.desc = desc;
     }
 
-    public static EventStatus from(Integer key){
-        for(EventStatus eventStatus: EventStatus.values()){
-            if(eventStatus.getKey() == key){
-                return eventStatus;
+    public static EventStatus from(Integer value) {
+        for (EventStatus es : EventStatus.values()) {
+            if (Objects.equal(value, es.getValue())) {
+                return es;
             }
         }
         return null;

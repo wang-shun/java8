@@ -37,7 +37,7 @@ public class DoctorEditGroupEventManager {
     @Transactional
     public Boolean updateOldDoctorGroupEvents(List<DoctorGroupEvent> doctorGroupEventList){
         List<Long> ids = doctorGroupEventList.stream().map(DoctorGroupEvent::getId).collect(Collectors.toList());
-        return doctorGroupEventDao.updateGroupEventStatus(ids, EventStatus.HANDLING.getKey());
+        return doctorGroupEventDao.updateGroupEventStatus(ids, EventStatus.HANDLING.getValue());
     }
 
     @Transactional
