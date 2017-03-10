@@ -37,6 +37,7 @@
         <result column="rel_group_event_id" property="relGroupEventId"/>
         <result column="rel_pig_event_id" property="relPigEventId"/>
         <result column="out_id" property="outId"/>
+        <result column="status" property="status"/>
         <result column="remark" property="remark"/>
         <result column="extra" property="extra"/>
         <result column="created_at" property="createdAt"/>
@@ -86,6 +87,7 @@
         rel_group_event_id,
         rel_pig_event_id,
         out_id,
+        status,
         remark,
         extra,
         created_at,
@@ -127,6 +129,7 @@
         #{relGroupEventId},
         #{relPigEventId},
         #{outId},
+        #{status},
         #{remark},
         #{extra},
         now(),
@@ -200,7 +203,7 @@
     </select>
 
     <select id="countByBarnId" parameterType="long" resultType="long">
-        select count(id) from <include refid="tb" /> where `barn_id` = #{barnId}
+        select count(id) from <include refid="tb" /> where status = 1 AND `barn_id` = #{barnId}
     </select>
 
     <update id="update" parameterType="DoctorGroupEvent">
@@ -236,6 +239,7 @@
             <if test="relGroupEventId != null">rel_group_event_id = #{relGroupEventId},</if>
             <if test="relPigEventId != null">rel_pig_event_id = #{relPigEventId},</if>
             <if test="outId != null">out_id = #{outId},</if>
+            <if test="status != null">status = #{status},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="creatorId != null">creator_id = #{creatorId},</if>
@@ -272,16 +276,14 @@
 
     <select id="count" parameterType="map" resultType="long">
         SELECT count(1) from <include refid="tb"/>
-        <where>
-            <include refid="criteria"/>
-        </where>
+        where status = 1
+        <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorGroupEventMap">
         SELECT <include refid="cols_all"/> from <include refid="tb"/>
-        <where>
-            <include refid="criteria"/>
-        </where>
+        where status = 1
+        <include refid="criteria"/>
         ORDER BY event_at DESC, id DESC
         LIMIT #{offset}, #{limit}
     </select>
@@ -291,9 +293,8 @@
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        <where>
-            <include refid="criteria"/>
-        </where>
+        where status = 1
+        <include refid="criteria"/>
     </select>
 
     <select id="findGroupEventsByEventTypeAndDate" parameterType="map" resultMap="DoctorGroupEventMap">
@@ -359,7 +360,7 @@
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        where 1 = 1
+        where status = 1
         <if test="beginDate != null">
             <![CDATA[ and event_at >= #{beginDate} ]]>
         </if>
@@ -372,27 +373,31 @@
     <select id="findLastEventByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE group_id = #{groupId}
+        WHERE status = 1
+        AND group_id = #{groupId}
         ORDER BY event_at DESC, id DESC limit 1
     </select>
 
     <select id="findLastManualEventByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE group_id = #{groupId} AND is_auto = 0
+        WHERE status = 1
+        AND group_id = #{groupId} AND is_auto = 0
         ORDER BY event_at DESC, id DESC limit 1
     </select>
 
     <select id="findByRelGroupEventId" parameterType="long" resultMap="DoctorGroupEventMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE rel_group_event_id = #{relGroupEventId}
+        WHERE status = 1
+        AND rel_group_event_id = #{relGroupEventId}
     </select>
 
     <select id="findByRelPigEventId" parameterType="long" resultMap="DoctorGroupEventMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE rel_pig_event_id = #{relPigEventId}
+        WHERE status = 1
+        AND rel_pig_event_id = #{relPigEventId}
     </select>
 
     <select id="canRollbackEvent" parameterType="map" resultMap="DoctorGroupEventMap">
@@ -400,9 +405,8 @@
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        <where>
-            <include refid="criteria"/>
-        </where>
+        where status = 1
+        <include refid="criteria"/>
         order by event_at desc ,id DESC limit 1;
     </select>
 
@@ -410,7 +414,8 @@
         SELECT distinct creator_name AS operatorName,  creator_id AS operatorId
         FROM
         <include refid="tb"/>
-        WHERE creator_id IS NOT NULL
+        WHERE status = 1
+        AND creator_id IS NOT NULL
         <if test="types != null &amp;&amp; types.size() > 0">
             AND `type` IN
             <foreach collection="types" item="i" open="(" close=")" separator=",">
@@ -425,7 +430,8 @@
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        WHERE group_id = #{groupId}
+        WHERE status = 1
+        AND group_id = #{groupId}
         AND `type` = #{type}
         ORDER BY event_at DESC, id DESC limit 1
     </select>
@@ -435,7 +441,27 @@
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        WHERE group_id = #{groupId}
+        WHERE status = 1
+        AND group_id = #{groupId}
         ORDER BY event_at ASC , id ASC limit 1
     </select>
+
+    <select id="findLinkedGroupEventsByGroupId" parameterType="long" resultMap="DoctorGroupEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE status = 1
+        AND group_id = #{groupId}
+        ORDER BY id asc
+    </select>
+
+    <update id="updateGroupEventStatus" parameterType="map">
+        UPDATE <include refid="tb"/>
+        SET status = #{status}
+        WHERE id in
+            <foreach collection="ids" item="id" separator="," open="(" close=")">
+                #{id}
+            </foreach>
+    </update>
 </mapper>

@@ -4,6 +4,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
+import io.terminus.doctor.event.editHandler.DoctorEditGroupEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorEditGroupEventHandlers;
+import io.terminus.doctor.event.editHandler.group.DoctorEditMoveInGroupEventHandler;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
@@ -203,6 +207,16 @@ public class  DoctorEventConfiguration {
         doctorEventHandlers.setEventHandlerMap(eventHandlerMap);
         return doctorEventHandlers;
     }
+
+    @Bean
+    public DoctorEditGroupEventHandlers doctorEditGroupHandlers(DoctorEditMoveInGroupEventHandler doctorEditMoveInGroupEventHandler){
+        Map<Integer, DoctorEditGroupEventHandler> handlerMap = Maps.newHashMap();
+        handlerMap.put(GroupEventType.MOVE_IN.getValue(), doctorEditMoveInGroupEventHandler);
+        DoctorEditGroupEventHandlers doctorEditGroupEventHandlers = new DoctorEditGroupEventHandlers();
+        doctorEditGroupEventHandlers.setEventHandlerMap(handlerMap);
+        return doctorEditGroupEventHandlers;
+    }
+
 
     @Configuration
     public static class ZookeeperConfiguration{

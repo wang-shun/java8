@@ -18,6 +18,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.event.DoctorGroupEventListener;
@@ -125,6 +126,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setRemark(baseInput.getRemark());
         event.setRelGroupEventId(baseInput.getRelGroupEventId());
         event.setRelPigEventId(baseInput.getRelPigEventId());
+        event.setStatus(EventStatus.VALID.getValue());
         return event;
     }
 
@@ -159,19 +161,10 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     //创建猪群镜像信息
     protected DoctorGroupSnapshot createGroupSnapShot(DoctorGroupSnapShotInfo oldShot, DoctorGroupSnapShotInfo newShot, GroupEventType eventType) {
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-        groupSnapshot.setEventType(eventType.getValue());  //猪群事件类型
 
         //录入前的数据
-        groupSnapshot.setFromGroupId(oldShot.getGroup().getId());
+        groupSnapshot.setGroupId(newShot.getGroup().getId());
         groupSnapshot.setFromEventId(oldShot.getGroupEvent().getId());
-        groupSnapshot.setFromInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
-                .group(oldShot.getGroup())
-                .groupEvent(oldShot.getGroupEvent())
-                .groupTrack(oldShot.getGroupTrack())
-                .build()));
-
-        //录入后的数据
-        groupSnapshot.setToGroupId(newShot.getGroup().getId());
         groupSnapshot.setToEventId(newShot.getGroupEvent().getId());
         groupSnapshot.setToInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
                 .group(newShot.getGroup())

@@ -64,10 +64,11 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
         event.setExtraMap(antiEvent);
         doctorGroupEventDao.create(event);
 
-        //3.更新猪群跟踪
-        updateGroupTrack(groupTrack, event);
-
-        //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.ANTIEPIDEMIC);
+        //防疫事件不影响track,不创建snapshot
+//        //3.更新猪群跟踪
+//        updateGroupTrack(groupTrack, event);
+//
+//        //4.创建镜像
+//        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.ANTIEPIDEMIC);
     }
 }

@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -67,6 +68,15 @@ public class DoctorMoveInGroupEvent extends BaseGroupEvent implements Serializab
     private Long sowPigId;
 
     /**
+     * 母猪code
+     */
+    private String sowCode;
+
+    /**
+     * 转入数量
+     */
+    private Integer quantity;
+    /**
      * 母猪胎次
      */
     private Integer sowParity;
@@ -76,9 +86,33 @@ public class DoctorMoveInGroupEvent extends BaseGroupEvent implements Serializab
     private Integer sowQty;
 
     /**
+     * 平均日龄
+     */
+    @NotNull(message = "avgDayAge.not.null")
+    private Integer avgDayAge;
+
+    /**
+     * 平均体重(单位:kg)
+     */
+    @NotNull(message = "avgWeight.not.null")
+    private Double avgWeight;
+
+    /**
      * 金额(分)
      */
     private Long amount;
+
+
+
+    /**
+     * 健仔数
+     */
+    private Integer healthyQty;
+
+    /**
+     * 弱仔数
+     */
+    private Integer weakQty;
 
     public enum InType {
         PIGLET(1, "仔猪转入"),

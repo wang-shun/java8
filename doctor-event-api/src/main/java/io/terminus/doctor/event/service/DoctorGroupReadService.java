@@ -235,4 +235,11 @@ public interface DoctorGroupReadService {
      * @return 新建猪群事件
      */
     Response<DoctorGroupEvent> findInitGroupEvent(@NotNull(message = "groupId.not.null") Long groupId);
+
+    /**
+     * 获取猪群的所有事件,按发生日期排序
+     * @param groupId
+     * @return
+     */
+    Response<List<DoctorGroupEvent>> findLinkedGroupEventsByGroupId(@NotNull(message = "groupId.not.null") Long groupId);
 }

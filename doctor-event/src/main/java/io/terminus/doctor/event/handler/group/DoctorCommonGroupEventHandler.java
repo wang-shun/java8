@@ -252,6 +252,7 @@ public class DoctorCommonGroupEventHandler {
         farmEntryDto.setMotherCode(input.getMotherEarCode());
         farmEntryDto.setEarCode(input.getEarCode());
         farmEntryDto.setWeight(input.getWeight());
+
         DoctorPigEvent pigEvent = doctorEntryHandler.buildPigEvent(basicDto, farmEntryDto);
         doctorEntryHandler.handleCheck(pigEvent, null);
         doctorEntryHandler.handle(eventInfoList, doctorEntryHandler.buildPigEvent(basicDto, farmEntryDto), null);

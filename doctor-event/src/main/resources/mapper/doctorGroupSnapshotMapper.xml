@@ -7,12 +7,9 @@
 <mapper namespace="DoctorGroupSnapshot">
     <resultMap id="DoctorGroupSnapshotMap" type="DoctorGroupSnapshot">
         <id column="id" property="id"/>
-        <result column="event_type" property="eventType"/>
-        <result column="from_group_id" property="fromGroupId"/>
-        <result column="to_group_id" property="toGroupId"/>
+        <result column="group_id" property="groupId"/>
         <result column="from_event_id" property="fromEventId"/>
         <result column="to_event_id" property="toEventId"/>
-        <result column="from_info" property="fromInfo"/>
         <result column="to_info" property="toInfo"/>
         <result column="created_at" property="createdAt"/>
         
@@ -27,11 +24,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        event_type, from_group_id, to_group_id, from_event_id, to_event_id, from_info, to_info, created_at
+        group_id, from_event_id, to_event_id, to_info, created_at
     </sql>
 
     <sql id="vals">
-        #{eventType}, #{fromGroupId}, #{toGroupId}, #{fromEventId}, #{toEventId}, #{fromInfo}, #{toInfo}, now()
+        #{groupId}, #{fromEventId}, #{toEventId}, #{toInfo}, now()
     </sql>
 
     <insert id="create" parameterType="DoctorGroupSnapshot" keyProperty="id" useGeneratedKeys="true">
@@ -52,12 +49,9 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="eventType != null">event_type = #{eventType},</if>
-            <if test="fromGroupId != null">from_group_id = #{fromGroupId},</if>
-            <if test="toGroupId != null">to_group_id = #{toGroupId},</if>
+            <if test="groupId != null">group_id = #{groupId},</if>
             <if test="fromEventId != null">from_event_id = #{fromEventId},</if>
             <if test="toEventId != null">to_event_id = #{toEventId},</if>
-            <if test="fromInfo != null">from_info = #{fromInfo},</if>
             <if test="toInfo != null">to_info = #{toInfo},</if>
         </set>
         WHERE id = #{id}

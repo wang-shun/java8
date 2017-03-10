@@ -184,6 +184,12 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
     private String outId;
 
     /**
+     * 状态
+     * @see
+     */
+    private Integer status;
+
+    /**
      * 备注
      */
     private String remark;

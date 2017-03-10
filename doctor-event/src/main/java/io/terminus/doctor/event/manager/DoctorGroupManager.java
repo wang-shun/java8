@@ -20,6 +20,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInputInfo;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
@@ -128,8 +129,8 @@ public class DoctorGroupManager {
 
         //4. 创建猪群镜像
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-        groupSnapshot.setEventType(GroupEventType.NEW.getValue());  //猪群事件类型
-        groupSnapshot.setToGroupId(group.getId());
+        groupSnapshot.setGroupId(groupEvent.getGroupId());
+        groupSnapshot.setFromEventId(0L);
         groupSnapshot.setToEventId(groupEvent.getId());
         groupSnapshot.setToInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
                 .group(group)
@@ -239,6 +240,7 @@ public class DoctorGroupManager {
         DoctorNewGroupEvent newGroupEvent = new DoctorNewGroupEvent();
         newGroupEvent.setSource(newGroupInput.getSource());
         groupEvent.setExtraMap(newGroupEvent);
+        groupEvent.setStatus(EventStatus.VALID.getValue());
         return groupEvent;
     }
 

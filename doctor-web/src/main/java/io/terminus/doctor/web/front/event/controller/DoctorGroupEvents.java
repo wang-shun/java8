@@ -16,6 +16,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -23,6 +24,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorEditGroupEventService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -69,6 +71,9 @@ public class DoctorGroupEvents {
     private final TransFromUtil transFromUtil;
 
     @RpcConsumer
+    private DoctorEditGroupEventService doctorEditGroupEventService;
+
+    @RpcConsumer
     private DoctorPigReadService doctorPigReadService;
 
     @Autowired
@@ -76,7 +81,8 @@ public class DoctorGroupEvents {
                              DoctorGroupReadService doctorGroupReadService,
                              DoctorFarmAuthCenter doctorFarmAuthCenter,
                              DoctorGroupWriteService doctorGroupWriteService,
-                             DoctorBasicReadService doctorBasicReadService, TransFromUtil transFromUtil) {
+                             DoctorBasicReadService doctorBasicReadService, TransFromUtil transFromUtil
+                             ) {
         this.doctorGroupWebService = doctorGroupWebService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorFarmAuthCenter = doctorFarmAuthCenter;
@@ -421,5 +427,20 @@ public class DoctorGroupEvents {
             return Boolean.FALSE;
         }
 
+    }
+
+
+    @RequestMapping(value="/edit", method = RequestMethod.GET)
+    public Boolean editGroupEvent(@RequestParam Long id){
+        DoctorGroupEvent doctorGroupEvent = RespHelper.or500(doctorGroupReadService.findGroupEventById(id));
+        doctorGroupEvent.setQuantity(doctorGroupEvent.getQuantity() + 2);
+        doctorGroupEvent.setWeight(doctorGroupEvent.getWeight() + 10);
+        doctorGroupEvent.setAvgWeight(doctorGroupEvent.getWeight()/doctorGroupEvent.getQuantity());
+        DoctorMoveInGroupEvent doctorMoveInGroupEvent = JsonMapper.nonEmptyMapper().fromJson(doctorGroupEvent.getExtra(), DoctorMoveInGroupEvent.class);
+        doctorMoveInGroupEvent.setQuantity(doctorGroupEvent.getQuantity());
+        doctorMoveInGroupEvent.setHealthyQty(doctorMoveInGroupEvent.getHealthyQty() + 2);
+        doctorMoveInGroupEvent.setAvgWeight(doctorGroupEvent.getAvgWeight());
+        doctorEditGroupEventService.elicitDoctorGroupTrack(doctorGroupEvent);
+        return true;
     }
 }

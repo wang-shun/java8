@@ -16,21 +16,11 @@ public class DoctorGroupSnapshot implements Serializable {
     private static final long serialVersionUID = -6267365953172609599L;
 
     private Long id;
-    
-    /**
-     * 猪群事件类型
-     */
-    private Integer eventType;
-    
+
     /**
      * 操作前的猪群id
      */
-    private Long fromGroupId;
-    
-    /**
-     * 操作后的猪群id
-     */
-    private Long toGroupId;
+    private Long groupId;
     
     /**
      * 操作前的事件id
@@ -41,12 +31,8 @@ public class DoctorGroupSnapshot implements Serializable {
      * 操作后的事件id
      */
     private Long toEventId;
-    
-    /**
-     * 操作前的信息
-     */
-    private String fromInfo;
-    
+
+
     /**
      * 操作后的信息
      */
