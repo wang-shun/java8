@@ -151,7 +151,7 @@ public class DoctorGroupEvents {
      * @return
      */
     @RequestMapping(value = "/createGroupModifyRequest", method = RequestMethod.POST)
-    public Boolean createGroupModifyEventRequest(@RequestParam("groupId") Long groupId,
+    public Long createGroupModifyEventRequest(@RequestParam("groupId") Long groupId,
                                                  @RequestParam("eventType") Integer eventType,
                                                  @RequestParam("eventId") Long eventId,
                                                  @RequestParam("data") String data) {
