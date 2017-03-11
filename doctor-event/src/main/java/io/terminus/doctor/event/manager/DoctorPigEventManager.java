@@ -55,6 +55,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
 
 /**
  * Created by yaoqijun.
@@ -109,6 +110,17 @@ public class DoctorPigEventManager {
         return doctorEventInfoList;
     }
 
+    /**
+     * 构建编辑事件
+     * @param basic 基础数据
+     * @param inputDto 输入事件
+     * @return 编辑事件
+     */
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
+        return handler.buildPigEvent(basic, inputDto);
+    }
+
     public void modifyPigEventRequestHandle(DoctorEventModifyRequest modifyRequest) {
         log.info("modify pig event handle starting, modifyRequest:{}", modifyRequest);
         try {
@@ -129,13 +141,16 @@ public class DoctorPigEventManager {
         eventModifyRequestDao.update(modifyRequest);
         log.info("modify pig event handle ending");
     }
+
     /**
      * 事件编辑处理
      * @param modifyEvent 编辑事件
      */
     public void modifyPigEventHandle(DoctorPigEvent modifyEvent) {
         //事件能否编辑初步校验
-        canModify(modifyEvent);
+        if (!canModify(modifyEvent)) {
+            throw new ServiceException("event.not.allow.modify");
+        }
 
         List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
         List<Long> pigOldEventIdList = Lists.newLinkedList();
@@ -167,15 +182,15 @@ public class DoctorPigEventManager {
 
     }
 
-
     /**
      * 事件能否编辑初步校验
      * @param modifyEvent 编辑事件
      * @return 能否编辑
      */
     private Boolean canModify(DoctorPigEvent modifyEvent) {
-        return Objects.equals(modifyEvent.getType(), DoctorEventModifyRequest.TYPE.PIG.getValue())
+        return Objects.equals(modifyEvent.getKind(), DoctorEventModifyRequest.TYPE.PIG.getValue())
                 && !NOT_MODIFY_EVENT.contains(modifyEvent.getType())
+                && Objects.equals(modifyEvent.getStatus(), EventStatus.VALID.getValue())
                 && Objects.equals(modifyEvent.getIsAuto(), IsOrNot.NO.getValue());
     }
 
@@ -188,29 +203,35 @@ public class DoctorPigEventManager {
     private void modifyPigEventHandle (DoctorPigEvent modifyEvent, List<DoctorEventInfo> doctorEventInfoList, List<Long> oldEventIdList) {
         modifyEvent.setIsModify(IsOrNot.YES.getValue());
         modifyEvent.setStatus(EventStatus.VALID.getValue());
-        oldEventIdList.add(modifyEvent.getId());
+        //原事件id
+        Long oldEventId = modifyEvent.getId();
+        oldEventIdList.add(oldEventId);
+
+        //获取后续事件
+        List<DoctorPigEvent> followEventList = doctorPigEventDao.findFollowEvents(modifyEvent.getPigId(), oldEventId)
+                .stream().filter(doctorPigEvent -> !IGNORE_EVENT.contains(doctorPigEvent.getType())).collect(Collectors.toList());
+        //将原事件状态置为无效
+        oldEventIdList.addAll(followEventList.stream().map(DoctorPigEvent::getId).collect(Collectors.toList()));
+        doctorPigEventDao.updateEventsStatus(oldEventIdList, EventStatus.INVALID.getValue());
 
 //        //获取修改后事件
 //        DoctorPigEvent newModifyEvent = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(modifyRequest.getContent(), DoctorPigEvent.class);
 
         //获取修改前猪track
-        DoctorPigTrack fromTrack = null;
+        DoctorPigSnapshot lastPigSnapshot;
         if (!Objects.equals(modifyEvent.getType(), PigEvent.ENTRY.getKey())) {
-            DoctorPigSnapshot lastPigSnapshot = doctorPigSnapshotDao.queryByEventId(modifyEvent.getId());
-            fromTrack = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(lastPigSnapshot.getToPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack();
+            lastPigSnapshot = doctorPigSnapshotDao.queryByEventId(oldEventId);
+        } else {
+            lastPigSnapshot = doctorPigSnapshotDao.findByToEventId(oldEventId);
         }
+        DoctorPigTrack fromTrack = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(lastPigSnapshot.getToPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack();
 
         //获取事件处理器
         DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(modifyEvent.getType());
-
+        //事件校验
+        handler.handleCheck(modifyEvent, fromTrack);
         //处理事件
         handler.handle(doctorEventInfoList, modifyEvent, fromTrack);
-
-        //获取事件处理
-        List<DoctorPigEvent> followEventList = doctorPigEventDao.findFollowEvents(modifyEvent.getPigId(), modifyEvent.getId());
-        //将原事件状态置为无效
-        oldEventIdList.addAll(followEventList.stream().map(DoctorPigEvent::getId).collect(Collectors.toList()));
-        doctorPigEventDao.updateEventsStatus(oldEventIdList, EventStatus.INVALID.getValue());
 
         if (followEventList.isEmpty()) {
             return;

@@ -1,6 +1,9 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 
 /**
@@ -15,4 +18,24 @@ public interface DoctorEventModifyRequestWriteService {
      * @return 是否编辑成功
      */
     Response<Boolean> createRequest(DoctorEventModifyRequest modifyRequest);
+
+    /**
+     * 创建猪事件编辑的请求
+     * @param basic 基础输入
+     * @param inputDto 事件输入
+     * @param eventId 编辑事件id
+     * @param userId 编辑人id
+     * @param realName 编辑人真实姓名
+     * @return
+     */
+    Response<Boolean> createPigModifyEventRequest(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto, Long eventId, Long userId, String realName);
+
+    /**
+     * 创建猪群事件编辑的请求
+     * @param eventId 编辑事件id
+     * @param userId 编辑人id
+     * @param realName 编辑人真实姓名
+     * @return
+     */
+    Response<Boolean> createGroupModifyEventRequest(DoctorGroupInputInfo inputInfo, Long eventId, Integer eventType, Long userId, String realName);
 }

@@ -35,9 +35,10 @@ import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.*;
-
+import javax.validation.Valid;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.enums.PigType.*;
@@ -75,6 +76,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorBarnDao = doctorBarnDao;
+    }
+
+    @Override
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, @Valid I input) {
+        return null;
     }
 
     @Override

@@ -42,6 +42,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -55,6 +56,7 @@ import io.terminus.doctor.web.front.event.dto.DoctorBatchGroupEventDto;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchNewGroupEventDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +103,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private PrimaryUserReadService primaryUserReadService;
     @RpcConsumer
     private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
+    @RpcConsumer
+    private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
 
     @Autowired
     public DoctorGroupWebServiceImpl(DoctorGroupWriteService doctorGroupWriteService,
@@ -336,7 +340,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                             DoctorGroupInputInfo groupInputInfo = buildGroupEventInputInfo(inputInfo.getGroupId(), batchGroupEventDto.getEventType(), inputInfo.getInputJson());
                             return doctorValidService.valid(groupInputInfo, groupInputInfo.getGroupDetail().getGroup().getGroupCode());
                         } catch (InvalidException e) {
-                            throw new InvalidException(true, e.getError(),groupCode, e.getParams());
+                            throw new InvalidException(true, e.getError(), groupCode, e.getParams());
                         } catch (ServiceException e) {
                             throw new InvalidException(true, e.getMessage(), groupCode);
                         }
@@ -351,6 +355,44 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
             log.error("batch group event failed, batchGroupEventDto:{}, cause:{}", batchGroupEventDto, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail("group.event.create.fail");
+        }
+    }
+
+    @Override
+    public RespWithEx<Boolean> createGroupModifyEventRequest(Long groupId, Integer eventType, Long eventId, String data) {
+        try {
+            String groupCode = getGroupCode(groupId);
+            try {
+                DoctorGroupInputInfo groupInputInfo =  buildGroupEventInputInfo(groupId, eventType, data);
+                doctorValidService.valid(groupInputInfo, groupInputInfo.getGroupDetail().getGroup().getGroupCode());
+
+                //获取编辑人信息
+                User user = UserUtil.getCurrentUser();
+                if (isNull(user)) {
+                    throw new ServiceException("user.not.login");
+                }
+                //获取真实姓名
+                String userName = user.getName();
+                Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(user.getId());
+                if (userProfileResponse.isSuccess() && notNull(userProfileResponse.getResult())) {
+                    userName = userProfileResponse.getResult().getRealName();
+                }
+                doctorEventModifyRequestWriteService.createGroupModifyEventRequest(groupInputInfo, eventId, eventType, user.getId(), userName);
+                return RespWithEx.ok(Boolean.TRUE);
+            } catch (InvalidException e) {
+                throw new InvalidException(true, e.getError(), groupCode, e.getParams());
+            } catch (ServiceException e) {
+                throw new InvalidException(true, e.getMessage(), groupCode);
+            }
+        } catch (InvalidException e) {
+            log.error("batch group event failed, groupId:{}, eventType:{}, eventId:{}, data:{}, cause:{}", groupId, eventType, eventId, data, Throwables.getStackTraceAsString(e));
+            return RespWithEx.exception(e);
+        } catch (ServiceException e) {
+            log.error("batch group event failed, groupId:{}, eventType:{}, eventId:{}, data:{}, cause:{}", groupId, eventType, eventId, data, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("batch group event failed, groupId:{}, eventType:{}, eventId:{}, data:{}, cause:{}", groupId, eventType, eventId, data, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.event.create.fail");
         }
     }

@@ -143,6 +143,22 @@ public class DoctorGroupEvents {
     }
 
     /**
+     * 创建猪群编辑请求
+     * @param groupId 猪群id
+     * @param eventType 事件类型
+     * @param eventId 事件id
+     * @param data 输入数据
+     * @return
+     */
+    @RequestMapping(value = "/createGroupModifyRequest", method = RequestMethod.POST)
+    public Boolean createGroupModifyEventRequest(@RequestParam("groupId") Long groupId,
+                                                 @RequestParam("eventType") Integer eventType,
+                                                 @RequestParam("eventId") Long eventId,
+                                                 @RequestParam("data") String data) {
+        return RespWithExHelper.orInvalid(doctorGroupWebService.createGroupModifyEventRequest(groupId, eventType, eventId, data));
+    }
+
+    /**
      * 批量猪群事件
      * @param batchGroupEventDto 批量事件输入封装
      * @return 是否成功

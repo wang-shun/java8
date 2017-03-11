@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
@@ -53,15 +54,19 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.core.aspects.DoctorValidService;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchPigEventDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +86,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
@@ -121,6 +127,10 @@ public class DoctorPigCreateEvents {
     private DoctorBasicReadService doctorBasicReadService;
     @RpcConsumer
     private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
+    @RpcConsumer
+    private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
+    @RpcConsumer
+    private DoctorUserProfileReadService doctorUserProfileReadService;
 
     private static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
 
@@ -509,6 +519,40 @@ public class DoctorPigCreateEvents {
                 .content(JSON_NON_DEFAULT_MAPPER.toJson(modifyEvent))
                 .build();
         doctorPigEventWriteService.modifyPigEventHandle(modifyRequest);
+    }
+
+    /**
+     * 创建编辑事件请求
+     * @param farmId 猪场id
+     * @param eventId 事件id
+     * @param eventTye 事件类型
+     * @param pigSex 猪性别
+     * @param input 事件编辑内容
+     */
+    @RequestMapping(value = "/createPigModifyRequest", method = RequestMethod.POST)
+    public void createPigModifyRequest(@RequestParam Long farmId,
+                                    @RequestParam Long eventId,
+                                    @RequestParam Integer eventTye,
+                                    @RequestParam Integer pigSex,
+                                       @RequestParam String input) {
+        //构建事件所需信息
+        PigEvent pigEvent = PigEvent.from(eventTye);
+        DoctorBasicInputInfoDto basic = buildBasicInputInfoDto(farmId, pigEvent);
+        BasePigEventInputDto inputDto = eventInput(pigEvent, input, farmId, pigSex, null);
+
+        //获取编辑人信息
+        User user = UserUtil.getCurrentUser();
+        if (isNull(user)) {
+            throw new JsonResponseException("user.not.login");
+        }
+        //获取真实姓名
+        String userName = user.getName();
+        Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(user.getId());
+        if (userProfileResponse.isSuccess() && notNull(userProfileResponse.getResult())) {
+            userName = userProfileResponse.getResult().getRealName();
+        }
+
+        doctorEventModifyRequestWriteService.createPigModifyEventRequest(basic, inputDto, eventId, user.getId(), userName);
     }
 
     /**

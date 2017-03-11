@@ -18,6 +18,15 @@ import java.util.List;
 public interface DoctorGroupEventHandler {
 
     /**
+     * 构建猪群事件
+     * @param group         猪群
+     * @param groupTrack    猪群跟踪
+     * @param input         事件录入信息
+     * @param <I>           录入信息继承自 BaseGroupInput
+     */
+    <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, @Valid I input);
+
+    /**
      * 处理猪群事件的接口
      * @param eventInfoList 事件信息列表
      * @param group         猪群
