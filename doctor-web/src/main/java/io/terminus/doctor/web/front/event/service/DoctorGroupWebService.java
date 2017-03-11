@@ -71,5 +71,13 @@ public interface DoctorGroupWebService {
      */
     RespWithEx<Boolean> batchGroupEvent(DoctorBatchGroupEventDto batchGroupEventDto);
 
-
+    /**
+     * 创建猪群编辑事件请求
+     * @param groupId 猪群id
+     * @param eventType 事件类型
+     * @param eventId 事件id
+     * @param data 事件输入数据
+     * @return
+     */
+    RespWithEx<Boolean> createGroupModifyEventRequest(Long groupId, Integer eventType, Long eventId, String data);
 }

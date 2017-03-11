@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 
 import javax.validation.Valid;
@@ -15,6 +16,15 @@ import java.util.List;
  * Date: 16/6/18
  */
 public interface DoctorGroupEventHandler {
+
+    /**
+     * 构建猪群事件
+     * @param group         猪群
+     * @param groupTrack    猪群跟踪
+     * @param input         事件录入信息
+     * @param <I>           录入信息继承自 BaseGroupInput
+     */
+    <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, @Valid I input);
 
     /**
      * 处理猪群事件的接口

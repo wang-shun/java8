@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -75,6 +76,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorBarnDao = doctorBarnDao;
+    }
+
+    @Override
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, @Valid I input) {
+        return null;
     }
 
     @Override

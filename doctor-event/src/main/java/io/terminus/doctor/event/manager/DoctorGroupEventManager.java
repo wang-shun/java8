@@ -101,6 +101,18 @@ public class DoctorGroupEventManager {
     }
 
     /**
+     * 构建猪群事件
+     * @param inputInfo 输入信息
+     * @param eventType 事件类型
+     * @param <I>
+     * @return 猪群事件
+     */
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroupInputInfo inputInfo, Integer eventType) {
+        //暂时只有转入事件重写了此方法(为了编辑猪分娩)
+        return getHandler(eventType).buildGroupEvent(inputInfo.getGroupDetail().getGroup(), inputInfo.getGroupDetail().getGroupTrack(), inputInfo.getInput());
+    }
+
+    /**
      * 事务方式执行创建猪群事件
      * @param groupDetail  猪群明细
      * @param input        录入信息

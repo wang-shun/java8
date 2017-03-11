@@ -117,4 +117,10 @@
         FROM <include refid="tb"/>
         WHERE pig_id = #{pigId}
     </select>
+
+    <select id="findByToEventId" parameterType="long" resultMap="DoctorPigSnapshotMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE to_event_id = #{toEventId}
+    </select>
 </mapper>

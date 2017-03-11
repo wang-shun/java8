@@ -51,9 +51,43 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        DoctorGroupEvent event = buildGroupEvent(group, groupTrack, input);
+        doctorGroupEventDao.create(event);
         input.setEventType(GroupEventType.MOVE_IN.getValue());
+        DoctorMoveInGroupInput moveIn = (DoctorMoveInGroupInput) input;
 
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
+        //3.更新猪群跟踪
+        Integer oldQty = groupTrack.getQuantity();
+        groupTrack.setQuantity(EventUtil.plusInt(groupTrack.getQuantity(), moveIn.getQuantity()));
+        groupTrack.setBoarQty(EventUtil.plusInt(groupTrack.getBoarQty(), moveIn.getBoarQty()));
+        groupTrack.setSowQty(EventUtil.plusInt(groupTrack.getSowQty(), moveIn.getSowQty()));
+
+        //重新计算日龄, 按照事件录入日期计算
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()) + deltaDays);
+
+        //如果是母猪分娩转入或母猪转舍转入，窝数，分娩统计字段需要累加
+        if (moveIn.isSowEvent()) {
+            groupTrack.setNest(EventUtil.plusInt(groupTrack.getNest(), 1));  //窝数加 1
+            groupTrack.setLiveQty(EventUtil.plusInt(groupTrack.getLiveQty(), moveIn.getQuantity()));
+            groupTrack.setWeakQty(EventUtil.plusInt(groupTrack.getWeakQty(), moveIn.getWeakQty()));
+            groupTrack.setHealthyQty(groupTrack.getLiveQty() - groupTrack.getWeakQty());    //健仔数 = 活仔数 - 弱仔数
+            groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), moveIn.getQuantity()));    //分娩时，未断奶数累加
+            groupTrack.setBirthWeight(EventUtil.plusDouble(groupTrack.getBirthWeight(), moveIn.getAvgWeight() * moveIn.getQuantity()));
+        }
+        updateGroupTrack(groupTrack, event);
+
+        //4.创建镜像
+        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.MOVE_IN);
+
+        //发布统计事件
+        //publistGroupAndBarn(event);
+    }
+
+    @Override
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.MOVE_IN.getValue());
         DoctorMoveInGroupInput moveIn = (DoctorMoveInGroupInput) input;
 
         checkQuantityEqual(moveIn.getQuantity(), moveIn.getBoarQty(), moveIn.getSowQty());
@@ -86,33 +120,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
 
         event.setExtraMap(moveInEvent);
-        doctorGroupEventDao.create(event);
-
-        //3.更新猪群跟踪
-        Integer oldQty = groupTrack.getQuantity();
-        groupTrack.setQuantity(EventUtil.plusInt(groupTrack.getQuantity(), moveIn.getQuantity()));
-        groupTrack.setBoarQty(EventUtil.plusInt(groupTrack.getBoarQty(), moveIn.getBoarQty()));
-        groupTrack.setSowQty(EventUtil.plusInt(groupTrack.getSowQty(), moveIn.getSowQty()));
-
-        //重新计算日龄, 按照事件录入日期计算
-        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()) + deltaDays);
-
-        //如果是母猪分娩转入或母猪转舍转入，窝数，分娩统计字段需要累加
-        if (moveIn.isSowEvent()) {
-            groupTrack.setNest(EventUtil.plusInt(groupTrack.getNest(), 1));  //窝数加 1
-            groupTrack.setLiveQty(EventUtil.plusInt(groupTrack.getLiveQty(), moveIn.getQuantity()));
-            groupTrack.setWeakQty(EventUtil.plusInt(groupTrack.getWeakQty(), moveIn.getWeakQty()));
-            groupTrack.setHealthyQty(groupTrack.getLiveQty() - groupTrack.getWeakQty());    //健仔数 = 活仔数 - 弱仔数
-            groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), moveIn.getQuantity()));    //分娩时，未断奶数累加
-            groupTrack.setBirthWeight(EventUtil.plusDouble(groupTrack.getBirthWeight(), moveIn.getAvgWeight() * moveIn.getQuantity()));
-        }
-        updateGroupTrack(groupTrack, event);
-
-        //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.MOVE_IN);
-
-        //发布统计事件
-        //publistGroupAndBarn(event);
+        return event;
     }
 }

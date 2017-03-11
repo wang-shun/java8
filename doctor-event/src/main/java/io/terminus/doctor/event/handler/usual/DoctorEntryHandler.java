@@ -61,6 +61,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         //2.创建或更新track
         DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
         if (Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
+            toTrack.setId(fromTrack.getId());
             doctorPigTrackDao.update(toTrack);
         } else {
             doctorPigTrackDao.create(toTrack);
@@ -169,7 +170,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
     /**
      * 构建猪进厂 Track 信息表
      * @param executeEvent 执行事件
-     * @param fromTrack 原状态 进场为null
+     * @param fromTrack 原状态 进场为null(非编辑时),编辑时为进场之后track
      * @return 猪track
      */
     @Override

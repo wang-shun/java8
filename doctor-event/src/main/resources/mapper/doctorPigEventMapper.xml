@@ -931,7 +931,7 @@
         limit 1
     </select>
 
-    <select id="findFollowEvents" parameterType="long" resultMap="DoctorPigEventMap">
+    <select id="findFollowEvents" parameterType="map" resultMap="DoctorPigEventMap">
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE pig_id = #{pigId} AND status = 1 AND id > #{eventId}

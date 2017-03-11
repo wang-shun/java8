@@ -58,7 +58,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
-    private static final List<Integer> IgnoreEventList = Lists.newArrayList(PigEvent.VACCINATION.getKey(), PigEvent.DISEASE.getKey(), PigEvent.SEMEN.getKey());
+    public static final List<Integer> IGNORE_EVENT = Lists.newArrayList(PigEvent.VACCINATION.getKey(), PigEvent.DISEASE.getKey(), PigEvent.SEMEN.getKey());
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -74,7 +74,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
         //事件是否需要更新track和生成镜像
         DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
-        if (!IgnoreEventList.contains(executeEvent.getType())) {
+        if (!IGNORE_EVENT.contains(executeEvent.getType())) {
             //2.更新track
             doctorPigTrackDao.update(toTrack);
             //3.创建镜像
