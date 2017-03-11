@@ -75,9 +75,6 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         event.setExtraMap(turnSeedEvent);
         event.setQuantity(1);
 
-        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
-
         event.setWeight(turnSeed.getWeight());
         event.setAvgWeight(turnSeed.getWeight());
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id

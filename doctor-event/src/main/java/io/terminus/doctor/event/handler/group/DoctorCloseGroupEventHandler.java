@@ -6,7 +6,6 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.DataEvent;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -28,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -75,14 +73,10 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         //2.创建关闭猪群事件
         DoctorGroupEvent<DoctorCloseGroupEvent> event = dozerGroupEvent(group, GroupEventType.CLOSE, close);
 
-        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        int dayAge = getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays);
-        event.setAvgDayAge(dayAge);  //重算日龄
         event.setExtraMap(closeEvent);
         doctorGroupEventDao.create(event);
 
-        //3.更新猪群跟踪, 日龄是事件发生时的日龄
-        groupTrack.setAvgDayAge(dayAge);
+
         updateGroupTrack(groupTrack, event);
 
         //4.猪群状态改为关闭
