@@ -339,7 +339,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     protected static int getGroupEventAge(int groupAge, int deltaDays) {
         int eventAge = groupAge - deltaDays;
         if (eventAge < 0) {
-            throw new InvalidException("day.age.error");
+            //throw new InvalidException("day.age.error");
+            eventAge = 0;
         }
         return eventAge;
     }
