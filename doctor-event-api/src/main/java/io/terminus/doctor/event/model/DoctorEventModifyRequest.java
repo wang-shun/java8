@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
@@ -13,6 +15,8 @@ import java.util.Date;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DoctorEventModifyRequest implements Serializable{
 
     private static final long serialVersionUID = -1880711380492734949L;

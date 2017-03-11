@@ -59,7 +59,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
                     .userName(realName)
                     .build();
             eventModifyRequestDao.create(modifyRequest);
-            return Response.ok(modifyEvent.getId());
+            return Response.ok(modifyRequest.getId());
         } catch (Exception e) {
             log.error("create request failed, basic:{}, inputDto:{}, eventId:{}, userId:{}, userName:{}, cause:{}", basic, inputDto, eventId, userId, realName, Throwables.getStackTraceAsString(e));
             return Response.fail("create.pig.modify.event.request.failed");
