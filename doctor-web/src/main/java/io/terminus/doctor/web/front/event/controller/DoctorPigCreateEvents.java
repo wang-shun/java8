@@ -570,10 +570,12 @@ public class DoctorPigCreateEvents {
      * @return 分页结果
      */
     @RequestMapping(value = "/pagingRequest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Paging<DoctorEventModifyRequest> pagingRequest(@RequestParam DoctorEventModifyRequest modifyRequest,
+    public Paging<DoctorEventModifyRequest> pagingRequest(@RequestParam Long farmId,
+                                                          @RequestParam(required = false) String code,
                                                           @RequestParam Integer pageNo,
                                                           @RequestParam Integer pageSize) {
-        return RespHelper.or500(doctorEventModifyRequestReadService.pagingRequest(modifyRequest, pageNo, pageSize));
+        return RespHelper.or500(doctorEventModifyRequestReadService
+                .pagingRequest(DoctorEventModifyRequest.builder().farmId(farmId).build(), pageNo, pageSize));
     }
 
     /**
