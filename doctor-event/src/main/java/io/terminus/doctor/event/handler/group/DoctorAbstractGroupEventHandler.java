@@ -33,10 +33,7 @@ import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeUtils;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -96,6 +93,24 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         eventInfoList.add(eventInfo);
 
     }
+
+    /**
+     * 构建DoctorGroupEvent
+     * @param group
+     * @param input
+     * @param <I>
+     * @return
+     */
+    protected abstract <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input);
+
+    /**
+     * 推演DcotorGroupTrack
+     * @param event
+     * @param track
+     * @return
+     */
+    protected abstract DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track);
+
 
     /**
      * 处理事件的抽象方法, 由继承的子类去实现

@@ -1,5 +1,7 @@
 package io.terminus.doctor.event.handler.group;
 
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -52,7 +54,51 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
-    
+
+    @Override
+    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.TURN_SEED.getValue());
+
+        DoctorTurnSeedGroupInput turnSeed = (DoctorTurnSeedGroupInput) input;
+        DoctorBarn toBarn = getBarnById(turnSeed.getToBarnId());
+
+        //0. 校验数据
+        checkQuantity(groupTrack.getQuantity(), 1); // 确保 原数量 >= 1
+        checkTurnSeedData(group.getPigType(), toBarn.getPigType());
+
+        //1. 转换转种猪事件
+        DoctorTurnSeedGroupEvent turnSeedEvent = BeanMapper.map(turnSeed, DoctorTurnSeedGroupEvent.class);
+        turnSeedEvent.setToBarnType(toBarn.getPigType());
+
+
+        //2. 创建转种猪事件
+        DoctorGroupEvent<DoctorTurnSeedGroupEvent> event = dozerGroupEvent(group, GroupEventType.TURN_SEED, turnSeed);
+        event.setExtraMap(turnSeedEvent);
+        event.setQuantity(1);
+
+        event.setWeight(turnSeed.getWeight());
+        event.setAvgWeight(turnSeed.getWeight());
+        event.setOtherBarnId(toBarn.getId());          //目标猪舍id
+        event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
+        return event;
+    }
+
+    @Override
+    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
+        DoctorTurnSeedGroupEvent doctorTurnSeedGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTurnSeedGroupEvent.class);
+        if(Arguments.isNull(doctorTurnSeedGroupEvent)) {
+            log.error("parse doctorTurnSeedGroupEvent faild, doctorGroupEvent = {}", event);
+            throw new JsonResponseException("group.event.info.broken");
+        }
+
+        DoctorPig.PigSex sex = getSex(doctorTurnSeedGroupEvent.getToBarnType());
+
+        track.setQuantity(track.getQuantity() - 1);
+        track.setBoarQty(getBoarQty(sex, track.getBoarQty()));
+        track.setSowQty(track.getQuantity() - track.getBoarQty());
+        return track;
+    }
+
     @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.TURN_SEED.getValue());

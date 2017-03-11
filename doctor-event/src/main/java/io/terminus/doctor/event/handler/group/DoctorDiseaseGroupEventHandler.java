@@ -42,6 +42,30 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
+    @Override
+    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.DISEASE.getValue());
+
+        DoctorDiseaseGroupInput disease = (DoctorDiseaseGroupInput) input;
+
+        //1.转换下疾病信息
+        DoctorDiseaseGroupEvent diseaseEvent = BeanMapper.map(disease, DoctorDiseaseGroupEvent.class);
+
+        //2.创建疾病事件
+        DoctorGroupEvent<DoctorDiseaseGroupEvent> event = dozerGroupEvent(group, GroupEventType.DISEASE, disease);
+
+
+        event.setQuantity(disease.getQuantity());
+        event.setExtraMap(diseaseEvent);
+
+        return event;
+    }
+
+    @Override
+    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
+        return null;
+    }
+
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {

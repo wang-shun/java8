@@ -100,6 +100,29 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         }
     }
 
+    @Override
+    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.CLOSE.getValue());
+
+        DoctorCloseGroupInput close = (DoctorCloseGroupInput) input;
+
+        //1.转换下信息
+        DoctorCloseGroupEvent closeEvent = BeanMapper.map(close, DoctorCloseGroupEvent.class);
+
+        //2.创建关闭猪群事件
+        DoctorGroupEvent<DoctorCloseGroupEvent> event = dozerGroupEvent(group, GroupEventType.CLOSE, close);
+
+        event.setExtraMap(closeEvent);
+
+        return event;
+    }
+
+    @Override
+    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
+        return null;
+    }
+
+
     //猪群里还有猪不可关闭!
     private void checkCanClose(DoctorGroupTrack groupTrack) {
         if (groupTrack.getQuantity() > 0) {
