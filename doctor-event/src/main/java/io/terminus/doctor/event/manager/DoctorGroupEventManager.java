@@ -14,21 +14,13 @@ import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorAntiepidemicGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorCloseGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorCommonGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorDiseaseGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorLiveStockGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorMoveInGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
+import io.terminus.doctor.event.handler.group.*;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -254,5 +246,9 @@ public class DoctorGroupEventManager {
         if (inputList.size() != inputSet.size()) {
             throw new ServiceException("batch.event.groupCode.not.repeat");
         }
+    }
+
+    public int calculateAvgDay(Long id){
+        return handlerMapping.get(DoctorMoveInGroupEventHandler.class).getGroupAvgDayAge(id, null);
     }
 }

@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.group;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
@@ -30,15 +31,14 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.enums.PigType.*;
@@ -341,5 +341,99 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             throw new InvalidException("day.age.error");
         }
         return eventAge;
+    }
+
+    //重新计算日龄
+    @Override
+    public int getGroupAvgDayAge(Long groupId, DoctorGroupEvent event) {
+        List<DoctorGroupEvent> doctorGroupEventList = doctorGroupEventDao.findByGroupId(groupId);
+        if(!Arguments.isNull(event)) {
+            doctorGroupEventList.add(event);
+        }
+        //avgDay日龄, quantity数量, lastEventAt上一次事件发生时间
+        DoctorGroupTrack doctorGroupTrack = new DoctorGroupTrack();
+        doctorGroupEventList.stream()
+                .sorted((doctorGroupEvent1, doctorGroupEvent2) -> doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent2.getEventAt()))
+                .forEach(doctorGroupEvent -> {
+                    reCalculate(doctorGroupTrack, doctorGroupEvent);
+                });
+        return doctorGroupTrack.getAvgDayAge();
+    }
+
+    protected  void reCalculate(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
+        int avgDay = Objects.isNull(doctorGroupTrack.getAvgDayAge()) ? 0 : doctorGroupTrack.getAvgDayAge();
+        int quantity = Objects.isNull(doctorGroupTrack.getQuantity()) ? 0 : doctorGroupTrack.getQuantity();
+        Date lastEventAt = Objects.isNull(doctorGroupTrack.getBirthDate()) ? doctorGroupEvent.getEventAt() : doctorGroupTrack.getBirthDate();
+        int deltaDays;
+        switch(GroupEventType.from(doctorGroupEvent.getType())){
+            case NEW:
+                break;
+            case MOVE_IN:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, doctorGroupEvent.getAvgDayAge(), doctorGroupEvent.getQuantity()) + deltaDays;
+                quantity += doctorGroupEvent.getQuantity();
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case CHANGE:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                quantity -= doctorGroupEvent.getQuantity();
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case TRANS_GROUP:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                quantity -= doctorGroupEvent.getQuantity();
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case TURN_SEED:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                quantity -= 1;
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case LIVE_STOCK:
+                break;
+            case DISEASE:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case ANTIEPIDEMIC:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                quantity -= doctorGroupEvent.getQuantity();
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case TRANS_FARM:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                quantity -= doctorGroupEvent.getQuantity();
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case CLOSE:
+                break;
+            case WEAN:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+        }
     }
 }

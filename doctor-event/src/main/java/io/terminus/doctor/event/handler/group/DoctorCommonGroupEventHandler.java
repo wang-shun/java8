@@ -11,13 +11,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
-import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
-import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
-import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
-import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
-import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
-import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
-import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.*;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -26,12 +20,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
-import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.*;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -42,9 +31,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -72,6 +59,9 @@ public class DoctorCommonGroupEventHandler {
 
     @Autowired
     private DoctorEntryHandler doctorEntryHandler;
+
+    @Autowired
+    private DoctorWeanGroupEventHandler doctorWeanGroupEventHandler;
 
     @Autowired
     private DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
@@ -270,5 +260,12 @@ public class DoctorCommonGroupEventHandler {
         summary.setCloseAt(eventAt);
 
         RespHelper.orServEx(doctorGroupBatchSummaryWriteService.createGroupBatchSummary(summary));
+    }
+
+    public void sowWeanGroupEvent(List<DoctorEventInfo> eventInfoList, DoctorWeanGroupInput input){
+
+        DoctorGroupTrack doctorGroupTrack = doctorGroupTrackDao.findByGroupId(input.getGroupId());
+        DoctorGroup doctorGroup = doctorGroupDao.findById(input.getGroupId());
+        doctorWeanGroupEventHandler.handle(eventInfoList, doctorGroup, doctorGroupTrack, input);
     }
 }

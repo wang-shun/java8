@@ -3,7 +3,6 @@ package io.terminus.doctor.event.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.enums.EventElicitStatus;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
 
 /**
  * Created by IntelliJ IDEA.

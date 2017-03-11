@@ -4,7 +4,6 @@ import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -24,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -77,9 +75,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         //2.创建猪群变动事件
         DoctorGroupEvent<DoctorChangeGroupEvent> event = dozerGroupEvent(group, GroupEventType.CHANGE, change);
         event.setQuantity(change.getQuantity());
-
-        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
 
         event.setWeight(change.getWeight());            //总重
         event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
