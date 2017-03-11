@@ -33,7 +33,7 @@
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{startEventId}, #{eventId}, #{type}, #{content}, #{status},#{reason}, #{userId}, #{userName}, #{createdAt}, #{updatedAt}
+        #{farmId}, #{startEventId}, #{eventId}, #{type}, #{content}, #{status},#{reason}, #{userId}, #{userName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorEventModifyRequest" keyProperty="id" useGeneratedKeys="true">
