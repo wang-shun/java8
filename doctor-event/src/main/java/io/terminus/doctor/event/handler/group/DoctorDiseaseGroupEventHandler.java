@@ -43,7 +43,7 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
     }
 
     @Override
-    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.DISEASE.getValue());
 
         DoctorDiseaseGroupInput disease = (DoctorDiseaseGroupInput) input;

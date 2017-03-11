@@ -66,7 +66,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     }
 
     @Override
-    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.TRANS_GROUP.getValue());
 
         DoctorTransGroupInput transGroup = (DoctorTransGroupInput) input;

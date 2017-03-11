@@ -44,7 +44,7 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
     }
 
     @Override
-    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.ANTIEPIDEMIC.getValue());
         DoctorAntiepidemicGroupInput antiepidemic = (DoctorAntiepidemicGroupInput) input;
         //1.转换下防疫信息

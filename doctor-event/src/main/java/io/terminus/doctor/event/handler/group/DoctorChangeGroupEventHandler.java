@@ -120,7 +120,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     }
 
     @Override
-    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.CHANGE.getValue());
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
         //1.转换猪群变动事件

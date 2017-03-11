@@ -43,7 +43,7 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
     }
 
     @Override
-    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.LIVE_STOCK.getValue());
 
         DoctorLiveStockGroupInput liveStock = (DoctorLiveStockGroupInput) input;
