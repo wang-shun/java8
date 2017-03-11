@@ -11,6 +11,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
@@ -22,10 +23,13 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.EventElicitStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorEditGroupEventService;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -73,9 +77,12 @@ public class DoctorGroupEvents {
 
     @RpcConsumer
     private DoctorEditGroupEventService doctorEditGroupEventService;
-
     @RpcConsumer
     private DoctorPigReadService doctorPigReadService;
+    @RpcConsumer
+    private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
+    @RpcConsumer
+    private DoctorEventModifyRequestReadService doctorEventModifyRequestReadService;
 
     @Autowired
     public DoctorGroupEvents(DoctorGroupWebService doctorGroupWebService,
@@ -151,11 +158,14 @@ public class DoctorGroupEvents {
      * @return
      */
     @RequestMapping(value = "/createGroupModifyRequest", method = RequestMethod.POST)
-    public Long createGroupModifyEventRequest(@RequestParam("groupId") Long groupId,
+    public void createGroupModifyEventRequest(@RequestParam("groupId") Long groupId,
                                                  @RequestParam("eventType") Integer eventType,
                                                  @RequestParam("eventId") Long eventId,
                                                  @RequestParam("data") String data) {
-        return RespWithExHelper.orInvalid(doctorGroupWebService.createGroupModifyEventRequest(groupId, eventType, eventId, data));
+        Long requestId = RespWithExHelper.orInvalid(doctorGroupWebService.createGroupModifyEventRequest(groupId, eventType, eventId, data));
+        DoctorEventModifyRequest modifyRequest = RespHelper.or500(doctorEventModifyRequestReadService.findById(requestId));
+        DoctorGroupEvent modifyEvent = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(modifyRequest.getContent(), DoctorGroupEvent.class);
+        RespHelper.or500(doctorEditGroupEventService.elicitDoctorGroupTrack(modifyEvent, EventElicitStatus.EDIT));
     }
 
     /**

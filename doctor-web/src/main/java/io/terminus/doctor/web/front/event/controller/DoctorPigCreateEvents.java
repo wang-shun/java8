@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
@@ -54,6 +55,7 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
@@ -127,6 +129,8 @@ public class DoctorPigCreateEvents {
     private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
     @RpcConsumer
     private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
+    @RpcConsumer
+    private DoctorEventModifyRequestReadService doctorEventModifyRequestReadService;
     @RpcConsumer
     private DoctorUserProfileReadService doctorUserProfileReadService;
 
@@ -556,7 +560,20 @@ public class DoctorPigCreateEvents {
         }
 
         Long requestId = RespHelper.or500(doctorEventModifyRequestWriteService.createPigModifyEventRequest(basic, inputDto, eventId, user.getId(), userName));
+        DoctorEventModifyRequest modifyRequest = RespHelper.or500(doctorEventModifyRequestReadService.findById(requestId));
+        RespWithExHelper.orInvalid(doctorPigEventWriteService.modifyPigEventHandle(modifyRequest));
+    }
 
+    /**
+     * 分页查询事件编辑请求
+     * @param modifyRequest 查询条件
+     * @return 分页结果
+     */
+    @RequestMapping(value = "/pagingRequest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Paging<DoctorEventModifyRequest> pagingRequest(@RequestParam DoctorEventModifyRequest modifyRequest,
+                                                          @RequestParam Integer pageNo,
+                                                          @RequestParam Integer pageSize) {
+        return RespHelper.or500(doctorEventModifyRequestReadService.pagingRequest(modifyRequest, pageNo, pageSize));
     }
 
     /**
