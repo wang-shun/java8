@@ -44,6 +44,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.EventRequestStatus;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -499,6 +500,7 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/modifyPigEvent", method = RequestMethod.GET)
     public void modifyPigEvent(@RequestParam Long eventId) {
         DoctorPigEvent modifyEvent = RespHelper.or500(doctorPigEventReadService.queryPigEventById(eventId));
+        modifyEvent.setStatus(EventStatus.VALID.getValue());
         DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest.builder()
                 .farmId(modifyEvent.getFarmId())
                 .createdAt(new Date())

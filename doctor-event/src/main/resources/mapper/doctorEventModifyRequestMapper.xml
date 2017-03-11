@@ -54,13 +54,13 @@
         </foreach>
     </insert>
 
-    <select id="findById" parameterType="long" resultMap="DoctorEventModifyRequestMap" >
+    <select id="findById" parameterType="long" resultType="DoctorEventModifyRequest" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id = #{id}
     </select>
 
-    <select id="findByIds" parameterType="long" resultMap="DoctorEventModifyRequestMap" >
+    <select id="findByIds" parameterType="long" resultType="DoctorEventModifyRequest" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id in
@@ -69,7 +69,7 @@
         </foreach>
     </select>
 
-    <update id="update" parameterMap="DoctorEventModifyRequestMap">
+    <update id="update" parameterType="DoctorEventModifyRequest">
         UPDATE
         <include refid="tb"/>
         <set>
@@ -113,7 +113,7 @@
         </where>
     </sql>
 
-    <select id="list" parameterType="map" resultMap="DoctorEventModifyRequestMap">
+    <select id="list" parameterType="map" resultType="DoctorEventModifyRequest">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
@@ -125,7 +125,7 @@
         <include refid="criteria"/>
     </select>
 
-    <select id="paging" parameterType="map" resultMap="DoctorEventModifyRequestMap">
+    <select id="paging" parameterType="map" resultType="DoctorEventModifyRequest">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>

@@ -186,6 +186,8 @@ public class DoctorPigEventManager {
      * @param oldEventIdList 原事件id列表
      */
     private void modifyPigEventHandle (DoctorPigEvent modifyEvent, List<DoctorEventInfo> doctorEventInfoList, List<Long> oldEventIdList) {
+        modifyEvent.setIsModify(IsOrNot.YES.getValue());
+        modifyEvent.setStatus(EventStatus.VALID.getValue());
         oldEventIdList.add(modifyEvent.getId());
 
 //        //获取修改后事件
@@ -197,7 +199,7 @@ public class DoctorPigEventManager {
             DoctorPigSnapshot lastPigSnapshot = doctorPigSnapshotDao.queryByEventId(modifyEvent.getId());
             fromTrack = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(lastPigSnapshot.getToPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack();
         }
-        
+
         //获取事件处理器
         DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(modifyEvent.getType());
 
@@ -206,14 +208,13 @@ public class DoctorPigEventManager {
 
         //获取事件处理
         List<DoctorPigEvent> followEventList = doctorPigEventDao.findFollowEvents(modifyEvent.getPigId(), modifyEvent.getId());
-        if (followEventList.isEmpty()) {
-            return;
-        }
-
         //将原事件状态置为无效
         oldEventIdList.addAll(followEventList.stream().map(DoctorPigEvent::getId).collect(Collectors.toList()));
         doctorPigEventDao.updateEventsStatus(oldEventIdList, EventStatus.INVALID.getValue());
 
+        if (followEventList.isEmpty()) {
+            return;
+        }
         //处理后续事件
         followEventList.forEach(followEvent -> followPigEventHandle(doctorEventInfoList, followEvent));
     }
@@ -225,6 +226,7 @@ public class DoctorPigEventManager {
      */
     private void followPigEventHandle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent) {
         executeEvent.setIsModify(IsOrNot.YES.getValue());
+        executeEvent.setStatus(EventStatus.VALID.getValue());
         DoctorPigTrack fromTrack = doctorPigTrackDao.findByPigId(executeEvent.getPigId());
         //获取事件处理器
         DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(executeEvent.getType());
@@ -243,11 +245,11 @@ public class DoctorPigEventManager {
     @Transactional
     private void modifyPidEventRollback(List<Long> pigOldEventIdList, List<Long> pigNewEventIdList, DoctorPigTrack fromTrack) {
         //1.将新生成事件置为无效
-        if (Arguments.isNullOrEmpty(pigNewEventIdList)) {
+        if (!Arguments.isNullOrEmpty(pigNewEventIdList)) {
             doctorPigEventDao.updateEventsStatus(pigNewEventIdList, EventStatus.INVALID.getValue());
         }
         //2.将原事件置为有效
-        if (Arguments.isNullOrEmpty(pigOldEventIdList)) {
+        if (!Arguments.isNullOrEmpty(pigOldEventIdList)) {
             doctorPigEventDao.updateEventsStatus(pigOldEventIdList, EventStatus.VALID.getValue());
         }
         //3.还原track
