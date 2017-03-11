@@ -942,9 +942,9 @@
         UPDATE <include refid="tb" />
         SET status = #{status}
         WHERE
-       `id` IN
-        <foreach collection="ids" item="id" open="(" close=")" separator=",">
-            #{id}
+        `id` IN
+        <foreach collection="ids" item="i" open="(" close=")" separator=",">
+            #{i}
         </foreach>
     </update>
 </mapper>

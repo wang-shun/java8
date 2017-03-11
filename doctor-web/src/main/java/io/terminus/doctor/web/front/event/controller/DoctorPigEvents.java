@@ -7,6 +7,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -22,13 +23,16 @@ import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupEventDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupEventExportData;
@@ -36,6 +40,9 @@ import io.terminus.doctor.web.front.event.dto.DoctorPigEventDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorPigEventExportData;
 import io.terminus.doctor.web.front.event.dto.DoctorPigEventPagingDto;
 import io.terminus.doctor.web.util.TransFromUtil;
+import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +52,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,6 +66,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static java.util.stream.Collectors.toList;
 
@@ -88,6 +97,10 @@ public class DoctorPigEvents {
 
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
 
+    @RpcConsumer
+    private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
+    @RpcConsumer
+    private DoctorUserProfileReadService doctorUserProfileReadService;
     @Autowired
     private Exporter exporter;
 
@@ -355,6 +368,53 @@ public class DoctorPigEvents {
         }
     }
 
+    /**
+     * 创建编辑事件请求
+     * @param modifyRequest 事件编辑请求
+     */
+    @RequestMapping(value = "/", method = RequestMethod.POST)
+    public void createEventModify(@RequestBody DoctorEventModifyRequest modifyRequest) {
+        User user = UserUtil.getCurrentUser();
+        if (isNull(user)) {
+            throw new JsonResponseException("user.not.login");
+        }
+        //获取真实姓名
+        String userName = user.getName();
+        Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(user.getId());
+        if (userProfileResponse.isSuccess() && notNull(userProfileResponse.getResult())) {
+            userName = userProfileResponse.getResult().getRealName();
+        }
+        modifyRequest.setUserId(user.getId());
+        modifyRequest.setUserName(userName);
+        doctorEventModifyRequestWriteService.createRequest(modifyRequest);
+
+    }
+
+    /**
+     * 事件导出
+     * @param eventCriteria 查询条件
+     * @param request HttpRequest
+     * @param response HttpResponse
+     */
+    @RequestMapping(value = "/eventExport", method = RequestMethod.GET)
+    public void pigEventExport(@RequestParam Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response){
+        try {
+            log.info("event.export.starting");
+            if (Strings.isNullOrEmpty(eventCriteria.get("kind"))) {
+                return;
+            }
+            if (Objects.equals(eventCriteria.get("kind"), "4")) {
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingGroupEvent, request, response);
+            } else {
+                eventCriteria.put("ordered","0");
+                exporter.export("web-pig-event", eventCriteria, 1, 500, this::pagingPigEvent, request, response);
+            }
+            log.info("event.export.ending");
+        } catch (Exception e) {
+            log.error("event.export.failed");
+        }
+    }
+
     private Paging<DoctorGroupEventDetail> queryGroupEventsByCriteria(Map<String, Object> params, Integer pageNo, Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
@@ -383,31 +443,6 @@ public class DoctorPigEvents {
                     return detail;
                 }).collect(toList());
         return new Paging<>(pagingResponse.getResult().getTotal(), groupEventDetailList);
-    }
-
-    /**
-     * 事件导出
-     * @param eventCriteria 查询条件
-     * @param request HttpRequest
-     * @param response HttpResponse
-     */
-    @RequestMapping(value = "/eventExport", method = RequestMethod.GET)
-    public void pigEventExport(@RequestParam Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response){
-        try {
-            log.info("event.export.starting");
-            if (Strings.isNullOrEmpty(eventCriteria.get("kind"))) {
-                return;
-            }
-            if (Objects.equals(eventCriteria.get("kind"), "4")) {
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingGroupEvent, request, response);
-            } else {
-                eventCriteria.put("ordered","0");
-                exporter.export("web-pig-event", eventCriteria, 1, 500, this::pagingPigEvent, request, response);
-            }
-            log.info("event.export.ending");
-        } catch (Exception e) {
-            log.error("event.export.failed");
-        }
     }
 
     /**
