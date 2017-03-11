@@ -101,7 +101,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
     }
 
     @Override
-    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.CLOSE.getValue());
 
         DoctorCloseGroupInput close = (DoctorCloseGroupInput) input;

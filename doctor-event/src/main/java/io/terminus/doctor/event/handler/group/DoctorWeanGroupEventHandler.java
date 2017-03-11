@@ -40,7 +40,7 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
     }
 
     @Override
-    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.WEAN.getValue());
         DoctorWeanGroupInput weanInput = (DoctorWeanGroupInput) input;
 

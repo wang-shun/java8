@@ -101,15 +101,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     /**
-     * 构建DoctorGroupEvent
-     * @param group
-     * @param input
-     * @param <I>
-     * @return
-     */
-    protected abstract <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input);
-
-    /**
      * 推演DcotorGroupTrack
      * @param event
      * @param track
