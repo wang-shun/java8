@@ -531,9 +531,9 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/createPigModifyRequest", method = RequestMethod.POST)
     public void createPigModifyRequest(@RequestParam Long farmId,
-                                    @RequestParam Long eventId,
-                                    @RequestParam Integer eventTye,
-                                    @RequestParam Integer pigSex,
+                                       @RequestParam Long eventId,
+                                       @RequestParam Integer eventTye,
+                                       @RequestParam Integer pigSex,
                                        @RequestParam String input) {
         //构建事件所需信息
         PigEvent pigEvent = PigEvent.from(eventTye);
