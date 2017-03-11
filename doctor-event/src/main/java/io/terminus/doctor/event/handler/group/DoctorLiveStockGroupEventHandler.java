@@ -42,6 +42,32 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
+    @Override
+    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.LIVE_STOCK.getValue());
+
+        DoctorLiveStockGroupInput liveStock = (DoctorLiveStockGroupInput) input;
+
+        //1.转换下猪只存栏信息
+        DoctorLiveStockGroupEvent liveStockEvent = BeanMapper.map(liveStock, DoctorLiveStockGroupEvent.class);
+
+        //2.创建猪只存栏事件
+        DoctorGroupEvent<DoctorLiveStockGroupEvent> event = dozerGroupEvent(group, GroupEventType.LIVE_STOCK, liveStock);
+        event.setQuantity(groupTrack.getQuantity());  //猪群存栏数量 = 猪群数量
+
+
+
+        event.setAvgWeight(liveStock.getAvgWeight());
+        event.setWeight(event.getQuantity() * event.getAvgWeight()); // 总活体重 = 数量 * 均重
+        event.setExtraMap(liveStockEvent);
+        return event;
+    }
+
+    @Override
+    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
+        return null;
+    }
+
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {

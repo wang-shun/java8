@@ -40,6 +40,35 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
     }
 
     @Override
+    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.WEAN.getValue());
+        DoctorWeanGroupInput weanInput = (DoctorWeanGroupInput) input;
+
+        //1.转换转入猪群事件
+        DoctorWeanGroupEvent weanGroupEvent = BeanMapper.map(weanInput, DoctorWeanGroupEvent.class);
+
+        //2.创建猪群断奶事件
+        DoctorGroupEvent<DoctorWeanGroupEvent> event = dozerGroupEvent(group, GroupEventType.WEAN, weanInput);
+        event.setQuantity(weanInput.getPartWeanPigletsCount());
+        event.setAvgWeight(weanInput.getPartWeanAvgWeight());
+
+
+        event.setExtraMap(weanGroupEvent);
+        return event;
+    }
+
+    @Override
+    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
+        DoctorWeanGroupEvent weanGroupEvent = (DoctorWeanGroupEvent) event.getExtraMap();
+        track.setUnqQty(EventUtil.plusInt(track.getUnqQty(), weanGroupEvent.getNotQualifiedCount()));
+        track.setQuaQty(EventUtil.minusQuantity(track.getQuantity(), track.getUnqQty()));
+        track.setWeanQty(EventUtil.plusInt(track.getWeanQty(), weanGroupEvent.getPartWeanPigletsCount()));
+        track.setUnweanQty(EventUtil.minusQuantity(track.getQuantity(), track.getWeanQty()));
+        track.setWeanWeight(EventUtil.plusDouble(track.getWeanWeight(), weanGroupEvent.getPartWeanAvgWeight() * weanGroupEvent.getPartWeanPigletsCount()));
+        return null;
+    }
+
+    @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.WEAN.getValue());
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
@@ -58,7 +87,6 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         doctorGroupEventDao.create(event);
 
         //3.更新猪群跟踪
-        Integer oldQty = groupTrack.getQuantity();
         groupTrack.setUnqQty(EventUtil.plusInt(groupTrack.getUnqQty(), weanInput.getNotQualifiedCount()));
         groupTrack.setQuaQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getUnqQty()));
         groupTrack.setWeanQty(EventUtil.plusInt(groupTrack.getWeanQty(), weanInput.getPartWeanPigletsCount()));

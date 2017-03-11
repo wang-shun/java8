@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -61,6 +63,80 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorGroupManager = doctorGroupManager;
         this.doctorBarnDao = doctorBarnDao;
+    }
+
+    @Override
+    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.TRANS_GROUP.getValue());
+
+        DoctorTransGroupInput transGroup = (DoctorTransGroupInput) input;
+
+        //同舍不可转群
+        if (Objects.equals(group.getCurrentBarnId(), transGroup.getToBarnId())) {
+            throw new InvalidException("same.barn.can.not.trans");
+        }
+
+        //校验能否转群, 数量, 日龄差, 转群总重
+        checkCanTransBarn(group.getPigType(), transGroup.getToBarnId());
+        checkCanTransGroup(transGroup.getToGroupId(), transGroup.getToBarnId(), transGroup.getIsCreateGroup());
+        checkFarrowGroupUnique(transGroup.getIsCreateGroup(), transGroup.getToBarnId());
+        checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
+        checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
+        Double realWeight = transGroup.getAvgWeight() * transGroup.getQuantity();   //后台计算的总重
+
+        //转入猪舍
+        DoctorBarn toBarn = getBarn(transGroup.getToBarnId());
+        if (!input.isSowEvent()) {
+            checkUnweanTrans(group.getPigType(), toBarn.getPigType(), groupTrack, transGroup.getQuantity());
+        }
+
+        //1.转换转群事件
+        DoctorTransGroupEvent transGroupEvent = BeanMapper.map(transGroup, DoctorTransGroupEvent.class);
+        checkBreed(group.getBreedId(), transGroupEvent.getBreedId());
+        transGroupEvent.setToBarnType(toBarn.getPigType());
+
+        //2.创建转群事件
+        DoctorGroupEvent<DoctorTransGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
+        event.setQuantity(transGroup.getQuantity());
+
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
+
+        event.setAvgWeight(transGroup.getAvgWeight());  //均重
+        event.setWeight(realWeight);                    //总重
+        event.setTransGroupType(getTransType(null, group.getPigType(), toBarn).getValue());   //区别内转还是外转(null是因为不用判断转入类型)
+        event.setOtherBarnId(toBarn.getId());          //目标猪舍id
+        event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
+        event.setExtraMap(transGroupEvent);
+        return event;
+    }
+
+    @Override
+    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
+        DoctorTransGroupEvent doctorTransGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
+        if(Arguments.isNull(doctorTransGroupEvent)) {
+            log.error("parse doctorTransGroupEvent faild, doctorGroupEvent = {}", event);
+            throw new JsonResponseException("group.event.info.broken");
+        }
+
+        //更新quanity
+        track.setQuantity(EventUtil.minusQuantity(track.getQuantity(), event.getQuantity()));
+
+        //如果公猪数量 lt 0 按 0 计算
+        Integer boarQty = EventUtil.minusQuantity(track.getBoarQty(), doctorTransGroupEvent.getBoarQty());
+        boarQty = boarQty > track.getQuantity() ? track.getQuantity() : boarQty;
+        track.setBoarQty(boarQty < 0 ? 0 : boarQty);
+        track.setSowQty(EventUtil.minusQuantity(track.getQuantity(), track.getBoarQty()));
+
+        //如果是母猪触发的转群事件，窝数-1，活仔，健仔数累减
+        if (event.getIsAuto() == IsOrNot.YES.getValue()) {
+            track.setNest(EventUtil.plusInt(track.getNest(), -1));
+            track.setLiveQty(EventUtil.plusInt(track.getLiveQty(), - event.getQuantity()));
+            track.setHealthyQty(track.getLiveQty() - MoreObjects.firstNonNull(track.getWeakQty(), 0));
+            track.setUnweanQty(EventUtil.plusInt(track.getUnweanQty(), -event.getQuantity()));
+            track.setBirthWeight(EventUtil.plusDouble(track.getBirthWeight(), - event.getAvgWeight() * event.getQuantity()));
+        }
+        return track;
     }
 
     @Override

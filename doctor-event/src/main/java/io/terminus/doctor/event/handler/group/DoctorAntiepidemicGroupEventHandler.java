@@ -44,12 +44,9 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
     }
 
     @Override
-    protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    protected <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.ANTIEPIDEMIC.getValue());
-        DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorAntiepidemicGroupInput antiepidemic = (DoctorAntiepidemicGroupInput) input;
-
-        checkQuantity(groupTrack.getQuantity(), antiepidemic.getQuantity());
         //1.转换下防疫信息
         DoctorAntiepidemicGroupEvent antiEvent = BeanMapper.map(antiepidemic, DoctorAntiepidemicGroupEvent.class);
 
@@ -58,13 +55,32 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
         event.setQuantity(antiepidemic.getQuantity());
         event.setExtraMap(antiEvent);
+
+        return event;
+    }
+
+    @Override
+    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
+        return null;
+    }
+
+
+    @Override
+    protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+
+        //1.构建event
+        DoctorGroupEvent event = buildGroupEvent(group, groupTrack, input);
+
+        //2.检验事件是否可执行
+
+
         doctorGroupEventDao.create(event);
 
-        //防疫事件不影响track,不创建snapshot
-//        //3.更新猪群跟踪
-//        updateGroupTrack(groupTrack, event);
-//
-//        //4.创建镜像
-//        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.ANTIEPIDEMIC);
+        //3.推演track
+
+
+        //4.创建snapshot
+
+
     }
 }

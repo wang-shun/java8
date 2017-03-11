@@ -101,6 +101,24 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     /**
+     * 构建DoctorGroupEvent
+     * @param group
+     * @param input
+     * @param <I>
+     * @return
+     */
+    protected abstract <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input);
+
+    /**
+     * 推演DcotorGroupTrack
+     * @param event
+     * @param track
+     * @return
+     */
+    protected abstract DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track);
+
+
+    /**
      * 处理事件的抽象方法, 由继承的子类去实现
      * @param eventInfoList 事件信息列表 每发生一个事件记录下来
      * @param group       猪群
