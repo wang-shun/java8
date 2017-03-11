@@ -69,7 +69,7 @@
         </foreach>
     </select>
 
-    <update id="update" parameterType="DoctorEventModifyRequestMap">
+    <update id="update" parameterMap="DoctorEventModifyRequestMap">
         UPDATE
         <include refid="tb"/>
         <set>
