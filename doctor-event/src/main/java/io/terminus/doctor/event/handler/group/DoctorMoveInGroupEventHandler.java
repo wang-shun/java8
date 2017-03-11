@@ -122,4 +122,9 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setExtraMap(moveInEvent);
         return event;
     }
+
+    @Override
+    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
+        return null;
+    }
 }
