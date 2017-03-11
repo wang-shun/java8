@@ -67,6 +67,8 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
         //1. 转换转种猪事件
         DoctorTurnSeedGroupEvent turnSeedEvent = BeanMapper.map(turnSeed, DoctorTurnSeedGroupEvent.class);
+        turnSeedEvent.setToBarnType(toBarn.getPigType());
+
 
         //2. 创建转种猪事件
         DoctorGroupEvent<DoctorTurnSeedGroupEvent> event = dozerGroupEvent(group, GroupEventType.TURN_SEED, turnSeed);

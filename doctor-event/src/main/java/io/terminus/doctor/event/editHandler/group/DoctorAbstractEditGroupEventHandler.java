@@ -1,17 +1,14 @@
 package io.terminus.doctor.event.editHandler.group;
 
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.event.dao.DoctorGroupDao;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.editHandler.DoctorEditGroupEventHandler;
-import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.*;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -33,22 +30,61 @@ public abstract class DoctorAbstractEditGroupEventHandler implements DoctorEditG
     private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     @Autowired
     private DoctorGroupDao doctorGroupDao;
+    @Autowired
+    private DoctorBarnDao doctorBarnDao;
 
     @Override
-    public DoctorGroupTrack handle(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
+    public DoctorGroupTrack handle(List<DoctorGroupEvent> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
+        //校验基本的数量,看会不会失败
+        if(!checkDoctorGroupEvent(doctorGroupTrack, doctorGroupEvent)){
+            log.info("edit group event failed, doctorGroupEvent={}", doctorGroupEvent);
+            throw new JsonResponseException("edit.group.event.failed");
+        }
+
         DoctorGroupEvent preDoctorGroupEvent = doctorGroupEventDao.findById(doctorGroupTrack.getRelEventId());
         //根据event推演track
         handlerGroupEvent(doctorGroupTrack, doctorGroupEvent, preDoctorGroupEvent);
-        if(!checkDoctorGroupTrack(doctorGroupTrack)){
-            return null;
-        }
         //创建猪群事件
         doctorGroupEventDao.create(doctorGroupEvent);
 
-        //创建猪群track
-        doctorGroupTrack.setRelEventId(doctorGroupEvent.getId());    //关联此次的事件id
-        doctorGroupTrackDao.update(doctorGroupTrack);
+        //新增的事件放入需要回滚的list
+        doctorGroupEventList.add(doctorGroupEvent);
 
+        //创建猪群track
+        updateGroupTrack(doctorGroupTrack, doctorGroupEvent);
+
+        //创建snapshot
+        createGroupEventSnapshot(doctorGroupTrack, doctorGroupEvent, preDoctorGroupEvent);
+
+
+        return doctorGroupTrack;
+    }
+
+    /**
+     * 推演之前先校验
+     * @param doctorGroupTrack
+     * @param doctorGroupEvent
+     */
+    protected abstract boolean checkDoctorGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent);
+
+    /**
+     * 推演doctorGroupTrack
+     * @param doctorGroupTrack
+     * @param doctorGroupEvent
+     */
+    protected abstract void handlerGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent, DoctorGroupEvent preDoctorGroupEvent);
+
+
+    //更新猪群跟踪
+    public void updateGroupTrack(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent) {
+        doctorGroupTrack.setRelEventId(doctorGroupEvent.getId());    //关联此次的事件id
+        doctorGroupTrack.setUpdatorId(doctorGroupEvent.getCreatorId());
+        doctorGroupTrack.setUpdatorName(doctorGroupEvent.getCreatorName());
+        doctorGroupTrack.setBirthDate(new DateTime(doctorGroupEvent.getEventAt()).plusDays(1 - doctorGroupTrack.getAvgDayAge()).toDate());
+        doctorGroupTrackDao.update(doctorGroupTrack);
+    }
+
+    private void createGroupEventSnapshot(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent, DoctorGroupEvent preDoctorGroupEvent) {
         //创建snapshot
         DoctorGroupSnapshot doctorGroupSnapshot = new DoctorGroupSnapshot();
         doctorGroupSnapshot.setGroupId(doctorGroupEvent.getGroupId());
@@ -62,37 +98,29 @@ public abstract class DoctorAbstractEditGroupEventHandler implements DoctorEditG
         doctorGroupSnapShotInfo.setGroup(doctorGroup);
         doctorGroupSnapshot.setToInfo(JSON_MAPPER.toJson(doctorGroupSnapShotInfo));
         doctorGroupSnapshotDao.create(doctorGroupSnapshot);
-
-        return doctorGroupTrack;
     }
 
-    /**
-     * 推演doctorGroupTrack
-     * @param doctorGroupTrack
-     * @param doctorGroupEvent
-     */
-    protected abstract void handlerGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent, DoctorGroupEvent preDoctorGroupEvent);
+    public DoctorBarn getBarnById(Long barnId) {
+        return doctorBarnDao.findById(barnId);
+    }
 
-    /**
-     * 检查推演之后的doctorGroupTrack是否正确
-     * @param doctorGroupTrack
-     * @return
-     */
-    private Boolean checkDoctorGroupTrack(DoctorGroupTrack doctorGroupTrack){
-        if(doctorGroupTrack.getAvgDayAge() <= 0 ||
-                doctorGroupTrack.getQuantity() <0 ||
-                doctorGroupTrack.getBoarQty() < 0 ||
-                doctorGroupTrack.getSowQty() < 0 ||
-                doctorGroupTrack.getLiveQty() < 0 ||
-                doctorGroupTrack.getHealthyQty() < 0 ||
-                doctorGroupTrack.getWeakQty() < 0 ||
-                doctorGroupTrack.getQuaQty() < 0 ||
-                doctorGroupTrack.getUnqQty() < 0 ||
-                doctorGroupTrack.getWeanQty() < 0 ||
-                doctorGroupTrack.getUnweanQty() < 0){
-            return false;
+    //获取转种猪性别
+    public static DoctorPig.PigSex getSex(Integer toBarnType) {
+        if (PigType.MATING_TYPES.contains(toBarnType)) {
+            return DoctorPig.PigSex.SOW;
         }
-        return true;
+        return DoctorPig.PigSex.BOAR;
+    }
+
+    //如果是公猪并且数量大于0 就 -1
+    public static int getBoarQty(DoctorPig.PigSex sex, Integer oldQty) {
+        if (oldQty <= 0) {
+            return 0;
+        }
+        if (sex.equals(DoctorPig.PigSex.BOAR)) {
+            return oldQty - 1;
+        }
+        return oldQty;
     }
 
 }

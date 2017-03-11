@@ -64,10 +64,11 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setExtraMap(liveStockEvent);
         doctorGroupEventDao.create(event);
 
-        //3.更新猪群跟踪
-        updateGroupTrack(groupTrack, event);
-
-        //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.LIVE_STOCK);
+        //猪只存栏不更新track,不增加snapshot
+//        //3.更新猪群跟踪
+//        updateGroupTrack(groupTrack, event);
+//
+//        //4.创建镜像
+//        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.LIVE_STOCK);
     }
 }

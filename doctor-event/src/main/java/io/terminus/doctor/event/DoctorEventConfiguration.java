@@ -5,8 +5,7 @@ import com.google.common.collect.Maps;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.editHandler.DoctorEditGroupEventHandler;
-import io.terminus.doctor.event.editHandler.group.DoctorEditGroupEventHandlers;
-import io.terminus.doctor.event.editHandler.group.DoctorEditMoveInGroupEventHandler;
+import io.terminus.doctor.event.editHandler.group.*;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
@@ -209,9 +208,17 @@ public class  DoctorEventConfiguration {
     }
 
     @Bean
-    public DoctorEditGroupEventHandlers doctorEditGroupHandlers(DoctorEditMoveInGroupEventHandler doctorEditMoveInGroupEventHandler){
+    public DoctorEditGroupEventHandlers doctorEditGroupHandlers(DoctorEditTurnSeedGroupEventHandler doctorEditTurnSeedGroupEventHandler,
+                                                                DoctorEditMoveInGroupEventHandler doctorEditMoveInGroupEventHandler,
+                                                                DoctorEditChangeGroupEventHandler doctorEditChangeGroupEventHandler,
+                                                                DoctorEditTransGroupEventHandler doctorEditTransGroupEventHandler,
+                                                                DoctorEditTransFarmGroupEventHandler doctorEditTransFarmGroupEventHandler){
         Map<Integer, DoctorEditGroupEventHandler> handlerMap = Maps.newHashMap();
+        handlerMap.put(GroupEventType.TURN_SEED.getValue(),doctorEditTurnSeedGroupEventHandler);
         handlerMap.put(GroupEventType.MOVE_IN.getValue(), doctorEditMoveInGroupEventHandler);
+        handlerMap.put(GroupEventType.CHANGE.getValue(), doctorEditChangeGroupEventHandler);
+        handlerMap.put(GroupEventType.TRANS_GROUP.getValue(), doctorEditTransGroupEventHandler);
+        handlerMap.put(GroupEventType.TRANS_FARM.getValue(), doctorEditTransFarmGroupEventHandler);
         DoctorEditGroupEventHandlers doctorEditGroupEventHandlers = new DoctorEditGroupEventHandlers();
         doctorEditGroupEventHandlers.setEventHandlerMap(handlerMap);
         return doctorEditGroupEventHandlers;

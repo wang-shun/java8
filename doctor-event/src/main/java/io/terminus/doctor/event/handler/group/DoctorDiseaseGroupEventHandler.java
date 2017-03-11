@@ -66,7 +66,7 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         event.setExtraMap(diseaseEvent);
         doctorGroupEventDao.create(event);
 
-        //疾病不影响track
+        //疾病事件不更新track,不增加snapshot
 
 //        //3.更新猪群跟踪
 //        updateGroupTrack(groupTrack, event);

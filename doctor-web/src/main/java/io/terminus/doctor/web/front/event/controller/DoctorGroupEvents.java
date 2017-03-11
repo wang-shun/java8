@@ -19,6 +19,7 @@ import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.enums.EventElicitStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -440,7 +441,7 @@ public class DoctorGroupEvents {
         doctorMoveInGroupEvent.setQuantity(doctorGroupEvent.getQuantity());
         doctorMoveInGroupEvent.setHealthyQty(doctorMoveInGroupEvent.getHealthyQty() + 2);
         doctorMoveInGroupEvent.setAvgWeight(doctorGroupEvent.getAvgWeight());
-        doctorEditGroupEventService.elicitDoctorGroupTrack(doctorGroupEvent);
+        doctorEditGroupEventService.elicitDoctorGroupTrack(doctorGroupEvent, EventElicitStatus.EDIT);
         return true;
     }
 }
