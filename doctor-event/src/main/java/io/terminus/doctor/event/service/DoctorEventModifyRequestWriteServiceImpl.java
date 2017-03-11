@@ -44,7 +44,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     }
 
     @Override
-    public Response<Boolean> createPigModifyEventRequest(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto,Long eventId, Long userId, String realName) {
+    public Response<Long> createPigModifyEventRequest(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto,Long eventId, Long userId, String realName) {
         try {
             DoctorPigEvent modifyEvent = pigEventManager.buildPigEvent(basic, inputDto);
             modifyEvent.setId(eventId);
@@ -58,7 +58,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
                     .userId(userId)
                     .userName(realName)
                     .build();
-            return Response.ok(eventModifyRequestDao.create(modifyRequest));
+            eventModifyRequestDao.create(modifyRequest);
+            return Response.ok(modifyEvent.getId());
         } catch (Exception e) {
             log.error("create request failed, basic:{}, inputDto:{}, eventId:{}, userId:{}, userName:{}, cause:{}", basic, inputDto, eventId, userId, realName, Throwables.getStackTraceAsString(e));
             return Response.fail("create.pig.modify.event.request.failed");
@@ -66,7 +67,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     }
 
     @Override
-    public Response<Boolean> createGroupModifyEventRequest(DoctorGroupInputInfo inputInfo, Long eventId, Integer eventType, Long userId, String realName) {
+    public Response<Long> createGroupModifyEventRequest(DoctorGroupInputInfo inputInfo, Long eventId, Integer eventType, Long userId, String realName) {
         try {
             DoctorGroupEvent modifyEvent = groupEventManager.buildGroupEvent(inputInfo, eventType);
             modifyEvent.setId(eventId);
@@ -80,7 +81,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
                     .userId(userId)
                     .userName(realName)
                     .build();
-            return Response.ok(eventModifyRequestDao.create(modifyRequest));
+            eventModifyRequestDao.create(modifyRequest);
+            return Response.ok(modifyRequest.getId());
         } catch (Exception e) {
             log.error("create request failed, inputInfo:{}, eventId:{}, eventType:{}, userId:{}, userName:{}, cause:{}", inputInfo, eventId, eventType, userId, realName, Throwables.getStackTraceAsString(e));
             return Response.fail("create.group.modify.event.request.failed");

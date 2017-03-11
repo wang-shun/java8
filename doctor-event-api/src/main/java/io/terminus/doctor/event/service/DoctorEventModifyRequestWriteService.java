@@ -26,16 +26,16 @@ public interface DoctorEventModifyRequestWriteService {
      * @param eventId 编辑事件id
      * @param userId 编辑人id
      * @param realName 编辑人真实姓名
-     * @return
+     * @return 请求id
      */
-    Response<Boolean> createPigModifyEventRequest(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto, Long eventId, Long userId, String realName);
+    Response<Long> createPigModifyEventRequest(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto, Long eventId, Long userId, String realName);
 
     /**
      * 创建猪群事件编辑的请求
      * @param eventId 编辑事件id
      * @param userId 编辑人id
      * @param realName 编辑人真实姓名
-     * @return
+     * @return 请求id
      */
-    Response<Boolean> createGroupModifyEventRequest(DoctorGroupInputInfo inputInfo, Long eventId, Integer eventType, Long userId, String realName);
+    Response<Long> createGroupModifyEventRequest(DoctorGroupInputInfo inputInfo, Long eventId, Integer eventType, Long userId, String realName);
 }

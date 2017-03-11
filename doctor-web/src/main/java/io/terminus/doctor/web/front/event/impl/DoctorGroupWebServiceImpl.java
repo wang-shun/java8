@@ -360,7 +360,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     }
 
     @Override
-    public RespWithEx<Boolean> createGroupModifyEventRequest(Long groupId, Integer eventType, Long eventId, String data) {
+    public RespWithEx<Long> createGroupModifyEventRequest(Long groupId, Integer eventType, Long eventId, String data) {
         try {
             String groupCode = getGroupCode(groupId);
             try {
@@ -378,8 +378,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                 if (userProfileResponse.isSuccess() && notNull(userProfileResponse.getResult())) {
                     userName = userProfileResponse.getResult().getRealName();
                 }
-                doctorEventModifyRequestWriteService.createGroupModifyEventRequest(groupInputInfo, eventId, eventType, user.getId(), userName);
-                return RespWithEx.ok(Boolean.TRUE);
+                Long requestId = RespHelper.orServEx(doctorEventModifyRequestWriteService.createGroupModifyEventRequest(groupInputInfo, eventId, eventType, user.getId(), userName));
+                return RespWithEx.ok(requestId);
             } catch (InvalidException e) {
                 throw new InvalidException(true, e.getError(), groupCode, e.getParams());
             } catch (ServiceException e) {

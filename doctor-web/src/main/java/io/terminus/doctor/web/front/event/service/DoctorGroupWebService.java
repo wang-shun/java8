@@ -77,7 +77,7 @@ public interface DoctorGroupWebService {
      * @param eventType 事件类型
      * @param eventId 事件id
      * @param data 事件输入数据
-     * @return
+     * @return 请求id
      */
-    RespWithEx<Boolean> createGroupModifyEventRequest(Long groupId, Integer eventType, Long eventId, String data);
+    RespWithEx<Long> createGroupModifyEventRequest(Long groupId, Integer eventType, Long eventId, String data);
 }

@@ -5,5 +5,4 @@ package io.terminus.doctor.event.service;
  * 编辑请求读service
  */
 public interface DoctorEventModifyRequestReadService {
-
 }

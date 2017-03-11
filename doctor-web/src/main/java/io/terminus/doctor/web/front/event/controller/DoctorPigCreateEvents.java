@@ -59,13 +59,13 @@ import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.core.aspects.DoctorValidService;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchPigEventDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -86,9 +86,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.PigType.*;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
@@ -531,17 +529,22 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/createPigModifyRequest", method = RequestMethod.POST)
     public void createPigModifyRequest(@RequestParam Long farmId,
-                                    @RequestParam Long eventId,
-                                    @RequestParam Integer eventTye,
-                                    @RequestParam Integer pigSex,
+                                       @RequestParam Long eventId,
+                                       @RequestParam Integer eventType,
+                                       @RequestParam Integer pigSex,
                                        @RequestParam String input) {
         //构建事件所需信息
-        PigEvent pigEvent = PigEvent.from(eventTye);
+        PigEvent pigEvent = PigEvent.from(eventType);
         DoctorBasicInputInfoDto basic = buildBasicInputInfoDto(farmId, pigEvent);
         BasePigEventInputDto inputDto = eventInput(pigEvent, input, farmId, pigSex, null);
+        if (Objects.equals(eventType, PigEvent.ENTRY.getKey())) {
+            inputDto = buildEntryEventInput(inputDto, pigEvent);
+        } else {
+            inputDto = buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
+        }
 
         //获取编辑人信息
-        User user = UserUtil.getCurrentUser();
+        DoctorUser user = UserUtil.getCurrentUser();
         if (isNull(user)) {
             throw new JsonResponseException("user.not.login");
         }
@@ -552,7 +555,8 @@ public class DoctorPigCreateEvents {
             userName = userProfileResponse.getResult().getRealName();
         }
 
-        doctorEventModifyRequestWriteService.createPigModifyEventRequest(basic, inputDto, eventId, user.getId(), userName);
+        Long requestId = RespHelper.or500(doctorEventModifyRequestWriteService.createPigModifyEventRequest(basic, inputDto, eventId, user.getId(), userName));
+
     }
 
     /**
