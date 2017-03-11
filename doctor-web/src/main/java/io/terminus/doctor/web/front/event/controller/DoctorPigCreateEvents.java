@@ -43,6 +43,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
+import io.terminus.doctor.event.enums.EventRequestStatus;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -501,6 +502,7 @@ public class DoctorPigCreateEvents {
         DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest.builder()
                 .farmId(modifyEvent.getFarmId())
                 .createdAt(new Date())
+                .status(EventRequestStatus.WAITING.getValue())
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .content(JSON_NON_DEFAULT_MAPPER.toJson(modifyEvent))
                 .build();

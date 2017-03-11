@@ -49,6 +49,12 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
 
+        //如果是编辑进场事件需要更新猪信息
+        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
+            DoctorPig updatePig = doctorPigDao.findById(executeEvent.getPigId());
+            doctorPigDao.update(buildUpdatePig(executeEvent, updatePig));
+        }
+
         //1.创建事件
         doctorPigEventDao.create(executeEvent);
 
@@ -124,6 +130,26 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
             doctorPig.setExtraMap(extraMapInfo);
         }
         return doctorPig;
+    }
+
+    /**
+     * 构建更新猪(修改事件使用)
+     * @param executeEvent 修改的进场事件
+     * @param pig 原猪信息
+     * @return 更改后猪信息
+     */
+    public DoctorPig buildUpdatePig(DoctorPigEvent executeEvent, DoctorPig pig) {
+        DoctorFarmEntryDto farmEntryDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFarmEntryDto.class);
+        pig.setBirthDate(farmEntryDto.getBirthday());
+        pig.setInFarmDate(executeEvent.getEventAt());
+        pig.setPigCode(executeEvent.getPigCode());
+        pig.setBreedId(farmEntryDto.getBreed());
+        pig.setBreedName(farmEntryDto.getBreedName());
+        pig.setPigFatherCode(farmEntryDto.getFatherCode());
+        pig.setPigMotherCode(farmEntryDto.getMotherCode());
+        pig.setSource(farmEntryDto.getSource());
+        pig.setBoarType(farmEntryDto.getBoarType());
+        return pig;
     }
 
     @Override

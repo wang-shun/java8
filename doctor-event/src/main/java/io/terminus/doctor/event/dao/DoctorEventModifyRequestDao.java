@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class DoctorEventModifyRequestDao extends MyBatisDao<DoctorEventModifyRequest>{
+
 }

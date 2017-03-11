@@ -181,7 +181,7 @@ public class DoctorPigEventManager {
 
     /**
      * 猪事件编辑具体实现
-     * @param modifyEvent 编辑事件
+     * @param modifyEvent 编辑之后的事件
      * @param doctorEventInfoList 事件信息
      * @param oldEventIdList 原事件id列表
      */
@@ -192,9 +192,12 @@ public class DoctorPigEventManager {
 //        DoctorPigEvent newModifyEvent = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(modifyRequest.getContent(), DoctorPigEvent.class);
 
         //获取修改前猪track
-        DoctorPigSnapshot lastPigSnapshot = doctorPigSnapshotDao.queryByEventId(modifyEvent.getId());
-        DoctorPigTrack fromTrack = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(lastPigSnapshot.getToPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack();
-
+        DoctorPigTrack fromTrack = null;
+        if (!Objects.equals(modifyEvent.getType(), PigEvent.ENTRY.getKey())) {
+            DoctorPigSnapshot lastPigSnapshot = doctorPigSnapshotDao.queryByEventId(modifyEvent.getId());
+            fromTrack = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(lastPigSnapshot.getToPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack();
+        }
+        
         //获取事件处理器
         DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(modifyEvent.getType());
 
