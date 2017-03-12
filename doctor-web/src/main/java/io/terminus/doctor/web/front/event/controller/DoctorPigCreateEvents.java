@@ -55,6 +55,7 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorEditPigEventService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
@@ -131,6 +132,8 @@ public class DoctorPigCreateEvents {
     private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
     @RpcConsumer
     private DoctorEventModifyRequestReadService doctorEventModifyRequestReadService;
+    @RpcConsumer
+    private DoctorEditPigEventService doctorEditPigEventService;
     @RpcConsumer
     private DoctorUserProfileReadService doctorUserProfileReadService;
 
@@ -520,7 +523,7 @@ public class DoctorPigCreateEvents {
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .content(JSON_NON_DEFAULT_MAPPER.toJson(modifyEvent))
                 .build();
-        doctorPigEventWriteService.modifyPigEventHandle(modifyRequest);
+        doctorEditPigEventService.modifyPigEventHandle(modifyRequest);
     }
 
     /**
@@ -561,7 +564,7 @@ public class DoctorPigCreateEvents {
 
         Long requestId = RespHelper.or500(doctorEventModifyRequestWriteService.createPigModifyEventRequest(basic, inputDto, eventId, user.getId(), userName));
         DoctorEventModifyRequest modifyRequest = RespHelper.or500(doctorEventModifyRequestReadService.findById(requestId));
-        RespWithExHelper.orInvalid(doctorPigEventWriteService.modifyPigEventHandle(modifyRequest));
+        RespWithExHelper.orInvalid(doctorEditPigEventService.modifyPigEventHandle(modifyRequest));
     }
 
     /**
@@ -571,11 +574,12 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/pagingRequest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Paging<DoctorEventModifyRequest> pagingRequest(@RequestParam Long farmId,
+                                                          @RequestParam(required = false) Integer status,
                                                           @RequestParam(required = false) String code,
                                                           @RequestParam Integer pageNo,
                                                           @RequestParam Integer pageSize) {
         return RespHelper.or500(doctorEventModifyRequestReadService
-                .pagingRequest(DoctorEventModifyRequest.builder().farmId(farmId).build(), pageNo, pageSize));
+                .pagingRequest(DoctorEventModifyRequest.builder().farmId(farmId).status(status).build(), pageNo, pageSize));
     }
 
     /**

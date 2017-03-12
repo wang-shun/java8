@@ -67,4 +67,14 @@
         FROM <include refid="tb" />
         WHERE to_event_id = #{toEventId}
     </select>
+
+    <select id="queryByEventId" parameterType="long" resultMap="DoctorGroupSnapshotMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE to_event_id = (
+        SELECT from_event_id
+        FROM <include refid="tb"/>
+        WHERE to_event_id = #{eventId}
+        )
+    </select>
+
 </mapper>

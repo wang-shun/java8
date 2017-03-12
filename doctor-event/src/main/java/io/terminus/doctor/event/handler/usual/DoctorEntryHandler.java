@@ -142,7 +142,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
      * @param pig 原猪信息
      * @return 更改后猪信息
      */
-    public DoctorPig buildUpdatePig(DoctorPigEvent executeEvent, DoctorPig pig) {
+    private DoctorPig buildUpdatePig(DoctorPigEvent executeEvent, DoctorPig pig) {
         DoctorFarmEntryDto farmEntryDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFarmEntryDto.class);
         pig.setBirthDate(farmEntryDto.getBirthday());
         pig.setInFarmDate(executeEvent.getEventAt());

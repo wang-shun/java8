@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 
@@ -35,4 +36,11 @@ public interface DoctorPigEventHandler {
      * @param fromTrack 原状态
      */
     void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack);
+
+    /**
+     * 通过猪事件构建其触发猪群事件的输入
+     * @param pigEvent 猪事件
+     * @return 猪群事件输入
+     */
+    BaseGroupInput buildTriggerGroupEventInput(DoctorPigEvent pigEvent);
 }
