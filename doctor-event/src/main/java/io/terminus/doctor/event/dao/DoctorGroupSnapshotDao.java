@@ -16,4 +16,13 @@ public class DoctorGroupSnapshotDao extends MyBatisDao<DoctorGroupSnapshot> {
     public DoctorGroupSnapshot findGroupSnapshotByToEventId(Long toEventId) {
         return getSqlSession().selectOne(sqlId("findGroupSnapshotByToEventId"), toEventId);
     }
+
+    /**
+     * 获取事件执行前的镜像
+     * @param eventId 事件id
+     * @return 镜像
+     */
+    public DoctorGroupSnapshot queryByEventId(Long eventId) {
+        return getSqlSession().selectOne(sqlId("queryByEventId"), eventId);
+    }
 }

@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
+import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.enums.FarrowingType;
@@ -133,7 +134,9 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     @Override
     public void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack) {
         //触发猪群事件
-        Long groupId = createNewFarrowGroup(doctorEventInfoList, doctorPigEvent);
+        DoctorSowMoveInGroupInput input = (DoctorSowMoveInGroupInput) buildTriggerGroupEventInput(doctorPigEvent);
+        Long groupId = doctorCommonGroupEventHandler.sowGroupEventMoveIn(doctorEventInfoList, input);
+
         expectTrue(notNull(groupId), "farrow.group.not.null");
         doctorPigTrack.setGroupId(groupId);
         doctorPigTrackDao.update(doctorPigTrack);
@@ -150,7 +153,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
      * 创建对应的猪群
      *
      */
-    private Long createNewFarrowGroup(List<DoctorEventInfo> eventInfoList, DoctorPigEvent doctorPigEvent) {
+    @Override
+    public BaseGroupInput buildTriggerGroupEventInput(DoctorPigEvent doctorPigEvent) {
         DoctorFarrowingDto farrowingDto = JSON_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorFarrowingDto.class);
         // Build 新建猪群操作方式
         DoctorSowMoveInGroupInput input = new DoctorSowMoveInGroupInput();
@@ -191,7 +195,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         input.setHealthyQty(CountUtil.getIntegerDefault0(farrowingDto.getHealthCount()));
 
         input.setRelPigEventId(doctorPigEvent.getId());
-        return doctorCommonGroupEventHandler.sowGroupEventMoveIn(eventInfoList, input);
+        return input;
     }
 
     /**

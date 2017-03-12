@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -68,7 +69,11 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        //上一个事件
         Long currentEventId = fromTrack.getCurrentEventId();
+        //原事件id,编辑可用
+        Long oldEventId = executeEvent.getId();
+
         //1.创建事件
         doctorPigEventDao.create(executeEvent);
 
@@ -90,6 +95,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .orgId(executeEvent.getOrgId())
                 .farmId(executeEvent.getFarmId())
                 .eventId(executeEvent.getId())
+                .oldEventId(oldEventId)
                 .eventAt(executeEvent.getEventAt())
                 .kind(executeEvent.getKind())
                 .mateType(executeEvent.getDoctorMateType())
@@ -107,6 +113,11 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
             triggerEvent(doctorEventInfoList, executeEvent, toTrack);
         }
+    }
+
+    @Override
+    public BaseGroupInput buildTriggerGroupEventInput(DoctorPigEvent pigEvent) {
+        return null;
     }
 
     /**
