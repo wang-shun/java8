@@ -7,7 +7,9 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -153,7 +155,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         List<DoctorGroupEvent> doctorGroupEventList = doctorGroupEventResp.getResult();
 
         linkedDoctorGroupEventList = doctorGroupEventList.stream().filter(
-                doctorGroupEvent1 -> !Objects.equals(doctorGroupEvent1.getId(), doctorGroupEvent.getId()) && doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent.getEventAt()) >= 0
+                doctorGroupEvent1 -> !Objects.equals(doctorGroupEvent1.getId(), doctorGroupEvent.getId()) && Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) >= 0
         ).collect(Collectors.toList());
 
         linkedDoctorGroupEventList = linkedDoctorGroupEventList.stream().sorted(
