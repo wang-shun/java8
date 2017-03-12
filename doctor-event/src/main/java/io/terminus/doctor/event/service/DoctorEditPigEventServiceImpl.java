@@ -3,13 +3,14 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
-import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
+import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
@@ -19,6 +20,7 @@ import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
+import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.enums.EventElicitStatus;
 import io.terminus.doctor.event.enums.EventRequestStatus;
@@ -32,6 +34,7 @@ import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -69,6 +72,8 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
     @Autowired
     private DoctorPigEventDao doctorPigEventDao;
     @Autowired
+    private DoctorPigDao doctorPigDao;
+    @Autowired
     private DoctorEditGroupEventService doctorEditGroupEventService;
 
     private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
@@ -85,15 +90,9 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
         try {
             modifyPigEventRequestHandleImpl(modifyRequest);
             return RespWithEx.ok(Boolean.TRUE);
-        } catch (ServiceException | IllegalStateException e) {
-            log.error("modify.pig.event.handle.failed, modifyRequest, cause by :{}", modifyRequest, Throwables.getStackTraceAsString(e));
-            return RespWithEx.fail(e.getMessage());
-        } catch (InvalidException e) {
-            log.error("modify.pig.event.handle.failed, modifyRequest, cause by :{}", modifyRequest, Throwables.getStackTraceAsString(e));
-            return RespWithEx.exception(e);
         } catch (Exception e) {
-            log.error("modify.pig.event.handle.failed, modifyRequest, cause by :{}", modifyRequest, Throwables.getStackTraceAsString(e));
-            return RespWithEx.fail("pig.event.modify.failed");
+            log.error("modify.pig.event.handle.failed, modifyRequest:{}, cause by :{}", modifyRequest, Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException("modify.pig.event.handle.failed");
         }
     }
 
@@ -102,15 +101,9 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
         try {
             modifyPigEventHandleImpl(modifyEvent);
             return RespWithEx.ok(Boolean.TRUE);
-        } catch (ServiceException | IllegalStateException e) {
-            log.error("modify.pig.event.handle.failed, modifyRequest, cause by :{}", modifyEvent, Throwables.getStackTraceAsString(e));
-            return RespWithEx.fail(e.getMessage());
-        } catch (InvalidException e) {
-            log.error("modify.pig.event.handle.failed, modifyRequest, cause by :{}", modifyEvent, Throwables.getStackTraceAsString(e));
-            return RespWithEx.exception(e);
         } catch (Exception e) {
-            log.error("modify.pig.event.handle.failed, modifyRequest, cause by :{}", modifyEvent, Throwables.getStackTraceAsString(e));
-            return RespWithEx.fail("pig.event.modify.failed");
+            log.error("modify.pig.event.handle.failed, modifyEvent:{}, cause by :{}", modifyEvent, Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException("modify.pig.event.handle.failed");
         }
     }
 
@@ -130,12 +123,14 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
 
             //更新修改请求的状态
             modifyRequest.setStatus(EventRequestStatus.SUCCESS.getValue());
+            eventModifyRequestDao.update(modifyRequest);
         } catch (Exception e) {
             log.info("modify pig event request handle failed, cause by:{}", Throwables.getStackTraceAsString(e));
             modifyRequest.setStatus(EventRequestStatus.FAILED.getValue());
             modifyRequest.setReason("");
+            eventModifyRequestDao.update(modifyRequest);
+            throw new ServiceException("modify.pig.event.request.handle.failed");
         }
-        eventModifyRequestDao.update(modifyRequest);
         log.info("modify pig event handle ending");
     }
 
@@ -152,13 +147,15 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
         List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
         List<Long> pigOldEventIdList = Lists.newLinkedList();
         DoctorPigTrack currentTrack = doctorPigTrackDao.findByPigId(modifyEvent.getPigId());
+        DoctorPig oldPig = doctorPigDao.findById(modifyEvent.getPigId());
+        Long oldEventId = modifyEvent.getId();
         try {
             //1.处理猪事件编辑
             modifyPigEventHandle(modifyEvent, doctorEventInfoList, pigOldEventIdList);
 
             //2.处理关联的猪群事件编辑
             if (TRIGGER_GROUP_EVENT.contains(modifyEvent.getType())) {
-                if (!Objects.equals(modifyEvent.getType(), PigEvent.WEAN.getKey())) {
+                if (!Objects.equals(modifyEvent.getType(), PigEvent.WEAN.getKey()) && isEffectWeanEvent(modifyEvent, oldEventId)) {
                     //是否有断奶事件
                     List<DoctorEventInfo> weanEventInfoList = doctorEventInfoList.stream()
                             .filter(doctorEventInfo -> Objects.equals(doctorEventInfo.getBusinessType(), DoctorEventInfo.Business_Type.PIG.getValue())
@@ -171,36 +168,26 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                         //获取猪群断奶事件输入
                         BaseGroupInput weanGroupInput = doctorPigEventManager.getHandler(PigEvent.WEAN.getKey()).buildTriggerGroupEventInput(weanEvent);
                         //猪群断奶事件前镜像
-                        DoctorGroupEvent oldGroupWeanEvent = doctorGroupEventDao.findByRelPigEventId(modifyEvent.getId());
+                        DoctorGroupEvent oldGroupWeanEvent = doctorGroupEventDao.findByRelPigEventId(weanEventInfo.getOldEventId());
                         DoctorGroupSnapshot oldGroupWeanSnapshot = doctorGroupSnapshotDao.queryByEventId(oldGroupWeanEvent.getId());
                         DoctorGroupSnapShotInfo oldGroupWeanSnapshotInfo = JSON_MAPPER.fromJson(oldGroupWeanSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
                         //构建猪群断奶事件
                         DoctorGroupEvent newGroupWeanEvent = doctorGroupEventManager.buildGroupEvent(new DoctorGroupInputInfo(new DoctorGroupDetail(oldGroupWeanSnapshotInfo.getGroup(), oldGroupWeanSnapshotInfo.getGroupTrack()), weanGroupInput), GroupEventType.WEAN.getValue());
+                        newGroupWeanEvent.setId(oldGroupWeanEvent.getId());
                         //猪群事件编辑
                         doctorEditGroupEventService.elicitDoctorGroupTrack(newGroupWeanEvent, EventElicitStatus.EDIT);
-//                    oldGroupWeanEvent.setStatus(EventStatus.INVALID.getValue());
-//                    doctorGroupEventDao.update(oldGroupWeanEvent);
-//                    doctorGroupEventDao.create(newGroupWeanEvent);
-//                    DoctorEventInfo groupWeanEvent = DoctorEventInfo.builder()
-//                            .eventId(newGroupWeanEvent.getId())
-//                            .eventType(GroupEventType.WEAN.getValue())
-//                            .oldEventId(oldGroupWeanEvent.getId())
-//                            .businessId(newGroupWeanEvent.getGroupId())
-//                            .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
-//                            .farmId(newGroupWeanEvent.getFarmId())
-//                            .build();
                     }
                 }
                 //获取猪群事件输入
                 BaseGroupInput newGroupEventInput = doctorPigEventManager.getHandler(modifyEvent.getType()).buildTriggerGroupEventInput(modifyEvent);
                 //获取猪群需要修改原事件
-                DoctorGroupEvent oldGroupModifyEvent = doctorGroupEventDao.findByRelPigEventId(modifyEvent.getId());
+                DoctorGroupEvent oldGroupModifyEvent = doctorGroupEventDao.findByRelPigEventId(oldEventId);
                 DoctorGroupSnapshot beforeGroupSnapshot = doctorGroupSnapshotDao.queryByEventId(oldGroupModifyEvent.getId());
                 DoctorGroupSnapShotInfo beforeGroupSnapShotInfo = JSON_MAPPER.fromJson(beforeGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
                 DoctorGroupEvent modifyGroupEvent = doctorGroupEventManager.buildGroupEvent(new DoctorGroupInputInfo(new DoctorGroupDetail(beforeGroupSnapShotInfo.getGroup(), beforeGroupSnapShotInfo.getGroupTrack()), newGroupEventInput), oldGroupModifyEvent.getType());
+                modifyGroupEvent.setId(oldGroupModifyEvent.getId());
                 //猪群事件编辑
                 doctorEditGroupEventService.elicitDoctorGroupTrack(modifyGroupEvent, EventElicitStatus.EDIT);
-
             }
         } catch (Exception e) {
             //Map<Integer, List<DoctorEventInfo>> businessTypeMap = doctorEventInfoList.stream().collect(Collectors.groupingBy(DoctorEventInfo::getBusinessType));
@@ -208,7 +195,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
             //回滚猪事件编辑
             doctorPigEventManager.modifyPidEventRollback(doctorEventInfoList.stream()
                     .filter(doctorEventInfo -> Objects.equals(doctorEventInfo.getBusinessType(), DoctorEventInfo.Business_Type.PIG.getValue()))
-                    .map(DoctorEventInfo::getEventId).collect(Collectors.toList()), pigOldEventIdList, currentTrack);
+                    .map(DoctorEventInfo::getEventId).collect(Collectors.toList()), pigOldEventIdList, currentTrack, oldPig);
 
             log.info("modify pig event handle failed, cause by:{}", Throwables.getStackTraceAsString(e));
             throw new ServiceException("pig.event.modify.failed");
@@ -304,4 +291,25 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
         doctorPigEventManager.transactionalHandle(handler, doctorEventInfoList, executeEvent, fromTrack);
     }
 
+    /**
+     * 是否会影响断奶事件
+     * @param modifyEvent 编辑后的事件
+     * @param oldEventId 原事件id
+     * @return 是否影响
+     */
+    private boolean isEffectWeanEvent(DoctorPigEvent modifyEvent, Long oldEventId) {
+        DoctorPigEvent oldPigEvent = doctorPigEventDao.findById(oldEventId);
+        //
+        if (Objects.equals(oldPigEvent.getType(), PigEvent.FARROWING.getKey())
+                && !Objects.equals(oldPigEvent.getLiveCount(), modifyEvent.getLiveCount())) {
+            return true;
+        }
+
+        if (Objects.equals(oldPigEvent.getType(), PigEvent.PIGLETS_CHG.getKey())) {
+            DoctorPigletsChgDto oldPigletsChgDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorPigletsChgDto.class);
+            DoctorPigletsChgDto newPigletsChgDto = JSON_MAPPER.fromJson(modifyEvent.getExtra(), DoctorPigletsChgDto.class);
+            return !Objects.equals(oldPigletsChgDto.getPigletsCount(), newPigletsChgDto.getPigletsCount());
+        }
+        return false;
+    }
 }
