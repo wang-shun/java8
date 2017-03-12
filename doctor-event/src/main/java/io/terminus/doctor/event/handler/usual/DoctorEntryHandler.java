@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
@@ -49,11 +50,11 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
 
-        //如果是编辑进场事件需要更新猪信息
-        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
-            DoctorPig updatePig = doctorPigDao.findById(executeEvent.getPigId());
-            doctorPigDao.update(buildUpdatePig(executeEvent, updatePig));
-        }
+//        //如果是编辑进场事件需要更新猪信息
+//        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
+//            DoctorPig updatePig = doctorPigDao.findById(executeEvent.getPigId());
+//            doctorPigDao.update(buildUpdatePig(executeEvent, updatePig));
+//        }
 
         //1.创建事件
         doctorPigEventDao.create(executeEvent);
@@ -160,7 +161,11 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorFarmEntryDto farmEntryDto = (DoctorFarmEntryDto) inputDto;
         DoctorPig doctorPig = buildDoctorPig(farmEntryDto, basic);
-        doctorPigDao.create(doctorPig);
+        if (isNull(farmEntryDto.getPigId())) {
+            doctorPigDao.create(doctorPig);
+        } else {
+            doctorPigDao.update(doctorPig);
+        }
         farmEntryDto.setPigId(doctorPig.getId());
         DoctorPigEvent doctorPigEvent =  super.buildPigEvent(basic, inputDto);
         doctorPigEvent.setParity(farmEntryDto.getParity());

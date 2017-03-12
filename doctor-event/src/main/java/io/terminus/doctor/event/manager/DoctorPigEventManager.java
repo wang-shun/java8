@@ -7,6 +7,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -30,6 +31,7 @@ import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.DoctorPigsByEventSelector;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.zookeeper.pubsub.Publisher;
@@ -62,6 +64,8 @@ public class DoctorPigEventManager {
     private DoctorPigTrackDao doctorPigTrackDao;
     @Autowired
     private DoctorPigEventDao doctorPigEventDao;
+    @Autowired
+    private DoctorPigDao doctorPigDao;
 
     /**
      * 事件处理
@@ -105,12 +109,12 @@ public class DoctorPigEventManager {
 
     /**
      * 猪事件编辑错误时回滚
-     * @param pigOldEventIdList 原事件列
      * @param pigNewEventIdList 新事件列表
+     * @param pigOldEventIdList 原事件列
      * @param fromTrack 事件编辑前猪track
      */
     @Transactional
-    public void modifyPidEventRollback(List<Long> pigOldEventIdList, List<Long> pigNewEventIdList, DoctorPigTrack fromTrack) {
+    public void modifyPidEventRollback(List<Long> pigNewEventIdList, List<Long> pigOldEventIdList, DoctorPigTrack fromTrack, DoctorPig oldPig) {
         //1.将新生成事件置为无效
         if (!Arguments.isNullOrEmpty(pigNewEventIdList)) {
             doctorPigEventDao.updateEventsStatus(pigNewEventIdList, EventStatus.INVALID.getValue());
@@ -120,7 +124,9 @@ public class DoctorPigEventManager {
             doctorPigEventDao.updateEventsStatus(pigOldEventIdList, EventStatus.VALID.getValue());
         }
         //3.还原track
-        doctorPigTrackDao.update(fromTrack);
+       doctorPigTrackDao.update(fromTrack);
+        //4.还原猪
+        doctorPigDao.update(oldPig);
     }
 
     /**
