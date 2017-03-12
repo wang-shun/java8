@@ -297,4 +297,17 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         }
         return true;
     }
+
+    /**
+     * 触发其他猪群事件
+     * @param triggerDoctorGroupEventList
+     * @param doctorGroupEventList
+     * @param doctorGroupTrack
+     * @param doctorGroupEvent
+     */
+    @Override
+    public List<DoctorGroupEvent> triggerGroupEvent(List<DoctorGroupEvent> triggerDoctorGroupEventList,DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent){
+
+        return triggerDoctorGroupEventList;
+    }
 }

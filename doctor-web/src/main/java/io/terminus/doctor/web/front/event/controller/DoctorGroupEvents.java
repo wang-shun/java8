@@ -165,7 +165,7 @@ public class DoctorGroupEvents {
         Long requestId = RespWithExHelper.orInvalid(doctorGroupWebService.createGroupModifyEventRequest(groupId, eventType, eventId, data));
         DoctorEventModifyRequest modifyRequest = RespHelper.or500(doctorEventModifyRequestReadService.findById(requestId));
         DoctorGroupEvent modifyEvent = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(modifyRequest.getContent(), DoctorGroupEvent.class);
-        RespHelper.or500(doctorEditGroupEventService.elicitDoctorGroupTrack(modifyEvent, EventElicitStatus.EDIT));
+        RespHelper.or500(doctorEditGroupEventService.elicitDoctorGroupTrack(modifyEvent));
     }
 
     /**
@@ -458,16 +458,23 @@ public class DoctorGroupEvents {
 
 
     @RequestMapping(value="/edit", method = RequestMethod.GET)
-    public Boolean editGroupEvent(@RequestParam Long id){
-        DoctorGroupEvent doctorGroupEvent = RespHelper.or500(doctorGroupReadService.findGroupEventById(id));
-        doctorGroupEvent.setQuantity(doctorGroupEvent.getQuantity() + 2);
-        doctorGroupEvent.setWeight(doctorGroupEvent.getWeight() + 10);
-        doctorGroupEvent.setAvgWeight(doctorGroupEvent.getWeight()/doctorGroupEvent.getQuantity());
-        DoctorMoveInGroupEvent doctorMoveInGroupEvent = JsonMapper.nonEmptyMapper().fromJson(doctorGroupEvent.getExtra(), DoctorMoveInGroupEvent.class);
-        doctorMoveInGroupEvent.setQuantity(doctorGroupEvent.getQuantity());
-        doctorMoveInGroupEvent.setHealthyQty(doctorMoveInGroupEvent.getHealthyQty() + 2);
-        doctorMoveInGroupEvent.setAvgWeight(doctorGroupEvent.getAvgWeight());
-        doctorEditGroupEventService.elicitDoctorGroupTrack(doctorGroupEvent, EventElicitStatus.EDIT);
-        return true;
+    public Response<String> editGroupEvent(@RequestParam Long id){
+        log.info("edit group event , eventId={}", id);
+        try{
+            DoctorGroupEvent doctorGroupEvent = RespHelper.or500(doctorGroupReadService.findGroupEventById(id));
+            doctorGroupEvent.setQuantity(doctorGroupEvent.getQuantity() + 2);
+            doctorGroupEvent.setWeight(doctorGroupEvent.getWeight() + 10);
+            doctorGroupEvent.setAvgWeight(doctorGroupEvent.getWeight()/doctorGroupEvent.getQuantity());
+            DoctorMoveInGroupEvent doctorMoveInGroupEvent = JsonMapper.nonEmptyMapper().fromJson(doctorGroupEvent.getExtra(), DoctorMoveInGroupEvent.class);
+            doctorMoveInGroupEvent.setQuantity(doctorGroupEvent.getQuantity());
+            doctorMoveInGroupEvent.setHealthyQty(doctorMoveInGroupEvent.getHealthyQty() + 2);
+            doctorMoveInGroupEvent.setAvgWeight(doctorGroupEvent.getAvgWeight());
+            log.info("edit event = {}", doctorGroupEvent);
+            doctorEditGroupEventService.elicitDoctorGroupTrack(doctorGroupEvent);
+        }catch(Exception e){
+            log.info("edit event failed");
+            return Response.fail("edit event failed");
+        }
+        return Response.ok("edit event success");
     }
 }

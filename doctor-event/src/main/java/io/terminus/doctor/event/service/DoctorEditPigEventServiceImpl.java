@@ -177,7 +177,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                         //构建猪群断奶事件
                         DoctorGroupEvent newGroupWeanEvent = doctorGroupEventManager.buildGroupEvent(new DoctorGroupInputInfo(new DoctorGroupDetail(oldGroupWeanSnapshotInfo.getGroup(), oldGroupWeanSnapshotInfo.getGroupTrack()), weanGroupInput), GroupEventType.WEAN.getValue());
                         //猪群事件编辑
-                        doctorEditGroupEventService.elicitDoctorGroupTrack(newGroupWeanEvent, EventElicitStatus.EDIT);
+                        doctorEditGroupEventService.elicitDoctorGroupTrack(newGroupWeanEvent);
 //                    oldGroupWeanEvent.setStatus(EventStatus.INVALID.getValue());
 //                    doctorGroupEventDao.update(oldGroupWeanEvent);
 //                    doctorGroupEventDao.create(newGroupWeanEvent);
@@ -199,7 +199,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                 DoctorGroupSnapShotInfo beforeGroupSnapShotInfo = JSON_MAPPER.fromJson(beforeGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
                 DoctorGroupEvent modifyGroupEvent = doctorGroupEventManager.buildGroupEvent(new DoctorGroupInputInfo(new DoctorGroupDetail(beforeGroupSnapShotInfo.getGroup(), beforeGroupSnapShotInfo.getGroupTrack()), newGroupEventInput), oldGroupModifyEvent.getType());
                 //猪群事件编辑
-                doctorEditGroupEventService.elicitDoctorGroupTrack(modifyGroupEvent, EventElicitStatus.EDIT);
+                doctorEditGroupEventService.elicitDoctorGroupTrack(modifyGroupEvent);
 
             }
         } catch (Exception e) {

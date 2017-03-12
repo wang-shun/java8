@@ -442,39 +442,64 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
 
     @Override
-    public DoctorGroupTrack editGroupEvent(List<DoctorGroupEvent> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
+    public DoctorGroupTrack editGroupEvent(List<DoctorGroupEvent> triggerDoctorGroupEventList, List<DoctorGroupEvent> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent){
+
         //校验基本的数量,看会不会失败
-        if(!checkDoctorGroupEvent(doctorGroupTrack, doctorGroupEvent)){
-            log.info("edit group event failed, doctorGroupEvent={}", doctorGroupEvent);
+        if(!checkDoctorGroupEvent(doctorGroupTrack, newEvent)){
+            log.info("edit group event failed, doctorGroupEvent={}", newEvent);
             throw new JsonResponseException("edit.group.event.failed");
         }
 
         DoctorGroupEvent preDoctorGroupEvent = doctorGroupEventDao.findById(doctorGroupTrack.getRelEventId());
 
         //根据event推演track
-        doctorGroupTrack = elicitGroupTrack(preDoctorGroupEvent, doctorGroupEvent, doctorGroupTrack);
+        doctorGroupTrack = elicitGroupTrack(preDoctorGroupEvent, newEvent, doctorGroupTrack);
         //创建猪群事件
-        doctorGroupEventDao.create(doctorGroupEvent);
+        doctorGroupEventDao.create(newEvent);
 
         //新增的事件放入需要回滚的list
-        doctorGroupEventList.add(doctorGroupEvent);
+        doctorGroupEventList.add(newEvent);
 
         //创建猪群track
-        updateGroupTrack(doctorGroupTrack, doctorGroupEvent);
+        updateGroupTrack(doctorGroupTrack, newEvent);
 
         //创建snapshot
-        createGroupEventSnapshot(doctorGroupTrack, doctorGroupEvent, preDoctorGroupEvent);
+        createGroupEventSnapshot(doctorGroupTrack, newEvent, preDoctorGroupEvent);
 
+        //触发其他事件
+        triggerGroupEvent(triggerDoctorGroupEventList, oldEvent, newEvent);
 
         return doctorGroupTrack;
     }
 
+    /**
+     * 触发其他猪群事件
+     * @param triggerDoctorGroupEventList
+     * @param oldEvent
+     * @param newEvent
+     * @return
+     */
+    public List<DoctorGroupEvent> triggerGroupEvent(List<DoctorGroupEvent> triggerDoctorGroupEventList, DoctorGroupEvent oldEvent,  DoctorGroupEvent newEvent){
+        return triggerDoctorGroupEventList;
+    }
+
+    /**
+     * 校验DoctorGroupEvent
+     * @param doctorGroupTrack
+     * @param doctorGroupEvent
+     * @return
+     */
     public boolean checkDoctorGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
         return true;
     }
 
+    /**
+     * 创建snapshot
+     * @param doctorGroupTrack
+     * @param doctorGroupEvent
+     * @param preDoctorGroupEvent
+     */
     private void createGroupEventSnapshot(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent, DoctorGroupEvent preDoctorGroupEvent) {
-        //创建snapshot
         DoctorGroupSnapshot doctorGroupSnapshot = new DoctorGroupSnapshot();
         doctorGroupSnapshot.setGroupId(doctorGroupEvent.getGroupId());
         doctorGroupSnapshot.setFromEventId(preDoctorGroupEvent.getId());

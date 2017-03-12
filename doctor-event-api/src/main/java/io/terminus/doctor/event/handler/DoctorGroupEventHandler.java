@@ -46,7 +46,7 @@ public interface DoctorGroupEventHandler {
     DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track);
 
 
-    DoctorGroupTrack editGroupEvent(List<DoctorGroupEvent> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent);
+    DoctorGroupTrack editGroupEvent(List<DoctorGroupEvent> triggerGroupEventList, List<DoctorGroupEvent> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent);
 
     int getGroupAvgDayAge(Long groupId, DoctorGroupEvent doctorGroupEvent);
 }
