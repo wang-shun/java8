@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.enums.EventElicitStatus;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.manager.DoctorEditGroupEventManager;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -102,8 +103,11 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
             taskDoctorGroupEventList.add(doctorGroupEvent);
 
+            List<DoctorGroupEvent> statusLists = Lists.newArrayList();
+            statusLists.add(doctorGroupEvent);
+            statusLists.addAll(localDoctorGroupEventList);
             //将需要推演的groupEvent.status = 0
-            doctorEditGroupEventManager.updateOldDoctorGroupEvents(localDoctorGroupEventList);
+            doctorEditGroupEventManager.updateDoctorGroupEventStatus(statusLists, EventStatus.HANDLING.getValue());
             taskDoctorGroupEventList.addAll(localDoctorGroupEventList);
 
             int index = 0;
@@ -126,6 +130,8 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
                     this.elicitDoctorGroupEvents(triggerEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
                 });
             }
+
+            doctorEditGroupEventManager.updateDoctorGroupEventStatus(taskDoctorGroupEventList, EventStatus.INVALID.getValue());
 
         }catch(Exception e){
             log.info("edit event failed, cause: {}", Throwables.getStackTraceAsString(e));
