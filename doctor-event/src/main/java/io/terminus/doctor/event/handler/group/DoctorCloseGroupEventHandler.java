@@ -118,7 +118,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
     }
 
     @Override
-    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
+    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
         return null;
     }
 

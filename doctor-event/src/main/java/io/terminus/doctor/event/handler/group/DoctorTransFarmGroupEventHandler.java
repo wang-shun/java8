@@ -87,7 +87,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
     }
 
     @Override
-    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
+    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorTransFarmGroupEvent doctorTransFarmGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransFarmGroupEvent.class);
         if(Arguments.isNull(doctorTransFarmGroupEvent)) {
             log.error("parse doctorTransFarmGroupEvent faild, doctorGroupEvent = {}", event);

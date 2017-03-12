@@ -175,7 +175,18 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                         DoctorGroupEvent newGroupWeanEvent = doctorGroupEventManager.buildGroupEvent(new DoctorGroupInputInfo(new DoctorGroupDetail(oldGroupWeanSnapshotInfo.getGroup(), oldGroupWeanSnapshotInfo.getGroupTrack()), weanGroupInput), GroupEventType.WEAN.getValue());
                         newGroupWeanEvent.setId(oldGroupWeanEvent.getId());
                         //猪群事件编辑
-                        doctorEditGroupEventService.elicitDoctorGroupTrack(newGroupWeanEvent, EventElicitStatus.EDIT);
+                        doctorEditGroupEventService.elicitDoctorGroupTrack(newGroupWeanEvent);
+//                    oldGroupWeanEvent.setStatus(EventStatus.INVALID.getValue());
+//                    doctorGroupEventDao.update(oldGroupWeanEvent);
+//                    doctorGroupEventDao.create(newGroupWeanEvent);
+//                    DoctorEventInfo groupWeanEvent = DoctorEventInfo.builder()
+//                            .eventId(newGroupWeanEvent.getId())
+//                            .eventType(GroupEventType.WEAN.getValue())
+//                            .oldEventId(oldGroupWeanEvent.getId())
+//                            .businessId(newGroupWeanEvent.getGroupId())
+//                            .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
+//                            .farmId(newGroupWeanEvent.getFarmId())
+//                            .build();
                     }
                 }
                 //获取猪群事件输入
@@ -187,7 +198,8 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                 DoctorGroupEvent modifyGroupEvent = doctorGroupEventManager.buildGroupEvent(new DoctorGroupInputInfo(new DoctorGroupDetail(beforeGroupSnapShotInfo.getGroup(), beforeGroupSnapShotInfo.getGroupTrack()), newGroupEventInput), oldGroupModifyEvent.getType());
                 modifyGroupEvent.setId(oldGroupModifyEvent.getId());
                 //猪群事件编辑
-                doctorEditGroupEventService.elicitDoctorGroupTrack(modifyGroupEvent, EventElicitStatus.EDIT);
+                doctorEditGroupEventService.elicitDoctorGroupTrack(modifyGroupEvent);
+
             }
         } catch (Exception e) {
             //Map<Integer, List<DoctorEventInfo>> businessTypeMap = doctorEventInfoList.stream().collect(Collectors.groupingBy(DoctorEventInfo::getBusinessType));

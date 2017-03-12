@@ -84,7 +84,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
     }
 
     @Override
-    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
+    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorTurnSeedGroupEvent doctorTurnSeedGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTurnSeedGroupEvent.class);
         if(Arguments.isNull(doctorTurnSeedGroupEvent)) {
             log.error("parse doctorTurnSeedGroupEvent faild, doctorGroupEvent = {}", event);
@@ -191,5 +191,13 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
             return oldQty - 1;
         }
         return oldQty;
+    }
+
+    @Override
+    public boolean checkDoctorGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent) {
+        if(doctorGroupTrack.getQuantity() < 1){
+            return false;
+        }
+        return true;
     }
 }

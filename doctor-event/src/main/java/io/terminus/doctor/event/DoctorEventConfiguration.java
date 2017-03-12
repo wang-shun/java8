@@ -4,13 +4,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
-import io.terminus.doctor.event.editHandler.DoctorEditGroupEventHandler;
-import io.terminus.doctor.event.editHandler.group.*;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
+import io.terminus.doctor.event.handler.group.*;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgFarmEventHandler;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgLocationEventHandler;
@@ -208,20 +208,30 @@ public class  DoctorEventConfiguration {
     }
 
     @Bean
-    public DoctorEditGroupEventHandlers doctorEditGroupHandlers(DoctorEditTurnSeedGroupEventHandler doctorEditTurnSeedGroupEventHandler,
-                                                                DoctorEditMoveInGroupEventHandler doctorEditMoveInGroupEventHandler,
-                                                                DoctorEditChangeGroupEventHandler doctorEditChangeGroupEventHandler,
-                                                                DoctorEditTransGroupEventHandler doctorEditTransGroupEventHandler,
-                                                                DoctorEditTransFarmGroupEventHandler doctorEditTransFarmGroupEventHandler){
-        Map<Integer, DoctorEditGroupEventHandler> handlerMap = Maps.newHashMap();
-        handlerMap.put(GroupEventType.TURN_SEED.getValue(),doctorEditTurnSeedGroupEventHandler);
-        handlerMap.put(GroupEventType.MOVE_IN.getValue(), doctorEditMoveInGroupEventHandler);
-        handlerMap.put(GroupEventType.CHANGE.getValue(), doctorEditChangeGroupEventHandler);
-        handlerMap.put(GroupEventType.TRANS_GROUP.getValue(), doctorEditTransGroupEventHandler);
-        handlerMap.put(GroupEventType.TRANS_FARM.getValue(), doctorEditTransFarmGroupEventHandler);
-        DoctorEditGroupEventHandlers doctorEditGroupEventHandlers = new DoctorEditGroupEventHandlers();
-        doctorEditGroupEventHandlers.setEventHandlerMap(handlerMap);
-        return doctorEditGroupEventHandlers;
+    public DoctorGroupEventHandlers doctorGroupEventHandlers(DoctorAntiepidemicGroupEventHandler doctorAntiepidemicGroupEventHandler,
+                                                             DoctorChangeGroupEventHandler doctorChangeGroupEventHandler,
+                                                             DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
+                                                             DoctorDiseaseGroupEventHandler doctorDiseaseGroupEventHandler,
+                                                             DoctorLiveStockGroupEventHandler doctorLiveStockGroupEventHandler,
+                                                             DoctorMoveInGroupEventHandler doctorMoveInGroupEventHandler,
+                                                             DoctorTransFarmGroupEventHandler doctorTransFarmGroupEventHandler,
+                                                             DoctorTransGroupEventHandler doctorTransGroupEventHandler,
+                                                             DoctorTurnSeedGroupEventHandler doctorTurnSeedGroupEventHandler,
+                                                             DoctorWeanGroupEventHandler doctorWeanGroupEventHandler){
+        Map<Integer, DoctorGroupEventHandler> handlerMap = Maps.newHashMap();
+        handlerMap.put(GroupEventType.ANTIEPIDEMIC.getValue(),doctorAntiepidemicGroupEventHandler);
+        handlerMap.put(GroupEventType.CHANGE.getValue(),doctorChangeGroupEventHandler);
+        handlerMap.put(GroupEventType.CLOSE.getValue(),doctorCloseGroupEventHandler);
+        handlerMap.put(GroupEventType.DISEASE.getValue(),doctorDiseaseGroupEventHandler);
+        handlerMap.put(GroupEventType.LIVE_STOCK.getValue(), doctorLiveStockGroupEventHandler);
+        handlerMap.put(GroupEventType.MOVE_IN.getValue(), doctorMoveInGroupEventHandler);
+        handlerMap.put(GroupEventType.TRANS_FARM.getValue(), doctorTransFarmGroupEventHandler);
+        handlerMap.put(GroupEventType.TRANS_GROUP.getValue(), doctorTransGroupEventHandler);
+        handlerMap.put(GroupEventType.TURN_SEED.getValue(), doctorTurnSeedGroupEventHandler);
+        handlerMap.put(GroupEventType.WEAN.getValue(), doctorWeanGroupEventHandler);
+        DoctorGroupEventHandlers doctorGroupEventHandlers = new DoctorGroupEventHandlers();
+        doctorGroupEventHandlers.setEventHandlerMap(handlerMap);
+        return doctorGroupEventHandlers;
     }
 
 

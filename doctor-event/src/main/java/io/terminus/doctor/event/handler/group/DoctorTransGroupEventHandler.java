@@ -112,7 +112,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     }
 
     @Override
-    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
+    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorTransGroupEvent doctorTransGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
         if(Arguments.isNull(doctorTransGroupEvent)) {
             log.error("parse doctorTransGroupEvent faild, doctorGroupEvent = {}", event);
@@ -287,5 +287,27 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
     private DoctorBarn getBarn(Long barnId) {
         return doctorBarnDao.findById(barnId);
+    }
+
+
+    @Override
+    public boolean checkDoctorGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent) {
+        if(doctorGroupTrack.getQuantity() < doctorGroupEvent.getQuantity()){
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 触发其他猪群事件
+     * @param triggerDoctorGroupEventList
+     * @param doctorGroupEventList
+     * @param doctorGroupTrack
+     * @param doctorGroupEvent
+     */
+    @Override
+    public List<DoctorGroupEvent> triggerGroupEvent(List<DoctorGroupEvent> triggerDoctorGroupEventList,DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent){
+
+        return triggerDoctorGroupEventList;
     }
 }
