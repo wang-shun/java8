@@ -120,6 +120,14 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     }
 
     @Override
+    public boolean checkDoctorGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent) {
+        if(doctorGroupTrack.getQuantity() < doctorGroupEvent.getQuantity()){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.CHANGE.getValue());
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
@@ -143,8 +151,8 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
 
     @Override
-    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack groupTrack) {
-        DoctorChangeGroupEvent changeEvent = (DoctorChangeGroupEvent) event.getExtraMap();
+    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack groupTrack) {
+        DoctorChangeGroupEvent changeEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorChangeGroupEvent.class);
         groupTrack.setQuantity(EventUtil.minusQuantity(groupTrack.getQuantity(), event.getQuantity()));
 
         //如果公猪数量 lt 0 按 0 计算
@@ -164,7 +172,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     }
 
     private void checkGroupEvent(DoctorGroup group, DoctorGroupEvent event, DoctorGroupTrack groupTrack) {
-        DoctorChangeGroupEvent changeEvent = (DoctorChangeGroupEvent) event.getExtraMap();
+        DoctorChangeGroupEvent changeEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorChangeGroupEvent.class);
         checkQuantity(groupTrack.getQuantity(), event.getQuantity());
         checkQuantityEqual(event.getQuantity(), changeEvent.getBoarQty(), changeEvent.getSowQty());
 

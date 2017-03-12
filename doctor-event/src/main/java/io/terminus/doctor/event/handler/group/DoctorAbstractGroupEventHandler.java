@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
@@ -16,6 +17,7 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.dto.event.group.DoctorChangeGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
@@ -99,15 +101,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         eventInfoList.add(eventInfo);
 
     }
-
-    /**
-     * 推演DcotorGroupTrack
-     * @param event
-     * @param track
-     * @return
-     */
-    protected abstract DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track);
-
 
     /**
      * 处理事件的抽象方法, 由继承的子类去实现
@@ -445,4 +438,56 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 break;
         }
     }
+
+
+
+    @Override
+    public DoctorGroupTrack editGroupEvent(List<DoctorGroupEvent> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
+        //校验基本的数量,看会不会失败
+        if(!checkDoctorGroupEvent(doctorGroupTrack, doctorGroupEvent)){
+            log.info("edit group event failed, doctorGroupEvent={}", doctorGroupEvent);
+            throw new JsonResponseException("edit.group.event.failed");
+        }
+
+        DoctorGroupEvent preDoctorGroupEvent = doctorGroupEventDao.findById(doctorGroupTrack.getRelEventId());
+
+        //根据event推演track
+        doctorGroupTrack = elicitGroupTrack(preDoctorGroupEvent, doctorGroupEvent, doctorGroupTrack);
+        //创建猪群事件
+        doctorGroupEventDao.create(doctorGroupEvent);
+
+        //新增的事件放入需要回滚的list
+        doctorGroupEventList.add(doctorGroupEvent);
+
+        //创建猪群track
+        updateGroupTrack(doctorGroupTrack, doctorGroupEvent);
+
+        //创建snapshot
+        createGroupEventSnapshot(doctorGroupTrack, doctorGroupEvent, preDoctorGroupEvent);
+
+
+        return doctorGroupTrack;
+    }
+
+    public boolean checkDoctorGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
+        return true;
+    }
+
+    private void createGroupEventSnapshot(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent, DoctorGroupEvent preDoctorGroupEvent) {
+        //创建snapshot
+        DoctorGroupSnapshot doctorGroupSnapshot = new DoctorGroupSnapshot();
+        doctorGroupSnapshot.setGroupId(doctorGroupEvent.getGroupId());
+        doctorGroupSnapshot.setFromEventId(preDoctorGroupEvent.getId());
+        doctorGroupSnapshot.setToEventId(doctorGroupEvent.getId());
+
+        DoctorGroupSnapShotInfo doctorGroupSnapShotInfo = new DoctorGroupSnapShotInfo();
+        DoctorGroup doctorGroup = doctorGroupDao.findById(doctorGroupEvent.getGroupId());
+        doctorGroupSnapShotInfo.setGroupEvent(doctorGroupEvent);
+        doctorGroupSnapShotInfo.setGroupTrack(doctorGroupTrack);
+        doctorGroupSnapShotInfo.setGroup(doctorGroup);
+        doctorGroupSnapshot.setToInfo(JSON_MAPPER.toJson(doctorGroupSnapShotInfo));
+        doctorGroupSnapshotDao.create(doctorGroupSnapshot);
+    }
+    
+
 }

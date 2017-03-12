@@ -2,8 +2,8 @@ package io.terminus.doctor.event.manager;
 
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.editHandler.group.DoctorEditGroupEventHandlers;
 import io.terminus.doctor.event.enums.EventStatus;
+import io.terminus.doctor.event.handler.group.DoctorGroupEventHandlers;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
@@ -24,15 +24,15 @@ import java.util.stream.Collectors;
 @Component
 public class DoctorEditGroupEventManager {
 
-    private DoctorEditGroupEventHandlers doctorEditGroupEventHandlers;
+    private DoctorGroupEventHandlers doctorGroupEventHandlers;
     private DoctorGroupEventDao doctorGroupEventDao;
     private DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
-    public DoctorEditGroupEventManager(DoctorEditGroupEventHandlers doctorEditGroupEventHandlers,
+    public DoctorEditGroupEventManager(DoctorGroupEventHandlers doctorGroupEventHandlers,
                                        DoctorGroupEventDao doctorGroupEventDao,
                                        DoctorGroupTrackDao doctorGroupTrackDao){
-        this.doctorEditGroupEventHandlers = doctorEditGroupEventHandlers;
+        this.doctorGroupEventHandlers = doctorGroupEventHandlers;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
     }
@@ -45,7 +45,7 @@ public class DoctorEditGroupEventManager {
 
     @Transactional
     public DoctorGroupTrack elicitDoctorGroupTrack(List<DoctorGroupEvent> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
-        return doctorEditGroupEventHandlers.getEventHandlerMap().get(doctorGroupEvent.getType()).handle(doctorGroupEventList, doctorGroupTrack, doctorGroupEvent);
+        return doctorGroupEventHandlers.getEventHandlerMap().get(doctorGroupEvent.getType()).editGroupEvent(doctorGroupEventList, doctorGroupTrack, doctorGroupEvent);
     }
 
 

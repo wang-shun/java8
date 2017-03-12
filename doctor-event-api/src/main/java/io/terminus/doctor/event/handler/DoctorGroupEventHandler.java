@@ -36,5 +36,17 @@ public interface DoctorGroupEventHandler {
      */
     <I extends BaseGroupInput> void handle(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, @Valid I input);
 
+    /**
+     * 推演DcotorGroupTrack
+     * @param preEvent
+     * @param event
+     * @param track
+     * @return
+     */
+    DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track);
+
+
+    DoctorGroupTrack editGroupEvent(List<DoctorGroupEvent> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent);
+
     int getGroupAvgDayAge(Long groupId, DoctorGroupEvent doctorGroupEvent);
 }

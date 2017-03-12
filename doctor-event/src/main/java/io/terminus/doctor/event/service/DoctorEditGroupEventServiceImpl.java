@@ -11,7 +11,6 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
-import io.terminus.doctor.event.editHandler.group.DoctorEditGroupEventHandlers;
 import io.terminus.doctor.event.enums.EventElicitStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.manager.DoctorEditGroupEventManager;
@@ -40,8 +39,6 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
-    private DoctorEditGroupEventHandlers doctorEditGroupEventHandlers;
-
     private DoctorGroupReadService doctorGroupReadService;
 
     private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
@@ -52,17 +49,18 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
     private DoctorGroupWriteService doctorGroupWriteService;
 
+
     @Autowired
-    public DoctorEditGroupEventServiceImpl(DoctorEditGroupEventHandlers doctorEditGroupEventHandlers,
-                                           DoctorGroupReadService doctorGroupReadService,
+    public DoctorEditGroupEventServiceImpl(DoctorGroupReadService doctorGroupReadService,
                                            DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                            DoctorEditGroupEventManager doctorEditGroupEventManager,
-                                           DoctorGroupTrackDao doctorGroupTrackDao){
-        this.doctorEditGroupEventHandlers = doctorEditGroupEventHandlers;
+                                           DoctorGroupTrackDao doctorGroupTrackDao,
+                                           DoctorGroupWriteService doctorGroupWriteService){
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorEditGroupEventManager = doctorEditGroupEventManager;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
+        this.doctorGroupWriteService = doctorGroupWriteService;
     }
 
     @Override
@@ -120,7 +118,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         List<DoctorGroupEvent> doctorGroupEventList = doctorGroupEventResp.getResult();
 
         linkedDoctorGroupEventList = doctorGroupEventList.stream().filter(
-                doctorGroupEvent1 -> doctorGroupEvent1.getId() != doctorGroupEvent.getId() && doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent.getEventAt()) >= 0
+                doctorGroupEvent1 -> !Objects.equals(doctorGroupEvent1.getId(), doctorGroupEvent.getId()) && doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent.getEventAt()) >= 0
         ).collect(Collectors.toList());
         if(Objects.equals(flag, EventElicitStatus.ADD) || Objects.equals(flag, EventElicitStatus.EDIT)){
             taskDoctorGroupEventList.add(doctorGroupEvent);

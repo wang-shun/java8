@@ -58,14 +58,14 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
     }
 
     @Override
-    protected DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track) {
-        DoctorWeanGroupEvent weanGroupEvent = (DoctorWeanGroupEvent) event.getExtraMap();
+    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
+        DoctorWeanGroupEvent weanGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorWeanGroupEvent.class);
         track.setUnqQty(EventUtil.plusInt(track.getUnqQty(), weanGroupEvent.getNotQualifiedCount()));
         track.setQuaQty(EventUtil.minusQuantity(track.getQuantity(), track.getUnqQty()));
         track.setWeanQty(EventUtil.plusInt(track.getWeanQty(), weanGroupEvent.getPartWeanPigletsCount()));
         track.setUnweanQty(EventUtil.minusQuantity(track.getQuantity(), track.getWeanQty()));
         track.setWeanWeight(EventUtil.plusDouble(track.getWeanWeight(), weanGroupEvent.getPartWeanAvgWeight() * weanGroupEvent.getPartWeanPigletsCount()));
-        return null;
+        return track;
     }
 
     @Override
