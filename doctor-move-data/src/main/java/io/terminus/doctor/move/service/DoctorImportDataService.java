@@ -1203,7 +1203,7 @@ public class DoctorImportDataService {
     //创建进场事件
     private DoctorPigEvent createEntryEvent(DoctorImportSow info, DoctorPig sow) {
         DoctorPigEvent event = createSowEvent(info, sow);
-        event.setEventAt(new DateTime(info.getMateDate()).plusDays(-1).toDate());
+        event.setEventAt(sow.getInFarmDate());
         event.setType(PigEvent.ENTRY.getKey());
         event.setName(PigEvent.ENTRY.getName());
         event.setPigStatusAfter(PigStatus.Entry.getKey());
