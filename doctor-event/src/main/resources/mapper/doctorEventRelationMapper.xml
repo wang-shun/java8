@@ -99,7 +99,7 @@
         </where>
     </sql>
 
-    <select id="list" parameterType="map" resultType="DoctorEventRelation">
+    <select id="list" parameterType="map" resultMap="DoctorEventRelationMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
@@ -111,14 +111,14 @@
         <include refid="criteria"/>
     </select>
 
-    <select id="paging" parameterType="map" resultType="DoctorEventRelation">
+    <select id="paging" parameterType="map" resultMap="DoctorEventRelationMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="findByOriginAndType" parameterType="map" resultType="DoctorEventRelation">
+    <select id="findByOriginAndType" parameterType="map" resultMap="DoctorEventRelationMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE
@@ -127,7 +127,7 @@
         AND status = 1
     </select>
 
-    <select id="findByTrigger" parameterType="long" resultType="DoctorEventRelation">
+    <select id="findByTrigger" parameterType="long" resultMap="DoctorEventRelationMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE
@@ -135,7 +135,7 @@
         AND status = 1
     </select>
 
-    <select id="findByOrigin" parameterType="long" resultType="DoctorEventRelation">
+    <select id="findByOrigin" parameterType="long" resultMap="DoctorEventRelationMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE

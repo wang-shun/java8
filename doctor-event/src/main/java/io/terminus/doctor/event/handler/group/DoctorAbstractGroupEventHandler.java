@@ -6,7 +6,6 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -135,6 +134,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                     updateEventRelation.setId(doctorEventRelation.getId());
                     updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
                     doctorEventRelationDao.update(updateEventRelation);
+                    doctorEventRelation.setOriginEventId(executeEvent.getId());
                     doctorEventRelationDao.create(doctorEventRelation);
                 });
             }
