@@ -29,6 +29,12 @@ public class DoctorEventInfo {
     private Long oldEventId;
 
     /**
+     * 是否是自动事件
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    private Integer isAuto;
+
+    /**
      * 目标号
      */
     private String code;

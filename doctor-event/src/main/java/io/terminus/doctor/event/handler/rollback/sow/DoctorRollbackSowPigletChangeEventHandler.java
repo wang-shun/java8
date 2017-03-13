@@ -6,6 +6,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupChangeHandler;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -36,14 +37,16 @@ public class DoctorRollbackSowPigletChangeEventHandler extends DoctorAbstractRol
         }
 
         //母猪仔猪变动会触发猪群变动事件，校验猪群变动事件是否是最新事件
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
+        Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(toGroupEventId);
         return isRelLastGroupEvent(toGroupEvent);
     }
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //1. 回滚猪群变动
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
+        Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(toGroupEventId);
         doctorRollbackGroupChangeHandler.rollback(toGroupEvent, operatorId, operatorName);
         //3. 回滚母猪仔猪变动
         handleRollbackWithStatus(pigEvent, operatorId, operatorName);

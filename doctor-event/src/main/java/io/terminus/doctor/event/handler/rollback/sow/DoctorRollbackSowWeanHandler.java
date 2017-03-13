@@ -9,6 +9,7 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -46,7 +47,9 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
         //断奶后如果转舍，判断转舍是否是最新事件
         DoctorWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorWeanDto.class);
         if (weanDto.getChgLocationToBarnId() != null) {
-            DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
+            Long toPigEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.PIG.getValue()).getTriggerEventId();
+            DoctorPigEvent toPigEvent = doctorPigEventDao.findById(toPigEventId);
+
             expectTrue(notNull(toPigEvent), "relate.pig.event.not.null", pigEvent.getId());
             DoctorBarn doctorBarn = doctorBarnDao.findById(weanDto.getChgLocationToBarnId());
             if (Objects.equals(doctorBarn.getPigType(), PigType.MATE_SOW.getValue()) || Objects.equals(doctorBarn.getPigType(), PigType.PREG_SOW.getValue())) {
@@ -63,7 +66,9 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
         //如果断奶后转舍， 先回滚转舍
         DoctorWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorWeanDto.class);
         if (weanDto.getChgLocationToBarnId() != null) {
-            DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
+            Long toPigEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.PIG.getValue()).getTriggerEventId();
+            DoctorPigEvent toPigEvent = doctorPigEventDao.findById(toPigEventId);
+
             DoctorBarn doctorBarn = doctorBarnDao.findById(weanDto.getChgLocationToBarnId());
             if (Objects.equals(doctorBarn.getPigType(), PigType.MATE_SOW.getValue()) || Objects.equals(doctorBarn.getPigType(), PigType.PREG_SOW.getValue())){
                 doctorRollbackSowToChgLocationEventHandler.rollback(toPigEvent, operatorId, operatorName);

@@ -2,7 +2,6 @@ package io.terminus.doctor.front;
 
 import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontPrimaryWebConfiguration;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.parana.auth.model.CompiledTree;
 import org.junit.Test;

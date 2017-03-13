@@ -57,6 +57,10 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         log.info("========================handler doctor group movein,eventInfoList = {}, DoctorGroup = {}, groupTrack = {} ", eventInfoList, group, groupTrack);
         DoctorGroupEvent event = buildGroupEvent(group, groupTrack, input);
         doctorGroupEventDao.create(event);
+
+        //创建关联关系
+        createEventRelation(event);
+
         input.setEventType(GroupEventType.MOVE_IN.getValue());
         DoctorMoveInGroupInput moveIn = (DoctorMoveInGroupInput) input;
 

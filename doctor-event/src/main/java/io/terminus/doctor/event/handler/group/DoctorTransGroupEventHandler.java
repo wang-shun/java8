@@ -23,6 +23,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -186,6 +187,10 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
         event.setExtraMap(transGroupEvent);
         doctorGroupEventDao.create(event);
+
+        //创建关联关系
+        createEventRelation(event);
+
         transGroup.setRelGroupEventId(event.getId());
 
         Integer oldQuantity = groupTrack.getQuantity();
@@ -217,7 +222,8 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         if (Objects.equals(oldQuantity, transGroup.getQuantity())) {
             doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, transGroup, event.getEventAt(), transGroup.getFcrFeed());
 
-            DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+            DoctorGroupEvent closeEvent = doctorGroupEventDao.findById(toGroupEventId);
             transGroup.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
 
@@ -299,13 +305,6 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         return true;
     }
 
-    /**
-     * 触发其他猪群事件
-     * @param triggerDoctorGroupEventList
-     * @param oldEvent
-     * @param newEvent
-     * @return
-     */
     @Override
     public List<DoctorGroupEvent> triggerGroupEvent(List<DoctorGroupEvent> triggerDoctorGroupEventList,DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent){
         //修改转入猪舍,影响原猪舍

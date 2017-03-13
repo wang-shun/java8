@@ -7,6 +7,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
@@ -31,6 +32,7 @@ import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.DoctorPigsByEventSelector;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -66,6 +68,8 @@ public class DoctorPigEventManager {
     private DoctorPigEventDao doctorPigEventDao;
     @Autowired
     private DoctorPigDao doctorPigDao;
+    @Autowired
+    private DoctorEventRelationDao doctorEventRelationDao;
 
     /**
      * 事件处理
@@ -109,13 +113,16 @@ public class DoctorPigEventManager {
 
     /**
      * 猪事件编辑错误时回滚
-     * @param pigNewEventIdList 新事件列表
-     * @param pigOldEventIdList 原事件列
+     * @param doctorEventInfoList 新事件列表
+     * @param pigOldEventIdList 原事件id列
      * @param fromTrack 事件编辑前猪track
      */
     @Transactional
-    public void modifyPidEventRollback(List<Long> pigNewEventIdList, List<Long> pigOldEventIdList, DoctorPigTrack fromTrack, DoctorPig oldPig) {
+    public void modifyPidEventRollback(List<DoctorEventInfo> doctorEventInfoList, List<Long> pigOldEventIdList, DoctorPigTrack fromTrack, DoctorPig oldPig) {
         //1.将新生成事件置为无效
+        List<Long> pigNewEventIdList = doctorEventInfoList.stream()
+                .filter(doctorEventInfo -> Objects.equals(doctorEventInfo.getBusinessType(), DoctorEventInfo.Business_Type.PIG.getValue()))
+                .map(DoctorEventInfo::getEventId).collect(Collectors.toList());
         if (!Arguments.isNullOrEmpty(pigNewEventIdList)) {
             doctorPigEventDao.updateEventsStatus(pigNewEventIdList, EventStatus.INVALID.getValue());
         }
@@ -124,9 +131,17 @@ public class DoctorPigEventManager {
             doctorPigEventDao.updateEventsStatus(pigOldEventIdList, EventStatus.VALID.getValue());
         }
         //3.还原track
-       doctorPigTrackDao.update(fromTrack);
+        doctorPigTrackDao.update(fromTrack);
         //4.还原猪
         doctorPigDao.update(oldPig);
+        //5.还原之前的关联关系
+        if (!Arguments.isNullOrEmpty(pigNewEventIdList)) {
+            doctorEventRelationDao.updateStatusByOrigin(pigNewEventIdList, DoctorEventRelation.Status.INVALID.getValue());
+            List<Long> pigCreateOldEventIdList = doctorEventInfoList.stream()
+                    .filter(doctorEventInfo -> Objects.equals(doctorEventInfo.getBusinessType(), DoctorEventInfo.Business_Type.PIG.getValue()))
+                    .map(DoctorEventInfo::getOldEventId).collect(Collectors.toList());
+            doctorEventRelationDao.updateStatusByOrigin(pigOldEventIdList, DoctorEventRelation.Status.VALID.getValue());
+        }
     }
 
     /**
