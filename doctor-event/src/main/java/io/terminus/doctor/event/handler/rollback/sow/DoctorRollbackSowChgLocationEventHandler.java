@@ -11,6 +11,7 @@ import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -38,7 +39,9 @@ public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRoll
         DoctorChgLocationDto dto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorChgLocationDto.class);
         DoctorBarn toBarn = doctorBarnDao.findById(dto.getChgLocationToBarnId());
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
-        DoctorGroupEvent relGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
+        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+        DoctorGroupEvent relGroupEvent = doctorGroupEventDao.findById(toPigEventId);
+
         if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && doctorRollbackGroupTransHandler.handleCheck(relGroupEvent)){
             doctorRollbackGroupTransHandler.handleRollback(relGroupEvent, operatorId, operatorName);
         }

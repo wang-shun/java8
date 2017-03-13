@@ -3,9 +3,9 @@ package io.terminus.doctor.event.handler.group;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.DataEvent;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -76,6 +76,8 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setExtraMap(closeEvent);
         doctorGroupEventDao.create(event);
 
+        //创建关联关系
+        createEventRelation(event);
 
         updateGroupTrack(groupTrack, event);
 

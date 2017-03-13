@@ -5,7 +5,6 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -17,6 +16,7 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -145,7 +144,8 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         if (Objects.equals(groupTrack.getQuantity(), 0)) {
             doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, turnSeed, event.getEventAt(), turnSeed.getFcrFeed());
 
-            DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+            DoctorGroupEvent closeEvent = doctorGroupEventDao.findById(toGroupEventId);
             turnSeed.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
 

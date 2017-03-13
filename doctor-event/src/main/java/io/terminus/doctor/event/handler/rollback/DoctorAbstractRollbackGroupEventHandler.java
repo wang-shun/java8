@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.rollback;
 
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -11,10 +12,10 @@ import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorRevertLog;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -39,6 +40,7 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
     @Autowired protected DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired protected DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     @Autowired protected DoctorPigEventDao doctorPigEventDao;
+    @Autowired protected DoctorEventRelationDao doctorEventRelationDao;
 
     /**
      * 判断能否回滚(1.手动事件 2.三个月内的事件 3.最新事件 4.子类根据事件类型特殊处理)
@@ -121,7 +123,8 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
         DoctorGroupEvent tmpEvent = event;
         while (event != null) {
             tmpEvent = event;
-            event = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+            event = doctorGroupEventDao.findById(toGroupEventId);
         }
         return isLastEvent(tmpEvent);
     }

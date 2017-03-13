@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,8 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         }
 
         //如果触发关闭猪群事件，说明此事件肯定不是最新事件
-        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
+        Long eventId = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+        DoctorGroupEvent close = doctorGroupEventDao.findById(eventId);
         if (isCloseEvent(close)) {
             return doctorRollbackGroupCloseHandler.handleCheck(close);
         }

@@ -12,6 +12,7 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.enums.FarrowingType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -186,7 +187,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         input.setAvgDayAge(1);
         input.setAvgWeight(farrowingLiveCount == 0 ? 0d : farrowingDto.getBirthNestAvg() / farrowingLiveCount);
         input.setEventAt(DateUtil.toDateString(doctorPigEvent.getEventAt()));
-        input.setIsAuto(1);
+        input.setIsAuto(IsOrNot.YES.getValue());
         input.setCreatorId(doctorPigEvent.getCreatorId());
         input.setCreatorName(doctorPigEvent.getCreatorName());
 

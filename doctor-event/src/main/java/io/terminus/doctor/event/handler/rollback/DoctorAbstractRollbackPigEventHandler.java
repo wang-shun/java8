@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.rollback;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -12,6 +13,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -56,6 +58,8 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
     protected DoctorPigDao doctorPigDao;
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
+    @Autowired
+    protected DoctorEventRelationDao doctorEventRelationDao;
 
     @Value("${flow.definition.key.sow:sow}")
     protected String sowFlowKey;
@@ -161,7 +165,8 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         DoctorGroupEvent tmpEvent = event;
         while (event != null) {
             tmpEvent = event;
-            event = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+            Long eventId = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+            event = doctorGroupEventDao.findById(eventId);
         }
         DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(tmpEvent.getGroupId());
         if (!Objects.equals(tmpEvent.getId(), lastEvent.getId())) {

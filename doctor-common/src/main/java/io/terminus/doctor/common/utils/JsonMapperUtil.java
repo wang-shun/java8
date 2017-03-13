@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.base.Strings;
-import io.terminus.common.utils.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,13 +17,12 @@ import java.io.IOException;
 import java.text.DateFormat;
 
 
-
 /**
  * Created by xjn on 17/1/23.
  * json 转换工具
  */
 public class JsonMapperUtil {
-    private static Logger logger = LoggerFactory.getLogger(JsonMapper.class);
+    private static Logger logger = LoggerFactory.getLogger(JsonMapperUtil.class);
     public static final JsonMapperUtil JSON_NON_EMPTY_MAPPER = new JsonMapperUtil(JsonInclude.Include.NON_EMPTY);
     public static final JsonMapperUtil JSON_NON_DEFAULT_MAPPER = new JsonMapperUtil(JsonInclude.Include.NON_DEFAULT);
     private ObjectMapper mapper;

@@ -1,11 +1,12 @@
 package io.terminus.doctor.event.handler.rollback.group;
 
 import com.google.common.collect.Lists;
-import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
+import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,9 @@ public class DoctorRollbackGroupChangeHandler extends DoctorAbstractRollbackGrou
         }
 
         //如果变动后关闭猪群
-        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
+        Long eventId = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+        DoctorGroupEvent close = doctorGroupEventDao.findById(eventId);
+
         if (isCloseEvent(close)) {
             return doctorRollbackGroupCloseHandler.handleCheck(close);
         }
@@ -45,7 +48,8 @@ public class DoctorRollbackGroupChangeHandler extends DoctorAbstractRollbackGrou
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a change event:{}", groupEvent);
-        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
+        Long eventId = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+        DoctorGroupEvent close = doctorGroupEventDao.findById(eventId);
         if (isCloseEvent(close)) {
             doctorRollbackGroupCloseHandler.rollback(close, operatorId, operatorName);
         }

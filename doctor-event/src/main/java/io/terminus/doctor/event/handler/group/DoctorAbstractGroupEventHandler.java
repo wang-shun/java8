@@ -11,13 +11,13 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorChangeGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
@@ -29,6 +29,7 @@ import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -37,10 +38,12 @@ import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.enums.PigType.*;
@@ -62,6 +65,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorBarnDao doctorBarnDao;
+    @Autowired
+    protected DoctorEventRelationDao doctorEventRelationDao;
 
     @Autowired
     private DoctorGroupDao doctorGroupDao;
@@ -99,9 +104,49 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 .pigType(group.getPigType())
                 .build();
         eventInfoList.add(eventInfo);
+    }
+
+    /**
+     * 创建事件的关联关系
+     * @param groupEvent 触发事件
+     */
+    protected void createEventRelation(DoctorGroupEvent groupEvent) {
+        if (Objects.equals(groupEvent.getIsAuto(), IsOrNot.NO.getValue())) {
+            return;
+        }
+        DoctorEventRelation eventRelation = DoctorEventRelation.builder()
+                .originEventId(MoreObjects.firstNonNull(groupEvent.getRelPigEventId(), groupEvent.getRelGroupEventId()))
+                .triggerEventId(groupEvent.getId())
+                .triggerTargetType(DoctorEventRelation.TargetType.GROUP.getValue())
+                .status(DoctorEventRelation.Status.VALID.getValue())
+                .build();
+        doctorEventRelationDao.create(eventRelation);
 
     }
 
+    private void createEventRelation(DoctorGroupEvent executeEvent, Long oldEventId) {
+
+        if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.NO.getValue())) {
+            List<DoctorEventRelation> eventRelationList = doctorEventRelationDao.findByOrigin(oldEventId);
+            if (!eventRelationList.isEmpty()) {
+                eventRelationList.forEach(doctorEventRelation -> {
+                    DoctorEventRelation updateEventRelation = new DoctorEventRelation();
+                    updateEventRelation.setId(doctorEventRelation.getId());
+                    updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
+                    doctorEventRelationDao.update(updateEventRelation);
+                    doctorEventRelationDao.create(doctorEventRelation);
+                });
+            }
+        } else if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.YES.getValue())) {
+            DoctorEventRelation eventRelation = doctorEventRelationDao.findByTrigger(oldEventId);
+            eventRelation.setTriggerEventId(executeEvent.getId());
+            DoctorEventRelation updateEventRelation = new DoctorEventRelation();
+            updateEventRelation.setId(eventRelation.getId());
+            updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
+            doctorEventRelationDao.update(updateEventRelation);
+            doctorEventRelationDao.create(eventRelation);
+        }
+    }
     /**
      * 处理事件的抽象方法, 由继承的子类去实现
      * @param eventInfoList 事件信息列表 每发生一个事件记录下来
