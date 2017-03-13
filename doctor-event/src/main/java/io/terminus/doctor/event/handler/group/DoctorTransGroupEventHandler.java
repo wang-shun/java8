@@ -307,7 +307,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
      */
     @Override
     public List<DoctorGroupEvent> triggerGroupEvent(List<DoctorGroupEvent> triggerDoctorGroupEventList,DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent){
-
+        //修改转入猪舍,影响原猪舍
         return triggerDoctorGroupEventList;
     }
 }

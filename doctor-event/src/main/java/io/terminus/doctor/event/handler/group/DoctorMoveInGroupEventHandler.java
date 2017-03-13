@@ -54,6 +54,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        log.info("========================handler doctor group movein,eventInfoList = {}, DoctorGroup = {}, groupTrack = {} ", eventInfoList, group, groupTrack);
         DoctorGroupEvent event = buildGroupEvent(group, groupTrack, input);
         doctorGroupEventDao.create(event);
         input.setEventType(GroupEventType.MOVE_IN.getValue());
