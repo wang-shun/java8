@@ -59,25 +59,22 @@ public class DoctorEditGroupEventManager {
     }
 
     @Transactional
-    public Boolean updateDoctorGroupEventStatus(List<DoctorGroupEvent> doctorGroupEventList, Integer status){
-        List<Long> ids = doctorGroupEventList.stream().map(DoctorGroupEvent::getId).collect(Collectors.toList());
-        return doctorGroupEventDao.updateGroupEventStatus(ids, status);
+    public Boolean updateDoctorGroupEventStatus(List<Long> doctorGroupEventList, Integer status){
+        return doctorGroupEventDao.updateGroupEventStatus(doctorGroupEventList, status);
     }
 
     @Transactional
-    public DoctorGroupTrack elicitDoctorGroupTrack(List<DoctorGroupEvent> triggerDoctorGroupEventList, List<DoctorGroupEvent> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent newEvent){
+    public DoctorGroupTrack elicitDoctorGroupTrack(List<DoctorGroupEvent> triggerDoctorGroupEventList, List<Long> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent newEvent){
         DoctorGroupEvent oldEvent = newEvent;
         return doctorGroupEventHandlers.getEventHandlerMap().get(newEvent.getType()).editGroupEvent(triggerDoctorGroupEventList, doctorGroupEventList, doctorGroupTrack, oldEvent, newEvent);
     }
 
 
     @Transactional
-    public Boolean rollbackElicitEvents(List<DoctorGroupTrack> doctorGroupTrackList, List<DoctorGroupEvent> newDoctorGroupEvents, List<DoctorGroupEvent> oldDoctorGroupEvents) {
+    public Boolean rollbackElicitEvents(List<DoctorGroupTrack> doctorGroupTrackList, List<Long> newDoctorGroupEvents, List<Long> oldDoctorGroupEvents) {
         Boolean status = true;
-        List<Long> oldEventIds = oldDoctorGroupEvents.stream().map(DoctorGroupEvent::getId).collect(Collectors.toList());
-        status = status && doctorGroupEventDao.updateGroupEventStatus(oldEventIds, EventStatus.VALID.getValue());
-        List<Long> newEventIds = newDoctorGroupEvents.stream().map(DoctorGroupEvent::getId).collect(Collectors.toList());
-        status = status && doctorGroupEventDao.updateGroupEventStatus(oldEventIds, EventStatus.INVALID.getValue());
+        status = status && doctorGroupEventDao.updateGroupEventStatus(oldDoctorGroupEvents, EventStatus.INVALID.getValue());
+        status = status && doctorGroupEventDao.updateGroupEventStatus(newDoctorGroupEvents, EventStatus.VALID.getValue());
         doctorGroupTrackList.stream().forEach(doctorGroupTrack -> doctorGroupTrackDao.update(doctorGroupTrack));
         return status;
     }

@@ -443,7 +443,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
 
     @Override
-    public DoctorGroupTrack editGroupEvent(List<DoctorGroupEvent> triggerDoctorGroupEventList, List<DoctorGroupEvent> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent){
+    public DoctorGroupTrack editGroupEvent(List<DoctorGroupEvent> triggerDoctorGroupEventList, List<Long> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent){
 
         //校验基本的数量,看会不会失败
         if(!checkDoctorGroupEvent(doctorGroupTrack, newEvent)){
@@ -459,7 +459,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         doctorGroupEventDao.create(newEvent);
 
         //新增的事件放入需要回滚的list
-        doctorGroupEventList.add(newEvent);
+        doctorGroupEventList.add(newEvent.getId());
 
         //创建猪群track
         updateGroupTrack(doctorGroupTrack, newEvent);

@@ -14,6 +14,7 @@ import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.enums.EventElicitStatus;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -75,8 +76,8 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
     @Override
     public Response<String> elicitDoctorGroupTrack(DoctorGroupEvent doctorGroupEvent){
         List<DoctorGroupTrack> rollbackDoctorGroupTrackList = Lists.newArrayList();
-        List<DoctorGroupEvent> rollbackDoctorGroupEventList = Lists.newArrayList();
-        List<DoctorGroupEvent> taskDoctorGroupEventList = Lists.newArrayList();
+        List<Long> rollbackDoctorGroupEventList = Lists.newArrayList();
+        List<Long> taskDoctorGroupEventList = Lists.newArrayList();
         try{
             return elicitDoctorGroupEvents(doctorGroupEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
         }catch(Exception e){
@@ -87,28 +88,31 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
     }
 
 
-    private Response<String> elicitDoctorGroupEvents(DoctorGroupEvent doctorGroupEvent, List<DoctorGroupTrack> rollbackDoctorGroupTrackList, List<DoctorGroupEvent> rollbackDoctorGroupEventList, List<DoctorGroupEvent> taskDoctorGroupEventList) {
+    private Response<String> elicitDoctorGroupEvents(DoctorGroupEvent doctorGroupEvent, List<DoctorGroupTrack> rollbackDoctorGroupTrackList, List<Long> rollbackDoctorGroupEventList, List<Long> taskDoctorGroupEventList) {
         log.info("elicitDoctorGroupTrack start, doctorGroupEvent: {}", doctorGroupEvent);
         List<DoctorGroupEvent> triggerDoctorGroupEventList = Lists.newArrayList();
         List<DoctorGroupEvent> localDoctorGroupEventList = Lists.newArrayList();
         DoctorGroupTrack doctorGroupTrack = new DoctorGroupTrack();
         try {
+            DoctorGroupEvent oldEvent = doctorGroupEventDao.findById(doctorGroupEvent.getId());
             rollbackDoctorGroupTrackList.add(doctorGroupTrackDao.findByGroupId(doctorGroupEvent.getGroupId()));
 
             //获取要重新推演的events list,不包括编辑的事件
             localDoctorGroupEventList = getTaskGroupEventList(localDoctorGroupEventList, doctorGroupEvent, doctorGroupTrack);
 
+            //不是新增的事件,放入需要重新生成的列表中
+            if(Objects.nonNull(doctorGroupEvent.getId())){
+                taskDoctorGroupEventList.add(doctorGroupEvent.getId());
+            }
+
+            taskDoctorGroupEventList.addAll(localDoctorGroupEventList.stream().map(DoctorGroupEvent::getId).collect(Collectors.toList()));
+
+
             //处理第一个事件
             doctorGroupTrack = doctorEditGroupEventManager.elicitDoctorGroupTrack(triggerDoctorGroupEventList, rollbackDoctorGroupEventList, doctorGroupTrack, doctorGroupEvent);
 
-            taskDoctorGroupEventList.add(doctorGroupEvent);
-
-            List<DoctorGroupEvent> statusLists = Lists.newArrayList();
-            statusLists.add(doctorGroupEvent);
-            statusLists.addAll(localDoctorGroupEventList);
             //将需要推演的groupEvent.status = 0
-            doctorEditGroupEventManager.updateDoctorGroupEventStatus(statusLists, EventStatus.HANDLING.getValue());
-            taskDoctorGroupEventList.addAll(localDoctorGroupEventList);
+            doctorEditGroupEventManager.updateDoctorGroupEventStatus(taskDoctorGroupEventList, EventStatus.HANDLING.getValue());
 
             int index = 0;
             for(DoctorGroupEvent handlerDoctorGroupEvent: localDoctorGroupEventList){
@@ -120,16 +124,11 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
                 }
             }
 
-            //如果第一个事件是转种猪,触发母猪事件
-            if(Objects.equals(GroupEventType.TURN_SEED.getValue(), doctorGroupEvent.getType())){
-                doctorEditGroupEventManager.triggerPigEvents(doctorGroupEvent);
-            }
-            //触发其他事件
-            if(!Arguments.isNullOrEmpty(triggerDoctorGroupEventList)){
-                triggerDoctorGroupEventList.forEach(triggerEvent -> {
-                    this.elicitDoctorGroupEvents(triggerEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
-                });
-            }
+            triggerEvents(oldEvent, doctorGroupEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
+
+
+
+
 
             doctorEditGroupEventManager.updateDoctorGroupEventStatus(taskDoctorGroupEventList, EventStatus.INVALID.getValue());
 
@@ -140,6 +139,26 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
         return Response.ok();
     }
+
+    private void triggerEvents(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent, List<DoctorGroupTrack> rollbackDoctorGroupTrackList, List<Long> rollbackDoctorGroupEventList, List<Long> taskDoctorGroupEventList) {
+        //如果第一个事件是转种猪,触发母猪事件
+        if(Objects.equals(GroupEventType.TURN_SEED.getValue(), oldEvent.getType())){
+            doctorEditGroupEventManager.triggerPigEvents(newEvent);
+        }
+        if(Objects.equals(GroupEventType.TRANS_GROUP.getValue(), oldEvent.getType())){
+            //转向猪舍没有变, 只改变数量、重量、日期
+            DoctorTransGroupEvent oldTransEvent = JSON_MAPPER.fromJson(oldEvent.getExtra(), DoctorTransGroupEvent.class);
+            DoctorTransGroupEvent newTransEvent = JSON_MAPPER.fromJson(newEvent.getExtra(), DoctorTransGroupEvent.class);
+            if(Objects.equals(oldTransEvent.getToBarnId(), newTransEvent.getToBarnId())){
+                DoctorGroupEvent oldEvent2 = doctorGroupEventDao.findByRelGroupEventId(oldEvent.getId());
+            }
+            this.elicitDoctorGroupEvents(newEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
+        }
+
+    }
+
+
+
 
     private void closeGroupEvent(DoctorGroupEvent doctorGroupEvent) {
         doctorGroupEvent.setType(GroupEventType.CLOSE.getValue());
@@ -161,7 +180,12 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         List<DoctorGroupEvent> doctorGroupEventList = doctorGroupEventResp.getResult();
 
         linkedDoctorGroupEventList = doctorGroupEventList.stream().filter(
-                doctorGroupEvent1 -> !Objects.equals(doctorGroupEvent1.getId(), doctorGroupEvent.getId()) && Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) >= 0
+                doctorGroupEvent1 -> {
+                    if(Objects.nonNull(doctorGroupEvent.getId()) && Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) == 0){
+                        return doctorGroupEvent1.getId().compareTo(doctorGroupEvent.getId()) == 1;
+                    }
+                    return Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) == 1;
+                }
         ).collect(Collectors.toList());
 
         linkedDoctorGroupEventList = linkedDoctorGroupEventList.stream().sorted(
@@ -172,11 +196,17 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
                     return doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent2.getEventAt());
                 }).collect(Collectors.toList());
-        DoctorGroupEvent preDoctorGroupEvent = doctorGroupEventList.stream().filter(doctorGroupEvent1 -> doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent.getEventAt()) == -1)
+
+        DoctorGroupEvent preDoctorGroupEvent = doctorGroupEventList.stream().filter(
+                doctorGroupEvent1 -> {
+                    if(Objects.nonNull(doctorGroupEvent.getId()) && Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) == 0){
+                        return doctorGroupEvent1.getId().compareTo(doctorGroupEvent.getId()) == -1;
+                    }
+                    return Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) <= 0;
+                })
                 .sorted((doctorGroupEvent1, doctorGroupEvent2)-> doctorGroupEvent2.getId().compareTo(doctorGroupEvent1.getId()))
                 .findFirst()
                 .get();
-
 
         //要编辑的事件不是第一个事件
         if (!Arguments.isNull(preDoctorGroupEvent)) {
@@ -197,7 +227,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
     }
 
 
-    private void rollBackFailed(List<DoctorGroupTrack> doctorGroupTrackList, List<DoctorGroupEvent> doctorGroupEvents, List<DoctorGroupEvent> taskDoctorGroupEvents){
+    private void rollBackFailed(List<DoctorGroupTrack> doctorGroupTrackList, List<Long> doctorGroupEvents, List<Long> taskDoctorGroupEvents){
         log.info("rollback group track, doctorGroupTrackList = {}", doctorGroupTrackList);
         log.info("rollback group event, groupEventList = {}", doctorGroupEvents);
         log.info("rollback new group event, taskDoctorGroupEvents = {}", taskDoctorGroupEvents);
