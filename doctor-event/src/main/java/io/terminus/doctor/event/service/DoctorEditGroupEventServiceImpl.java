@@ -10,20 +10,21 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.enums.EventElicitStatus;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.manager.DoctorEditGroupEventManager;
-import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.*;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +58,8 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
     private DoctorGroupEventDao doctorGroupEventDao;
 
+    private DoctorEventRelationDao doctorEventRelationDao;
+
 
     @Autowired
     public DoctorEditGroupEventServiceImpl(DoctorGroupReadService doctorGroupReadService,
@@ -64,13 +67,15 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
                                            DoctorEditGroupEventManager doctorEditGroupEventManager,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
                                            DoctorGroupWriteService doctorGroupWriteService,
-                                           DoctorGroupEventDao doctorGroupEventDao){
+                                           DoctorGroupEventDao doctorGroupEventDao,
+                                           DoctorEventRelationDao doctorEventRelationDao){
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorEditGroupEventManager = doctorEditGroupEventManager;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorGroupEventDao = doctorGroupEventDao;
+        this.doctorEventRelationDao = doctorEventRelationDao;
     }
 
     @Override
@@ -107,7 +112,6 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
             taskDoctorGroupEventList.addAll(localDoctorGroupEventList.stream().map(DoctorGroupEvent::getId).collect(Collectors.toList()));
 
-
             //处理第一个事件
             doctorGroupTrack = doctorEditGroupEventManager.elicitDoctorGroupTrack(triggerDoctorGroupEventList, rollbackDoctorGroupEventList, doctorGroupTrack, doctorGroupEvent);
 
@@ -126,10 +130,6 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
             triggerEvents(oldEvent, doctorGroupEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
 
-
-
-
-
             doctorEditGroupEventManager.updateDoctorGroupEventStatus(taskDoctorGroupEventList, EventStatus.INVALID.getValue());
 
         }catch(Exception e){
@@ -146,18 +146,35 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
             doctorEditGroupEventManager.triggerPigEvents(newEvent);
         }
         if(Objects.equals(GroupEventType.TRANS_GROUP.getValue(), oldEvent.getType())){
-            //转向猪舍没有变, 只改变数量、重量、日期
             DoctorTransGroupEvent oldTransEvent = JSON_MAPPER.fromJson(oldEvent.getExtra(), DoctorTransGroupEvent.class);
             DoctorTransGroupEvent newTransEvent = JSON_MAPPER.fromJson(newEvent.getExtra(), DoctorTransGroupEvent.class);
-            if(Objects.equals(oldTransEvent.getToBarnId(), newTransEvent.getToBarnId())){
-                DoctorGroupEvent oldEvent2 = doctorGroupEventDao.findByRelGroupEventId(oldEvent.getId());
+            DoctorEventRelation rel = doctorEventRelationDao.findByOriginAndType(oldEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+            DoctorGroupEvent oldMoveInEvent = doctorGroupEventDao.findById(rel.getTriggerEventId());
+            //1.转向猪舍没有变, 只改变数量、重量、日期
+            //2.转向猪舍变了,删除原来的转入猪群(暂不支持)// TODO: 17/3/13
+            //3.新增一个转入猪群
+            if(!Objects.equals(oldTransEvent.getToBarnId(), newTransEvent.getToBarnId())){
+                log.info("eable edit transgroup change barn");
+                throw new JsonResponseException("enable.edit.trans.group.change.barn");
             }
-            this.elicitDoctorGroupEvents(newEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
+            oldMoveInEvent = buildMoveInByTransGroup(oldMoveInEvent, newEvent);
+            this.elicitDoctorGroupEvents(oldMoveInEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
         }
 
     }
 
-
+    private DoctorGroupEvent buildMoveInByTransGroup(DoctorGroupEvent moveInGroupEvent, DoctorGroupEvent transGroupEvent) {
+        DoctorMoveInGroupEvent oldMoveInEvent = JSON_MAPPER.fromJson(moveInGroupEvent.getExtra(), DoctorMoveInGroupEvent.class);
+        moveInGroupEvent.setEventAt(transGroupEvent.getEventAt());
+        moveInGroupEvent.setQuantity(transGroupEvent.getQuantity());
+        moveInGroupEvent.setWeight(transGroupEvent.getWeight());
+        moveInGroupEvent.setAvgWeight(transGroupEvent.getAvgWeight());
+        moveInGroupEvent.setRemark(transGroupEvent.getRemark());
+        oldMoveInEvent.setSowQty(transGroupEvent.getQuantity());
+        oldMoveInEvent.setBoarQty(0);
+        moveInGroupEvent.setExtraMap(oldMoveInEvent);
+        return moveInGroupEvent;
+    }
 
 
     private void closeGroupEvent(DoctorGroupEvent doctorGroupEvent) {
