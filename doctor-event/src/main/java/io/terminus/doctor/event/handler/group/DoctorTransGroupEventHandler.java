@@ -301,9 +301,9 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     /**
      * 触发其他猪群事件
      * @param triggerDoctorGroupEventList
-     * @param doctorGroupEventList
-     * @param doctorGroupTrack
-     * @param doctorGroupEvent
+     * @param oldEvent
+     * @param newEvent
+     * @return
      */
     @Override
     public List<DoctorGroupEvent> triggerGroupEvent(List<DoctorGroupEvent> triggerDoctorGroupEventList,DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent){

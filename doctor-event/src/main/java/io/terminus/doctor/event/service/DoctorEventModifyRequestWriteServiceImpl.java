@@ -47,6 +47,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     public Response<Long> createPigModifyEventRequest(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto,Long eventId, Long userId, String realName) {
         try {
             DoctorPigEvent modifyEvent = pigEventManager.buildPigEvent(basic, inputDto);
+            log.info("build modifyEvent, modifyEvent = {}", modifyEvent);
             modifyEvent.setId(eventId);
             DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest
                     .builder()
@@ -58,6 +59,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
                     .userId(userId)
                     .userName(realName)
                     .build();
+            log.info("build modifyRequest, modifyRequest = {}", modifyRequest);
             eventModifyRequestDao.create(modifyRequest);
             return Response.ok(modifyRequest.getId());
         } catch (Exception e) {
