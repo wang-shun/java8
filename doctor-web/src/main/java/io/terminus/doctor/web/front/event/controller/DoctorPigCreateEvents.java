@@ -521,7 +521,7 @@ public class DoctorPigCreateEvents {
                 .createdAt(new Date())
                 .status(EventRequestStatus.WAITING.getValue())
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
-                .content(JSON_NON_DEFAULT_MAPPER.toJson(modifyEvent))
+                .content(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(modifyEvent))
                 .build();
         doctorEditPigEventService.modifyPigEventHandle(modifyRequest);
     }

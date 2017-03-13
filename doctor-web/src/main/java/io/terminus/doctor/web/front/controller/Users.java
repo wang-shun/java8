@@ -17,6 +17,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.enums.SmsCodeType;
@@ -131,7 +132,7 @@ public class Users {
             BaseUser user = UserUtil.getCurrentUser();
             PermissionData perm = permissionHelper.getPermissions(acl, user, true);
             perm.setAllRequests(null); // empty it
-            doctorUser.setAuth(JsonMapper.nonEmptyMapper().toJson(perm));
+            doctorUser.setAuth(JsonMapperUtil.nonEmptyMapper().toJson(perm));
             return doctorUser;
         } catch (Exception e) {
             Throwables.propagateIfInstanceOf(e, JsonResponseException.class);

@@ -19,7 +19,7 @@ mysql_host_to = '127.0.0.1:3306'
 mysql_user_to = 'root'
 mysql_passwd_to = 'anywhere'
 
-db_from = torndb.Connection(mysql_host_from, "pig_doctor_v2", user=mysql_user_from, password=mysql_passwd_from)
+db_from = torndb.Connection(mysql_host_from, "pig_doctor", user=mysql_user_from, password=mysql_passwd_from)
 db_to = torndb.Connection(mysql_host_to, "pigdoctor", user=mysql_user_to, password=mysql_passwd_to)
 
 # epoch = datetime.utcfromtimestamp(0)
@@ -85,6 +85,30 @@ def migrate_doctor_pig_snapshots(pig_ids):
                          ps.created_at, ps.updated_at)
 
 
+def group_snapshot_pagination(last_id):
+    return db_from.query('select * from doctor_group_snapshots where id > %s order by id asc limit 1000', last_id)
+
+
+def migrate_doctor_group_snapshots():
+    db_to.execute("truncate doctor_group_snapshots")
+    last_id = 0
+    while True:
+        gss = group_snapshot_pagination(last_id)
+        for gs in gss:
+            db_to.insert("INSERT INTO doctor_group_snapshots"
+                         " (id, group_id, from_event_id, to_event_id, to_info, created_at) "
+                         " VALUES (%s, %s, %s, %s, %s, %s)",
+                         gs.id, gs.to_group_id, gs.from_event_id if gs.from_event_id else 0,
+                         gs.to_event_id, gs.to_info, gs.created_at)
+        count = len(gss)
+        if count == 0:
+            return
+        if count < 1000:
+            return
+        last_id = gss[count - 1].id
+
+
 if __name__ == "__main__":
     pig_ids = all_pig_ids()
     migrate_doctor_pig_snapshots(pig_ids)
+    migrate_doctor_group_snapshots()

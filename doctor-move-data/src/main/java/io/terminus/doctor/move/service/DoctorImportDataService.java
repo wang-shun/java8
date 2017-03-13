@@ -31,6 +31,7 @@ import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -131,7 +132,7 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @Slf4j
 @Service
 public class DoctorImportDataService {
-    private static final JsonMapper MAPPER = JsonMapper.nonEmptyMapper();
+    private static final JsonMapperUtil MAPPER = JsonMapperUtil.nonEmptyMapper();
 
     //拥有所有权限的用户id
     @Value("${xrnm.auth.user.id: 0}")

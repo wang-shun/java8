@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontPrimaryWebConfiguration;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.web.front.role.Sub;
 import org.junit.Test;
@@ -39,7 +40,7 @@ public class SubRolesTest extends BaseFrontWebTest{
         ResponseEntity<Paging> result= restTemplate.getForEntity("http://localhost:{port}/api/sub/role/pagination",  Paging.class, ImmutableMap.of("port", port));
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
         assertThat(result.getBody().getTotal(), not(0));
-        System.out.println(JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(result.getBody()));
+        System.out.println(JsonMapperUtil.JSON_NON_EMPTY_MAPPER.toJson(result.getBody()));
     }
 
     @Test
@@ -65,7 +66,7 @@ public class SubRolesTest extends BaseFrontWebTest{
         ResponseEntity<SubRole> result= restTemplate.getForEntity("http://localhost:{port}/api/sub/role/1",  SubRole.class, ImmutableMap.of("port", port));
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
         assertThat(result.getBody(), notNullValue());
-        System.out.println(JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(result.getBody()));
+        System.out.println(JsonMapperUtil.JSON_NON_EMPTY_MAPPER.toJson(result.getBody()));
     }
     private SubRole mockSubRole(){
         SubRole subRole = new SubRole();
@@ -73,7 +74,7 @@ public class SubRolesTest extends BaseFrontWebTest{
         subRole.setAppKey("MOBILE");
         subRole.setDesc("测试描述");
         subRole.setAllowJson("[\"manage_back_category\"]");
-        System.out.println(JsonMapper.nonEmptyMapper().toJson(subRole));
+        System.out.println(JsonMapperUtil.nonEmptyMapper().toJson(subRole));
         return subRole;
     }
 }

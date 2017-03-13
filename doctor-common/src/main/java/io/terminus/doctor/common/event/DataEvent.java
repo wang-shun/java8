@@ -2,6 +2,7 @@ package io.terminus.doctor.common.event;
 
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,8 @@ import static java.util.Objects.isNull;
 @NoArgsConstructor
 public class DataEvent {
 
+    private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
+
     private Integer eventType;     // 事件类型
 
     /**
@@ -32,12 +35,12 @@ public class DataEvent {
     public static <T> DataEvent make(Integer eventType, T content){
         return DataEvent.builder()
                 .eventType(eventType)
-                .content(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(content))
+                .content(JSON_MAPPER.toJson(content))
                 .build();
     }
 
     public static byte[] toBytes(DataEvent dataEvent){
-        return JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(dataEvent).getBytes();
+        return JSON_MAPPER.toJson(dataEvent).getBytes();
     }
 
     public static <T> byte[] toBytes(Integer eventType, T context){
@@ -46,12 +49,12 @@ public class DataEvent {
 
     public static DataEvent fromBytes(byte[] bytes){
         checkState(!isNull(bytes), "dataEvent.fromBytes.empty");
-        return JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(new String(bytes),DataEvent.class);
+        return JSON_MAPPER.fromJson(new String(bytes),DataEvent.class);
     }
 
     public static <T> T analyseContent(DataEvent dataEvent, Class<T> clazz){
         checkState(!isNull(dataEvent.getContent()),"dataEvent.content.empty");
-        return JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(dataEvent.getContent(), clazz);
+        return JSON_MAPPER.fromJson(dataEvent.getContent(), clazz);
     }
 
     public static <T> T analyseContextByBytes(byte[] bytes, Class<T> clazz){

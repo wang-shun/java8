@@ -10,6 +10,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -57,7 +58,7 @@ import static io.terminus.doctor.common.enums.PigType.*;
 @Slf4j
 public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEventHandler {
 
-    protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
 
 

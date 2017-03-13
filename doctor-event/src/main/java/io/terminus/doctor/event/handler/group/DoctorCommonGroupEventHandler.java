@@ -168,6 +168,7 @@ public class DoctorCommonGroupEventHandler {
      * @return 创建的猪群id
      */
     public Long sowGroupEventMoveIn(List<DoctorEventInfo> eventInfoList, @Valid DoctorSowMoveInGroupInput input) {
+        log.info("trigger group event start, DoctorSowMoveInGroupInput = {}", input);
         List<DoctorGroup> groups = doctorGroupDao.findByCurrentBarnId(input.getToBarnId());
         DoctorBarn doctorBarn = doctorBarnDao.findById(input.getToBarnId());
         //没有猪群, 新建
