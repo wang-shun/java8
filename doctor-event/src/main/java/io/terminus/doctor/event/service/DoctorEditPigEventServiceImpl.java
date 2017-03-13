@@ -143,7 +143,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
      * @param modifyEvent 编辑事件
      */
     private void modifyPigEventHandleImpl(DoctorPigEvent modifyEvent) {
-        log.info("");
+        log.info("modifyPigEventHandleImpl starting, modifyEvent:{}", modifyEvent);
         //事件能否编辑初步校验
         if (!canModify(modifyEvent)) {
             throw new ServiceException("event.not.allow.modify");
@@ -173,7 +173,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                         //获取猪群断奶事件输入
                         BaseGroupInput weanGroupInput = doctorPigEventManager.getHandler(PigEvent.WEAN.getKey()).buildTriggerGroupEventInput(weanEvent);
                         //猪群断奶事件前镜像
-                        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(weanEventInfo.getOldEventId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+                        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(weanEventInfo.getEventId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
                         DoctorGroupEvent oldGroupWeanEvent = doctorGroupEventDao.findById(toPigEventId);
                         DoctorGroupSnapshot oldGroupWeanSnapshot = doctorGroupSnapshotDao.queryByEventId(oldGroupWeanEvent.getId());
                         DoctorGroupSnapShotInfo oldGroupWeanSnapshotInfo = JSON_MAPPER.fromJson(oldGroupWeanSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
@@ -182,23 +182,12 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                         newGroupWeanEvent.setId(oldGroupWeanEvent.getId());
                         //猪群事件编辑
                         doctorEditGroupEventService.elicitDoctorGroupTrack(newGroupWeanEvent);
-//                    oldGroupWeanEvent.setStatus(EventStatus.INVALID.getValue());
-//                    doctorGroupEventDao.update(oldGroupWeanEvent);
-//                    doctorGroupEventDao.create(newGroupWeanEvent);
-//                    DoctorEventInfo groupWeanEvent = DoctorEventInfo.builder()
-//                            .eventId(newGroupWeanEvent.getId())
-//                            .eventType(GroupEventType.WEAN.getValue())
-//                            .oldEventId(oldGroupWeanEvent.getId())
-//                            .businessId(newGroupWeanEvent.getGroupId())
-//                            .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
-//                            .farmId(newGroupWeanEvent.getFarmId())
-//                            .build();
                     }
                 }
                 //获取猪群事件输入
                 BaseGroupInput newGroupEventInput = doctorPigEventManager.getHandler(modifyEvent.getType()).buildTriggerGroupEventInput(modifyEvent);
                 //获取猪群需要修改原事件
-                Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(oldEventId, DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+                Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(modifyEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
                 DoctorGroupEvent oldGroupModifyEvent = doctorGroupEventDao.findById(toGroupEventId);
                 if(Arguments.isNull(oldGroupModifyEvent)){
                     log.info("new group event input,  newGroupEventInput = {}", newGroupEventInput);
@@ -223,6 +212,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
             throw new ServiceException("pig.event.modify.failed");
         }
         doctorPigEventDao.updateEventsStatus(pigOldEventIdList, EventStatus.INVALID.getValue());
+        log.info("modifyPigEventHandleImpl ending");
     }
 
     /**
@@ -257,9 +247,6 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
         oldEventIdList.addAll(followEventList.stream().map(DoctorPigEvent::getId).collect(Collectors.toList()));
         doctorPigEventDao.updateEventsStatus(oldEventIdList, EventStatus.HANDLING.getValue());
 
-//        //获取修改后事件
-//        DoctorPigEvent newModifyEvent = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(modifyRequest.getContent(), DoctorPigEvent.class);
-
         //获取修改前猪track
         DoctorPigSnapshot lastPigSnapshot;
         if (!Objects.equals(modifyEvent.getType(), PigEvent.ENTRY.getKey())) {
@@ -290,6 +277,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
      * @param executeEvent 后续事件
      */
     private void followPigEventHandle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent) {
+        log.info("");
         //获取事件执行前track
         DoctorPigTrack fromTrack = doctorPigTrackDao.findByPigId(executeEvent.getPigId());
 
@@ -301,7 +289,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
             DoctorWeanDto weanDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorWeanDto.class);
             weanDto.setWeanPigletsCount(fromTrack.getUnweanQty());
             executeEvent.setExtra(JSON_MAPPER.toJson(weanDto));
-            executeEvent.setWeakCount(fromTrack.getUnweanQty());
+            executeEvent.setWeanCount(fromTrack.getUnweanQty());
             executeEvent.setDesc(weanDto.getEventDesc());
         }
 

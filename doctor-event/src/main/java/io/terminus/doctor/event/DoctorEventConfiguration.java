@@ -197,6 +197,8 @@ public class  DoctorEventConfiguration {
         eventHandlerMap.put(PigEvent.WEAN.getKey(), doctorSowWeanHandler);
         eventHandlerMap.put(PigEvent.CHG_FARM.getKey(), doctorChgFarmHandler);
         eventHandlerMap.put(PigEvent.CHG_LOCATION.getKey(), doctorChgLocationHandler);
+        eventHandlerMap.put(PigEvent.TO_FARROWING.getKey(), doctorChgLocationHandler);
+        eventHandlerMap.put(PigEvent.TO_MATING.getKey(), doctorChgLocationHandler);
         eventHandlerMap.put(PigEvent.CONDITION.getKey(), doctorConditionHandler);
         eventHandlerMap.put(PigEvent.DISEASE.getKey(), doctorDiseaseHandler);
         eventHandlerMap.put(PigEvent.REMOVAL.getKey(), doctorRemovalHandler);

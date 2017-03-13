@@ -195,6 +195,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                     updateEventRelation.setId(doctorEventRelation.getId());
                     updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
                     doctorEventRelationDao.update(updateEventRelation);
+                    doctorEventRelation.setOriginEventId(executeEvent.getId());
                     doctorEventRelationDao.create(doctorEventRelation);
                 });
             }

@@ -29,7 +29,7 @@ public class DoctorEventRelationDao extends MyBatisDao<DoctorEventRelation> {
      * @return 关联关系
      */
     public List<DoctorEventRelation> findByOrigin(Long originEventId){
-        return getSqlSession().selectOne(sqlId("findByOrigin"), originEventId);
+        return getSqlSession().selectList(sqlId("findByOrigin"), originEventId);
     }
 
     /**

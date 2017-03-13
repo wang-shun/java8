@@ -14,13 +14,22 @@ import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
-import io.terminus.doctor.event.handler.group.*;
+import io.terminus.doctor.event.handler.group.DoctorAntiepidemicGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorCloseGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorCommonGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorDiseaseGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorLiveStockGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorMoveInGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorWeanGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -89,6 +98,7 @@ public class DoctorGroupEventManager {
             handlerMap.put(GroupEventType.ANTIEPIDEMIC.getValue(), handlerMapping.get(DoctorAntiepidemicGroupEventHandler.class));
             handlerMap.put(GroupEventType.TRANS_FARM.getValue(), handlerMapping.get(DoctorTransFarmGroupEventHandler.class));
             handlerMap.put(GroupEventType.CLOSE.getValue(), handlerMapping.get(DoctorCloseGroupEventHandler.class));
+            handlerMap.put(GroupEventType.WEAN.getValue(), handlerMapping.get(DoctorWeanGroupEventHandler.class));
         }
     }
 
