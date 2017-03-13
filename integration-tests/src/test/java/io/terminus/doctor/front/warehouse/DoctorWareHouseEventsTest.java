@@ -2,6 +2,7 @@ package io.terminus.doctor.front.warehouse;
 
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.basic.dao.DoctorFarmWareHouseTypeDao;
 import io.terminus.doctor.basic.dao.DoctorMaterialConsumeAvgDao;
@@ -78,8 +79,8 @@ public class DoctorWareHouseEventsTest extends BaseFrontWebTest{
         Long result = this.restTemplate.postForObject(url, dto, Long.class);
         System.out.println(result);
 
-//        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorFarmWareHouseTypeDao.findByFarmId(12345l)));
-//        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialInWareHouseDao.queryByFarmAndWareHouseId(12345l, 2l)));
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialConsumeAvgDao.listAll()));
+//        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(doctorFarmWareHouseTypeDao.findByFarmId(12345l)));
+//        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialInWareHouseDao.queryByFarmAndWareHouseId(12345l, 2l)));
+        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialConsumeAvgDao.listAll()));
     }
 }

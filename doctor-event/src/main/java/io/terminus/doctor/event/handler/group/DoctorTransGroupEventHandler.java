@@ -7,6 +7,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -237,7 +238,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
             //更新镜像
             DoctorGroupSnapShotInfo toInfo = JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(doctorGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
             toInfo.setGroupEvent(event);
-            doctorGroupSnapshot.setToInfo(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(toInfo));
+            doctorGroupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(toInfo));
             doctorGroupSnapshotDao.update(doctorGroupSnapshot);
 
             //刷新最新事件id

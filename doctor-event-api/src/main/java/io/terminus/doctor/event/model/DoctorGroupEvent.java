@@ -2,6 +2,7 @@ package io.terminus.doctor.event.model;
 
 import com.google.common.base.Objects;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dto.event.group.BaseGroupEvent;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -23,7 +24,7 @@ import java.util.Map;
 public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable {
     private static final long serialVersionUID = 2651236908562482893L;
 
-    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.nonEmptyMapper();
 
     private Long id;
     

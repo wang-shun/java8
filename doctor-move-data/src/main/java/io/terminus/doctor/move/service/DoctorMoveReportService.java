@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
@@ -134,7 +135,7 @@ public class DoctorMoveReportService {
         report.setNurseryCount(group.getNurseryCount());    // 当天保育猪存栏
         report.setFattenCount(group.getFattenCount());      // 当天育肥猪存栏
         report.setSowCount(sow.getBuruSow() + sow.getKonghuaiSow() + sow.getPeihuaiSow());     // 当天母猪存栏
-        report.setData(JsonMapper.nonEmptyMapper().toJson(getDailyReportDto(farmId, group, sow, boar)));
+        report.setData(JsonMapperUtil.nonEmptyMapper().toJson(getDailyReportDto(farmId, group, sow, boar)));
         return report;
     }
 
