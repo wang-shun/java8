@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
@@ -193,6 +194,11 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                 BaseGroupInput newGroupEventInput = doctorPigEventManager.getHandler(modifyEvent.getType()).buildTriggerGroupEventInput(modifyEvent);
                 //获取猪群需要修改原事件
                 DoctorGroupEvent oldGroupModifyEvent = doctorGroupEventDao.findByRelPigEventId(oldEventId);
+                if(Arguments.isNull(oldGroupModifyEvent)){
+                    log.info("new group event input,  newGroupEventInput = {}", newGroupEventInput);
+                    log.info("get group event by relPigEventId failed, relPigEventId = {}", oldEventId);
+                    throw new JsonResponseException("find.rel.group.event.failed");
+                }
                 DoctorGroupSnapshot beforeGroupSnapshot = doctorGroupSnapshotDao.queryByEventId(oldGroupModifyEvent.getId());
                 DoctorGroupSnapShotInfo beforeGroupSnapShotInfo = JSON_MAPPER.fromJson(beforeGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
                 DoctorGroupEvent modifyGroupEvent = doctorGroupEventManager.buildGroupEvent(new DoctorGroupInputInfo(new DoctorGroupDetail(beforeGroupSnapShotInfo.getGroup(), beforeGroupSnapShotInfo.getGroupTrack()), newGroupEventInput), oldGroupModifyEvent.getType());

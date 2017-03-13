@@ -3,6 +3,7 @@ package io.terminus.doctor.front.warehouse;
 import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
 import io.terminus.doctor.common.enums.WareHouseType;
