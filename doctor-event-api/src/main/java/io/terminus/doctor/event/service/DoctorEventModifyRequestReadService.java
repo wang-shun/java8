@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorEventModifyRequestDto;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 
 import javax.validation.constraints.NotNull;
@@ -23,5 +24,5 @@ public interface DoctorEventModifyRequestReadService {
      * @param modifyRequest 查询条件
      * @return 分页结果
      */
-    Response<Paging<DoctorEventModifyRequest>> pagingRequest(DoctorEventModifyRequest modifyRequest, Integer pageNo, Integer pageSize);
+    Response<Paging<DoctorEventModifyRequestDto>> pagingRequest(DoctorEventModifyRequest modifyRequest, Integer pageNo, Integer pageSize);
 }

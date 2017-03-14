@@ -52,6 +52,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest
                     .builder()
                     .farmId(basic.getFarmId())
+                    .businessId(modifyEvent.getPigId())
+                    .businessCode(modifyEvent.getPigCode())
                     .eventId(eventId)
                     .status(EventRequestStatus.WAITING.getValue())
                     .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
@@ -76,6 +78,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest
                     .builder()
                     .farmId(inputInfo.getGroupDetail().getGroup().getFarmId())
+                    .businessId(modifyEvent.getGroupId())
+                    .businessCode(modifyEvent.getGroupCode())
                     .eventId(eventId)
                     .status(EventRequestStatus.WAITING.getValue())
                     .type(DoctorEventModifyRequest.TYPE.GROUP.getValue())

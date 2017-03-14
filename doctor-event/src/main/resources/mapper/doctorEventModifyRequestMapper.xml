@@ -8,6 +8,8 @@
     <resultMap id="DoctorEventModifyRequestMap" type="DoctorEventModifyRequest">
         <id column="id" property="id"/>
         <result column="farm_id" property="farmId"/>
+        <result column="business_id" property="businessId"/>
+        <result column="business_code" property="businessCode"/>
         <result column="start_event_id" property="startEventId"/>
         <result column="event_id" property="eventId"/>
         <result column="type" property="type"/>
@@ -29,11 +31,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, start_event_id, event_id, type, content, status, reason, user_id, user_name, created_at, updated_at
+        farm_id, business_id, business_code, start_event_id, event_id, type, content, status, reason, user_id, user_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{startEventId}, #{eventId}, #{type}, #{content}, #{status},#{reason}, #{userId}, #{userName}, now(), now()
+        #{farmId}, #{businessId}, #{businessCode}, #{startEventId}, #{eventId}, #{type}, #{content}, #{status},#{reason}, #{userId}, #{userName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorEventModifyRequest" keyProperty="id" useGeneratedKeys="true">
@@ -50,17 +52,17 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" item="i" separator=",">
-            (#{i.farmId}, #{i.startEventId}, #{i.eventId}, #{i.type}, #{i.content}, #{i.status}, #{reason}, #{i.userId}, #{i.userName},now(), now())
+            (#{i.farmId}, #{businessId}, #{i.businessCode}, #{i.startEventId}, #{i.eventId}, #{i.type}, #{i.content}, #{i.status}, #{reason}, #{i.userId}, #{i.userName},now(), now())
         </foreach>
     </insert>
 
-    <select id="findById" parameterType="long" resultType="DoctorEventModifyRequest" >
+    <select id="findById" parameterType="long" resultMap="DoctorEventModifyRequestMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id = #{id}
     </select>
 
-    <select id="findByIds" parameterType="long" resultType="DoctorEventModifyRequest" >
+    <select id="findByIds" parameterType="long" resultMap="DoctorEventModifyRequestMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id in
@@ -74,6 +76,8 @@
         <include refid="tb"/>
         <set>
             <if test="farmId != null">farm_id = #{farmId},</if>
+            <if test="businessId != null">business_id = #{businessId},</if>
+            <if test="businessCode != null">business_code = #{businessCode},</if>
             <if test="startEventId != null">start_event_id = #{startEventId},</if>
             <if test="eventId != null">event_id = #{eventId},</if>
             <if test="type != null">type = #{type},</if>
@@ -104,6 +108,8 @@
     <sql id="criteria">
         <where>
             <if test="farmId != null">AND farm_id = #{farmId}</if>
+            <if test="businessId != null">AND business_id = #{businessId}</if>
+            <if test="businessCode != null">AND business_code = #{businessCode}</if>
             <if test="startEventId != null">AND start_event_id = #{startEventId}</if>
             <if test="eventId != null">AND event_id = #{eventId}</if>
             <if test="type != null">AND type = #{type}</if>
@@ -113,7 +119,7 @@
         </where>
     </sql>
 
-    <select id="list" parameterType="map" resultType="DoctorEventModifyRequest">
+    <select id="list" parameterType="map" resultMap="DoctorEventModifyRequestMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
@@ -125,7 +131,7 @@
         <include refid="criteria"/>
     </select>
 
-    <select id="paging" parameterType="map" resultType="DoctorEventModifyRequest">
+    <select id="paging" parameterType="map" resultMap="DoctorEventModifyRequestMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>

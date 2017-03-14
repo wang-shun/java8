@@ -26,6 +26,7 @@ import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.DoctorEventModifyRequestDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
@@ -573,11 +574,11 @@ public class DoctorPigCreateEvents {
      * @return 分页结果
      */
     @RequestMapping(value = "/pagingRequest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Paging<DoctorEventModifyRequest> pagingRequest(@RequestParam Long farmId,
-                                                          @RequestParam(required = false) Integer status,
-                                                          @RequestParam(required = false) String code,
-                                                          @RequestParam Integer pageNo,
-                                                          @RequestParam Integer pageSize) {
+    public Paging<DoctorEventModifyRequestDto> pagingRequest(@RequestParam Long farmId,
+                                                             @RequestParam(required = false) Integer status,
+                                                             @RequestParam(required = false) String code,
+                                                             @RequestParam Integer pageNo,
+                                                             @RequestParam Integer pageSize) {
         return RespHelper.or500(doctorEventModifyRequestReadService
                 .pagingRequest(DoctorEventModifyRequest.builder().farmId(farmId).status(status).build(), pageNo, pageSize));
     }

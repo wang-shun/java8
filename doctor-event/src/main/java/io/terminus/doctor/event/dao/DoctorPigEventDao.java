@@ -356,4 +356,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public void updateEventsStatus(List<Long> ids, Integer status) {
         getSqlSession().update(sqlId("updateEventsStatus"), ImmutableMap.of("ids", ids, "status", status));
     }
+
+    /**
+     * 查询所有事件,包括无效事件
+     * @param id 事件id
+     * @return 事件
+     */
+    public DoctorPigEvent findEventById(Long id) {
+        return getSqlSession().selectOne(sqlId("findEventById"), id);
+    }
 }

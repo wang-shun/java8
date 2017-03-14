@@ -463,4 +463,10 @@
                 #{id}
             </foreach>
     </update>
+
+    <select id="findEventById" parameterType="long" resultMap="DoctorGroupEventMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE id = #{id}
+    </select>
 </mapper>

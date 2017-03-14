@@ -29,6 +29,16 @@ public class DoctorEventModifyRequest implements Serializable{
     private Long farmId;
 
     /**
+     * 目标id
+     */
+    private Long businessId;
+
+    /**
+     * 目标code
+     */
+    private String businessCode;
+
+    /**
      * 上一个事件
      */
     private Long startEventId;

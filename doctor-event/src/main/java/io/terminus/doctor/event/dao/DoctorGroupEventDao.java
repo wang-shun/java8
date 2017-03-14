@@ -6,6 +6,7 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -157,5 +158,14 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
 
     public Boolean updateGroupEventStatus(List<Long> ids, Integer status) {
         return Boolean.valueOf(getSqlSession().update(sqlId("updateGroupEventStatus"), MapBuilder.newHashMap().put("ids", ids, "status", status).map()) == 1);
+    }
+
+    /**
+     * 查询所有事件,包括无效事件
+     * @param id 事件id
+     * @return 事件
+     */
+    public DoctorPigEvent findEventById(Long id) {
+        return getSqlSession().selectOne(sqlId("findEventById"), id);
     }
 }
