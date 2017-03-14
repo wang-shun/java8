@@ -10,7 +10,17 @@ import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
-import io.terminus.doctor.event.handler.group.*;
+import io.terminus.doctor.event.handler.group.DoctorAntiepidemicGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorCloseGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorDiseaseGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorGroupEventHandlers;
+import io.terminus.doctor.event.handler.group.DoctorLiveStockGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorMoveInGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorWeanGroupEventHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgFarmEventHandler;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgLocationEventHandler;
@@ -64,10 +74,12 @@ import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 import java.util.Map;
 
@@ -84,6 +96,16 @@ import java.util.Map;
 @Import({MessageAutoConfig.class, DoctorCommonConfiguration.class})
 @AutoConfigureAfter({MybatisAutoConfiguration.class})
 public class  DoctorEventConfiguration {
+
+    @Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasename("classpath:messages");
+        messageSource.setCacheSeconds(3600);
+        messageSource.setUseCodeAsDefaultMessage(true);
+        messageSource.setDefaultEncoding("UTF-8");
+        return messageSource;
+    }
 
     /**
      * 事件回滚拦截器链

@@ -7,6 +7,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -183,7 +184,8 @@ public class DoctorPigEventManager {
      * @return 事件处理器
      */
     public DoctorPigEventHandler getHandler(Integer eventType) {
-        return pigEventHandlers.getEventHandlerMap().get(eventType);
+       return Checks.expectNotNull(pigEventHandlers.getEventHandlerMap().get(eventType), "get.pig.handler.failed", eventType);
+
     }
     /**
      * 校验携带数据正确性，发布事件
