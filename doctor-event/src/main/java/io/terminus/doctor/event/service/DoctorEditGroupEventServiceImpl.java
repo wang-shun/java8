@@ -136,8 +136,8 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
             log.info("edit event failed, cause: {}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException("edit.group.event.failed");
         }
-
-        return Response.ok();
+        log.info("elicitDoctorGroupTrack end, doctorGroupTrack: {}", doctorGroupTrack);
+        return Response.ok("编辑成功!!!");
     }
 
     private void triggerEvents(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent, List<DoctorGroupTrack> rollbackDoctorGroupTrackList, List<Long> rollbackDoctorGroupEventList, List<Long> taskDoctorGroupEventList) {
@@ -203,16 +203,15 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
                     }
                     return Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) == 1;
                 }
-        ).collect(Collectors.toList());
-
-        linkedDoctorGroupEventList = linkedDoctorGroupEventList.stream().sorted(
+        ).sorted(
                 (doctorGroupEvent1, doctorGroupEvent2)-> {
                     if(doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent2.getEventAt()) == 0){
                         return doctorGroupEvent1.getType().compareTo(doctorGroupEvent2.getType());
                     }
 
                     return doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent2.getEventAt());
-                }).collect(Collectors.toList());
+                }
+        ).collect(Collectors.toList());
 
         DoctorGroupEvent preDoctorGroupEvent = doctorGroupEventList.stream().filter(
                 doctorGroupEvent1 -> {

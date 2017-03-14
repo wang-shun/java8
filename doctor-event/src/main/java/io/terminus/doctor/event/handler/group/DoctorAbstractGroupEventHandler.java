@@ -139,12 +139,14 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
         //更新被触发
         DoctorEventRelation eventRelation = doctorEventRelationDao.findByTrigger(oldEventId);
-        eventRelation.setTriggerEventId(executeEvent.getId());
-        DoctorEventRelation updateEventRelation = new DoctorEventRelation();
-        updateEventRelation.setId(eventRelation.getId());
-        updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
-        doctorEventRelationDao.update(updateEventRelation);
-        doctorEventRelationDao.create(eventRelation);
+        if(Objects.nonNull(eventRelation)){
+            eventRelation.setTriggerEventId(executeEvent.getId());
+            DoctorEventRelation updateEventRelation = new DoctorEventRelation();
+            updateEventRelation.setId(eventRelation.getId());
+            updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
+            doctorEventRelationDao.update(updateEventRelation);
+            doctorEventRelationDao.create(eventRelation);
+        }
     }
     /**
      * 处理事件的抽象方法, 由继承的子类去实现

@@ -154,8 +154,8 @@ public class DoctorCommonGroupEventHandler {
         //4. 转入猪群事件
         DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId));
 
-        input.setRelPigEventId(null); //转入猪群事件 relPigEventId 置成空
-        input.setRelGroupEventId(groupDetail.getGroupTrack().getRelEventId());      //记录新建猪群事件的id(新建猪群时，track.relEventId = 新建猪群事件id)
+//        input.setRelPigEventId(null); //转入猪群事件 relPigEventId 置成空
+//        input.setRelGroupEventId(groupDetail.getGroupTrack().getRelEventId());      //记录新建猪群事件的id(新建猪群时，track.relEventId = 新建猪群事件id)
         input.setSowEvent(true);
         doctorMoveInGroupEventHandler.handle(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
         return groupId;
