@@ -3,7 +3,6 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
@@ -97,11 +96,11 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
     public RespWithEx<Boolean> modifyPigEventHandle(DoctorEventModifyRequest modifyRequest) {
         try {
             modifyPigEventRequestHandleImpl(modifyRequest);
-            return RespWithEx.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("modify.pig.event.handle.failed, modifyRequest:{}, cause by :{}", modifyRequest, Throwables.getStackTraceAsString(e));
-            throw new JsonResponseException("modify.pig.event.handle.failed");
         }
+        return RespWithEx.ok(Boolean.TRUE);
+
     }
 
     @Override
@@ -109,9 +108,12 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
         try {
             modifyPigEventHandleImpl(modifyEvent);
             return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            log.error("modify.pig.event.handle.failed, modifyEvent:{}, cause by :{}", modifyEvent, Throwables.getStackTraceAsString(e));
+            throw e;
         } catch (Exception e) {
             log.error("modify.pig.event.handle.failed, modifyEvent:{}, cause by :{}", modifyEvent, Throwables.getStackTraceAsString(e));
-            throw new JsonResponseException("modify.pig.event.handle.failed");
+            throw new InvalidException("modify.pig.event.handle.failed");
         }
     }
 
@@ -137,13 +139,11 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
             modifyRequest.setStatus(EventRequestStatus.FAILED.getValue());
             modifyRequest.setReason(messageSourceHelper.getMessage(e.getError(), e.getParams()));
             eventModifyRequestDao.update(modifyRequest);
-            throw e;
         } catch (Exception e) {
             log.info("modify pig event request handle failed, cause by:{}", Throwables.getStackTraceAsString(e));
             modifyRequest.setStatus(EventRequestStatus.FAILED.getValue());
             modifyRequest.setReason(messageSourceHelper.getMessage("modify.pig.event.request.handle.failed"));
             eventModifyRequestDao.update(modifyRequest);
-            throw e;
         }
         log.info("modify pig event handle ending");
     }
@@ -155,15 +155,15 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
     private void modifyPigEventHandleImpl(DoctorPigEvent modifyEvent) {
         log.info("modifyPigEventHandleImpl starting, modifyEvent:{}", modifyEvent);
 
+        //事件能否编辑初步校验
+        expectTrue(canModify(modifyEvent), "event.not.allow.modify");
+
         List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
         List<Long> pigOldEventIdList = Lists.newLinkedList();
         DoctorPigTrack currentTrack = doctorPigTrackDao.findByPigId(modifyEvent.getPigId());
         DoctorPig oldPig = doctorPigDao.findById(modifyEvent.getPigId());
         Long oldEventId = modifyEvent.getId();
         try {
-            //事件能否编辑初步校验
-            expectTrue(canModify(modifyEvent), "event.not.allow.modify");
-
             //1.处理猪事件编辑
             modifyPigEventHandle(modifyEvent, doctorEventInfoList, pigOldEventIdList);
 
