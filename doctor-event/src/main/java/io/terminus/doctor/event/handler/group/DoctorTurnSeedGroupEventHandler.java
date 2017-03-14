@@ -87,7 +87,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         DoctorTurnSeedGroupEvent doctorTurnSeedGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTurnSeedGroupEvent.class);
         if(Arguments.isNull(doctorTurnSeedGroupEvent)) {
             log.error("parse doctorTurnSeedGroupEvent faild, doctorGroupEvent = {}", event);
-            throw new JsonResponseException("group.event.info.broken");
+            throw new InvalidException("trunseed.group.event.info.broken", event.getId());
         }
 
         DoctorPig.PigSex sex = getSex(doctorTurnSeedGroupEvent.getToBarnType());

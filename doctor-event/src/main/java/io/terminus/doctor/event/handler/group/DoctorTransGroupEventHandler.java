@@ -118,7 +118,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         DoctorTransGroupEvent doctorTransGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
         if(Arguments.isNull(doctorTransGroupEvent)) {
             log.error("parse doctorTransGroupEvent faild, doctorGroupEvent = {}", event);
-            throw new JsonResponseException("group.event.info.broken");
+            throw new InvalidException("transgroup.event.info.broken", event.getId());
         }
 
         //更新quanity

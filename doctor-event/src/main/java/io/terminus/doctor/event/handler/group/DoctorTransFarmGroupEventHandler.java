@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.group;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -92,7 +93,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         DoctorTransFarmGroupEvent doctorTransFarmGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransFarmGroupEvent.class);
         if(Arguments.isNull(doctorTransFarmGroupEvent)) {
             log.error("parse doctorTransFarmGroupEvent faild, doctorGroupEvent = {}", event);
-            throw new JsonResponseException("group.event.info.broken");
+            throw new InvalidException("transfarm.group.event.info.broken", event.getId());
         }
         //更新track
         track.setQuantity(EventUtil.minusQuantity(track.getQuantity(), event.getQuantity()));

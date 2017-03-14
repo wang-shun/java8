@@ -4,6 +4,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -136,7 +137,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         DoctorMoveInGroupEvent doctorMoveInGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorMoveInGroupEvent.class);
         if(Arguments.isNull(doctorMoveInGroupEvent)) {
             log.error("parse doctorMoveInGroupEvent faild, doctorGroupEvent = {}", event);
-            throw new JsonResponseException("group.event.info.broken");
+            throw new InvalidException("movein.group.event.info.broken", event.getId());
         }
         //1.更新猪群跟踪
         Integer oldQty = track.getQuantity();

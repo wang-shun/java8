@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.service;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -9,11 +10,9 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.event.dao.DoctorEventRelationDao;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
@@ -24,6 +23,8 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.manager.DoctorEditGroupEventManager;
 import io.terminus.doctor.event.model.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,8 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
     private DoctorEventRelationDao doctorEventRelationDao;
 
+    private DoctorGroupDao doctorGroupDao;
+
 
     @Autowired
     public DoctorEditGroupEventServiceImpl(DoctorGroupReadService doctorGroupReadService,
@@ -68,7 +71,8 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
                                            DoctorGroupTrackDao doctorGroupTrackDao,
                                            DoctorGroupWriteService doctorGroupWriteService,
                                            DoctorGroupEventDao doctorGroupEventDao,
-                                           DoctorEventRelationDao doctorEventRelationDao){
+                                           DoctorEventRelationDao doctorEventRelationDao,
+                                           DoctorGroupDao doctorGroupDao){
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorEditGroupEventManager = doctorEditGroupEventManager;
@@ -76,6 +80,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorEventRelationDao = doctorEventRelationDao;
+        this.doctorGroupDao = doctorGroupDao;
     }
 
     @Override
@@ -92,6 +97,27 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
     }
 
+    private void breforeCheck(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {
+        DoctorGroupEvent initGroupEvent = doctorGroupEventDao.findInitGroupEvent(newEvent.getGroupId());
+        if(newEvent.getEventAt().compareTo(initGroupEvent.getEventAt()) == -1){
+            log.info("eventAt less than group createdAt, groupId = {}", newEvent.getGroupId());
+            throw new InvalidException("eventat.less.than.group.createdat", newEvent.getGroupCode(), DateFormatUtils.format(initGroupEvent.getEventAt(), "YYYY-MM-DD"));
+        }
+        DoctorGroupTrack track = doctorGroupTrackDao.findByGroupId(newEvent.getGroupId());
+        DoctorGroup group = doctorGroupDao.findById(newEvent.getGroupId());
+        if(Objects.equals(DoctorGroup.Status.CLOSED, group.getStatus())){
+            log.info("group has been closed, groupId = {}", newEvent.getGroupId());
+            throw new InvalidException("group.has.been.closed", newEvent.getGroupCode());
+        }
+        if(Objects.equals(GroupEventType.CHANGE.getValue(), newEvent.getType()) &&
+                track.getQuantity() + oldEvent.getQuantity() - newEvent.getQuantity() < 0){
+            log.info("group quantity not enough, groupId = {}", newEvent.getGroupId());
+            throw new InvalidException("group.quantity.not.enough", newEvent.getGroupCode(), track.getQuantity(), newEvent.getQuantity() - oldEvent.getQuantity());
+        }
+
+
+    }
+
 
     private Response<String> elicitDoctorGroupEvents(DoctorGroupEvent doctorGroupEvent, List<DoctorGroupTrack> rollbackDoctorGroupTrackList, List<Long> rollbackDoctorGroupEventList, List<Long> taskDoctorGroupEventList) {
         log.info("elicitDoctorGroupTrack start, doctorGroupEvent: {}", doctorGroupEvent);
@@ -100,6 +126,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         DoctorGroupTrack doctorGroupTrack = new DoctorGroupTrack();
         try {
             DoctorGroupEvent oldEvent = doctorGroupEventDao.findById(doctorGroupEvent.getId());
+            breforeCheck(oldEvent, doctorGroupEvent);
             rollbackDoctorGroupTrackList.add(doctorGroupTrackDao.findByGroupId(doctorGroupEvent.getGroupId()));
 
             //获取要重新推演的events list,不包括编辑的事件
@@ -154,8 +181,8 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
             //2.转向猪舍变了,删除原来的转入猪群(暂不支持)// TODO: 17/3/13
             //3.新增一个转入猪群
             if(!Objects.equals(oldTransEvent.getToBarnId(), newTransEvent.getToBarnId())){
-                log.info("eable edit transgroup change barn");
-                throw new JsonResponseException("enable.edit.trans.group.change.barn");
+                log.info("unable to edit transgroup change barn");
+                throw new InvalidException("unable.edit.trans.group.change.barn");
             }
             oldMoveInEvent = buildMoveInByTransGroup(oldMoveInEvent, newEvent);
             this.elicitDoctorGroupEvents(oldMoveInEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
@@ -191,7 +218,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         Response<List<DoctorGroupEvent>> doctorGroupEventResp = doctorGroupReadService.findLinkedGroupEventsByGroupId(doctorGroupEvent.getGroupId());
         if (!doctorGroupEventResp.isSuccess() || Arguments.isNullOrEmpty(doctorGroupEventResp.getResult())) {
             log.info("find linked group events failed, groupId: {}", doctorGroupEvent.getGroupId());
-            throw new JsonResponseException("find.group.list.failed");
+            throw new InvalidException("find.group.list.failed", doctorGroupEvent.getGroupCode());
         }
 
         List<DoctorGroupEvent> doctorGroupEventList = doctorGroupEventResp.getResult();
@@ -229,12 +256,12 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
             DoctorGroupSnapshot preDoctorGroupSnapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(preDoctorGroupEvent.getId());
             if (Arguments.isNull(preDoctorGroupSnapshot)) {
                 log.info("find DoctorGroupSnapshot failed, no DoctorGroupSnapshot, toEventId={}", preDoctorGroupEvent.getId());
-                throw new JsonResponseException("group.snapshot.info.broken");
+                throw new InvalidException("group.snapshot.info.broken", preDoctorGroupEvent.getId());
             }
             DoctorGroupSnapShotInfo doctorGroupSnapShotInfo = JSON_MAPPER.fromJson(preDoctorGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
             if (Arguments.isNull(doctorGroupSnapShotInfo) || Arguments.isNull(doctorGroupSnapShotInfo.getGroupTrack())) {
                 log.info("DoctorGroupSnapShotInfo broken, toEventId={}", preDoctorGroupEvent.getId());
-                throw new JsonResponseException("group.snapshot.info.broken");
+                throw new InvalidException("group.snapshot.info.broken", preDoctorGroupEvent.getId());
             }
             BeanMapper.copy(doctorGroupSnapShotInfo.getGroupTrack(), doctorGroupTrack);
         }
