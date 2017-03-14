@@ -3,12 +3,15 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.enums.EventRequestStatus;
+import io.terminus.doctor.event.helper.DoctorMessageSourceHelper;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
@@ -17,6 +20,8 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 /**
  * Created by xjn on 17/3/10.
@@ -31,6 +36,13 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     private DoctorPigEventManager pigEventManager;
     @Autowired
     private DoctorGroupEventManager groupEventManager;
+    @Autowired
+    private DoctorEditPigEventService doctorEditPigEventService;
+    @Autowired
+    private DoctorEditGroupEventService doctorEditGroupEventService;
+
+    @Autowired
+    private DoctorMessageSourceHelper messageSourceHelper;
 
     @Override
     public Response<Boolean> createRequest(DoctorEventModifyRequest modifyRequest) {
@@ -93,5 +105,55 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             log.error("create request failed, inputInfo:{}, eventId:{}, eventType:{}, userId:{}, userName:{}, cause:{}", inputInfo, eventId, eventType, userId, realName, Throwables.getStackTraceAsString(e));
             return Response.fail("create.group.modify.event.request.failed");
         }
+    }
+
+    @Override
+    public RespWithEx<Boolean> modifyPigEventHandle(DoctorEventModifyRequest modifyRequest) {
+        try {
+            modifyEventRequestHandleImpl(modifyRequest);
+        } catch (Exception e) {
+            log.error("modify.pig.event.handle.failed, modifyRequest:{}, cause by :{}", modifyRequest, Throwables.getStackTraceAsString(e));
+        }
+        return RespWithEx.ok(Boolean.TRUE);
+
+    }
+
+    /**
+     * 通过编辑事件请求处理猪事件编辑请求
+     *
+     * @param modifyRequest 编辑事件请求
+     */
+    private void modifyEventRequestHandleImpl(DoctorEventModifyRequest modifyRequest) {
+        log.info("modify event handle starting, modifyRequest:{}", modifyRequest);
+        try {
+            modifyRequest.setStatus(EventRequestStatus.HANDLING.getValue());
+            eventModifyRequestDao.update(modifyRequest);
+
+
+            if (Objects.equals(modifyRequest.getType(), DoctorEventModifyRequest.TYPE.PIG.getValue())) {
+                //处理猪事件修改
+                DoctorPigEvent modifyEvent = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(modifyRequest.getContent(), DoctorPigEvent.class);
+                doctorEditPigEventService.modifyPigEventHandle(modifyEvent);
+            } else {
+                //处理猪群事件修改
+                DoctorGroupEvent modifyEvent = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(modifyRequest.getContent(), DoctorGroupEvent.class);
+                doctorEditGroupEventService.elicitDoctorGroupTrack(modifyEvent);
+            }
+
+            //更新修改请求的状态
+            modifyRequest.setStatus(EventRequestStatus.SUCCESS.getValue());
+            eventModifyRequestDao.update(modifyRequest);
+        } catch (InvalidException e) {
+            log.info("modify event request handle failed, cause by:{}", Throwables.getStackTraceAsString(e));
+            modifyRequest.setStatus(EventRequestStatus.FAILED.getValue());
+            modifyRequest.setReason(messageSourceHelper.getMessage(e.getError(), e.getParams()));
+            eventModifyRequestDao.update(modifyRequest);
+        } catch (Exception e) {
+            log.info("modify event request handle failed, cause by:{}", Throwables.getStackTraceAsString(e));
+            modifyRequest.setStatus(EventRequestStatus.FAILED.getValue());
+            modifyRequest.setReason(messageSourceHelper.getMessage("modify.event.request.handle.failed"));
+            eventModifyRequestDao.update(modifyRequest);
+        }
+        log.info("modify event handle ending");
     }
 }

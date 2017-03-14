@@ -1,31 +1,31 @@
 package io.terminus.doctor.event.service;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.exception.InvalidException;
-import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.event.dao.*;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
-import io.terminus.doctor.event.enums.EventElicitStatus;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.manager.DoctorEditGroupEventManager;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.model.DoctorEventRelation;
+import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupSnapshot;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RpcProvider
 public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventService{
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
@@ -84,17 +83,16 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
     }
 
     @Override
-    public Response<String> elicitDoctorGroupTrack(DoctorGroupEvent doctorGroupEvent){
+    public void elicitDoctorGroupTrack(DoctorGroupEvent doctorGroupEvent){
         List<DoctorGroupTrack> rollbackDoctorGroupTrackList = Lists.newArrayList();
         List<Long> rollbackDoctorGroupEventList = Lists.newArrayList();
         List<Long> taskDoctorGroupEventList = Lists.newArrayList();
         try{
-            return elicitDoctorGroupEvents(doctorGroupEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
+            elicitDoctorGroupEvents(doctorGroupEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
         }catch(Exception e){
             rollBackFailed(rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
-            return Response.fail("edit group event failed");
+            throw e;
         }
-
     }
 
     private void breforeCheck(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {
@@ -105,7 +103,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         }
         DoctorGroupTrack track = doctorGroupTrackDao.findByGroupId(newEvent.getGroupId());
         DoctorGroup group = doctorGroupDao.findById(newEvent.getGroupId());
-        if(Objects.equals(DoctorGroup.Status.CLOSED, group.getStatus())){
+        if(Objects.equals(DoctorGroup.Status.CLOSED.getValue(), group.getStatus())){
             log.info("group has been closed, groupId = {}", newEvent.getGroupId());
             throw new InvalidException("group.has.been.closed", newEvent.getGroupCode());
         }
@@ -119,7 +117,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
     }
 
 
-    private Response<String> elicitDoctorGroupEvents(DoctorGroupEvent doctorGroupEvent, List<DoctorGroupTrack> rollbackDoctorGroupTrackList, List<Long> rollbackDoctorGroupEventList, List<Long> taskDoctorGroupEventList) {
+    private void elicitDoctorGroupEvents(DoctorGroupEvent doctorGroupEvent, List<DoctorGroupTrack> rollbackDoctorGroupTrackList, List<Long> rollbackDoctorGroupEventList, List<Long> taskDoctorGroupEventList) {
         log.info("elicitDoctorGroupTrack start, doctorGroupEvent: {}", doctorGroupEvent);
         List<DoctorGroupEvent> triggerDoctorGroupEventList = Lists.newArrayList();
         List<DoctorGroupEvent> localDoctorGroupEventList = Lists.newArrayList();
@@ -161,10 +159,9 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
         }catch(Exception e){
             log.info("edit event failed, cause: {}", Throwables.getStackTraceAsString(e));
-            throw new JsonResponseException("edit.group.event.failed");
+           throw e;
         }
         log.info("elicitDoctorGroupTrack end, doctorGroupTrack: {}", doctorGroupTrack);
-        return Response.ok("编辑成功!!!");
     }
 
     private void triggerEvents(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent, List<DoctorGroupTrack> rollbackDoctorGroupTrackList, List<Long> rollbackDoctorGroupEventList, List<Long> taskDoctorGroupEventList) {

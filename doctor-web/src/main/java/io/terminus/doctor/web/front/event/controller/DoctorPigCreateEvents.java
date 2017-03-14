@@ -46,8 +46,6 @@ import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
-import io.terminus.doctor.event.enums.EventRequestStatus;
-import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -56,7 +54,6 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.event.service.DoctorEditPigEventService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
@@ -85,7 +82,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -134,8 +130,6 @@ public class DoctorPigCreateEvents {
     private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
     @RpcConsumer
     private DoctorEventModifyRequestReadService doctorEventModifyRequestReadService;
-    @RpcConsumer
-    private DoctorEditPigEventService doctorEditPigEventService;
     @RpcConsumer
     private DoctorUserProfileReadService doctorUserProfileReadService;
 
@@ -512,23 +506,6 @@ public class DoctorPigCreateEvents {
     }
 
     /**
-     * 修改猪事件
-     */
-    @RequestMapping(value = "/modifyPigEvent", method = RequestMethod.GET)
-    public void modifyPigEvent(@RequestParam Long eventId) {
-        DoctorPigEvent modifyEvent = RespHelper.or500(doctorPigEventReadService.queryPigEventById(eventId));
-        modifyEvent.setStatus(EventStatus.VALID.getValue());
-        DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest.builder()
-                .farmId(modifyEvent.getFarmId())
-                .createdAt(new Date())
-                .status(EventRequestStatus.WAITING.getValue())
-                .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
-                .content(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(modifyEvent))
-                .build();
-        doctorEditPigEventService.modifyPigEventHandle(modifyRequest);
-    }
-
-    /**
      * 创建编辑事件请求
      * @param farmId 猪场id
      * @param eventId 事件id
@@ -566,7 +543,7 @@ public class DoctorPigCreateEvents {
 
         Long requestId = RespHelper.or500(doctorEventModifyRequestWriteService.createPigModifyEventRequest(basic, inputDto, eventId, user.getId(), userName));
         DoctorEventModifyRequest modifyRequest = RespHelper.or500(doctorEventModifyRequestReadService.findById(requestId));
-        RespWithExHelper.orInvalid(doctorEditPigEventService.modifyPigEventHandle(modifyRequest));
+        RespWithExHelper.orInvalid(doctorEventModifyRequestWriteService.modifyPigEventHandle(modifyRequest));
     }
 
     /**

@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
+import io.terminus.doctor.common.utils.DateUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -45,7 +46,7 @@ public class DoctorWeanGroupInput extends BaseGroupInput implements Serializable
     public Map<String, String> descMap() {
         Map<String, String> descMap = new HashMap<>();
         if(partWeanDate != null){
-            descMap.put("断奶日期", this.partWeanDate.toString());
+            descMap.put("断奶日期", DateUtil.toDateString(this.partWeanDate));
         }
         if(partWeanPigletsCount != null){
             descMap.put("断奶数量", this.partWeanPigletsCount.toString());

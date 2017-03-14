@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
@@ -38,4 +39,11 @@ public interface DoctorEventModifyRequestWriteService {
      * @return 请求id
      */
     Response<Long> createGroupModifyEventRequest(DoctorGroupInputInfo inputInfo, Long eventId, Integer eventType, Long userId, String realName);
+
+    /**
+     * 猪事件编辑处理
+     * @param modifyRequest 事件编辑请求
+     * @return
+     */
+    RespWithEx<Boolean> modifyPigEventHandle(DoctorEventModifyRequest modifyRequest);
 }

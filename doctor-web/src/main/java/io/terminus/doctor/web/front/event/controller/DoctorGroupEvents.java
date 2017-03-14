@@ -11,23 +11,19 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
-import io.terminus.doctor.event.enums.EventElicitStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.service.DoctorEditGroupEventService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -75,8 +71,6 @@ public class DoctorGroupEvents {
     private final DoctorBasicReadService doctorBasicReadService;
     private final TransFromUtil transFromUtil;
 
-    @RpcConsumer
-    private DoctorEditGroupEventService doctorEditGroupEventService;
     @RpcConsumer
     private DoctorPigReadService doctorPigReadService;
     @RpcConsumer
@@ -164,8 +158,7 @@ public class DoctorGroupEvents {
                                                  @RequestParam("data") String data) {
         Long requestId = RespWithExHelper.orInvalid(doctorGroupWebService.createGroupModifyEventRequest(groupId, eventType, eventId, data));
         DoctorEventModifyRequest modifyRequest = RespHelper.or500(doctorEventModifyRequestReadService.findById(requestId));
-        DoctorGroupEvent modifyEvent = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(modifyRequest.getContent(), DoctorGroupEvent.class);
-        RespHelper.or500(doctorEditGroupEventService.elicitDoctorGroupTrack(modifyEvent));
+        RespWithExHelper.orInvalid(doctorEventModifyRequestWriteService.modifyPigEventHandle(modifyRequest));
     }
 
     /**
@@ -454,27 +447,5 @@ public class DoctorGroupEvents {
             return Boolean.FALSE;
         }
 
-    }
-
-
-    @RequestMapping(value="/edit", method = RequestMethod.GET)
-    public Response<String> editGroupEvent(@RequestParam Long id){
-        log.info("edit group event , eventId={}", id);
-        try{
-            DoctorGroupEvent doctorGroupEvent = RespHelper.or500(doctorGroupReadService.findGroupEventById(id));
-            doctorGroupEvent.setQuantity(doctorGroupEvent.getQuantity() + 2);
-            doctorGroupEvent.setWeight(doctorGroupEvent.getWeight() + 10);
-            doctorGroupEvent.setAvgWeight(doctorGroupEvent.getWeight()/doctorGroupEvent.getQuantity());
-            DoctorMoveInGroupEvent doctorMoveInGroupEvent = JsonMapper.nonEmptyMapper().fromJson(doctorGroupEvent.getExtra(), DoctorMoveInGroupEvent.class);
-            doctorMoveInGroupEvent.setQuantity(doctorGroupEvent.getQuantity());
-            doctorMoveInGroupEvent.setHealthyQty(doctorMoveInGroupEvent.getHealthyQty() + 2);
-            doctorMoveInGroupEvent.setAvgWeight(doctorGroupEvent.getAvgWeight());
-            log.info("edit event = {}", doctorGroupEvent);
-            doctorEditGroupEventService.elicitDoctorGroupTrack(doctorGroupEvent);
-        }catch(Exception e){
-            log.info("edit event failed");
-            return Response.fail("edit event failed");
-        }
-        return Response.ok("edit event success");
     }
 }

@@ -1,11 +1,6 @@
 package io.terminus.doctor.event.service;
 
-import io.terminus.common.model.Response;
-import io.terminus.doctor.event.enums.EventElicitStatus;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
-
-import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -15,5 +10,5 @@ import java.util.List;
 
 public interface DoctorEditGroupEventService {
 
-    Response<String> elicitDoctorGroupTrack(DoctorGroupEvent doctorGroupEvent);
+    void elicitDoctorGroupTrack(DoctorGroupEvent doctorGroupEvent);
 }

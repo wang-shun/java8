@@ -185,7 +185,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         input.setSowQty(sowCount);
         input.setBoarQty(boarCount);
         input.setAvgDayAge(1);
-        input.setAvgWeight(farrowingLiveCount == 0 ? 0d : farrowingDto.getBirthNestAvg() / farrowingLiveCount);
+        input.setAvgWeight(farrowingLiveCount == 0 ? 0d : Double.parseDouble(String.format("%.2f", farrowingDto.getBirthNestAvg() / farrowingLiveCount)));
         input.setEventAt(DateUtil.toDateString(doctorPigEvent.getEventAt()));
         input.setIsAuto(IsOrNot.YES.getValue());
         input.setCreatorId(doctorPigEvent.getCreatorId());
