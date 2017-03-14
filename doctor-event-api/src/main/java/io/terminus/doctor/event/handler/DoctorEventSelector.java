@@ -114,7 +114,7 @@ public class DoctorEventSelector {
 
         //待分娩和哺乳只能转产房
         map.put(PigStatus.Farrow, PigType.DELIVER_SOW, Lists.newArrayList(PigType.DELIVER_SOW));
-        map.put(PigStatus.FEED, PigType.DELIVER_SOW, Lists.newArrayList(PigType.DELIVER_SOW, PigType.MATE_SOW, PigType.PREG_SOW));
+        map.put(PigStatus.FEED, PigType.DELIVER_SOW, Lists.newArrayList(PigType.DELIVER_SOW));
 
         //空怀和断奶在产房可已转配怀和产房
         map.put(PigStatus.KongHuai, PigType.DELIVER_SOW, Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW, PigType.DELIVER_SOW));
