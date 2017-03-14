@@ -126,27 +126,25 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     private void createEventRelation(DoctorGroupEvent executeEvent, Long oldEventId) {
 
-        if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.NO.getValue())) {
-            List<DoctorEventRelation> eventRelationList = doctorEventRelationDao.findByOrigin(oldEventId);
-            if (!eventRelationList.isEmpty()) {
-                eventRelationList.forEach(doctorEventRelation -> {
-                    DoctorEventRelation updateEventRelation = new DoctorEventRelation();
-                    updateEventRelation.setId(doctorEventRelation.getId());
-                    updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
-                    doctorEventRelationDao.update(updateEventRelation);
-                    doctorEventRelation.setOriginEventId(executeEvent.getId());
-                    doctorEventRelationDao.create(doctorEventRelation);
-                });
-            }
-        } else if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.YES.getValue())) {
-            DoctorEventRelation eventRelation = doctorEventRelationDao.findByTrigger(oldEventId);
-            eventRelation.setTriggerEventId(executeEvent.getId());
+        //更新当前事件触发的事件
+        List<DoctorEventRelation> eventRelationList = doctorEventRelationDao.findByOrigin(oldEventId);
+        eventRelationList.forEach(doctorEventRelation -> {
             DoctorEventRelation updateEventRelation = new DoctorEventRelation();
-            updateEventRelation.setId(eventRelation.getId());
+            updateEventRelation.setId(doctorEventRelation.getId());
             updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
             doctorEventRelationDao.update(updateEventRelation);
-            doctorEventRelationDao.create(eventRelation);
-        }
+            doctorEventRelation.setOriginEventId(executeEvent.getId());
+            doctorEventRelationDao.create(doctorEventRelation);
+        });
+
+        //更新被触发
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findByTrigger(oldEventId);
+        eventRelation.setTriggerEventId(executeEvent.getId());
+        DoctorEventRelation updateEventRelation = new DoctorEventRelation();
+        updateEventRelation.setId(eventRelation.getId());
+        updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
+        doctorEventRelationDao.update(updateEventRelation);
+        doctorEventRelationDao.create(eventRelation);
     }
     /**
      * 处理事件的抽象方法, 由继承的子类去实现
@@ -502,6 +500,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         doctorGroupTrack = elicitGroupTrack(preDoctorGroupEvent, newEvent, doctorGroupTrack);
         //创建猪群事件
         doctorGroupEventDao.create(newEvent);
+
+        createEventRelation(newEvent, oldEvent.getId());
 
         //新增的事件放入需要回滚的list
         doctorGroupEventList.add(newEvent.getId());
