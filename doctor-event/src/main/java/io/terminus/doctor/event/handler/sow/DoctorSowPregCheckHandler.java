@@ -38,6 +38,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         expectTrue(Objects.equals(fromTrack.getStatus(), PigStatus.Mate.getKey())
                         || Objects.equals(fromTrack.getStatus(), PigStatus.KongHuai.getKey())
                         || Objects.equals(fromTrack.getStatus(), PigStatus.Pregnancy.getKey())
+                        || Objects.equals(fromTrack.getStatus(), PigStatus.Farrow.getKey())
                 ,"pig.status.failed", PigStatus.from(fromTrack.getStatus()).getName());
         DoctorPregChkResultDto pregChkResultDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorPregChkResultDto.class);
         if (Objects.equals(executeEvent.getPregCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
