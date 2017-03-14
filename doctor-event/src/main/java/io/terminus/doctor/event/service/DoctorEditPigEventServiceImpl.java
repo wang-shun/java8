@@ -113,7 +113,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
             throw e;
         } catch (Exception e) {
             log.error("modify.pig.event.handle.failed, modifyEvent:{}, cause by :{}", modifyEvent, Throwables.getStackTraceAsString(e));
-            throw new InvalidException("modify.pig.event.handle.failed");
+            throw new InvalidException("modify.pig.event.request.handle.failed");
         }
     }
 
@@ -180,9 +180,13 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                         //获取猪断奶事件
                         DoctorEventInfo weanEventInfo = weanEventInfoList.get(0);
                         DoctorPigEvent weanEvent = doctorPigEventDao.findById(weanEventInfo.getEventId());
+                        expectNotNull(weanEvent, "pig.event.not.found", weanEventInfo.getEventId());
+
 
                         //获取猪群断奶事件输入
                         BaseGroupInput weanGroupInput = doctorPigEventManager.getHandler(PigEvent.WEAN.getKey()).buildTriggerGroupEventInput(weanEvent);
+                        expectNotNull(weanGroupInput, "get.group.wean.event.input.failed");
+
 
                         //获取猪群断奶事件前镜像
                         Long toPigEventId = doctorEventRelationDao.findByOriginAndType(weanEventInfo.getEventId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
@@ -273,6 +277,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
         }
         expectNotNull(lastPigSnapshot, "find.per.pig.snapshot.failed", oldEventId);
         DoctorPigTrack fromTrack = JSON_MAPPER.fromJson(lastPigSnapshot.getToPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack();
+        expectNotNull(fromTrack, "find.pig.track.from.snapshot.failed", lastPigSnapshot.getId());
 
         //获取事件处理器
         DoctorPigEventHandler handler = doctorPigEventManager.getHandler(modifyEvent.getType());
@@ -298,6 +303,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
         log.info("followPigEventHandle stating, executeEvent:{}", executeEvent);
         //获取事件执行前track
         DoctorPigTrack fromTrack = doctorPigTrackDao.findByPigId(executeEvent.getPigId());
+        expectNotNull(fromTrack, "pig.track.not.null", executeEvent.getPigId());
 
         //设置事件属性
         executeEvent.setIsModify(IsOrNot.YES.getValue());
@@ -328,12 +334,13 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
      */
     private boolean isEffectWeanEvent(DoctorPigEvent modifyEvent, Long oldEventId) {
         DoctorPigEvent oldPigEvent = doctorPigEventDao.findById(oldEventId);
-        //
+        //是否是分娩事件
         if (Objects.equals(oldPigEvent.getType(), PigEvent.FARROWING.getKey())
                 && !Objects.equals(oldPigEvent.getLiveCount(), modifyEvent.getLiveCount())) {
             return true;
         }
 
+        //是否是仔猪变动事件
         if (Objects.equals(oldPigEvent.getType(), PigEvent.PIGLETS_CHG.getKey())) {
             DoctorPigletsChgDto oldPigletsChgDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorPigletsChgDto.class);
             DoctorPigletsChgDto newPigletsChgDto = JSON_MAPPER.fromJson(modifyEvent.getExtra(), DoctorPigletsChgDto.class);
