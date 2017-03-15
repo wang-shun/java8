@@ -42,11 +42,21 @@ public class DoctorEventRelationDao extends MyBatisDao<DoctorEventRelation> {
     }
 
     /**
-     * 根据原事件id批量更新关联关系状态
-     * @param originEventIdList 原事件id
+     * 更新正在处理中的关联关系
+     * @param eventIdList 事件列表(原事件或触发事件)
+     * @param status 状态
+     */
+    public void updateStatusUnderHandling(List<Long> eventIdList, Integer status) {
+        getSqlSession().update(sqlId("updateStatusUnderHandling"), ImmutableMap.of("list", eventIdList, "status", status));
+    }
+
+    /**
+     * 批量更新关联关系状态
+     * @param originEventIdList 事件列表(原事件或触发事件)
      * @param status 要设置的状态
      */
-    public void updateStatusByOrigin(List<Long> originEventIdList, Integer status) {
-        getSqlSession().update(sqlId("updateStatusByOrigin"), ImmutableMap.of("list", originEventIdList, "status", status));
+    public void batchUpdateStatus(List<Long> originEventIdList, Integer status) {
+        getSqlSession().update(sqlId("batchUpdateStatus"), ImmutableMap.of("list", originEventIdList, "status", status));
     }
+
 }

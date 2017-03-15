@@ -50,7 +50,8 @@ public class DoctorEventRelation implements Serializable{
 
     public enum Status{
         VALID(1, "有效"),
-        INVALID(0, "无效");
+        HANDLING(0, "正在处理"),
+        INVALID(-1, "无效");
 
         Status(Integer value, String name) {
             this.value = value;

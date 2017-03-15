@@ -81,7 +81,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         //1.创建事件
         doctorPigEventDao.create(executeEvent);
 
-        //如果是自动事件则创建关联关系
+        //如果是自动事件,或者编辑事件则创建关联关系
         if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.YES.getValue())
                 || Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
             createEventRelation(executeEvent, oldEventId);
@@ -175,7 +175,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
      * @param executeEvent 事件
      * @param oldEventId 事件原id
      */
-    private void createEventRelation(DoctorPigEvent executeEvent, Long oldEventId) {
+    protected void createEventRelation(DoctorPigEvent executeEvent, Long oldEventId) {
 
         if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.YES.getValue())
                 && Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
@@ -186,28 +186,29 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                     .status(DoctorEventRelation.Status.VALID.getValue())
                     .build();
             doctorEventRelationDao.create(eventRelation);
-        } else if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.NO.getValue())
-                && Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
+        } else {
+            //1.为原事件时
             List<DoctorEventRelation> eventRelationList = doctorEventRelationDao.findByOrigin(oldEventId);
             if (!eventRelationList.isEmpty()) {
                 eventRelationList.forEach(doctorEventRelation -> {
                     DoctorEventRelation updateEventRelation = new DoctorEventRelation();
                     updateEventRelation.setId(doctorEventRelation.getId());
-                    updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
+                    updateEventRelation.setStatus(DoctorEventRelation.Status.HANDLING.getValue());
                     doctorEventRelationDao.update(updateEventRelation);
                     doctorEventRelation.setOriginEventId(executeEvent.getId());
                     doctorEventRelationDao.create(doctorEventRelation);
                 });
             }
-        } else if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.YES.getValue())
-                && Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())){
+            //2.为触发事件时
             DoctorEventRelation eventRelation = doctorEventRelationDao.findByTrigger(oldEventId);
-            eventRelation.setTriggerEventId(executeEvent.getId());
-            DoctorEventRelation updateEventRelation = new DoctorEventRelation();
-            updateEventRelation.setId(eventRelation.getId());
-            updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
-            doctorEventRelationDao.update(updateEventRelation);
-            doctorEventRelationDao.create(eventRelation);
+            if (notNull(eventRelation)) {
+                DoctorEventRelation updateEventRelation = new DoctorEventRelation();
+                updateEventRelation.setId(eventRelation.getId());
+                updateEventRelation.setStatus(DoctorEventRelation.Status.HANDLING.getValue());
+                doctorEventRelationDao.update(updateEventRelation);
+                eventRelation.setTriggerEventId(executeEvent.getId());
+                doctorEventRelationDao.create(eventRelation);
+            }
         }
     }
     /**

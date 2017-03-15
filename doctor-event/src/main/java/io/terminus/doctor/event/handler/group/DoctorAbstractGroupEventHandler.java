@@ -2,7 +2,6 @@ package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
@@ -131,7 +130,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             eventRelationList.forEach(doctorEventRelation -> {
                 DoctorEventRelation updateEventRelation = new DoctorEventRelation();
                 updateEventRelation.setId(doctorEventRelation.getId());
-                updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
+                updateEventRelation.setStatus(DoctorEventRelation.Status.HANDLING.getValue());
                 doctorEventRelationDao.update(updateEventRelation);
                 doctorEventRelation.setOriginEventId(executeEvent.getId());
                 doctorEventRelationDao.create(doctorEventRelation);
@@ -140,11 +139,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             //更新被触发
             DoctorEventRelation eventRelation = doctorEventRelationDao.findByTrigger(oldEventId);
             if(Objects.nonNull(eventRelation)){
-                eventRelation.setTriggerEventId(executeEvent.getId());
                 DoctorEventRelation updateEventRelation = new DoctorEventRelation();
                 updateEventRelation.setId(eventRelation.getId());
-                updateEventRelation.setStatus(DoctorEventRelation.Status.INVALID.getValue());
+                updateEventRelation.setStatus(DoctorEventRelation.Status.HANDLING.getValue());
                 doctorEventRelationDao.update(updateEventRelation);
+                eventRelation.setTriggerEventId(executeEvent.getId());
                 doctorEventRelationDao.create(eventRelation);
             }
         }catch (Exception e){

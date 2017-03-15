@@ -143,7 +143,7 @@
         AND status = 1
     </select>
 
-    <update id="updateStatusByOrigin" parameterType="map" >
+    <update id="batchUpdateStatus" parameterType="map" >
         UPDATE <include refid="tb"/>
         set status = #{status}
         WHERE
@@ -151,5 +151,27 @@
         <foreach collection="list" item="i" open="(" separator="," close=")" >
             #{i}
         </foreach>
+        OR
+        trigger_event_id IN
+        <foreach collection="list" item="i" open="(" separator="," close=")" >
+            #{i}
+        </foreach>
     </update>
+
+    <update id="updateStatusUnderHandling" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        set status = #{status}
+        WHERE
+        status = 0 AND
+        origin_event_id IN
+        <foreach collection="list" item="i" open="(" separator="," close=")" >
+            #{i}
+        </foreach>
+        OR
+        trigger_event_id IN
+        <foreach collection="list" item="i" open="(" separator="," close=")" >
+            #{i}
+        </foreach>
+    </update>
+
 </mapper>

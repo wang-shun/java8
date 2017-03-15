@@ -95,7 +95,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         }
     }
 
-    private void breforeCheck(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {
+    private void beforeCheck(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {
         DoctorGroupEvent initGroupEvent = doctorGroupEventDao.findInitGroupEvent(newEvent.getGroupId());
         if(newEvent.getEventAt().compareTo(initGroupEvent.getEventAt()) == -1){
             log.info("eventAt less than group createdAt, groupId = {}", newEvent.getGroupId());
@@ -124,7 +124,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         DoctorGroupTrack doctorGroupTrack = new DoctorGroupTrack();
         try {
             DoctorGroupEvent oldEvent = doctorGroupEventDao.findById(doctorGroupEvent.getId());
-            breforeCheck(oldEvent, doctorGroupEvent);
+            beforeCheck(oldEvent, doctorGroupEvent);
             rollbackDoctorGroupTrackList.add(doctorGroupTrackDao.findByGroupId(doctorGroupEvent.getGroupId()));
 
             //获取要重新推演的events list,不包括编辑的事件
@@ -156,11 +156,12 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
             triggerEvents(oldEvent, doctorGroupEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
 
             doctorEditGroupEventManager.updateDoctorGroupEventStatus(taskDoctorGroupEventList, EventStatus.INVALID.getValue());
-
+            doctorEventRelationDao.updateStatusUnderHandling(taskDoctorGroupEventList, DoctorEventRelation.Status.INVALID.getValue());
         }catch(Exception e){
             log.info("edit event failed, cause: {}", Throwables.getStackTraceAsString(e));
            throw e;
         }
+
         log.info("elicitDoctorGroupTrack end, doctorGroupTrack: {}", doctorGroupTrack);
     }
 

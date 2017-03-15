@@ -55,9 +55,14 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
 //            DoctorPig updatePig = doctorPigDao.findById(executeEvent.getPigId());
 //            doctorPigDao.update(buildUpdatePig(executeEvent, updatePig));
 //        }
-
+        Long oldEventId = executeEvent.getId();
         //1.创建事件
         doctorPigEventDao.create(executeEvent);
+
+        //如果是自动事件,或者编辑事件则创建关联关系
+        if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.YES.getValue())) {
+            createEventRelation(executeEvent, oldEventId);
+        }
 
         //2.创建或更新track
         DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);

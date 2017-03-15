@@ -186,6 +186,8 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
             throw e;
         }
         doctorPigEventDao.updateEventsStatus(pigOldEventIdList, EventStatus.INVALID.getValue());
+        List<Long> pigCreateOldEventIdList =  doctorEventInfoList.stream().map(DoctorEventInfo::getOldEventId).collect(Collectors.toList());
+        doctorEventRelationDao.updateStatusUnderHandling(pigCreateOldEventIdList, DoctorEventRelation.Status.INVALID.getValue());
         log.info("modifyPigEventHandleImpl ending");
     }
 

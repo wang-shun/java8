@@ -6,6 +6,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -19,6 +20,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.handler.group.DoctorGroupEventHandlers;
 import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -46,7 +48,7 @@ public class DoctorEditGroupEventManager {
     private DoctorGroupTrackDao doctorGroupTrackDao;
     private DoctorPigEventDao doctorPigEventDao;
     private DoctorEntryHandler doctorEntryHandler;
-
+    private DoctorEventRelationDao doctorEventRelationDao;
     private static JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     @Autowired
@@ -54,12 +56,14 @@ public class DoctorEditGroupEventManager {
                                        DoctorGroupEventDao doctorGroupEventDao,
                                        DoctorGroupTrackDao doctorGroupTrackDao,
                                        DoctorPigEventDao doctorPigEventDao,
-                                       DoctorEntryHandler doctorEntryHandler){
+                                       DoctorEntryHandler doctorEntryHandler,
+                                       DoctorEventRelationDao doctorEventRelationDao){
         this.doctorGroupEventHandlers = doctorGroupEventHandlers;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorEntryHandler = doctorEntryHandler;
+        this.doctorEventRelationDao= doctorEventRelationDao;
     }
 
     @Transactional
@@ -77,10 +81,12 @@ public class DoctorEditGroupEventManager {
 
     @Transactional
     public Boolean rollbackElicitEvents(List<DoctorGroupTrack> doctorGroupTrackList, List<Long> newDoctorGroupEvents, List<Long> oldDoctorGroupEvents) {
-        Boolean status = true;
-        status = status && doctorGroupEventDao.updateGroupEventStatus(oldDoctorGroupEvents, EventStatus.INVALID.getValue());
-        status = status && doctorGroupEventDao.updateGroupEventStatus(newDoctorGroupEvents, EventStatus.VALID.getValue());
-        doctorGroupTrackList.stream().forEach(doctorGroupTrack -> doctorGroupTrackDao.update(doctorGroupTrack));
+        Boolean status = doctorGroupEventDao.updateGroupEventStatus(oldDoctorGroupEvents, EventStatus.VALID.getValue());
+        status = status && doctorGroupEventDao.updateGroupEventStatus(newDoctorGroupEvents, EventStatus.INVALID.getValue());
+        doctorGroupTrackList.forEach(doctorGroupTrack -> doctorGroupTrackDao.update(doctorGroupTrack));
+        //回滚关联关系
+        doctorEventRelationDao.updateStatusUnderHandling(oldDoctorGroupEvents, DoctorEventRelation.Status.VALID.getValue());
+        doctorEventRelationDao.batchUpdateStatus(newDoctorGroupEvents, DoctorEventRelation.Status.INVALID.getValue());
         return status;
     }
 

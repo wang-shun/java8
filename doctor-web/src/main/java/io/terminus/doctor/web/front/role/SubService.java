@@ -293,7 +293,7 @@ public class SubService {
         } catch (ServiceException | JsonResponseException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
-            log.error("creat sub failed, user={}, sub={}, cause:{}", user, sub, Throwables.getStackTraceAsString(e));
+            log.error("create sub failed, user={}, sub={}, cause:{}", user, sub, Throwables.getStackTraceAsString(e));
             return Response.fail("sub.create.fail");
         }
     }

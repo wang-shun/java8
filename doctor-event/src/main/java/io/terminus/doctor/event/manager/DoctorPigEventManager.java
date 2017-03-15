@@ -138,11 +138,11 @@ public class DoctorPigEventManager {
         doctorPigDao.update(oldPig);
         //5.还原之前的关联关系
         if (!Arguments.isNullOrEmpty(pigNewEventIdList)) {
-            doctorEventRelationDao.updateStatusByOrigin(pigNewEventIdList, DoctorEventRelation.Status.INVALID.getValue());
+            doctorEventRelationDao.batchUpdateStatus(pigNewEventIdList, DoctorEventRelation.Status.INVALID.getValue());
             List<Long> pigCreateOldEventIdList = doctorEventInfoList.stream()
                     .filter(doctorEventInfo -> Objects.equals(doctorEventInfo.getBusinessType(), DoctorEventInfo.Business_Type.PIG.getValue()))
                     .map(DoctorEventInfo::getOldEventId).collect(Collectors.toList());
-            doctorEventRelationDao.updateStatusByOrigin(pigOldEventIdList, DoctorEventRelation.Status.VALID.getValue());
+            doctorEventRelationDao.updateStatusUnderHandling(pigCreateOldEventIdList, DoctorEventRelation.Status.VALID.getValue());
         }
         log.info("rollback.modify.failed, ending");
     }
