@@ -10,15 +10,20 @@ import com.google.common.collect.Maps;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
+import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
+import io.terminus.doctor.event.dto.event.sow.*;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PregCheckResult;
@@ -54,6 +59,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isDecimal;
 import static io.terminus.common.utils.Arguments.notNull;
 import static java.util.stream.Collectors.toList;
 
@@ -81,6 +87,7 @@ public class DoctorPigEvents {
     private final TransFromUtil transFromUtil;
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
+    private static final JsonMapperUtil JSON_MAPPER  = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
 
@@ -436,42 +443,123 @@ public class DoctorPigEvents {
      * 猪事件的报表生成
      */
     @RequestMapping(value = "/pigEventExport", method = RequestMethod.GET)
-    @ResponseBody
     public void pigEventExports(@RequestParam Map<String, String> pigEventCriteria, HttpServletRequest request, HttpServletResponse response) {
 
         try {
+            pigEventCriteria.put("size",pigEventCriteria.get("pageSize"));
+            pigEventCriteria.put("size","500");
+            pigEventCriteria.put("pageNo","1");
             log.info("event.export.starting");
-            if (Strings.isNullOrEmpty(pigEventCriteria.get("kind")) && Strings.isNullOrEmpty(pigEventCriteria.get("eventypes"))) {
+            if (Strings.isNullOrEmpty(pigEventCriteria.get("kind")) && Strings.isNullOrEmpty(pigEventCriteria.get("eventTypes"))) {
                 return;
             }
-            if (Objects.equals(pigEventCriteria.get("kind"),"1")) {
-                String eventType = pigEventCriteria.get("eventypes");
+            String eventType = pigEventCriteria.get("eventTypes");
+            if (Objects.equals(pigEventCriteria.get("kind"),"2")) {
+
                 switch (eventType) {
                     case "7": exporter.export(pagingInFarmExport(pigEventCriteria), "web-pig-boarInputFactory", request, response);
                         break;
                     case "8": exporter.export(pagingSemenExport(pigEventCriteria), "web-pig-boarCollect" , request, response);
                         break;
-                    case "1": exporter.export(pagingChangeBar(pigEventCriteria), "" , request, response);
+                    case "1": exporter.export(pagingChangeBarn(pigEventCriteria), "web-pig-boarChangeBarn" , request, response);
                         break;
 //                    case "2": exporter.export();
 //                        break;
 //                    case "3": exporter.export();
 //                        break;
-//                    case "4": exporter.export();
-//                        break;
-//                    case "5": exporter.export();
-//                        break;
-//                    case "6": exporter.export();
-//                        break;
+                    case "4": exporter.export(pagingDisease(pigEventCriteria), "web-pig-boarDisease", request, response);
+                        break;
+                    case "5": exporter.export(pagingVaccination(pigEventCriteria), "web-pig-boarVaccination", request, response);
+                        break;
+                    case "6": exporter.export(pagingRemove(pigEventCriteria), "web-pig-boarRemove", request, response);
+                        break;
                     default:
                         log.error("eventType error");
+                        break;
                 }
             }
-            if (Objects.equals(pigEventCriteria.get("kind"),"2")) {
+            if (Objects.equals(pigEventCriteria.get("kind"),"1")) {
+
+                switch (eventType) {
+                    case "7":
+                        exporter.export(pagingInFarmExport(pigEventCriteria), "web-pig-sowInputFactory", request, response);
+                        break;
+//                    case "9":
+//                        exporter.export(, , request, response);
+//                        break;
+//                    case "11":
+//                        exporter.export(, , request, response);
+//                        break;
+//                    case "15":
+//                        exporter.export(, , request, response);
+//                        break;
+//                    case "16":
+//                        exporter.export(, , request, response);
+//                        break;
+//                    case "17":
+//                        exporter.export(, , request, response);
+//                        break;
+//                    case "18":
+//                        exporter.export(, , request, response);
+//                        break;
+                    case "1":
+                    case "12":
+                    case "14": exporter.export(pagingChangeBarn(pigEventCriteria), "web-pig-sowChangeBarn", request, response);
+                        break;
+//                    case "2":
+//                        exporter.export(, , request, response);
+//                        break;
+//                    case "3":
+//                        exporter.export(, , request, response);
+//                        break;
+                    case "4":
+                        exporter.export(pagingDisease(pigEventCriteria), "web-pig-sowDisease", request, response);
+                        break;
+                    case "5":
+                        exporter.export(pagingVaccination(pigEventCriteria), "web-pig-sowVaccination", request, response);
+                        break;
+                    case "6": exporter.export(pagingRemove(pigEventCriteria), "web-pig-sowRemove", request, response);
+                        break;
+
+                    default:
+                        log.error("eventType error");
+                        break;
+                }
 
             }
             if (Objects.equals(pigEventCriteria.get("kind"),"4")) {
-
+                switch (eventType) {
+//                    case "1":
+//                        exporter.export(pagingChangeBarn(pigEventCriteria), "web-pig-sowChangeBarn", request, response);
+//                        break;
+//                    case "2":
+//                        exporter.export(, , request, response);
+//                        break;
+//                    case "3":
+//                        exporter.export(, , request, response);
+//                        break;
+//                    case "6":
+//                        exporter.export(, , request, response);
+//                        break;
+//                    case "4":
+//                        exporter.export(pagingDisease(pigEventCriteria), "web-pig-sowDisease", request, response);
+//                        break;
+//                    case "5":
+//                        exporter.export(pagingVaccination(pigEventCriteria), "web-pig-sowVaccination", request, response);
+//                        break;
+//                    case "9":
+//                        exporter.export(, , request, response);
+//                        break;
+//                    case "7":
+//                        exporter.export(, , request, response);
+//                        break;
+//                    case "8":
+//                        exporter.export(, , request, response);
+//                        break;
+                    default:
+                        log.error("ventType error");
+                        break;
+                }
             }
             log.info("event.export.ending");
         } catch (Exception e) {
@@ -497,6 +585,7 @@ public class DoctorPigEvents {
             DoctorPigEventDetail detail = OBJECT_MAPPER.convertValue(doctorPigEventDetail, DoctorPigEventDetail.class);
             DoctorPigBoarInFarmExportDto doctorPigBoarInFarmExportDto = new DoctorPigBoarInFarmExportDto();
             doctorPigBoarInFarmExportDto.setPigCode(detail.getPigCode());
+            doctorPigBoarInFarmExportDto.setPigStatusAfter(detail.getPigStatusAfter());
             if (detail.getExtraMap().containsKey("parity")) {
                 doctorPigBoarInFarmExportDto.setParity((int)detail.getExtraMap().get("parity"));
             }else {
@@ -552,7 +641,21 @@ public class DoctorPigEvents {
             }else {
                 doctorPigBoarInFarmExportDto.setPigMotherCode(null);
             }
-
+            if (detail.getExtraMap().containsKey("earCode")) {
+                doctorPigBoarInFarmExportDto.setEarCode((String) detail.getExtraMap().get("earCode"));
+            }else {
+                doctorPigBoarInFarmExportDto.setEarCode(null);
+            }
+            if (detail.getExtraMap().containsKey("left")) {
+                doctorPigBoarInFarmExportDto.setLeft((int) detail.getExtraMap().get("left"));
+            }else {
+                doctorPigBoarInFarmExportDto.setLeft(0);
+            }
+            if (detail.getExtraMap().containsKey("right")) {
+                doctorPigBoarInFarmExportDto.setRight((int) detail.getExtraMap().get("right"));
+            }else {
+                doctorPigBoarInFarmExportDto.setRight(0);
+            }
             pigBoarInFarmExportLists.add(doctorPigBoarInFarmExportDto);
 
         }
@@ -644,7 +747,7 @@ public class DoctorPigEvents {
     /**
      * 转舍事件
      */
-    public List<DoctorPigChangeBarnExportDto> pagingChangeBar(Map<String, String> pigEventCriteria) {
+    public List<DoctorPigChangeBarnExportDto> pagingChangeBarn(Map<String, String> pigEventCriteria) {
 
         List<DoctorPigChangeBarnExportDto> doctorPigChangeBarnLists = Lists.newArrayList();
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
@@ -653,10 +756,14 @@ public class DoctorPigEvents {
         for(DoctorPigEventDetail detail : list) {
             DoctorPigChangeBarnExportDto doctorPigChangeBarnExportDto = new DoctorPigChangeBarnExportDto();
             doctorPigChangeBarnExportDto.setPigCode(detail.getPigCode());
+            doctorPigChangeBarnExportDto.setPigStatusAfter(detail.getPigStatusAfter());
             if (detail.getExtraMap().containsKey("changeLocationDate")) {
                 doctorPigChangeBarnExportDto.setChangeLocationDate(new Date((long)detail.getExtraMap().get("changeLocationDate")));
             } else{
                 doctorPigChangeBarnExportDto.setChangeLocationDate(null);
+            }
+            if (detail.getExtraMap().containsKey("parity")) {
+                doctorPigChangeBarnExportDto.setParity((int)detail.getExtraMap().get("parity"));
             }
             if (detail.getExtraMap().containsKey("chgLocationFromBarnName")){
                 doctorPigChangeBarnExportDto.setChgLocationFromBarnName((String)detail.getExtraMap().get("chgLocationFromBarnName"));
@@ -668,6 +775,7 @@ public class DoctorPigEvents {
             }else {
                 doctorPigChangeBarnExportDto.setChgLocationToBarnName(null);
             }
+
             if (detail.getExtraMap().containsKey("remark")) {
                 doctorPigChangeBarnExportDto.setRemark((String) detail.getExtraMap().get("remark"));
             }else {
@@ -701,6 +809,11 @@ public class DoctorPigEvents {
                 doctorEventDiseaseExport.setBarnName((String)detail.getExtraMap().get("barnName"));
             }else {
                 doctorEventDiseaseExport.setBarnName(null);
+            }
+            if (detail.getExtraMap().containsKey("parity")) {
+                doctorEventDiseaseExport.setParity((int)detail.getExtraMap().get("parity"));
+            }else {
+                doctorEventDiseaseExport.setParity(detail.getParity());
             }
             if (detail.getExtraMap().containsKey("diseaseDate")) {
                 doctorEventDiseaseExport.setDiseaseDate(new Date((long) detail.getExtraMap().get("diseaseDate")));
@@ -785,7 +898,7 @@ public class DoctorPigEvents {
     /**
      * 猪的离场事件
      */
-    public List<DoctorPigRemoveExportDto> pagingRemvoe(Map<String, String> pigEventCriteria) {
+    public List<DoctorPigRemoveExportDto> pagingRemove(Map<String, String> pigEventCriteria) {
         List<DoctorPigRemoveExportDto> doctorPigRemoveLists = Lists.newArrayList();
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
         Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
@@ -793,7 +906,197 @@ public class DoctorPigEvents {
         for(DoctorPigEventDetail detail : list) {
             DoctorPigRemoveExportDto doctorPigRemove = new DoctorPigRemoveExportDto();
             doctorPigRemove.setPigCode(detail.getPigCode());
+            if (detail.getExtraMap().containsKey("parity")) {
+                doctorPigRemove.setParity((int) detail.getExtraMap().get("parity"));
+            }else {
+                doctorPigRemove.setParity(detail.getParity());
+            }
+            if (detail.getExtraMap().containsKey("barnName")){
+                doctorPigRemove.setBarnName((String) detail.getExtraMap().get("barnName"));
+            }else {
+                doctorPigRemove.setBarnName(detail.getBarnName());
+            }
+            if (detail.getExtraMap().containsKey("removalDate")) {
+                doctorPigRemove.setRemovalDate(new Date((long) detail.getExtraMap().get("removalDate")));
+            }else {
+                doctorPigRemove.setRemovalDate(null);
+            }
+            if (detail.getExtraMap().containsKey("chgTypeName")) {
+                doctorPigRemove.setChgTypeName((String) detail.getExtraMap().get("chgTypeName"));
+            }else {
+                doctorPigRemove.setChgTypeName(null);
+            }
+            if (detail.getExtraMap().containsKey("chgReasonName")) {
+                doctorPigRemove.setChgReasonName((String) detail.getExtraMap().get("chgReasonName"));
+            }else {
+                doctorPigRemove.setChgReasonName(null);
+            }
+            if (detail.getExtraMap().containsKey("weight")) {
+                doctorPigRemove.setWeight((double) detail.getExtraMap().get("weight"));
+            }else {
+                doctorPigRemove.setWeight(0.0);
+            }
+            if (detail.getExtraMap().containsKey("price")) {
+                doctorPigRemove.setPrice((int) detail.getExtraMap().get("price") / 1000);
+            }else {
+                doctorPigRemove.setPrice(0);
+            }
+            if (detail.getExtraMap().containsKey("amount")) {
+                doctorPigRemove.setAmount((int) detail.getExtraMap().get("amount") / 1000);
+            }else {
+                doctorPigRemove.setAmount(0);
+            }
+            //客户未知
+            doctorPigRemove.setXxx(null);
+            if (detail.getExtraMap().containsKey("operatorName")) {
+                doctorPigRemove.setOperatorName((String) detail.getExtraMap().get("operatorName"));
+            }else {
+                doctorPigRemove.setOperatorName(detail.getOperatorName());
+            }
+            if (detail.getExtraMap().containsKey("remark")) {
+                doctorPigRemove.setRemark((String) detail.getExtraMap().get("remark"));
+            }else {
+                doctorPigRemove.setRemark(detail.getRemark());
+            }
+            if (detail.getExtraMap().containsKey("updatorName")) {
+                doctorPigRemove.setUpdatorName((String) detail.getExtraMap().get("updatorName"));
+            }else {
+                doctorPigRemove.setUpdatorName(detail.getUpdatorName());
+            }
+            doctorPigRemoveLists.add(doctorPigRemove);
         }
-        return null;
+        return doctorPigRemoveLists;
+    }
+    /**
+     * 猪的配种事件
+     */
+    public List<DoctorPigMatingExportDto> pagingMating(Map<String, String> pigEventCriteria) {
+        List<DoctorPigMatingExportDto> doctorPigMatingLists = Lists.newArrayList();
+        Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
+        Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
+        List<DoctorPigEventDetail> list = pigEventPaging.getData();
+        for(DoctorPigEventDetail detail : list) {
+            DoctorMatingDto matingDto = JSON_MAPPER.fromJson(detail.getExtra(), DoctorMatingDto.class);
+            DoctorPigMatingExportDto dto = BeanMapper.map(matingDto, DoctorPigMatingExportDto.class);
+            doctorPigMatingLists.add(dto);
+        }
+        return doctorPigMatingLists;
+    }
+    /**
+     * 仔猪变动事件
+     */
+    public List<DoctorPigletsChgExportDto> pagingLetsChg(Map<String, String> pigEventCriteria) {
+        List<DoctorPigletsChgExportDto> doctorPigLetsChgLists = Lists.newArrayList();
+        Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
+        Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
+        List<DoctorPigEventDetail> list = pigEventPaging.getData();
+        for(DoctorPigEventDetail detail : list) {
+            DoctorPigletsChgDto letsChgDto = JSON_MAPPER.fromJson(detail.getExtra(), DoctorPigletsChgDto.class);
+            DoctorPigletsChgExportDto dto = BeanMapper.map(letsChgDto, DoctorPigletsChgExportDto.class);
+            doctorPigLetsChgLists.add(dto);
+        }
+        return doctorPigLetsChgLists;
+    }
+    /**
+     * 断奶事件
+     */
+    public List<DoctorWeanExportDto> pagingWean(Map<String, String> pigEventCriteria) {
+        List<DoctorWeanExportDto> doctorWeanLists = Lists.newArrayList();
+        Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
+        Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
+        List<DoctorPigEventDetail> list = pigEventPaging.getData();
+        for(DoctorPigEventDetail detail : list) {
+            DoctorWeanDto weanDto = JSON_MAPPER.fromJson(detail.getExtra(), DoctorWeanDto.class);
+            DoctorWeanExportDto dto = BeanMapper.map(weanDto, DoctorWeanExportDto.class);
+            doctorWeanLists.add(dto);
+        }
+        return doctorWeanLists;
+    }
+    /**
+     *检查
+     */
+    public List<DoctorPregChkResultExportDto> pagingPregChkResult(Map<String, String> pigEventCriteria) {
+        List<DoctorPregChkResultExportDto> pregChkResultLists = Lists.newArrayList();
+        Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
+        Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
+        List<DoctorPigEventDetail> list = pigEventPaging.getData();
+        for(DoctorPigEventDetail detail : list) {
+            DoctorPregChkResultDto pregChkResultDto = JSON_MAPPER.fromJson(detail.getExtra(), DoctorPregChkResultDto.class);
+            DoctorPregChkResultExportDto dto = BeanMapper.map(pregChkResultDto, DoctorPregChkResultExportDto.class);
+            pregChkResultLists.add(dto);
+        }
+        return pregChkResultLists;
+    }
+    /**
+     *分娩
+     */
+    public List<DoctorFarrowingExportDto> pagingFarrowing(Map<String, String> pigEventCriteria) {
+        List<DoctorFarrowingExportDto> farrowingLists = Lists.newArrayList();
+        Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, JacksonType.MAP_OF_OBJECT);
+        Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
+        List<DoctorPigEventDetail> list = pigEventPaging.getData();
+        for(DoctorPigEventDetail detail : list) {
+            DoctorFarrowingDto farrowing = JSON_MAPPER.fromJson(detail.getExtra(), DoctorFarrowingDto.class);
+            DoctorFarrowingExportDto dto = BeanMapper.map(farrowing, DoctorFarrowingExportDto.class);
+            farrowingLists.add(dto);
+        }
+        return farrowingLists;
+    }
+    /**
+     * 拼窝
+     */
+    public List<DoctorFostersExportDto> pagingFosters(Map<String, String> pigEventCriteria) {
+        List<DoctorFostersExportDto> fostersLists = Lists.newArrayList();
+        Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, JacksonType.MAP_OF_OBJECT);
+        Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
+        List<DoctorPigEventDetail> list = pigEventPaging.getData();
+        for(DoctorPigEventDetail detail : list) {
+            DoctorFarrowingDto fosters = JSON_MAPPER.fromJson(detail.getExtra(), DoctorFarrowingDto.class);
+            DoctorFostersExportDto dto = BeanMapper.map(fosters, DoctorFostersExportDto.class);
+            fostersLists.add(dto);
+        }
+        return fostersLists;
+    }
+    /**
+     * 公猪体况
+     */
+    public List<DoctorBoarConditionExportDto> pagingBoarCondition(Map<String, String> pigEventCriteria) {
+        List<DoctorBoarConditionExportDto> boarConditionLists = Lists.newArrayList();
+        Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, JacksonType.MAP_OF_OBJECT);
+        Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
+        List<DoctorPigEventDetail> list = pigEventPaging.getData();
+        for(DoctorPigEventDetail detail : list) {
+            DoctorBoarConditionDto boarCondition = JSON_MAPPER.fromJson(detail.getExtra(), DoctorBoarConditionDto.class);
+            DoctorBoarConditionExportDto dto = BeanMapper.map(boarCondition, DoctorBoarConditionExportDto.class);
+            boarConditionLists.add(dto);
+        }
+        return boarConditionLists;
+    }
+    /**
+     * 猪的离场事件
+     */
+    public List<DoctorChgFarmExportDto> pagingChgFarm(Map<String, String> pigEventCriteria) {
+        List<DoctorChgFarmExportDto> chgFarmLists = Lists.newArrayList();
+        Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, JacksonType.MAP_OF_OBJECT);
+        Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
+        List<DoctorPigEventDetail> list = pigEventPaging.getData();
+        for(DoctorPigEventDetail detail : list) {
+            DoctorChgFarmDto chgFarm = JSON_MAPPER.fromJson(detail.getExtra(), DoctorChgFarmDto.class);
+            DoctorChgFarmExportDto dto = BeanMapper.map(chgFarm, DoctorChgFarmExportDto.class);
+            chgFarmLists.add(dto);
+        }
+        return chgFarmLists;
+    }
+    /**
+     * 新建猪
+     */
+    public List<DoctorNewExportGroup> paingNewGroup(Map<String, String> groupEventCriteriaMap) {
+        Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(groupEventCriteriaMap, JacksonType.MAP_OF_OBJECT);
+        Paging<DoctorGroupEventDetail> paging = queryGroupEventsByCriteria(criteriaMap, Integer.parseInt(groupEventCriteriaMap.get("pageNo")), Integer.parseInt(groupEventCriteriaMap.get("size"))););
+        return paging.getData().stream().map(doctorGroupEventDetail -> {
+            DoctorNewExportGroup newExportGroup = BeanMapper.map(doctorGroupEventDetail, DoctorNewExportGroup.class);
+            return newExportGroup;
+        }).collect(toList());
+
     }
 }

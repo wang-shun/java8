@@ -259,3 +259,205 @@ export.tables:
           display: 备注
         - name: updatorName
           display: 录入人员
+  web-pig-boarChangeBarn:
+      display: 公猪转舍事件
+      columns:
+        - name: pigCode
+          display: 公猪号
+        - name: changeLocationDate
+          display: 转舍时间
+        - name: chgLocationFromBarnName
+          display: 原猪舍
+        - name: chgLocationToBarnName
+          display: 转入猪舍
+        - name: remark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-pig-boarDisease:
+      display: 疾病事件
+      columns:
+        - name: pigCode
+          display: 公猪号
+        - name: barnName
+          display: 猪舍
+        - name: diseaseDate
+          display: 疾病日期
+        - name: diseaseName
+          display: 疾病
+        - name: diseaseStaff
+          display: 诊断人员
+        - name: diseaseRemark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-pig-boarVaccination:
+      display: 防疫事件
+      columns:
+        - name: pigCode
+          display: 公猪号
+        - name: barnName
+          display: 猪舍
+        - name: vaccinationDate
+          display: 防疫日期
+        - name: vaccinationItemNam
+          display: 防疫项目
+        - name: vaccinationName
+          display: 疫苗
+        - name: vaccinationStaffName
+          display: 防疫人员
+        - name: remark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-pig-boarRemove:
+      display: 公猪离场事件
+      columns:
+        - name: pigCode
+          display: 公猪号
+        - name: parity
+          display: 胎次
+        - name: barnName
+          display: 猪舍
+        - name: removalDate
+          display: 离场日期
+        - name: chgTypeName
+          display: 离场类型
+        - name: chgReasonName
+          display: 变动原因
+        - name: weight
+          display: 重量
+        - name: price
+          display: 单价
+        - name: amount
+          display: 金额
+        - name: xxx
+          display: 客户
+        - name: operatorName
+          display: 离场操作人员
+        - name: remark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+
+  web-pig-sowRemove:
+      display: 母猪离场事件
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: barnName
+          display: 猪舍
+        - name: removalDate
+          display: 离场日期
+        - name: chgTypeName
+          display: 离场类型
+        - name: chgReasonName
+          display: 变动原因
+        - name: weight
+          display: 重量
+        - name: price
+          display: 单价
+        - name: amount
+          display: 金额
+        - name: xxx
+          display: 客户
+        - name: operatorName
+          display: 离场操作人员
+        - name: remark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-pig-sowVaccination:
+      display: 防疫事件
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: barnName
+          display: 猪舍
+        - name: vaccinationDate
+          display: 防疫日期
+        - name: vaccinationItemNam
+          display: 防疫项目
+        - name: vaccinationName
+          display: 疫苗
+        - name: vaccinationStaffName
+          display: 防疫人员
+        - name: remark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-pig-sowDisease:
+      display: 疾病事件
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: barnName
+          display: 猪舍
+        - name: diseaseDate
+          display: 疾病日期
+        - name: diseaseName
+          display: 疾病
+        - name: diseaseStaff
+          display: 诊断人员
+        - name: diseaseRemark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-pig-sowChangeBarn:
+      display: 母猪转舍事件
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: changeLocationDate
+          display: 转舍时间
+        - name: chgLocationFromBarnName
+          display: 原猪舍
+        - name: chgLocationToBarnName
+          display: 转入猪舍
+        - name: pigStatusAfter
+          display: 当前状态
+        - name: remark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-pig-sowInputFactory:
+      display: 母猪进场事件
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 进场胎次
+        - name: breedName
+          display: 品种
+        - name: geneticName
+          display: 品系
+        - name: inFarmDate
+          display: 进场日期
+        - name: birthDate
+          display: 出生日期
+        - name: boarType
+          display: 公猪类型
+        - name: initBarnName
+          display: 进场猪舍
+        - name: source
+          display: 来源
+        - name: pigFatherCode
+          display: 父号
+        - name: pigMotherCode
+          display: 母号
+        - name: earCode
+          display: 耳缺号
+        - name: left
+          display: 左乳头数
+        - name: right
+          display: 右乳头数
+        - name: remark
+          display: 备注
+        - name: updatorName
+          display: 录入人员

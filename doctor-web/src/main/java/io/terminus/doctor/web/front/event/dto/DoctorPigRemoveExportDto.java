@@ -20,9 +20,10 @@ public class DoctorPigRemoveExportDto implements Serializable{
     private String chgTypeName;
     private String chgReasonName;
     private Double weight;
-    private Double price;
-    private Double amount;
+    private Integer price;
+    private Integer amount;
 //缺少客户
+    private String xxx;
     private String operatorName;
     private String remark;
     private String updatorName;

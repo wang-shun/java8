@@ -14,6 +14,7 @@ public class DoctorPigDiseaseExportDto implements Serializable{
     private static final long serialVersionUID = 4686393901501420403L;
 
     private String pigCode;
+    private Integer parity;
     private String barnName;
     private Date diseaseDate;
     private String diseaseName;
