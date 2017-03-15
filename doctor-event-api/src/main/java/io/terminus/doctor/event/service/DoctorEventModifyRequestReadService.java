@@ -25,4 +25,11 @@ public interface DoctorEventModifyRequestReadService {
      * @return 分页结果
      */
     Response<Paging<DoctorEventModifyRequestDto>> pagingRequest(DoctorEventModifyRequest modifyRequest, Integer pageNo, Integer pageSize);
+
+    /**
+     * 更具id获取dto
+     * @param requestId
+     * @return
+     */
+    Response<DoctorEventModifyRequestDto> findDtoById(@NotNull(message = "requestId.not.null") Long requestId);
 }

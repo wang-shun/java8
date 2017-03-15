@@ -56,20 +56,34 @@ public class DoctorEventModifyRequestReadServiceImpl implements DoctorEventModif
             Paging<DoctorEventModifyRequest> paging = modifyRequestDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), BeanMapper.convertObjectToMap(modifyRequest));
             List<DoctorEventModifyRequestDto> list = paging.getData().stream()
                     .map(request -> {
-                        DoctorEventModifyRequestDto dto = BeanMapper.map(request, DoctorEventModifyRequestDto.class);
-                        if (Objects.equals(request.getType(), DoctorEventModifyRequest.TYPE.PIG.getValue())) {
-                            dto.setOldPigEvent(doctorPigEventDao.findEventById(request.getEventId()));
-                            dto.setNewPigEvent(JSON_MAPPER.fromJson(request.getContent(), DoctorPigEvent.class));
-                        } else {
-                            dto.setOldPigEvent(doctorGroupEventDao.findEventById(request.getEventId()));
-                            dto.setNewGroupEvent(JSON_MAPPER.fromJson(request.getContent(), DoctorGroupEvent.class));
-                        }
-                        return dto;
+                        return buildDoctorEventModifyRequestDto(request);
                     }).collect(Collectors.toList());
             return Response.ok(new Paging<>(paging.getTotal(), list));
         } catch (Exception e) {
             log.info("paging request failed, modifyRequest:{}, cause:{}", modifyRequest, Throwables.getStackTraceAsString(e));
             return Response.fail("paging.request.failed");
         }
+    }
+
+    @Override
+    public Response<DoctorEventModifyRequestDto> findDtoById(@NotNull(message = "requestId.not.null") Long requestId) {
+        Response<DoctorEventModifyRequestDto> result = new Response<>();
+        DoctorEventModifyRequest doctorEventModifyRequest = modifyRequestDao.findById(requestId);
+        if(!Objects.isNull(doctorEventModifyRequest)){
+            result.setResult(buildDoctorEventModifyRequestDto(doctorEventModifyRequest));
+        }
+        return result;
+    }
+
+    public DoctorEventModifyRequestDto buildDoctorEventModifyRequestDto(DoctorEventModifyRequest request) {
+        DoctorEventModifyRequestDto dto = BeanMapper.map(request, DoctorEventModifyRequestDto.class);
+        if (Objects.equals(request.getType(), DoctorEventModifyRequest.TYPE.PIG.getValue())) {
+            dto.setOldPigEvent(doctorPigEventDao.findEventById(request.getEventId()));
+            dto.setNewPigEvent(JSON_MAPPER.fromJson(request.getContent(), DoctorPigEvent.class));
+        } else {
+            dto.setOldPigEvent(doctorGroupEventDao.findEventById(request.getEventId()));
+            dto.setNewGroupEvent(JSON_MAPPER.fromJson(request.getContent(), DoctorGroupEvent.class));
+        }
+        return dto;
     }
 }
