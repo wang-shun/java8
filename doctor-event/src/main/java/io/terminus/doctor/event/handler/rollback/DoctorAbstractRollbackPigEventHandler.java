@@ -29,6 +29,8 @@ import org.springframework.beans.factory.annotation.Value;
 import java.text.SimpleDateFormat;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
+
 /**
  * Desc: 猪事件回滚handler
  * Mail: yangzl@terminus.io
@@ -165,8 +167,8 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         DoctorGroupEvent tmpEvent = event;
         while (event != null) {
             tmpEvent = event;
-            Long eventId = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-            event = doctorGroupEventDao.findById(eventId);
+            DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+            event = isNull(eventRelation)? null :doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
         }
         DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(tmpEvent.getGroupId());
         if (!Objects.equals(tmpEvent.getId(), lastEvent.getId())) {
