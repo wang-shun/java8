@@ -1299,10 +1299,6 @@ public class DoctorPigEvents {
             }
             if (Objects.equals(eventCriteria.get("kind"), "4")) {
                 exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingNewGroup, request, response);
-            } else {
-                eventCriteria.put("ordered","0");
-                exporter.export("web-pig-event", eventCriteria, 1, 500, this::pagingMating, request, response);
-                exportGroupEvents(eventCriteria, request, response);
             }
 
             log.info("event.export.ending");
