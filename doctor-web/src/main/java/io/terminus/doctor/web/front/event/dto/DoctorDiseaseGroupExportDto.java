@@ -8,4 +8,31 @@ import lombok.Data;
  */
 @Data
 public class DoctorDiseaseGroupExportDto extends DoctorGroupEvent{
+
+
+    /**
+     * 疾病id
+     */
+    private Long diseaseId;
+
+    /**
+     * 疾病名称
+     */
+    private String diseaseName;
+
+    /**
+     * 诊断人员id
+     */
+    private Long doctorId;
+
+    /**
+     * 诊断人员name
+     */
+    private String doctorName;
+
+
+    /**
+     * 疾病猪只数
+     */
+    private Integer quantity;
 }
