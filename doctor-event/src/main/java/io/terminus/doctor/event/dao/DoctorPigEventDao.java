@@ -337,4 +337,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<DoctorPigEvent> findByGroupId(Long groupId) {
         return getSqlSession().selectList(sqlId("findByGroupId"), ImmutableMap.of("groupId", groupId));
     }
+
+    /**
+     * 根据条件搜索猪id
+     * @param criteria
+     * @return
+     */
+    public List<Long> findPigIdsBy(Map<String, Object> criteria) {
+        return getSqlSession().selectList(sqlId("findPigIdsBy"), criteria);
+    }
 }

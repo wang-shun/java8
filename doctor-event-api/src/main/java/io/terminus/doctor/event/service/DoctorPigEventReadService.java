@@ -168,4 +168,15 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<DoctorPigEvent> findLastEventByType(@NotNull(message = "input.pigId.empty") Long pigId, Integer type);
+
+
+    /**
+     * 根据事件来获取猪id
+     * @param criteria
+     *  type      事件类型
+     *  beginAt   事件日期开始
+     *  endAt     事件日期结束
+     * @return
+     */
+    Response<List<Long>> findPigIdsBy(Map<String, Object> criteria);
 }
