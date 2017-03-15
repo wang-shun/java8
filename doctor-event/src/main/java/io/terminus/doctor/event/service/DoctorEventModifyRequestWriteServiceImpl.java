@@ -61,6 +61,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             DoctorPigEvent modifyEvent = pigEventManager.buildPigEvent(basic, inputDto);
             log.info("build modifyEvent, modifyEvent = {}", modifyEvent);
             modifyEvent.setId(eventId);
+            modifyEvent.setExtraMap(null);
             DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest
                     .builder()
                     .farmId(basic.getFarmId())
@@ -86,6 +87,10 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     public Response<Long> createGroupModifyEventRequest(DoctorGroupInputInfo inputInfo, Long eventId, Integer eventType, Long userId, String realName) {
         try {
             DoctorGroupEvent modifyEvent = groupEventManager.buildGroupEvent(inputInfo, eventType);
+            String extra = modifyEvent.getExtra();
+            //将extraMap置null,往外拿的时候不会报错
+            modifyEvent.setExtraMap(null);
+            modifyEvent.setExtra(extra);
             modifyEvent.setId(eventId);
             DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest
                     .builder()

@@ -8,6 +8,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -26,9 +27,12 @@ import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DateFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -97,9 +101,9 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
     private void beforeCheck(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {
         DoctorGroupEvent initGroupEvent = doctorGroupEventDao.findInitGroupEvent(newEvent.getGroupId());
-        if(newEvent.getEventAt().compareTo(initGroupEvent.getEventAt()) == -1){
+        if(Dates.startOfDay(newEvent.getEventAt()).compareTo(Dates.startOfDay(initGroupEvent.getEventAt())) == -1){
             log.info("eventAt less than group createdAt, groupId = {}", newEvent.getGroupId());
-            throw new InvalidException("eventat.less.than.group.createdat", newEvent.getGroupCode(), DateFormatUtils.format(initGroupEvent.getEventAt(), "YYYY-MM-DD"));
+            throw new InvalidException("eventat.less.than.group.createdat", newEvent.getGroupCode(), DateUtil.getDateStr(initGroupEvent.getEventAt()));
         }
         DoctorGroupTrack track = doctorGroupTrackDao.findByGroupId(newEvent.getGroupId());
         DoctorGroup group = doctorGroupDao.findById(newEvent.getGroupId());
