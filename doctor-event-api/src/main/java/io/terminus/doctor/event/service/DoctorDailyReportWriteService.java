@@ -39,4 +39,11 @@ public interface DoctorDailyReportWriteService {
      * @return 是否成功
      */
     Response<Boolean> deleteDailyReport2Update(Long farmId);
+
+    /**
+     * job daily reports,生成昨天和今天的报表
+     * @param farmIds
+     * @return
+     */
+    Response<Boolean> createYesterdayAndTodayReports(@NotNull(message = "farmId.not.null") List<Long> farmIds);
 }

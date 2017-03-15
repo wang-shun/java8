@@ -4,6 +4,8 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
+import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -71,5 +74,21 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
             log.error("saveDailyReport2Update failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("save.daily.report.to.update.fail");
         }
+    }
+
+    @Override
+    public Response<Boolean> createYesterdayAndTodayReports(@NotNull(message = "farmId.not.null") List<Long> farmIds) {
+        log.info("daily reports job start, now is: {}, farmIds = {}", DateUtil.toDateTimeString(new Date()), farmIds);
+        Boolean status = true;
+        Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusSeconds(-1).toDate();
+        try{
+            createDailyReports(farmIds, yesterday);
+            createDailyReports(farmIds,new Date());
+        }catch(Exception e){
+            log.error("daily reports job failed, cause: {} ", Throwables.getStackTraceAsString(e));
+            return Response.fail("dailyReport.create.fail");
+        }
+        log.info("daily reports job start, now is: {}", DateUtil.toDateTimeString(new Date()), farmIds);
+        return Response.ok(Boolean.TRUE);
     }
 }
