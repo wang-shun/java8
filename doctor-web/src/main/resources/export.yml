@@ -526,16 +526,40 @@ export.tables:
           display: 转场人员
         - name: remark
           display: 备注
+  web-pig-sowCondition:
+      display: 母猪猪体况
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: barnName
+          display: 猪舍
+        - name: checkAt
+          display: 检查日期
+        - name: scoreHuoli
+          display: 活力
+        - name: scoreXingtai
+          display: 形态
+        - name: scoreShuliang
+          display: 数量
+        - name: weight
+          display: 体重
+        - name: operatorName
+          display: 操作人
+        - name: remark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
   web-group-new:
       display: 猪群新建事件
       columns:
         - name: groupCode
-          display: 母猪号
-        - name: parity
-          display: 进场胎次
+          display: 猪群号
+        - name: eventAt
+          display: 建群日期
+          formatter: isoDateFormatter
         - name: barnName
           display: 猪舍
-        - name: pigType
+        - name: pigTypeName
           display: 猪类
         - name: sex
           display: 性别
@@ -605,69 +629,6 @@ export.tables:
           display: 单价
         - name: amount
           display: 金额
-  web-pig-sowCondition:
-      display: 母猪猪体况
-      columns:
-        - name: pigCode
-          display: 母猪号
-        - name: barnName
-          display: 猪舍
-        - name: checkAt
-          display: 检查日期
-        - name: scoreHuoli
-          display: 活力
-        - name: scoreXingtai
-          display: 形态
-        - name: scoreShuliang
-          display: 数量
-        - name: weight
-          display: 体重
-        - name: operatorName
-          display: 操作人
-        - name: remark
-          display: 备注
-        - name: updatorName
-          display: 录入人员
-  web-group-Disease:
-      display: 猪群防疫
-      columns:
-        - name: groupCode
-          display: 猪群号
-        - name: barnName
-          display: 猪舍
-        - name: eventAt
-          display: 疾病时间
-          formatter: isoDateFormatter
-        - name: diseaseName
-          display: 疾病
-        - name: quantity
-          display: 猪只数
-        - name: doctorName
-          display: 诊断人员
-        - name: remark
-          display: 备注
-        - name: updatorName
-          display: 录入人员
-  web-group-accination:
-      display: 猪群防疫
-      columns:
-        - name: groupCode
-          display: 猪群号
-        - name: barnName
-          display: 猪舍
-        - name: eventAt
-          display: 防疫事件
-          formatter: isoDateFormatter
-        - name: vaccinItemName
-          display: 防疫项目
-        - name: vaccinName
-          display: 疫苗
-        - name: vaccinStaffName
-          display: 防疫人员
-        - name: remark
-          display: 备注
-        - name: updatorName
-          display: 录入人员
   web-group-transGroup:
       display: 猪群转群
       columns:
@@ -718,4 +679,72 @@ export.tables:
           display: 品系
         - name: sex
           display: 性别
+  web-group-Disease:
+      display: 猪群防疫
+      columns:
+        - name: groupCode
+          display: 猪群号
+        - name: barnName
+          display: 猪舍
+        - name: eventAt
+          display: 疾病时间
+          formatter: isoDateFormatter
+        - name: diseaseName
+          display: 疾病
+        - name: quantity
+          display: 猪只数
+        - name: doctorName
+          display: 诊断人员
+        - name: remark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-group-accination:
+      display: 猪群防疫
+      columns:
+        - name: groupCode
+          display: 猪群号
+        - name: barnName
+          display: 猪舍
+        - name: eventAt
+          display: 防疫时间
+          formatter: isoDateFormatter
+        - name: vaccinItemName
+          display: 防疫项目
+        - name: vaccinName
+          display: 疫苗
+        - name: vaccinStaffName
+          display: 防疫人员
+        - name: remark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-group-transFarm:
+      display: 猪群转场事件
+      columns:
+        - name: groupCode
+          display: 猪群号
+        - name: breedName
+          display: 品种
+        - name: eventAt
+          display: 转场日期
+          formatter: isoDateFormatter
+        - name: fromFarmName
+          display: 原厂
+        - name: toFarmName
+          display: 转入猪场
+        - name: fromBarnName
+          display: 转入猪场
+        - name: toBarnName
+          display: 转入猪舍
+        - name: fromGroupCode
+          display: 转入猪群
+        - name: quantity
+          display: 猪只数
+        - name: weight
+          display: 总重
+        - name: remark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
 

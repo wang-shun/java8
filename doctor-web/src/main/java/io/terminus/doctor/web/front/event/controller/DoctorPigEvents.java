@@ -36,10 +36,10 @@ import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PregCheckResult;
-import io.terminus.doctor.event.enums.*;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -1145,8 +1145,10 @@ public class DoctorPigEvents {
     public Paging<DoctorNewExportGroup> pagingNewGroup(Map<String, String> groupEventCriteriaMap) {
         Paging<DoctorGroupEvent> paging = groupEventPaging(groupEventCriteriaMap);
         List<DoctorNewExportGroup> list = paging.getData().stream().map(doctorGroupEventDetail -> {
-            DoctorNewExportGroup exportData = BeanMapper.map(doctorGroupEventDetail, DoctorNewExportGroup.class);
-            DoctorNewGroupEvent newGroupEvent = JSON_MAPPER.fromJson(exportData.getExtra(), DoctorNewGroupEvent.class);
+            DoctorNewGroupEvent newGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorNewGroupEvent.class);
+            DoctorNewExportGroup exportData = BeanMapper.map(newGroupEvent, DoctorNewExportGroup.class);
+            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+            exportData.setEventAt(doctorGroupEventDetail.getEventAt());
             return exportData;
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
@@ -1163,6 +1165,8 @@ public class DoctorPigEvents {
             exportData.setAmount(doctorGroupEventDetail.getAmount());
             exportData.setWeight(doctorGroupEventDetail.getWeight());
             exportData.setEventAt(doctorGroupEventDetail.getEventAt());
+            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+
             return exportData;
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
@@ -1172,6 +1176,7 @@ public class DoctorPigEvents {
         List<DoctorChangeGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
             DoctorChangeGroupEvent changeGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorChangeGroupEvent.class);
             DoctorChangeGroupExportDto exportData = BeanMapper.map(changeGroupEvent, DoctorChangeGroupExportDto.class);
+            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
             exportData.setQuantity(doctorGroupEventDetail.getQuantity());
             exportData.setEventAt(doctorGroupEventDetail.getEventAt());
             return exportData;
@@ -1184,6 +1189,9 @@ public class DoctorPigEvents {
             DoctorTransFarmGroupEvent transFarmGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorTransFarmGroupEvent.class);
             DoctorChgFarmGroupExportDto exportData = BeanMapper.map(transFarmGroupEvent, DoctorChgFarmGroupExportDto.class);
             exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+            exportData.setEventAt(doctorGroupEventDetail.getEventAt());
+            exportData.setQuantity(doctorGroupEventDetail.getQuantity());
+            exportData.setWeight(doctorGroupEventDetail.getWeight());
             return exportData;
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
@@ -1217,6 +1225,7 @@ public class DoctorPigEvents {
             DoctorTransGroupEvent transGroupEvent = JSON_MAPPER.fromJson(exportData.getExtra(), DoctorTransGroupEvent.class);
             exportData.setToBarnName(transGroupEvent.getToBarnName());
             exportData.setToGroupCode(transGroupEvent.getToGroupCode());
+            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
 
             return exportData;
         }).collect(toList());
