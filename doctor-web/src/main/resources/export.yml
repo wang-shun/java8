@@ -214,8 +214,10 @@ export.tables:
           display: 品系
         - name: inFarmDate
           display: 进场日期
+          formatter: isoDateFormatter
         - name: birthDate
           display: 出生日期
+          formatter: isoDateFormatter
         - name: boarType
           display: 公猪类型
         - name: initBarnName
@@ -239,6 +241,7 @@ export.tables:
           display: 猪舍
         - name: semenDate
           display: 采精日期
+          formatter: isoDateFormatter
         - name: semenWeight
           display: 采精重量采精重量
         - name: dilutionRatio
@@ -266,6 +269,7 @@ export.tables:
           display: 公猪号
         - name: changeLocationDate
           display: 转舍时间
+          formatter: isoDateFormatter
         - name: chgLocationFromBarnName
           display: 原猪舍
         - name: chgLocationToBarnName
@@ -283,6 +287,7 @@ export.tables:
           display: 猪舍
         - name: diseaseDate
           display: 疾病日期
+          formatter: isoDateFormatter
         - name: diseaseName
           display: 疾病
         - name: diseaseStaff
@@ -300,6 +305,7 @@ export.tables:
           display: 猪舍
         - name: vaccinationDate
           display: 防疫日期
+          formatter: isoDateFormatter
         - name: vaccinationItemNam
           display: 防疫项目
         - name: vaccinationName
@@ -320,6 +326,7 @@ export.tables:
           display: 猪舍
         - name: checkAt
           display: 检查日期
+          formatter: isoDateFormatter
         - name: scoreHuoli
           display: 活力
         - name: scoreMidu
@@ -346,6 +353,7 @@ export.tables:
           display: 猪舍
         - name: removalDate
           display: 离场日期
+          formatter: isoDateFormatter
         - name: chgTypeName
           display: 离场类型
         - name: chgReasonName
@@ -371,6 +379,7 @@ export.tables:
           display: 公猪号
         - name: chgFarmDate
           display: 转场日期
+          formatter: isoDateFormatter
         - name: fromFarmName
           display: 原猪场
         - name: fromBarnName
@@ -395,6 +404,7 @@ export.tables:
           display: 猪舍
         - name: removalDate
           display: 离场日期
+          formatter: isoDateFormatter
         - name: chgTypeName
           display: 离场类型
         - name: chgReasonName
@@ -422,6 +432,7 @@ export.tables:
           display: 猪舍
         - name: vaccinationDate
           display: 防疫日期
+          formatter: isoDateFormatter
         - name: vaccinationItemNam
           display: 防疫项目
         - name: vaccinationName
@@ -443,6 +454,7 @@ export.tables:
           display: 猪舍
         - name: diseaseDate
           display: 疾病日期
+          formatter: isoDateFormatter
         - name: diseaseName
           display: 疾病
         - name: diseaseStaff
@@ -460,6 +472,7 @@ export.tables:
           display: 胎次
         - name: changeLocationDate
           display: 转舍时间
+          formatter: isoDateFormatter
         - name: chgLocationFromBarnName
           display: 原猪舍
         - name: chgLocationToBarnName
@@ -483,8 +496,10 @@ export.tables:
           display: 品系
         - name: inFarmDate
           display: 进场日期
+          formatter: isoDateFormatter
         - name: birthDate
           display: 出生日期
+          formatter: isoDateFormatter
         - name: boarType
           display: 公猪类型
         - name: initBarnName
@@ -505,6 +520,150 @@ export.tables:
           display: 备注
         - name: updatorName
           display: 录入人员
+  web-pig-sowMating:
+      display: 母猪配种
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: barnName
+          display: 猪舍
+        - name: matingDate
+          display: 配种日期
+          formatter: isoDateFormatter
+        - name: matingStaff
+          display: 配种员
+        - name: matingBoarPigCode
+          display: 公猪号
+        - name: doctorMateType
+          display: 配种类型
+        - name: judgePregDate
+          display: 预产期
+        - name: mattingMark
+          display: 备注
+        - name: operatorName
+          display: 录入人员
+        - name: pigStatusAfter
+          display: 当前状态
+  web-pig-sowPregChkResult:
+      display: 妊娠检查
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: barnNam
+          display: 猪舍
+        - name: checkDate
+          display: 检查日期
+          formatter: isoDateFormatter
+        - name: checkResult
+          display: 检查结果
+        - name: npd
+          display: 已配种天数
+        - name: operatorName
+          display: 检查人员
+        - name: checkMark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-pig-sowFarrowing:
+      display: 分娩
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: farrowingDate
+          display: 分娩日期
+          formatter: isoDateFormatter
+        - name: nestCode
+          display: 窝号
+        - name: barnName
+          display: 分娩猪舍
+        - name: bedCode
+          display: 床号
+        - name: farrowingType
+          display: 分娩类型
+        - name: farrowStaff1
+          display: 接产员1
+        - name: farrowStaff2
+          display: 接产员2
+        - name: birthNestAvg
+          display: 出生窝重
+        - name: farrowingLiveCount
+          display: 活仔数
+        - name: healthCount
+          display: 健仔数
+        - name: weakCount
+          display: 弱仔数
+        - name: deadCount
+          display: 死胎
+        - name: blackCount
+          display: 黑胎
+        - name: mnyCount
+          display: 木乃伊
+        - name: jxCount
+          display: 畸形
+        - name: toBarnName
+          display: 转入猪群
+        - name: liveBoarCount
+          display: 活公
+        - name: liveSowCount
+          display: 活母
+        - name: farrowRemark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-pig-sowWean:
+      display: 断奶事件
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: partWeanDate
+          display: 断奶日期
+          formatter: isoDateFormatter
+        - name: barnName
+          display: 断奶猪舍
+        - name:
+          display: 断奶数
+        - name: partWeanAvgWeight
+          display: 断奶均重
+        - name: chgLocationToBarnId
+          display: 母猪转入猪舍
+        - name: qualifiedCount
+          display: 合格数
+        - name: notQualifiedCount
+          display: 不合格数
+        - name: operatorName
+          display: 断奶人员
+        - name: partWeanRemark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-pig-sowFosters:
+        display: 母猪拼窝事件
+        columns:
+          - name: pigCode
+            display: 母猪号
+          - name: parity
+            display: 胎次
+          - name: parity
+            display: 猪舍
+          - name: barnName
+            display: 拼窝日期
+            formatter: isoDateFormatter
+          - name: fromSowCode
+            display: 代哺母猪
+          - name: fosterByCount
+            display: 猪只数
+          - name: remark
+            display: 备注
+          - name: operatorName
+            display: 转场人员
   web-pig-sowTransFarm:
       display: 母猪转场事件
       columns:
@@ -512,6 +671,7 @@ export.tables:
           display: 母猪号
         - name: chgFarmDate
           display: 转场日期
+          formatter: isoDateFormatter
         - name: fromFarmName
           display: 原猪场
         - name: fromBarnName
@@ -535,6 +695,7 @@ export.tables:
           display: 猪舍
         - name: checkAt
           display: 检查日期
+          formatter: isoDateFormatter
         - name: scoreHuoli
           display: 活力
         - name: scoreXingtai
@@ -697,130 +858,6 @@ export.tables:
           display: 诊断人员
         - name: remark
           display: 备注
-  web-pig-sowMating:
-      display: 母猪配种
-      columns:
-        - name: pigCode
-          display: 母猪号
-        - name: parity
-          display: 胎次
-        - name: barnName
-          display: 猪舍
-        - name: matingDate
-          display: 配种日期
-        - name: matingStaff
-          display: 配种员
-        - name: matingBoarPigCode
-          display: 公猪号
-        - name: doctorMateType
-          display: 配种类型
-        - name: judgePregDate
-          display: 预产期
-        - name: mattingMark
-          display: 备注
-        - name: operatorName
-          display: 录入人员
-        - name: pigStatusAfter
-          display: 当前状态
-  web-pig-sowPregChkResult:
-      display: 妊娠检查
-      columns:
-        - name: pigCode
-          display: 母猪号
-        - name: parity
-          display: 胎次
-        - name: barnNam
-          display: 猪舍
-        - name: checkDate
-          display: 检查日期
-        - name: checkResult
-          display: 检查结果
-        - name: npd
-          display: 已配种天数
-        - name: operatorName
-          display: 检查人员
-        - name: checkMark
-          display: 备注
-        - name: updatorName
-          display: 录入人员
-  web-pig-sowFarrowing:
-      display: 分娩
-      columns:
-        - name: pigCode
-          display: 母猪号
-        - name: parity
-          display: 胎次
-        - name: farrowingDate
-          display: 分娩日期
-        - name: nestCode
-          display: 窝号
-        - name: barnName
-          display: 分娩猪舍
-        - name: bedCode
-          display: 床号
-        - name: farrowingType
-          display: 分娩类型
-        - name: farrowStaff1
-          display: 接产员1
-        - name: farrowStaff2
-          display: 接产员2
-        - name: birthNestAvg
-          display: 出生窝重
-        - name: farrowingLiveCount
-          display: 活仔数
-        - name: healthCount
-          display: 健仔数
-        - name: weakCount
-          display: 弱仔数
-        - name: deadCount
-          display: 死胎
-        - name: blackCount
-          display: 黑胎
-        - name: mnyCount
-          display: 木乃伊
-        - name: jxCount
-          display: 畸形
-        - name: toBarnName
-          display: 转入猪群
-        - name: liveBoarCount
-          display: 活公
-        - name: liveSowCount
-          display: 活母
-        - name: farrowRemark
-          display: 备注
-        - name: updatorName
-          display: 录入人员
-  web-pig-sowWean:
-      display: 断奶事件
-      columns:
-        - name: pigCode
-          display: 母猪号
-        - name: parity
-          display: 胎次
-        - name: partWeanDate
-          display: 断奶日期
-        - name: barnName
-          display: 断奶猪舍
-        - name:
-          display: 断奶数
-        - name: partWeanAvgWeight
-          display: 断奶均重
-        - name: chgLocationToBarnId
-          display: 母猪转入猪舍
-        - name: qualifiedCount
-          display: 合格数
-        - name: notQualifiedCount
-          display: 不合格数
-        - name: operatorName
-          display: 断奶人员
-        - name: partWeanRemark
-          display: 备注
-        - name: updatorName
-          display: 录入人员
-
-
-  web-group-newGroup:
-      display: 新建猪群
 
   web-group-accination:
       display: 猪群防疫

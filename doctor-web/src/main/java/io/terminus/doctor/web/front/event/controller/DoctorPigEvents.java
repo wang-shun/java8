@@ -1319,27 +1319,27 @@ public class DoctorPigEvents {
                 break;
             case "9":
                 //配种
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingMating, request, response);
+                exporter.export("web-pig-sowMating", eventCriteria, 1, 500, this::pagingMating, request, response);
                 break;
             case "11":
                 //妊娠检查
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingPregChkResult, request, response);
+                exporter.export("web-pig-sowPregChkResult", eventCriteria, 1, 500, this::pagingPregChkResult, request, response);
                 break;
             case "15":
                 //分娩
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingFarrowing, request, response);
+                exporter.export("web-pig-sowFarrowing", eventCriteria, 1, 500, this::pagingFarrowing, request, response);
                 break;
             case "16":
                 //断奶
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingWean, request, response);
+                exporter.export("web-pig-sowWean", eventCriteria, 1, 500, this::pagingWean, request, response);
                 break;
             case "17":
                 //拼窝
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingFosters, request, response);
+                exporter.export("web-pig-sowFosters", eventCriteria, 1, 500, this::pagingFosters, request, response);
                 break;
             case "18":
                 //仔猪变动
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingLetsChg, request, response);
+                exporter.export("web-pig-sowFosters", eventCriteria, 1, 500, this::pagingLetsChg, request, response);
                 break;
             case "1,12,14":
                 //转舍
