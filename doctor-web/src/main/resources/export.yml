@@ -550,8 +550,6 @@ export.tables:
           display: 转场人员
         - name: remark
           display: 备注
-  web-pig-sow
-
 
   web-group-newGroup:
       display:

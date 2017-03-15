@@ -1256,7 +1256,7 @@ public class DoctorPigEvents {
         switch(eventCriteria.get("eventTypes")){
             case "7":
                 //进场
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
+                exporter.export("web-pig-sowInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
                 break;
             case "9":
                 //配种
@@ -1284,27 +1284,27 @@ public class DoctorPigEvents {
                 break;
             case "1,12,14":
                 //转舍
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingChangeBarn, request, response);
+                exporter.export("web-pig-sowChangeBarn", eventCriteria, 1, 500, this::pagingChangeBarn, request, response);
                 break;
             case "2":
                 //转场
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingChgFarm, request, response);
+                exporter.export("web-pig-sowTransFarm", eventCriteria, 1, 500, this::pagingChgFarm, request, response);
                 break;
             case "3":
                 //体况
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingBoarCondition, request, response);
+                exporter.export("web-pig-sowCondition", eventCriteria, 1, 500, this::pagingBoarCondition, request, response);
                 break;
             case "4":
                 //疾病
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingDisease, request, response);
+                exporter.export("web-pig-sowDisease", eventCriteria, 1, 500, this::pagingDisease, request, response);
                 break;
             case "5":
                 //防疫
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingVaccination, request, response);
+                exporter.export("web-pig-sowVaccination", eventCriteria, 1, 500, this::pagingVaccination, request, response);
                 break;
             case "6":
                 //离场
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingRemove, request, response);
+                exporter.export("web-pig-sowRemove", eventCriteria, 1, 500, this::pagingRemove, request, response);
                 break;
 
         }
@@ -1315,34 +1315,34 @@ public class DoctorPigEvents {
         switch(PigEvent.from(eventCriteria.get("eventTypes"))){
             case ENTRY:
                 //进场
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
+                exporter.export("web-pig-boarInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
                 break;
             case SEMEN:
                 //采精
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingSemenExport, request, response);
+                exporter.export("web-pig-boarCollect", eventCriteria, 1, 500, this::pagingSemenExport, request, response);
                 break;
             case CHG_LOCATION:
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingChangeBarn, request, response);
+                exporter.export("web-pig-boarChangeBarn", eventCriteria, 1, 500, this::pagingChangeBarn, request, response);
                 //转舍
                 break;
             case CHG_FARM:
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingChgFarm, request, response);
+                exporter.export("web-pig-boarTransFarm", eventCriteria, 1, 500, this::pagingChgFarm, request, response);
                 //转场
                 break;
             case CONDITION:
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingBoarCondition, request, response);
+                exporter.export("web-pig-boarCondition", eventCriteria, 1, 500, this::pagingBoarCondition, request, response);
                 //体况
                 break;
             case DISEASE:
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingDisease, request, response);
+                exporter.export("web-pig-boarDisease", eventCriteria, 1, 500, this::pagingDisease, request, response);
                 //疾病
                 break;
             case VACCINATION:
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingVaccination, request, response);
+                exporter.export("web-pig-boarVaccination", eventCriteria, 1, 500, this::pagingVaccination, request, response);
                 //防疫
                 break;
             case REMOVAL:
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingRemove, request, response);
+                exporter.export("web-pig-boarRemove", eventCriteria, 1, 500, this::pagingRemove, request, response);
                 //离场
                 break;
         }
