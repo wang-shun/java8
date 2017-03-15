@@ -1403,23 +1403,23 @@ public class DoctorPigEvents {
         switch(GroupEventType.from(eventCriteria.get("eventType"))){
             case NEW:
                 //新建
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingNewGroup, request, response);
+                exporter.export("web-group-new", eventCriteria, 1, 500, this::pagingNewGroup, request, response);
                 break;
             case MOVE_IN:
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingMoveInGroup, request, response);
+                exporter.export("web-group-MoveIn", eventCriteria, 1, 500, this::pagingMoveInGroup, request, response);
                 //转入
                 break;
             case CHANGE:
                 //猪群变动
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingChangeGroup, request, response);
+                exporter.export("web-group-change", eventCriteria, 1, 500, this::pagingChangeGroup, request, response);
                 break;
             case TRANS_GROUP:
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingTransGroup, request, response);
+                exporter.export("web-group-transGroup", eventCriteria, 1, 500, this::pagingTransGroup, request, response);
                 //转群
                 break;
             case TURN_SEED:
                 //商品猪转种猪
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingTurnSeedGroup, request, response);
+                exporter.export("web-group-turnSeed", eventCriteria, 1, 500, this::pagingTurnSeedGroup, request, response);
                 break;
             case LIVE_STOCK:
                 //猪只存栏
@@ -1427,15 +1427,15 @@ public class DoctorPigEvents {
                 break;
             case DISEASE:
                 //疾病
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingDiseaseGroup, request, response);
+                exporter.export("web-group-Disease", eventCriteria, 1, 500, this::pagingDiseaseGroup, request, response);
                 break;
             case ANTIEPIDEMIC:
                 //防疫
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingVaccinationGroup, request, response);
+                exporter.export("web-group-accination", eventCriteria, 1, 500, this::pagingVaccinationGroup, request, response);
                 break;
             case TRANS_FARM:
                 //转场
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingChgFramGroup, request, response);
+                exporter.export("web-group-transFarm", eventCriteria, 1, 500, this::pagingChgFramGroup, request, response);
                 break;
             case CLOSE:
                 break;
