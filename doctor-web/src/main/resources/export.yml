@@ -739,6 +739,57 @@ export.tables:
           display: 备注
         - name: updatorName
           display: 录入人员
+  web-pig-PigletsChg:
+      display: 猪仔变动
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: barnName
+          display: 猪舍
+        - name: pigletsChangeDate
+          display: 变动日期
+        - name: pigletsChangeTypeName
+          display: 变动类型
+        - name: pigletsChangeReasonName
+          display: 变动原因
+        - name: pigletsCount
+          display: 头数
+        - name: pigletsWeight
+          display: 总重
+        - name: pigletsCustomerName
+          display: 客户
+        - name: pigletsPrice
+          display: 单价
+        - name: pigletsSum
+          display: 金额
+        - name: pigletsMark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+
+  web-pig-sowFosters:
+      display: 拼窝
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: barnName
+          display: 猪舍
+        - name: fostersDate
+          display: 拼窝日期
+        - name: fosterSowCode
+          display: 代哺母猪
+        - name: fostersCount
+          display: 猪只数
+        - name: fosterReasonName
+          display: 寄养原因
+        - name: fosterRemark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
   web-pig-sowWean:
       display: 断奶事件
       columns:
@@ -766,11 +817,6 @@ export.tables:
           display: 备注
         - name: updatorName
           display: 录入人员
-
-
-  web-group-newGroup:
-      display: 新建猪群
-
   web-group-accination:
       display: 猪群防疫
       columns:
