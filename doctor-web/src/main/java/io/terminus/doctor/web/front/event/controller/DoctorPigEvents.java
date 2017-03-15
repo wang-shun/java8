@@ -978,6 +978,7 @@ public class DoctorPigEvents {
         for(DoctorPigEventDetail detail : list) {
             DoctorMatingDto matingDto = JSON_MAPPER.fromJson(detail.getExtra(), DoctorMatingDto.class);
             DoctorPigMatingExportDto dto = BeanMapper.map(matingDto, DoctorPigMatingExportDto.class);
+            dto.setPigStatusAfter((int) new DoctorPigEvent().getPigStatusAfter());
             doctorPigMatingLists.add(dto);
         }
         return doctorPigMatingLists;
@@ -1073,7 +1074,7 @@ public class DoctorPigEvents {
         return boarConditionLists;
     }
     /**
-     * 猪的离场事件
+     * 猪的转场事件
      */
     public List<DoctorChgFarmExportDto> pagingChgFarm(Map<String, String> pigEventCriteria) {
         List<DoctorChgFarmExportDto> chgFarmLists = Lists.newArrayList();
@@ -1092,7 +1093,7 @@ public class DoctorPigEvents {
      */
     public List<DoctorNewExportGroup> paingNewGroup(Map<String, String> groupEventCriteriaMap) {
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(groupEventCriteriaMap, JacksonType.MAP_OF_OBJECT);
-        Paging<DoctorGroupEventDetail> paging = queryGroupEventsByCriteria(criteriaMap, Integer.parseInt(groupEventCriteriaMap.get("pageNo")), Integer.parseInt(groupEventCriteriaMap.get("size"))););
+        Paging<DoctorGroupEventDetail> paging = queryGroupEventsByCriteria(criteriaMap, Integer.parseInt(groupEventCriteriaMap.get("pageNo")), Integer.parseInt(groupEventCriteriaMap.get("size")));
         return paging.getData().stream().map(doctorGroupEventDetail -> {
             DoctorNewExportGroup newExportGroup = BeanMapper.map(doctorGroupEventDetail, DoctorNewExportGroup.class);
             return newExportGroup;
