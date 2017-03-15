@@ -1013,7 +1013,6 @@ public class DoctorPigEvents {
         for(DoctorPigEventDetail detail : list) {
             DoctorMatingDto matingDto = JSON_MAPPER.fromJson(detail.getExtra(), DoctorMatingDto.class);
             DoctorPigMatingExportDto dto = BeanMapper.map(matingDto, DoctorPigMatingExportDto.class);
-            dto.setPigStatusAfter((int) new DoctorPigEvent().getPigStatusAfter());
             doctorPigMatingLists.add(dto);
         }
         return doctorPigMatingLists;
