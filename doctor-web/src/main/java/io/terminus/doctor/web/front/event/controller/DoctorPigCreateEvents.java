@@ -13,6 +13,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
@@ -48,11 +49,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorEventModifyRequest;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.model.*;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
@@ -567,8 +564,8 @@ public class DoctorPigCreateEvents {
      * @return 编辑请求
      */
     @RequestMapping(value = "/findModifyReuqest/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public DoctorEventModifyRequest findModifyRequest(@PathVariable Long id) {
-        return RespHelper.or500(doctorEventModifyRequestReadService.findById(id));
+    public DoctorEventModifyRequestDto findModifyRequest(@PathVariable Long id) {
+        return RespHelper.or500(doctorEventModifyRequestReadService.findDtoById(id));
     }
 
     /**
