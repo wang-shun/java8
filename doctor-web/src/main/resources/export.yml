@@ -310,6 +310,31 @@ export.tables:
           display: 备注
         - name: updatorName
           display: 录入人员
+
+  web-pig-boarCondition:
+      display: 公猪体况
+      columns:
+        - name: pigCode
+          display: 公猪号
+        - name: barnName
+          display: 猪舍
+        - name: checkAt
+          display: 检查日期
+        - name: scoreHuoli
+          display: 活力
+        - name: scoreMidu
+          display: 密度
+        - name: scoreXingtai
+          display: 形态
+        - name: scoreShuliang
+          display: 数量
+        - name: weight
+          display: 体重
+        - name: remark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+
   web-pig-boarRemove:
       display: 公猪离场事件
       columns:
@@ -339,6 +364,25 @@ export.tables:
           display: 备注
         - name: updatorName
           display: 录入人员
+  web-pig-boarTransFarm:
+      display: 公猪转场事件
+      columns:
+        - name: pigCode
+          display: 公猪号
+        - name: chgFarmDate
+          display: 转场日期
+        - name: fromFarmName
+          display: 原猪场
+        - name: fromBarnName
+          display: 原猪舍
+        - name: toFarmName
+          display: 转入猪场
+        - name: toBarnName
+          display: 转入猪舍
+        - name: operatorName
+          display: 转场人员
+        - name: remark
+          display: 备注
 
   web-pig-sowRemove:
       display: 母猪离场事件
@@ -461,6 +505,27 @@ export.tables:
           display: 备注
         - name: updatorName
           display: 录入人员
+  web-pig-sowTransFarm:
+      display: 母猪转场事件
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: chgFarmDate
+          display: 转场日期
+        - name: fromFarmName
+          display: 原猪场
+        - name: fromBarnName
+          display: 原猪舍
+        - name: toFarmName
+          display: 转入猪场
+        - name: toBarnName
+          display: 转入猪舍
+        - name: pigletsCount
+          display: 转入仔猪数
+        - name: operatorName
+          display: 转场人员
+        - name: remark
+          display: 备注
   web-group-new:
       display: 猪群新建事件
       columns:
@@ -540,6 +605,25 @@ export.tables:
           display: 单价
         - name: amount
           display: 金额
+  web-pig-sowCondition:
+      display: 母猪猪体况
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: barnName
+          display: 猪舍
+        - name: checkAt
+          display: 检查日期
+        - name: scoreHuoli
+          display: 活力
+        - name: scoreXingtai
+          display: 形态
+        - name: scoreShuliang
+          display: 数量
+        - name: weight
+          display: 体重
+        - name: operatorName
+          display: 操作人
         - name: remark
           display: 备注
         - name: updatorName
@@ -634,3 +718,4 @@ export.tables:
           display: 品系
         - name: sex
           display: 性别
+

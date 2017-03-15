@@ -39,6 +39,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.enums.*;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -479,7 +480,7 @@ public class DoctorPigEvents {
     /**
      * 猪事件的报表生成
      */
- //   @RequestMapping(value = "/pigEventExport", method = RequestMethod.GET)
+//    @RequestMapping(value = "/pigEventExport", method = RequestMethod.GET)
 //    public void pigEventExports(@RequestParam Map<String, String> pigEventCriteria, HttpServletRequest request, HttpServletResponse response) {
 //
 //        try {
@@ -499,6 +500,20 @@ public class DoctorPigEvents {
 //                    case "8": exporter.export(pagingSemenExport(pigEventCriteria), "web-pig-boarCollect" , request, response);
 //                        break;
 //                    case "1": exporter.export(pagingChangeBarn(pigEventCriteria), "web-pig-boarChangeBarn" , request, response);
+//                        break;
+////                    case "2": exporter.export();
+////                        break;
+////                    case "3": exporter.export();
+////                        break;
+//                    case "4": exporter.export(pagingDisease(pigEventCriteria), "web-pig-boarDisease", request, response);
+//                        break;
+//                    case "5": exporter.export(pagingVaccination(pigEventCriteria), "web-pig-boarVaccination", request, response);
+//                        break;
+//                    case "6": exporter.export(pagingRemove(pigEventCriteria), "web-pig-boarRemove", request, response);
+//                        break;
+//                    default:
+//                        log.error("eventType error");
+//                        break;
 //                        break;
 ////                    case "2": exporter.export();
 ////                        break;
@@ -607,7 +622,7 @@ public class DoctorPigEvents {
     /**
      * 猪入场事件的导出报表的构建
      */
-    public List<DoctorPigBoarInFarmExportDto> pagingInFarmExport(Map<String, String> pigEventCriteria) {
+    public Paging<DoctorPigBoarInFarmExportDto> pagingInFarmExport(Map<String, String> pigEventCriteria) {
 
         List<DoctorPigBoarInFarmExportDto> pigBoarInFarmExportLists = Lists.newArrayList();
 
@@ -696,12 +711,12 @@ public class DoctorPigEvents {
             pigBoarInFarmExportLists.add(doctorPigBoarInFarmExportDto);
 
         }
-        return pigBoarInFarmExportLists;
+        return new Paging<>(pigEventPaging.getTotal(), pigBoarInFarmExportLists);
     }
     /**
      * 公猪采精事件事件的导出报表构建
      */
-    public List<DoctorPigSemenExportDto> pagingSemenExport(Map<String, String> pigEventCriteria) {
+    public Paging<DoctorPigSemenExportDto> pagingSemenExport(Map<String, String> pigEventCriteria) {
 
         List<DoctorPigSemenExportDto> doctorEventSemenLists = Lists.newArrayList();
 
@@ -779,12 +794,12 @@ public class DoctorPigEvents {
             doctorEventSemenLists.add(doctorEventSemenExport);
         }
 
-        return doctorEventSemenLists;
+        return new Paging<>(pigEventPaging.getTotal(), doctorEventSemenLists);
     }
     /**
      * 转舍事件
      */
-    public List<DoctorPigChangeBarnExportDto> pagingChangeBarn(Map<String, String> pigEventCriteria) {
+    public Paging<DoctorPigChangeBarnExportDto> pagingChangeBarn(Map<String, String> pigEventCriteria) {
 
         List<DoctorPigChangeBarnExportDto> doctorPigChangeBarnLists = Lists.newArrayList();
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
@@ -825,12 +840,13 @@ public class DoctorPigEvents {
             }
             doctorPigChangeBarnLists.add(doctorPigChangeBarnExportDto);
         }
-        return doctorPigChangeBarnLists;
+
+        return new Paging<>(pigEventPaging.getTotal(), doctorPigChangeBarnLists);
     }
     /**
      * 公猪的疾病事件
      */
-    public List<DoctorPigDiseaseExportDto> pagingDisease(Map<String, String> pigEventCriteria){
+    public Paging<DoctorPigDiseaseExportDto> pagingDisease(Map<String, String> pigEventCriteria){
         List<DoctorPigDiseaseExportDto> doctorEventDiseaseLists = Lists.newArrayList();
 
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
@@ -879,13 +895,13 @@ public class DoctorPigEvents {
             }
             doctorEventDiseaseLists.add(doctorEventDiseaseExport);
         }
-        return doctorEventDiseaseLists;
+        return new Paging<>(pigEventPaging.getTotal(), doctorEventDiseaseLists);
     }
 
     /**
      * 猪的防疫事件报表模板
      */
-    public List<DoctorPigVaccinationExportDto> pagingVaccination(Map<String, String> pigEventCriteria) {
+    public Paging<DoctorPigVaccinationExportDto> pagingVaccination(Map<String, String> pigEventCriteria) {
         List<DoctorPigVaccinationExportDto> doctorPigVaccinalionLists = Lists.newArrayList();
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
         Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
@@ -930,12 +946,12 @@ public class DoctorPigEvents {
             }
             doctorPigVaccinalionLists.add(doctorPigVaccinalion);
         }
-        return doctorPigVaccinalionLists;
+        return new Paging<>(pigEventPaging.getTotal(), doctorPigVaccinalionLists);
     }
     /**
      * 猪的离场事件
      */
-    public List<DoctorPigRemoveExportDto> pagingRemove(Map<String, String> pigEventCriteria) {
+    public Paging<DoctorPigRemoveExportDto> pagingRemove(Map<String, String> pigEventCriteria) {
         List<DoctorPigRemoveExportDto> doctorPigRemoveLists = Lists.newArrayList();
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
         Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
@@ -1002,7 +1018,7 @@ public class DoctorPigEvents {
             }
             doctorPigRemoveLists.add(doctorPigRemove);
         }
-        return doctorPigRemoveLists;
+        return new Paging<>(pigEventPaging.getTotal(), doctorPigRemoveLists);
     }
     /**
      * 猪的配种事件
@@ -1020,7 +1036,7 @@ public class DoctorPigEvents {
     /**
      * 仔猪变动事件
      */
-    public List<DoctorPigletsChgExportDto> pagingLetsChg(Map<String, String> pigEventCriteria) {
+    public Paging<DoctorPigletsChgExportDto> pagingLetsChg(Map<String, String> pigEventCriteria) {
         List<DoctorPigletsChgExportDto> doctorPigLetsChgLists = Lists.newArrayList();
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
         Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
@@ -1030,12 +1046,12 @@ public class DoctorPigEvents {
             DoctorPigletsChgExportDto dto = BeanMapper.map(letsChgDto, DoctorPigletsChgExportDto.class);
             doctorPigLetsChgLists.add(dto);
         }
-        return doctorPigLetsChgLists;
+        return new Paging<>(pigEventPaging.getTotal(), doctorPigLetsChgLists);
     }
     /**
      * 断奶事件
      */
-    public List<DoctorWeanExportDto> pagingWean(Map<String, String> pigEventCriteria) {
+    public Paging<DoctorWeanExportDto> pagingWean(Map<String, String> pigEventCriteria) {
         List<DoctorWeanExportDto> doctorWeanLists = Lists.newArrayList();
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
         Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
@@ -1045,12 +1061,12 @@ public class DoctorPigEvents {
             DoctorWeanExportDto dto = BeanMapper.map(weanDto, DoctorWeanExportDto.class);
             doctorWeanLists.add(dto);
         }
-        return doctorWeanLists;
+        return new Paging<>(pigEventPaging.getTotal(), doctorWeanLists);
     }
     /**
      *检查
      */
-    public List<DoctorPregChkResultExportDto> pagingPregChkResult(Map<String, String> pigEventCriteria) {
+    public Paging<DoctorPregChkResultExportDto> pagingPregChkResult(Map<String, String> pigEventCriteria) {
         List<DoctorPregChkResultExportDto> pregChkResultLists = Lists.newArrayList();
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
         Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
@@ -1060,12 +1076,12 @@ public class DoctorPigEvents {
             DoctorPregChkResultExportDto dto = BeanMapper.map(pregChkResultDto, DoctorPregChkResultExportDto.class);
             pregChkResultLists.add(dto);
         }
-        return pregChkResultLists;
+        return new Paging<>(pigEventPaging.getTotal(), pregChkResultLists);
     }
     /**
      *分娩
      */
-    public List<DoctorFarrowingExportDto> pagingFarrowing(Map<String, String> pigEventCriteria) {
+    public Paging<DoctorFarrowingExportDto> pagingFarrowing(Map<String, String> pigEventCriteria) {
         List<DoctorFarrowingExportDto> farrowingLists = Lists.newArrayList();
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, JacksonType.MAP_OF_OBJECT);
         Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
@@ -1075,12 +1091,12 @@ public class DoctorPigEvents {
             DoctorFarrowingExportDto dto = BeanMapper.map(farrowing, DoctorFarrowingExportDto.class);
             farrowingLists.add(dto);
         }
-        return farrowingLists;
+        return new Paging<>(pigEventPaging.getTotal(), farrowingLists);
     }
     /**
      * 拼窝
      */
-    public List<DoctorFostersExportDto> pagingFosters(Map<String, String> pigEventCriteria) {
+    public Paging<DoctorFostersExportDto> pagingFosters(Map<String, String> pigEventCriteria) {
         List<DoctorFostersExportDto> fostersLists = Lists.newArrayList();
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, JacksonType.MAP_OF_OBJECT);
         Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
@@ -1090,12 +1106,12 @@ public class DoctorPigEvents {
             DoctorFostersExportDto dto = BeanMapper.map(fosters, DoctorFostersExportDto.class);
             fostersLists.add(dto);
         }
-        return fostersLists;
+        return new Paging<>(pigEventPaging.getTotal(), fostersLists);
     }
     /**
      * 公猪体况
      */
-    public List<DoctorBoarConditionExportDto> pagingBoarCondition(Map<String, String> pigEventCriteria) {
+    public Paging<DoctorBoarConditionExportDto> pagingBoarCondition(Map<String, String> pigEventCriteria) {
         List<DoctorBoarConditionExportDto> boarConditionLists = Lists.newArrayList();
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, JacksonType.MAP_OF_OBJECT);
         Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
@@ -1105,10 +1121,10 @@ public class DoctorPigEvents {
             DoctorBoarConditionExportDto dto = BeanMapper.map(boarCondition, DoctorBoarConditionExportDto.class);
             boarConditionLists.add(dto);
         }
-        return boarConditionLists;
+        return new Paging<>(pigEventPaging.getTotal(), boarConditionLists);
     }
     /**
-     * 猪的离场事件
+     * 猪的转场事件
      */
     public Paging<DoctorChgFarmExportDto> pagingChgFarm(Map<String, String> pigEventCriteria) {
         List<DoctorChgFarmExportDto> chgFarmLists = Lists.newArrayList();
@@ -1266,16 +1282,166 @@ public class DoctorPigEvents {
             if (Strings.isNullOrEmpty(eventCriteria.get("kind"))) {
                 return;
             }
+            if(Objects.equals(eventCriteria.get("kind"), "1")){
+                exportSowEvents(eventCriteria, request, response);
+            }
+            if(Objects.equals(eventCriteria.get("kind"), "2")){
+                exportBoarEvents(eventCriteria, request, response);
+            }
             if (Objects.equals(eventCriteria.get("kind"), "4")) {
                 exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingNewGroup, request, response);
             } else {
                 eventCriteria.put("ordered","0");
                 exporter.export("web-pig-event", eventCriteria, 1, 500, this::pagingMating, request, response);
+                exportGroupEvents(eventCriteria, request, response);
             }
+
             log.info("event.export.ending");
         } catch (Exception e) {
             log.error("event.export.failed");
         }
     }
+
+    private void exportSowEvents(Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
+        switch(eventCriteria.get("eventTypes")){
+            case "7":
+                //进场
+                exporter.export("web-pig-sowInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
+                break;
+            case "9":
+                //配种
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingMating, request, response);
+                break;
+            case "11":
+                //妊娠检查
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingPregChkResult, request, response);
+                break;
+            case "15":
+                //分娩
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingFarrowing, request, response);
+                break;
+            case "16":
+                //断奶
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingWean, request, response);
+                break;
+            case "17":
+                //拼窝
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingFosters, request, response);
+                break;
+            case "18":
+                //仔猪变动
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingLetsChg, request, response);
+                break;
+            case "1,12,14":
+                //转舍
+                exporter.export("web-pig-sowChangeBarn", eventCriteria, 1, 500, this::pagingChangeBarn, request, response);
+                break;
+            case "2":
+                //转场
+                exporter.export("web-pig-sowTransFarm", eventCriteria, 1, 500, this::pagingChgFarm, request, response);
+                break;
+            case "3":
+                //体况
+                exporter.export("web-pig-sowCondition", eventCriteria, 1, 500, this::pagingBoarCondition, request, response);
+                break;
+            case "4":
+                //疾病
+                exporter.export("web-pig-sowDisease", eventCriteria, 1, 500, this::pagingDisease, request, response);
+                break;
+            case "5":
+                //防疫
+                exporter.export("web-pig-sowVaccination", eventCriteria, 1, 500, this::pagingVaccination, request, response);
+                break;
+            case "6":
+                //离场
+                exporter.export("web-pig-sowRemove", eventCriteria, 1, 500, this::pagingRemove, request, response);
+                break;
+
+        }
+    }
+
+
+    private void exportBoarEvents(Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
+        switch(PigEvent.from(eventCriteria.get("eventTypes"))){
+            case ENTRY:
+                //进场
+                exporter.export("web-pig-boarInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
+                break;
+            case SEMEN:
+                //采精
+                exporter.export("web-pig-boarCollect", eventCriteria, 1, 500, this::pagingSemenExport, request, response);
+                break;
+            case CHG_LOCATION:
+                exporter.export("web-pig-boarChangeBarn", eventCriteria, 1, 500, this::pagingChangeBarn, request, response);
+                //转舍
+                break;
+            case CHG_FARM:
+                exporter.export("web-pig-boarTransFarm", eventCriteria, 1, 500, this::pagingChgFarm, request, response);
+                //转场
+                break;
+            case CONDITION:
+                exporter.export("web-pig-boarCondition", eventCriteria, 1, 500, this::pagingBoarCondition, request, response);
+                //体况
+                break;
+            case DISEASE:
+                exporter.export("web-pig-boarDisease", eventCriteria, 1, 500, this::pagingDisease, request, response);
+                //疾病
+                break;
+            case VACCINATION:
+                exporter.export("web-pig-boarVaccination", eventCriteria, 1, 500, this::pagingVaccination, request, response);
+                //防疫
+                break;
+            case REMOVAL:
+                exporter.export("web-pig-boarRemove", eventCriteria, 1, 500, this::pagingRemove, request, response);
+                //离场
+                break;
+        }
+    }
+
+
+    private void exportGroupEvents(Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
+        switch(GroupEventType.from(eventCriteria.get("eventType"))){
+            case NEW:
+                //新建
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingNewGroup, request, response);
+                break;
+            case MOVE_IN:
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingMoveInGroup, request, response);
+                //转入
+                break;
+            case CHANGE:
+                //猪群变动
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingChangeGroup, request, response);
+                break;
+            case TRANS_GROUP:
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingTransGroup, request, response);
+                //转群
+                break;
+            case TURN_SEED:
+                //商品猪转种猪
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingTurnSeedGroup, request, response);
+                break;
+            case LIVE_STOCK:
+                //猪只存栏
+//                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingTurnSeedGroup, request, response);
+                break;
+            case DISEASE:
+                //疾病
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingDiseaseGroup, request, response);
+                break;
+            case ANTIEPIDEMIC:
+                //防疫
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingVaccinationGroup, request, response);
+                break;
+            case TRANS_FARM:
+                //转场
+                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingChgFramGroup, request, response);
+                break;
+            case CLOSE:
+                break;
+        }
+    }
+
+
 
 }
