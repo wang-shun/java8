@@ -81,7 +81,7 @@ public class DoctorEventModifyRequestReadServiceImpl implements DoctorEventModif
             dto.setOldPigEvent(doctorPigEventDao.findEventById(request.getEventId()));
             dto.setNewPigEvent(JSON_MAPPER.fromJson(request.getContent(), DoctorPigEvent.class));
         } else {
-            dto.setOldPigEvent(doctorGroupEventDao.findEventById(request.getEventId()));
+            dto.setOldGroupEvent(doctorGroupEventDao.findEventById(request.getEventId()));
             dto.setNewGroupEvent(JSON_MAPPER.fromJson(request.getContent(), DoctorGroupEvent.class));
         }
         return dto;

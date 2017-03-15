@@ -165,7 +165,7 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      * @param id 事件id
      * @return 事件
      */
-    public DoctorPigEvent findEventById(Long id) {
+    public DoctorGroupEvent findEventById(Long id) {
         return getSqlSession().selectOne(sqlId("findEventById"), id);
     }
 }

@@ -5,6 +5,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Dates;
@@ -368,7 +369,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                 doctorValidService.valid(groupInputInfo, groupInputInfo.getGroupDetail().getGroup().getGroupCode());
 
                 //获取编辑人信息
-                User user = UserUtil.getCurrentUser();
+                BaseUser user = UserUtil.getCurrentUser();
                 if (isNull(user)) {
                     throw new ServiceException("user.not.login");
                 }
