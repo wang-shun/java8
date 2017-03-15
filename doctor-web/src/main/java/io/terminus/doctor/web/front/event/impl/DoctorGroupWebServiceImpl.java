@@ -365,7 +365,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         try {
             String groupCode = getGroupCode(groupId);
             try {
-                DoctorGroupInputInfo groupInputInfo =  buildGroupEventInputInfo(groupId, eventType, data);
+                DoctorGroupDetail groupDetail = checkGroupExist(groupId);
+                Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
+                DoctorGroupInputInfo groupInputInfo = buildGroupEventInfo(eventType, groupDetail, params);
                 doctorValidService.valid(groupInputInfo, groupInputInfo.getGroupDetail().getGroup().getGroupCode());
 
                 //获取编辑人信息
@@ -419,6 +421,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         checkEventAt(groupId, eventAt);
 
         //4.根据不同的事件类型调用不同的录入接口
+        return buildGroupEventInfo(eventType, groupDetail, params);
+    }
+
+    private DoctorGroupInputInfo buildGroupEventInfo(Integer eventType, DoctorGroupDetail groupDetail, Map<String, Object> params){
+        Long groupId = groupDetail.getGroup().getId();
         GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
         params.put("eventType", eventType);
         switch (groupEventType) {

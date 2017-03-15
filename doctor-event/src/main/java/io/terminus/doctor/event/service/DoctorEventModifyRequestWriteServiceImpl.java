@@ -61,7 +61,6 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             DoctorPigEvent modifyEvent = pigEventManager.buildPigEvent(basic, inputDto);
             log.info("build modifyEvent, modifyEvent = {}", modifyEvent);
             modifyEvent.setId(eventId);
-            modifyEvent.setExtraMap(null);
             DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest
                     .builder()
                     .farmId(basic.getFarmId())

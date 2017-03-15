@@ -65,7 +65,7 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
 
     @Override
     public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack groupTrack) {
-        return null;
+        return groupTrack;
     }
 
 

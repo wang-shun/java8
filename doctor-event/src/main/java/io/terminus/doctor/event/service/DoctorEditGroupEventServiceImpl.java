@@ -19,6 +19,7 @@ import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.manager.DoctorEditGroupEventManager;
 import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -32,6 +33,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.acl.Group;
 import java.text.DateFormat;
 import java.util.List;
 import java.util.Objects;
@@ -210,6 +212,8 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         doctorGroupEvent.setType(GroupEventType.CLOSE.getValue());
         doctorGroupEvent.setName(GroupEventType.CLOSE.getDesc());
         doctorGroupEvent.setDesc("【系统自动】");
+        doctorGroupEvent.setIsAuto(IsOrNot.YES.getValue());
+        doctorGroupEvent.setRelGroupEventId(doctorGroupEvent.getId());
         doctorGroupEvent.setExtra(null);
         doctorGroupWriteService.createGroupEvent(doctorGroupEvent);
     }
@@ -227,27 +231,34 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
         linkedDoctorGroupEventList = doctorGroupEventList.stream().filter(
                 doctorGroupEvent1 -> {
+                    Boolean status = !Objects.equals(doctorGroupEvent1.getType(), GroupEventType.LIVE_STOCK.getValue()) &&
+                            !Objects.equals(doctorGroupEvent1.getType(), GroupEventType.DISEASE.getValue()) &&
+                            !Objects.equals(doctorGroupEvent1.getType(), GroupEventType.ANTIEPIDEMIC.getValue());
                     if(Objects.nonNull(doctorGroupEvent.getId()) && Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) == 0){
-                        return doctorGroupEvent1.getId().compareTo(doctorGroupEvent.getId()) == 1;
+                        return status && doctorGroupEvent1.getId().compareTo(doctorGroupEvent.getId()) == 1;
                     }
-                    return Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) == 1;
+                    return status && Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) == 1;
                 }
         ).sorted(
                 (doctorGroupEvent1, doctorGroupEvent2)-> {
-                    if(doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent2.getEventAt()) == 0){
-                        return doctorGroupEvent1.getType().compareTo(doctorGroupEvent2.getType());
+                    if(Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent2.getEventAt())) == 0){
+                        return doctorGroupEvent1.getId().compareTo(doctorGroupEvent2.getId());
                     }
 
                     return doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent2.getEventAt());
                 }
         ).collect(Collectors.toList());
 
+
         DoctorGroupEvent preDoctorGroupEvent = doctorGroupEventList.stream().filter(
                 doctorGroupEvent1 -> {
+                    Boolean status = !Objects.equals(doctorGroupEvent1.getType(), GroupEventType.LIVE_STOCK.getValue()) &&
+                            !Objects.equals(doctorGroupEvent1.getType(), GroupEventType.DISEASE.getValue()) &&
+                            !Objects.equals(doctorGroupEvent1.getType(), GroupEventType.ANTIEPIDEMIC.getValue());
                     if(Objects.nonNull(doctorGroupEvent.getId()) && Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) == 0){
-                        return doctorGroupEvent1.getId().compareTo(doctorGroupEvent.getId()) == -1;
+                        return status && doctorGroupEvent1.getId().compareTo(doctorGroupEvent.getId()) == -1;
                     }
-                    return Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) <= 0;
+                    return status && Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) <= 0;
                 })
                 .sorted((doctorGroupEvent1, doctorGroupEvent2)-> doctorGroupEvent2.getId().compareTo(doctorGroupEvent1.getId()))
                 .findFirst()
