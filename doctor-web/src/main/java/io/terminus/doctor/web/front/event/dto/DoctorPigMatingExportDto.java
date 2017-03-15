@@ -22,7 +22,7 @@ public class DoctorPigMatingExportDto implements Serializable{
     private Integer doctorMateType;
     private Date judgePregDate;
     private String mattingMark;
-    private String updatorName;
+    private String operatorName;
     private Integer pigStatusAfter;
 
 }

@@ -44,4 +44,5 @@ public class DoctorBoarConditionExportDto implements Serializable{
      */
     private String remark;
     private String updatorName;
+    private String operatorName;
 }

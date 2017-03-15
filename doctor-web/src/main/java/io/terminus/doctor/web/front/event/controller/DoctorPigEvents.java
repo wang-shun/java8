@@ -1011,6 +1011,7 @@ public class DoctorPigEvents {
         for(DoctorPigEventDetail detail : list) {
             DoctorMatingDto matingDto = JSON_MAPPER.fromJson(detail.getExtra(), DoctorMatingDto.class);
             DoctorPigMatingExportDto dto = BeanMapper.map(matingDto, DoctorPigMatingExportDto.class);
+            dto.setPigStatusAfter((int) new DoctorPigEvent().getPigStatusAfter());
             doctorPigMatingLists.add(dto);
         }
         return new Paging<>(pigEventPaging.getTotal(), doctorPigMatingLists);
@@ -1106,7 +1107,7 @@ public class DoctorPigEvents {
         return new Paging<>(pigEventPaging.getTotal(), boarConditionLists);
     }
     /**
-     * 猪的离场事件
+     * 猪的转场事件
      */
     public Paging<DoctorChgFarmExportDto> pagingChgFarm(Map<String, String> pigEventCriteria) {
         List<DoctorChgFarmExportDto> chgFarmLists = Lists.newArrayList();
