@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 
 /**
@@ -125,8 +126,8 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
         DoctorGroupEvent tmpEvent = event;
         while (event != null) {
             tmpEvent = event;
-            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-            event = doctorGroupEventDao.findById(toGroupEventId);
+            DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+            event = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
         }
         return isLastEvent(tmpEvent);
     }

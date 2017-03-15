@@ -25,9 +25,4 @@ public class DoctorGroupSnapshotDao extends MyBatisDao<DoctorGroupSnapshot> {
     public DoctorGroupSnapshot queryByEventId(Long eventId) {
         return getSqlSession().selectOne(sqlId("queryByEventId"), eventId);
     }
-
-    @Override
-    public Boolean create(DoctorGroupSnapshot doctorGroupSnapshot) {
-        return Boolean.TRUE;
-    }
 }
