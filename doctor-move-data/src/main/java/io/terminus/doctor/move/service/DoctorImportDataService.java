@@ -498,7 +498,8 @@ public class DoctorImportDataService {
             //初始化服务状态
             userInitService.initDefaultServiceStatus(userId);
         }else{
-            serviceStatus.setPigdoctorStatus(1);
+            serviceStatus.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
+            serviceStatus.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
             doctorServiceStatusDao.update(serviceStatus);
         }
 
