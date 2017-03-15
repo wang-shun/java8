@@ -8,5 +8,7 @@ import lombok.Data;
  */
 @Data
 public class DoctorChangeGroupExportDto extends DoctorGroupEvent{
+    private String changeTypeName;
+    private String changeReasonName;
 
 }
