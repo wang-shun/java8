@@ -33,14 +33,12 @@ public class DoctorRollbackGroupNewHandler extends DoctorAbstractRollbackGroupEv
         log.info("this is a new event:{}", groupEvent);
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
 
-        DoctorGroupSnapshot oldSnapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(snapshot.getFromEventId());
-
         //删除此事件 -> 删除猪群跟踪 -> 删除猪群 -> 删除镜像 -> 创建回滚日志
         doctorGroupEventDao.delete(groupEvent.getId());
         doctorGroupTrackDao.deleteByGroupId(groupEvent.getGroupId());
         doctorGroupDao.delete(groupEvent.getGroupId());
         doctorGroupSnapshotDao.delete(snapshot.getId());
-        createRevertLog(groupEvent, snapshot, oldSnapshot, operatorId, operatorName);
+        createRevertLog(groupEvent, snapshot, null, operatorId, operatorName);
     }
 
     @Override

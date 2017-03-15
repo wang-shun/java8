@@ -43,7 +43,7 @@ public class DoctorRollbackSowPigletChangeEventHandler extends DoctorAbstractRol
         DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
         expectTrue(notNull(eventRelation), "relate.group.event.not.null" , pigEvent.getId());
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
-        return isRelLastGroupEvent(toGroupEvent);
+        return isLastGroupEvent(toGroupEvent);
     }
 
     @Override

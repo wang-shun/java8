@@ -77,7 +77,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         doctorGroupEventDao.create(event);
 
         //创建关联关系
-        createEventRelation(event);
+        //createEventRelation(event);
 
         updateGroupTrack(groupTrack, event);
 

@@ -104,7 +104,6 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
      * @return 猪
      */
     private DoctorPig buildDoctorPig(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic) {
-        expectTrue(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(basic.getFarmId(), dto.getPigCode(), dto.getPigType()) == null, "pigCode.have.existed");
         DoctorPig doctorPig = DoctorPig.builder()
                 .farmId(basic.getFarmId())
                 .farmName(basic.getFarmName())
@@ -167,12 +166,13 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         DoctorFarmEntryDto farmEntryDto = (DoctorFarmEntryDto) inputDto;
         DoctorPig doctorPig = buildDoctorPig(farmEntryDto, basic);
         if (isNull(farmEntryDto.getPigId())) {
+            expectTrue(isNull(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(basic.getFarmId(), farmEntryDto.getPigCode(), farmEntryDto.getPigType())), "pigCode.have.existed");
             doctorPigDao.create(doctorPig);
         } else {
             doctorPigDao.update(doctorPig);
         }
         farmEntryDto.setPigId(doctorPig.getId());
-        DoctorPigEvent doctorPigEvent =  super.buildPigEvent(basic, inputDto);
+        DoctorPigEvent doctorPigEvent =  super.buildPigEvent(basic, farmEntryDto);
         doctorPigEvent.setParity(farmEntryDto.getParity());
         return doctorPigEvent;
     }

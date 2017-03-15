@@ -365,4 +365,11 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public DoctorPigEvent findEventById(Long id) {
         return getSqlSession().selectOne(sqlId("findEventById"), id);
     }
+
+    /**
+     * 查询最新影响事件不包含某些事件类型的最新事件
+     */
+    public DoctorPigEvent findLastEventExcludeTypes(Long pigId, List<Integer> types) {
+        return getSqlSession().selectOne(sqlId("findLastEventExcludeTypes"), ImmutableMap.of("pigId", pigId, "types", types));
+    }
 }

@@ -47,7 +47,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
         DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
         expectTrue(notNull(eventRelation), "relate.group.event.not.null" , pigEvent.getId());
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
-        return isRelLastGroupEvent(toGroupEvent);
+        return isLastPigEvent(pigEvent) && isLastGroupEvent(toGroupEvent);
     }
 
     @Override
@@ -58,7 +58,13 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
         doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
 
-        //2. 母猪分娩
+        //2.如果有新建猪群,则会滚
+        DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
+        if (notNull(newCreateEvent)) {
+            doctorRollbackGroupNewHandler.rollback(newCreateEvent, operatorId, operatorName);
+        }
+
+        //3. 回滚母猪分娩
         handleRollbackWithStatus(pigEvent, operatorId, operatorName);
     }
 

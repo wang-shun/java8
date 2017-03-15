@@ -6,7 +6,6 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -83,6 +82,13 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     }
 
     /**
+     * 查询最新影响事件不包含某些事件类型的最新事件
+     */
+    public DoctorGroupEvent findLastEventExcludeTypes(Long groupId, List<Integer> types) {
+        return getSqlSession().selectOne(sqlId("findLastEventExcludeTypes"), ImmutableMap.of("groupId", groupId, "types", types));
+    }
+
+    /**
      * 查询最新手动猪群事件
      */
     public DoctorGroupEvent findLastManualEventByGroupId(Long groupId) {
@@ -94,8 +100,8 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      * @param relGroupEventId 关联事件id
      * @return 关联的事件
      */
-    public DoctorGroupEvent findByRelGroupEventId(Long relGroupEventId) {
-        return getSqlSession().selectOne(sqlId("findByRelGroupEventId"), relGroupEventId);
+    public DoctorGroupEvent findByRelGroupEventIdAndType(Long relGroupEventId, Integer type) {
+        return getSqlSession().selectOne(sqlId("findByRelGroupEventIdAndType"), ImmutableMap.of("relGroupEventId", relGroupEventId, "type", type));
     }
 
     /**

@@ -127,13 +127,13 @@ public class DoctorCommonGroupEventHandler {
     }
 
     /**
-     * 母猪事件触发的仔猪转入猪群事件, 同时新建猪群(新建猪群不与其他事件关联,为手动事件)
+     * 母猪事件触发的仔猪转入猪群事件
      * @param input 录入信息
      * @return 创建的猪群id
      */
     @Transactional
     public Long sowGroupEventMoveInWithNew(List<DoctorEventInfo> eventInfoList, DoctorSowMoveInGroupInput input) {
-        input.setIsAuto(IsOrNot.NO.getValue());
+        input.setIsAuto(IsOrNot.YES.getValue());
         input.setRemark(notEmpty(input.getRemark()) ? input.getRemark() : "系统自动生成的从母猪舍转入猪群的仔猪转入事件");
 
         //1. 转换新建猪群字段
@@ -246,7 +246,7 @@ public class DoctorCommonGroupEventHandler {
 
         DoctorPigEvent pigEvent = doctorEntryHandler.buildPigEvent(basicDto, farmEntryDto);
         doctorEntryHandler.handleCheck(pigEvent, null);
-        doctorEntryHandler.handle(eventInfoList, doctorEntryHandler.buildPigEvent(basicDto, farmEntryDto), null);
+        doctorEntryHandler.handle(eventInfoList, pigEvent, null);
     }
 
     /**

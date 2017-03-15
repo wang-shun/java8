@@ -256,7 +256,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     }
 
     /**
-     * 系统触发的自动新建猪群事件(但是不与转群关联,非自动事件)
+     * 系统触发的自动新建猪群事件
      */
     private Long autoTransGroupEventNew(List<DoctorEventInfo> eventInfoList, DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup, DoctorBarn toBarn) {
         DoctorNewGroupInput newGroupInput = new DoctorNewGroupInput();
@@ -273,7 +273,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         newGroupInput.setGeneticId(fromGroup.getGeneticId());
         newGroupInput.setGeneticName(fromGroup.getGeneticName());
         newGroupInput.setSource(PigSource.LOCAL.getKey());          //来源:本场
-        newGroupInput.setIsAuto(IsOrNot.NO.getValue());
+        newGroupInput.setIsAuto(IsOrNot.YES.getValue());
         newGroupInput.setRemark(transGroup.getRemark());
         newGroupInput.setRelGroupEventId(transGroup.getRelGroupEventId()); //由什么事件触发的新建猪群事件
 

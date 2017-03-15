@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.rollback;
 
+import com.google.common.collect.Lists;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.isNull;
@@ -44,6 +46,8 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
     @Autowired protected DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     @Autowired protected DoctorPigEventDao doctorPigEventDao;
     @Autowired protected DoctorEventRelationDao doctorEventRelationDao;
+
+    static List<Integer> excludeGroupEvent = Lists.newArrayList(GroupEventType.ANTIEPIDEMIC.getValue(), GroupEventType.ANTIEPIDEMIC.getValue());
 
     /**
      * 判断能否回滚(1.手动事件 2.三个月内的事件 3.最新事件 4.子类根据事件类型特殊处理)
@@ -77,7 +81,7 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
      * 是否是最新事件
      */
     protected boolean isLastEvent(DoctorGroupEvent groupEvent) {
-        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(groupEvent.getGroupId());
+        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventExcludeTypes(groupEvent.getGroupId(), excludeGroupEvent);
         if (!Objects.equals(groupEvent.getId(), lastEvent.getId())) {
             return Boolean.FALSE;
         }
@@ -109,7 +113,9 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
         DoctorRevertLog revertLog = new  DoctorRevertLog();
         revertLog.setFarmId(groupEvent.getFarmId());
         revertLog.setGroupId(groupEvent.getGroupId());
-        revertLog.setFromInfo(oldSnapshot.getToInfo());
+        if (!Objects.equals(groupEvent.getType(), GroupEventType.NEW.getValue())) {
+            revertLog.setFromInfo(oldSnapshot.getToInfo());
+        }
         revertLog.setToInfo(snapshot.getToInfo());
         revertLog.setType(DoctorRevertLog.Type.GROUP.getValue());
         revertLog.setReverterId(operatorId);

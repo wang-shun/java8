@@ -5,7 +5,6 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupWeanHandler;
@@ -14,7 +13,6 @@ import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -65,7 +63,7 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
         DoctorEventRelation weanGroupRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
         expectTrue(notNull(weanGroupRelation), "relate.group.event.not.null", pigEvent.getId());
         DoctorGroupEvent relGroupEvent = doctorGroupEventDao.findById(weanGroupRelation.getTriggerEventId());
-        return canRollback && isRelLastGroupEvent(relGroupEvent);
+        return canRollback && isLastGroupEvent(relGroupEvent);
     }
 
     @Override
@@ -92,12 +90,12 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
         doctorRollbackGroupWeanHandler.rollback(relGroupEvent, operatorId, operatorName);
 
         //如果成功断奶，需要回滚状态
-        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
-        if (!Objects.equals(pigTrack.getStatus(), PigStatus.FEED.getKey())) {
+//        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
+//        if (!Objects.equals(pigTrack.getStatus(), PigStatus.FEED.getKey())) {
             handleRollbackWithStatus(pigEvent, operatorId, operatorName);
-        } else {
-            handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
-        }
+//        } else {
+//            handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
+//        }
     }
 
     @Override

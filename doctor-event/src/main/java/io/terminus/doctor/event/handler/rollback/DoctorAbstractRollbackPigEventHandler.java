@@ -30,6 +30,8 @@ import java.text.SimpleDateFormat;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
+import static io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler.excludeGroupEvent;
 
 /**
  * Desc: 猪事件回滚handler
@@ -172,6 +174,28 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         }
         DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(tmpEvent.getGroupId());
         if (!Objects.equals(tmpEvent.getId(), lastEvent.getId())) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
+    }
+
+    /**
+     * 是否是最新猪群事件
+     */
+    protected boolean isLastGroupEvent(DoctorGroupEvent groupEvent) {
+        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventExcludeTypes(groupEvent.getGroupId(), excludeGroupEvent);
+        if (!Objects.equals(groupEvent.getId(), lastEvent.getId())) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
+    }
+
+    /**
+     * 是否是最新猪事件
+     */
+    protected boolean isLastPigEvent(DoctorPigEvent pigEvent) {
+        DoctorPigEvent lastEvent = doctorPigEventDao.findLastEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
+        if (!Objects.equals(pigEvent.getId(), lastEvent.getId())) {
             return Boolean.FALSE;
         }
         return Boolean.TRUE;

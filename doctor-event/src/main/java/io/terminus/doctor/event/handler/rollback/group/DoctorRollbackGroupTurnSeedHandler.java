@@ -60,16 +60,17 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a turn seed event:{}", groupEvent);
-        Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-        DoctorGroupEvent close = doctorGroupEventDao.findById(toGroupEventId);
 
-        //如果触发关闭猪群事件, 要回滚关闭事件
+        //1.回滚进场事件
+        rollbackEntry(groupEvent, operatorId, operatorName);
+
+        //2.如果触发关闭猪群事件, 要回滚关闭事件
+        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventIdAndType(groupEvent.getId(), GroupEventType.CLOSE.getValue());
         if (isCloseEvent(close)) {
-            rollbackEntry(close, operatorId, operatorName);
             doctorRollbackGroupCloseHandler.rollback(close, operatorId, operatorName);
-        } else {
-            rollbackEntry(groupEvent, operatorId, operatorName);
         }
+
+        //3.回滚自己
         sampleRollback(groupEvent, operatorId, operatorName);
     }
 
