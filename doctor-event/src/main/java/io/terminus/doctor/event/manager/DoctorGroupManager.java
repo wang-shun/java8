@@ -122,12 +122,14 @@ public class DoctorGroupManager {
 
         //4. 创建猪群镜像
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
+        DoctorGroupEvent shotEvent = BeanMapper.map(groupEvent, DoctorGroupEvent.class);
+        shotEvent.setExtraMap(null);
         groupSnapshot.setGroupId(groupEvent.getGroupId());
         groupSnapshot.setFromEventId(0L);
         groupSnapshot.setToEventId(groupEvent.getId());
         groupSnapshot.setToInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
                 .group(group)
-                .groupEvent(groupEvent)
+                .groupEvent(shotEvent)
                 .groupTrack(groupTrack)
                 .build()));
         doctorGroupSnapshotDao.create(groupSnapshot);
