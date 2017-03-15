@@ -52,10 +52,9 @@ import java.util.stream.Collectors;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
- * Created by yaoqijun.
- * Date:2016-05-19
- * Email:yaoqj@terminus.io
- * Descirbe: 母猪事件信息录入管理过程
+ * Created by xjn.
+ * Date:2017-01-19
+ * 猪事件管理
  */
 @Component
 @Slf4j
@@ -120,6 +119,8 @@ public class DoctorPigEventManager {
      */
     @Transactional
     public void modifyPidEventRollback(List<DoctorEventInfo> doctorEventInfoList, List<Long> pigOldEventIdList, DoctorPigTrack fromTrack, DoctorPig oldPig) {
+        log.info("rollback.modify.failed, starting");
+        log.info("doctorEventInfoList:{}, pigOldEventIdList:{}, fromTrack:{}, oldPig:{}", doctorEventInfoList, pigOldEventIdList, fromTrack, oldPig);
         //1.将新生成事件置为无效
         List<Long> pigNewEventIdList = doctorEventInfoList.stream()
                 .filter(doctorEventInfo -> Objects.equals(doctorEventInfo.getBusinessType(), DoctorEventInfo.Business_Type.PIG.getValue()))
@@ -143,6 +144,7 @@ public class DoctorPigEventManager {
                     .map(DoctorEventInfo::getOldEventId).collect(Collectors.toList());
             doctorEventRelationDao.updateStatusByOrigin(pigOldEventIdList, DoctorEventRelation.Status.VALID.getValue());
         }
+        log.info("rollback.modify.failed, ending");
     }
 
     /**

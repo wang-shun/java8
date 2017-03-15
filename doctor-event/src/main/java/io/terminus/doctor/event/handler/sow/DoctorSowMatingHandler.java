@@ -47,7 +47,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
                 || Objects.equals(fromTrack.getStatus(), PigStatus.KongHuai.getKey())
                 || Objects.equals(fromTrack.getStatus(), PigStatus.Wean.getKey())
                 || Objects.equals(fromTrack.getStatus(), PigStatus.Mate.getKey())
-                ,"pig.status.failed", PigStatus.from(fromTrack.getStatus()).getName());
+                ,"pig.status.failed", PigEvent.from(executeEvent.getType()).getName(), PigStatus.from(fromTrack.getStatus()).getName());
         expectTrue(fromTrack.getCurrentMatingCount() < 3, "mate.count.over");
         expectTrue(notNull(executeEvent.getOperatorId()), "mating.operator.not.null");
     }

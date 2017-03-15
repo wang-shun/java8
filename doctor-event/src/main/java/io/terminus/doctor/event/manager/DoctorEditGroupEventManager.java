@@ -2,6 +2,7 @@ package io.terminus.doctor.event.manager;
 
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
@@ -11,7 +12,11 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
-import io.terminus.doctor.event.enums.*;
+import io.terminus.doctor.event.enums.BoarEntryType;
+import io.terminus.doctor.event.enums.EventStatus;
+import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.handler.group.DoctorGroupEventHandlers;
 import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -25,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -65,7 +69,8 @@ public class DoctorEditGroupEventManager {
 
     @Transactional
     public DoctorGroupTrack elicitDoctorGroupTrack(List<DoctorGroupEvent> triggerDoctorGroupEventList, List<Long> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent newEvent){
-        DoctorGroupEvent oldEvent = newEvent;
+        DoctorGroupEvent oldEvent = new DoctorGroupEvent();
+        BeanMapper.copy(newEvent, oldEvent);
         return doctorGroupEventHandlers.getEventHandlerMap().get(newEvent.getType()).editGroupEvent(triggerDoctorGroupEventList, doctorGroupEventList, doctorGroupTrack, oldEvent, newEvent);
     }
 

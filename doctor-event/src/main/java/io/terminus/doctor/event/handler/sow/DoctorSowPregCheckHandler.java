@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
@@ -39,7 +40,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
                         || Objects.equals(fromTrack.getStatus(), PigStatus.KongHuai.getKey())
                         || Objects.equals(fromTrack.getStatus(), PigStatus.Pregnancy.getKey())
                         || Objects.equals(fromTrack.getStatus(), PigStatus.Farrow.getKey())
-                ,"pig.status.failed", PigStatus.from(fromTrack.getStatus()).getName());
+                ,"pig.status.failed", PigEvent.from(executeEvent.getType()).getName(), PigStatus.from(fromTrack.getStatus()).getName());
         DoctorPregChkResultDto pregChkResultDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorPregChkResultDto.class);
         if (Objects.equals(executeEvent.getPregCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
             expectTrue(notNull(pregChkResultDto.getAbortionReasonId()), "liuchan.reason.not.null", pregChkResultDto.getPigCode());
