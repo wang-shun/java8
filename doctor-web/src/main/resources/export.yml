@@ -697,8 +697,131 @@ export.tables:
           display: 诊断人员
         - name: remark
           display: 备注
+  web-pig-sowMating:
+      display: 母猪配种
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: barnName
+          display: 猪舍
+        - name: matingDate
+          display: 配种日期
+        - name: matingStaff
+          display: 配种员
+        - name: matingBoarPigCode
+          display: 公猪号
+        - name: doctorMateType
+          display: 配种类型
+        - name: judgePregDate
+          display: 预产期
+        - name: mattingMark
+          display: 备注
+        - name: operatorName
+          display: 录入人员
+        - name: pigStatusAfter
+          display: 当前状态
+  web-pig-sowPregChkResult:
+      display: 妊娠检查
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: barnNam
+          display: 猪舍
+        - name: checkDate
+          display: 检查日期
+        - name: checkResult
+          display: 检查结果
+        - name: npd
+          display: 已配种天数
+        - name: operatorName
+          display: 检查人员
+        - name: checkMark
+          display: 备注
         - name: updatorName
           display: 录入人员
+  web-pig-sowFarrowing:
+      display: 分娩
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: farrowingDate
+          display: 分娩日期
+        - name: nestCode
+          display: 窝号
+        - name: barnName
+          display: 分娩猪舍
+        - name: bedCode
+          display: 床号
+        - name: farrowingType
+          display: 分娩类型
+        - name: farrowStaff1
+          display: 接产员1
+        - name: farrowStaff2
+          display: 接产员2
+        - name: birthNestAvg
+          display: 出生窝重
+        - name: farrowingLiveCount
+          display: 活仔数
+        - name: healthCount
+          display: 健仔数
+        - name: weakCount
+          display: 弱仔数
+        - name: deadCount
+          display: 死胎
+        - name: blackCount
+          display: 黑胎
+        - name: mnyCount
+          display: 木乃伊
+        - name: jxCount
+          display: 畸形
+        - name: toBarnName
+          display: 转入猪群
+        - name: liveBoarCount
+          display: 活公
+        - name: liveSowCount
+          display: 活母
+        - name: farrowRemark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+  web-pig-sowWean:
+      display: 断奶事件
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: parity
+          display: 胎次
+        - name: partWeanDate
+          display: 断奶日期
+        - name: barnName
+          display: 断奶猪舍
+        - name:
+          display: 断奶数
+        - name: partWeanAvgWeight
+          display: 断奶均重
+        - name: chgLocationToBarnId
+          display: 母猪转入猪舍
+        - name: qualifiedCount
+          display: 合格数
+        - name: notQualifiedCount
+          display: 不合格数
+        - name: operatorName
+          display: 断奶人员
+        - name: partWeanRemark
+          display: 备注
+        - name: updatorName
+          display: 录入人员
+
+
+  web-group-newGroup:
+      display: 新建猪群
+
   web-group-accination:
       display: 猪群防疫
       columns:
