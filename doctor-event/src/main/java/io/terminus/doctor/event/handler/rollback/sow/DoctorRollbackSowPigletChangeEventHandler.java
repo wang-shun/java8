@@ -16,6 +16,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
+
 /**
  * Desc: 母猪的仔猪变动事件回滚
  * Mail: yangzl@terminus.io
@@ -37,16 +40,18 @@ public class DoctorRollbackSowPigletChangeEventHandler extends DoctorAbstractRol
         }
 
         //母猪仔猪变动会触发猪群变动事件，校验猪群变动事件是否是最新事件
-        Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(toGroupEventId);
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        expectTrue(notNull(eventRelation), "relate.group.event.not.null" , pigEvent.getId());
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
         return isRelLastGroupEvent(toGroupEvent);
     }
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //1. 回滚猪群变动
-        Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(toGroupEventId);
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        expectTrue(notNull(eventRelation), "relate.group.event.not.null" , pigEvent.getId());
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
         doctorRollbackGroupChangeHandler.rollback(toGroupEvent, operatorId, operatorName);
         //3. 回滚母猪仔猪变动
         handleRollbackWithStatus(pigEvent, operatorId, operatorName);

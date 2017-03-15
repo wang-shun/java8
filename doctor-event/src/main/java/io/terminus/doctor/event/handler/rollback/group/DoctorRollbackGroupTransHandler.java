@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
+
 /**
  * Desc: 猪群转群回滚
  * Mail: yangzl@terminus.io
@@ -43,8 +45,8 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
         }
 
         //如果触发关闭猪群事件，说明此事件肯定不是最新事件
-        Long eventId = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-        DoctorGroupEvent close = doctorGroupEventDao.findById(eventId);
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
         if (isCloseEvent(close)) {
             return doctorRollbackGroupCloseHandler.handleCheck(close);
         }
@@ -54,13 +56,13 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
     @Override
     public void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a trans event:{}", groupEvent);
-        Long eventId = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-        DoctorGroupEvent to1 = doctorGroupEventDao.findById(eventId);
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorGroupEvent to1 = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
 
         //如果关闭猪群
         if (isCloseEvent(to1)) {
-            Long to2Id = doctorEventRelationDao.findByOriginAndType(to1.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-            DoctorGroupEvent to2 = doctorGroupEventDao.findById(to2Id);
+            DoctorEventRelation eventRelation1 = doctorEventRelationDao.findByOriginAndType(to1.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+            DoctorGroupEvent to2 = isNull(eventRelation1)? null : doctorGroupEventDao.findById(eventRelation1.getTriggerEventId());
 
             rollbackMoveIn(to2, operatorId, operatorName);
             doctorRollbackGroupCloseHandler.rollback(to1, operatorId, operatorName);    //回滚关闭猪群
@@ -73,15 +75,15 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
 
     //如果有新建猪群, 就需要先回滚新建猪群事件
     private void rollbackMoveIn(DoctorGroupEvent to2, Long operatorId, String operatorName) {
-        if (Objects.equals(to2.getType(), GroupEventType.NEW.getValue())) {
-            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(to2.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-            DoctorGroupEvent moveIn = doctorGroupEventDao.findById(toGroupEventId);
-
-            doctorRollbackGroupMoveInHandler.rollback(moveIn, operatorId, operatorName);
-            doctorRollbackGroupNewHandler.rollback(to2, operatorId, operatorName);
-        } else {
+//        if (Objects.equals(to2.getType(), GroupEventType.NEW.getValue())) {
+//            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(to2.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+//            DoctorGroupEvent moveIn = doctorGroupEventDao.findById(toGroupEventId);
+//
+//            doctorRollbackGroupMoveInHandler.rollback(moveIn, operatorId, operatorName);
+//            doctorRollbackGroupNewHandler.rollback(to2, operatorId, operatorName);
+//        } else {
             doctorRollbackGroupMoveInHandler.rollback(to2, operatorId, operatorName);
-        }
+ //       }
     }
 
     @Override

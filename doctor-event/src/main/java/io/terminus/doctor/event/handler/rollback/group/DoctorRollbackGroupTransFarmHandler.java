@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
+
 /**
  * Desc: 猪群转场回滚
  * Mail: yangzl@terminus.io
@@ -41,8 +43,8 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         }
 
         //如果触发关闭猪群事件，说明此事件肯定不是最新事件
-        Long eventId = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-        DoctorGroupEvent close = doctorGroupEventDao.findById(eventId);
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
         if (isCloseEvent(close)) {
             return doctorRollbackGroupCloseHandler.handleCheck(close);
         }

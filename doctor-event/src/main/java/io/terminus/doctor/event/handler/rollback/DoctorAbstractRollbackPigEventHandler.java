@@ -142,7 +142,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
                 .pig(fromPig)
                 .build();
 
-        DoctorPigEvent toPigEvent = doctorPigEventDao.queryLastPigEventById(fromPigEvent.getPigId());
+        //DoctorPigEvent toPigEvent = doctorPigEventDao.queryLastPigEventById(fromPigEvent.getPigId());
         DoctorPigTrack toPigTrack = doctorPigTrackDao.findByPigId(fromPigEvent.getPigId());
         DoctorPig toPig = doctorPigDao.findById(fromPigEvent.getPigId());
         DoctorPigSnapShotInfo toInfo = DoctorPigSnapShotInfo.builder()

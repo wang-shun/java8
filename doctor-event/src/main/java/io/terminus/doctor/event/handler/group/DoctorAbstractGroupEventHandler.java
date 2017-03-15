@@ -219,8 +219,12 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     //创建猪群镜像信息
     protected DoctorGroupSnapshot createGroupSnapShot(DoctorGroupSnapShotInfo oldShot, DoctorGroupSnapShotInfo newShot, GroupEventType eventType) {
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
+        String oldExtra = oldShot.getGroupEvent().getExtra();
+        String newExtra = newShot.getGroupEvent().getExtra();
         oldShot.getGroupEvent().setExtraMap(null);
         newShot.getGroupEvent().setExtraMap(null);
+        oldShot.getGroupEvent().setExtra(oldExtra);
+        newShot.getGroupEvent().setExtra(newExtra);
         //录入前的数据
         groupSnapshot.setGroupId(newShot.getGroup().getId());
         groupSnapshot.setFromEventId(oldShot.getGroupEvent().getId());

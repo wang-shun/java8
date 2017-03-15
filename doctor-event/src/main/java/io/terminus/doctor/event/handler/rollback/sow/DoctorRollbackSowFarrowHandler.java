@@ -2,7 +2,6 @@ package io.terminus.doctor.event.handler.rollback.sow;
 
 import com.google.common.collect.Lists;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
-import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
@@ -45,27 +44,19 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
         }
 
         //母猪分娩会触发转入猪群事件，如果有新建猪群，还要校验最新事件(分娩)
-        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(toPigEventId);
-        expectTrue(notNull(toGroupEvent), "relate.group.event.not.null" , pigEvent.getId());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        expectTrue(notNull(eventRelation), "relate.group.event.not.null" , pigEvent.getId());
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
         return isRelLastGroupEvent(toGroupEvent);
     }
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        //1.判断是否新建猪群
-        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(toPigEventId);
-        expectTrue(notNull(toGroupEvent), "relate.group.event.not.null" , pigEvent.getId());
-        if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
-            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(toGroupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-            DoctorGroupEvent moveInEvent = doctorGroupEventDao.findById(toGroupEventId);
-
-            doctorRollbackGroupMoveInHandler.rollback(moveInEvent, operatorId, operatorName);
-            doctorRollbackGroupNewHandler.rollback(toGroupEvent, operatorId, operatorName);
-        } else {
-            doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
-        }
+        //1.回滚转入事件
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        expectTrue(notNull(eventRelation), "relate.group.event.not.null" , pigEvent.getId());
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
 
         //2. 母猪分娩
         handleRollbackWithStatus(pigEvent, operatorId, operatorName);

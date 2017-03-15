@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
@@ -23,7 +22,6 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -221,10 +219,6 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         //5.判断转群数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, transGroup.getQuantity())) {
             doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, transGroup, event.getEventAt(), transGroup.getFcrFeed());
-
-            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-            DoctorGroupEvent closeEvent = doctorGroupEventDao.findById(toGroupEventId);
-            transGroup.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
 
         //设置来源为本场
@@ -247,10 +241,10 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
             doctorGroupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(toInfo));
             doctorGroupSnapshotDao.update(doctorGroupSnapshot);
 
-            //刷新最新事件id
-            DoctorGroupEvent newGroupEvent = doctorGroupEventDao.findLastEventByGroupId(toGroupId);
-            transGroup.setRelGroupEventId(newGroupEvent.getId());
-
+//            //刷新最新事件id
+//            DoctorGroupEvent newGroupEvent = doctorGroupEventDao.findLastEventByGroupId(toGroupId);
+//            transGroup.setRelGroupEventId(newGroupEvent.getId());
+//
             //转入猪群
             doctorCommonGroupEventHandler.autoTransEventMoveIn(eventInfoList, group, groupTrack, transGroup);
         } else {
@@ -262,7 +256,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     }
 
     /**
-     * 系统触发的自动新建猪群事件(转群触发)
+     * 系统触发的自动新建猪群事件(但是不与转群关联,非自动事件)
      */
     private Long autoTransGroupEventNew(List<DoctorEventInfo> eventInfoList, DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup, DoctorBarn toBarn) {
         DoctorNewGroupInput newGroupInput = new DoctorNewGroupInput();
@@ -279,7 +273,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         newGroupInput.setGeneticId(fromGroup.getGeneticId());
         newGroupInput.setGeneticName(fromGroup.getGeneticName());
         newGroupInput.setSource(PigSource.LOCAL.getKey());          //来源:本场
-        newGroupInput.setIsAuto(IsOrNot.YES.getValue());
+        newGroupInput.setIsAuto(IsOrNot.NO.getValue());
         newGroupInput.setRemark(transGroup.getRemark());
         newGroupInput.setRelGroupEventId(transGroup.getRelGroupEventId()); //由什么事件触发的新建猪群事件
 

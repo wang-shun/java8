@@ -30,7 +30,7 @@ public class DoctorRollbackSowEntryEventHandler extends DoctorAbstractRollbackPi
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
+        DoctorPigSnapshot snapshot = doctorPigSnapshotDao.findByToEventId(pigEvent.getId());
         DoctorPigSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getToPigInfo(), DoctorPigSnapShotInfo.class);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
         DoctorPig doctorPig = doctorPigDao.findById(pigEvent.getPigId());

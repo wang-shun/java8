@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
 
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
+
 /**
  * Desc: 猪群事件回滚处理器
  * Mail: yangzl@terminus.io
@@ -88,8 +90,8 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
     protected void sampleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
 
-        DoctorGroupSnapshot oldSnapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(snapshot.getFromEventId());
-
+        DoctorGroupSnapshot oldSnapshot = doctorGroupSnapshotDao.queryByEventId(groupEvent.getId());
+        expectNotNull(oldSnapshot, "query.pre.snapshot.failed", groupEvent.getId());
         DoctorGroupSnapShotInfo info = JSON_MAPPER.fromJson(oldSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
 
         //删除此事件 -> 回滚猪群跟踪 -> 回滚猪群 -> 删除镜像

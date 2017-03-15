@@ -1,26 +1,24 @@
 package io.terminus.doctor.event.handler.rollback.sow;
 
 import com.google.common.collect.Lists;
-import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransHandler;
-import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Created by xjn on 16/9/22.
@@ -36,13 +34,13 @@ public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRoll
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        DoctorChgLocationDto dto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorChgLocationDto.class);
-        DoctorBarn toBarn = doctorBarnDao.findById(dto.getChgLocationToBarnId());
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
-        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-        DoctorGroupEvent relGroupEvent = doctorGroupEventDao.findById(toPigEventId);
+//        DoctorChgLocationDto dto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorChgLocationDto.class);
+//        DoctorBarn toBarn = doctorBarnDao.findById(dto.getChgLocationToBarnId());
+//        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
 
-        if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && doctorRollbackGroupTransHandler.handleCheck(relGroupEvent)){
+        if (notNull(eventRelation)) {
+            DoctorGroupEvent relGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
             doctorRollbackGroupTransHandler.handleRollback(relGroupEvent, operatorId, operatorName);
         }
         handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
