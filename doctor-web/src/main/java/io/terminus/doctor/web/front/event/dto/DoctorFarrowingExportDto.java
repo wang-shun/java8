@@ -20,7 +20,7 @@ public class DoctorFarrowingExportDto implements Serializable{
     private String nestCode; // 窝号
     private String bedCode; // 床号
     private Integer farrowingType;  // 分娩类型
-    private double birthNestAvg;    //出生窝重
+    private Double birthNestAvg;    //出生窝重
     private Integer farrowingLiveCount; // 分娩猪的数量 = 活公猪 + 活母猪 = 健崽数量 + 弱仔数量 (拼窝后， 可能不相等， 差值 拼窝数量)
     private Integer liveSowCount;   //  活母猪数量
     private Integer liveBoarCount;  // 活公猪数量

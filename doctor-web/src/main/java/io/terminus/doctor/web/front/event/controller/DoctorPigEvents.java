@@ -689,14 +689,14 @@ public class DoctorPigEvents {
                 doctorPigBoarInFarmExportDto.setUpdatorName(detail.getUpdatorName());
             }
             if (detail.getExtraMap().containsKey("fatherCode")) {
-                doctorPigBoarInFarmExportDto.setPigFatherCode((String) detail.getExtraMap().get("atherCode"));
+                doctorPigBoarInFarmExportDto.setFatherCode((String) detail.getExtraMap().get("fatherCode"));
             }else {
-                doctorPigBoarInFarmExportDto.setPigFatherCode(null);
+                doctorPigBoarInFarmExportDto.setFatherCode(null);
             }
             if (detail.getExtraMap().containsKey("motherCode")) {
-                doctorPigBoarInFarmExportDto.setPigMotherCode((String) detail.getExtraMap().get("motherCode"));
+                doctorPigBoarInFarmExportDto.setMotherCode((String) detail.getExtraMap().get("motherCode"));
             }else {
-                doctorPigBoarInFarmExportDto.setPigMotherCode(null);
+                doctorPigBoarInFarmExportDto.setMotherCode(null);
             }
             if (detail.getExtraMap().containsKey("earCode")) {
                 doctorPigBoarInFarmExportDto.setEarCode((String) detail.getExtraMap().get("earCode"));
@@ -731,8 +731,6 @@ public class DoctorPigEvents {
 
         List<DoctorPigEventDetail> list = pigEventPaging.getData();
         for(DoctorPigEventDetail detail : list) {
-
-//            DoctorPigEventDetail detail = OBJECT_MAPPER.convertValue(doctorPigEventDetail, DoctorPigEventDetail.class);
             DoctorPigSemenExportDto doctorEventSemenExport = new DoctorPigSemenExportDto();
             doctorEventSemenExport.setPigCode(detail.getPigCode());
 

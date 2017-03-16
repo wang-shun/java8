@@ -22,7 +22,6 @@ public class DoctorPigRemoveExportDto implements Serializable{
     private Double weight;
     private Integer price;
     private Integer amount;
-//缺少客户
     private String xxx;
     private String operatorName;
     private String remark;
