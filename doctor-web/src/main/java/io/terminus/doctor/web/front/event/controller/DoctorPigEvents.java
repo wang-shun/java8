@@ -1162,7 +1162,7 @@ public class DoctorPigEvents {
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
                 return exportData;
             } catch (Exception e) {
-                log.error("get.group.new.failed, eventId:{}", doctorGroupEventDetail.getId());
+                log.info("get.group.new.failed, eventId:{}", doctorGroupEventDetail.getId());
             }
             return new DoctorNewExportGroup();
         }).collect(toList());
@@ -1189,7 +1189,7 @@ public class DoctorPigEvents {
                 exportData.setSex(isNull(moveInGroupEvent.getSex()) ? null : DoctorGroupTrack.Sex.from(moveInGroupEvent.getSex()).getDesc());
                 return exportData;
             } catch (Exception e) {
-                log.error("get.group.MoveIn.failed, eventId:{}", doctorGroupEventDetail.getId());
+                log.info("get.group.MoveIn.failed, eventId:{}", doctorGroupEventDetail.getId());
             }
             return new DoctorMoveInGroupExportDto();
         }).collect(toList());
@@ -1210,7 +1210,7 @@ public class DoctorPigEvents {
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
                 return exportData;
             } catch (Exception e) {
-                log.error("get.group.change.failed, eventId:{}", doctorGroupEventDetail.getId());
+                log.info("get.group.change.failed, eventId:{}", doctorGroupEventDetail.getId());
             }
             return new DoctorChangeGroupExportDto();
         }).collect(toList());
@@ -1225,6 +1225,7 @@ public class DoctorPigEvents {
                 DoctorChgFarmGroupExportDto exportData = BeanMapper.map(transFarmGroupEvent, DoctorChgFarmGroupExportDto.class);
                 exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
                 exportData.setBarnName(doctorGroupEventDetail.getBarnName());
+                exportData.setFarmName(doctorGroupEventDetail.getFarmName());
                 exportData.setEventAt(doctorGroupEventDetail.getEventAt());
                 exportData.setQuantity(doctorGroupEventDetail.getQuantity());
                 exportData.setWeight(doctorGroupEventDetail.getWeight());
@@ -1232,7 +1233,7 @@ public class DoctorPigEvents {
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
                 return exportData;
             } catch (Exception e) {
-                log.error("get.group.chgFarm.failed, eventId:{}", doctorGroupEventDetail.getId());
+                log.info("get.group.chgFarm.failed, eventId:{}", doctorGroupEventDetail.getId());
             }
             return new DoctorChgFarmGroupExportDto();
         }).collect(toList());
@@ -1252,7 +1253,7 @@ public class DoctorPigEvents {
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
                 return exportData;
             } catch (Exception e) {
-                log.error("get.group.disease.failed, eventId:{}", doctorGroupEventDetail.getId());
+                log.info("get.group.disease.failed, eventId:{}", doctorGroupEventDetail.getId());
             }
             return new DoctorDiseaseGroupExportDto();
         }).collect(toList());
@@ -1272,7 +1273,7 @@ public class DoctorPigEvents {
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
                 return exportData;
             } catch (Exception e) {
-                log.error("get.group.vaccination.failed, eventId:{}", doctorGroupEventDetail.getId());
+                log.info("get.group.vaccination.failed, eventId:{}", doctorGroupEventDetail.getId());
             }
             return new DoctorVaccinationGroupExportDto();
         }).collect(toList());
@@ -1294,7 +1295,7 @@ public class DoctorPigEvents {
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
                 return exportData;
             } catch (Exception e) {
-                log.error("get.group.transGroup.failed, eventId:{}", doctorGroupEventDetail.getId());
+                log.info("get.group.transGroup.failed, eventId:{}", doctorGroupEventDetail.getId());
             }
             return new DoctorTransGroupExportDto();
         }).collect(toList());
@@ -1314,7 +1315,7 @@ public class DoctorPigEvents {
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
                 return exportData;
             } catch (Exception e) {
-                log.error("get.group.turnSeed.failed, eventId:{}", doctorGroupEventDetail.getId());
+                log.info("get.group.turnSeed.failed, eventId:{}", doctorGroupEventDetail.getId());
             }
             return new DoctorTurnSeedGroupExportDto();
         }).collect(toList());
