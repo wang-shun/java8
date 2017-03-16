@@ -776,11 +776,11 @@ export.tables:
           display: 猪舍
         - name: pigTypeName
           display: 猪类
-        - name: sex
+        - name: sexName
           display: 性别
         - name: breedName
           display: 品种
-        - name: currentStatus
+        - name: status
           display: 当前状态
         - name: remark
           display: 备注
@@ -835,7 +835,7 @@ export.tables:
         - name: changeTypeName
           display: 变动类型
         - name: changeReasonName
-          display: 变动类型
+          display: 变动原因
         - name: quantity
           display: 猪只数
         - name: customerName
@@ -851,8 +851,9 @@ export.tables:
           display: 猪群号
         - name: barnName
           display: 猪舍
-        - name: transGroupAt
+        - name: eventAt
           display: 转群日期
+          formatter: isoDateFormatter
         - name: toBarnName
           display: 转入猪舍
         - name: toGroupCode
@@ -876,10 +877,12 @@ export.tables:
           display: 猪群号
         - name: barnName
           display: 猪舍
-        - name: 转入日期
-          display: transInAt
-        - name: 转入日期
-          display: birthDate
+        - name: eventAt
+          display: 转入日期
+          formatter: isoDateFormatter
+        - name: birthDate
+          display: 出生日期
+          formatter: isoDateFormatter
         - name: pigCode
           display: 种猪号
         - name: toBarnName
@@ -912,7 +915,6 @@ export.tables:
           display: 诊断人员
         - name: remark
           display: 备注
-
   web-group-accination:
       display: 猪群防疫
       columns:

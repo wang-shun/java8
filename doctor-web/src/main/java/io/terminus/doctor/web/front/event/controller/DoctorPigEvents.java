@@ -14,6 +14,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -39,8 +40,11 @@ import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -99,6 +103,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -1143,11 +1148,23 @@ public class DoctorPigEvents {
     public Paging<DoctorNewExportGroup> pagingNewGroup(Map<String, String> groupEventCriteriaMap) {
         Paging<DoctorGroupEvent> paging = groupEventPaging(groupEventCriteriaMap);
         List<DoctorNewExportGroup> list = paging.getData().stream().map(doctorGroupEventDetail -> {
-            DoctorNewGroupEvent newGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorNewGroupEvent.class);
-            DoctorNewExportGroup exportData = BeanMapper.map(newGroupEvent, DoctorNewExportGroup.class);
-            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
-            exportData.setEventAt(doctorGroupEventDetail.getEventAt());
-            return exportData;
+            try {
+                DoctorNewGroupEvent newGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorNewGroupEvent.class);
+                DoctorNewExportGroup exportData = BeanMapper.map(newGroupEvent, DoctorNewExportGroup.class);
+                DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(doctorGroupEventDetail.getGroupId()));
+                exportData.setPigTypeName(PigType.from(doctorGroupEventDetail.getPigType()).getDesc());
+                exportData.setBreedName(group.getBreedName());
+                exportData.setStatus(DoctorGroup.Status.from(group.getStatus()).getDesc());
+                exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+                exportData.setBarnName(doctorGroupEventDetail.getBarnName());
+                exportData.setEventAt(doctorGroupEventDetail.getEventAt());
+                exportData.setRemark(doctorGroupEventDetail.getRemark());
+                exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                return exportData;
+            } catch (Exception e) {
+                log.error("get.group.new.failed, eventId:{}", doctorGroupEventDetail.getId());
+            }
+            return new DoctorNewExportGroup();
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
     }
@@ -1155,87 +1172,151 @@ public class DoctorPigEvents {
     public Paging<DoctorMoveInGroupExportDto> pagingMoveInGroup(Map<String, String> groupEventCriteriaMap) {
         Paging<DoctorGroupEvent> paging = groupEventPaging(groupEventCriteriaMap);
         List<DoctorMoveInGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
-            DoctorMoveInGroupEvent moveInGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorMoveInGroupEvent.class);
-            DoctorMoveInGroupExportDto exportData = BeanMapper.map(moveInGroupEvent, DoctorMoveInGroupExportDto.class);
-            exportData.setQuantity(doctorGroupEventDetail.getQuantity());
-            exportData.setAvgDayAge(doctorGroupEventDetail.getAvgDayAge());
-            exportData.setAvgWeight(doctorGroupEventDetail.getAvgWeight());
-            exportData.setAmount(doctorGroupEventDetail.getAmount());
-            exportData.setWeight(doctorGroupEventDetail.getWeight());
-            exportData.setEventAt(doctorGroupEventDetail.getEventAt());
-            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
-
-            return exportData;
+            try {
+                DoctorMoveInGroupEvent moveInGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorMoveInGroupEvent.class);
+                DoctorMoveInGroupExportDto exportData = BeanMapper.map(moveInGroupEvent, DoctorMoveInGroupExportDto.class);
+                exportData.setQuantity(doctorGroupEventDetail.getQuantity());
+                exportData.setAvgDayAge(doctorGroupEventDetail.getAvgDayAge());
+                exportData.setAvgWeight(doctorGroupEventDetail.getAvgWeight());
+                exportData.setAmount(doctorGroupEventDetail.getAmount());
+                exportData.setWeight(doctorGroupEventDetail.getWeight());
+                exportData.setEventAt(doctorGroupEventDetail.getEventAt());
+                exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+                exportData.setBarnName(doctorGroupEventDetail.getBarnName());
+                exportData.setRemark(doctorGroupEventDetail.getRemark());
+                exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                exportData.setSource(isNull(moveInGroupEvent.getSource()) ? null : PigSource.from(moveInGroupEvent.getSource()).getDesc());
+                exportData.setSex(isNull(moveInGroupEvent.getSex()) ? null : DoctorGroupTrack.Sex.from(moveInGroupEvent.getSex()).getDesc());
+                return exportData;
+            } catch (Exception e) {
+                log.error("get.group.MoveIn.failed, eventId:{}", doctorGroupEventDetail.getId());
+            }
+            return new DoctorMoveInGroupExportDto();
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
     }
+
     public Paging<DoctorChangeGroupExportDto> pagingChangeGroup(Map<String, String> groupEventCriteriaMap) {
         Paging<DoctorGroupEvent> paging = groupEventPaging(groupEventCriteriaMap);
         List<DoctorChangeGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
-            DoctorChangeGroupEvent changeGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorChangeGroupEvent.class);
-            DoctorChangeGroupExportDto exportData = BeanMapper.map(changeGroupEvent, DoctorChangeGroupExportDto.class);
-            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
-            exportData.setQuantity(doctorGroupEventDetail.getQuantity());
-            exportData.setEventAt(doctorGroupEventDetail.getEventAt());
-            return exportData;
+            try {
+                DoctorChangeGroupEvent changeGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorChangeGroupEvent.class);
+                DoctorChangeGroupExportDto exportData = BeanMapper.map(changeGroupEvent, DoctorChangeGroupExportDto.class);
+                exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+                exportData.setBarnName(doctorGroupEventDetail.getBarnName());
+                exportData.setQuantity(doctorGroupEventDetail.getQuantity());
+                exportData.setEventAt(doctorGroupEventDetail.getEventAt());
+                exportData.setRemark(doctorGroupEventDetail.getRemark());
+                exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                return exportData;
+            } catch (Exception e) {
+                log.error("get.group.change.failed, eventId:{}", doctorGroupEventDetail.getId());
+            }
+            return new DoctorChangeGroupExportDto();
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
     }
+
     public Paging<DoctorChgFarmGroupExportDto> pagingChgFramGroup(Map<String, String> groupEventCriteriaMap) {
         Paging<DoctorGroupEvent> paging = groupEventPaging(groupEventCriteriaMap);
         List<DoctorChgFarmGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
-            DoctorTransFarmGroupEvent transFarmGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorTransFarmGroupEvent.class);
-            DoctorChgFarmGroupExportDto exportData = BeanMapper.map(transFarmGroupEvent, DoctorChgFarmGroupExportDto.class);
-            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
-            exportData.setEventAt(doctorGroupEventDetail.getEventAt());
-            exportData.setQuantity(doctorGroupEventDetail.getQuantity());
-            exportData.setWeight(doctorGroupEventDetail.getWeight());
-            return exportData;
+            try {
+                DoctorTransFarmGroupEvent transFarmGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorTransFarmGroupEvent.class);
+                DoctorChgFarmGroupExportDto exportData = BeanMapper.map(transFarmGroupEvent, DoctorChgFarmGroupExportDto.class);
+                exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+                exportData.setBarnName(doctorGroupEventDetail.getBarnName());
+                exportData.setEventAt(doctorGroupEventDetail.getEventAt());
+                exportData.setQuantity(doctorGroupEventDetail.getQuantity());
+                exportData.setWeight(doctorGroupEventDetail.getWeight());
+                exportData.setRemark(doctorGroupEventDetail.getRemark());
+                exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                return exportData;
+            } catch (Exception e) {
+                log.error("get.group.chgFarm.failed, eventId:{}", doctorGroupEventDetail.getId());
+            }
+            return new DoctorChgFarmGroupExportDto();
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
     }
+
     public Paging<DoctorDiseaseGroupExportDto> pagingDiseaseGroup(Map<String, String> groupEventCriteriaMap) {
         Paging<DoctorGroupEvent> paging = groupEventPaging(groupEventCriteriaMap);
         List<DoctorDiseaseGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
-            DoctorDiseaseGroupEvent diseaseGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorDiseaseGroupEvent.class);
-            DoctorDiseaseGroupExportDto exportData = BeanMapper.map(diseaseGroupEvent, DoctorDiseaseGroupExportDto.class);
-            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
-            exportData.setEventAt(doctorGroupEventDetail.getEventAt());
-            return exportData;
+            try {
+                DoctorDiseaseGroupEvent diseaseGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorDiseaseGroupEvent.class);
+                DoctorDiseaseGroupExportDto exportData = BeanMapper.map(diseaseGroupEvent, DoctorDiseaseGroupExportDto.class);
+                exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+                exportData.setBarnName(doctorGroupEventDetail.getBarnName());
+                exportData.setEventAt(doctorGroupEventDetail.getEventAt());
+                exportData.setRemark(doctorGroupEventDetail.getRemark());
+                exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                return exportData;
+            } catch (Exception e) {
+                log.error("get.group.disease.failed, eventId:{}", doctorGroupEventDetail.getId());
+            }
+            return new DoctorDiseaseGroupExportDto();
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
     }
+
     public Paging<DoctorVaccinationGroupExportDto> pagingVaccinationGroup(Map<String, String> groupEventCriteriaMap) {
         Paging<DoctorGroupEvent> paging = groupEventPaging(groupEventCriteriaMap);
         List<DoctorVaccinationGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
-            DoctorAntiepidemicGroupEvent antiepidemicGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorAntiepidemicGroupEvent.class);
-            DoctorVaccinationGroupExportDto exportData = BeanMapper.map(antiepidemicGroupEvent, DoctorVaccinationGroupExportDto.class);
-            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
-            exportData.setEventAt(doctorGroupEventDetail.getEventAt());
-            return exportData;
+            try {
+                DoctorAntiepidemicGroupEvent antiepidemicGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorAntiepidemicGroupEvent.class);
+                DoctorVaccinationGroupExportDto exportData = BeanMapper.map(antiepidemicGroupEvent, DoctorVaccinationGroupExportDto.class);
+                exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+                exportData.setBarnName(doctorGroupEventDetail.getBarnName());
+                exportData.setEventAt(doctorGroupEventDetail.getEventAt());
+                exportData.setRemark(doctorGroupEventDetail.getRemark());
+                exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                return exportData;
+            } catch (Exception e) {
+                log.error("get.group.vaccination.failed, eventId:{}", doctorGroupEventDetail.getId());
+            }
+            return new DoctorVaccinationGroupExportDto();
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
     }
+
     public Paging<DoctorTransGroupExportDto> pagingTransGroup(Map<String, String> groupEventCriteriaMap) {
         Paging<DoctorGroupEvent> paging = groupEventPaging(groupEventCriteriaMap);
         List<DoctorTransGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
-            DoctorTransGroupExportDto exportData = BeanMapper.map(doctorGroupEventDetail, DoctorTransGroupExportDto.class);
-            DoctorTransGroupEvent transGroupEvent = JSON_MAPPER.fromJson(exportData.getExtra(), DoctorTransGroupEvent.class);
-            exportData.setToBarnName(transGroupEvent.getToBarnName());
-            exportData.setToGroupCode(transGroupEvent.getToGroupCode());
-            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
-
-            return exportData;
+            try {
+                DoctorTransGroupExportDto exportData = BeanMapper.map(doctorGroupEventDetail, DoctorTransGroupExportDto.class);
+                DoctorTransGroupEvent transGroupEvent = JSON_MAPPER.fromJson(exportData.getExtra(), DoctorTransGroupEvent.class);
+                exportData.setToBarnName(transGroupEvent.getToBarnName());
+                exportData.setToGroupCode(transGroupEvent.getToGroupCode());
+                exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+                exportData.setBarnName(doctorGroupEventDetail.getBarnName());
+                exportData.setEventAt(doctorGroupEventDetail.getEventAt());
+                exportData.setRemark(doctorGroupEventDetail.getRemark());
+                exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                return exportData;
+            } catch (Exception e) {
+                log.error("get.group.transGroup.failed, eventId:{}", doctorGroupEventDetail.getId());
+            }
+            return new DoctorTransGroupExportDto();
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
     }
+
     public Paging<DoctorTurnSeedGroupExportDto> pagingTurnSeedGroup(Map<String, String> groupEventCriteriaMap) {
         Paging<DoctorGroupEvent> paging = groupEventPaging(groupEventCriteriaMap);
         List<DoctorTurnSeedGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
-            DoctorTurnSeedGroupEvent seedGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorTurnSeedGroupEvent.class);
-            DoctorTurnSeedGroupExportDto exportData = BeanMapper.map(seedGroupEvent, DoctorTurnSeedGroupExportDto.class);
-            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
-            return exportData;
+            try {
+                DoctorTurnSeedGroupEvent seedGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorTurnSeedGroupEvent.class);
+                DoctorTurnSeedGroupExportDto exportData = BeanMapper.map(seedGroupEvent, DoctorTurnSeedGroupExportDto.class);
+                exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+                exportData.setBarnName(doctorGroupEventDetail.getBarnName());
+                exportData.setEventAt(doctorGroupEventDetail.getEventAt());
+                exportData.setRemark(doctorGroupEventDetail.getRemark());
+                exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                return exportData;
+            } catch (Exception e) {
+                log.error("get.group.turnSeed.failed, eventId:{}", doctorGroupEventDetail.getId());
+            }
+            return new DoctorTurnSeedGroupExportDto();
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
     }
@@ -1283,16 +1364,16 @@ public class DoctorPigEvents {
     }
 
     @RequestMapping(value = "/pigEventExport", method = RequestMethod.GET)
-    public void eventExport(@RequestParam Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response){
+    public void eventExport(@RequestParam Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
         try {
             log.info("event.export.starting");
             if (Strings.isNullOrEmpty(eventCriteria.get("kind"))) {
                 return;
             }
-            if(Objects.equals(eventCriteria.get("kind"), "1")){
+            if (Objects.equals(eventCriteria.get("kind"), "1")) {
                 exportSowEvents(eventCriteria, request, response);
             }
-            if(Objects.equals(eventCriteria.get("kind"), "2")){
+            if (Objects.equals(eventCriteria.get("kind"), "2")) {
                 exportBoarEvents(eventCriteria, request, response);
             }
             if (Objects.equals(eventCriteria.get("kind"), "4")) {
@@ -1306,7 +1387,7 @@ public class DoctorPigEvents {
     }
 
     private void exportSowEvents(Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
-        switch(eventCriteria.get("eventTypes")){
+        switch (eventCriteria.get("eventTypes")) {
             case "7":
                 //进场
                 exporter.export("web-pig-sowInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
