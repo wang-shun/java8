@@ -16,6 +16,7 @@
         <result column="content" property="content"/>
         <result column="status" property="status"/>
         <result column="reason" property="reason"/>
+        <result column="error_stack" property="errorStack"/>
         <result column="user_id" property="userId"/>
         <result column="user_name" property="userName"/>
         <result column="created_at" property="createdAt"/>
@@ -31,11 +32,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, business_id, business_code, start_event_id, event_id, type, content, status, reason, user_id, user_name, created_at, updated_at
+        farm_id, business_id, business_code, start_event_id, event_id, type, content, status, reason, error_stack, user_id, user_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{businessId}, #{businessCode}, #{startEventId}, #{eventId}, #{type}, #{content}, #{status},#{reason}, #{userId}, #{userName}, now(), now()
+        #{farmId}, #{businessId}, #{businessCode}, #{startEventId}, #{eventId}, #{type}, #{content}, #{status},#{reason}, #{errorStack}, #{userId}, #{userName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorEventModifyRequest" keyProperty="id" useGeneratedKeys="true">

@@ -71,6 +71,11 @@ public class DoctorEventModifyRequest implements Serializable{
     private String reason;
 
     /**
+     * 当不知道具体错误原因时记录错误堆栈
+     */
+    private String errorStack;
+
+    /**
      * 操作人id
      */
     private Long userId;
