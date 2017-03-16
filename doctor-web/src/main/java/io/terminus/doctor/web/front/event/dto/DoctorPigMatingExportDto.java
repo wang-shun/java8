@@ -17,12 +17,12 @@ public class DoctorPigMatingExportDto implements Serializable{
     private Integer parity;
     private String barnName;
     private Date matingDate; // 配种日期
-    private String matingStaff;
     private String matingBoarPigCode; //配种公猪号
     private Integer matingType; // 配种类型
     private Date judgePregDate; //预产日期
     private String mattingMark; // 配种mark
     private String operatorName;
+    private String creatorName;
     private Integer pigStatusAfter;
 
 }

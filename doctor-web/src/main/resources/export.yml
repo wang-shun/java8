@@ -533,7 +533,7 @@ export.tables:
         - name: matingDate
           display: 配种日期
           formatter: isoDateFormatter
-        - name: matingStaff
+        - name: operatorName
           display: 配种员
         - name: matingBoarPigCode
           display: 公猪号
@@ -674,7 +674,7 @@ export.tables:
           display: 母猪号
         - name: parity
           display: 胎次
-        - name: partWeanDate
+        - name: partweanDate
           display: 断奶日期
           formatter: isoDateFormatter
         - name: barnName
