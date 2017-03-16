@@ -44,7 +44,7 @@ public class DoctorEventModifyRequestReadServiceImpl implements DoctorEventModif
         try {
             return Response.ok(modifyRequestDao.findById(requestId));
         } catch (Exception e) {
-            log.info("find by id failed, requestId:{}, cause:{}", requestId, Throwables.getStackTraceAsString(e));
+            log.error("find by id failed, requestId:{}, cause:{}", requestId, Throwables.getStackTraceAsString(e));
             return Response.fail("find.by.id.failed");
         }
     }
@@ -60,19 +60,34 @@ public class DoctorEventModifyRequestReadServiceImpl implements DoctorEventModif
                     }).collect(Collectors.toList());
             return Response.ok(new Paging<>(paging.getTotal(), list));
         } catch (Exception e) {
-            log.info("paging request failed, modifyRequest:{}, cause:{}", modifyRequest, Throwables.getStackTraceAsString(e));
+            log.error("paging request failed, modifyRequest:{}, cause:{}", modifyRequest, Throwables.getStackTraceAsString(e));
             return Response.fail("paging.request.failed");
         }
     }
 
     @Override
     public Response<DoctorEventModifyRequestDto> findDtoById(@NotNull(message = "requestId.not.null") Long requestId) {
-        Response<DoctorEventModifyRequestDto> result = new Response<>();
-        DoctorEventModifyRequest doctorEventModifyRequest = modifyRequestDao.findById(requestId);
-        if(!Objects.isNull(doctorEventModifyRequest)){
-            result.setResult(buildDoctorEventModifyRequestDto(doctorEventModifyRequest));
+        try {
+            Response<DoctorEventModifyRequestDto> result = new Response<>();
+            DoctorEventModifyRequest doctorEventModifyRequest = modifyRequestDao.findById(requestId);
+            if(!Objects.isNull(doctorEventModifyRequest)){
+                result.setResult(buildDoctorEventModifyRequestDto(doctorEventModifyRequest));
+            }
+            return result;
+        } catch (Exception e) {
+            log.error("find dto by id failed, requestId:{}, cause:{}", requestId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.dto.by.id.failed");
         }
-        return result;
+    }
+
+    @Override
+    public Response<List<DoctorEventModifyRequest>> listByStatus(Integer status) {
+        try {
+            return Response.ok(modifyRequestDao.listByStatus(status));
+        } catch (Exception e) {
+            log.error("list by status failed, status:{}, cause:{}", status, Throwables.getStackTraceAsString(e));
+            return Response.fail("list.by.status.failed");
+        }
     }
 
     public DoctorEventModifyRequestDto buildDoctorEventModifyRequestDto(DoctorEventModifyRequest request) {

@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dto.DoctorEventModifyRequestDto;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Created by xjn on 17/3/10.
@@ -32,4 +33,11 @@ public interface DoctorEventModifyRequestReadService {
      * @return
      */
     Response<DoctorEventModifyRequestDto> findDtoById(@NotNull(message = "requestId.not.null") Long requestId);
+
+    /**
+     * 查询所需状态的编辑请求
+     * @param status 请求状态
+     * @return 请求列表
+     */
+    Response<List<DoctorEventModifyRequest>> listByStatus(@NotNull(message = "status.not.null")Integer status);
 }

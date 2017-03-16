@@ -7,6 +7,8 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 
+import java.util.List;
+
 /**
  * Created by xjn on 17/3/10.
  * 编辑事件写service
@@ -45,5 +47,18 @@ public interface DoctorEventModifyRequestWriteService {
      * @param modifyRequest 事件编辑请求
      * @return
      */
-    RespWithEx<Boolean> modifyPigEventHandle(DoctorEventModifyRequest modifyRequest);
+    RespWithEx<Boolean> modifyEventHandle(DoctorEventModifyRequest modifyRequest);
+
+    /**
+     * 批量跟新状态
+     * @param ids 需要跟新的id列表
+     * @return 更新是否成功
+     */
+    Response<Boolean> batchUpdateStatus(List<Long> ids, Integer status);
+
+    /**
+     * 编辑请求处理job
+     * @return
+     */
+    Response<Boolean> modifyRequestHandleJob(List<DoctorEventModifyRequest> requestList);
 }

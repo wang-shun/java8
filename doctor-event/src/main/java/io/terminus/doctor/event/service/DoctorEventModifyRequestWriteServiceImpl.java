@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
@@ -21,7 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by xjn on 17/3/10.
@@ -112,7 +115,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     }
 
     @Override
-    public RespWithEx<Boolean> modifyPigEventHandle(DoctorEventModifyRequest modifyRequest) {
+    public RespWithEx<Boolean> modifyEventHandle(DoctorEventModifyRequest modifyRequest) {
         try {
             modifyEventRequestHandleImpl(modifyRequest);
         } catch (Exception e) {
@@ -120,6 +123,34 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
         }
         return RespWithEx.ok(Boolean.TRUE);
 
+    }
+
+    @Override
+    public Response<Boolean> batchUpdateStatus(List<Long> ids, Integer status) {
+        try {
+            if (Arguments.isNullOrEmpty(ids)) {
+                return Response.ok(Boolean.TRUE);
+            }
+            return Response.ok(eventModifyRequestDao.batchUpdateStatus(ids, status));
+        } catch (Exception e) {
+            log.error("batch update status failed, ids:{}, status:{}, cause:{}", ids, status, Throwables.getStackTraceAsString(e));
+            return Response.fail("batch.update.status.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> modifyRequestHandleJob(List<DoctorEventModifyRequest> requestList) {
+        try {
+            if (Arguments.isNullOrEmpty(requestList)) {
+                return Response.ok(Boolean.TRUE);
+            }
+            eventModifyRequestDao.batchUpdateStatus(requestList.stream().map(DoctorEventModifyRequest::getId).collect(Collectors.toList()), EventRequestStatus.HANDLING.getValue());
+            requestList.forEach(this::modifyEventRequestHandleImpl);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("modify request handle job failed, requestList:{}, cause:{}", requestList, Throwables.getStackTraceAsString(e));
+            return Response.fail("modify.request.handle.job.failed");
+        }
     }
 
     /**
