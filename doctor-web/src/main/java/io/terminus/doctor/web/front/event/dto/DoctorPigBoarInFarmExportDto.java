@@ -70,7 +70,7 @@ public class DoctorPigBoarInFarmExportDto implements Serializable{
     /**
      * 录入人员
      */
-    private String updatorName;
+    private String creatorName;
     /**
      * 进场状态
      */

@@ -64,5 +64,5 @@ public class DoctorPigSemenExportDto implements Serializable{
     /**
      * 操作人
      */
-    private String updatorName;
+    private String creatorName;
 }

@@ -20,5 +20,5 @@ public class DoctorPigDiseaseExportDto implements Serializable{
     private String diseaseName;
     private String diseaseStaff;
     private String diseaseRemark;
-    private String updatorName;
+    private String creatorName;
 }

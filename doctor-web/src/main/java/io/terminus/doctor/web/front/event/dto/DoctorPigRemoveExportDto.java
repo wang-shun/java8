@@ -25,7 +25,7 @@ public class DoctorPigRemoveExportDto implements Serializable{
     private String xxx;
     private String operatorName;
     private String remark;
-    private String updatorName;
+    private String creatorName;
 
 
 }

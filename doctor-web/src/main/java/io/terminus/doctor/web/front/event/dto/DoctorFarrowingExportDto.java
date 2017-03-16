@@ -34,5 +34,5 @@ public class DoctorFarrowingExportDto implements Serializable{
     private String farrowStaff1;  //接生员1
     private String farrowStaff2;  //接生员2
     private String farrowRemark;    //标志
-    private String updatorName;
+    private String creatorName;
 }

@@ -24,6 +24,6 @@ public class DoctorWeanExportDto implements Serializable{
     private Long chgLocationToBarnId;   // 转舍Id
     private Integer weanPigletsCount; //已断奶数
     private String operatorName;
-    private String updatorName;
+    private String creatorName;
 
 }

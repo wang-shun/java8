@@ -43,6 +43,6 @@ public class DoctorBoarConditionExportDto implements Serializable{
      * 备注
      */
     private String remark;
-    private String updatorName;
+    private String creatorName;
     private String operatorName;
 }

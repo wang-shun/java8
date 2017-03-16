@@ -230,7 +230,7 @@ export.tables:
           display: 母号
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-boarCollect:
       display: 公猪采精事件
@@ -260,7 +260,7 @@ export.tables:
           display: 畸形率
         - name: semenRemark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-boarChangeBarn:
       display: 公猪转舍事件
@@ -276,7 +276,7 @@ export.tables:
           display: 转入猪舍
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-boarDisease:
       display: 疾病事件
@@ -294,7 +294,7 @@ export.tables:
           display: 诊断人员
         - name: diseaseRemark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-boarVaccination:
       display: 防疫事件
@@ -314,7 +314,7 @@ export.tables:
           display: 防疫人员
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
 
   web-pig-boarCondition:
@@ -339,7 +339,7 @@ export.tables:
           display: 体重
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
 
   web-pig-boarRemove:
@@ -370,7 +370,7 @@ export.tables:
           display: 离场操作人员
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-boarTransFarm:
       display: 公猪转场事件
@@ -422,7 +422,7 @@ export.tables:
           display: 离场操作人员
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-sowVaccination:
       display: 防疫事件
@@ -442,7 +442,7 @@ export.tables:
           display: 防疫人员
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-sowDisease:
       display: 疾病事件
@@ -462,7 +462,7 @@ export.tables:
           display: 诊断人员
         - name: diseaseRemark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-sowChangeBarn:
       display: 母猪转舍事件
@@ -482,7 +482,7 @@ export.tables:
           display: 当前状态
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-sowInputFactory:
       display: 母猪进场事件
@@ -519,7 +519,7 @@ export.tables:
           display: 右乳头数
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-sowMating:
       display: 母猪配种
@@ -543,7 +543,7 @@ export.tables:
           display: 预产期
         - name: mattingMark
           display: 备注
-        - name: operatorName
+        - name: creatorName
           display: 录入人员
         - name: pigStatusAfter
           display: 当前状态
@@ -567,7 +567,7 @@ export.tables:
           display: 检查人员
         - name: checkMark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-sowFarrowing:
       display: 分娩
@@ -615,7 +615,7 @@ export.tables:
           display: 活母
         - name: farrowRemark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-PigletsChg:
       display: 猪仔变动
@@ -644,7 +644,7 @@ export.tables:
           display: 金额
         - name: pigletsMark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
 #  web-pig-sowFosters:
 #      display: 拼窝
@@ -693,7 +693,7 @@ export.tables:
           display: 断奶人员
         - name: partWeanRemark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-pig-sowFosters:
       display: 母猪拼窝事件
@@ -707,7 +707,7 @@ export.tables:
         - name: fostersDate
           display: 拼窝日期
           formatter: isoDateFormatter
-        - name: fromSowCode
+        - name: fosterSowCode
           display: 代哺母猪
         - name: fostersCount
           display: 猪只数
@@ -761,7 +761,7 @@ export.tables:
           display: 操作人
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
 
   web-group-new:

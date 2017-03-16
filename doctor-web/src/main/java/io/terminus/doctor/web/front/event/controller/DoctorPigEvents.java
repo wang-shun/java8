@@ -15,6 +15,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -31,11 +32,7 @@ import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
-import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
+import io.terminus.doctor.event.dto.event.sow.*;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.MatingType;
@@ -654,12 +651,12 @@ public class DoctorPigEvents {
             doctorPigBoarInFarmExportDto.setGeneticName("");
 
             if (detail.getExtraMap().containsKey("inFarmDate")) {
-                doctorPigBoarInFarmExportDto.setInFarmDate(new Date((Long) detail.getExtraMap().get("inFarmDate")));
+                doctorPigBoarInFarmExportDto.setInFarmDate(new Date(Long.getLong((String) detail.getExtraMap().get("inFarmDate"))));
             }else {
                 doctorPigBoarInFarmExportDto.setInFarmDate(null);
             }
             if (detail.getExtraMap().containsKey("birthday")) {
-                doctorPigBoarInFarmExportDto.setBirthDate(new Date((Long) detail.getExtraMap().get("birthday")));
+                doctorPigBoarInFarmExportDto.setBirthDate(new Date(Long.getLong((String) detail.getExtraMap().get("birthday"))));
             }else {
                 doctorPigBoarInFarmExportDto.setBirthDate(null);
             }
@@ -683,10 +680,10 @@ public class DoctorPigEvents {
             } else {
                 doctorPigBoarInFarmExportDto.setRemark(detail.getRemark());
             }
-            if (detail.getExtraMap().containsKey("updatorName")) {
-                doctorPigBoarInFarmExportDto.setRemark((String)detail.getExtraMap().get("updatorName"));
+            if (detail.getExtraMap().containsKey("creatorName")) {
+                doctorPigBoarInFarmExportDto.setCreatorName((String)detail.getExtraMap().get("creatorName"));
             }else {
-                doctorPigBoarInFarmExportDto.setUpdatorName(detail.getUpdatorName());
+                doctorPigBoarInFarmExportDto.setCreatorName(detail.getCreatorName());
             }
             if (detail.getExtraMap().containsKey("fatherCode")) {
                 doctorPigBoarInFarmExportDto.setFatherCode((String) detail.getExtraMap().get("fatherCode"));
@@ -727,13 +724,10 @@ public class DoctorPigEvents {
 
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
         Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
-
-
         List<DoctorPigEventDetail> list = pigEventPaging.getData();
         for(DoctorPigEventDetail detail : list) {
             DoctorPigSemenExportDto doctorEventSemenExport = new DoctorPigSemenExportDto();
             doctorEventSemenExport.setPigCode(detail.getPigCode());
-
             if(detail.getExtraMap().containsKey("barnName")) {
                 doctorEventSemenExport.setBarnName((String)detail.getExtraMap().get("barnName"));
             }else {
@@ -789,10 +783,10 @@ public class DoctorPigEvents {
             }else {
                 doctorEventSemenExport.setSemenRemark(detail.getRemark());
             }
-            if (detail.getExtraMap().containsKey("updatorName")) {
-                doctorEventSemenExport.setUpdatorName((String) detail.getExtraMap().get("updatorName"));
+            if (detail.getExtraMap().containsKey("creatorName")) {
+                doctorEventSemenExport.setCreatorName((String) detail.getExtraMap().get("creatorName"));
             }else {
-                doctorEventSemenExport.setUpdatorName(detail.getUpdatorName());
+                doctorEventSemenExport.setCreatorName(detail.getCreatorName());
             }
             doctorEventSemenLists.add(doctorEventSemenExport);
         }
@@ -836,10 +830,10 @@ public class DoctorPigEvents {
             }else {
                 doctorPigChangeBarnExportDto.setRemark(detail.getRemark());
             }
-            if (detail.getExtraMap().containsKey("updatorName")) {
-                doctorPigChangeBarnExportDto.setUpdatorName((String) detail.getExtraMap().get("updatorName"));
+            if (detail.getExtraMap().containsKey("creatorName")) {
+                doctorPigChangeBarnExportDto.setCreatorName((String) detail.getExtraMap().get("creatorName"));
             }else {
-                doctorPigChangeBarnExportDto.setUpdatorName(detail.getUpdatorName());
+                doctorPigChangeBarnExportDto.setCreatorName(detail.getCreatorName());
             }
             doctorPigChangeBarnLists.add(doctorPigChangeBarnExportDto);
         }
@@ -864,7 +858,7 @@ public class DoctorPigEvents {
             if (detail.getExtraMap().containsKey("barnName")) {
                 doctorEventDiseaseExport.setBarnName((String)detail.getExtraMap().get("barnName"));
             }else {
-                doctorEventDiseaseExport.setBarnName(null);
+                doctorEventDiseaseExport.setBarnName(detail.getBarnName());
             }
             if (detail.getExtraMap().containsKey("parity")) {
                 doctorEventDiseaseExport.setParity((int)detail.getExtraMap().get("parity"));
@@ -891,10 +885,10 @@ public class DoctorPigEvents {
             }else {
                 doctorEventDiseaseExport.setDiseaseRemark(null);
             }
-            if (detail.getExtraMap().containsKey("updatorName")) {
-                doctorEventDiseaseExport.setUpdatorName((String) detail.getExtraMap().get("updatorName"));
+            if (detail.getExtraMap().containsKey("creatorName")) {
+                doctorEventDiseaseExport.setCreatorName((String) detail.getExtraMap().get("creatorName"));
             }else {
-                doctorEventDiseaseExport.setUpdatorName(detail.getUpdatorName());
+                doctorEventDiseaseExport.setCreatorName(detail.getCreatorName());
             }
             doctorEventDiseaseLists.add(doctorEventDiseaseExport);
         }
@@ -942,10 +936,10 @@ public class DoctorPigEvents {
             }else {
                 doctorPigVaccinalion.setRemark(detail.getRemark());
             }
-            if (detail.getExtraMap().containsKey("updatorName")) {
-                doctorPigVaccinalion.setUpdatorName((String) detail.getExtraMap().get("updatorName"));
+            if (detail.getExtraMap().containsKey("creatorName")) {
+                doctorPigVaccinalion.setCreatorName((String) detail.getExtraMap().get("creatorName"));
             }else {
-                doctorPigVaccinalion.setUpdatorName(detail.getUpdatorName());
+                doctorPigVaccinalion.setCreatorName(detail.getCreatorName());
             }
             doctorPigVaccinalionLists.add(doctorPigVaccinalion);
         }
@@ -973,7 +967,7 @@ public class DoctorPigEvents {
                 doctorPigRemove.setBarnName(detail.getBarnName());
             }
             if (detail.getExtraMap().containsKey("removalDate")) {
-                doctorPigRemove.setRemovalDate(new Date((long) detail.getExtraMap().get("removalDate")));
+                doctorPigRemove.setRemovalDate(detail.getEventAt());
             }else {
                 doctorPigRemove.setRemovalDate(null);
             }
@@ -993,12 +987,12 @@ public class DoctorPigEvents {
                 doctorPigRemove.setWeight(0.0);
             }
             if (detail.getExtraMap().containsKey("price")) {
-                doctorPigRemove.setPrice((int) detail.getExtraMap().get("price") / 1000);
+                doctorPigRemove.setPrice((int) detail.getExtraMap().get("price") / 100);
             }else {
                 doctorPigRemove.setPrice(0);
             }
             if (detail.getExtraMap().containsKey("amount")) {
-                doctorPigRemove.setAmount((int) detail.getExtraMap().get("amount") / 1000);
+                doctorPigRemove.setAmount((int) detail.getExtraMap().get("amount") / 100);
             }else {
                 doctorPigRemove.setAmount(0);
             }
@@ -1014,10 +1008,10 @@ public class DoctorPigEvents {
             }else {
                 doctorPigRemove.setRemark(detail.getRemark());
             }
-            if (detail.getExtraMap().containsKey("updatorName")) {
-                doctorPigRemove.setUpdatorName((String) detail.getExtraMap().get("updatorName"));
+            if (detail.getExtraMap().containsKey("creatorName")) {
+                doctorPigRemove.setCreatorName((String) detail.getExtraMap().get("creatorName"));
             }else {
-                doctorPigRemove.setUpdatorName(detail.getUpdatorName());
+                doctorPigRemove.setCreatorName(detail.getCreatorName());
             }
             doctorPigRemoveLists.add(doctorPigRemove);
         }
@@ -1031,6 +1025,9 @@ public class DoctorPigEvents {
         List<DoctorPigMatingExportDto> list = pigEventPaging.getData().stream().map(doctorPigEventDetail -> {
             DoctorMatingDto matingDto = JSON_MAPPER.fromJson(doctorPigEventDetail.getExtra(), DoctorMatingDto.class);
             DoctorPigMatingExportDto dto = BeanMapper.map(matingDto, DoctorPigMatingExportDto.class);
+            dto.setParity(doctorPigEventDetail.getParity());
+            dto.setCreatorName(doctorPigEventDetail.getCreatorName());
+            dto.setPigStatusAfter(doctorPigEventDetail.getPigStatusAfter());
             return dto;
         }).collect(toList());
         return new Paging<>(pigEventPaging.getTotal(), list);
@@ -1047,6 +1044,8 @@ public class DoctorPigEvents {
         for(DoctorPigEventDetail detail : list) {
             DoctorPigletsChgDto letsChgDto = JSON_MAPPER.fromJson(detail.getExtra(), DoctorPigletsChgDto.class);
             DoctorPigletsChgExportDto dto = BeanMapper.map(letsChgDto, DoctorPigletsChgExportDto.class);
+            dto.setParity(detail.getParity());
+            dto.setCreatorName(detail.getCreatorName());
             doctorPigLetsChgLists.add(dto);
         }
         return new Paging<>(pigEventPaging.getTotal(), doctorPigLetsChgLists);
@@ -1062,6 +1061,8 @@ public class DoctorPigEvents {
         for(DoctorPigEventDetail detail : list) {
             DoctorWeanDto weanDto = JSON_MAPPER.fromJson(detail.getExtra(), DoctorWeanDto.class);
             DoctorWeanExportDto dto = BeanMapper.map(weanDto, DoctorWeanExportDto.class);
+            dto.setParity(detail.getParity());
+            dto.setCreatorName(detail.getCreatorName());
             doctorWeanLists.add(dto);
         }
         return new Paging<>(pigEventPaging.getTotal(), doctorWeanLists);
@@ -1077,6 +1078,9 @@ public class DoctorPigEvents {
         for(DoctorPigEventDetail detail : list) {
             DoctorPregChkResultDto pregChkResultDto = JSON_MAPPER.fromJson(detail.getExtra(), DoctorPregChkResultDto.class);
             DoctorPregChkResultExportDto dto = BeanMapper.map(pregChkResultDto, DoctorPregChkResultExportDto.class);
+            dto.setNpd(detail.getNpd());
+            dto.setParity(detail.getParity());
+            dto.setCreatorName(detail.getCreatorName());
             pregChkResultLists.add(dto);
         }
         return new Paging<>(pigEventPaging.getTotal(), pregChkResultLists);
@@ -1092,6 +1096,8 @@ public class DoctorPigEvents {
         for(DoctorPigEventDetail detail : list) {
             DoctorFarrowingDto farrowing = JSON_MAPPER.fromJson(detail.getExtra(), DoctorFarrowingDto.class);
             DoctorFarrowingExportDto dto = BeanMapper.map(farrowing, DoctorFarrowingExportDto.class);
+            dto.setCreatorName(detail.getCreatorName());
+            dto.setParity(detail.getParity());
             farrowingLists.add(dto);
         }
         return new Paging<>(pigEventPaging.getTotal(), farrowingLists);
@@ -1105,8 +1111,9 @@ public class DoctorPigEvents {
         Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
         List<DoctorPigEventDetail> list = pigEventPaging.getData();
         for(DoctorPigEventDetail detail : list) {
-            DoctorFarrowingDto fosters = JSON_MAPPER.fromJson(detail.getExtra(), DoctorFarrowingDto.class);
+            DoctorFostersDto fosters = JSON_MAPPER.fromJson(detail.getExtra(), DoctorFostersDto.class);
             DoctorFostersExportDto dto = BeanMapper.map(fosters, DoctorFostersExportDto.class);
+            dto.setParity(detail.getParity());
             fostersLists.add(dto);
         }
         return new Paging<>(pigEventPaging.getTotal(), fostersLists);
@@ -1122,6 +1129,7 @@ public class DoctorPigEvents {
         for(DoctorPigEventDetail detail : list) {
             DoctorBoarConditionDto boarCondition = JSON_MAPPER.fromJson(detail.getExtra(), DoctorBoarConditionDto.class);
             DoctorBoarConditionExportDto dto = BeanMapper.map(boarCondition, DoctorBoarConditionExportDto.class);
+            dto.setCreatorName(detail.getCreatorName());
             boarConditionLists.add(dto);
         }
         return new Paging<>(pigEventPaging.getTotal(), boarConditionLists);
