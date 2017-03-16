@@ -15,11 +15,6 @@ public class DoctorPigBoarInFarmExportDto implements Serializable{
     private static final long serialVersionUID = -5594568389939010764L;
 
     /**
-     * 猪ID
-     */
-    private Long pigId;
-
-    /**
      * 进场胎次
      */
     private Integer parity;
@@ -66,7 +61,7 @@ public class DoctorPigBoarInFarmExportDto implements Serializable{
     /**
      * 备注
      */
-    private String remark;
+    private String entryMark;
     /**
      * 录入人员
      */

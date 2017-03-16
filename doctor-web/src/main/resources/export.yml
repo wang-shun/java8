@@ -204,118 +204,118 @@ export.tables:
   web-pig-boarInputFactory:
     display: 公猪进场事件
     columns:
-        - name: pigCode
-          display: 公猪号
-        - name: currentParity
-          display: 进场胎次
-        - name: breedName
-          display: 品种
-        - name: geneticName
-          display: 品系
-        - name: inFarmDate
-          display: 进场日期
-          formatter: isoDateFormatter
-        - name: birthDate
-          display: 出生日期
-          formatter: isoDateFormatter
-        - name: boarType
-          display: 公猪类型
-        - name: initBarnName
-          display: 进场猪舍
-        - name: source
-          display: 来源
-        - name: pigFatherCode
-          display: 父号
-        - name: pigMotherCode
-          display: 母号
-        - name: remark
-          display: 备注
-        - name: creatorName
-          display: 录入人员
+      - name: pigCode
+        display: 公猪号
+      - name: currentParity
+        display: 进场胎次
+      - name: breedName
+        display: 品种
+      - name: geneticName
+        display: 品系
+      - name: inFarmDate
+        display: 进场日期
+        formatter: isoDateFormatter
+      - name: birthDate
+        display: 出生日期
+        formatter: isoDateFormatter
+      - name: boarType
+        display: 公猪类型
+      - name: initBarnName
+        display: 进场猪舍
+      - name: source
+        display: 来源
+      - name: pigFatherCode
+        display: 父号
+      - name: pigMotherCode
+        display: 母号
+      - name: entryMark
+        display: 备注
+      - name: creatorName
+        display: 录入人员
   web-pig-boarCollect:
-      display: 公猪采精事件
-      columns:
-        - name: pigCode
-          display: 公猪号
-        - name: barnName
-          display: 猪舍
-        - name: semenDate
-          display: 采精日期
-          formatter: isoDateFormatter
-        - name: semenWeight
-          display: 采精重量采精重量
-        - name: dilutionRatio
-          display: 稀释倍数
-        - name: dilutionWeight
-          display: 释后重量
-        - name: semenDensity
-          display: 精液密度
-        - name: semenActive
-          display: 精液活力
-        - name: semenPh
-          display: PH值
-        - name: semenTotal
-          display: 总评
-        - name: semenJxRatio
-          display: 畸形率
-        - name: semenRemark
-          display: 备注
-        - name: creatorName
-          display: 录入人员
+    display: 公猪采精事件
+    columns:
+      - name: pigCode
+        display: 公猪号
+      - name: barnName
+        display: 猪舍
+      - name: semenDate
+        display: 采精日期
+        formatter: isoDateFormatter
+      - name: semenWeight
+        display: 采精重量采精重量
+      - name: dilutionRatio
+        display: 稀释倍数
+      - name: dilutionWeight
+        display: 释后重量
+      - name: semenDensity
+        display: 精液密度
+      - name: semenActive
+        display: 精液活力
+      - name: semenPh
+        display: PH值
+      - name: semenTotal
+        display: 总评
+      - name: semenJxRatio
+        display: 畸形率
+      - name: semenRemark
+        display: 备注
+      - name: creatorName
+        display: 录入人员
   web-pig-boarChangeBarn:
-      display: 公猪转舍事件
-      columns:
-        - name: pigCode
-          display: 公猪号
-        - name: changeLocationDate
-          display: 转舍时间
-          formatter: isoDateFormatter
-        - name: chgLocationFromBarnName
-          display: 原猪舍
-        - name: chgLocationToBarnName
-          display: 转入猪舍
-        - name: remark
-          display: 备注
-        - name: creatorName
-          display: 录入人员
+    display: 公猪转舍事件
+    columns:
+      - name: pigCode
+        display: 公猪号
+      - name: changeLocationDate
+        display: 转舍时间
+        formatter: isoDateFormatter
+      - name: chgLocationFromBarnName
+        display: 原猪舍
+      - name: chgLocationToBarnName
+        display: 转入猪舍
+      - name: remark
+        display: 备注
+      - name: creatorName
+        display: 录入人员
   web-pig-boarDisease:
-      display: 疾病事件
-      columns:
-        - name: pigCode
-          display: 公猪号
-        - name: barnName
-          display: 猪舍
-        - name: diseaseDate
-          display: 疾病日期
-          formatter: isoDateFormatter
-        - name: diseaseName
-          display: 疾病
-        - name: diseaseStaff
-          display: 诊断人员
-        - name: diseaseRemark
-          display: 备注
-        - name: creatorName
-          display: 录入人员
+    display: 疾病事件
+    columns:
+      - name: pigCode
+        display: 公猪号
+      - name: barnName
+        display: 猪舍
+      - name: diseaseDate
+        display: 疾病日期
+        formatter: isoDateFormatter
+      - name: diseaseName
+        display: 疾病
+      - name: diseaseStaff
+        display: 诊断人员
+      - name: diseaseRemark
+        display: 备注
+      - name: creatorName
+        display: 录入人员
   web-pig-boarVaccination:
-      display: 防疫事件
-      columns:
-        - name: pigCode
-          display: 公猪号
-        - name: barnName
-          display: 猪舍
-        - name: vaccinationDate
-          display: 防疫日期
-          formatter: isoDateFormatter
-        - name: vaccinationItemNam
-          display: 防疫项目
-        - name: vaccinationName
-          display: 疫苗
-        - name: vaccinationStaffName
-          display: 防疫人员
-        - name: remark
-          display: 备注
-        - name: creatorName
-          display: 录入人员
+    display: 防疫事件
+    columns:
+      - name: pigCode
+        display: 公猪号
+      - name: barnName
+        display: 猪舍
+      - name: vaccinationDate
+        display: 防疫日期
+        formatter: isoDateFormatter
+      - name: vaccinationItemNam
+        display: 防疫项目
+      - name: vaccinationName
+        display: 疫苗
+      - name: vaccinationStaffName
+        display: 防疫人员
+      - name: vaccinationRemark
+        display: 备注
+      - name: creatorName
+        display: 录入人员
 
   web-pig-boarCondition:
       display: 公猪体况
@@ -364,7 +364,7 @@ export.tables:
           display: 单价
         - name: amount
           display: 金额
-        - name: xxx
+        - name: customerName
           display: 客户
         - name: operatorName
           display: 离场操作人员
@@ -416,7 +416,7 @@ export.tables:
           display: 单价
         - name: amount
           display: 金额
-        - name: xxx
+        - name: customerName
           display: 客户
         - name: operatorName
           display: 离场操作人员
@@ -440,7 +440,7 @@ export.tables:
           display: 疫苗
         - name: vaccinationStaffName
           display: 防疫人员
-        - name: remark
+        - name: vaccinationRemark
           display: 备注
         - name: creatorName
           display: 录入人员
@@ -517,7 +517,7 @@ export.tables:
           display: 左乳头数
         - name: right
           display: 右乳头数
-        - name: remark
+        - name: entryMark
           display: 备注
         - name: creatorName
           display: 录入人员
