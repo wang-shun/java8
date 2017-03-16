@@ -74,7 +74,7 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
      * 均重(kg)
      * 转群以此字段为主, 转场已总重为主
      */
-    @NotNull(message = "avgWeight.not.null")
+    //@NotNull(message = "avgWeight.not.null")
     private Double avgWeight;
 
     /**

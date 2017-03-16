@@ -945,15 +945,15 @@ export.tables:
         - name: eventAt
           display: 转场日期
           formatter: isoDateFormatter
-        - name: fromFarmName
+        - name: farmName
           display: 原厂
         - name: toFarmName
           display: 转入猪场
-        - name: fromBarnName
-          display: 转入猪场
+        - name: barnName
+          display: 原猪舍
         - name: toBarnName
           display: 转入猪舍
-        - name: fromGroupCode
+        - name: toGroupCode
           display: 转入猪群
         - name: quantity
           display: 猪只数
