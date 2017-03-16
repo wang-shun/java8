@@ -21,6 +21,6 @@ public class DoctorPregChkResultExportDto implements Serializable{
     private String checkMark;
     private Integer npd;
     private String operatorName;
-    private String updatorName;
+    private String creatorName;
 
 }

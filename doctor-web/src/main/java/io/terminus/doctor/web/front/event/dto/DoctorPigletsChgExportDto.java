@@ -26,6 +26,6 @@ public class DoctorPigletsChgExportDto implements Serializable{
     private Long pigletsSum; //  总价(分)（非必填）
     private String pigletsCustomerName;    //客户姓名 （非必填）
     private String pigletsMark;  //标识(非必填)
-    private String updatorName;
+    private String creatorName;
 }
 

@@ -15,10 +15,10 @@ public class DoctorFostersExportDto implements Serializable{
     private String pigCode;
     private Integer parity;
     private String barnName;
-    private String fostersDate;   // 拼窝日期
+    private String fosterByDate;   // 拼窝日期
     private String fosterReasonName;  //寄养原因名称
     private String fosterRemark;    // 拼窝标识
     private Integer fostersCount;   //  拼窝数量
-    private Integer fromSowCode; //代哺母猪
+    private Integer fosterSowCode;; //代哺母猪
     private String operatorName;
 }

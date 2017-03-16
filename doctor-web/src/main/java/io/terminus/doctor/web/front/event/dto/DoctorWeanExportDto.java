@@ -16,7 +16,7 @@ public class DoctorWeanExportDto implements Serializable{
     private String pigCode;
     private Integer parity;
     private String barnName;
-    private Date partWeanDate; //断奶日期
+    private Date partweanDate; //断奶日期
     private Double partWeanAvgWeight;   //断奶平均重量
     private String partWeanRemark;  //部分断奶标识
     private Integer qualifiedCount; // 合格数量
@@ -24,6 +24,6 @@ public class DoctorWeanExportDto implements Serializable{
     private Long chgLocationToBarnId;   // 转舍Id
     private Integer weanPigletsCount; //已断奶数
     private String operatorName;
-    private String updatorName;
+    private String creatorName;
 
 }
