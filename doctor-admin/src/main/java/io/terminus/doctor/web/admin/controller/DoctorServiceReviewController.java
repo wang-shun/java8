@@ -285,7 +285,9 @@ public class DoctorServiceReviewController {
         List<DoctorOrg> orgs = RespHelper.or500(doctorOrgReadService.findOrgsByUserId(userId));
         dto.setFarms(farms);
         dto.setUserId(userId);
-        dto.setOrg(orgs.get(0)); // TODO: 2017/2/16 暂时取第一个
+        if(!Arguments.isNullOrEmpty(orgs)){
+            dto.setOrg(orgs.get(0)); // TODO: 2017/2/16 暂时取第一个
+        }
         return dto;
     }
 

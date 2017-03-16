@@ -148,9 +148,9 @@ public class SubService {
 
             //子账号@主账号
             String userName = subAccount(sub, user);
-            if(!Objects.equals(subUser.getName(), userName)){
-                checkSubUserAccount(userName);
-            }
+//            if(!Objects.equals(subUser.getName(), userName)){
+//                checkSubUserAccount(userName);
+//            }
             subUser.setName(userName);
 
             if(StringUtils.isNotBlank(sub.getContact())){
@@ -254,7 +254,7 @@ public class SubService {
 
             //子账号@主账号
             String userName = subAccount(sub, user);
-            checkSubUserAccount(userName);
+//            checkSubUserAccount(userName);
             subUser.setName(userName);
 
             if(StringUtils.isNotBlank(sub.getContact())){
