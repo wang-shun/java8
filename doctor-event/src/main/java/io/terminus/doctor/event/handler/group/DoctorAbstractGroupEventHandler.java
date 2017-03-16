@@ -502,7 +502,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         //校验基本的数量,看会不会失败
         if(!checkDoctorGroupEvent(doctorGroupTrack, newEvent)){
             log.info("edit group event failed, doctorGroupEvent={}", newEvent);
-            throw new InvalidException("group.quantity.edit.error");
+            throw new InvalidException("group.quantity.not.enough",newEvent.getGroupCode(), doctorGroupTrack.getQuantity(), newEvent.getQuantity() - oldEvent.getQuantity());
         }
 
         DoctorGroupEvent preDoctorGroupEvent = doctorGroupEventDao.findById(doctorGroupTrack.getRelEventId());

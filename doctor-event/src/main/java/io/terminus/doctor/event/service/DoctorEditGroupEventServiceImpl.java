@@ -113,10 +113,15 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
             log.info("group has been closed, groupId = {}", newEvent.getGroupId());
             throw new InvalidException("group.has.been.closed", newEvent.getGroupCode());
         }
+        if((Objects.equals(GroupEventType.MOVE_IN.getValue(), newEvent.getType()) || Objects.equals(GroupEventType.WEAN.getValue(), newEvent.getType())) &&
+                track.getQuantity() + newEvent.getQuantity() - oldEvent.getQuantity()  < 0){
+            log.info("group quantity not enough, groupId = {}", newEvent.getGroupId());
+            throw new InvalidException("group.quantity.not.enough", newEvent.getGroupCode(), track.getQuantity(),  Math.abs(oldEvent.getQuantity() - newEvent.getQuantity()));
+        }
         if(Objects.equals(GroupEventType.CHANGE.getValue(), newEvent.getType()) &&
                 track.getQuantity() + oldEvent.getQuantity() - newEvent.getQuantity() < 0){
             log.info("group quantity not enough, groupId = {}", newEvent.getGroupId());
-            throw new InvalidException("group.quantity.not.enough", newEvent.getGroupCode(), track.getQuantity(), newEvent.getQuantity() - oldEvent.getQuantity());
+            throw new InvalidException("group.quantity.not.enough", newEvent.getGroupCode(), track.getQuantity(), Math.abs(newEvent.getQuantity() - oldEvent.getQuantity()));
         }
 
 
@@ -284,6 +289,9 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
 
     private void rollBackFailed(List<DoctorGroupTrack> doctorGroupTrackList, List<Long> doctorGroupEvents, List<Long> taskDoctorGroupEvents){
+        if(Arguments.isNullOrEmpty(doctorGroupEvents) || Arguments.isNullOrEmpty(taskDoctorGroupEvents)){
+            return;
+        }
         log.info("rollback group track, doctorGroupTrackList = {}", doctorGroupTrackList);
         log.info("rollback group event, groupEventList = {}", doctorGroupEvents);
         log.info("rollback new group event, taskDoctorGroupEvents = {}", taskDoctorGroupEvents);
