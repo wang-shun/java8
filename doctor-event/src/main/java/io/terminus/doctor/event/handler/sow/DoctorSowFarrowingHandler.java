@@ -91,11 +91,11 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setDeadCount(CountUtil.getIntegerDefault0(farrowingDto.getDeadCount()));
         doctorPigEvent.setBlackCount(CountUtil.getIntegerDefault0(farrowingDto.getBlackCount()));
 
-        if (farrowingDate.isBefore(pregJudgeDate)) {
-            extra.put("farrowingType", FarrowingType.EARLY.getKey());
-        } else {
-            extra.put("farrowingType", FarrowingType.USUAL.getKey());
-        }
+//        if (farrowingDate.isBefore(pregJudgeDate)) {
+//            extra.put("farrowingType", FarrowingType.EARLY.getKey());
+//        } else {
+//            extra.put("farrowingType", FarrowingType.USUAL.getKey());
+//        }
         doctorPigEvent.setExtraMap(extra);
         return doctorPigEvent;
     }
