@@ -202,8 +202,8 @@ export.tables:
         format: priceFormatter
 
   web-pig-boarInputFactory:
-      display: 公猪进场事件
-      columns:
+    display: 公猪进场事件
+    columns:
         - name: pigCode
           display: 公猪号
         - name: currentParity
@@ -393,6 +393,7 @@ export.tables:
         - name: remark
           display: 备注
 
+
   web-pig-sowRemove:
       display: 母猪离场事件
       columns:
@@ -506,9 +507,9 @@ export.tables:
           display: 进场猪舍
         - name: source
           display: 来源
-        - name: pigFatherCode
+        - name: fatherCode
           display: 父号
-        - name: pigMotherCode
+        - name: motherCode
           display: 母号
         - name: earCode
           display: 耳缺号
@@ -536,7 +537,7 @@ export.tables:
           display: 配种员
         - name: matingBoarPigCode
           display: 公猪号
-        - name: doctorMateType
+        - name: matingType
           display: 配种类型
         - name: judgePregDate
           display: 预产期
@@ -645,28 +646,27 @@ export.tables:
           display: 备注
         - name: updatorName
           display: 录入人员
-
-  web-pig-sowFosters:
-      display: 拼窝
-      columns:
-        - name: pigCode
-          display: 母猪号
-        - name: parity
-          display: 胎次
-        - name: barnName
-          display: 猪舍
-        - name: fostersDate
-          display: 拼窝日期
-        - name: fosterSowCode
-          display: 代哺母猪
-        - name: fostersCount
-          display: 猪只数
-        - name: fosterReasonName
-          display: 寄养原因
-        - name: fosterRemark
-          display: 备注
-        - name: updatorName
-          display: 录入人员
+#  web-pig-sowFosters:
+#      display: 拼窝
+#      columns:
+#        - name: pigCode
+#          display: 母猪号
+#        - name: parity
+#          display: 胎次
+#        - name: barnName
+#          display: 猪舍
+#        - name: fostersDate
+#          display: 拼窝日期
+#        - name: fosterSowCode
+#          display: 代哺母猪
+#        - name: fostersCount
+#          display: 猪只数
+#        - name: fosterReasonName
+#          display: 寄养原因
+#        - name: fosterRemark
+#          display: 备注
+#        - name: updatorName
+#          display: 录入人员
   web-pig-sowWean:
       display: 断奶事件
       columns:
@@ -679,7 +679,7 @@ export.tables:
           formatter: isoDateFormatter
         - name: barnName
           display: 断奶猪舍
-        - name:
+        - name: weanPigletsCount
           display: 断奶数
         - name: partWeanAvgWeight
           display: 断奶均重
@@ -702,16 +702,18 @@ export.tables:
           display: 母猪号
         - name: parity
           display: 胎次
-        - name: parity
-          display: 猪舍
         - name: barnName
+          display: 猪舍
+        - name: fostersDate
           display: 拼窝日期
           formatter: isoDateFormatter
         - name: fromSowCode
           display: 代哺母猪
-        - name: fosterByCount
+        - name: fostersCount
           display: 猪只数
-        - name: remark
+        - name: fosterReasonName
+          display: 寄养原因名称
+        - name: fosterRemark
           display: 备注
         - name: operatorName
           display: 转场人员
@@ -761,6 +763,7 @@ export.tables:
           display: 备注
         - name: updatorName
           display: 录入人员
+
   web-group-new:
       display: 猪群新建事件
       columns:

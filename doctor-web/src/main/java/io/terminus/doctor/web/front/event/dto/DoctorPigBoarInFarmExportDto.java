@@ -58,11 +58,11 @@ public class DoctorPigBoarInFarmExportDto implements Serializable{
     /**
      * 猪的父亲代码
      */
-    private String pigFatherCode;
+    private String fatherCode;
     /**
      * 猪的母亲代码
      */
-    private String pigMotherCode;
+    private String motherCode;
     /**
      * 备注
      */

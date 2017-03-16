@@ -19,6 +19,6 @@ public class DoctorFostersExportDto implements Serializable{
     private String fosterReasonName;  //寄养原因名称
     private String fosterRemark;    // 拼窝标识
     private Integer fostersCount;   //  拼窝数量
-    private String fosterSowCode; // 拼窝母猪code
-    private String updatorName;
+    private Integer fromSowCode; //代哺母猪
+    private String operatorName;
 }
