@@ -36,10 +36,10 @@ import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PregCheckResult;
-import io.terminus.doctor.event.enums.*;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -1145,8 +1145,10 @@ public class DoctorPigEvents {
     public Paging<DoctorNewExportGroup> pagingNewGroup(Map<String, String> groupEventCriteriaMap) {
         Paging<DoctorGroupEvent> paging = groupEventPaging(groupEventCriteriaMap);
         List<DoctorNewExportGroup> list = paging.getData().stream().map(doctorGroupEventDetail -> {
-            DoctorNewExportGroup exportData = BeanMapper.map(doctorGroupEventDetail, DoctorNewExportGroup.class);
-            DoctorNewGroupEvent newGroupEvent = JSON_MAPPER.fromJson(exportData.getExtra(), DoctorNewGroupEvent.class);
+            DoctorNewGroupEvent newGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorNewGroupEvent.class);
+            DoctorNewExportGroup exportData = BeanMapper.map(newGroupEvent, DoctorNewExportGroup.class);
+            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+            exportData.setEventAt(doctorGroupEventDetail.getEventAt());
             return exportData;
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
@@ -1163,6 +1165,8 @@ public class DoctorPigEvents {
             exportData.setAmount(doctorGroupEventDetail.getAmount());
             exportData.setWeight(doctorGroupEventDetail.getWeight());
             exportData.setEventAt(doctorGroupEventDetail.getEventAt());
+            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+
             return exportData;
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
@@ -1172,6 +1176,7 @@ public class DoctorPigEvents {
         List<DoctorChangeGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
             DoctorChangeGroupEvent changeGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorChangeGroupEvent.class);
             DoctorChangeGroupExportDto exportData = BeanMapper.map(changeGroupEvent, DoctorChangeGroupExportDto.class);
+            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
             exportData.setQuantity(doctorGroupEventDetail.getQuantity());
             exportData.setEventAt(doctorGroupEventDetail.getEventAt());
             return exportData;
@@ -1184,6 +1189,9 @@ public class DoctorPigEvents {
             DoctorTransFarmGroupEvent transFarmGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorTransFarmGroupEvent.class);
             DoctorChgFarmGroupExportDto exportData = BeanMapper.map(transFarmGroupEvent, DoctorChgFarmGroupExportDto.class);
             exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
+            exportData.setEventAt(doctorGroupEventDetail.getEventAt());
+            exportData.setQuantity(doctorGroupEventDetail.getQuantity());
+            exportData.setWeight(doctorGroupEventDetail.getWeight());
             return exportData;
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
@@ -1217,6 +1225,7 @@ public class DoctorPigEvents {
             DoctorTransGroupEvent transGroupEvent = JSON_MAPPER.fromJson(exportData.getExtra(), DoctorTransGroupEvent.class);
             exportData.setToBarnName(transGroupEvent.getToBarnName());
             exportData.setToGroupCode(transGroupEvent.getToGroupCode());
+            exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
 
             return exportData;
         }).collect(toList());
@@ -1290,10 +1299,6 @@ public class DoctorPigEvents {
             }
             if (Objects.equals(eventCriteria.get("kind"), "4")) {
                 exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingNewGroup, request, response);
-            } else {
-                eventCriteria.put("ordered","0");
-                exporter.export("web-pig-event", eventCriteria, 1, 500, this::pagingMating, request, response);
-                exportGroupEvents(eventCriteria, request, response);
             }
 
             log.info("event.export.ending");
@@ -1310,27 +1315,27 @@ public class DoctorPigEvents {
                 break;
             case "9":
                 //配种
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingMating, request, response);
+                exporter.export("web-pig-sowMating", eventCriteria, 1, 500, this::pagingMating, request, response);
                 break;
             case "11":
                 //妊娠检查
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingPregChkResult, request, response);
+                exporter.export("web-pig-sowPregChkResult", eventCriteria, 1, 500, this::pagingPregChkResult, request, response);
                 break;
             case "15":
                 //分娩
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingFarrowing, request, response);
+                exporter.export("web-pig-sowFarrowing", eventCriteria, 1, 500, this::pagingFarrowing, request, response);
                 break;
             case "16":
                 //断奶
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingWean, request, response);
+                exporter.export("web-pig-sowWean", eventCriteria, 1, 500, this::pagingWean, request, response);
                 break;
             case "17":
                 //拼窝
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingFosters, request, response);
+                exporter.export("web-pig-sowFosters", eventCriteria, 1, 500, this::pagingFosters, request, response);
                 break;
             case "18":
                 //仔猪变动
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingLetsChg, request, response);
+                exporter.export("web-pig-sowFosters", eventCriteria, 1, 500, this::pagingLetsChg, request, response);
                 break;
             case "1,12,14":
                 //转舍
