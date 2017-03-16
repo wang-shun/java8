@@ -113,4 +113,14 @@
         group by ware_house_id
     </select>
 
+    <select id="findMaterialData" parameterType="map" resultMap="DoctorMaterialPriceInWareHouseMap">
+
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE 1 = 1
+        <if test="farmId != null"> AND farm_id = #{farmId}</if>
+        <if test="materialId != null"> AND material_id = #{materialId}</if>
+        <if test="wareHouseId != null"> AND ware_house_id = #{wareHouseId}</if>
+    </select>
+
 </mapper>

@@ -1,28 +1,24 @@
-package io.terminus.doctor.event.dto.event.group;
+package io.terminus.doctor.web.front.event.dto;
 
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 
 /**
- * Desc: 新建猪群事件
- * Mail: yangzl@terminus.io
- * author: DreamYoung
- * Date: 16/5/26
+ * Created by terminus on 2017/3/15.
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class DoctorNewGroupEvent extends BaseGroupEvent implements Serializable {
-    private static final long serialVersionUID = 9002796651907338443L;
+public class DoctorNewExportGroup extends DoctorGroupEvent {
+
+    private static final long serialVersionUID = -6774030780276956182L;
 
     /**
      * 来源 1 本场, 2 外购
      * @see io.terminus.doctor.event.enums.PigSource
      */
-    private Integer source;
+    private String source;
 
     /**
      * 猪场id
@@ -52,14 +48,14 @@ public class DoctorNewGroupEvent extends BaseGroupEvent implements Serializable 
      * 猪类 枚举9种
      * @see io.terminus.doctor.common.enums.PigType
      */
-    private Integer pigType;
+    private String pigTypeName;
 
     /**
      * 性别 1:混合 2:母 3:公
      * @see io.terminus.doctor.event.model.DoctorGroupTrack.Sex
      */
     @NotNull(message = "sex.not.null")
-    private Integer sex;
+    private String sexName;
 
     /**
      * 品种id
@@ -80,4 +76,6 @@ public class DoctorNewGroupEvent extends BaseGroupEvent implements Serializable 
      * 品系name
      */
     private String geneticName;
+
+    private String status;
 }

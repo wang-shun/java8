@@ -93,4 +93,16 @@ public class DoctorMaterialInWareHouseReadServiceImpl implements DoctorMaterialI
         }
     }
 
+    @Override
+    public Response<DoctorMaterialInWareHouse> findMaterialUnits(@NotNull(message = "input.farmId.empty") Long farmId,
+                                                                 @NotNull(message = "input.materialId.empty") Long materialId,
+                                                                 @NotNull(message = "input.wareHouseId.empty") Long wareHouseId) {
+        try {
+            return Response.ok(doctorMaterialInWareHouseDao.findMaterialUnit(farmId, materialId, wareHouseId));
+        }catch (Exception e) {
+            log.error("find material unit fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find material unit fail");
+        }
+    }
+
 }

@@ -10,6 +10,7 @@ import java.util.Date;
 
 /**
  * Created by xjn on 17/2/7.
+ * 仓库事件导出数据集
  */
 @Data
 @Builder

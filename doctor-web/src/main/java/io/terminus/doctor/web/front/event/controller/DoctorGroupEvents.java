@@ -44,6 +44,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -110,6 +112,7 @@ public class DoctorGroupEvents {
 
     /**
      * 批量新建猪群
+     *
      * @param batchNewGroupEventDto 批量新建信息
      * @return
      */
@@ -137,6 +140,7 @@ public class DoctorGroupEvents {
 
     /**
      * 批量猪群事件
+     *
      * @param batchGroupEventDto 批量事件输入封装
      * @return 是否成功
      */
@@ -144,6 +148,7 @@ public class DoctorGroupEvents {
     public Boolean batchCreateGroupEvent(@RequestBody DoctorBatchGroupEventDto batchGroupEventDto) {
         return RespWithExHelper.orInvalid(doctorGroupWebService.batchGroupEvent(batchGroupEventDto));
     }
+
     /**
      * 根据猪群id查询可以操作的事件类型
      *
@@ -185,7 +190,7 @@ public class DoctorGroupEvents {
     /**
      * 查询猪群详情
      *
-     * @param groupId 猪群id
+     * @param groupId   猪群id
      * @param eventSize 事件大小
      * @return 猪群详情
      */
@@ -201,7 +206,7 @@ public class DoctorGroupEvents {
         transFromUtil.transFromGroupEvents(groupEvents);
         Response<DoctorGroupEvent> groupEventResponse = doctorGroupReadService.canRollbackEvent(groupId);
         Long canRollback = null;
-        if (groupEventResponse.isSuccess() && groupEventResponse.getResult() != null){
+        if (groupEventResponse.isSuccess() && groupEventResponse.getResult() != null) {
             canRollback = groupEventResponse.getResult().getId();
         }
         return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents, canRollback);
@@ -224,7 +229,7 @@ public class DoctorGroupEvents {
                                                      @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                      @RequestParam(value = "size", required = false) Integer size,
                                                      @RequestParam(value = "startDate", required = false) String startDate,
-                                                     @RequestParam(value = "endDate",required = false) String endDate) {
+                                                     @RequestParam(value = "endDate", required = false) String endDate) {
 
         Paging<DoctorGroupEvent> doctorGroupEventPaging = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(farmId, groupId, type, pageNo, size, startDate, endDate));
 
@@ -234,16 +239,16 @@ public class DoctorGroupEvents {
 
     @RequestMapping(value = "/pagingRollbackGroupEvent", method = RequestMethod.GET)
     public DoctorGroupEventPagingDto pagingGroupEventWithCanRollback(@RequestParam("farmId") Long farmId,
-                                                      @RequestParam(value = "groupId", required = false) Long groupId,
-                                                      @RequestParam(value = "type", required = false) Integer type,
-                                                      @RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                                      @RequestParam(value = "size", required = false) Integer size,
-                                                      @RequestParam(value = "startDate", required = false) String startDate,
-                                                      @RequestParam(value = "endDate",required = false) String endDate) {
+                                                                     @RequestParam(value = "groupId", required = false) Long groupId,
+                                                                     @RequestParam(value = "type", required = false) Integer type,
+                                                                     @RequestParam(value = "pageNo", required = false) Integer pageNo,
+                                                                     @RequestParam(value = "size", required = false) Integer size,
+                                                                     @RequestParam(value = "startDate", required = false) String startDate,
+                                                                     @RequestParam(value = "endDate", required = false) String endDate) {
         Paging<DoctorGroupEvent> doctorGroupEventPaging = pagingGroupEvent(farmId, groupId, type, pageNo, size, startDate, endDate);
         Response<DoctorGroupEvent> groupEventResponse = doctorGroupReadService.canRollbackEvent(groupId);
         Long canRollback = null;
-        if (groupEventResponse.isSuccess() && groupEventResponse.getResult() != null){
+        if (groupEventResponse.isSuccess() && groupEventResponse.getResult() != null) {
             canRollback = groupEventResponse.getResult().getId();
         }
         return DoctorGroupEventPagingDto.builder().paging(doctorGroupEventPaging).canRollback(canRollback).build();
@@ -324,9 +329,9 @@ public class DoctorGroupEvents {
     @RequestMapping(value = "/breeds", method = RequestMethod.GET)
     public List<DoctorBasic> findCanBreed(@RequestParam("groupId") Long groupId) {
         DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(groupId));
-        if(group.getBreedId() != null){
+        if (group.getBreedId() != null) {
             DoctorBasic breed = RespHelper.or500(doctorBasicReadService.findBasicById(group.getBreedId()));
-            if(breed != null){
+            if (breed != null) {
                 return Lists.newArrayList(breed);
             }
         }
@@ -348,6 +353,7 @@ public class DoctorGroupEvents {
 
     /**
      * 获取猪群事件类型列表
+     *
      * @return
      * @see GroupEventType
      */
@@ -359,6 +365,7 @@ public class DoctorGroupEvents {
 
     /**
      * 分页查询某一类型的猪群事件
+     *
      * @param params
      * @param pageNo
      * @param pageSize
@@ -371,8 +378,8 @@ public class DoctorGroupEvents {
             return Paging.empty();
         }
         params = Params.filterNullOrEmpty(params);
-        if (params.get("eventTypes") !=null) {
-            params.put("types", Splitters.COMMA.splitToList((String)params.get("eventTypes")));
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
         return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize));
@@ -380,6 +387,7 @@ public class DoctorGroupEvents {
 
     /**
      * 获取猪群初始事件
+     *
      * @param groupId 猪群id
      * @return 新建事件
      */
@@ -390,6 +398,7 @@ public class DoctorGroupEvents {
 
     /**
      * 猪群转群事件的extra中添加groupid(暂时)
+     *
      * @return
      */
     @RequestMapping(value = "/fix/groupExtra", method = RequestMethod.GET)
