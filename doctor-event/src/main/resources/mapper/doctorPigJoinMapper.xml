@@ -36,6 +36,12 @@
         <if test="pigType != null">AND a.pig_type = #{pigType}</if>
         <if test="pigCode != null">AND a.pig_code like concat('%', #{pigCode}, '%')</if>
         <if test="boarType != null">AND a.boar_type = #{boarType}</if>
+        <if test="pigIds != null &amp;&amp; pigIds.size() > 0">AND a.id in
+            <foreach collection="pigIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+
     </sql>
 
     <select id="count" parameterType="map" resultType="long" >
