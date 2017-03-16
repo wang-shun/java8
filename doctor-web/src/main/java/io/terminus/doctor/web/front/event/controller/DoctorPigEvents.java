@@ -1296,12 +1296,12 @@ public class DoctorPigEvents {
                 exportBoarEvents(eventCriteria, request, response);
             }
             if (Objects.equals(eventCriteria.get("kind"), "4")) {
-                exporter.export("web-group-event", eventCriteria, 1, 500, this::pagingNewGroup, request, response);
+                exportGroupEvents(eventCriteria, request, response);
             }
 
             log.info("event.export.ending");
         } catch (Exception e) {
-            log.error("event.export.failed");
+            log.error("event.export.failed,cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
 
@@ -1365,7 +1365,7 @@ public class DoctorPigEvents {
 
 
     private void exportBoarEvents(Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
-        switch(PigEvent.from(eventCriteria.get("eventTypes"))){
+        switch(PigEvent.from(Integer.parseInt(eventCriteria.get("eventTypes")))){
             case ENTRY:
                 //进场
                 exporter.export("web-pig-boarInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
@@ -1403,7 +1403,7 @@ public class DoctorPigEvents {
 
 
     private void exportGroupEvents(Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
-        switch(GroupEventType.from(eventCriteria.get("eventType"))){
+        switch(GroupEventType.from(Integer.parseInt(eventCriteria.get("eventTypes")))){
             case NEW:
                 //新建
                 exporter.export("web-group-new", eventCriteria, 1, 500, this::pagingNewGroup, request, response);
