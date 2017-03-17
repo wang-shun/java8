@@ -29,7 +29,7 @@ public class DoctorPigBoarInFarmExportDto implements Serializable{
     /**
      * 品系
      */
-    private String geneticName;
+    private String breedTypeName;
     /**
      * 进场日期
      */
@@ -37,11 +37,11 @@ public class DoctorPigBoarInFarmExportDto implements Serializable{
     /**
      * 出生日期
      */
-    private Date birthDate;
+    private Date birthday;
     /**
      * 公猪类型
      */
-    private String boarType;
+    private String boarTypeName;
     /**
      * 进场猪舍
      */
@@ -50,6 +50,10 @@ public class DoctorPigBoarInFarmExportDto implements Serializable{
      * 来源
      */
     private Integer source;
+    /**
+     * 来源名
+     */
+    private  String sourceName;
     /**
      * 猪的父亲代码
      */
@@ -70,6 +74,7 @@ public class DoctorPigBoarInFarmExportDto implements Serializable{
      * 进场状态
      */
     private Integer pigStatusAfter;
+    private String pigStatusAfterName;
     /**
      * 耳缺号
      */

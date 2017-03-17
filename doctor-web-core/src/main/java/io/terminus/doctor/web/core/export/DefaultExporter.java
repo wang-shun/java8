@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.web.core.export.property.ExportColumn;
 import io.terminus.doctor.web.core.export.property.ExportTable;
@@ -104,7 +105,7 @@ public class DefaultExporter implements Exporter{
                 criteria.put("pageNo", pageNo.toString());
                 //创建每一行
                 for (Object obj: resp.getData()) {
-                    createContext(sheet, table, index, Params.objToMap(obj));
+                    createContext(sheet, table, index, BeanMapper.convertObjectToMap(obj));
                     index++;
                 }
 

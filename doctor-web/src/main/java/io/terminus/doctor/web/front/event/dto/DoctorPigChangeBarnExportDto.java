@@ -18,6 +18,7 @@ public class DoctorPigChangeBarnExportDto implements Serializable{
     private String chgLocationFromBarnName;
     private String chgLocationToBarnName;
     private Integer pigStatusAfter;
+    private String pigStatusAfterName;
     private String remark;
     private String creatorName;
 

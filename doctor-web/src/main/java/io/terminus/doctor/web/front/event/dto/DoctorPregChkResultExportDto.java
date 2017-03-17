@@ -18,6 +18,7 @@ public class DoctorPregChkResultExportDto implements Serializable{
     private String barnName;
     private Date checkDate; //妊娠检查日期
     private Integer checkResult;    // 妊娠检查结果
+    private String checkResultName;
     private String checkMark;
     private Integer npd;
     private String operatorName;

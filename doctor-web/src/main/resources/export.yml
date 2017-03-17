@@ -8,7 +8,7 @@ export.tables:
         display: 猪舍
       - name: eventAt
         display: 记录时间
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: name
         display: 事件名称
       - name: desc
@@ -20,7 +20,7 @@ export.tables:
         display: 猪群号
       - name: eventAt
         display: 记录时间
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: name
         display: 事件名称
       - name: desc
@@ -34,7 +34,7 @@ export.tables:
         display: 所属仓库
       - name: eventTime
         display: 日期
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: unitName
         display: 单位
       - name: unitPrice
@@ -60,7 +60,7 @@ export.tables:
         display: 饲养员
       - name: eventAt
         display: 发生日期
-        formatter: isoDateFormatter
+        format: isoDateFormatter
   web-message-pregCheck:
     display: 妊娠检查消息导出
     columns:
@@ -72,7 +72,7 @@ export.tables:
         display: 当前状态
       - name: eventAt
         display: 配种日期
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: timeDiff
         display: 已配种天数
       - name: operatorName
@@ -86,12 +86,12 @@ export.tables:
         display: 所属猪舍
       - name: eventAt
         display: 配种日期
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: timeDiff
         display: 怀孕天数
       - name: otherAt
         display: 预产日期
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: operatorName
         display: 配种员
   web-message-needWean:
@@ -103,10 +103,10 @@ export.tables:
         display: 所属猪舍
       - name: otherAt
         display: 配种日期
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: eventAt
         display: 分娩日期
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: timeDiff
         display: 哺乳天数
   web-message-sowEliminate:
@@ -153,7 +153,7 @@ export.tables:
         display: 所属猪舍
       - name: eventAt
         display: 配种日期
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: timeDiff
         display: 已配种天数
       - name: operatorName
@@ -206,23 +206,21 @@ export.tables:
     columns:
       - name: pigCode
         display: 公猪号
-      - name: currentParity
-        display: 进场胎次
       - name: breedName
         display: 品种
-      - name: geneticName
+      - name: breedTypeName
         display: 品系
       - name: inFarmDate
         display: 进场日期
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: birthDate
         display: 出生日期
-        formatter: isoDateFormatter
-      - name: boarType
+        format: isoDateFormatter
+      - name: boarTypeName
         display: 公猪类型
       - name: initBarnName
         display: 进场猪舍
-      - name: source
+      - name: sourceName
         display: 来源
       - name: pigFatherCode
         display: 父号
@@ -241,7 +239,7 @@ export.tables:
         display: 猪舍
       - name: semenDate
         display: 采精日期
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: semenWeight
         display: 采精重量采精重量
       - name: dilutionRatio
@@ -269,7 +267,7 @@ export.tables:
         display: 公猪号
       - name: changeLocationDate
         display: 转舍时间
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: chgLocationFromBarnName
         display: 原猪舍
       - name: chgLocationToBarnName
@@ -287,7 +285,7 @@ export.tables:
         display: 猪舍
       - name: diseaseDate
         display: 疾病日期
-        formatter: isoDateFormatter
+        format: isoDateFormatter
       - name: diseaseName
         display: 疾病
       - name: diseaseStaff
@@ -305,8 +303,8 @@ export.tables:
         display: 猪舍
       - name: vaccinationDate
         display: 防疫日期
-        formatter: isoDateFormatter
-      - name: vaccinationItemNam
+        format: isoDateFormatter
+      - name: vaccinationItemName
         display: 防疫项目
       - name: vaccinationName
         display: 疫苗
@@ -326,7 +324,7 @@ export.tables:
           display: 猪舍
         - name: checkAt
           display: 检查日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: scoreHuoli
           display: 活力
         - name: scoreMidu
@@ -347,13 +345,11 @@ export.tables:
       columns:
         - name: pigCode
           display: 公猪号
-        - name: parity
-          display: 胎次
         - name: barnName
           display: 猪舍
         - name: removalDate
           display: 离场日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: chgTypeName
           display: 离场类型
         - name: chgReasonName
@@ -379,7 +375,7 @@ export.tables:
           display: 公猪号
         - name: chgFarmDate
           display: 转场日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: fromFarmName
           display: 原猪场
         - name: fromBarnName
@@ -405,7 +401,7 @@ export.tables:
           display: 猪舍
         - name: removalDate
           display: 离场日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: chgTypeName
           display: 离场类型
         - name: chgReasonName
@@ -424,6 +420,7 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+
   web-pig-sowVaccination:
       display: 防疫事件
       columns:
@@ -433,8 +430,8 @@ export.tables:
           display: 猪舍
         - name: vaccinationDate
           display: 防疫日期
-          formatter: isoDateFormatter
-        - name: vaccinationItemNam
+          format: isoDateFormatter
+        - name: vaccinationItemName
           display: 防疫项目
         - name: vaccinationName
           display: 疫苗
@@ -444,6 +441,7 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+
   web-pig-sowDisease:
       display: 疾病事件
       columns:
@@ -455,7 +453,7 @@ export.tables:
           display: 猪舍
         - name: diseaseDate
           display: 疾病日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: diseaseName
           display: 疾病
         - name: diseaseStaff
@@ -473,12 +471,12 @@ export.tables:
           display: 胎次
         - name: changeLocationDate
           display: 转舍时间
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: chgLocationFromBarnName
           display: 原猪舍
         - name: chgLocationToBarnName
           display: 转入猪舍
-        - name: pigStatusAfter
+        - name: pigStatusAfterName
           display: 当前状态
         - name: remark
           display: 备注
@@ -493,19 +491,19 @@ export.tables:
           display: 进场胎次
         - name: breedName
           display: 品种
-        - name: geneticName
+        - name: breedTypeName
           display: 品系
         - name: inFarmDate
           display: 进场日期
-          formatter: isoDateFormatter
-        - name: birthDate
+          format: isoDateFormatter
+        - name: birthday
           display: 出生日期
-          formatter: isoDateFormatter
-        - name: boarType
+          format: isoDateFormatter
+        - name: boarTypeName
           display: 公猪类型
         - name: initBarnName
           display: 进场猪舍
-        - name: source
+        - name: sourceName
           display: 来源
         - name: fatherCode
           display: 父号
@@ -532,12 +530,12 @@ export.tables:
           display: 猪舍
         - name: matingDate
           display: 配种日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: operatorName
           display: 配种员
         - name: matingBoarPigCode
           display: 公猪号
-        - name: matingType
+        - name: matingTypeName
           display: 配种类型
         - name: judgePregDate
           display: 预产期
@@ -545,7 +543,7 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
-        - name: pigStatusAfter
+        - name: pigStatusAfterName
           display: 当前状态
   web-pig-sowPregChkResult:
       display: 妊娠检查
@@ -554,15 +552,13 @@ export.tables:
           display: 母猪号
         - name: parity
           display: 胎次
-        - name: barnNam
+        - name: barnName
           display: 猪舍
         - name: checkDate
           display: 检查日期
-          formatter: isoDateFormatter
-        - name: checkResult
+          format: isoDateFormatter
+        - name: checkResultName
           display: 检查结果
-        - name: npd
-          display: 已配种天数
         - name: operatorName
           display: 检查人员
         - name: checkMark
@@ -578,14 +574,14 @@ export.tables:
           display: 胎次
         - name: farrowingDate
           display: 分娩日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: nestCode
           display: 窝号
         - name: barnName
           display: 分娩猪舍
         - name: bedCode
           display: 床号
-        - name: farrowingType
+        - name: farrowingTypeName
           display: 分娩类型
         - name: farrowStaff1
           display: 接产员1
@@ -607,7 +603,7 @@ export.tables:
           display: 木乃伊
         - name: jxCount
           display: 畸形
-        - name: toBarnName
+        - name: groupCode
           display: 转入猪群
         - name: liveBoarCount
           display: 活公
@@ -674,9 +670,9 @@ export.tables:
           display: 母猪号
         - name: parity
           display: 胎次
-        - name: partweanDate
+        - name: partWeanDate
           display: 断奶日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: barnName
           display: 断奶猪舍
         - name: weanPigletsCount
@@ -706,7 +702,7 @@ export.tables:
           display: 猪舍
         - name: fostersDate
           display: 拼窝日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: fosterSowCode
           display: 代哺母猪
         - name: fostersCount
@@ -724,7 +720,7 @@ export.tables:
           display: 母猪号
         - name: chgFarmDate
           display: 转场日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: fromFarmName
           display: 原猪场
         - name: fromBarnName
@@ -746,20 +742,18 @@ export.tables:
           display: 母猪号
         - name: barnName
           display: 猪舍
-        - name: checkAt
+        - name: conditionDate
           display: 检查日期
-          formatter: isoDateFormatter
-        - name: scoreHuoli
-          display: 活力
-        - name: scoreXingtai
-          display: 形态
-        - name: scoreShuliang
-          display: 数量
-        - name: weight
+          format: isoDateFormatter
+        - name: conditionJudgeScore
+          display: 体况评分
+        - name: conditionBackWeight
+          display: 背膘
+        - name: conditionWeight
           display: 体重
         - name: operatorName
           display: 操作人
-        - name: remark
+        - name: conditionRemark
           display: 备注
         - name: creatorName
           display: 录入人员
@@ -771,7 +765,7 @@ export.tables:
           display: 猪群号
         - name: eventAt
           display: 建群日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: barnName
           display: 猪舍
         - name: pigTypeName
@@ -795,7 +789,7 @@ export.tables:
           display: 猪舍
         - name: eventAt
           display: 转入日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: inTypeName
           display: 转入类型
         - name: source
@@ -831,7 +825,7 @@ export.tables:
           display: 猪舍
         - name: eventAt
           display: 变动日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: changeTypeName
           display: 变动类型
         - name: changeReasonName
@@ -853,7 +847,7 @@ export.tables:
           display: 猪舍
         - name: eventAt
           display: 转群日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: toBarnName
           display: 转入猪舍
         - name: toGroupCode
@@ -879,10 +873,10 @@ export.tables:
           display: 猪舍
         - name: eventAt
           display: 转入日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: birthDate
           display: 出生日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: pigCode
           display: 种猪号
         - name: toBarnName
@@ -906,7 +900,7 @@ export.tables:
           display: 猪舍
         - name: eventAt
           display: 疾病时间
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: diseaseName
           display: 疾病
         - name: quantity
@@ -924,7 +918,7 @@ export.tables:
           display: 猪舍
         - name: eventAt
           display: 防疫时间
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: vaccinItemName
           display: 防疫项目
         - name: vaccinName
@@ -944,7 +938,7 @@ export.tables:
           display: 品种
         - name: eventAt
           display: 转场日期
-          formatter: isoDateFormatter
+          format: isoDateFormatter
         - name: farmName
           display: 原厂
         - name: toFarmName
