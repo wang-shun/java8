@@ -20,7 +20,7 @@ mysql_user_to = 'root'
 mysql_passwd_to = 'anywhere'
 
 db_from = torndb.Connection(mysql_host_from, "pig_doctor", user=mysql_user_from, password=mysql_passwd_from)
-db_to = torndb.Connection(mysql_host_to, "pigdoctor", user=mysql_user_to, password=mysql_passwd_to)
+db_to = torndb.Connection(mysql_host_to, "pig_doctor1", user=mysql_user_to, password=mysql_passwd_to)
 
 # epoch = datetime.utcfromtimestamp(0)
 #

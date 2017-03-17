@@ -18,6 +18,7 @@ import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
 
     @Autowired
     private DoctorMessageSourceHelper messageSourceHelper;
+    @Autowired(required = false)
+    private Publisher publisher;
 
     @Override
     public Response<Boolean> createRequest(DoctorEventModifyRequest modifyRequest) {
@@ -146,6 +149,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             }
             eventModifyRequestDao.batchUpdateStatus(requestList.stream().map(DoctorEventModifyRequest::getId).collect(Collectors.toList()), EventRequestStatus.HANDLING.getValue());
             requestList.forEach(this::modifyEventRequestHandleImpl);
+
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("modify request handle job failed, requestList:{}, cause:{}", requestList, Throwables.getStackTraceAsString(e));
@@ -158,7 +162,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
      *
      * @param modifyRequest 编辑事件请求
      */
-    private void modifyEventRequestHandleImpl(DoctorEventModifyRequest modifyRequest) {
+    private boolean modifyEventRequestHandleImpl(DoctorEventModifyRequest modifyRequest) {
         log.info("modify event handle starting, modifyRequest:{}", modifyRequest);
         try {
             modifyRequest.setStatus(EventRequestStatus.HANDLING.getValue());
@@ -178,6 +182,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             //更新修改请求的状态
             modifyRequest.setStatus(EventRequestStatus.SUCCESS.getValue());
             eventModifyRequestDao.update(modifyRequest);
+            return true;
         } catch (InvalidException e) {
             log.info("modify event request handle failed, cause by:{}", Throwables.getStackTraceAsString(e));
             modifyRequest.setStatus(EventRequestStatus.FAILED.getValue());
@@ -191,5 +196,19 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             eventModifyRequestDao.update(modifyRequest);
         }
         log.info("modify event handle ending");
+        return false;
     }
+// TODO: 17/3/17 刷新报表 
+//    private void publishReport(List<DoctorEventModifyRequest> requestList) {
+//        Map<Long, List<DoctorEventModifyRequest>> farmMap = requestList.stream()
+//                .collect(Collectors.groupingBy(DoctorEventModifyRequest::getFarmId));
+//        farmMap.keySet().forEach(farmId -> {
+//            List<Long> eventIdList = farmMap.get(farmId).stream().map(DoctorEventModifyRequest::getEventId).collect(Collectors.toList());
+//            
+//            try {
+//                publisher.publish(DataEvent.);
+//            }
+//        });
+//
+//    }
 }

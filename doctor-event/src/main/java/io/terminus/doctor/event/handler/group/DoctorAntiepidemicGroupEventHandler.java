@@ -59,6 +59,7 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
     @Override
     public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
+        checkQuantity(track.getQuantity(), event.getQuantity());
         return track;
     }
 
