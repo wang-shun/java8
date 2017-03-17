@@ -492,7 +492,6 @@ public class DoctorPigEvents {
             return new DoctorPigSemenExportDto();
         }).collect(toList());
         return new Paging<>(pigEventPaging.getTotal(), list);
-
     }
     /**
      * 转舍事件

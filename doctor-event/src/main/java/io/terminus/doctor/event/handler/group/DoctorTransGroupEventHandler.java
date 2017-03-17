@@ -79,7 +79,11 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         checkCanTransBarn(group.getPigType(), transGroup.getToBarnId());
         checkCanTransGroup(transGroup.getToGroupId(), transGroup.getToBarnId(), transGroup.getIsCreateGroup());
         checkFarrowGroupUnique(transGroup.getIsCreateGroup(), transGroup.getToBarnId());
-        checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
+        if (transGroup.isSowEvent()) {
+            checkQuantity(MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0), transGroup.getQuantity());
+        } else {
+            checkQuantity(groupTrack.getQuantity() - MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0), transGroup.getQuantity());
+        }
         checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
         Double realWeight = transGroup.getAvgWeight() * transGroup.getQuantity();   //后台计算的总重
         //checkDayAge(groupTrack.getAvgDayAge(), transGroup);
