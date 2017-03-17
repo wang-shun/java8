@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
@@ -53,7 +54,13 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
     public Response<List<DoctorFarm>> findFarmsByUserId(Long userId) {
         Response<List<DoctorFarm>> response = new Response<>();
         try {
-            response.setResult(doctorFarmDao.findByIds(RespHelper.orServEx(this.findFarmIdsByUserId(userId))));
+            List<Long> ids = RespHelper.orServEx(this.findFarmIdsByUserId(userId));
+            if(Arguments.isNullOrEmpty(ids)){
+                log.info("no farm find, userId = {}", userId);
+                response.setResult(Lists.newArrayList());
+                return response;
+            }
+            response.setResult(doctorFarmDao.findByIds(ids));
         } catch (ServiceException e) {
             response.setError(e.getMessage());
         } catch (Exception e) {
