@@ -651,12 +651,12 @@ public class DoctorPigEvents {
             doctorPigBoarInFarmExportDto.setGeneticName("");
 
             if (detail.getExtraMap().containsKey("inFarmDate")) {
-                doctorPigBoarInFarmExportDto.setInFarmDate(new Date(Long.getLong((String) detail.getExtraMap().get("inFarmDate"))));
+                doctorPigBoarInFarmExportDto.setInFarmDate(new DateTime(detail.getExtraMap().get("inFarmDate")).toDate());
             }else {
                 doctorPigBoarInFarmExportDto.setInFarmDate(null);
             }
             if (detail.getExtraMap().containsKey("birthday")) {
-                doctorPigBoarInFarmExportDto.setBirthDate(new Date(Long.getLong((String) detail.getExtraMap().get("birthday"))));
+                doctorPigBoarInFarmExportDto.setBirthDate(new DateTime(detail.getExtraMap().get("birthday")).toDate());
             }else {
                 doctorPigBoarInFarmExportDto.setBirthDate(null);
             }
@@ -734,7 +734,7 @@ public class DoctorPigEvents {
                 doctorEventSemenExport.setBarnName(detail.getBarnName());
             }
             if (detail.getExtraMap().containsKey("semenDate")) {
-                doctorEventSemenExport.setSemenDate(new Date((Long) detail.getExtraMap().get("semenDate")));
+                doctorEventSemenExport.setSemenDate(new DateTime(detail.getExtraMap().get("semenDate")).toDate());
             }else {
                 doctorEventSemenExport.setSemenDate(null);
             }
@@ -807,7 +807,7 @@ public class DoctorPigEvents {
             doctorPigChangeBarnExportDto.setPigCode(detail.getPigCode());
             doctorPigChangeBarnExportDto.setPigStatusAfter(detail.getPigStatusAfter());
             if (detail.getExtraMap().containsKey("changeLocationDate")) {
-                doctorPigChangeBarnExportDto.setChangeLocationDate(new Date((long)detail.getExtraMap().get("changeLocationDate")));
+                doctorPigChangeBarnExportDto.setChangeLocationDate(new DateTime(detail.getExtraMap().get("changeLocationDate")).toDate());
             } else{
                 doctorPigChangeBarnExportDto.setChangeLocationDate(null);
             }
@@ -866,7 +866,7 @@ public class DoctorPigEvents {
                 doctorEventDiseaseExport.setParity(detail.getParity());
             }
             if (detail.getExtraMap().containsKey("diseaseDate")) {
-                doctorEventDiseaseExport.setDiseaseDate(new Date((long) detail.getExtraMap().get("diseaseDate")));
+                doctorEventDiseaseExport.setDiseaseDate(new DateTime(detail.getExtraMap().get("diseaseDate")).toDate());
             }else {
                 doctorEventDiseaseExport.setDiseaseDate(null);
             }
@@ -927,7 +927,7 @@ public class DoctorPigEvents {
                 doctorPigVaccinalion.setVaccinationStaffName(null);
             }
             if (detail.getExtraMap().containsKey("vaccinationDate")) {
-                doctorPigVaccinalion.setVaccinationDate(new Date((long) detail.getExtraMap().get("vaccinationDate")));
+                doctorPigVaccinalion.setVaccinationDate(new DateTime(detail.getExtraMap().get("vaccinationDate")).toDate());
             }else {
                 doctorPigVaccinalion.setVaccinationDate(null);
             }
