@@ -20,6 +20,7 @@ import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
+import io.terminus.parana.auth.model.PermissionData;
 import io.terminus.parana.user.address.service.AddressReadService;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.model.User;
@@ -92,6 +93,10 @@ public class DoctorServiceReviewManager {
         review.setStatus(DoctorServiceReview.Status.REVIEW.getValue());
         review.setRealName(realName);
         doctorServiceReviewDao.update(review);
+        DoctorUserDataPermission permission = new DoctorUserDataPermission();
+        permission.setUserId(user.getId());
+        permission.setOrgIds(String.valueOf(org.getId()));
+        doctorUserDataPermissionDao.create(permission);
     }
     private void createDoctorStaff(Long userId, Long farmId) {
         DoctorStaff staff = new DoctorStaff();
