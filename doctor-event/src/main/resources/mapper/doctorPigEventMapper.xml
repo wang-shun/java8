@@ -547,7 +547,7 @@
             <include refid="criteria"/>
         </where>
         <if test="ordered!=null">
-            ORDER BY event_at
+            ORDER BY DATE_FORMAT(event_at,'%Y-%m-%d')
             <if test="ordered == 0">
                 DESC
             </if>

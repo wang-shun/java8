@@ -283,7 +283,7 @@
         SELECT <include refid="cols_all"/> from <include refid="tb"/>
         where status = 1
         <include refid="criteria"/>
-        ORDER BY event_at DESC, id DESC
+        ORDER BY DATE_FORMAT(event_at,'%Y-%m-%d') DESC, id DESC
         LIMIT #{offset}, #{limit}
     </select>
 
