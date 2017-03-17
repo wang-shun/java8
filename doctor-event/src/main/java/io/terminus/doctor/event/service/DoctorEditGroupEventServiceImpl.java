@@ -113,7 +113,12 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
             log.info("group has been closed, groupId = {}", newEvent.getGroupId());
             throw new InvalidException("group.has.been.closed", newEvent.getGroupCode());
         }
-        if((Objects.equals(GroupEventType.MOVE_IN.getValue(), newEvent.getType()) || Objects.equals(GroupEventType.WEAN.getValue(), newEvent.getType())) &&
+        if(Objects.equals(GroupEventType.WEAN.getValue(), newEvent.getType()) &&
+                track.getQuantity() - track.getUnweanQty() + newEvent.getQuantity() - oldEvent.getQuantity()  < 0){
+            log.info("group quantity not enough, groupId = {}", newEvent.getGroupId());
+            throw new InvalidException("group.quantity.not.enough", newEvent.getGroupCode(), track.getQuantity(),  Math.abs(oldEvent.getQuantity() - newEvent.getQuantity()));
+        }
+        if(Objects.equals(GroupEventType.MOVE_IN.getValue(), newEvent.getType())  &&
                 track.getQuantity() + newEvent.getQuantity() - oldEvent.getQuantity()  < 0){
             log.info("group quantity not enough, groupId = {}", newEvent.getGroupId());
             throw new InvalidException("group.quantity.not.enough", newEvent.getGroupCode(), track.getQuantity(),  Math.abs(oldEvent.getQuantity() - newEvent.getQuantity()));
@@ -159,7 +164,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
                 doctorGroupTrack = doctorEditGroupEventManager.elicitDoctorGroupTrack(triggerDoctorGroupEventList, rollbackDoctorGroupEventList, doctorGroupTrack, handlerDoctorGroupEvent);
                 index ++;
                 //如果doctorGroupTrack.quantity = 0 ,关闭猪群
-                if(index == taskDoctorGroupEventList.size() && doctorGroupTrack.getQuantity() == 0){
+                if(index == localDoctorGroupEventList.size() && doctorGroupTrack.getQuantity() == 0){
                     closeGroupEvent(handlerDoctorGroupEvent);
                 }
             }
