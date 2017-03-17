@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.sun.javadoc.Doc;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
@@ -113,7 +114,12 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
             log.info("group has been closed, groupId = {}", newEvent.getGroupId());
             throw new InvalidException("group.has.been.closed", newEvent.getGroupCode());
         }
-        if((Objects.equals(GroupEventType.MOVE_IN.getValue(), newEvent.getType()) || Objects.equals(GroupEventType.WEAN.getValue(), newEvent.getType())) &&
+        if(Objects.equals(GroupEventType.WEAN.getValue(), newEvent.getType()) &&
+                track.getQuantity() - track.getUnweanQty() + newEvent.getQuantity() - oldEvent.getQuantity()  < 0){
+            log.info("group quantity not enough, groupId = {}", newEvent.getGroupId());
+            throw new InvalidException("group.quantity.not.enough", newEvent.getGroupCode(), track.getQuantity(),  Math.abs(oldEvent.getQuantity() - newEvent.getQuantity()));
+        }
+        if(Objects.equals(GroupEventType.MOVE_IN.getValue(), newEvent.getType())  &&
                 track.getQuantity() + newEvent.getQuantity() - oldEvent.getQuantity()  < 0){
             log.info("group quantity not enough, groupId = {}", newEvent.getGroupId());
             throw new InvalidException("group.quantity.not.enough", newEvent.getGroupCode(), track.getQuantity(),  Math.abs(oldEvent.getQuantity() - newEvent.getQuantity()));
@@ -159,7 +165,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
                 doctorGroupTrack = doctorEditGroupEventManager.elicitDoctorGroupTrack(triggerDoctorGroupEventList, rollbackDoctorGroupEventList, doctorGroupTrack, handlerDoctorGroupEvent);
                 index ++;
                 //如果doctorGroupTrack.quantity = 0 ,关闭猪群
-                if(index == taskDoctorGroupEventList.size() && doctorGroupTrack.getQuantity() == 0){
+                if(index == localDoctorGroupEventList.size() && doctorGroupTrack.getQuantity() == 0){
                     closeGroupEvent(handlerDoctorGroupEvent);
                 }
             }
@@ -214,6 +220,9 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
 
     private void closeGroupEvent(DoctorGroupEvent doctorGroupEvent) {
+        DoctorGroup group = doctorGroupDao.findById(doctorGroupEvent.getGroupId());
+        group.setStatus(DoctorGroup.Status.CLOSED.getValue());
+        doctorGroupDao.update(group);
         doctorGroupEvent.setType(GroupEventType.CLOSE.getValue());
         doctorGroupEvent.setName(GroupEventType.CLOSE.getDesc());
         doctorGroupEvent.setDesc("【系统自动】");
