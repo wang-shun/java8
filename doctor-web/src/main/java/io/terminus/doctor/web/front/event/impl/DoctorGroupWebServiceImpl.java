@@ -598,7 +598,12 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         //手工录入, 记录下创建人
         params.put("isAuto", IsOrNot.NO.getValue());
         params.put("creatorId", UserUtil.getUserId());
-        params.put("creatorName", UserUtil.getCurrentUser().getName());
+        UserProfile profile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(UserUtil.getUserId()));
+        String realName = UserUtil.getCurrentUser().getName();
+        if (notNull(profile) && !com.google.common.base.Strings.isNullOrEmpty(profile.getRealName())) {
+            realName = profile.getRealName();
+        }
+        params.put("creatorName", realName);
 
         //id关联字段
         params.put("barnName", getBarnName(getLong(params, "barnId")));

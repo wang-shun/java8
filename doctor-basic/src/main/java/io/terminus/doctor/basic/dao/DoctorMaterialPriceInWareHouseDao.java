@@ -1,19 +1,13 @@
 package io.terminus.doctor.basic.dao;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ObjectArrays;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.WareHouseType;
-import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.basic.model.DoctorMaterialPriceInWareHouse;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 陈增辉
@@ -82,6 +76,11 @@ public class DoctorMaterialPriceInWareHouseDao extends MyBatisDao<DoctorMaterial
         map = sqlSession.selectOne(sqlId("stockAmount"), ImmutableMap.of("farmId", farmId, "warehouseId", warehouseId, "type", type));
 
         return map;
+    }
+
+    public List<DoctorMaterialPriceInWareHouse> findMaterialDatas(Long farmId, Long materialId, Long wareHouseId, Date endDate) {
+
+        return sqlSession.selectList(sqlId("findMaterialData"), ImmutableMap.of("farmId", farmId, "materialId", materialId, "wareHouseId", wareHouseId, "endDate", endDate));
     }
 
 }

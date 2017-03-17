@@ -160,4 +160,31 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
         List<BarnConsumeMaterialReport> datas = sqlSession.selectList(sqlId("pageBarnReport"), param);
         return new Paging<>(total, datas);
     }
+
+    /**
+     * 根据事件的时间查询事件中物料的统计数据
+     * @param startDate 事件开始时间
+     * @param endDate 事件结束时间
+     * @param farmId 公司Id
+     */
+    public List<DoctorMaterialConsumeProvider> findMaterialConsumeReports(Long farmId, Long wareHouseId, Long materialId, String materialName,
+                                                                          Date startDate, Date endDate, Integer pageNo, Integer size) {
+
+        if (farmId == null) {
+            throw new ServiceException("farmId.not.null");
+        }
+
+        Map<String, Object> criteriaMap = MapBuilder.<String, Object>of()
+                .put("farmId", farmId)
+                .put("wareHouseId", wareHouseId)
+                .put("materialId", materialId)
+                .put("materialName", materialName)
+                .put("startDate", startDate)
+                .put("endDate", endDate)
+                .put("pageNo", pageNo)
+                .put("size", size)
+                .map();
+        criteriaMap = ImmutableMap.copyOf(Params.filterNullOrEmpty((criteriaMap)));
+        return sqlSession.selectList(sqlId("findMaterialConsumeReport"), criteriaMap);
+    }
 }

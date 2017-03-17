@@ -45,6 +45,7 @@ import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -116,7 +117,10 @@ public class DoctorSearches {
      * @param pageSize 页大小
      * @param params   搜索参数
      *                 搜索参数可以参照:
+     *
      * @return
+     *
+     * 增加按事件类型,事件日期筛选 by lbw
      */
     @RequestMapping(value = "/sowpigs", method = RequestMethod.GET)
     public GroupPigPaging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
@@ -146,14 +150,31 @@ public class DoctorSearches {
     }
 
     //猪分页
+    //2017/3/14 增加事件筛选 type, event_at
     private Paging<SearchedPig> pagePigs(Integer pageNo, Integer pageSize, Map<String, String> params, DoctorPig.PigSex pigType){
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
+
         searchFromMessage(params);
+
         params.put("pigCode", params.get("q"));
         params.put("pigType", pigType.getKey().toString());
         Map<String, Object> objectMap = transMapType(params);
+        //先根据事件去查
+        boolean searchEvent = params.get("type") != null || params.get("beginDate") != null || params.get("endDate") != null;
+        if (searchEvent) {
+            Map<String, Object> eventCriteria = Maps.newHashMap();
+            eventCriteria.put("type", params.get("type"));
+            eventCriteria.put("beginDate", params.get("beginDate"));
+            eventCriteria.put("endDate", params.get("endDate"));
+            eventCriteria.put("farmId", params.get("farmId"));
+            List<Long> pigIds = RespHelper.or(doctorPigEventReadService.findPigIdsBy(eventCriteria), null);
+            if (CollectionUtils.isEmpty(pigIds)) {
+                return new Paging<SearchedPig>();
+            }
+            objectMap.put("pigIds", pigIds);
+        }
 
         BaseUser user = UserUtil.getCurrentUser();
         if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){

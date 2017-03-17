@@ -16,7 +16,7 @@ import java.util.Date;
 @Component
 public class IsoDateFormatter implements ColumnFormatter {
 
-    private static final DateTimeFormatter DFT = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DFT = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     @Override
     public String format(Object value) {

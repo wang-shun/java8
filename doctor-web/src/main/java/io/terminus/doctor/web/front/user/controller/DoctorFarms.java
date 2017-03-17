@@ -116,7 +116,6 @@ public class DoctorFarms {
 
     @RequestMapping(value = "/find/{farmId}", method = RequestMethod.GET)
     public List<FarmStaff> findByFarmId(@PathVariable Long farmId) {
-//        List<DoctorStaff> staffs = RespHelper.or500(doctorStaffReadService.findStaffByFarmIdAndStatus(farmId, DoctorStaff.Status.PRESENT.value()));
         return transformStaffs(farmId);
     }
 
@@ -128,7 +127,6 @@ public class DoctorFarms {
      */
     @RequestMapping(value = "/staff/{farmId}", method = RequestMethod.GET)
     public List<FarmStaff> findStaffByFarmId(@PathVariable Long farmId) {
-//        List<DoctorStaff> staffs = RespHelper.or500(doctorStaffReadService.findStaffByFarmIdAndStatus(farmId, null));
         return transformStaffs(farmId);
     }
 
@@ -138,25 +136,6 @@ public class DoctorFarms {
      * @return 员工列表
      */
     private List<FarmStaff> transformStaffs(Long farmId) {
-//        List<User> users = RespHelper.or500(doctorUserReadService.findByIds(staffs.stream()
-//                .map(DoctorStaff::getUserId).collect(Collectors.toList())));
-//        Map<Long, User> userMap = users.stream().collect(Collectors.toMap(User::getId, u -> u));
-//
-//        return staffs.stream()
-//                .map(staff -> {
-//                    FarmStaff farmStaff = BeanMapper.map(staff, FarmStaff.class);
-//
-//                    User user = userMap.get(staff.getUserId());
-//                    if (user != null) {
-//                        if(Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
-//                            farmStaff.setRealName(user.getName() == null ? user.getMobile() : user.getName());
-//                        }else if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
-//                            farmStaff.setRealName(Params.get(user.getExtra(), "realName"));
-//                        }
-//                    }
-//                    return farmStaff;
-//                })
-//                .collect(Collectors.toList());
         List<Sub> subList = RespHelper.or500(primaryUserReadService.findSubsByFarmId(farmId));
         List<FarmStaff> staffList = Lists.newArrayList();
         if (!Arguments.isNullOrEmpty(subList)) {

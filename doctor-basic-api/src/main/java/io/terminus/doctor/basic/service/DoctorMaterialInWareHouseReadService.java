@@ -54,4 +54,15 @@ public interface DoctorMaterialInWareHouseReadService {
      * @return
      */
     Response<DoctorMaterialInWareHouse> queryDoctorMaterialInWareHouse(@NotNull(message = "input.id.empty")  Long id);
+
+    /**
+     * 查找仓库ID和物料Id所对应的物料计量单位
+     * @param farmId
+     * @param materialId 物料ID
+     * @param wareHouseId 仓库ID
+     * @return
+     */
+    Response<DoctorMaterialInWareHouse> findMaterialUnits(@NotNull(message = "input.farmId.empty") Long farmId,
+                                                          @NotNull(message = "input.materialId.empty") Long materialId,
+                                                          @NotNull(message = "input.wareHouseId.empty") Long wareHouseId);
 }

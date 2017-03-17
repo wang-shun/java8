@@ -1,7 +1,11 @@
 package io.terminus.doctor.web.front.role;
 
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.pampas.common.UserUtil;
@@ -18,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static io.terminus.common.utils.Arguments.isNull;
+
 /**
  * Desc: 子账号
  * Mail: houly@terminus.io
@@ -32,6 +38,8 @@ public class Subs {
     private final SubService subService;
     private final DoctorUserReadService doctorUserReadService;
     private final MobilePattern mobilePattern;
+    @RpcConsumer
+    private DoctorUserDataPermissionReadService permissionReadService;
 
     @Autowired
     public Subs(SubService subService,
@@ -109,6 +117,16 @@ public class Subs {
                                   @RequestParam(required = false) Integer pageNo,
                                   @RequestParam(required = false) Integer pageSize) {
         checkAuth();
+        //校验猪场id是否为空
+        if (isNull(farmId)) {
+            throw new JsonResponseException("farm.id.not.null");
+        }
+        //校验是否拥有猪场权限
+        DoctorUserDataPermission permission = RespHelper.or500(permissionReadService.findDataPermissionByUserId(UserUtil.getUserId()));
+        if (isNull(permission) || Arguments.isNullOrEmpty(permission.getFarmIdsList()) || !permission.getFarmIdsList().contains(farmId)) {
+            throw new JsonResponseException(403, "user.no.permission");
+        }
+
         return RespHelper.or500(subService.pagingSubs(farmId, UserUtil.getCurrentUser(), roleId, roleName, username, realName, status, pageNo, pageSize));
     }
 
@@ -148,10 +166,6 @@ public class Subs {
         if (UserUtil.getCurrentUser() == null) {
             throw new JsonResponseException(401, "user.not.login");
         }
-
-//        if(!Objects.equals(UserUtil.getCurrentUser().getType(), UserType.FARM_ADMIN_PRIMARY.value())){
-//            throw new JsonResponseException(403, "user.no.permission");
-//        }
     }
 
     /**

@@ -46,6 +46,9 @@ public class DoctorPigEvent implements Serializable {
 
     private String pigCode; // 猪Code
 
+    /**
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
     private Integer isAuto; //是否是自动生成的事件 0 否 1 是
 
     private Date eventAt;   // 创建时间
@@ -134,6 +137,7 @@ public class DoctorPigEvent implements Serializable {
 
     /**
      * 妊娠检查结果，从extra中拆出来
+     * @see io.terminus.doctor.event.enums.PregCheckResult
      */
     private Integer pregCheckResult;
 

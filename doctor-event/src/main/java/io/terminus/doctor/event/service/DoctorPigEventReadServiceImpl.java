@@ -359,4 +359,14 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("find last event by type failed");
         }
     }
+
+    @Override
+    public Response<List<Long>> findPigIdsBy(Map<String, Object> criteria) {
+        try {
+            return Response.ok(doctorPigEventDao.findPigIdsBy(criteria));
+        } catch (Exception e) {
+            log.error("find.pigIds.by.event, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find pigIds by type failed");
+        }
+    }
 }

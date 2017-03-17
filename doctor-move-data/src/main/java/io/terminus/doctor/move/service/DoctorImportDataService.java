@@ -302,10 +302,10 @@ public class DoctorImportDataService {
 
     private void importStaff(Sheet staffShit, User primaryUser, DoctorFarm farm) {
         final String appKey = "MOBILE";
-        List<SubRole> existRoles = subRoleDao.findByUserIdAndStatus(appKey, primaryUser.getId(), 1);
+        List<SubRole> existRoles = subRoleDao.findByFarmIdAndStatus(appKey, farm.getId(), 1);
         if(existRoles.isEmpty()){
-            RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUser.getId()));
-            existRoles = subRoleDao.findByUserIdAndStatus(appKey, primaryUser.getId(), 1);
+            RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUser.getId(), farm.getId()));
+            existRoles = subRoleDao.findByFarmIdAndStatus(appKey, farm.getId(), 1);
         }
         // key = roleName, value = roleId
         Map<String, Long> existRole = existRoles.stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
@@ -451,6 +451,9 @@ public class DoctorImportDataService {
             user.setStatus(UserStatus.NORMAL.value());
             user.setType(UserType.FARM_ADMIN_PRIMARY.value());
             user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
+            Map<String, String> userExtraMap = Maps.newHashMap();
+            userExtraMap.put("realName", realName);
+            user.setExtra(userExtraMap);
             userId = RespHelper.or500(userWriteService.create(user));
             user.setId(userId);
 
@@ -459,7 +462,6 @@ public class DoctorImportDataService {
             PrimaryUser updatePrimary = new PrimaryUser();
             updatePrimary.setId(primaryUser.getId());
             updatePrimary.setRelFarmId(farm.getId());
-            updatePrimary.setRealName(realName);
             primaryUserDao.update(updatePrimary);
 
             // 把真实姓名存进 user profile
@@ -497,7 +499,8 @@ public class DoctorImportDataService {
             //初始化服务状态
             userInitService.initDefaultServiceStatus(userId);
         }else{
-            serviceStatus.setPigdoctorStatus(1);
+            serviceStatus.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
+            serviceStatus.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
             doctorServiceStatusDao.update(serviceStatus);
         }
 
@@ -1202,7 +1205,7 @@ public class DoctorImportDataService {
     //创建进场事件
     private DoctorPigEvent createEntryEvent(DoctorImportSow info, DoctorPig sow) {
         DoctorPigEvent event = createSowEvent(info, sow);
-        event.setEventAt(new DateTime(info.getMateDate()).plusDays(-1).toDate());
+        event.setEventAt(sow.getInFarmDate());
         event.setType(PigEvent.ENTRY.getKey());
         event.setName(PigEvent.ENTRY.getName());
         event.setPigStatusAfter(PigStatus.Entry.getKey());

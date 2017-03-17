@@ -44,7 +44,7 @@ public class DoctorReportJobs {
 
     @RpcConsumer
     private DoctorDailyReportReadService doctorDailyReportReadService;
-    @RpcConsumer
+    @RpcConsumer(timeout = "60000")
     private DoctorDailyReportWriteService doctorDailyReportWriteService;
     @RpcConsumer(timeout = "60000")
     private DoctorCommonReportWriteService doctorCommonReportWriteService;
@@ -77,14 +77,9 @@ public class DoctorReportJobs {
             }
             log.info("daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            //获取昨天的最后一秒(必须是昨天, 因为统计日期设置的是此字段)
-            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusSeconds(-1).toDate();
-            doctorDailyReportWriteService.createDailyReports(getAllFarmIds(), yesterday);
-            log.info("yesterday daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+            doctorDailyReportWriteService.createYesterdayAndTodayReports(getAllFarmIds());
 
-            //生成一下当天的日报，为月报做准备
-            doctorDailyReportWriteService.createDailyReports(getAllFarmIds(), new Date());
-            log.info("today daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+            log.info("daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("daily report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }

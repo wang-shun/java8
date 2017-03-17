@@ -966,4 +966,9 @@
         </if>
         ORDER BY event_at DESC, id DESC limit 1
     </select>
+
+    <select id="findPigIdsBy" parameterType="map" resultType="Long">
+        SELECT pig_id FROM <include refid="tb"/>
+        WHERE 1=1 <include refid="criteria"/>
+    </select>
 </mapper>

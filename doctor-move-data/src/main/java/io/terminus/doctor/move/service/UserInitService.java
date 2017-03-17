@@ -117,7 +117,7 @@ public class UserInitService {
         for(View_FarmMember member : list){
             if(member.getLevels() == 0 && "admin".equals(member.getLoginName())){
                 // 主账号注册,内含事务
-                primaryUser = this.registerByMobile(mobile, "123456", loginName);
+                primaryUser = this.registerByMobile(mobile, "123456", loginName, member.getOrganizeName());
                 Long userId = primaryUser.getId();
                 //初始化服务状态
                 this.initDefaultServiceStatus(userId);
@@ -194,7 +194,7 @@ public class UserInitService {
      * @param userName 用户名
      * @return 注册成功之后的用户
      */
-    private User registerByMobile(String mobile, String password, String userName) {
+    private User registerByMobile(String mobile, String password, String userName, String realName) {
         Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
         // 检测手机号是否已存在
         if(result.isSuccess() && result.getResult() != null){
@@ -205,6 +205,9 @@ public class UserInitService {
         user.setMobile(mobile);
         user.setPassword(password);
         user.setName(userName);
+        Map<String, String> userExtraMap = Maps.newHashMap();
+        userExtraMap.put("realName", realName);
+        user.setExtra(userExtraMap);
 
         // 用户状态 0: 未激活, 1: 正常, -1: 锁定, -2: 冻结, -3: 删除
         user.setStatus(UserStatus.NORMAL.value());
@@ -278,7 +281,7 @@ public class UserInitService {
 
     private Map<String, Long> createSubRole(Long farmId, Long primaryUserId, Long dataSourceId){
         final String appKey = "MOBILE";
-        RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUserId));
+        RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUserId, farmId));
         // key = roleName, value = roleId
         Map<String, Long> existRole = subRoleDao.findByUserIdAndStatus(appKey, primaryUserId, 1).stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
 

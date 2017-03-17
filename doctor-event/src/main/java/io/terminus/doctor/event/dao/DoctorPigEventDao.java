@@ -339,6 +339,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+<<<<<<< HEAD
      * 去获取猪某一事件之后的事件列表
      * @param pigId 猪id
      * @param eventId 事件id
@@ -371,5 +372,14 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      */
     public DoctorPigEvent findLastEventExcludeTypes(Long pigId, List<Integer> types) {
         return getSqlSession().selectOne(sqlId("findLastEventExcludeTypes"), ImmutableMap.of("pigId", pigId, "types", types));
+    }
+
+    /*
+     * 根据条件搜索猪id
+     * @param criteria
+     * @return
+     */
+    public List<Long> findPigIdsBy(Map<String, Object> criteria) {
+        return getSqlSession().selectList(sqlId("findPigIdsBy"), criteria);
     }
 }
