@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.sun.javadoc.Doc;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
@@ -219,6 +220,9 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
 
     private void closeGroupEvent(DoctorGroupEvent doctorGroupEvent) {
+        DoctorGroup group = doctorGroupDao.findById(doctorGroupEvent.getGroupId());
+        group.setStatus(DoctorGroup.Status.CLOSED.getValue());
+        doctorGroupDao.update(group);
         doctorGroupEvent.setType(GroupEventType.CLOSE.getValue());
         doctorGroupEvent.setName(GroupEventType.CLOSE.getDesc());
         doctorGroupEvent.setDesc("【系统自动】");
