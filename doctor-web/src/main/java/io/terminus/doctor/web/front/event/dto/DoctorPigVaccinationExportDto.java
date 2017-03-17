@@ -18,6 +18,6 @@ public class DoctorPigVaccinationExportDto implements Serializable{
     private String vaccinationItemName;
     private String vaccinationName;
     private String vaccinationStaffName;
-    private String remark;
+    private String vaccinationRemark;
     private String creatorName;
 }

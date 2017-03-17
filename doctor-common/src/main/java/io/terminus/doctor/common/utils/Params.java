@@ -7,6 +7,7 @@
 package io.terminus.doctor.common.utils;
 
 import com.google.common.base.Strings;
+import io.terminus.doctor.common.constants.JacksonType;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Nullable;
@@ -80,7 +81,7 @@ public final class Params {
     public static Map<String, Object> objToMap(Object obj) {
         return JSON.getMapper()
                 .setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
-                .convertValue(obj, Map.class);
+                .convertValue(obj, JacksonType.MAP_OF_OBJECT);
     }
 
     public static boolean containsNotEmpty(Map<String, ?> params, String key) {
