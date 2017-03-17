@@ -42,6 +42,32 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
+    @Override
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.LIVE_STOCK.getValue());
+
+        DoctorLiveStockGroupInput liveStock = (DoctorLiveStockGroupInput) input;
+
+        //1.转换下猪只存栏信息
+        DoctorLiveStockGroupEvent liveStockEvent = BeanMapper.map(liveStock, DoctorLiveStockGroupEvent.class);
+
+        //2.创建猪只存栏事件
+        DoctorGroupEvent<DoctorLiveStockGroupEvent> event = dozerGroupEvent(group, GroupEventType.LIVE_STOCK, liveStock);
+        event.setQuantity(groupTrack.getQuantity());  //猪群存栏数量 = 猪群数量
+
+
+
+        event.setAvgWeight(liveStock.getAvgWeight());
+        event.setWeight(event.getQuantity() * event.getAvgWeight()); // 总活体重 = 数量 * 均重
+        event.setExtraMap(liveStockEvent);
+        return event;
+    }
+
+    @Override
+    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack groupTrack) {
+        return groupTrack;
+    }
+
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
@@ -64,10 +90,11 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setExtraMap(liveStockEvent);
         doctorGroupEventDao.create(event);
 
-        //3.更新猪群跟踪
-        updateGroupTrack(groupTrack, event);
-
-        //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.LIVE_STOCK);
+        //猪只存栏不更新track,不增加snapshot
+//        //3.更新猪群跟踪
+//        updateGroupTrack(groupTrack, event);
+//
+//        //4.创建镜像
+//        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.LIVE_STOCK);
     }
 }

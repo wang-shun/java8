@@ -82,6 +82,13 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     }
 
     /**
+     * 查询最新影响事件不包含某些事件类型的最新事件
+     */
+    public DoctorGroupEvent findLastEventExcludeTypes(Long groupId, List<Integer> types) {
+        return getSqlSession().selectOne(sqlId("findLastEventExcludeTypes"), ImmutableMap.of("groupId", groupId, "types", types));
+    }
+
+    /**
      * 查询最新手动猪群事件
      */
     public DoctorGroupEvent findLastManualEventByGroupId(Long groupId) {
@@ -93,8 +100,8 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      * @param relGroupEventId 关联事件id
      * @return 关联的事件
      */
-    public DoctorGroupEvent findByRelGroupEventId(Long relGroupEventId) {
-        return getSqlSession().selectOne(sqlId("findByRelGroupEventId"), relGroupEventId);
+    public DoctorGroupEvent findByRelGroupEventIdAndType(Long relGroupEventId, Integer type) {
+        return getSqlSession().selectOne(sqlId("findByRelGroupEventIdAndType"), ImmutableMap.of("relGroupEventId", relGroupEventId, "type", type));
     }
 
     /**
@@ -143,5 +150,28 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      */
     public DoctorGroupEvent findInitGroupEvent(Long groupId) {
         return getSqlSession().selectOne(sqlId("findInitGroupEvent"), groupId);
+    }
+
+
+    /**
+     * 获取猪群的所有事件,按发生事件升序排序
+     * @param groupId
+     * @return
+     */
+    public List<DoctorGroupEvent> findLinkedGroupEventsByGroupId(Long groupId){
+        return getSqlSession().selectList(sqlId("findLinkedGroupEventsByGroupId"), groupId);
+    }
+
+    public Boolean updateGroupEventStatus(List<Long> ids, Integer status) {
+        return Boolean.valueOf(getSqlSession().update(sqlId("updateGroupEventStatus"), MapBuilder.newHashMap().put("ids", ids, "status", status).map()) == 1);
+    }
+
+    /**
+     * 查询所有事件,包括无效事件
+     * @param id 事件id
+     * @return 事件
+     */
+    public DoctorGroupEvent findEventById(Long id) {
+        return getSqlSession().selectOne(sqlId("findEventById"), id);
     }
 }

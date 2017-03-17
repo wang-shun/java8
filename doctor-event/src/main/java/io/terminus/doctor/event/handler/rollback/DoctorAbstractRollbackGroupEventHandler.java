@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.handler.rollback;
 
+import com.google.common.collect.Lists;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -11,16 +13,20 @@ import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorRevertLog;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Objects;
+
+import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 
 /**
  * Desc: 猪群事件回滚处理器
@@ -39,6 +45,9 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
     @Autowired protected DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired protected DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     @Autowired protected DoctorPigEventDao doctorPigEventDao;
+    @Autowired protected DoctorEventRelationDao doctorEventRelationDao;
+
+    static List<Integer> excludeGroupEvent = Lists.newArrayList(GroupEventType.ANTIEPIDEMIC.getValue(), GroupEventType.ANTIEPIDEMIC.getValue());
 
     /**
      * 判断能否回滚(1.手动事件 2.三个月内的事件 3.最新事件 4.子类根据事件类型特殊处理)
@@ -72,7 +81,7 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
      * 是否是最新事件
      */
     protected boolean isLastEvent(DoctorGroupEvent groupEvent) {
-        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(groupEvent.getGroupId());
+        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventExcludeTypes(groupEvent.getGroupId(), excludeGroupEvent);
         if (!Objects.equals(groupEvent.getId(), lastEvent.getId())) {
             return Boolean.FALSE;
         }
@@ -86,7 +95,9 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
     protected void sampleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
 
-        DoctorGroupSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getFromInfo(), DoctorGroupSnapShotInfo.class);
+        DoctorGroupSnapshot oldSnapshot = doctorGroupSnapshotDao.queryByEventId(groupEvent.getId());
+        expectNotNull(oldSnapshot, "query.pre.snapshot.failed", groupEvent.getId());
+        DoctorGroupSnapShotInfo info = JSON_MAPPER.fromJson(oldSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
 
         //删除此事件 -> 回滚猪群跟踪 -> 回滚猪群 -> 删除镜像
         doctorGroupEventDao.delete(groupEvent.getId());
@@ -95,15 +106,17 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
         doctorGroupSnapshotDao.delete(snapshot.getId());
 
         //创建回滚日志
-        createRevertLog(groupEvent, snapshot, operatorId, operatorName);
+        createRevertLog(groupEvent, snapshot, oldSnapshot, operatorId, operatorName);
     }
 
-    protected void createRevertLog(DoctorGroupEvent groupEvent, DoctorGroupSnapshot snapshot, Long operatorId, String operatorName) {
+    protected void createRevertLog(DoctorGroupEvent groupEvent, DoctorGroupSnapshot snapshot, DoctorGroupSnapshot oldSnapshot, Long operatorId, String operatorName) {
         DoctorRevertLog revertLog = new  DoctorRevertLog();
         revertLog.setFarmId(groupEvent.getFarmId());
         revertLog.setGroupId(groupEvent.getGroupId());
-        revertLog.setFromInfo(snapshot.getToInfo());
-        revertLog.setToInfo(snapshot.getFromInfo());
+        if (!Objects.equals(groupEvent.getType(), GroupEventType.NEW.getValue())) {
+            revertLog.setFromInfo(oldSnapshot.getToInfo());
+        }
+        revertLog.setToInfo(snapshot.getToInfo());
         revertLog.setType(DoctorRevertLog.Type.GROUP.getValue());
         revertLog.setReverterId(operatorId);
         revertLog.setReverterName(operatorName);
@@ -119,7 +132,8 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
         DoctorGroupEvent tmpEvent = event;
         while (event != null) {
             tmpEvent = event;
-            event = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+            DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+            event = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
         }
         return isLastEvent(tmpEvent);
     }

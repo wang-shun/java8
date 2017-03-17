@@ -24,7 +24,8 @@ public enum GroupEventType {
     DISEASE(7, "疾病"),
     ANTIEPIDEMIC(8, "防疫"),
     TRANS_FARM(9, "转场"),
-    CLOSE(10, "关闭猪群");
+    CLOSE(10, "关闭猪群"),
+    WEAN(11, "断奶");
 
     @Getter
     private final int value;

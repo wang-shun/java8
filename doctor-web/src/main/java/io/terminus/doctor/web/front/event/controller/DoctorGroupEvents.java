@@ -23,6 +23,8 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -72,13 +74,18 @@ public class DoctorGroupEvents {
 
     @RpcConsumer
     private DoctorPigReadService doctorPigReadService;
+    @RpcConsumer
+    private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
+    @RpcConsumer
+    private DoctorEventModifyRequestReadService doctorEventModifyRequestReadService;
 
     @Autowired
     public DoctorGroupEvents(DoctorGroupWebService doctorGroupWebService,
                              DoctorGroupReadService doctorGroupReadService,
                              DoctorFarmAuthCenter doctorFarmAuthCenter,
                              DoctorGroupWriteService doctorGroupWriteService,
-                             DoctorBasicReadService doctorBasicReadService, TransFromUtil transFromUtil) {
+                             DoctorBasicReadService doctorBasicReadService, TransFromUtil transFromUtil
+                             ) {
         this.doctorGroupWebService = doctorGroupWebService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorFarmAuthCenter = doctorFarmAuthCenter;
@@ -136,6 +143,25 @@ public class DoctorGroupEvents {
                                     @RequestParam("eventType") Integer eventType,
                                     @RequestParam("data") String data) {
         return RespWithExHelper.orInvalid(doctorGroupWebService.createGroupEvent(groupId, eventType, data));
+    }
+
+    /**
+     * 创建猪群编辑请求
+     * @param groupId 猪群id
+     * @param eventType 事件类型
+     * @param eventId 事件id
+     * @param data 输入数据
+     * @return
+     */
+    @RequestMapping(value = "/createGroupModifyRequest", method = RequestMethod.POST)
+    public void createGroupModifyEventRequest(@RequestParam("groupId") Long groupId,
+                                                 @RequestParam("eventType") Integer eventType,
+                                                 @RequestParam("eventId") Long eventId,
+                                                 @RequestParam("data") String data) {
+        Long requestId = RespWithExHelper.orInvalid(doctorGroupWebService.createGroupModifyEventRequest(groupId, eventType, eventId, data));
+        // 通过job 执行
+//        DoctorEventModifyRequest modifyRequest = RespHelper.or500(doctorEventModifyRequestReadService.findById(requestId));
+//        RespWithExHelper.orInvalid(doctorEventModifyRequestWriteService.modifyEventHandle(modifyRequest));
     }
 
     /**

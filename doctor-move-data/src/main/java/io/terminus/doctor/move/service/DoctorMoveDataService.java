@@ -121,7 +121,7 @@ import static io.terminus.doctor.event.enums.PregCheckResult.from;
 @Service
 public class DoctorMoveDataService {
 
-    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.nonEmptyMapper();
     private static final JsonMapperUtil MAPPER = JsonMapperUtil.nonDefaultMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;

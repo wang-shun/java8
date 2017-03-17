@@ -774,7 +774,7 @@ export.tables:
           display: 性别
         - name: breedName
           display: 品种
-        - name: status
+        - name: currentStatus
           display: 当前状态
         - name: remark
           display: 备注

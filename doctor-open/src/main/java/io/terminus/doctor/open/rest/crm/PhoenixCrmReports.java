@@ -6,6 +6,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorMonthlyReport;
@@ -48,7 +49,7 @@ public class PhoenixCrmReports {
     private final DoctorGroupReadService doctorGroupReadService;
 
     private final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
-    private final JsonMapper MAPPER = JsonMapper.JSON_NON_EMPTY_MAPPER;
+    private final JsonMapperUtil MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
     @Value(value = "${open.domain}")
     private String domain;

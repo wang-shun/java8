@@ -15,7 +15,6 @@ import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -27,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
@@ -44,108 +44,66 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
     private  DoctorPigInfoCache doctorPigInfoCache;
 
     @Override
-    public void handleCheck(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        expectTrue(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(basic.getFarmId(), inputDto.getPigCode(), inputDto.getPigType()) == null, "pigCode.have.existed");
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
     }
 
-
     @Override
-    public void handle(List<DoctorEventInfo> doctorEventInfoList, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        DoctorFarmEntryDto farmEntryDto = (DoctorFarmEntryDto) inputDto;
+    public void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
 
-        //1.创建猪
-        DoctorPig doctorPig = buildDoctorPig(farmEntryDto, basic);
-        farmEntryDto.setPigId(doctorPig.getId());
-        doctorPigDao.create(doctorPig);
-        inputDto.setPigId(doctorPig.getId());
+//        //如果是编辑进场事件需要更新猪信息
+//        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
+//            DoctorPig updatePig = doctorPigDao.findById(executeEvent.getPigId());
+//            doctorPigDao.update(buildUpdatePig(executeEvent, updatePig));
+//        }
+        Long oldEventId = executeEvent.getId();
+        //1.创建事件
+        doctorPigEventDao.create(executeEvent);
 
-        //2.创建事件
-        DoctorPigEvent doctorPigEvent = buildPigEvent(basic, inputDto);
-        doctorPigEventDao.create(doctorPigEvent);
+        //如果是自动事件,或者编辑事件则创建关联关系
+        if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.YES.getValue())) {
+            createEventRelation(executeEvent, oldEventId);
+        }
 
-        //3.创建或更新track
-        DoctorPigTrack doctorPigTrack = createOrUpdatePigTrack(basic, inputDto);
-        doctorPigTrackDao.create(doctorPigTrack);
+        //2.创建或更新track
+        DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
+        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
+            toTrack.setId(fromTrack.getId());
+            doctorPigTrackDao.update(toTrack);
+        } else {
+            doctorPigTrackDao.create(toTrack);
+        }
+        //3.创建镜像
+        createPigSnapshot(toTrack, executeEvent, 0L);
 
-        //4.创建镜像////
-        DoctorPigSnapshot doctorPigSnapshot = createPigSnapshot(doctorPigTrack, doctorPigEvent, doctorPigEvent.getId());
-        doctorPigSnapshotDao.create(doctorPigSnapshot);
+        //4.特殊处理
+        specialHandle(executeEvent, toTrack);
 
-        //5.特殊处理
-        specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
-
-        //6.记录发生的事件信息
+        //5.记录发生的事件信息
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
-                .orgId(doctorPigEvent.getOrgId())
-                .farmId(doctorPigEvent.getFarmId())
-                .eventId(doctorPigEvent.getId())
-                .eventAt(doctorPigEvent.getEventAt())
-                .kind(doctorPigEvent.getKind())
-                .mateType(doctorPigEvent.getDoctorMateType())
-                .pregCheckResult(doctorPigEvent.getPregCheckResult())
-                .businessId(doctorPigEvent.getPigId())
-                .code(doctorPigEvent.getPigCode())
-                .status(doctorPigTrack.getStatus())
+                .orgId(executeEvent.getOrgId())
+                .farmId(executeEvent.getFarmId())
+                .eventId(executeEvent.getId())
+                .eventAt(executeEvent.getEventAt())
+                .kind(executeEvent.getKind())
+                .mateType(executeEvent.getDoctorMateType())
+                .pregCheckResult(executeEvent.getPregCheckResult())
+                .businessId(executeEvent.getPigId())
+                .code(executeEvent.getPigCode())
+                .status(toTrack.getStatus())
                 .businessType(DoctorEventInfo.Business_Type.PIG.getValue())
-                .eventType(doctorPigEvent.getType())
+                .eventType(executeEvent.getType())
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
-    }
-
-    @Override
-    protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        super.specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
-        doctorPigInfoCache.addPigCodeToFarm(basic.getFarmId(), inputDto.getPigCode());
-    }
-
-    @Override
-    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorPigEvent doctorPigEvent =  super.buildPigEvent(basic, inputDto);
-        DoctorFarmEntryDto farmEntryDto = (DoctorFarmEntryDto) inputDto;
-        doctorPigEvent.setParity(farmEntryDto.getParity());
-        return doctorPigEvent;
-    }
-
-    /**
-     * 构建猪进厂 Track 信息表
-     *
-     * @param basic
-     * @return
-     */
-    @Override
-    protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorFarmEntryDto dto = (DoctorFarmEntryDto) inputDto;
-        DoctorBarn doctorBarn = doctorBarnDao.findById(dto.getBarnId());
-        expectTrue(notNull(doctorBarn), "barn.not.null", dto.getBarnId());
-        DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId()).pigType(inputDto.getPigType())
-                .isRemoval(IsOrNot.NO.getValue()).currentMatingCount(0)
-                .pigId(inputDto.getPigId()).pigType(inputDto.getPigType())
-                .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
-                .currentBarnType(doctorBarn.getPigType()).currentParity(dto.getParity())
-                .weight(dto.getWeight())
-                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
-                .build();
-        if (Objects.equals(inputDto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
-            doctorPigTrack.setStatus(PigStatus.Entry.getKey());
-        } else if (Objects.equals(inputDto.getPigType(), DoctorPig.PigSex.BOAR.getKey())) {
-            doctorPigTrack.setStatus(PigStatus.BOAR_ENTRY.getKey());
-        } else {
-            throw new InvalidException("pig.sex.error", inputDto.getPigType(),inputDto.getPigCode());
-        }
-        //添加进场到配种标志位
-        doctorPigTrack.addAllExtraMap(MapBuilder.<String, Object>of().put("enterToMate", true).map());
-        return doctorPigTrack;
     }
 
     /**
      * 构建DoctorPig
      *
-     * @param dto
-     * @param basic
-     * @return
+     * @param dto 进场信息
+     * @param basic 基础数据
+     * @return 猪
      */
     private DoctorPig buildDoctorPig(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic) {
-
         DoctorPig doctorPig = DoctorPig.builder()
                 .farmId(basic.getFarmId())
                 .farmName(basic.getFarmName())
@@ -183,4 +141,78 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         return doctorPig;
     }
 
+    /**
+     * 构建更新猪(修改事件使用)
+     * @param executeEvent 修改的进场事件
+     * @param pig 原猪信息
+     * @return 更改后猪信息
+     */
+    private DoctorPig buildUpdatePig(DoctorPigEvent executeEvent, DoctorPig pig) {
+        DoctorFarmEntryDto farmEntryDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFarmEntryDto.class);
+        pig.setBirthDate(farmEntryDto.getBirthday());
+        pig.setInFarmDate(executeEvent.getEventAt());
+        pig.setPigCode(executeEvent.getPigCode());
+        pig.setBreedId(farmEntryDto.getBreed());
+        pig.setBreedName(farmEntryDto.getBreedName());
+        pig.setPigFatherCode(farmEntryDto.getFatherCode());
+        pig.setPigMotherCode(farmEntryDto.getMotherCode());
+        pig.setSource(farmEntryDto.getSource());
+        pig.setBoarType(farmEntryDto.getBoarType());
+        return pig;
+    }
+
+    @Override
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorFarmEntryDto farmEntryDto = (DoctorFarmEntryDto) inputDto;
+        DoctorPig doctorPig = buildDoctorPig(farmEntryDto, basic);
+        if (isNull(farmEntryDto.getPigId())) {
+            expectTrue(isNull(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(basic.getFarmId(), farmEntryDto.getPigCode(), farmEntryDto.getPigType())), "pigCode.have.existed");
+            doctorPigDao.create(doctorPig);
+        } else {
+            doctorPigDao.update(doctorPig);
+        }
+        farmEntryDto.setPigId(doctorPig.getId());
+        DoctorPigEvent doctorPigEvent =  super.buildPigEvent(basic, farmEntryDto);
+        doctorPigEvent.setParity(farmEntryDto.getParity());
+        return doctorPigEvent;
+    }
+
+    /**
+     * 构建猪进厂 Track 信息表
+     * @param executeEvent 执行事件
+     * @param fromTrack 原状态 进场为null(非编辑时),编辑时为进场之后track
+     * @return 猪track
+     */
+    @Override
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorFarmEntryDto farmEntryDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFarmEntryDto.class);
+        DoctorBarn doctorBarn = doctorBarnDao.findById(executeEvent.getBarnId());
+        expectTrue(notNull(doctorBarn), "barn.not.null", executeEvent.getBarnId());
+        DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(executeEvent.getFarmId())
+                .isRemoval(IsOrNot.NO.getValue()).currentMatingCount(0)
+                .pigId(executeEvent.getPigId()).pigType(executeEvent.getKind())
+                .currentBarnId(doctorBarn.getId()).currentBarnName(doctorBarn.getName())
+                .currentBarnType(doctorBarn.getPigType()).currentParity(executeEvent.getParity())
+                .weight(farmEntryDto.getWeight())
+                .creatorId(executeEvent.getOperatorId()).creatorName(executeEvent.getOperatorName())
+                .currentEventId(executeEvent.getId())
+                .build();
+        if (Objects.equals(executeEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
+            doctorPigTrack.setStatus(PigStatus.Entry.getKey());
+        } else if (Objects.equals(executeEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())) {
+            doctorPigTrack.setStatus(PigStatus.BOAR_ENTRY.getKey());
+        } else {
+            throw new InvalidException("pig.sex.error", executeEvent.getKind());
+        }
+        //添加进场到配种标志位
+        doctorPigTrack.addAllExtraMap(MapBuilder.<String, Object>of().put("enterToMate", true).map());
+        return doctorPigTrack;
+    }
+
+
+    @Override
+    protected void specialHandle(DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
+        super.specialHandle(executeEvent, toTrack);
+        doctorPigInfoCache.addPigCodeToFarm(executeEvent.getFarmId(), executeEvent.getPigCode());
+    }
 }

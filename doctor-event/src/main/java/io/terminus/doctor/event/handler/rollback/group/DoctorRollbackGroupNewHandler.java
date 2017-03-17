@@ -38,7 +38,7 @@ public class DoctorRollbackGroupNewHandler extends DoctorAbstractRollbackGroupEv
         doctorGroupTrackDao.deleteByGroupId(groupEvent.getGroupId());
         doctorGroupDao.delete(groupEvent.getGroupId());
         doctorGroupSnapshotDao.delete(snapshot.getId());
-        createRevertLog(groupEvent, snapshot, operatorId, operatorName);
+        createRevertLog(groupEvent, snapshot, null, operatorId, operatorName);
     }
 
     @Override

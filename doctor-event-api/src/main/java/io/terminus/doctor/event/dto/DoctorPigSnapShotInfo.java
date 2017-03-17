@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.dto;
 
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,5 +24,5 @@ public class DoctorPigSnapShotInfo implements Serializable {
 
     private DoctorPig pig;
     private DoctorPigTrack pigTrack;
-    private DoctorPigEvent pigEvent;
+    //private DoctorPigEvent pigEvent;
 }

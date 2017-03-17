@@ -1,12 +1,10 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
@@ -19,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -45,29 +42,44 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
     }
 
     @Override
-    protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.ANTIEPIDEMIC.getValue());
-        DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorAntiepidemicGroupInput antiepidemic = (DoctorAntiepidemicGroupInput) input;
-
-        checkQuantity(groupTrack.getQuantity(), antiepidemic.getQuantity());
         //1.转换下防疫信息
         DoctorAntiepidemicGroupEvent antiEvent = BeanMapper.map(antiepidemic, DoctorAntiepidemicGroupEvent.class);
 
         //2.创建防疫事件
         DoctorGroupEvent<DoctorAntiepidemicGroupEvent> event = dozerGroupEvent(group, GroupEventType.ANTIEPIDEMIC, antiepidemic);
 
-        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
-
         event.setQuantity(antiepidemic.getQuantity());
         event.setExtraMap(antiEvent);
+
+        return event;
+    }
+
+    @Override
+    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
+        checkQuantity(track.getQuantity(), event.getQuantity());
+        return track;
+    }
+
+
+    @Override
+    protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+
+        //1.构建event
+        DoctorGroupEvent event = buildGroupEvent(group, groupTrack, input);
+
+        //2.检验事件是否可执行
+
+
         doctorGroupEventDao.create(event);
 
-        //3.更新猪群跟踪
-        updateGroupTrack(groupTrack, event);
+        //3.推演track
 
-        //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.ANTIEPIDEMIC);
+
+        //4.创建snapshot
+
+
     }
 }

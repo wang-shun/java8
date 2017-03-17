@@ -339,6 +339,42 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+<<<<<<< HEAD
+     * 去获取猪某一事件之后的事件列表
+     * @param pigId 猪id
+     * @param eventId 事件id
+     * @return 事件列表
+     */
+    public List<DoctorPigEvent> findFollowEvents(Long pigId, Long eventId) {
+        return getSqlSession().selectList(sqlId("findFollowEvents"), ImmutableMap.of("eventId", eventId, "pigId", pigId));
+    }
+
+    /**
+     * 批量更改事件状态
+     * @param ids 事件id列表
+     * @param status 需要更改的状态
+     */
+    public void updateEventsStatus(List<Long> ids, Integer status) {
+        getSqlSession().update(sqlId("updateEventsStatus"), ImmutableMap.of("ids", ids, "status", status));
+    }
+
+    /**
+     * 查询所有事件,包括无效事件
+     * @param id 事件id
+     * @return 事件
+     */
+    public DoctorPigEvent findEventById(Long id) {
+        return getSqlSession().selectOne(sqlId("findEventById"), id);
+    }
+
+    /**
+     * 查询最新影响事件不包含某些事件类型的最新事件
+     */
+    public DoctorPigEvent findLastEventExcludeTypes(Long pigId, List<Integer> types) {
+        return getSqlSession().selectOne(sqlId("findLastEventExcludeTypes"), ImmutableMap.of("pigId", pigId, "types", types));
+    }
+
+    /*
      * 根据条件搜索猪id
      * @param criteria
      * @return

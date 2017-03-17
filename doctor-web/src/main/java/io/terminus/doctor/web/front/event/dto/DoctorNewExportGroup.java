@@ -77,5 +77,8 @@ public class DoctorNewExportGroup extends DoctorGroupEvent {
      */
     private String geneticName;
 
-    private String status;
+    /**
+     * 当前状态
+     */
+    private String currentStatus;
 }

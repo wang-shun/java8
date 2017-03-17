@@ -280,10 +280,9 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             if (pigEvent == null) {
                 return RespWithEx.ok(null);
             }
-            for (DoctorRollbackPigEventHandler handler : doctorRollbackHandlerChain.getRollbackPigEventHandlers()) {
-                if (handler.canRollback(pigEvent)) {
-                    return RespWithEx.ok(pigEvent);
-                }
+            DoctorRollbackPigEventHandler handler = doctorRollbackHandlerChain.getRollbackPigEventHandlers().get(pigEvent.getType(), pigEvent.getKind());
+            if (handler.canRollback(pigEvent)) {
+                return RespWithEx.ok(pigEvent);
             }
             return RespWithEx.ok(null);
         } catch (InvalidException e) {
@@ -298,10 +297,9 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     public RespWithEx<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId) {
         try {
             DoctorPigEvent pigEvent = doctorPigEventDao.findById(eventId);
-            for (DoctorRollbackPigEventHandler handler : doctorRollbackHandlerChain.getRollbackPigEventHandlers()) {
-                if (handler.canRollback(pigEvent)) {
-                    return RespWithEx.ok(Boolean.TRUE);
-                }
+            DoctorRollbackPigEventHandler handler = doctorRollbackHandlerChain.getRollbackPigEventHandlers().get(pigEvent.getType(), pigEvent.getKind());
+            if (handler.canRollback(pigEvent)) {
+                return RespWithEx.ok(Boolean.TRUE);
             }
             return RespWithEx.ok(Boolean.FALSE);
         } catch (InvalidException e) {

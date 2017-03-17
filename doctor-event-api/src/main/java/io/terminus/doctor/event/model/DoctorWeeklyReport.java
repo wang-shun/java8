@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.model;
 
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -21,7 +22,7 @@ import java.util.Date;
 public class DoctorWeeklyReport implements Serializable {
     private static final long serialVersionUID = 8251705900654083560L;
 
-    private static final JsonMapper MAPPER = JsonMapper.nonEmptyMapper();
+    private static final JsonMapperUtil MAPPER = JsonMapperUtil.nonEmptyMapper();
 
     private Long id;
     

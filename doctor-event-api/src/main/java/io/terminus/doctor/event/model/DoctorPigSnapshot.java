@@ -22,19 +22,23 @@ public class DoctorPigSnapshot implements Serializable{
 
     private Long id;
 
-    private Long orgId;
-
-    private Long farmId;
-
     private Long pigId;
 
-    private Long eventId;
+    /**
+     * 来源事件id
+     */
+    private Long fromEventId;
 
     /**
-     * 当前事件发生前的info
+     * 导致变化事件id
+     */
+    private Long toEventId;
+
+    /**
+     * 事件发生后镜像
      * @see io.terminus.doctor.event.dto.DoctorPigSnapShotInfo
      */
-    private String pigInfo;
+    private String toPigInfo;
 
     private Date createdAt;
 

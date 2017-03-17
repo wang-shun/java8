@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import configuration.front.FrontPrimaryWebConfiguration;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.web.front.role.Sub;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -88,7 +89,7 @@ public class SubsTest extends BaseFrontWebTest{
         sub.setContact("18661744610");
         sub.setRoleId(1L);
         sub.setPassword("123456");
-        System.out.println(JsonMapper.nonEmptyMapper().toJson(sub));
+        System.out.println(JsonMapperUtil.nonEmptyMapper().toJson(sub));
         return sub;
     }
 }
