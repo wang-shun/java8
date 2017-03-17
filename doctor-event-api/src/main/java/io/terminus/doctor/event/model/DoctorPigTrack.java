@@ -103,6 +103,11 @@ public class DoctorPigTrack implements Serializable {
      */
     private String relEventIds;
 
+    /**
+     * 猪的最新有效事件
+     */
+    private Long currentEventId;
+
     @Setter(AccessLevel.NONE)
     private Map<String, Object> extraMap;
 

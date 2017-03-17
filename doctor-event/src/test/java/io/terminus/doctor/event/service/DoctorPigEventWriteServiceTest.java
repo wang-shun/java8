@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -93,7 +94,7 @@ public class DoctorPigEventWriteServiceTest extends BaseServiceTest{
 //    }
 
     private <T> void printInfo(T t){
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(t));
+        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(t));
     }
 
 }

@@ -10,6 +10,8 @@ import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
@@ -24,6 +26,7 @@ import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.DoctorEventModifyRequestDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
@@ -46,23 +49,30 @@ import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.core.aspects.DoctorValidService;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchPigEventDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -77,8 +87,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.PigType.*;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
@@ -117,6 +126,12 @@ public class DoctorPigCreateEvents {
     private DoctorBasicReadService doctorBasicReadService;
     @RpcConsumer
     private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
+    @RpcConsumer
+    private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
+    @RpcConsumer
+    private DoctorEventModifyRequestReadService doctorEventModifyRequestReadService;
+    @RpcConsumer
+    private DoctorUserProfileReadService doctorUserProfileReadService;
 
     private static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
 
@@ -488,6 +503,73 @@ public class DoctorPigCreateEvents {
                     }
                 }).collect(Collectors.toList());
         return RespWithExHelper.orInvalid(doctorPigEventWriteService.batchPigEventHandle(inputDtoList, buildBasicInputInfoDto(batchPigEventDto.getFarmId(), pigEvent)));
+    }
+
+    /**
+     * 创建编辑事件请求
+     * @param farmId 猪场id
+     * @param eventId 事件id
+     * @param eventTye 事件类型
+     * @param pigSex 猪性别
+     * @param input 事件编辑内容
+     */
+    @RequestMapping(value = "/createPigModifyRequest", method = RequestMethod.POST)
+    public void createPigModifyRequest(@RequestParam Long farmId,
+                                       @RequestParam Long eventId,
+                                       @RequestParam Integer eventType,
+                                       @RequestParam Integer pigSex,
+                                       @RequestParam String input) {
+        //构建事件所需信息
+        PigEvent pigEvent = PigEvent.from(eventType);
+        DoctorBasicInputInfoDto basic = buildBasicInputInfoDto(farmId, pigEvent);
+        BasePigEventInputDto inputDto = eventInput(pigEvent, input, farmId, pigSex, null);
+        if (Objects.equals(eventType, PigEvent.ENTRY.getKey())) {
+            inputDto = buildEntryEventInput(inputDto, pigEvent);
+        } else {
+            inputDto = buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
+        }
+
+        //获取编辑人信息
+        DoctorUser user = UserUtil.getCurrentUser();
+        if (isNull(user)) {
+            throw new JsonResponseException("user.not.login");
+        }
+        //获取真实姓名
+        String userName = user.getName();
+        Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(user.getId());
+        if (userProfileResponse.isSuccess() && notNull(userProfileResponse.getResult())) {
+            userName = userProfileResponse.getResult().getRealName();
+        }
+
+        Long requestId = RespHelper.or500(doctorEventModifyRequestWriteService.createPigModifyEventRequest(basic, inputDto, eventId, user.getId(), userName));
+        //通过job执行
+//        DoctorEventModifyRequest modifyRequest = RespHelper.or500(doctorEventModifyRequestReadService.findById(requestId));
+//        RespWithExHelper.orInvalid(doctorEventModifyRequestWriteService.modifyEventHandle(modifyRequest));
+    }
+
+    /**
+     * 分页查询事件编辑请求
+     * @param modifyRequest 查询条件
+     * @return 分页结果
+     */
+    @RequestMapping(value = "/pagingRequest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Paging<DoctorEventModifyRequestDto> pagingRequest(@RequestParam Long farmId,
+                                                             @RequestParam(required = false) Integer status,
+                                                             @RequestParam(required = false) String code,
+                                                             @RequestParam Integer pageNo,
+                                                             @RequestParam Integer pageSize) {
+        return RespHelper.or500(doctorEventModifyRequestReadService
+                .pagingRequest(DoctorEventModifyRequest.builder().farmId(farmId).status(status).build(), pageNo, pageSize));
+    }
+
+    /**
+     * 根据id查询事件编辑请求
+     * @param id 请求id
+     * @return 编辑请求
+     */
+    @RequestMapping(value = "/findModifyReuqest/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public DoctorEventModifyRequestDto findModifyRequest(@PathVariable Long id) {
+        return RespHelper.or500(doctorEventModifyRequestReadService.findDtoById(id));
     }
 
     /**

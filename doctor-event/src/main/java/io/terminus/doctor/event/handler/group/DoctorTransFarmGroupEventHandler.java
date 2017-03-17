@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.handler.group;
 
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -17,6 +19,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -25,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,6 +62,51 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
     }
 
     @Override
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.TRANS_FARM.getValue());
+
+        DoctorTransFarmGroupInput transFarm = (DoctorTransFarmGroupInput) input;
+
+        //转入猪舍
+        DoctorBarn toBarn = getBarn(transFarm.getToBarnId());
+
+        //1.转换转场事件
+        DoctorTransFarmGroupEvent transFarmEvent = BeanMapper.map(transFarm, DoctorTransFarmGroupEvent.class);
+        checkBreed(group.getBreedId(), transFarmEvent.getBreedId());
+        transFarmEvent.setToBarnType(toBarn.getPigType());
+
+        //2.创建转场事件
+        DoctorGroupEvent<DoctorTransFarmGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_FARM, transFarm);
+        event.setQuantity(transFarm.getQuantity());
+
+        event.setWeight(transFarm.getWeight());
+        event.setAvgWeight(EventUtil.getAvgWeight(transFarm.getWeight(), transFarm.getQuantity()));
+        event.setTransGroupType(DoctorGroupEvent.TransGroupType.OUT.getValue());   //转场肯定是外转
+        event.setOtherBarnId(toBarn.getId());          //目标猪舍id
+        event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
+        event.setExtraMap(transFarmEvent);
+        return event;
+    }
+
+    @Override
+    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
+        DoctorTransFarmGroupEvent doctorTransFarmGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransFarmGroupEvent.class);
+        if(Arguments.isNull(doctorTransFarmGroupEvent)) {
+            log.error("parse doctorTransFarmGroupEvent faild, doctorGroupEvent = {}", event);
+            throw new InvalidException("transfarm.group.event.info.broken", event.getId());
+        }
+        //更新track
+        track.setQuantity(EventUtil.minusQuantity(track.getQuantity(), event.getQuantity()));
+
+        //如果公猪数量 lt 0 按 0 计算
+        Integer boarQty = EventUtil.minusQuantity(track.getBoarQty(), doctorTransFarmGroupEvent.getBoarQty());
+        boarQty = boarQty > track.getQuantity() ? track.getQuantity() : boarQty;
+        track.setBoarQty(boarQty < 0 ? 0 : boarQty);
+        track.setSowQty(EventUtil.minusQuantity(track.getQuantity(), track.getBoarQty()));
+        return track;
+    }
+
+    @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.TRANS_FARM.getValue());
 
@@ -87,9 +134,6 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         //2.创建转场事件
         DoctorGroupEvent<DoctorTransFarmGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_FARM, transFarm);
         event.setQuantity(transFarm.getQuantity());
-
-        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
 
         event.setWeight(transFarm.getWeight());
         event.setAvgWeight(EventUtil.getAvgWeight(transFarm.getWeight(), transFarm.getQuantity()));
@@ -120,7 +164,8 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         if (Objects.equals(oldQuantity, transFarm.getQuantity())) {
             doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, transFarm, event.getEventAt(), transFarm.getFcrFeed());
 
-            DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+            DoctorGroupEvent closeEvent = doctorGroupEventDao.findById(toGroupEventId);
             transFarm.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
 

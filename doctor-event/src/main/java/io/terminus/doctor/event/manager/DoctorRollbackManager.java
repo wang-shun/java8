@@ -40,11 +40,10 @@ public class DoctorRollbackManager {
     @Transactional
     public List<DoctorRollbackDto> rollbackGroup(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         //获取拦截器链, 判断能否回滚,执行回滚操作, 返回需要更新的报表
-        for (DoctorRollbackGroupEventHandler handler : doctorRollbackHandlerChain.getRollbackGroupEventHandlers()) {
-            if (handler.canRollback(groupEvent)) {
-                handler.rollback(groupEvent, operatorId, operatorName);
-                return handler.updateReport(groupEvent);
-            }
+        DoctorRollbackGroupEventHandler handler = doctorRollbackHandlerChain.getRollbackGroupEventHandlers().get(groupEvent.getType());
+        if (handler.canRollback(groupEvent)) {
+            handler.rollback(groupEvent, operatorId, operatorName);
+            return handler.updateReport(groupEvent);
         }
         throw new ServiceException("rollback.group.not.allow");
     }
@@ -55,12 +54,11 @@ public class DoctorRollbackManager {
     @Transactional
     public List<DoctorRollbackDto> rollbackPig(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //获取拦截器链, 判断能否回滚, 执行回滚操作, 返回需要更新的报表
-        for (DoctorRollbackPigEventHandler handler : doctorRollbackHandlerChain.getRollbackPigEventHandlers()) {
+        DoctorRollbackPigEventHandler handler = doctorRollbackHandlerChain.getRollbackPigEventHandlers().get(pigEvent.getType(), pigEvent.getKind());
             if (handler.canRollback(pigEvent)) {
                 handler.rollback(pigEvent, operatorId, operatorName);
                 return handler.updateReport(pigEvent);
             }
-        }
         throw new ServiceException("rollback.pig.not.allow");
     }
 

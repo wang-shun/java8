@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.rollback;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -12,6 +13,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -26,6 +28,10 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.text.SimpleDateFormat;
 import java.util.Objects;
+
+import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
+import static io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler.excludeGroupEvent;
 
 /**
  * Desc: 猪事件回滚handler
@@ -56,6 +62,8 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
     protected DoctorPigDao doctorPigDao;
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
+    @Autowired
+    protected DoctorEventRelationDao doctorEventRelationDao;
 
     @Value("${flow.definition.key.sow:sow}")
     protected String sowFlowKey;
@@ -106,11 +114,11 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         DoctorPig doctorPig = doctorPigDao.findById(pigEvent.getPigId());
         DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
         JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-        DoctorPigSnapShotInfo info = jsonMapperUtil.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
+        DoctorPigSnapShotInfo info = jsonMapperUtil.fromJson(snapshot.getToPigInfo(), DoctorPigSnapShotInfo.class);
         doctorPigEventDao.delete(pigEvent.getId());
         doctorPigTrackDao.update(info.getPigTrack());
         doctorPigDao.update(info.getPig());
-        doctorPigSnapshotDao.delete(snapshot.getId());
+        doctorPigSnapshotDao.deleteByEventId(pigEvent.getId());
         createDoctorRevertLog(pigEvent, doctorPigTrack, doctorPig, operatorId, operatorName);
     }
 
@@ -131,16 +139,16 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
      */
     protected void createDoctorRevertLog(DoctorPigEvent fromPigEvent, DoctorPigTrack fromPigTrack, DoctorPig fromPig, Long operatorId, String operatorName) {
         DoctorPigSnapShotInfo fromInfo = DoctorPigSnapShotInfo.builder()
-                .pigEvent(fromPigEvent)
+                //.pigEvent(fromPigEvent)
                 .pigTrack(fromPigTrack)
                 .pig(fromPig)
                 .build();
 
-        DoctorPigEvent toPigEvent = doctorPigEventDao.queryLastPigEventById(fromPigEvent.getPigId());
+        //DoctorPigEvent toPigEvent = doctorPigEventDao.queryLastPigEventById(fromPigEvent.getPigId());
         DoctorPigTrack toPigTrack = doctorPigTrackDao.findByPigId(fromPigEvent.getPigId());
         DoctorPig toPig = doctorPigDao.findById(fromPigEvent.getPigId());
         DoctorPigSnapShotInfo toInfo = DoctorPigSnapShotInfo.builder()
-                .pigEvent(toPigEvent)
+                //.pigEvent(toPigEvent)
                 .pigTrack(toPigTrack)
                 .pig(toPig)
                 .build();
@@ -161,10 +169,33 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         DoctorGroupEvent tmpEvent = event;
         while (event != null) {
             tmpEvent = event;
-            event = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+            DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+            event = isNull(eventRelation)? null :doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
         }
         DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(tmpEvent.getGroupId());
         if (!Objects.equals(tmpEvent.getId(), lastEvent.getId())) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
+    }
+
+    /**
+     * 是否是最新猪群事件
+     */
+    protected boolean isLastGroupEvent(DoctorGroupEvent groupEvent) {
+        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventExcludeTypes(groupEvent.getGroupId(), excludeGroupEvent);
+        if (!Objects.equals(groupEvent.getId(), lastEvent.getId())) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
+    }
+
+    /**
+     * 是否是最新猪事件
+     */
+    protected boolean isLastPigEvent(DoctorPigEvent pigEvent) {
+        DoctorPigEvent lastEvent = doctorPigEventDao.findLastEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
+        if (!Objects.equals(pigEvent.getId(), lastEvent.getId())) {
             return Boolean.FALSE;
         }
         return Boolean.TRUE;

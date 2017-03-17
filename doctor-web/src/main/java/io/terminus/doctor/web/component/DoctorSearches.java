@@ -16,6 +16,7 @@ import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBarnDto;
@@ -309,7 +310,7 @@ public class DoctorSearches {
             pigTypes = Splitters.splitToInteger(params.get("pigTypes"), Splitters.UNDERSCORE);
             params.remove("pigTypes");
         }
-        DoctorGroupSearchDto searchDto = JsonMapper.nonEmptyMapper().fromJson(JsonMapper.nonEmptyMapper().toJson(params), DoctorGroupSearchDto.class);
+        DoctorGroupSearchDto searchDto = JsonMapper.nonEmptyMapper().fromJson(JsonMapperUtil.nonEmptyMapper().toJson(params), DoctorGroupSearchDto.class);
         searchDto.setPigTypes(pigTypes);
 
         BaseUser user = UserUtil.getCurrentUser();

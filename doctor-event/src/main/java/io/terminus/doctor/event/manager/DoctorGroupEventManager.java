@@ -29,6 +29,7 @@ import io.terminus.doctor.event.handler.group.DoctorMoveInGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorWeanGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -97,7 +98,20 @@ public class DoctorGroupEventManager {
             handlerMap.put(GroupEventType.ANTIEPIDEMIC.getValue(), handlerMapping.get(DoctorAntiepidemicGroupEventHandler.class));
             handlerMap.put(GroupEventType.TRANS_FARM.getValue(), handlerMapping.get(DoctorTransFarmGroupEventHandler.class));
             handlerMap.put(GroupEventType.CLOSE.getValue(), handlerMapping.get(DoctorCloseGroupEventHandler.class));
+            handlerMap.put(GroupEventType.WEAN.getValue(), handlerMapping.get(DoctorWeanGroupEventHandler.class));
         }
+    }
+
+    /**
+     * 构建猪群事件
+     * @param inputInfo 输入信息
+     * @param eventType 事件类型
+     * @param <I>
+     * @return 猪群事件
+     */
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroupInputInfo inputInfo, Integer eventType) {
+        //暂时只有转入事件重写了此方法(为了编辑猪分娩)
+        return getHandler(eventType).buildGroupEvent(inputInfo.getGroupDetail().getGroup(), inputInfo.getGroupDetail().getGroupTrack(), inputInfo.getInput());
     }
 
     /**
@@ -151,10 +165,13 @@ public class DoctorGroupEventManager {
         checkCanRollback(groupEvent);
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
 
-        //记录回滚日志
-        createRevertLog(snapshot, reverterId, reverterName);
 
-        DoctorGroupSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getFromInfo(), DoctorGroupSnapShotInfo.class);
+
+        DoctorGroupSnapshot oldSnapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(snapshot.getFromEventId());
+        DoctorGroupSnapShotInfo info = JSON_MAPPER.fromJson(oldSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
+
+        //记录回滚日志
+        createRevertLog(snapshot, oldSnapshot, reverterId, reverterName);
 
         //删除此事件 -> 回滚猪群跟踪 -> 回滚猪群 -> 删除镜像
         doctorGroupEventDao.delete(groupEvent.getId());
@@ -188,11 +205,11 @@ public class DoctorGroupEventManager {
     }
 
     //记录回滚日志
-    private void createRevertLog(DoctorGroupSnapshot snapshot, Long reverterId, String reverterName) {
+    private void createRevertLog(DoctorGroupSnapshot snapshot, DoctorGroupSnapshot oldSnapshot, Long reverterId, String reverterName) {
         DoctorRevertLog revertLog = new DoctorRevertLog();
         revertLog.setType(DoctorRevertLog.Type.GROUP.getValue());
         revertLog.setFromInfo(snapshot.getToInfo());
-        revertLog.setToInfo(snapshot.getFromInfo());
+        revertLog.setToInfo(oldSnapshot.getToInfo());
         revertLog.setReverterId(reverterId);
         revertLog.setReverterName(reverterName);
         doctorRevertLogDao.create(revertLog);
@@ -239,5 +256,9 @@ public class DoctorGroupEventManager {
         if (inputList.size() != inputSet.size()) {
             throw new ServiceException("batch.event.groupCode.not.repeat");
         }
+    }
+
+    public int calculateAvgDay(Long id){
+        return handlerMapping.get(DoctorMoveInGroupEventHandler.class).getGroupAvgDayAge(id, null);
     }
 }

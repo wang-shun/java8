@@ -7,6 +7,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.basic.dto.DoctorMaterialProductRatioDto;
@@ -115,7 +116,7 @@ public class DoctorFeedFormulas {
         feedFormula.setFeedName(feed.getName());
         feedFormula.setFarmId(dto.getFarmId());
         feedFormula.setFarmName(RespHelper.or500(doctorFarmReadService.findFarmById(dto.getFarmId())).getName());
-        feedFormula.setFormulaMap(ImmutableMap.of("materialProduce", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(dto.getProduce())));
+        feedFormula.setFormulaMap(ImmutableMap.of("materialProduce", JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(dto.getProduce())));
 
         FeedFormula exist = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(feed.getId(), dto.getFarmId()));
         if(exist == null){

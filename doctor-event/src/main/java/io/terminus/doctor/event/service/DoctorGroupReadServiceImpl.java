@@ -25,7 +25,6 @@ import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -373,10 +372,8 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             if (groupEvent == null) {
                 return RespWithEx.ok(null);
             }
-            for (DoctorRollbackGroupEventHandler handler : doctorRollbackHandlerChain.getRollbackGroupEventHandlers()) {
-                if (handler.canRollback(groupEvent)) {
-                    return RespWithEx.ok(groupEvent);
-                }
+            if (doctorRollbackHandlerChain.getRollbackGroupEventHandlers().get(groupEvent.getType()).canRollback(groupEvent)) {
+                return RespWithEx.ok(groupEvent);
             }
             return RespWithEx.ok(null);
         } catch (InvalidException e) {
@@ -391,10 +388,8 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     public RespWithEx<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId) {
         try {
             DoctorGroupEvent groupEvent = doctorGroupEventDao.findById(eventId);
-            for (DoctorRollbackGroupEventHandler handler : doctorRollbackHandlerChain.getRollbackGroupEventHandlers()) {
-                if (handler.canRollback(groupEvent)) {
-                    return RespWithEx.ok(Boolean.TRUE);
-                }
+            if (doctorRollbackHandlerChain.getRollbackGroupEventHandlers().get(groupEvent.getType()).canRollback(groupEvent)) {
+                return RespWithEx.ok(Boolean.TRUE);
             }
             return RespWithEx.ok(Boolean.FALSE);
         } catch (InvalidException e) {
@@ -460,6 +455,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("find.new.group.event.by.groupId.failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
             return Response.fail("find new group event by groupId failed");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorGroupEvent>> findLinkedGroupEventsByGroupId(@NotNull(message = "groupId.not.null") Long groupId){
+        try{
+            return Response.ok(doctorGroupEventDao.findLinkedGroupEventsByGroupId(groupId));
+        }catch(Exception e){
+            log.error("find linked group events failed, groupId: {}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.linked.group.events.failed");
         }
     }
 }

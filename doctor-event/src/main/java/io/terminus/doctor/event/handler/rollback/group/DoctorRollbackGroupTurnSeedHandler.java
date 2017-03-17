@@ -7,6 +7,7 @@ import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarEntryEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowEntryEventHandler;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
+
+import static io.terminus.common.utils.Arguments.isNull;
 
 /**
  * Desc: 商品猪转种猪事件回滚
@@ -38,13 +41,16 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
         }
 
         //如果触发关闭猪群事件
-        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+
         if (isCloseEvent(close) && !doctorRollbackGroupCloseHandler.handleCheck(close)) {
             return false;
         }
 
         //商品猪转种猪会触发猪的进场事件，所以需要校验猪的进场事件是否是最新事件
-        DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(groupEvent.getId());
+        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.PIG.getValue()).getTriggerEventId();
+        DoctorPigEvent toPigEvent = doctorPigEventDao.findById(toPigEventId);
         DoctorPigEvent lastPigEvent = doctorPigEventDao.queryLastPigEventById(toPigEvent.getPigId());
         return Objects.equals(lastPigEvent.getId(), toPigEvent.getId());
 
@@ -54,21 +60,24 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a turn seed event:{}", groupEvent);
-        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
 
-        //如果触发关闭猪群事件, 要回滚关闭事件
+        //1.回滚进场事件
+        rollbackEntry(groupEvent, operatorId, operatorName);
+
+        //2.如果触发关闭猪群事件, 要回滚关闭事件
+        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventIdAndType(groupEvent.getId(), GroupEventType.CLOSE.getValue());
         if (isCloseEvent(close)) {
-            rollbackEntry(close, operatorId, operatorName);
             doctorRollbackGroupCloseHandler.rollback(close, operatorId, operatorName);
-        } else {
-            rollbackEntry(groupEvent, operatorId, operatorName);
         }
+
+        //3.回滚自己
         sampleRollback(groupEvent, operatorId, operatorName);
     }
 
     private void rollbackEntry(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         //先回滚猪的进场事件(判断公猪还是母猪进场)
-        DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(groupEvent.getId());
+        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.PIG.getValue()).getTriggerEventId();
+        DoctorPigEvent toPigEvent = doctorPigEventDao.findById(toPigEventId);
         if (Objects.equals(toPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             doctorRollbackSowEntryEventHandler.rollback(toPigEvent, operatorId, operatorName);
         } else {

@@ -1,9 +1,9 @@
 package io.terminus.doctor.event.handler.group;
 
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,7 +51,51 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
-    
+
+    @Override
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.TURN_SEED.getValue());
+
+        DoctorTurnSeedGroupInput turnSeed = (DoctorTurnSeedGroupInput) input;
+        DoctorBarn toBarn = getBarnById(turnSeed.getToBarnId());
+
+        //0. 校验数据
+        checkQuantity(groupTrack.getQuantity(), 1); // 确保 原数量 >= 1
+        checkTurnSeedData(group.getPigType(), toBarn.getPigType());
+
+        //1. 转换转种猪事件
+        DoctorTurnSeedGroupEvent turnSeedEvent = BeanMapper.map(turnSeed, DoctorTurnSeedGroupEvent.class);
+        turnSeedEvent.setToBarnType(toBarn.getPigType());
+
+
+        //2. 创建转种猪事件
+        DoctorGroupEvent<DoctorTurnSeedGroupEvent> event = dozerGroupEvent(group, GroupEventType.TURN_SEED, turnSeed);
+        event.setExtraMap(turnSeedEvent);
+        event.setQuantity(1);
+
+        event.setWeight(turnSeed.getWeight());
+        event.setAvgWeight(turnSeed.getWeight());
+        event.setOtherBarnId(toBarn.getId());          //目标猪舍id
+        event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
+        return event;
+    }
+
+    @Override
+    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
+        DoctorTurnSeedGroupEvent doctorTurnSeedGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTurnSeedGroupEvent.class);
+        if(Arguments.isNull(doctorTurnSeedGroupEvent)) {
+            log.error("parse doctorTurnSeedGroupEvent faild, doctorGroupEvent = {}", event);
+            throw new InvalidException("trunseed.group.event.info.broken", event.getId());
+        }
+
+        DoctorPig.PigSex sex = getSex(doctorTurnSeedGroupEvent.getToBarnType());
+
+        track.setQuantity(track.getQuantity() - 1);
+        track.setBoarQty(getBoarQty(sex, track.getBoarQty()));
+        track.setSowQty(track.getQuantity() - track.getBoarQty());
+        return track;
+    }
+
     @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.TURN_SEED.getValue());
@@ -67,14 +110,13 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
         //1. 转换转种猪事件
         DoctorTurnSeedGroupEvent turnSeedEvent = BeanMapper.map(turnSeed, DoctorTurnSeedGroupEvent.class);
+        turnSeedEvent.setToBarnType(toBarn.getPigType());
+
 
         //2. 创建转种猪事件
         DoctorGroupEvent<DoctorTurnSeedGroupEvent> event = dozerGroupEvent(group, GroupEventType.TURN_SEED, turnSeed);
         event.setExtraMap(turnSeedEvent);
         event.setQuantity(1);
-
-        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
 
         event.setWeight(turnSeed.getWeight());
         event.setAvgWeight(turnSeed.getWeight());
@@ -100,8 +142,9 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         if (Objects.equals(groupTrack.getQuantity(), 0)) {
             doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, turnSeed, event.getEventAt(), turnSeed.getFcrFeed());
 
-            DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
-            turnSeed.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
+//            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+//            DoctorGroupEvent closeEvent = doctorGroupEventDao.findById(toGroupEventId);
+//            turnSeed.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
 
         //6.判断公母猪, 触发进场事件
@@ -146,5 +189,13 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
             return oldQty - 1;
         }
         return oldQty;
+    }
+
+    @Override
+    public boolean checkDoctorGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent) {
+        if(doctorGroupTrack.getQuantity() < 1){
+            return false;
+        }
+        return true;
     }
 }

@@ -27,6 +27,7 @@ import java.util.List;
 @Slf4j
 public class DoctorPigManager {
     private static final JsonMapperUtil MAPPER = JsonMapperUtil.nonDefaultMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+    private static final JsonMapperUtil IN_JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     private final DoctorPigDao doctorPigDao;
     private final DoctorPigEventDao doctorPigEventDao;
@@ -67,10 +68,10 @@ public class DoctorPigManager {
 
         List<DoctorPigSnapshot> snapshots = doctorPigSnapshotDao.findByPigId(pigId);
         snapshots.forEach(snapshot -> {
-            DoctorPigSnapShotInfo info = MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
+            DoctorPigSnapShotInfo info = MAPPER.fromJson(snapshot.getToPigInfo(), DoctorPigSnapShotInfo.class);
             info.getPig().setPigCode(pigCode);
-            info.getPigEvent().setPigCode(pigCode);
-            snapshot.setPigInfo(MAPPER.toJson(info));
+            //info.getPigEvent().setPigCode(pigCode);
+            snapshot.setToPigInfo(IN_JSON_MAPPER.toJson(info));
             doctorPigSnapshotDao.update(snapshot);
         });
 

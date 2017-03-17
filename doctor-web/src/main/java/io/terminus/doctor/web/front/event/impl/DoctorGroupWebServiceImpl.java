@@ -5,6 +5,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Dates;
@@ -42,6 +43,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -55,6 +57,7 @@ import io.terminus.doctor.web.front.event.dto.DoctorBatchGroupEventDto;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchNewGroupEventDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +104,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private PrimaryUserReadService primaryUserReadService;
     @RpcConsumer
     private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
+    @RpcConsumer
+    private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
 
     @Autowired
     public DoctorGroupWebServiceImpl(DoctorGroupWriteService doctorGroupWriteService,
@@ -336,7 +341,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                             DoctorGroupInputInfo groupInputInfo = buildGroupEventInputInfo(inputInfo.getGroupId(), batchGroupEventDto.getEventType(), inputInfo.getInputJson());
                             return doctorValidService.valid(groupInputInfo, groupInputInfo.getGroupDetail().getGroup().getGroupCode());
                         } catch (InvalidException e) {
-                            throw new InvalidException(true, e.getError(),groupCode, e.getParams());
+                            throw new InvalidException(true, e.getError(), groupCode, e.getParams());
                         } catch (ServiceException e) {
                             throw new InvalidException(true, e.getMessage(), groupCode);
                         }
@@ -351,6 +356,46 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
             log.error("batch group event failed, batchGroupEventDto:{}, cause:{}", batchGroupEventDto, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail("group.event.create.fail");
+        }
+    }
+
+    @Override
+    public RespWithEx<Long> createGroupModifyEventRequest(Long groupId, Integer eventType, Long eventId, String data) {
+        try {
+            String groupCode = getGroupCode(groupId);
+            try {
+                DoctorGroupDetail groupDetail = checkGroupExist(groupId);
+                Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
+                DoctorGroupInputInfo groupInputInfo = buildGroupEventInfo(eventType, groupDetail, params);
+                doctorValidService.valid(groupInputInfo, groupInputInfo.getGroupDetail().getGroup().getGroupCode());
+
+                //获取编辑人信息
+                BaseUser user = UserUtil.getCurrentUser();
+                if (isNull(user)) {
+                    throw new ServiceException("user.not.login");
+                }
+                //获取真实姓名
+                String userName = user.getName();
+                Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(user.getId());
+                if (userProfileResponse.isSuccess() && notNull(userProfileResponse.getResult())) {
+                    userName = userProfileResponse.getResult().getRealName();
+                }
+                Long requestId = RespHelper.orServEx(doctorEventModifyRequestWriteService.createGroupModifyEventRequest(groupInputInfo, eventId, eventType, user.getId(), userName));
+                return RespWithEx.ok(requestId);
+            } catch (InvalidException e) {
+                throw new InvalidException(true, e.getError(), groupCode, e.getParams());
+            } catch (ServiceException e) {
+                throw new InvalidException(true, e.getMessage(), groupCode);
+            }
+        } catch (InvalidException e) {
+            log.error("batch group event failed, groupId:{}, eventType:{}, eventId:{}, data:{}, cause:{}", groupId, eventType, eventId, data, Throwables.getStackTraceAsString(e));
+            return RespWithEx.exception(e);
+        } catch (ServiceException e) {
+            log.error("batch group event failed, groupId:{}, eventType:{}, eventId:{}, data:{}, cause:{}", groupId, eventType, eventId, data, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("batch group event failed, groupId:{}, eventType:{}, eventId:{}, data:{}, cause:{}", groupId, eventType, eventId, data, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.event.create.fail");
         }
     }
@@ -376,6 +421,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         checkEventAt(groupId, eventAt);
 
         //4.根据不同的事件类型调用不同的录入接口
+        return buildGroupEventInfo(eventType, groupDetail, params);
+    }
+
+    private DoctorGroupInputInfo buildGroupEventInfo(Integer eventType, DoctorGroupDetail groupDetail, Map<String, Object> params){
+        Long groupId = groupDetail.getGroup().getId();
         GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
         params.put("eventType", eventType);
         switch (groupEventType) {

@@ -31,36 +31,40 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
 @Slf4j
 public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
     @Override
-    protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
-        expectTrue(!Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "removal.status.not.feed");
-        DoctorRemovalDto removalDto = (DoctorRemovalDto) inputDto;
-        doctorPigTrack.setGroupId(-1L);
-        doctorPigTrack.addAllExtraMap(removalDto.toMap());
-        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
-        if (Objects.equals(DoctorPig.PigSex.BOAR.getKey(), removalDto.getPigType())) {
-            doctorPigTrack.setStatus(PigStatus.BOAR_LEAVE.getKey());
-        } else if (Objects.equals(DoctorPig.PigSex.SOW.getKey(), removalDto.getPigType())) {
-            doctorPigTrack.setStatus(PigStatus.Removal.getKey());
-        } else {
-            throw new InvalidException("pig.sex.error", removalDto.getPigType(),removalDto.getPigCode());
-        }
-        doctorPigTrack.setIsRemoval(IsOrNot.YES.getValue());
-        return doctorPigTrack;
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        expectTrue(!Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey()), "removal.status.not.feed");
     }
 
     @Override
-    protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        super.specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
+        //DoctorRemovalDto removalDto = (DoctorRemovalDto) inputDto;
+        toTrack.setGroupId(-1L);
+        //doctorPigTrack.addAllExtraMap(removalDto.toMap());
+        //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        if (Objects.equals(DoctorPig.PigSex.BOAR.getKey(), toTrack.getPigType())) {
+            toTrack.setStatus(PigStatus.BOAR_LEAVE.getKey());
+        } else if (Objects.equals(DoctorPig.PigSex.SOW.getKey(), toTrack.getPigType())) {
+            toTrack.setStatus(PigStatus.Removal.getKey());
+        } else {
+            throw new InvalidException("pig.sex.error", toTrack.getPigType(),executeEvent.getPigCode());
+        }
+        toTrack.setIsRemoval(IsOrNot.YES.getValue());
+        return toTrack;
+    }
+
+    @Override
+    protected void specialHandle(DoctorPigEvent inputEvent, DoctorPigTrack currentTrack) {
+        super.specialHandle(inputEvent, currentTrack);
        // 离场 事件 修改Pig 状态信息
-        DoctorPig doctorPig = doctorPigDao.findById(inputDto.getPigId());
-        expectTrue(notNull(doctorPig), "pig.not.null", inputDto.getPigId());
+        DoctorPig doctorPig = doctorPigDao.findById(inputEvent.getPigId());
+        expectTrue(notNull(doctorPig), "pig.not.null", inputEvent.getPigId());
         doctorPigDao.removalPig(doctorPig.getId());
     }
 
     @Override
-    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());

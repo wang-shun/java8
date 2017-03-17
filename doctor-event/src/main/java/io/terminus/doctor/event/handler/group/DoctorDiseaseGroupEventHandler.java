@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -19,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -44,6 +42,30 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
+    @Override
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        input.setEventType(GroupEventType.DISEASE.getValue());
+
+        DoctorDiseaseGroupInput disease = (DoctorDiseaseGroupInput) input;
+
+        //1.转换下疾病信息
+        DoctorDiseaseGroupEvent diseaseEvent = BeanMapper.map(disease, DoctorDiseaseGroupEvent.class);
+
+        //2.创建疾病事件
+        DoctorGroupEvent<DoctorDiseaseGroupEvent> event = dozerGroupEvent(group, GroupEventType.DISEASE, disease);
+
+
+        event.setQuantity(disease.getQuantity());
+        event.setExtraMap(diseaseEvent);
+
+        return event;
+    }
+
+    @Override
+    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack groupTrack) {
+        return groupTrack;
+    }
+
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
@@ -59,17 +81,17 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         //2.创建疾病事件
         DoctorGroupEvent<DoctorDiseaseGroupEvent> event = dozerGroupEvent(group, GroupEventType.DISEASE, disease);
 
-        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
 
         event.setQuantity(disease.getQuantity());
         event.setExtraMap(diseaseEvent);
         doctorGroupEventDao.create(event);
 
-        //3.更新猪群跟踪
-        updateGroupTrack(groupTrack, event);
+        //疾病事件不更新track,不增加snapshot
+
+//        //3.更新猪群跟踪
+//        updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.DISEASE);
+//        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.DISEASE);
     }
 }

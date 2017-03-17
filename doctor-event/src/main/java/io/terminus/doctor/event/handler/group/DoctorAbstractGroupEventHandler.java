@@ -3,12 +3,14 @@ package io.terminus.doctor.event.handler.group;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -18,6 +20,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.event.DoctorGroupEventListener;
@@ -25,14 +28,17 @@ import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -50,7 +56,7 @@ import static io.terminus.doctor.common.enums.PigType.*;
 @Slf4j
 public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEventHandler {
 
-    protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
 
 
@@ -58,6 +64,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorBarnDao doctorBarnDao;
+    @Autowired
+    protected DoctorEventRelationDao doctorEventRelationDao;
 
     @Autowired
     private DoctorGroupDao doctorGroupDao;
@@ -77,6 +85,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     @Override
+    public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, @Valid I input) {
+        return null;
+    }
+
+    @Override
     public <I extends BaseGroupInput> void handle(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         handleEvent(eventInfoList, group, groupTrack, input);
         DoctorEventInfo eventInfo = DoctorEventInfo.builder()
@@ -90,9 +103,55 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 .pigType(group.getPigType())
                 .build();
         eventInfoList.add(eventInfo);
+    }
+
+    /**
+     * 创建事件的关联关系
+     * @param groupEvent 触发事件
+     */
+    protected void createEventRelation(DoctorGroupEvent groupEvent) {
+        if (Objects.equals(groupEvent.getIsAuto(), IsOrNot.NO.getValue())) {
+            return;
+        }
+        DoctorEventRelation eventRelation = DoctorEventRelation.builder()
+                .originEventId(MoreObjects.firstNonNull(groupEvent.getRelPigEventId(), groupEvent.getRelGroupEventId()))
+                .triggerEventId(groupEvent.getId())
+                .triggerTargetType(DoctorEventRelation.TargetType.GROUP.getValue())
+                .status(DoctorEventRelation.Status.VALID.getValue())
+                .build();
+        doctorEventRelationDao.create(eventRelation);
 
     }
 
+    private void createEventRelation(DoctorGroupEvent executeEvent, Long oldEventId) {
+        try{
+            //更新当前事件触发的事件
+            List<DoctorEventRelation> eventRelationList = doctorEventRelationDao.findByOrigin(oldEventId);
+            eventRelationList.forEach(doctorEventRelation -> {
+                DoctorEventRelation updateEventRelation = new DoctorEventRelation();
+                updateEventRelation.setId(doctorEventRelation.getId());
+                updateEventRelation.setStatus(DoctorEventRelation.Status.HANDLING.getValue());
+                doctorEventRelationDao.update(updateEventRelation);
+                doctorEventRelation.setOriginEventId(executeEvent.getId());
+                doctorEventRelationDao.create(doctorEventRelation);
+            });
+
+            //更新被触发
+            DoctorEventRelation eventRelation = doctorEventRelationDao.findByTrigger(oldEventId);
+            if(Objects.nonNull(eventRelation)){
+                DoctorEventRelation updateEventRelation = new DoctorEventRelation();
+                updateEventRelation.setId(eventRelation.getId());
+                updateEventRelation.setStatus(DoctorEventRelation.Status.HANDLING.getValue());
+                doctorEventRelationDao.update(updateEventRelation);
+                eventRelation.setTriggerEventId(executeEvent.getId());
+                doctorEventRelationDao.create(eventRelation);
+            }
+        }catch (Exception e){
+            log.error("update doctorEventRelation failed, oldEventId = {}, newDoctorGroupEvent = {}", oldEventId, executeEvent);
+            throw new InvalidException("update.event.relation.failed", oldEventId, executeEvent.getId());
+        }
+
+    }
     /**
      * 处理事件的抽象方法, 由继承的子类去实现
      * @param eventInfoList 事件信息列表 每发生一个事件记录下来
@@ -125,6 +184,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setRemark(baseInput.getRemark());
         event.setRelGroupEventId(baseInput.getRelGroupEventId());
         event.setRelPigEventId(baseInput.getRelPigEventId());
+        event.setStatus(EventStatus.VALID.getValue());
         return event;
     }
 
@@ -159,19 +219,15 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     //创建猪群镜像信息
     protected DoctorGroupSnapshot createGroupSnapShot(DoctorGroupSnapShotInfo oldShot, DoctorGroupSnapShotInfo newShot, GroupEventType eventType) {
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-        groupSnapshot.setEventType(eventType.getValue());  //猪群事件类型
-
+        String oldExtra = oldShot.getGroupEvent().getExtra();
+        String newExtra = newShot.getGroupEvent().getExtra();
+        oldShot.getGroupEvent().setExtraMap(null);
+        newShot.getGroupEvent().setExtraMap(null);
+        oldShot.getGroupEvent().setExtra(oldExtra);
+        newShot.getGroupEvent().setExtra(newExtra);
         //录入前的数据
-        groupSnapshot.setFromGroupId(oldShot.getGroup().getId());
+        groupSnapshot.setGroupId(newShot.getGroup().getId());
         groupSnapshot.setFromEventId(oldShot.getGroupEvent().getId());
-        groupSnapshot.setFromInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
-                .group(oldShot.getGroup())
-                .groupEvent(oldShot.getGroupEvent())
-                .groupTrack(oldShot.getGroupTrack())
-                .build()));
-
-        //录入后的数据
-        groupSnapshot.setToGroupId(newShot.getGroup().getId());
         groupSnapshot.setToEventId(newShot.getGroupEvent().getId());
         groupSnapshot.setToInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
                 .group(newShot.getGroup())
@@ -345,4 +401,178 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
         return eventAge;
     }
+
+    //重新计算日龄
+    @Override
+    public int getGroupAvgDayAge(Long groupId, DoctorGroupEvent event) {
+        List<DoctorGroupEvent> doctorGroupEventList = doctorGroupEventDao.findByGroupId(groupId);
+        if(!Arguments.isNull(event)) {
+            doctorGroupEventList.add(event);
+        }
+        //avgDay日龄, quantity数量, lastEventAt上一次事件发生时间
+        DoctorGroupTrack doctorGroupTrack = new DoctorGroupTrack();
+        doctorGroupEventList.stream()
+                .sorted((doctorGroupEvent1, doctorGroupEvent2) -> doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent2.getEventAt()))
+                .forEach(doctorGroupEvent -> {
+                    reCalculate(doctorGroupTrack, doctorGroupEvent);
+                });
+        return doctorGroupTrack.getAvgDayAge();
+    }
+
+    protected  void reCalculate(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
+        int avgDay = Objects.isNull(doctorGroupTrack.getAvgDayAge()) ? 0 : doctorGroupTrack.getAvgDayAge();
+        int quantity = Objects.isNull(doctorGroupTrack.getQuantity()) ? 0 : doctorGroupTrack.getQuantity();
+        Date lastEventAt = Objects.isNull(doctorGroupTrack.getBirthDate()) ? doctorGroupEvent.getEventAt() : doctorGroupTrack.getBirthDate();
+        int deltaDays;
+        switch(GroupEventType.from(doctorGroupEvent.getType())){
+            case NEW:
+                break;
+            case MOVE_IN:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, doctorGroupEvent.getAvgDayAge(), doctorGroupEvent.getQuantity()) + deltaDays;
+                quantity += doctorGroupEvent.getQuantity();
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case CHANGE:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                quantity -= doctorGroupEvent.getQuantity();
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case TRANS_GROUP:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                quantity -= doctorGroupEvent.getQuantity();
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case TURN_SEED:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                quantity -= 1;
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case LIVE_STOCK:
+                break;
+            case DISEASE:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case ANTIEPIDEMIC:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                quantity -= doctorGroupEvent.getQuantity();
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case TRANS_FARM:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                quantity -= doctorGroupEvent.getQuantity();
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+            case CLOSE:
+                break;
+            case WEAN:
+                deltaDays = avgDay == 0 ? 0 : DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), lastEventAt);
+                avgDay = EventUtil.getAvgDayAge(avgDay, quantity, 0, 0) + deltaDays;
+                doctorGroupTrack.setQuantity(quantity);
+                doctorGroupTrack.setAvgDayAge(avgDay);
+                doctorGroupTrack.setBirthDate(doctorGroupEvent.getEventAt());
+                break;
+        }
+    }
+
+
+
+    @Override
+    public DoctorGroupTrack editGroupEvent(List<DoctorGroupEvent> triggerDoctorGroupEventList, List<Long> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent){
+
+        //校验基本的数量,看会不会失败
+        if(!checkDoctorGroupEvent(doctorGroupTrack, newEvent)){
+            log.info("edit group event failed, doctorGroupEvent={}", newEvent);
+            throw new InvalidException("group.quantity.not.enough",newEvent.getGroupCode(), doctorGroupTrack.getQuantity(), newEvent.getQuantity() - oldEvent.getQuantity());
+        }
+
+        DoctorGroupEvent preDoctorGroupEvent = doctorGroupEventDao.findById(doctorGroupTrack.getRelEventId());
+
+        //根据event推演track
+        doctorGroupTrack = elicitGroupTrack(preDoctorGroupEvent, newEvent, doctorGroupTrack);
+        //创建猪群事件
+        doctorGroupEventDao.create(newEvent);
+
+        createEventRelation(newEvent, oldEvent.getId());
+
+        //新增的事件放入需要回滚的list
+        doctorGroupEventList.add(newEvent.getId());
+
+        //创建猪群track
+        updateGroupTrack(doctorGroupTrack, newEvent);
+
+        //创建snapshot
+        createGroupEventSnapshot(doctorGroupTrack, newEvent, preDoctorGroupEvent);
+
+        //触发其他事件
+        triggerGroupEvent(triggerDoctorGroupEventList, oldEvent, newEvent);
+
+        return doctorGroupTrack;
+    }
+
+    /**
+     * 触发其他猪群事件
+     * @param triggerDoctorGroupEventList
+     * @param oldEvent
+     * @param newEvent
+     * @return
+     */
+    public List<DoctorGroupEvent> triggerGroupEvent(List<DoctorGroupEvent> triggerDoctorGroupEventList, DoctorGroupEvent oldEvent,  DoctorGroupEvent newEvent){
+        return triggerDoctorGroupEventList;
+    }
+
+    /**
+     * 校验DoctorGroupEvent
+     * @param doctorGroupTrack
+     * @param doctorGroupEvent
+     * @return
+     */
+    public boolean checkDoctorGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent){
+        return true;
+    }
+
+    /**
+     * 创建snapshot
+     * @param doctorGroupTrack
+     * @param doctorGroupEvent
+     * @param preDoctorGroupEvent
+     */
+    private void createGroupEventSnapshot(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent, DoctorGroupEvent preDoctorGroupEvent) {
+        DoctorGroupSnapshot doctorGroupSnapshot = new DoctorGroupSnapshot();
+        doctorGroupSnapshot.setGroupId(doctorGroupEvent.getGroupId());
+        doctorGroupSnapshot.setFromEventId(preDoctorGroupEvent.getId());
+        doctorGroupSnapshot.setToEventId(doctorGroupEvent.getId());
+
+        DoctorGroupSnapShotInfo doctorGroupSnapShotInfo = new DoctorGroupSnapShotInfo();
+        DoctorGroup doctorGroup = doctorGroupDao.findById(doctorGroupEvent.getGroupId());
+        doctorGroupEvent.setExtraMap(null);
+        doctorGroupSnapShotInfo.setGroupEvent(doctorGroupEvent);
+        doctorGroupSnapShotInfo.setGroupTrack(doctorGroupTrack);
+        doctorGroupSnapShotInfo.setGroup(doctorGroup);
+        doctorGroupSnapshot.setToInfo(JSON_MAPPER.toJson(doctorGroupSnapShotInfo));
+        doctorGroupSnapshotDao.create(doctorGroupSnapshot);
+    }
+    
+
 }

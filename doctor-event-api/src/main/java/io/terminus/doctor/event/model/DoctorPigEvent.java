@@ -46,6 +46,9 @@ public class DoctorPigEvent implements Serializable {
 
     private String pigCode; // 猪Code
 
+    /**
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
     private Integer isAuto; //是否是自动生成的事件 0 否 1 是
 
     private Date eventAt;   // 创建时间
@@ -134,6 +137,7 @@ public class DoctorPigEvent implements Serializable {
 
     /**
      * 妊娠检查结果，从extra中拆出来
+     * @see io.terminus.doctor.event.enums.PregCheckResult
      */
     private Integer pregCheckResult;
 
@@ -274,6 +278,12 @@ public class DoctorPigEvent implements Serializable {
 
     private String outId;
 
+    /**
+     * 事件状态
+     * @see io.terminus.doctor.event.enums.EventStatus
+     */
+    private Integer status;
+
     @Setter(AccessLevel.NONE)
     private Map<String, Object> extraMap;
 
@@ -303,6 +313,12 @@ public class DoctorPigEvent implements Serializable {
     private Date createdAt;
 
     private Date updatedAt;
+
+    /**
+     * 事件来源(不存到数据库中,只在事件处理时有效)
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    private Integer isModify;
 
     @SneakyThrows
     public void setExtra(String extra) {

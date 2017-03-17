@@ -59,4 +59,6 @@ public class DoctorTransFarmGroupEvent extends BaseGroupEvent implements Seriali
     private Integer boarQty;
 
     private Integer sowQty;
+
+    private Double weight;
 }
