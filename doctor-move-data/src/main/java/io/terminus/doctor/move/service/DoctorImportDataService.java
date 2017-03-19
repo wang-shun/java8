@@ -10,7 +10,6 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Joiners;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
@@ -50,6 +49,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.DoctorMatingType;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -122,6 +122,7 @@ import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc:
@@ -687,6 +688,8 @@ public class DoctorImportDataService {
             boarTrack.setCurrentBarnName(boar.getInitBarnName());
             boarTrack.setCurrentBarnType(barn.getPigType());
             boarTrack.setCurrentParity(1);      //配种次数置成1
+            DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(boar.getId());
+            boarTrack.setCurrentEventId(notNull(lastEvent) ? lastEvent.getId() : 0L);
             doctorPigTrackDao.create(boarTrack);
 
             //公猪进场事件
@@ -708,6 +711,7 @@ public class DoctorImportDataService {
                     .creatorName(boar.getCreatorName())
                     .operatorId(boar.getCreatorId())
                     .operatorName(boar.getCreatorName())
+                    .status(EventStatus.VALID.getValue())
                     .npd(0)
                     .dpnpd(0)
                     .pfnpd(0)
@@ -844,6 +848,7 @@ public class DoctorImportDataService {
         event.setAvgDayAge(dayAge);
         event.setIsAuto(IsOrNot.YES.getValue());
         event.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
+        event.setStatus(EventStatus.VALID.getValue());
         doctorGroupEventDao.create(event);
     }
 
@@ -1174,6 +1179,8 @@ public class DoctorImportDataService {
         if(!extra.isEmpty()){
             sowTrack.setExtraMap(extra);
         }
+        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(sow.getId());
+        sowTrack.setCurrentEventId(notNull(lastEvent) ? lastEvent.getId() : 0L);
 
         doctorPigTrackDao.create(sowTrack);
         return sowTrack;
@@ -1199,6 +1206,7 @@ public class DoctorImportDataService {
         event.setBarnId(sow.getInitBarnId());
         event.setBarnName(sow.getInitBarnName());
         event.setRemark(info.getRemark());
+        event.setStatus(EventStatus.VALID.getValue());
         return event;
     }
 

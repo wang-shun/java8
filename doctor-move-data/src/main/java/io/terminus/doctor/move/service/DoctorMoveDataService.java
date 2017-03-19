@@ -10,16 +10,15 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
+import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -45,9 +44,9 @@ import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
@@ -56,7 +55,9 @@ import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
+import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.DoctorMatingType;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -89,7 +90,6 @@ import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_SowCardList;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -107,6 +107,7 @@ import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
 import static io.terminus.doctor.event.enums.PregCheckResult.YANG;
 import static io.terminus.doctor.event.enums.PregCheckResult.from;
@@ -762,6 +763,7 @@ public class DoctorMoveDataService {
         sowEvent.setFarmName(sow.getFarmName());
         sowEvent.setPigId(sow.getId());
         sowEvent.setPigCode(sow.getPigCode());
+        sowEvent.setStatus(EventStatus.VALID.getValue());
 
         sowEvent.setEventAt(event.getEventAt());
         sowEvent.setKind(sow.getPigType());       // 猪类(公猪2,母猪1)
@@ -1121,6 +1123,8 @@ public class DoctorMoveDataService {
         track.setOutFarmDate(DateUtil.toDate(card.getOutFarmDate()));
         track.setRemark(card.getRemark());
         track.setCurrentParity(card.getCurrentParity());
+        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(sow.getId());
+        track.setCurrentEventId(notNull(lastEvent) ? lastEvent.getId() : 0L);
 
         if (notEmpty(events)) {
             //按照时间 asc 排序
@@ -1602,6 +1606,7 @@ public class DoctorMoveDataService {
         boarEvent.setDesc(event.getEventDesc());
         boarEvent.setOutId(event.getEventOutId());
         boarEvent.setRemark(event.getRemark());
+        boarEvent.setStatus(EventStatus.VALID.getValue());
 
         //事件类型
         PigEvent eventType = PigEvent.from(event.getEventName());
@@ -1794,6 +1799,8 @@ public class DoctorMoveDataService {
         track.setWeight(card.getWeight());
         track.setOutFarmDate(DateUtil.toDate(card.getOutFarmDate()));
         track.setRemark(card.getRemark());
+        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(boar.getId());
+        track.setCurrentEventId(notNull(lastEvent) ? lastEvent.getId() : 0L);
 
         if (notEmpty(events)) {
             //按照时间 asc 排序
@@ -1831,6 +1838,7 @@ public class DoctorMoveDataService {
         event.setGroupId(group.getId());
         event.setGroupCode(group.getGroupCode());
         event.setEventAt(gainEvent.getEventAt());
+        event.setStatus(EventStatus.VALID.getValue());
 
         //转换事件类型
         GroupEventType type = GroupEventType.from(gainEvent.getEventTypeName());
