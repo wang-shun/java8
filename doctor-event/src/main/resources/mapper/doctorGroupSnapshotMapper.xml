@@ -77,4 +77,16 @@
         )
     </select>
 
+    <select id="queryNotSnapshotGroupId" resultType="long" >
+        SELECT a.id
+        FROM doctor_groups a LEFT JOIN doctor_group_snapshots b on a.id = b.group_id
+        WHERE b.group_id IS NULL AND a.status = 1
+    </select>
+
+    <select id="queryByFromEventIdIsNull" resultMap="DoctorGroupSnapshotMap" >
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE from_event_id IS NULL
+    </select>
+
 </mapper>

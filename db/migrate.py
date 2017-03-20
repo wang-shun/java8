@@ -61,7 +61,7 @@ def all_pig_ids():
 def migrate_doctor_pig_snapshots(pig_ids):
     db_to.execute("truncate doctor_pig_snapshots")
     for pid in pig_ids:
-        pig_snapshots = db_from.query("select * from doctor_pig_snapshots where pig_id=%s order by event_id desc", pid)
+        pig_snapshots = db_from.query("select * from doctor_pig_snapshots where pig_id=%s order by event_id asc", pid)
         pig = db_from.get("select * from doctor_pigs where id=%s", pid)
         for i, ps in enumerate(pig_snapshots):
             previous_index = i - 1

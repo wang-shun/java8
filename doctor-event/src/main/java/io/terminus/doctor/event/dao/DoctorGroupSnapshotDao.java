@@ -4,6 +4,8 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Desc: 猪群快照表Dao类
  * Mail: yangzl@terminus.io
@@ -24,5 +26,21 @@ public class DoctorGroupSnapshotDao extends MyBatisDao<DoctorGroupSnapshot> {
      */
     public DoctorGroupSnapshot queryByEventId(Long eventId) {
         return getSqlSession().selectOne(sqlId("queryByEventId"), eventId);
+    }
+
+    /**
+     * 获取没有镜像的猪群id列表
+     * @return 猪群id列表
+     */
+    public List<Long> queryNotSnapshotGroupId() {
+        return getSqlSession().selectList(sqlId("queryNotSnapshotGroupId"));
+    }
+
+    /**
+     * 获取from_event_id 是空 的猪群id列表
+     * @return 猪群id列表
+     */
+    public List<DoctorGroupSnapshot> queryByFromEventIdIsNull() {
+        return getSqlSession().selectList(sqlId("queryByFromEventIdIsNull"));
     }
 }

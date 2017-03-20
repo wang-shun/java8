@@ -126,9 +126,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isEmpty;
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 
 /**
  * Desc:
@@ -1265,7 +1263,7 @@ public class DoctorImportDataService {
         event.setType(PigEvent.ENTRY.getKey());
         event.setName(PigEvent.ENTRY.getName());
         event.setPigStatusAfter(PigStatus.Entry.getKey());
-        event.setParity(info.getParity() - 1 <= 0 ? 0 : info.getParity() - 1);
+        event.setParity(info.getParity());
 
         //进场extra
         DoctorFarmEntryDto entry = new DoctorFarmEntryDto();
@@ -1842,5 +1840,96 @@ public class DoctorImportDataService {
         pig.setId(boarId);
         pig.setBoarType(MoreObjects.firstNonNull(boarType, BoarEntryType.HGZ.getKey()));
         doctorPigDao.update(pig);
+    }
+
+    /**
+     * 没有猪群镜像的生成镜像
+     */
+    @Transactional
+    public void generateGroupSnapshot() {
+        //1.没有镜像猪群,直接生成镜像
+        List<Long> groupIdList = doctorGroupSnapshotDao.queryNotSnapshotGroupId();
+        groupIdList.forEach(this::createNotGroupSnapshot);
+
+        //2.from_event_id 是空的
+        List<DoctorGroupSnapshot> doctorGroupSnapshots = doctorGroupSnapshotDao.queryByFromEventIdIsNull();
+        doctorGroupSnapshots.forEach(this::createNullGroupSnapShot);
+
+    }
+
+    /**
+     * 生成镜像
+     * @param groupId
+     */
+    private void createNotGroupSnapshot(Long groupId) {
+
+        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(groupId);
+        if (isNull(lastEvent)) {
+            log.info("没有最新事件,猪群id:" + groupId);
+            return;
+        }
+        DoctorGroup group = doctorGroupDao.findById(groupId);
+        DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
+
+        DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
+        groupSnapshot.setGroupId(groupId);
+        groupSnapshot.setFromEventId(0L);
+        groupSnapshot.setToEventId(lastEvent.getId());
+        DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder().group(group).groupTrack(groupTrack).groupEvent(lastEvent).build();
+        groupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
+        doctorGroupSnapshotDao.create(groupSnapshot);
+    }
+
+    private void createNullGroupSnapShot(DoctorGroupSnapshot snapshot) {
+        Long groupId = snapshot.getGroupId();
+        DoctorGroupEvent groupEvent = doctorGroupEventDao.findInitGroupEvent(groupId);
+        if (isNull(groupEvent) || !Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
+            log.info("没有初始事件,或初始事件不是转入事件,猪群id:" + groupId);
+            return;
+        }
+        DoctorGroup group = doctorGroupDao.findById(groupId);
+        DoctorGroupTrack currentTrack  = doctorGroupTrackDao.findByGroupId(groupId);
+
+        DoctorGroupTrack groupTrack = new DoctorGroupTrack();
+        groupTrack.setGroupId(groupId);
+
+        groupTrack.setSex(currentTrack.getSex());
+        groupTrack.setQuantity(groupEvent.getQuantity());
+        groupTrack.setBoarQty(0);
+        groupTrack.setSowQty(MoreObjects.firstNonNull(groupTrack.getQuantity(), 0) - groupTrack.getBoarQty());
+
+        //excel日龄是转入时的日龄，所以要重新算一发
+        groupTrack.setAvgDayAge(groupEvent.getAvgDayAge());
+        groupTrack.setBirthDate(new DateTime(groupEvent.getEventAt()).minusDays(groupTrack.getAvgDayAge()).toDate());
+
+        Double avgWeight = groupEvent.getAvgWeight();
+
+        groupTrack.setBirthWeight(avgWeight * groupTrack.getQuantity());
+
+        //产房仔猪的批次总结字段
+        if (PigType.FARROW_TYPES.contains(group.getPigType())) {
+            groupTrack.setWeanWeight(groupTrack.getBirthWeight());
+            groupTrack.setNest(0);
+            groupTrack.setLiveQty(groupTrack.getQuantity());
+            groupTrack.setHealthyQty(groupTrack.getQuantity());
+            groupTrack.setWeakQty(0);
+            groupTrack.setUnweanQty(0);
+            groupTrack.setUnqQty(0);
+            groupTrack.setWeanQty(groupTrack.getQuantity());    //默认全部断奶
+            groupTrack.setQuaQty(groupTrack.getQuantity());
+        }
+
+        DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
+        groupSnapshot.setGroupId(groupId);
+        groupSnapshot.setFromEventId(0L);
+        groupSnapshot.setToEventId(groupEvent.getId());
+        DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder().group(group).groupTrack(groupTrack).groupEvent(groupEvent).build();
+        groupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
+        doctorGroupSnapshotDao.create(groupSnapshot);
+
+        DoctorGroupSnapshot updateSnapshot = new DoctorGroupSnapshot();
+        updateSnapshot.setId(snapshot.getId());
+        updateSnapshot.setFromEventId(groupEvent.getId());
+        doctorGroupSnapshotDao.update(updateSnapshot);
     }
 }
