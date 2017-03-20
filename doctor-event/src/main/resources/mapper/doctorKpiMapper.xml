@@ -7,6 +7,7 @@
 <mapper namespace="DoctorKpi">
 
     <sql id="criteria">
+        AND status = 1
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
         <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
@@ -19,18 +20,18 @@
           SELECT
             ifnull(sum(quantity),0) AS dead_count
           FROM doctor_group_events
-          WHERE
-            change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-            group_id = #{groupId}
+          WHERE status = 1
+            AND change_type_id IN (110, 111)  -- 变动类型是死亡和淘汰
+            AND group_id = #{groupId}
         )
         /
         (
           SELECT
             ifnull(sum(quantity),1) AS trans_in_count
           FROM doctor_group_events
-          WHERE
-            type = 2 AND -- 转入猪群事件
-            group_id = #{groupId}
+          WHERE status = 1
+            AND type = 2  -- 转入猪群事件
+            AND group_id = #{groupId}
         ), 0)
         FROM DUAL
     </select>
@@ -539,128 +540,98 @@
 
     <!-- 配后备-->
     <select id="firstMatingCounts" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.`doctor_mate_type` = 1
-        and t1.`current_mating_count` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 9
+        and kind = 1
+        and `doctor_mate_type` = 1
+        and `current_mating_count` = 1
+        <include refid="criteria" />
     </select>
 
     <!-- 配流产-->
     <select id="abortionMatingCounts" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.`doctor_mate_type` in (2, 3)
-        and t1.`current_mating_count` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 9
+        and kind = 1
+        and `doctor_mate_type` in (2, 3)
+        and `current_mating_count` = 1
+        <include refid="criteria" />
     </select>
 
     <!-- 配断奶-->
     <select id="weanMatingCounts" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.`doctor_mate_type` = 4
-        and t1.`current_mating_count` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 9
+        and kind = 1
+        and `doctor_mate_type` = 4
+        and `current_mating_count` = 1
+        <include refid="criteria" />
     </select>
 
     <!-- 配阴性-->
     <select id="yinMatingCounts" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.`doctor_mate_type` = 5
-        and t1.`current_mating_count` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 9
+        and kind = 1
+        and `doctor_mate_type` = 5
+        and `current_mating_count` = 1
+        <include refid="criteria" />
     </select>
 
     <!-- 配返情-->
     <select id="fanQMatingCounts" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.`doctor_mate_type` = 6
-        and t1.`current_mating_count` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 9
+        and kind = 1
+        and `doctor_mate_type` = 6
+        and `current_mating_count` = 1
+        <include refid="criteria" />
     </select>
 
 
     <!-- 妊娠检查阳性-->
     <select id="checkYangCounts" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 11
-        and t1.kind = 1
-        and t1.`preg_check_result` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 11
+        and kind = 1
+        and `preg_check_result` = 1
+        <include refid="criteria" />
     </select>
 
     <!-- 返情-->
     <select id="checkFanQCounts" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 11
-        and t1.kind = 1
-        and t1.`preg_check_result` = 4
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 11
+        and kind = 1
+        and `preg_check_result` = 4
+        <include refid="criteria" />
     </select>
 
     <!-- 妊娠检查阴性-->
     <select id="checkYingCounts" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 11
-        and t1.kind = 1
-        and t1.`preg_check_result` = 2
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 11
+        and kind = 1
+        and `preg_check_result` = 2
+        <include refid="criteria" />
     </select>
 
     <!-- 流产-->
     <select id="checkAbortionCounts" parameterType="map" resultType="int">
         select
         (
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 11
-        and t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
-        and t1.`preg_check_result` = 3
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 11
+        and kind = 1
+        and `preg_check_result` = 3
+        <include refid="criteria" />
         )
         +
         (
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 13
-        and t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 13
+        and kind = 1
+        <include refid="criteria" />
         ) from dual
     </select>
 
@@ -669,21 +640,18 @@
     <select id="assessPregnancyRate" parameterType="map" resultType="double">
         select
         (
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 11
-        and t1.kind = 1
-        and t1.`preg_check_result` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 11
+        and kind = 1
+        and `preg_check_result` = 1
+        <include refid="criteria" />
         )
         /
         (
         select case ifnull(count(1),0) when 0 then 1 else count(1) end
         from doctor_pig_events t1
-        where
-        t1.`type` = 9
+        where t1.status = 1
+        and t1.`type` = 9
         and t1.kind = 1
         and t1.current_mating_count = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
@@ -697,26 +665,20 @@
         select
         (
         select ifnull(count(1),0)
-        from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.current_mating_count = 1
-        and t1.`is_impregnation` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        from doctor_pig_events
+        where `type` = 9
+        and kind = 1
+        and current_mating_count = 1
+        and `is_impregnation` = 1
+        <include refid="criteria" />
         ) /
         (
         select case ifnull(count(1),0) when 0 then 1 else count(1) end
-        from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.current_mating_count = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        from doctor_pig_events
+        where `type` = 9
+        and kind = 1
+        and current_mating_count = 1
+        <include refid="criteria" />
         ) from dual
     </select>
 
@@ -724,18 +686,15 @@
     <select id="assessFarrowingRate" parameterType="map" resultType="double">
         select
         (
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 15
-        and t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 15
+        and kind = 1
+        <include refid="criteria" />
         ) /
         (
         select case ifnull(count(1),0) when 0 then 1 else count(1) end from doctor_pig_events t1
-        where
-        t1.`type` = 9
+        where t1.status = 1
+        and t1.`type` = 9
         and t1.kind = 1
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
         <if test="startAt != null">and t1.`event_at` &gt;= DATE_SUB(#{startAt}, INTERVAL 114 DAY)</if>
@@ -749,38 +708,29 @@
     <select id="realFarrowingRate" parameterType="map" resultType="double">
         select
         (
-        select ifnull(count(1),0) from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.current_mating_count = 1
-        and t1.`is_delivery` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(count(1),0) from doctor_pig_events
+        where `type` = 9
+        and kind = 1
+        and current_mating_count = 1
+        and `is_delivery` = 1
+        <include refid="criteria" />
         ) /
         (
         select case ifnull(count(1),0) when 0 then 1 else count(1) end
-        from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.current_mating_count = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        from doctor_pig_events
+        where `type` = 9
+        and kind = 1
+        and current_mating_count = 1
+        <include refid="criteria" />
         ) from dual
     </select>
 
     <!-- NPD -->
     <select id="npd" parameterType="map" resultType="double">
         select (
-        select ifnull(sum(npd),0) from doctor_pig_events t1
-        where
-        t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        select ifnull(sum(npd),0) from doctor_pig_events
+        where kind = 1
+        <include refid="criteria" />
         ) /
         (
         select
@@ -801,12 +751,9 @@
         SELECT (365 -
         (SELECT
         (SELECT ifnull(sum(npd),0)
-        FROM doctor_pig_events t1
-        WHERE
-        t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.event_at &lt;= #{endAt}</if>
+        FROM doctor_pig_events
+        WHERE kind = 1
+        <include refid="criteria" />
         ) /
         (
         SELECT CASE sum(sow_count)/(CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
@@ -820,42 +767,30 @@
         ) * 12
         FROM dual)) / (CASE (
         (SELECT ifnull(sum(preg_days), 0) / (CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
-        FROM doctor_pig_events t1
-        WHERE
-        t1.`type` = 15
-        AND t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.event_at &lt;= #{endAt}</if>
+        FROM doctor_pig_events
+        WHERE `type` = 15
+        AND kind = 1
+        <include refid="criteria" />
         ) +
         (SELECT ifnull(sum(feed_days), 0) / (CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
-        FROM doctor_pig_events t1
-        WHERE
-        t1.`type` = 16
-        AND t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.event_at &lt;= #{endAt}</if>
+        FROM doctor_pig_events
+        WHERE `type` = 16
+        AND kind = 1
+        <include refid="criteria" />
         ))
         WHEN 0 THEN 1
         ELSE (
         (SELECT ifnull(sum(preg_days), 0) / (CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
-        FROM doctor_pig_events t1
-        WHERE
-        t1.`type` = 15
-        AND t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.event_at &lt;= #{endAt}</if>
+        FROM doctor_pig_events
+        WHERE `type` = 15
+        AND kind = 1
+        <include refid="criteria" />
         ) +
         (SELECT ifnull(sum(feed_days), 0) / (CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
-        FROM doctor_pig_events t1
-        WHERE
-        t1.`type` = 16
-        AND t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.event_at &lt;= #{endAt}</if>
+        FROM doctor_pig_events
+        WHERE `type` = 16
+        AND kind = 1
+        <include refid="criteria" />
         ))
         END) * (
         select ifnull(sum(wean_count)/count(1),0) from doctor_pig_events
@@ -876,9 +811,10 @@
                 CASE WHEN TYPE = 5 THEN 1 ELSE 0 END AS turnCount
             FROM doctor_group_events
             WHERE group_id = #{groupId}
+                AND status = 1
                 AND  TYPE IN (2, 3, 4, 5, 9)
                 AND event_at &lt;= (
-                    SELECT event_at  FROM  doctor_group_events  WHERE group_id = #{groupId} AND TYPE = 2
+                    SELECT event_at  FROM  doctor_group_events  WHERE group_id = #{groupId} AND TYPE = 2 AND status = 1
                     ORDER BY event_at DESC, id DESC
                     LIMIT 1
                 )
@@ -914,6 +850,7 @@
                      event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
                      pig_type IN (1, 7) AND
                      TYPE IN (2, 3, 4, 5, 9)
+                     AND status = 1
                  ) AS delta
           )
         FROM DUAL
@@ -948,6 +885,7 @@
                     event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
                     pig_type = 2 AND
                     TYPE IN (2, 3, 4, 5, 9)
+                    AND status = 1
             ) AS delta
         )
         FROM DUAL
@@ -982,6 +920,7 @@
                     event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
                     pig_type = 3 AND
                     TYPE IN (2, 3, 4, 5, 9)
+                    AND status = 1
             ) AS delta
         )
         FROM DUAL
@@ -1016,6 +955,7 @@
                     event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
                     pig_type = 4 AND
                     TYPE IN (2, 3, 4, 5, 9)
+                    AND status = 1
             ) AS delta
         )
         FROM DUAL
@@ -1050,6 +990,7 @@
                     event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
                     pig_type = 8 AND
                     TYPE IN (2, 3, 4, 5, 9)
+                    AND status = 1
             ) AS delta
         )
         FROM DUAL
@@ -1082,6 +1023,7 @@
                     a.kind = 2 AND
                     a.TYPE IN (6, 7) AND
                     b.boar_type = 1
+                    and a.status = 1
                   GROUP BY a.type
                 ) AS delta
           )
@@ -1112,6 +1054,7 @@
                     event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
                     farm_id = #{farmId} AND
                     kind = 1 AND type IN (6, 7)
+                    AND status = 1
                   GROUP BY type
                 ) AS delta
           )
@@ -1161,6 +1104,7 @@
                                    event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
                                    kind = 1 AND
                                    type IN (2, 6, 7, 10, 12, 14)      -- 限定这几个事件范围
+                                   AND status = 1
                                ) AS event
                             LEFT JOIN doctor_barns AS barn ON event.barn_id = barn.id
                           WHERE barn.pig_type = 7 OR event.type = 14  -- 限定分娩舍发生的事件
@@ -1236,6 +1180,7 @@
         left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 11
         and t2.preg_check_result = 1
+        AND t2.status = 1
     </select>
 
     <!-- 公猪生产月报: 产仔母猪数 -->
@@ -1249,6 +1194,7 @@
         group by farm_id, boar_code, pig_id,parity) as t1
         left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
+        AND t2.status = 1
     </select>
 
 
@@ -1263,6 +1209,7 @@
         group by farm_id, boar_code, pig_id,parity) as t1
         left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
+        AND t2.status = 1
     </select>
 
     <!-- 公猪生产月报: 平均产活仔数 -->
@@ -1276,6 +1223,7 @@
         group by farm_id, boar_code, pig_id,parity) as t1
         left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
+        AND t2.status = 1
     </select>
 
     <!-- 公猪生产月报: 受胎率 -->
@@ -1290,7 +1238,8 @@
         group by farm_id, boar_code, pig_id,parity) as t1
         left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 11
-        and t2.preg_check_result = 1)
+        and t2.preg_check_result = 1
+        AND t2.status = 1)
         / (
         select case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end as pzcs
         from doctor_pig_events
@@ -1312,7 +1261,8 @@
         <include refid="criteria"/>
         group by farm_id, boar_code, pig_id,parity) as t1
         left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
-        where t2.type = 15)
+        where t2.type = 15
+        AND t2.status = 1)
         / (
         select case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end as pzcs
         from doctor_pig_events
@@ -1606,6 +1556,7 @@
         and type in (6, 7)
         and farm_id = #{farmId}
         and event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
+        AND status = 1
         group by case when parity &lt; 10 then parity else '10' end
         ) t13 on t11.parity = t13.parity
         left join
@@ -1618,6 +1569,7 @@
         and type = 9
         and farm_id = #{farmId}
         and event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
+        AND status = 1
         group by case when parity-1 &lt; 9 then parity-1 else '10' end
         ) t14 on t11.parity = t14.parity
         left join (
@@ -1630,6 +1582,7 @@
         and parity > 1
         and farm_id = #{farmId}
         and event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
+        AND status = 1
         group by case when parity &lt; 10 then parity else '10' end
         ) t15 on t11.parity = t15.parity
     </select>
@@ -1665,6 +1618,7 @@
             AND t1.type IN (6, 7)
             and t1.event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
             AND t1.farm_id = #{farmId}
+            AND t1.status = 1
         GROUP BY t2.breed_id, t2.breed_name
         ) t12 on t11.breed_id = t12.breed_id and t11.breed_name = t12.breed_name;
     </select>
@@ -1691,6 +1645,7 @@
         and farm_id = #{farmId}
         and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
         and event_at &lt;= #{endAt}
+        AND status = 1
         ) t2,
         (
         -- 断奶七天内配种
@@ -1710,6 +1665,7 @@
         and farm_id = #{farmId}
         and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
         and event_at &lt;= #{endAt}
+        AND status = 1
         )
         )  t3,
         (-- 本月7天内断奶配种数
@@ -1729,6 +1685,7 @@
         where type = 9
         and farm_id = 92
         and current_mating_count = 1
+        AND status = 1
         and pig_id in(
         select  pig_id
         from doctor_pig_events
@@ -1771,6 +1728,7 @@
                WHERE event_at &gt;= date_add(DATE(#{date}), INTERVAL 1 DAY)   -- 日期取下一天的天初(因为每天的存栏算的是天末)
                     AND pig_type IN (1, 7)
                     AND TYPE IN (2, 3, 4, 5, 9)
+                    AND status = 1
                 GROUP BY group_id
             ) AS delta
         ) c ON g.id = c.group_id

@@ -24,7 +24,7 @@ import static io.terminus.common.utils.Arguments.isEmpty;
 public class DoctorDailyReport implements Serializable {
     private static final long serialVersionUID = 123812107494777505L;
 
-    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
     private Long id;
     

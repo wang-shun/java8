@@ -3,6 +3,7 @@ package io.terminus.doctor.front.warehouse;
 import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -33,7 +34,7 @@ public class DoctorWareHouseQueryTest extends BaseFrontWebTest{
         String url = "http://localhost:{port}/api/doctor/warehouse/query/listWareHouseType?farmId={farmId}";
         ResponseEntity responseEntity = this.restTemplate.getForEntity(url, Object.class,
                 ImmutableMap.of("port",this.port, "farmId", 12345));
-        System.out.println(JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(responseEntity.getBody()));
+        System.out.println(JsonMapperUtil.JSON_NON_EMPTY_MAPPER.toJson(responseEntity.getBody()));
     }
 
     @Test
@@ -48,7 +49,7 @@ public class DoctorWareHouseQueryTest extends BaseFrontWebTest{
 
         // 校验数据插入
         System.out.println(result);
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorWareHouseDao.findById(result)));
+        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(doctorWareHouseDao.findById(result)));
     }
 
     @Test
@@ -56,6 +57,6 @@ public class DoctorWareHouseQueryTest extends BaseFrontWebTest{
         String url = "http://localhost:"+this.port+
                 "/api/doctor/warehouse/query/pagingDoctorWareHouseDto?farmId={farmId}&type={type}&pageNo={pageNo}&pageSize={pageSize}";
         Object result = this.restTemplate.getForEntity(url, Object.class, ImmutableMap.of("farmId",12345l, "type", 1, "pageNo",1, "pageSize", 2)).getBody();
-        System.out.println(JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(result));
+        System.out.println(JsonMapperUtil.JSON_NON_EMPTY_MAPPER.toJson(result));
     }
 }

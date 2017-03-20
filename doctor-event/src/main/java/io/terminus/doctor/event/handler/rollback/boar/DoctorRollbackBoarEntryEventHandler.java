@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Created by xiao on 16/9/22.
+ * Created by xjn on 16/9/22.
  */
 @Component
 public class DoctorRollbackBoarEntryEventHandler extends DoctorAbstractRollbackPigEventHandler{
@@ -30,7 +30,7 @@ public class DoctorRollbackBoarEntryEventHandler extends DoctorAbstractRollbackP
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
-        DoctorPigSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
+        DoctorPigSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getToPigInfo(), DoctorPigSnapShotInfo.class);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
         DoctorPig doctorPig = doctorPigDao.findById(pigEvent.getPigId());
         doctorPigEventDao.delete(pigEvent.getId());

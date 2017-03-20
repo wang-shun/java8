@@ -36,6 +36,8 @@ public class DoctorChangeGroupEvent extends BaseGroupEvent implements Serializab
      */
     private String changeReasonName;
 
+    private Double weight;
+
     private Long breedId;
 
     private String breedName;
@@ -56,6 +58,8 @@ public class DoctorChangeGroupEvent extends BaseGroupEvent implements Serializab
     private Long customerId;
 
     private String customerName;
+
+    private Integer quantity;
 
     /**
      * 其中:公猪数

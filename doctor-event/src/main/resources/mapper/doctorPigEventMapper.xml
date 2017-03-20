@@ -65,6 +65,7 @@
         <result column="doctor_mate_type" property="doctorMateType"/>
         <result column="boar_code" property="boarCode"/>
         <result column="out_id" property="outId"/>
+        <result column="status" property="status"/>
         <result column="extra" property="extra"/>
         <result column="remark" property="remark"/>
         <result column="operator_id" property="operatorId"/>
@@ -141,6 +142,7 @@
         doctor_mate_type,
         boar_code,
         out_id,
+        status,
         extra,
         remark,
         operator_id,
@@ -211,6 +213,7 @@
         #{doctorMateType},
         #{boarCode},
         #{outId},
+        #{status},
         #{extra},
         #{remark},
         #{operatorId},
@@ -297,6 +300,7 @@
                 #{i}
             </foreach>
         </if>
+        AND status =1
     </sql>
 
     <insert id="create" parameterType="DoctorPigEvent" keyProperty="id" useGeneratedKeys="true">
@@ -369,6 +373,7 @@
             #{item.doctorMateType},
             #{item.boarCode},
             #{item.outId},
+            #{item.status},
             #{item.extra},
             #{item.remark},
             #{item.operatorId},
@@ -407,17 +412,18 @@
         where pig_id = #{pigId} and event_at = (
         select min(event_at) from
         <include refid="tb"/>
-        where pig_id = #{pigId}
+        where pig_id = #{pigId} AND status =1
         <if test="fromDate != null">
             <![CDATA[ and event_at >= #{fromDate} ]]>
         </if>
-        ) limit 1
+        ) AND status =1
+        limit 1
     </select>
 
     <select id="countByBarnId" parameterType="long" resultType="long">
         select count(id) from
         <include refid="tb"/>
-        where `barn_id` = #{barnId}
+        where `barn_id` = #{barnId} AND status =1
     </select>
 
     <select id="list" resultMap="DoctorPigEventMap">
@@ -433,6 +439,7 @@
     <select id="queryAllFarmInEvent" resultType="long">
         select distinct(farm_id) from
         <include refid="tb"/>
+        WHERE status =1
     </select>
 
     <select id="countPigEventTypeDuration" parameterType="map" resultType="long">
@@ -443,6 +450,7 @@
             <if test="eventType != null">AND `type` = #{eventType}</if>
             <if test="startDate != null">AND created_at &gt;= #{startDate}</if>
             <if test="endDate != null">AND created_at &lt;= #{endDate}</if>
+            AND status =1
         </where>
     </select>
 
@@ -451,7 +459,7 @@
         <include refid="cols_all"/>
         from
         <include refid="tb"/>
-        where pig_id = #{pigId}
+        where pig_id = #{pigId} AND status =1
         order by event_at desc, id desc limit 1;
     </select>
 
@@ -460,8 +468,8 @@
         <include refid="cols_all"/>
         from
         <include refid="tb"/>
-        where pig_id = #{pigId} AND is_auto = 0
-        order by event_at desc, id desc limit 1;
+        where pig_id = #{pigId} AND is_auto = 0 AND status =1
+        order by DATE_FORMAT(event_at,'%Y-%m-%d') desc, id desc limit 1;
     </select>
 
     <select id="queryLastPigEventInWorkflow" parameterType="map" resultMap="DoctorPigEventMap">
@@ -476,6 +484,7 @@
                 #{i}
             </foreach>
         </if>
+        AND status =1
         order by event_at desc ,id DESC limit 1;
     </select>
 
@@ -488,6 +497,7 @@
         and parity = #{parity}
         and current_mating_count = #{currentMatingCount}
         and type = ${type}
+        AND status =1
         order by event_at desc ,id DESC limit 1;
     </select>
 
@@ -498,6 +508,7 @@
         <include refid="tb"/>
         where pig_id = #{pigId}
         and type = ${type}
+        AND status =1
         order by event_at desc ,id DESC limit 1;
     </select>
 
@@ -506,7 +517,7 @@
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        WHERE pig_id = #{pigId}
+        WHERE pig_id = #{pigId} AND status =1
         order by event_at DESC , id DESC
     </select>
 
@@ -515,7 +526,7 @@
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        WHERE pig_id = #{pigId}
+        WHERE pig_id = #{pigId} AND status =1
         order by event_at ASC , id ASC
     </select>
 
@@ -536,7 +547,7 @@
             <include refid="criteria"/>
         </where>
         <if test="ordered!=null">
-            ORDER BY event_at
+            ORDER BY DATE_FORMAT(event_at,'%Y-%m-%d')
             <if test="ordered == 0">
                 DESC
             </if>
@@ -545,7 +556,6 @@
                 DESC
             </if>
         </if>
-
         LIMIT #{offset}, #{limit}
     </select>
 
@@ -557,7 +567,7 @@
             <if test="farmId != null">,`farm_id` = #{farmId}</if>
             <if test="farmName != null">,`farm_name` = #{farmName}</if>
         </set>
-        WHERE `pig_id` = #{pigId}
+        WHERE `pig_id` = #{pigId} AND status =1
     </update>
 
     <update id="update" parameterType="DoctorPigEvent">
@@ -620,6 +630,7 @@
             <if test="doctorMateType != null">doctor_mate_type = #{doctorMateType},</if>
             <if test="boarCode != null">boar_code = #{boarCode},</if>
             <if test="outId != null">out_id = #{outId},</if>
+            <if test="status != null">status = #{status},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="operatorId != null">operator_id = #{operatorId},</if>
@@ -638,7 +649,7 @@
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        WHERE farm_id = #{farmId} AND kind = ${kind}
+        WHERE farm_id = #{farmId} AND kind = ${kind} AND status = 1
     </select>
 
     <select id="findByFarmIdAndKindAndEventTypes" parameterType="map" resultMap="DoctorPigEventMap">
@@ -655,6 +666,7 @@
                     #{i}
                 </foreach>
             </if>
+            AND status = 1
         </where>
     </select>
 
@@ -674,7 +686,7 @@
         <where>
             <if test="farmId != null">`farm_id` = #{farmId}</if>
             <if test="pigId != null">AND `pig_id` = #{pigId}</if>
-            AND type = #{type} AND kind = #{kind}
+            AND type = #{type} AND kind = #{kind} AND status = 1
         </where>
         order by id DESC
         limit #{count},1
@@ -694,7 +706,7 @@
     <delete id="deleteByFarmId" parameterType="long">
         DELETE FROM
         <include refid="tb"/>
-        WHERE farm_id=#{farmId}
+        WHERE farm_id=#{farmId} AND status = 1
     </delete>
 
     <select id="findByDateRange" parameterType="map" resultMap="DoctorPigEventMap">
@@ -709,6 +721,7 @@
         <if test="endDate != null">
             <![CDATA[ and event_at < #{endDate} ]]>
         </if>
+        AND status = 1
         limit 5000
     </select>
 
@@ -773,6 +786,7 @@
                 doctor_mate_type = #{item.doctorMateType},
                 boar_code = #{item.boarCode},
                 out_id = #{item.outId},
+                status = #{item.status}
                 extra = #{item.extra},
                 remark = #{item.remark},
                 operator_id = #{item.operatorId},
@@ -801,18 +815,19 @@
         </if>
         <if test="farmId != null">AND `farm_id` = #{farmId}</if>
         <if test="kind != null">AND `kind` = #{kind}</if>
+        AND status = 1
     </select>
 
     <select id="findByRelGroupEventId" parameterType="long" resultMap="DoctorPigEventMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE rel_group_event_id = #{relGroupEventId}
+        WHERE rel_group_event_id = #{relGroupEventId} AND status = 1
     </select>
 
     <select id="findByRelPigEventId" parameterType="long" resultMap="DoctorPigEventMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE rel_pig_event_id = #{relPigEventId}
+        WHERE rel_pig_event_id = #{relPigEventId} AND status = 1
     </select>
 
     <select id="queryLastPigEventByPigIds" parameterType="list" resultMap="DoctorPigEventMap" >
@@ -822,18 +837,20 @@
         <foreach collection="list" item="i" open="(" close=")" separator=",">
             #{i}
         </foreach>
+        AND status = 1
         ORDER BY event_at DESC ,id DESC limit 1
     </select>
+
     <select id="findByPigId" parameterType="long" resultMap="DoctorPigEventMap">
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE pig_id = #{pigId}
+        WHERE pig_id = #{pigId} AND status = 1
     </select>
 
     <select id="addWeanEventAfterFosAndPigLets"  resultMap="DoctorPigEventMap">
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE `type` != 16 AND pig_status_before != 9 AND pig_status_after = 9 AND <![CDATA[ created_at < '2016-11-03 20:00:00' ]]>
+        WHERE `type` != 16 AND pig_status_before != 9 AND status = 1 AND pig_status_after = 9 AND <![CDATA[ created_at < '2016-11-03 20:00:00' ]]>
     </select>
 
     <select id="canRollbackEvent" parameterType="map" resultMap="DoctorPigEventMap">
@@ -864,13 +881,13 @@
     <select id="findByFarmIdAndTypeAndDate" parameterType="map" resultMap="DoctorPigEventMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
-        WHERE farm_id = #{farmId} AND `type` = #{type}
+        WHERE farm_id = #{farmId} AND `type` = #{type} AND status = 1
         <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
         <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
     </select>
 
     <update id="updatePigCode" parameterType="map">
-        update <include refid="tb"/> set pig_code = #{pigCode}, updated_at=now() where pig_id = #{pigId}
+        update <include refid="tb"/> set pig_code = #{pigCode}, updated_at=now() where pig_id = #{pigId} AND status = 1
     </update>
 
     <select id="querySowParityAvg" parameterType="long" resultType="map">
@@ -884,13 +901,13 @@
         ifnull(round(AVG (dead_count), 2), 0) avgDeadCount,
         ifnull(round(AVG (mny_count), 2), 0) avgMujiCount
         FROM <include refid="tb"/>
-        WHERE pig_id = #{pigId}
+        WHERE pig_id = #{pigId} AND status = 1
     </select>
 
     <select id="limitPigEventOrderByEventAt" parameterType="map" resultMap="DoctorPigEventMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
-        WHERE pig_id = #{pigId}
+        WHERE pig_id = #{pigId} AND status = 1
         ORDER BY event_at DESC, id DESC
         limit #{limit}
     </select>
@@ -898,17 +915,56 @@
     <select id="findByGroupId" parameterType="map" resultMap="DoctorPigEventMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
-        WHERE group_id = #{groupId}
+        WHERE group_id = #{groupId} AND status = 1
     </select>
 
     <select id="findLastByTypeAndDate" parameterType="map" resultMap="DoctorPigEventMap">
         SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         WHERE pig_id = #{pigId}
-          AND `type` = #{type}
-          AND event_at &lt;= #{eventAt}
+        AND `type` = #{type}
+        AND event_at &lt;= #{eventAt}
+        AND status = 1
         ORDER BY event_at DESC
         limit 1
+    </select>
+
+    <select id="findFollowEvents" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE pig_id = #{pigId} AND status = 1 AND id > #{eventId}
+        ORDER BY id ASC
+    </select>
+
+    <update id="updateEventsStatus" parameterType="map">
+        UPDATE <include refid="tb" />
+        SET status = #{status}
+        WHERE
+        `id` IN
+        <foreach collection="ids" item="i" open="(" close=")" separator=",">
+            #{i}
+        </foreach>
+    </update>
+
+    <select id="findEventById" parameterType="long" resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE id = #{id}
+    </select>
+
+    <select id="findLastEventExcludeTypes" parameterType="map" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE status = 1
+        AND pig_id = #{pigId}
+        <if test="types != null &amp;&amp; types.size() > 0">
+            AND `type` NOT IN
+            <foreach collection="types" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
+        ORDER BY event_at DESC, id DESC limit 1
     </select>
 
     <select id="findPigIdsBy" parameterType="map" resultType="Long">

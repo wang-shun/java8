@@ -7,6 +7,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.service.DoctorAddressReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
@@ -35,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @RequestMapping("/api/doctor/basic")
 public class DoctorBasics {
 
-    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.nonEmptyMapper();
 
     private final DoctorBasicReadService doctorBasicReadService;
     private final DoctorBasicWriteService doctorBasicWriteService;

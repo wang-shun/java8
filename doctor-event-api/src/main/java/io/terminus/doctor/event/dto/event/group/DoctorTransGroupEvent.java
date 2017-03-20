@@ -53,4 +53,6 @@ public class DoctorTransGroupEvent extends BaseGroupEvent implements Serializabl
     private Integer boarQty;
 
     private Integer sowQty;
+
+    private Double avgWeight;
 }

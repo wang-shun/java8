@@ -8,9 +8,11 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
+import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.enums.FarrowingType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
@@ -48,7 +51,13 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     private DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
     @Override
-    protected DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        expectTrue(Objects.equals(fromTrack.getStatus(), PigStatus.Farrow.getKey()), "pig.status.failed", PigEvent.from(executeEvent.getType()).getName(), PigStatus.from(fromTrack.getStatus()).getName());
+    }
+
+    @Override
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
@@ -82,51 +91,40 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setDeadCount(CountUtil.getIntegerDefault0(farrowingDto.getDeadCount()));
         doctorPigEvent.setBlackCount(CountUtil.getIntegerDefault0(farrowingDto.getBlackCount()));
 
-        if (farrowingDate.isBefore(pregJudgeDate)) {
-            extra.put("farrowingType", FarrowingType.EARLY.getKey());
-        } else {
-            extra.put("farrowingType", FarrowingType.USUAL.getKey());
-        }
+//        if (farrowingDate.isBefore(pregJudgeDate)) {
+//            extra.put("farrowingType", FarrowingType.EARLY.getKey());
+//        } else {
+//            extra.put("farrowingType", FarrowingType.USUAL.getKey());
+//        }
         doctorPigEvent.setExtraMap(extra);
         return doctorPigEvent;
     }
 
-    private String generateNestCode(Long farmId, DateTime eventAt) {
-        Long farrowingCount =  doctorPigEventDao.countPigEventTypeDuration(
-                farmId,
-                PigEvent.FARROWING.getKey(),
-                eventAt.withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
-                eventAt.plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().toDate());
-        return eventAt.toString(DateTimeFormat.forPattern("yyyyMM")) + "-" + farrowingCount;
-    }
-
     @Override
-    public DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-        expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
-        DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
-        Map<String, Object> extra = doctorPigTrack.getExtraMap();
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
+        Map<String, Object> extra = toTrack.getExtraMap();
         // 对应的 仔猪 猪舍的 信息
-        extra.put("toBarnId", doctorPigTrack.getCurrentBarnId());
-        extra.put("toBarnName", doctorPigTrack.getCurrentBarnName());
+        extra.put("toBarnId", toTrack.getCurrentBarnId());
+        extra.put("toBarnName", toTrack.getCurrentBarnName());
         //Long pigEventId = (Long) context.get("doctorPigEventId");
 
         //分娩时记录下 分娩数量
-        doctorPigTrack.setFarrowQty(farrowingDto.getFarrowingLiveCount());
-        doctorPigTrack.setUnweanQty(farrowingDto.getFarrowingLiveCount());
-        doctorPigTrack.setWeanQty(0);  //分娩时 断奶数为0
-        doctorPigTrack.setFarrowAvgWeight(farrowingDto.getBirthNestAvg());
-        doctorPigTrack.setWeanAvgWeight(0D); //分娩时, 断奶均重置成0
+        toTrack.setFarrowQty(executeEvent.getLiveCount());
+        toTrack.setUnweanQty(executeEvent.getLiveCount());
+        toTrack.setWeanQty(0);  //分娩时 断奶数为0
+        toTrack.setFarrowAvgWeight(executeEvent.getFarrowWeight());
+        toTrack.setWeanAvgWeight(0D); //分娩时, 断奶均重置成0
 
-        doctorPigTrack.setExtraMap(extra);
-        doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
+        toTrack.setExtraMap(extra);
+        toTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
 
-        return doctorPigTrack;
+        return toTrack;
     }
 
     @Override
-    protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        super.specialHandle(doctorPigEvent, doctorPigTrack, inputDto, basic);
+    protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack) {
+        super.specialHandle(doctorPigEvent, doctorPigTrack);
         //对应的最近一次的 周期配种的初陪 的 isDelivery 字段变成true
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
         expectTrue(notNull(firstMate), "first.mate.not.null", doctorPigTrack.getPigId());
@@ -135,11 +133,12 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    public void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
+    public void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack) {
         //触发猪群事件
-        Long groupId = createNewFarrowGroup(doctorEventInfoList, doctorPigEvent, farrowingDto, basic);
-        expectTrue(notNull(groupId), "farrow.group.not.null", inputDto.getPigCode());
+        DoctorSowMoveInGroupInput input = (DoctorSowMoveInGroupInput) buildTriggerGroupEventInput(doctorPigEvent);
+        Long groupId = doctorCommonGroupEventHandler.sowGroupEventMoveIn(doctorEventInfoList, input);
+
+        expectTrue(notNull(groupId), "farrow.group.not.null");
         doctorPigTrack.setGroupId(groupId);
         doctorPigTrackDao.update(doctorPigTrack);
 
@@ -155,15 +154,16 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
      * 创建对应的猪群
      *
      */
-    protected Long createNewFarrowGroup(List<DoctorEventInfo> eventInfoList, DoctorPigEvent doctorPigEvent, DoctorFarrowingDto farrowingDto, DoctorBasicInputInfoDto basic) {
-
+    @Override
+    public BaseGroupInput buildTriggerGroupEventInput(DoctorPigEvent doctorPigEvent) {
+        DoctorFarrowingDto farrowingDto = JSON_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorFarrowingDto.class);
         // Build 新建猪群操作方式
         DoctorSowMoveInGroupInput input = new DoctorSowMoveInGroupInput();
-        input.setSowCode(farrowingDto.getPigCode());
-        input.setOrgId(basic.getOrgId());
-        input.setOrgName(basic.getOrgName());
-        input.setFarmId(basic.getFarmId());
-        input.setFarmName(basic.getFarmName());
+        input.setSowCode(doctorPigEvent.getPigCode());
+        input.setOrgId(doctorPigEvent.getOrgId());
+        input.setOrgName(doctorPigEvent.getOrgName());
+        input.setFarmId(doctorPigEvent.getFarmId());
+        input.setFarmName(doctorPigEvent.getFarmName());
         input.setGroupCode(farrowingDto.getGroupCode());
 
         input.setFromBarnId(farrowingDto.getBarnId());
@@ -185,9 +185,9 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         input.setSowQty(sowCount);
         input.setBoarQty(boarCount);
         input.setAvgDayAge(1);
-        input.setAvgWeight(farrowingLiveCount == 0 ? 0d : farrowingDto.getBirthNestAvg() / farrowingLiveCount);
+        input.setAvgWeight(farrowingLiveCount == 0 ? 0d : Double.parseDouble(String.format("%.2f", farrowingDto.getBirthNestAvg() / farrowingLiveCount)));
         input.setEventAt(DateUtil.toDateString(doctorPigEvent.getEventAt()));
-        input.setIsAuto(1);
+        input.setIsAuto(IsOrNot.YES.getValue());
         input.setCreatorId(doctorPigEvent.getCreatorId());
         input.setCreatorName(doctorPigEvent.getCreatorName());
 
@@ -196,6 +196,21 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         input.setHealthyQty(CountUtil.getIntegerDefault0(farrowingDto.getHealthCount()));
 
         input.setRelPigEventId(doctorPigEvent.getId());
-        return doctorCommonGroupEventHandler.sowGroupEventMoveIn(eventInfoList, input);
+        return input;
+    }
+
+    /**
+     * 生成窝号
+     * @param farmId 猪场id
+     * @param eventAt 事件时间
+     * @return 窝号
+     */
+    private String generateNestCode(Long farmId, DateTime eventAt) {
+        Long farrowingCount =  doctorPigEventDao.countPigEventTypeDuration(
+                farmId,
+                PigEvent.FARROWING.getKey(),
+                eventAt.withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
+                eventAt.plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().toDate());
+        return eventAt.toString(DateTimeFormat.forPattern("yyyyMM")) + "-" + farrowingCount;
     }
 }

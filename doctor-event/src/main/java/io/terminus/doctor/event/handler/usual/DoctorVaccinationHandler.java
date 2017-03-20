@@ -1,8 +1,7 @@
 package io.terminus.doctor.event.handler.usual;
 
-import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DoctorVaccinationHandler extends DoctorAbstractEventHandler{
     @Override
-    protected DoctorPigTrack createOrUpdatePigTrack(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        return doctorPigTrackDao.findByPigId(inputDto.getPigId());
+    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        return fromTrack;
     }
 }

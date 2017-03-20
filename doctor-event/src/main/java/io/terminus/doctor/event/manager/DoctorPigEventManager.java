@@ -7,10 +7,16 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.Checks;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
+import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -27,6 +33,10 @@ import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.DoctorPigsByEventSelector;
+import io.terminus.doctor.event.model.DoctorEventRelation;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +52,9 @@ import java.util.stream.Collectors;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
- * Created by yaoqijun.
- * Date:2016-05-19
- * Email:yaoqj@terminus.io
- * Descirbe: 母猪事件信息录入管理过程
+ * Created by xjn.
+ * Date:2017-01-19
+ * 猪事件管理
  */
 @Component
 @Slf4j
@@ -53,6 +62,14 @@ public class DoctorPigEventManager {
 
     @Autowired
     private DoctorPigEventHandlers pigEventHandlers;
+    @Autowired
+    private DoctorPigTrackDao doctorPigTrackDao;
+    @Autowired
+    private DoctorPigEventDao doctorPigEventDao;
+    @Autowired
+    private DoctorPigDao doctorPigDao;
+    @Autowired
+    private DoctorEventRelationDao doctorEventRelationDao;
 
     /**
      * 事件处理
@@ -62,16 +79,77 @@ public class DoctorPigEventManager {
     @Transactional
     public List<DoctorEventInfo> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
         log.info("pig event handle starting, inputDto:{}, basic:{}", inputDto, basic);
-        DoctorPigEventHandler doctorEventCreateHandler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
-        doctorEventCreateHandler.handleCheck(inputDto, basic);
+
         final List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
-        doctorEventCreateHandler.handle(doctorEventInfoList, inputDto, basic);
+        DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
+        //获取需要执行的事件
+        DoctorPigEvent executeEvent = handler.buildPigEvent(basic, inputDto);
+        //事件执行前的状态
+        DoctorPigTrack fromTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+        //数据校验
+        handler.handleCheck(executeEvent, fromTrack);
+        //处理事件
+        handler.handle(doctorEventInfoList, executeEvent, fromTrack);
+
         log.info("pig event handle ending, inputDto:{}, basic:{}", inputDto, basic);
         return doctorEventInfoList;
     }
 
     /**
+     * 构建编辑事件
+     * @param basic 基础数据
+     * @param inputDto 输入事件
+     * @return 编辑事件
+     */
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
+        return handler.buildPigEvent(basic, inputDto);
+    }
+
+    @Transactional
+    public void transactionalHandle(DoctorPigEventHandler handler, List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        handler.handle(doctorEventInfoList, executeEvent, fromTrack);
+    }
+
+    /**
+     * 猪事件编辑错误时回滚
+     * @param doctorEventInfoList 新事件列表
+     * @param pigOldEventIdList 原事件id列
+     * @param fromTrack 事件编辑前猪track
+     */
+    @Transactional
+    public void modifyPidEventRollback(List<DoctorEventInfo> doctorEventInfoList, List<Long> pigOldEventIdList, DoctorPigTrack fromTrack, DoctorPig oldPig) {
+        log.info("rollback.modify.failed, starting");
+        log.info("doctorEventInfoList:{}, pigOldEventIdList:{}, fromTrack:{}, oldPig:{}", doctorEventInfoList, pigOldEventIdList, fromTrack, oldPig);
+        //1.将新生成事件置为无效
+        List<Long> pigNewEventIdList = doctorEventInfoList.stream()
+                .filter(doctorEventInfo -> Objects.equals(doctorEventInfo.getBusinessType(), DoctorEventInfo.Business_Type.PIG.getValue()))
+                .map(DoctorEventInfo::getEventId).collect(Collectors.toList());
+        if (!Arguments.isNullOrEmpty(pigNewEventIdList)) {
+            doctorPigEventDao.updateEventsStatus(pigNewEventIdList, EventStatus.INVALID.getValue());
+        }
+        //2.将原事件置为有效
+        if (!Arguments.isNullOrEmpty(pigOldEventIdList)) {
+            doctorPigEventDao.updateEventsStatus(pigOldEventIdList, EventStatus.VALID.getValue());
+        }
+        //3.还原track
+        doctorPigTrackDao.update(fromTrack);
+        //4.还原猪
+        doctorPigDao.update(oldPig);
+        //5.还原之前的关联关系
+        if (!Arguments.isNullOrEmpty(pigNewEventIdList)) {
+            doctorEventRelationDao.batchUpdateStatus(pigNewEventIdList, DoctorEventRelation.Status.INVALID.getValue());
+            List<Long> pigCreateOldEventIdList = doctorEventInfoList.stream()
+                    .filter(doctorEventInfo -> Objects.equals(doctorEventInfo.getBusinessType(), DoctorEventInfo.Business_Type.PIG.getValue()))
+                    .map(DoctorEventInfo::getOldEventId).collect(Collectors.toList());
+            doctorEventRelationDao.updateStatusUnderHandling(pigCreateOldEventIdList, DoctorEventRelation.Status.VALID.getValue());
+        }
+        log.info("rollback.modify.failed, ending");
+    }
+
+    /**
      * 批量事件处理
+     *
      * @param eventInputs
      * @param basic
      * @return
@@ -82,12 +160,18 @@ public class DoctorPigEventManager {
         //校验输入数据的重复性
         eventRepeatCheck(eventInputs);
 
-        DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(eventInputs.get(0).getEventType());
+        DoctorPigEventHandler handler = getHandler(eventInputs.get(0).getEventType());
         final List<DoctorEventInfo> eventInfos = Lists.newArrayList();
         eventInputs.forEach(inputDto -> {
             try {
-                handler.handleCheck(inputDto, basic);
-                handler.handle(eventInfos, inputDto, basic);
+                //获取需要执行的事件
+                DoctorPigEvent executeEvent = handler.buildPigEvent(basic, inputDto);
+                //事件执行前的状态
+                DoctorPigTrack fromTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+                //数据校验
+                handler.handleCheck(executeEvent, fromTrack);
+                //处理事件
+                handler.handle(eventInfos, executeEvent, fromTrack);
             } catch (InvalidException e) {
                throw new InvalidException(true, e.getError(), inputDto.getPigCode(), e.getParams());
             }
@@ -96,6 +180,15 @@ public class DoctorPigEventManager {
         return eventInfos;
     }
 
+    /**
+     * 根据事件类型获取时间处理器
+     * @param eventType 事件类型
+     * @return 事件处理器
+     */
+    public DoctorPigEventHandler getHandler(Integer eventType) {
+       return Checks.expectNotNull(pigEventHandlers.getEventHandlerMap().get(eventType), "get.pig.handler.failed", eventType);
+
+    }
     /**
      * 校验携带数据正确性，发布事件
      */
