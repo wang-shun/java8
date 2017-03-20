@@ -162,13 +162,16 @@ public class DoctorSearches {
         params.put("pigType", pigType.getKey().toString());
         Map<String, Object> objectMap = transMapType(params);
         //先根据事件去查
-        boolean searchEvent = params.get("type") != null || params.get("beginDate") != null || params.get("endDate") != null;
+        boolean searchEvent = !Strings.isNullOrEmpty(params.get("types")) || !Strings.isNullOrEmpty(params.get("beginDate")) || !Strings.isNullOrEmpty(params.get("endDate"));
         if (searchEvent) {
             Map<String, Object> eventCriteria = Maps.newHashMap();
-            eventCriteria.put("type", params.get("type"));
+            if (!Strings.isNullOrEmpty(params.get("types"))){
+                eventCriteria.put("types", Splitters.splitToInteger(params.get("types"), Splitters.COMMA));
+            }
             eventCriteria.put("beginDate", params.get("beginDate"));
             eventCriteria.put("endDate", params.get("endDate"));
             eventCriteria.put("farmId", params.get("farmId"));
+            eventCriteria = Params.filterNullOrEmpty(eventCriteria);
             List<Long> pigIds = RespHelper.or(doctorPigEventReadService.findPigIdsBy(eventCriteria), null);
             if (CollectionUtils.isEmpty(pigIds)) {
                 return new Paging<SearchedPig>();
