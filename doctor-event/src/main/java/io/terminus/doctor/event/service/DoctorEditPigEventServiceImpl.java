@@ -3,7 +3,6 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
@@ -89,15 +88,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
 
     @Override
     public void modifyPigEventHandle(DoctorPigEvent modifyEvent) {
-        try {
-            modifyPigEventHandleImpl(modifyEvent);
-        } catch (InvalidException e) {
-            log.error("modify.pig.event.handle.failed, modifyEvent:{}, cause by :{}", modifyEvent, Throwables.getStackTraceAsString(e));
-            throw e;
-        } catch (Exception e) {
-            log.error("modify.pig.event.handle.failed, modifyEvent:{}, cause by :{}", modifyEvent, Throwables.getStackTraceAsString(e));
-            throw new InvalidException("modify.pig.event.request.handle.failed");
-        }
+        modifyPigEventHandleImpl(modifyEvent);
     }
 
     /**

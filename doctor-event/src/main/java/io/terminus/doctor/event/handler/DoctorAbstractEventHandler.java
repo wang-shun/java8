@@ -210,6 +210,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 doctorEventRelationDao.create(eventRelation);
             }
         }
+        executeEvent.setRelEventId(null);
+        executeEvent.setRelGroupEventId(null);
     }
     /**
      * 构建事件发生后的track

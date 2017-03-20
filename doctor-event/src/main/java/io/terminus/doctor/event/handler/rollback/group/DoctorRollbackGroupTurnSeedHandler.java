@@ -36,7 +36,7 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
 
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
-        if (!Objects.equals(groupEvent.getType(), GroupEventType.TURN_SEED.getValue())) {
+        if (!Objects.equals(groupEvent.getType(), GroupEventType.TURN_SEED.getValue()) || !isLastEvent(groupEvent)) {
             return false;
         }
 
@@ -53,7 +53,6 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
         DoctorPigEvent toPigEvent = doctorPigEventDao.findById(toPigEventId);
         DoctorPigEvent lastPigEvent = doctorPigEventDao.queryLastPigEventById(toPigEvent.getPigId());
         return Objects.equals(lastPigEvent.getId(), toPigEvent.getId());
-
 
     }
 
