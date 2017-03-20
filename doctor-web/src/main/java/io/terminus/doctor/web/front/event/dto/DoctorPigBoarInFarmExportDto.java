@@ -53,7 +53,7 @@ public class DoctorPigBoarInFarmExportDto implements Serializable{
     /**
      * 来源名
      */
-    private  String sourceName;
+    private String sourceName;
     /**
      * 猪的父亲代码
      */
