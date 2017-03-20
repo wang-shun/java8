@@ -22,6 +22,7 @@ import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
 import io.terminus.doctor.web.admin.service.DoctorInitBarnService;
+import io.terminus.doctor.web.admin.service.DoctorInitFarmService;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
@@ -55,6 +56,7 @@ public class DoctorServiceReviewController {
     private final DoctorFarmReadService doctorFarmReadService;
     private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorInitBarnService doctorInitBarnService;
+    private final DoctorInitFarmService doctorInitFarmService;
     private final MobilePattern mobilePattern;
     private final UserReadService userReadService;
 
@@ -73,7 +75,8 @@ public class DoctorServiceReviewController {
                                          CoreEventDispatcher coreEventDispatcher,
                                          DoctorInitBarnService doctorInitBarnService,
                                          MobilePattern mobilePattern,
-                                         UserReadService userReadService){
+                                         UserReadService userReadService,
+                                         DoctorInitFarmService doctorInitFarmService){
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorOrgReadService = doctorOrgReadService;
@@ -82,6 +85,7 @@ public class DoctorServiceReviewController {
         this.doctorInitBarnService = doctorInitBarnService;
         this.mobilePattern = mobilePattern;
         this.userReadService = userReadService;
+        this.doctorInitFarmService = doctorInitFarmService;
     }
 
     /**
@@ -122,7 +126,7 @@ public class DoctorServiceReviewController {
 
         log.info("init barn start, userId:{}, farms:{}", dto.getUserId(), newFarms);
         //初始化猪舍和仓库大类
-        newFarms.forEach(farm -> doctorInitBarnService.initBarns(farm, dto.getUserId()));
+        newFarms.forEach(farm -> doctorInitFarmService.initFarm(farm, dto.getUserId()));
 
         log.info("init barn end");
         return true;

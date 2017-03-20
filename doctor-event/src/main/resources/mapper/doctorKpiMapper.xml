@@ -823,142 +823,70 @@
 
     <!-- 实时存栏: 产房仔猪 -->
     <select id="realTimeLiveStockFarrow" parameterType="map" resultType="int">
-        SELECT
-        (
-          SELECT
-            ifnull(sum(quantity), 0) AS nowCount    -- 当前存栏
-          FROM
-            (
-              SELECT id
-              FROM doctor_groups
-              WHERE `status` = 1 AND pig_type IN (1, 7) AND farm_id = #{farmId}
-            ) AS a
-            LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
+        select
+        ifnull(
+        sum(
+        CASE WHEN TYPE = 2 THEN quantity ELSE 0 END -
+        CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END -
+        CASE WHEN TYPE = 5 THEN 1 ELSE 0 END
         )
-          -
-        (
-            SELECT
-              ifnull(sum(ifnull(delta.inCount, 0)) - sum(ifnull(delta.outCount, 0)) - sum(ifnull(delta.turnCount, 0)), 0) AS deltaCount  -- 算出这段时间的增量
-            FROM (
-                   SELECT
-                     CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
-                     CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END AS outCount,
-                     CASE WHEN TYPE = 5 THEN 1 ELSE 0 END AS turnCount
-                   FROM doctor_group_events
-                   WHERE
-                     farm_id = #{farmId} AND
-                     event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
-                     pig_type IN (1, 7) AND
-                     TYPE IN (2, 3, 4, 5, 9)
-                     AND status = 1
-                 ) AS delta
-          )
-        FROM DUAL
+        ,0)
+        from doctor_group_events
+        where farm_id = #{farmId}
+        and event_at &lt;=  date_add(date(#{date}), INTERVAL 86399 SECOND)  -- 当前23:59:59
+        and pig_type = 7
+        and type in(2,3,4,5,9)
     </select>
 
     <!-- 实时存栏: 保育猪 -->
     <select id="realTimeLiveStockNursery" parameterType="map" resultType="int">
-        SELECT
-        (
-            SELECT
-              ifnull(sum(quantity), 0) AS nowCount    -- 当前存栏
-            FROM
-            (
-                SELECT id
-                FROM doctor_groups
-                WHERE `status` = 1 AND pig_type = 2 AND farm_id = #{farmId}
-            ) AS a
-            LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
+        select
+        ifnull(
+        sum(
+        CASE WHEN TYPE = 2 THEN quantity ELSE 0 END -
+        CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END -
+        CASE WHEN TYPE = 5 THEN 1 ELSE 0 END
         )
-        -
-        (
-            SELECT
-              ifnull(sum(ifnull(delta.inCount, 0)) - sum(ifnull(delta.outCount, 0)) - sum(ifnull(delta.turnCount, 0)), 0) AS deltaCount  -- 算出这段时间的增量
-            FROM (
-                SELECT
-                    CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
-                    CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END AS outCount,
-                    CASE WHEN TYPE = 5 THEN 1 ELSE 0 END AS turnCount
-                FROM doctor_group_events
-                WHERE
-                    farm_id = #{farmId} AND
-                    event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
-                    pig_type = 2 AND
-                    TYPE IN (2, 3, 4, 5, 9)
-                    AND status = 1
-            ) AS delta
-        )
-        FROM DUAL
+        ,0)
+        from doctor_group_events
+        where farm_id = #{farmId}
+        and event_at &lt;=  date_add(date(#{date}), INTERVAL 86399 SECOND)  -- 当前23:59:59
+        and pig_type = 2
+        and type in(2,3,4,5,9)
     </select>
 
     <!-- 实时存栏: 育肥猪 -->
     <select id="realTimeLiveStockFatten" parameterType="map" resultType="int">
-        SELECT
-        (
-            SELECT
-              ifnull(sum(quantity), 0) AS nowCount    -- 当前存栏
-            FROM
-            (
-                SELECT id
-                FROM doctor_groups
-                WHERE `status` = 1 AND pig_type = 3 AND farm_id = #{farmId}
-            ) AS a
-            LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
+        select
+        ifnull(
+        sum(
+        CASE WHEN TYPE = 2 THEN quantity ELSE 0 END -
+        CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END -
+        CASE WHEN TYPE = 5 THEN 1 ELSE 0 END
         )
-        -
-        (
-            SELECT
-              ifnull(sum(ifnull(delta.inCount, 0)) - sum(ifnull(delta.outCount, 0)) - sum(ifnull(delta.turnCount, 0)), 0) AS deltaCount  -- 算出这段时间的增量
-            FROM (
-                SELECT
-                    CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
-                    CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END AS outCount,
-                    CASE WHEN TYPE = 5 THEN 1 ELSE 0 END AS turnCount
-                FROM doctor_group_events
-                WHERE
-                    farm_id = #{farmId} AND
-                    event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
-                    pig_type = 3 AND
-                    TYPE IN (2, 3, 4, 5, 9)
-                    AND status = 1
-            ) AS delta
-        )
-        FROM DUAL
+        ,0)
+        from doctor_group_events
+        where farm_id = #{farmId}
+        and event_at &lt;=  date_add(date(#{date}), INTERVAL 86399 SECOND)  -- 当前23:59:59
+        and pig_type = 3
+        and type in(2,3,4,5,9)
     </select>
 
     <!-- 实时存栏: 后备母猪 -->
     <select id="realTimeLiveStockHoubeiSow" parameterType="map" resultType="int">
-        SELECT
-        (
-            SELECT
-              ifnull(sum(quantity), 0) AS nowCount    -- 当前存栏
-            FROM
-            (
-                SELECT id
-                FROM doctor_groups
-                WHERE `status` = 1 AND pig_type = 4 AND farm_id = #{farmId}
-            ) AS a
-            LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
+        select
+        ifnull(
+        sum(
+        CASE WHEN TYPE = 2 THEN quantity ELSE 0 END -
+        CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END -
+        CASE WHEN TYPE = 5 THEN 1 ELSE 0 END
         )
-        -
-        (
-            SELECT
-              ifnull(sum(ifnull(delta.inCount, 0)) - sum(ifnull(delta.outCount, 0)) - sum(ifnull(delta.turnCount, 0)), 0) AS deltaCount  -- 算出这段时间的增量
-            FROM (
-                SELECT
-                    CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
-                    CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END AS outCount,
-                    CASE WHEN TYPE = 5 THEN 1 ELSE 0 END AS turnCount
-                FROM doctor_group_events
-                WHERE
-                    farm_id = #{farmId} AND
-                    event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
-                    pig_type = 4 AND
-                    TYPE IN (2, 3, 4, 5, 9)
-                    AND status = 1
-            ) AS delta
-        )
-        FROM DUAL
+        ,0)
+        from doctor_group_events
+        where farm_id = #{farmId}
+        and event_at &lt;=  date_add(date(#{date}), INTERVAL 86399 SECOND)  -- 当前23:59:59
+        and pig_type = 4
+        and type in(2,3,4,5,9)
     </select>
 
     <!-- 实时存栏: 后备公猪 -->
@@ -998,67 +926,27 @@
 
     <!-- 实时存栏: 公猪 -->
     <select id="realTimeLiveStockBoar" parameterType="map" resultType="int">
-        SELECT
-          (
-            SELECT count(1)
-            FROM doctor_pigs
-            WHERE is_removal = 0 AND pig_type = 2 AND farm_id = #{farmId} AND boar_type = 1  -- 活公猪才计算
-          )
-          -
-          (
-            SELECT
-              ifnull(
-                ifnull(max(CASE WHEN delta.type = 7 THEN quantity ELSE 0 END), 0) -     -- 进场 - 离场 算出delta数量
-                ifnull(max(CASE WHEN delta.type = 6 THEN quantity ELSE 0 END), 0), 0
-              )
-            FROM (
-                  SELECT
-                    a.TYPE,
-                    count(a.TYPE) AS quantity
-                  FROM doctor_pig_events a
-                  LEFT JOIN doctor_pigs b ON a.pig_id = b.id
-                  WHERE
-                    a.event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
-                    a.farm_id = #{farmId} AND
-                    a.kind = 2 AND
-                    a.TYPE IN (6, 7) AND
-                    b.boar_type = 1
-                    and a.status = 1
-                  GROUP BY a.type
-                ) AS delta
-          )
-        FROM dual
+        select
+        ifnull(sum(case a.type when 7 then 1 else 0 end - case a.type when 6 then 1 else 0 end), 0) as count
+        from doctor_pig_events a
+        left join doctor_pigs b on a.pig_id = b.id
+        where a.farm_id = #{farmId}
+        and a.kind = 2
+        and b.boar_type = 1
+        and a.type in(6, 7)
+        and a.event_at &lt;= date_add(date(#{date}), INTERVAL 86399 SECOND)
     </select>
 
     <!-- 实时存栏: 母猪 -->
     <select id="realTimeLiveStockSow" parameterType="map" resultType="int">
-        SELECT
-          (
-            SELECT count(1)
-            FROM doctor_pigs
-            WHERE is_removal = 0 AND pig_type = 1 AND farm_id = #{farmId}
-          )
-          -
-          (
-            SELECT
-              ifnull(
-                ifnull(max(CASE WHEN delta.type = 7 THEN quantity ELSE 0 END), 0) -     -- 进场 - 离场 算出delta数量
-                ifnull(max(CASE WHEN delta.type = 6 THEN quantity ELSE 0 END), 0), 0
-              )
-            FROM (
-                  SELECT
-                    type,
-                    count(type) AS quantity
-                  FROM doctor_pig_events
-                  WHERE
-                    event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
-                    farm_id = #{farmId} AND
-                    kind = 1 AND type IN (6, 7)
-                    AND status = 1
-                  GROUP BY type
-                ) AS delta
-          )
-        FROM dual
+        select
+        ifnull(sum(case a.type when 7 then 1 else 0 end - case a.type when 6 then 1 else 0 end), 0) as count
+        from doctor_pig_events a
+        left join doctor_pigs b on a.pig_id = b.id
+        where a.farm_id = #{farmId}
+        and a.kind = 1
+        and a.type in(6, 7)
+        and a.event_at &lt;= date_add(date(#{date}), INTERVAL 86399 SECOND)
     </select>
 
     <!-- 实时存栏: 在产房的母猪 -->

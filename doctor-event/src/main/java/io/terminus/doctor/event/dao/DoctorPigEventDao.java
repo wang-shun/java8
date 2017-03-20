@@ -339,7 +339,6 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
-<<<<<<< HEAD
      * 去获取猪某一事件之后的事件列表
      * @param pigId 猪id
      * @param eventId 事件id
