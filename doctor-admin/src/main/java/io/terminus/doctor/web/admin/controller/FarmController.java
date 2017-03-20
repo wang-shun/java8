@@ -11,6 +11,7 @@ import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
 import io.terminus.doctor.web.admin.service.DoctorInitBarnService;
+import io.terminus.doctor.web.admin.service.DoctorInitFarmService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.model.User;
@@ -39,18 +40,21 @@ public class FarmController {
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
     private final DoctorInitBarnService doctorInitBarnService;
+    private final DoctorInitFarmService doctorInitFarmService;
 
     @Autowired
     public FarmController(DoctorFarmReadService doctorFarmReadService,
                           DoctorUserReadService doctorUserReadService,
                           DoctorServiceStatusReadService doctorServiceStatusReadService,
                           DoctorFarmWriteService doctorFarmWriteService,
-                          DoctorInitBarnService doctorInitBarnService){
+                          DoctorInitBarnService doctorInitBarnService,
+                          DoctorInitFarmService doctorInitFarmService){
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
         this.doctorFarmWriteService = doctorFarmWriteService;
         this.doctorInitBarnService = doctorInitBarnService;
+        this.doctorInitFarmService = doctorInitFarmService;
     }
 
     /**
@@ -110,7 +114,7 @@ public class FarmController {
 
         log.info("init barn start, userId:{}, farms:{}", dto.getUserId(), newFarms);
         //初始化猪舍
-        newFarms.forEach(farm -> doctorInitBarnService.initBarns(farm, dto.getUserId()));
+        newFarms.forEach(farm -> doctorInitFarmService.initFarm(farm, dto.getUserId()));
 
         log.info("init barn end");
         return Boolean.TRUE;
