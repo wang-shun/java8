@@ -213,7 +213,7 @@ export.tables:
       - name: inFarmDate
         display: 进场日期
         format: isoDateFormatter
-      - name: birthDate
+      - name: birthday
         display: 出生日期
         format: isoDateFormatter
       - name: boarTypeName

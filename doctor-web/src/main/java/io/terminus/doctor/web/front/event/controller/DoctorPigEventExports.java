@@ -5,6 +5,7 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
@@ -79,6 +80,8 @@ public class DoctorPigEventExports {
 
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
 
+
+
     @Autowired
     private Exporter exporter;
     @Autowired
@@ -103,9 +106,14 @@ public class DoctorPigEventExports {
         Paging<DoctorPigEvent> pigEventPaging = pigEventPaging(pigEventCriteria);
         List<DoctorPigBoarInFarmExportDto> list = pigEventPaging.getData().stream().map(doctorPigEventDetail -> {
             try {
+
+                DoctorPigBoarInFarmExportDto dto;
                 DoctorFarmEntryDto farmEntryDto = JSON_MAPPER.fromJson(doctorPigEventDetail.getExtra(), DoctorFarmEntryDto.class);
-                DoctorPigBoarInFarmExportDto dto = OBJECT_MAPPER.convertValue(farmEntryDto, DoctorPigBoarInFarmExportDto.class);
-                if (doctorPigEventDetail.getExtraMap().containsKey("source")) {
+                dto = OBJECT_MAPPER.convertValue(farmEntryDto, DoctorPigBoarInFarmExportDto.class);
+                if (doctorPigEventDetail.getExtra() == null) {
+                    dto  = new DoctorPigBoarInFarmExportDto();
+                }
+                if (doctorPigEventDetail.getExtra() != null && doctorPigEventDetail.getExtraMap().containsKey("source")) {
                     dto.setSourceName(PigSource.from(dto.getSource()).getDesc());
                 }
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
@@ -452,7 +460,7 @@ public class DoctorPigEventExports {
                 DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(doctorGroupEventDetail.getGroupId()));
                 exportData.setPigTypeName(PigType.from(doctorGroupEventDetail.getPigType()).getDesc());
                 exportData.setBreedName(group.getBreedName());
-                exportData.setStatus(DoctorGroup.Status.from(group.getStatus()).getDesc());
+                exportData.setStatusName(DoctorGroup.Status.from(group.getStatus()).getDesc());
                 exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
                 exportData.setBarnName(doctorGroupEventDetail.getBarnName());
                 exportData.setEventAt(doctorGroupEventDetail.getEventAt());

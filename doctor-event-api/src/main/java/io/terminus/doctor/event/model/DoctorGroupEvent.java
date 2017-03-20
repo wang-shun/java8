@@ -190,6 +190,8 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
      */
     private Integer status;
 
+    private String statusName;
+
     /**
      * 备注
      */
