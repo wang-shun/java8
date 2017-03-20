@@ -499,8 +499,6 @@ export.tables:
         - name: birthday
           display: 出生日期
           format: isoDateFormatter
-        - name: boarTypeName
-          display: 公猪类型
         - name: initBarnName
           display: 进场猪舍
         - name: sourceName
@@ -539,6 +537,7 @@ export.tables:
           display: 配种类型
         - name: judgePregDate
           display: 预产期
+          format: isoDateFormatter
         - name: mattingMark
           display: 备注
         - name: creatorName
@@ -642,27 +641,6 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
-#  web-pig-sowFosters:
-#      display: 拼窝
-#      columns:
-#        - name: pigCode
-#          display: 母猪号
-#        - name: parity
-#          display: 胎次
-#        - name: barnName
-#          display: 猪舍
-#        - name: fostersDate
-#          display: 拼窝日期
-#        - name: fosterSowCode
-#          display: 代哺母猪
-#        - name: fostersCount
-#          display: 猪只数
-#        - name: fosterReasonName
-#          display: 寄养原因
-#        - name: fosterRemark
-#          display: 备注
-#        - name: updatorName
-#          display: 录入人员
   web-pig-sowWean:
       display: 断奶事件
       columns:
