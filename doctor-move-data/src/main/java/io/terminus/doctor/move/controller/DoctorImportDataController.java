@@ -305,4 +305,13 @@ public class DoctorImportDataController {
             return false;
         }
     }
+
+    /**
+     * 没有猪群镜像的生成镜像
+     */
+    @RequestMapping(value = "/generateGroupSnapshot", method = RequestMethod.GET)
+    public Boolean generateGroupSnapshot() {
+        doctorImportDataService.generateGroupSnapshot();
+        return true;
+    }
 }

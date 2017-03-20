@@ -10,7 +10,6 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Joiners;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
@@ -37,10 +36,14 @@ import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -50,6 +53,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.DoctorMatingType;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -60,9 +64,11 @@ import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
@@ -120,8 +126,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isEmpty;
-import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.*;
 
 /**
  * Desc:
@@ -210,6 +215,10 @@ public class DoctorImportDataService {
     private DoctorBasicMaterialDao doctorBasicMaterialDao;
     @Autowired
     private DoctorMoveDataService doctorMoveDataService;
+    @Autowired
+    private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    @Autowired
+    private DoctorPigSnapshotDao doctorPigSnapshotDao;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -676,19 +685,6 @@ public class DoctorImportDataService {
             boar.setBoarType(entryType == null ? BoarEntryType.HGZ.getKey() : entryType.getKey());
             doctorPigDao.create(boar);
 
-            //公猪跟踪
-            DoctorPigTrack boarTrack = new DoctorPigTrack();
-            boarTrack.setFarmId(boar.getFarmId());
-            boarTrack.setPigId(boar.getId());
-            boarTrack.setPigType(boar.getPigType());
-            boarTrack.setStatus(PigStatus.BOAR_ENTRY.getKey());
-            boarTrack.setIsRemoval(boar.getIsRemoval());
-            boarTrack.setCurrentBarnId(boar.getInitBarnId());
-            boarTrack.setCurrentBarnName(boar.getInitBarnName());
-            boarTrack.setCurrentBarnType(barn.getPigType());
-            boarTrack.setCurrentParity(1);      //配种次数置成1
-            doctorPigTrackDao.create(boarTrack);
-
             //公猪进场事件
             DoctorPigEvent boarEntryEvent = DoctorPigEvent.builder()
                     .orgId(boar.getOrgId())
@@ -708,6 +704,7 @@ public class DoctorImportDataService {
                     .creatorName(boar.getCreatorName())
                     .operatorId(boar.getCreatorId())
                     .operatorName(boar.getCreatorName())
+                    .status(EventStatus.VALID.getValue())
                     .npd(0)
                     .dpnpd(0)
                     .pfnpd(0)
@@ -724,6 +721,31 @@ public class DoctorImportDataService {
             String desc = Joiner.on("#").withKeyValueSeparator("：").join(fieldMap);
             boarEntryEvent.setDesc(desc);
             doctorPigEventDao.create(boarEntryEvent);
+
+            //公猪跟踪
+            DoctorPigTrack boarTrack = new DoctorPigTrack();
+            boarTrack.setFarmId(boar.getFarmId());
+            boarTrack.setPigId(boar.getId());
+            boarTrack.setPigType(boar.getPigType());
+            boarTrack.setStatus(PigStatus.BOAR_ENTRY.getKey());
+            boarTrack.setIsRemoval(boar.getIsRemoval());
+            boarTrack.setCurrentBarnId(boar.getInitBarnId());
+            boarTrack.setCurrentBarnName(boar.getInitBarnName());
+            boarTrack.setCurrentBarnType(barn.getPigType());
+            boarTrack.setCurrentParity(1);      //配种次数置成1
+            DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(boar.getId());
+            boarTrack.setCurrentEventId(notNull(lastEvent) ? lastEvent.getId() : 0L);
+            doctorPigTrackDao.create(boarTrack);
+
+            //创建镜像
+            DoctorPigSnapshot pigSnapshot = DoctorPigSnapshot.builder()
+                    .pigId(boar.getId())
+                    .fromEventId(0L)
+                    .toEventId(boarTrack.getCurrentEventId())
+                    .toPigInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(new DoctorPigSnapShotInfo(boar, boarTrack)))
+                    .build();
+            doctorPigSnapshotDao.create(pigSnapshot);
+
         }
     }
 
@@ -816,14 +838,31 @@ public class DoctorImportDataService {
                 groupTrack.setQuaQty(groupTrack.getQuantity());
             }
             doctorGroupTrackDao.create(groupTrack);
-            createMoveInGroupEvent(group, groupTrack, dayAge, avgWeight);
+            DoctorGroupEvent moveInEvent = createMoveInGroupEvent(group, groupTrack, dayAge, avgWeight);
+
+            //groupTrack关联最新事件
+            groupTrack.setRelEventId(moveInEvent.getId());
+            doctorGroupTrackDao.update(groupTrack);
+
+            //创建镜像
+            DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
+            groupSnapshot.setFromEventId(0L);
+            groupSnapshot.setToEventId(moveInEvent.getId());
+            groupSnapshot.setGroupId(group.getId());
+            DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder()
+                    .group(group)
+                    .groupTrack(groupTrack)
+                    .groupEvent(moveInEvent)
+                    .build();
+            groupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
+            doctorGroupSnapshotDao.create(groupSnapshot);
         }
     }
 
     /**
      * 创建默认的转入事件
      */
-    private void createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, Integer dayAge, Double avgWeight) {
+    private DoctorGroupEvent createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, Integer dayAge, Double avgWeight) {
         DoctorGroupEvent event = new DoctorGroupEvent();
         event.setOrgId(group.getOrgId());
         event.setOrgName(group.getOrgName());
@@ -844,7 +883,9 @@ public class DoctorImportDataService {
         event.setAvgDayAge(dayAge);
         event.setIsAuto(IsOrNot.YES.getValue());
         event.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
+        event.setStatus(EventStatus.VALID.getValue());
         doctorGroupEventDao.create(event);
+        return event;
     }
 
     /**
@@ -1041,6 +1082,16 @@ public class DoctorImportDataService {
             }
 
             DoctorPigTrack track = getSowTrack(sow, last, parityMap, barnMap.get(last.getBarnName()));
+
+            //创建镜像
+            DoctorPigSnapshot pigSnapshot = DoctorPigSnapshot.builder()
+                    .pigId(sow.getId())
+                    .fromEventId(0L)
+                    .toEventId(track.getCurrentEventId())
+                    .toPigInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(new DoctorPigSnapShotInfo(sow, track)))
+                    .build();
+            doctorPigSnapshotDao.create(pigSnapshot);
+
             if (Objects.equals(track.getStatus(), PigStatus.FEED.getKey())) {
                 feedSowTrack.add(track);
             }
@@ -1174,6 +1225,8 @@ public class DoctorImportDataService {
         if(!extra.isEmpty()){
             sowTrack.setExtraMap(extra);
         }
+        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(sow.getId());
+        sowTrack.setCurrentEventId(notNull(lastEvent) ? lastEvent.getId() : 0L);
 
         doctorPigTrackDao.create(sowTrack);
         return sowTrack;
@@ -1199,6 +1252,7 @@ public class DoctorImportDataService {
         event.setBarnId(sow.getInitBarnId());
         event.setBarnName(sow.getInitBarnName());
         event.setRemark(info.getRemark());
+        event.setStatus(EventStatus.VALID.getValue());
         return event;
     }
 
@@ -1209,7 +1263,7 @@ public class DoctorImportDataService {
         event.setType(PigEvent.ENTRY.getKey());
         event.setName(PigEvent.ENTRY.getName());
         event.setPigStatusAfter(PigStatus.Entry.getKey());
-        event.setParity(info.getParity() - 1 <= 0 ? 0 : info.getParity() - 1);
+        event.setParity(info.getParity());
 
         //进场extra
         DoctorFarmEntryDto entry = new DoctorFarmEntryDto();
@@ -1786,5 +1840,96 @@ public class DoctorImportDataService {
         pig.setId(boarId);
         pig.setBoarType(MoreObjects.firstNonNull(boarType, BoarEntryType.HGZ.getKey()));
         doctorPigDao.update(pig);
+    }
+
+    /**
+     * 没有猪群镜像的生成镜像
+     */
+    @Transactional
+    public void generateGroupSnapshot() {
+        //1.没有镜像猪群,直接生成镜像
+        List<Long> groupIdList = doctorGroupSnapshotDao.queryNotSnapshotGroupId();
+        groupIdList.forEach(this::createNotGroupSnapshot);
+
+        //2.from_event_id 是空的
+        List<DoctorGroupSnapshot> doctorGroupSnapshots = doctorGroupSnapshotDao.queryByFromEventIdIsNull();
+        doctorGroupSnapshots.forEach(this::createNullGroupSnapShot);
+
+    }
+
+    /**
+     * 生成镜像
+     * @param groupId
+     */
+    private void createNotGroupSnapshot(Long groupId) {
+
+        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(groupId);
+        if (isNull(lastEvent)) {
+            log.info("没有最新事件,猪群id:" + groupId);
+            return;
+        }
+        DoctorGroup group = doctorGroupDao.findById(groupId);
+        DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
+
+        DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
+        groupSnapshot.setGroupId(groupId);
+        groupSnapshot.setFromEventId(0L);
+        groupSnapshot.setToEventId(lastEvent.getId());
+        DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder().group(group).groupTrack(groupTrack).groupEvent(lastEvent).build();
+        groupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
+        doctorGroupSnapshotDao.create(groupSnapshot);
+    }
+
+    private void createNullGroupSnapShot(DoctorGroupSnapshot snapshot) {
+        Long groupId = snapshot.getGroupId();
+        DoctorGroupEvent groupEvent = doctorGroupEventDao.findInitGroupEvent(groupId);
+        if (isNull(groupEvent) || !Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
+            log.info("没有初始事件,或初始事件不是转入事件,猪群id:" + groupId);
+            return;
+        }
+        DoctorGroup group = doctorGroupDao.findById(groupId);
+        DoctorGroupTrack currentTrack  = doctorGroupTrackDao.findByGroupId(groupId);
+
+        DoctorGroupTrack groupTrack = new DoctorGroupTrack();
+        groupTrack.setGroupId(groupId);
+
+        groupTrack.setSex(currentTrack.getSex());
+        groupTrack.setQuantity(groupEvent.getQuantity());
+        groupTrack.setBoarQty(0);
+        groupTrack.setSowQty(MoreObjects.firstNonNull(groupTrack.getQuantity(), 0) - groupTrack.getBoarQty());
+
+        //excel日龄是转入时的日龄，所以要重新算一发
+        groupTrack.setAvgDayAge(groupEvent.getAvgDayAge());
+        groupTrack.setBirthDate(new DateTime(groupEvent.getEventAt()).minusDays(groupTrack.getAvgDayAge()).toDate());
+
+        Double avgWeight = groupEvent.getAvgWeight();
+
+        groupTrack.setBirthWeight(avgWeight * groupTrack.getQuantity());
+
+        //产房仔猪的批次总结字段
+        if (PigType.FARROW_TYPES.contains(group.getPigType())) {
+            groupTrack.setWeanWeight(groupTrack.getBirthWeight());
+            groupTrack.setNest(0);
+            groupTrack.setLiveQty(groupTrack.getQuantity());
+            groupTrack.setHealthyQty(groupTrack.getQuantity());
+            groupTrack.setWeakQty(0);
+            groupTrack.setUnweanQty(0);
+            groupTrack.setUnqQty(0);
+            groupTrack.setWeanQty(groupTrack.getQuantity());    //默认全部断奶
+            groupTrack.setQuaQty(groupTrack.getQuantity());
+        }
+
+        DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
+        groupSnapshot.setGroupId(groupId);
+        groupSnapshot.setFromEventId(0L);
+        groupSnapshot.setToEventId(groupEvent.getId());
+        DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder().group(group).groupTrack(groupTrack).groupEvent(groupEvent).build();
+        groupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
+        doctorGroupSnapshotDao.create(groupSnapshot);
+
+        DoctorGroupSnapshot updateSnapshot = new DoctorGroupSnapshot();
+        updateSnapshot.setId(snapshot.getId());
+        updateSnapshot.setFromEventId(groupEvent.getId());
+        doctorGroupSnapshotDao.update(updateSnapshot);
     }
 }

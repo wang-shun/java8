@@ -10,26 +10,29 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
+import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
@@ -45,9 +48,9 @@ import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
@@ -56,7 +59,9 @@ import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
+import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.DoctorMatingType;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -71,9 +76,11 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryWriteService;
@@ -89,7 +96,6 @@ import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_SowCardList;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -105,8 +111,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.*;
 import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
 import static io.terminus.doctor.event.enums.PregCheckResult.YANG;
 import static io.terminus.doctor.event.enums.PregCheckResult.from;
@@ -138,6 +143,8 @@ public class DoctorMoveDataService {
     private final DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
     private final DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService;
     private final DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
+    private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    private final DoctorPigSnapshotDao doctorPigSnapshotDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -153,7 +160,9 @@ public class DoctorMoveDataService {
                                  DoctorBarnDao doctorBarnDao,
                                  DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService,
                                  DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService,
-                                 DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService) {
+                                 DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService,
+                                 DoctorGroupSnapshotDao doctorGroupSnapshotDao,
+                                 DoctorPigSnapshotDao doctorPigSnapshotDao) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
@@ -168,6 +177,8 @@ public class DoctorMoveDataService {
         this.doctorGroupBatchSummaryReadService = doctorGroupBatchSummaryReadService;
         this.doctorGroupBatchSummaryWriteService = doctorGroupBatchSummaryWriteService;
         this.doctorMaterialConsumeProviderReadService = doctorMaterialConsumeProviderReadService;
+        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
+        this.doctorPigSnapshotDao = doctorPigSnapshotDao;
     }
 
     //删除猪场所有猪相关的数据
@@ -565,6 +576,27 @@ public class DoctorMoveDataService {
             doctorGroupTrackDao.creates(groupTracks);
         }
 
+        groupTracks.forEach(groupTrack -> {
+            DoctorGroupEvent groupEvent = doctorGroupEventDao.findLastEventByGroupId(groupTrack.getGroupId());
+            DoctorGroup group = doctorGroupDao.findById(groupTrack.getGroupId());
+            //groupTrack关联最新事件
+            groupTrack.setRelEventId(groupEvent.getId());
+            doctorGroupTrackDao.update(groupTrack);
+
+            //创建镜像
+            DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
+            groupSnapshot.setFromEventId(0L);
+            groupSnapshot.setToEventId(groupEvent.getId());
+            groupSnapshot.setGroupId(group.getId());
+            DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder()
+                    .group(group)
+                    .groupTrack(groupTrack)
+                    .groupEvent(groupEvent)
+                    .build();
+            groupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
+            doctorGroupSnapshotDao.create(groupSnapshot);
+        });
+
         //批次总结
         createClosedGroupSummary(farm.getId());
     }
@@ -651,6 +683,17 @@ public class DoctorMoveDataService {
         if(!sowTracks.isEmpty()){
             doctorPigTrackDao.creates(sowTracks);
         }
+
+        sowTracks.forEach(sowTrack -> {
+            DoctorPig sow = doctorPigDao.findById(sowTrack.getPigId());
+            DoctorPigSnapshot pigSnapshot = DoctorPigSnapshot.builder()
+                    .pigId(sow.getId())
+                    .fromEventId(0L)
+                    .toEventId(sowTrack.getCurrentEventId())
+                    .toPigInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(new DoctorPigSnapShotInfo(sow, sowTrack)))
+                    .build();
+            doctorPigSnapshotDao.create(pigSnapshot);
+        });
 
         //4. 更新公猪的全部配种次数
         updateBoarCurrentParity(sowEvents);
@@ -762,6 +805,7 @@ public class DoctorMoveDataService {
         sowEvent.setFarmName(sow.getFarmName());
         sowEvent.setPigId(sow.getId());
         sowEvent.setPigCode(sow.getPigCode());
+        sowEvent.setStatus(EventStatus.VALID.getValue());
 
         sowEvent.setEventAt(event.getEventAt());
         sowEvent.setKind(sow.getPigType());       // 猪类(公猪2,母猪1)
@@ -1121,6 +1165,8 @@ public class DoctorMoveDataService {
         track.setOutFarmDate(DateUtil.toDate(card.getOutFarmDate()));
         track.setRemark(card.getRemark());
         track.setCurrentParity(card.getCurrentParity());
+        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(sow.getId());
+        track.setCurrentEventId(notNull(lastEvent) ? lastEvent.getId() : 0L);
 
         if (notEmpty(events)) {
             //按照时间 asc 排序
@@ -1518,6 +1564,18 @@ public class DoctorMoveDataService {
         if(!boarTracks.isEmpty()){
             doctorPigTrackDao.creates(boarTracks);
         }
+
+        boarTracks.forEach(boarTrack -> {
+            //创建镜像
+            DoctorPig boar = doctorPigDao.findById(boarTrack.getPigId());
+            DoctorPigSnapshot pigSnapshot = DoctorPigSnapshot.builder()
+                    .pigId(boar.getId())
+                    .fromEventId(0L)
+                    .toEventId(boarTrack.getCurrentEventId())
+                    .toPigInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(new DoctorPigSnapShotInfo(boar, boarTrack)))
+                    .build();
+            doctorPigSnapshotDao.create(pigSnapshot);
+        });
     }
 
     //更新猪的relEventId, 后面的事件存一下前面事件的id
@@ -1602,6 +1660,7 @@ public class DoctorMoveDataService {
         boarEvent.setDesc(event.getEventDesc());
         boarEvent.setOutId(event.getEventOutId());
         boarEvent.setRemark(event.getRemark());
+        boarEvent.setStatus(EventStatus.VALID.getValue());
 
         //事件类型
         PigEvent eventType = PigEvent.from(event.getEventName());
@@ -1794,6 +1853,8 @@ public class DoctorMoveDataService {
         track.setWeight(card.getWeight());
         track.setOutFarmDate(DateUtil.toDate(card.getOutFarmDate()));
         track.setRemark(card.getRemark());
+        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(boar.getId());
+        track.setCurrentEventId(notNull(lastEvent) ? lastEvent.getId() : 0L);
 
         if (notEmpty(events)) {
             //按照时间 asc 排序
@@ -1831,6 +1892,7 @@ public class DoctorMoveDataService {
         event.setGroupId(group.getId());
         event.setGroupCode(group.getGroupCode());
         event.setEventAt(gainEvent.getEventAt());
+        event.setStatus(EventStatus.VALID.getValue());
 
         //转换事件类型
         GroupEventType type = GroupEventType.from(gainEvent.getEventTypeName());
