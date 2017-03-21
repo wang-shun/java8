@@ -8,7 +8,6 @@ import io.terminus.doctor.basic.DoctorBasicConfiguration;
 import io.terminus.doctor.converter.JsonMessageConverter;
 import io.terminus.doctor.event.DoctorEventConfiguration;
 import io.terminus.doctor.interceptor.MockLoginInterceptor;
-import io.terminus.doctor.msg.DoctorMsgConfig;
 import io.terminus.doctor.user.DoctorUserConfiguration;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.component.DoctorHbsHelpers;
@@ -19,7 +18,7 @@ import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
 import io.terminus.pampas.openplatform.core.Gateway;
 import io.terminus.parana.auth.core.AuthenticationConfiguration;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
-import io.terminus.zookeeper.ZKClientFactory;
+import io.terminus.zookeeper.common.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +50,6 @@ import java.util.List;
 @Import({
         DoctorEventConfiguration.class,
         DoctorBasicConfiguration.class,
-        DoctorMsgConfig.class,
         DoctorUserConfiguration.class,
         DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,

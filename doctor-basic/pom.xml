@@ -34,7 +34,7 @@
         </dependency>
         <dependency>
             <groupId>io.terminus.boot</groupId>
-            <artifactId>spring-boot-starter-zookeeper</artifactId>
+            <artifactId>terminus-spring-boot-starter-zookeeper</artifactId>
         </dependency>
         <dependency>
             <groupId>io.terminus.boot</groupId>
@@ -43,6 +43,11 @@
         <dependency>
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-redis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.terminus.zookeeper</groupId>
+            <artifactId>pubsub</artifactId>
         </dependency>
 
         <dependency>

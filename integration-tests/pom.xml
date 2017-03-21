@@ -91,36 +91,6 @@
             </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-msg</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>mysql</groupId>
-                    <artifactId>mysql-connector-java</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.terminus.boot</groupId>
-                    <artifactId>spring-boot-starter-dubbo</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.terminus.boot</groupId>
-                    <artifactId>spring-boot-starter-datasource</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.alibaba</groupId>
-                    <artifactId>dubbo</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.terminus.boot</groupId>
-                    <artifactId>spring-boot-starter-mybatis</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.sgroschupf</groupId>
-                    <artifactId>zkclient</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <dependency>
             <groupId>io.terminus.doctor</groupId>
@@ -339,7 +309,12 @@
         <!-- zkClient test content -->
         <dependency>
             <groupId>io.terminus.boot</groupId>
-            <artifactId>spring-boot-starter-zookeeper</artifactId>
+            <artifactId>terminus-spring-boot-starter-zookeeper</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.terminus.zookeeper</groupId>
+            <artifactId>pubsub</artifactId>
         </dependency>
 
         <dependency>

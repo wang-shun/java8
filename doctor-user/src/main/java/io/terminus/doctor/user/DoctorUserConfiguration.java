@@ -5,7 +5,7 @@ import io.terminus.parana.article.impl.ArticleAutoConfig;
 import io.terminus.parana.file.FileAutoConfig;
 import io.terminus.parana.user.ExtraUserAutoConfig;
 import io.terminus.parana.user.UserAutoConfig;
-import io.terminus.zookeeper.ZKClientFactory;
+import io.terminus.zookeeper.common.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;

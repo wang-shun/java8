@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import io.terminus.doctor.converter.JsonMessageConverter;
 import io.terminus.doctor.event.DoctorEventConfiguration;
 import io.terminus.doctor.interceptor.MockLoginInterceptor;
-import io.terminus.doctor.msg.DoctorMsgConfig;
 import io.terminus.doctor.user.DoctorUserConfiguration;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.component.DoctorHbsHelpers;
@@ -45,7 +44,6 @@ import java.util.List;
 @Import({
         AuthenticationConfiguration.class,
         DoctorEventConfiguration.class,
-        DoctorMsgConfig.class,
         DoctorUserConfiguration.class,
         DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,

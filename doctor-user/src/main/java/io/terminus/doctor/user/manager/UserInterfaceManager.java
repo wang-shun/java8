@@ -21,7 +21,7 @@ import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
-import io.terminus.zookeeper.ZKClientFactory;
+import io.terminus.zookeeper.common.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

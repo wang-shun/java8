@@ -2,7 +2,6 @@ package configuration.open;
 
 import io.terminus.doctor.basic.DoctorBasicConfiguration;
 import io.terminus.doctor.event.DoctorEventConfiguration;
-import io.terminus.doctor.msg.DoctorMsgConfig;
 import io.terminus.doctor.open.DoctorOPConfiguration;
 import io.terminus.doctor.user.DoctorUserConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -22,7 +21,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Import({
         DoctorEventConfiguration.class,
         DoctorBasicConfiguration.class,
-        DoctorMsgConfig.class,
         DoctorUserConfiguration.class,
         DoctorOPConfiguration.class
 })
