@@ -1,17 +1,27 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.user.dao.DoctorAddressDao;
 import io.terminus.doctor.user.dto.DoctorAddressDto;
 import io.terminus.parana.user.address.model.Address;
+import io.terminus.parana.user.impl.address.service.AddressReadServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.joda.time.DateTimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.Date;
 import java.util.List;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -39,9 +49,14 @@ public class DoctorAddressReadServiceImpl implements DoctorAddressReadService {
     }
 
     @PostConstruct
-    public void loadAddress() {
+    public void loadAddress() throws InterruptedException {
+        addressTree = Lists.newArrayList();
         //初始 pid = 1
-        addressTree = getAddressTreeByPid(1);
+        new Thread(() -> {
+            log.info("build address tree start, now:{}", DateUtil.toDateTimeString(new Date()));
+            addressTree = getAddressTreeByPid(1);
+            log.info("build address tree end, now:{}", DateUtil.toDateTimeString(new Date()));
+        }).start();
     }
 
     @Override
@@ -56,6 +71,7 @@ public class DoctorAddressReadServiceImpl implements DoctorAddressReadService {
 
     //递归调用查询出地址树, 递归终止条件: level > MAX_DEPTH
     private List<DoctorAddressDto> getAddressTreeByPid(Integer pid) {
+        log.debug("build tree start, pid: {}", pid);
         List<Address> addresses = addressDao.findByPid(pid);
         List<DoctorAddressDto> trees = Lists.newArrayListWithCapacity(addresses.size());
 
