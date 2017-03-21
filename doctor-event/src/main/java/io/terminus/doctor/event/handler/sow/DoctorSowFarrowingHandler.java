@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Maps;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -11,7 +12,6 @@ import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
-import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
@@ -103,7 +104,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     @Override
     protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
-        Map<String, Object> extra = toTrack.getExtraMap();
+        Map<String, Object> extra = isNull(toTrack.getExtraMap()) ? Maps.newHashMap() : toTrack.getExtraMap();
         // 对应的 仔猪 猪舍的 信息
         extra.put("toBarnId", toTrack.getCurrentBarnId());
         extra.put("toBarnName", toTrack.getCurrentBarnName());

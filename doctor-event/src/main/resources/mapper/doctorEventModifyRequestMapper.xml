@@ -81,6 +81,7 @@
             <if test="businessCode != null">business_code = #{businessCode},</if>
             <if test="startEventId != null">start_event_id = #{startEventId},</if>
             <if test="eventId != null">event_id = #{eventId},</if>
+            <if test="errorStack != null">error_stack = #{errorStack},</if>
             <if test="type != null">type = #{type},</if>
             <if test="content != null">content = #{content},</if>
             <if test="status != null">status = #{status},</if>
