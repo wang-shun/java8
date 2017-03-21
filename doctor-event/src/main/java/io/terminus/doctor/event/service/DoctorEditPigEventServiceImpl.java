@@ -133,8 +133,9 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
 
 
                         //获取猪群断奶事件前镜像
-                        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(weanEventInfo.getEventId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-                        DoctorGroupEvent oldGroupWeanEvent = doctorGroupEventDao.findById(toPigEventId);
+                        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(weanEventInfo.getEventId(), DoctorEventRelation.TargetType.GROUP.getValue());
+                        expectNotNull(eventRelation, "find.event.relation.failed", weanEventInfo.getEventId());
+                        DoctorGroupEvent oldGroupWeanEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
                         expectNotNull(oldGroupWeanEvent, "find.rel.group.event.failed", weanEventInfo.getEventId());
                         DoctorGroupSnapshot oldGroupWeanSnapshot = doctorGroupSnapshotDao.queryByEventId(oldGroupWeanEvent.getId());
                         expectNotNull(oldGroupWeanSnapshot, "find.per.group.snapshot.failed", oldGroupWeanEvent.getId());
@@ -153,8 +154,9 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                 //获取猪群事件输入
                 BaseGroupInput newGroupEventInput = doctorPigEventManager.getHandler(modifyEvent.getType()).buildTriggerGroupEventInput(modifyEvent);
                 //获取猪群需要修改原事件
-                Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(modifyEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-                DoctorGroupEvent oldGroupModifyEvent = doctorGroupEventDao.findById(toGroupEventId);
+                DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(modifyEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+                expectNotNull(eventRelation, "find.event.relation.failed", modifyEvent.getId());
+                DoctorGroupEvent oldGroupModifyEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
                 expectNotNull(oldGroupModifyEvent, "find.rel.group.event.failed", modifyEvent.getId());
                 DoctorGroupSnapshot beforeGroupSnapshot = doctorGroupSnapshotDao.queryByEventId(oldGroupModifyEvent.getId());
                 expectNotNull(beforeGroupSnapshot, "find.per.group.snapshot.failed", oldGroupModifyEvent.getId());
