@@ -154,14 +154,12 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
             //将需要推演的groupEvent.status = 0
             doctorEditGroupEventManager.updateDoctorGroupEventStatus(taskDoctorGroupEventList, EventStatus.HANDLING.getValue());
 
-            int index = 0;
             for(DoctorGroupEvent handlerDoctorGroupEvent: localDoctorGroupEventList){
                 doctorGroupTrack = doctorEditGroupEventManager.elicitDoctorGroupTrack(triggerDoctorGroupEventList, rollbackDoctorGroupEventList, doctorGroupTrack, handlerDoctorGroupEvent);
-                index ++;
-                //如果doctorGroupTrack.quantity = 0 ,关闭猪群
-                if(index == localDoctorGroupEventList.size() && doctorGroupTrack.getQuantity() == 0){
-                    closeGroupEvent(handlerDoctorGroupEvent);
-                }
+            }
+            if(doctorGroupTrack.getQuantity() == 0){
+                DoctorGroupEvent lastEvent = Arguments.isNullOrEmpty(localDoctorGroupEventList) ? doctorGroupEvent : localDoctorGroupEventList.get(localDoctorGroupEventList.size() - 1);
+                closeGroupEvent(lastEvent);
             }
 
             triggerEvents(oldEvent, doctorGroupEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
