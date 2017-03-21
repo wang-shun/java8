@@ -625,3 +625,59 @@ alter table doctor_user_primarys add column rel_farm_id BIGINT(20) default null 
 -- 2017-03-05
 alter table doctor_user_primarys add column `real_name` VARCHAR(64) DEFAULT NULL COMMENT '真实姓名 (冗余),跟随 user_profile 表的 real_name 字段' after `user_name`;
 alter table doctor_farms add column `farm_code` VARCHAR(64) DEFAULT NULL COMMENT '猪场号' after `name`;
+
+-- 2017-03-21 事件编辑相关
+drop table if exists `doctor_event_modify_requests`;
+CREATE TABLE `doctor_event_modify_requests` (
+`id`         bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
+`farm_id`    bigint(20) NOT NULL COMMENT '猪场ID',
+`business_id`  bigint(20) NOT NULL COMMENT '目标ID',
+`business_code` varchar(64) NOT NULL COMMENT '目标code',
+`start_event_id` bigint(20) DEFAULT NULL COMMENT '上一个事件',
+`event_id`   bigint(20) NOT NULL COMMENT '处理的事件ID',
+`type`       tinyint(4) NOT NULL COMMENT '处理的事件类型1：猪事件，2：猪群事件',
+`content`    text NOT NULL COMMENT '事件类型',
+`status`     tinyint(4) NOT NULL COMMENT '状态，0：待处理，1：处理中，2：处理成功， -1：处理失败',
+`reason`     varchar(255) DEFAULT NULL COMMENT '失败原因',
+`user_id`    bigint(20) NOT NULL COMMENT '操作人ID',
+`user_name`  varchar(64) NOT NULL COMMENT '操作人名称',
+`created_at` datetime NOT NULL COMMENT '创建时间',
+`updated_at` datetime NOT NULL COMMENT '更新事件',
+primary key(id),
+key `doctor_event_modify_requests_farm_id` (farm_id)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='事件编辑请求表';
+
+alter table doctor_event_modify_requests add column error_stack text  Default null comment '没有具体错误原因是保存错误堆栈' after reason;
+
+
+alter table doctor_group_events add column status tinyint(4)  not null comment '是否有效1：有效，0：正在处理， -1：无效' after out_id ;
+
+alter table doctor_pig_events add column status tinyint(4)  not null comment '是否有效1：有效，0：正在处理， -1：无效' after out_id ;
+
+alter table doctor_pig_tracks add column `current_event_id` bigint(20) NOT NULL COMMENT '最新的事件ID' after rel_event_ids ;
+
+alter table doctor_pig_snapshots drop column org_id, drop column farm_id;
+
+alter table doctor_pig_snapshots add column from_event_id bigint(20) NOT NULL COMMENT '操作前的事件ID' after pig_id;
+alter table doctor_pig_snapshots change event_id to_event_id bigint(20) NOT NULL COMMENT '操作后的事件ID';
+alter table doctor_pig_snapshots change pig_info to_pig_info text COMMENT '猪快照信息';
+
+alter table doctor_group_snapshots drop column event_type, drop column from_group_id;
+alter table doctor_group_snapshots change to_group_id group_id bigint(20) NOT NULL COMMENT '猪群ID';
+alter table doctor_group_snapshots drop column from_info;
+
+
+drop table if exists `doctor_event_relations`;
+create table doctor_event_relations (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `origin_event_id` bigint(20) not null comment '原事件id',
+  `trigger_event_id` bigint(20) not null comment '触发事件id',
+  `trigger_target_type` tinyint(4) not null comment '1猪事件、2猪群事件',
+  `status` tinyint(4) not null comment '1有效、0正在处理、 -1无效',
+  `created_at` datetime not null,
+  `updated_at` datetime not null,
+  primary key (id),
+  key idx_relations_origin_event_id(origin_event_id),
+  key idx_relations_trigger_event_id(trigger_event_id)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='事件关联表';
+
