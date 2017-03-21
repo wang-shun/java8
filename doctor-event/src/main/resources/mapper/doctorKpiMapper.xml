@@ -1512,9 +1512,25 @@
                 ifnull(t12.counts, 0) + ifnull(t13.counts, 0) + ifnull(t14.counts, 0) - ifnull(t15.counts, 0) as count
         from
         (
-        select name as parity
-        from doctor_basics
-        where type = 9
+            select 1 as parity from dual
+            union
+            select 2 as parity from dual
+            union
+            select 3 as parity from dual
+            union
+            select 4 as parity from dual
+            union
+            select 5 as parity from dual
+            union
+            select 6 as parity from dual
+            union
+            select 7 as parity from dual
+            union
+            select 8 as parity from dual
+            union
+            select 9 as parity from dual
+            union
+            select 10 as parity from dual
         ) t11 left join
         (
         -- 当前
