@@ -98,6 +98,10 @@
             <artifactId>terminus-spring-boot-starter-zookeeper</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.terminus.zookeeper</groupId>
+            <artifactId>pubsub</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
