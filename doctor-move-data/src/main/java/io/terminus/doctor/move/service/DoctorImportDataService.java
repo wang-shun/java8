@@ -950,7 +950,24 @@ public class DoctorImportDataService {
             }
 
             doctorGroupTrackDao.create(groupTrack);
-            createMoveInGroupEvent(group, groupTrack, 1, MoreObjects.firstNonNull(groupTrack.getBirthWeight(), 7D) / groupTrack.getQuantity());
+            DoctorGroupEvent moveInEvent = createMoveInGroupEvent(group, groupTrack, 1, MoreObjects.firstNonNull(groupTrack.getBirthWeight(), 7D) / groupTrack.getQuantity());
+
+            //groupTrack关联最新事件
+            groupTrack.setRelEventId(moveInEvent.getId());
+            doctorGroupTrackDao.update(groupTrack);
+
+            //创建镜像
+            DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
+            groupSnapshot.setFromEventId(0L);
+            groupSnapshot.setToEventId(moveInEvent.getId());
+            groupSnapshot.setGroupId(group.getId());
+            DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder()
+                    .group(group)
+                    .groupTrack(groupTrack)
+                    .groupEvent(moveInEvent)
+                    .build();
+            groupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
+            doctorGroupSnapshotDao.create(groupSnapshot);
 
             // 把 产房仔猪群 的groupId 存入相应猪舍的所有母猪
             List<DoctorPigTrack> feedTracks = feedMap.get(group.getInitBarnId());
@@ -1918,6 +1935,7 @@ public class DoctorImportDataService {
             groupTrack.setWeanQty(groupTrack.getQuantity());    //默认全部断奶
             groupTrack.setQuaQty(groupTrack.getQuantity());
         }
+        groupTrack.setRelEventId(groupEvent.getId());
 
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
         groupSnapshot.setGroupId(groupId);
