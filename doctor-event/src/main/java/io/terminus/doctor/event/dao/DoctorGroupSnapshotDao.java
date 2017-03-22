@@ -43,4 +43,8 @@ public class DoctorGroupSnapshotDao extends MyBatisDao<DoctorGroupSnapshot> {
     public List<DoctorGroupSnapshot> queryByFromEventIdIsNull() {
         return getSqlSession().selectList(sqlId("queryByFromEventIdIsNull"));
     }
+
+    public Boolean deleteByGroupId(Long groupId) {
+        return getSqlSession().delete(sqlId("deleteByGroupId"), groupId) == 1;
+    }
 }

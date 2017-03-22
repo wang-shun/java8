@@ -466,7 +466,7 @@
         <include refid="tb"/>
         WHERE status = 1
         AND group_id = #{groupId}
-        ORDER BY id asc
+        ORDER BY event_at asc, id asc
     </select>
 
     <update id="updateGroupEventStatus" parameterType="map">

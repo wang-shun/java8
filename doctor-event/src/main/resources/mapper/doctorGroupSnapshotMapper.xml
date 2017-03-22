@@ -89,4 +89,9 @@
         WHERE from_event_id IS NULL
     </select>
 
+    <delete id="deleteByGroupId" parameterType="long">
+        delete from <include refid="tb"/>
+        where group_id = #{group_id}
+    </delete>
+
 </mapper>

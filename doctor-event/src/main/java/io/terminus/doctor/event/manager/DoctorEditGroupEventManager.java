@@ -1,31 +1,27 @@
 package io.terminus.doctor.event.manager;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
-import io.terminus.doctor.event.dao.DoctorEventRelationDao;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
-import io.terminus.doctor.event.enums.BoarEntryType;
-import io.terminus.doctor.event.enums.EventStatus;
-import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.enums.*;
 import io.terminus.doctor.event.handler.group.DoctorGroupEventHandlers;
 import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
-import io.terminus.doctor.event.model.DoctorEventRelation;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Arg;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +45,8 @@ public class DoctorEditGroupEventManager {
     private DoctorPigEventDao doctorPigEventDao;
     private DoctorEntryHandler doctorEntryHandler;
     private DoctorEventRelationDao doctorEventRelationDao;
+    private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    private DoctorGroupDao doctorGroupDao;
     private static JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     @Autowired
@@ -57,13 +55,17 @@ public class DoctorEditGroupEventManager {
                                        DoctorGroupTrackDao doctorGroupTrackDao,
                                        DoctorPigEventDao doctorPigEventDao,
                                        DoctorEntryHandler doctorEntryHandler,
-                                       DoctorEventRelationDao doctorEventRelationDao){
+                                       DoctorEventRelationDao doctorEventRelationDao,
+                                       DoctorGroupSnapshotDao doctorGroupSnapshotDao,
+                                       DoctorGroupDao doctorGroupDao){
         this.doctorGroupEventHandlers = doctorGroupEventHandlers;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorEntryHandler = doctorEntryHandler;
         this.doctorEventRelationDao= doctorEventRelationDao;
+        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
+        this.doctorGroupDao = doctorGroupDao;
     }
 
     @Transactional
@@ -88,6 +90,144 @@ public class DoctorEditGroupEventManager {
         doctorEventRelationDao.updateStatusUnderHandling(oldDoctorGroupEvents, DoctorEventRelation.Status.VALID.getValue());
         doctorEventRelationDao.batchUpdateStatus(newDoctorGroupEvents, DoctorEventRelation.Status.INVALID.getValue());
         return status;
+    }
+
+    @Transactional
+    public void reElicitGroupEventByGroupId(Long groupId) {
+        List<DoctorGroupEvent> groupEvents = doctorGroupEventDao.findLinkedGroupEventsByGroupId(groupId);
+        if(Arguments.isNullOrEmpty(groupEvents)){
+            log.error("group events info broken, groupId: {}", groupId);
+            throw new InvalidException("group.events.info.broken", groupId);
+        }
+        DoctorGroupTrack track = doctorGroupTrackDao.findByGroupId(groupId);
+        if(Arguments.isNull(track)){
+            log.error("group track info broken, groupId: {}", groupId);
+            throw new InvalidException("group.track.info.broken", groupId);
+        }
+        DoctorGroupTrack newTrack = new DoctorGroupTrack();
+        newTrack.setId(track.getId());
+
+        Long fromEventId = 0L;
+        doctorGroupSnapshotDao.deleteByGroupId(groupId);
+        for(DoctorGroupEvent doctorGroupEvent: groupEvents) {
+            switch(GroupEventType.from(doctorGroupEvent.getType())){
+                case NEW:
+                    newTrack.setQuantity(0);
+                    break;
+                case MOVE_IN:
+                    setAvgDayAge(newTrack, doctorGroupEvent);
+                    newTrack.setQuantity(MoreObjects.firstNonNull(newTrack.getQuantity(), 0) + doctorGroupEvent.getQuantity());
+                    DoctorMoveInGroupEvent moveInEvent = JSON_MAPPER.fromJson(doctorGroupEvent.getExtra(), DoctorMoveInGroupEvent.class);
+                    if(!Arguments.isNull(doctorGroupEvent.getRelPigEventId())){
+                        newTrack.setNest(MoreObjects.firstNonNull(newTrack.getNest(), 0) + 1);
+                        newTrack.setLiveQty(MoreObjects.firstNonNull(newTrack.getLiveQty(), 0) + doctorGroupEvent.getQuantity());
+                        newTrack.setHealthyQty(MoreObjects.firstNonNull(newTrack.getHealthyQty(), 0) + moveInEvent.getHealthyQty());
+                        newTrack.setUnweanQty(MoreObjects.firstNonNull(newTrack.getUnweanQty(), 0) + doctorGroupEvent.getQuantity());
+                        newTrack.setBirthWeight(MoreObjects.firstNonNull(newTrack.getBirthWeight(), 0d) + doctorGroupEvent.getWeight());
+                    }
+                    break;
+                case CHANGE:
+                    if(!Arguments.isNull(doctorGroupEvent.getRelPigEventId())){
+                        newTrack.setUnweanQty(newTrack.getUnweanQty() -  doctorGroupEvent.getQuantity());
+                    }
+                    newTrack.setQuantity(newTrack.getQuantity() - doctorGroupEvent.getQuantity());
+                    newTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
+                    break;
+                case TRANS_GROUP:
+                    if(!Arguments.isNull(doctorGroupEvent.getRelPigEventId())){
+                        newTrack.setNest(newTrack.getNest() - 1);
+                        newTrack.setLiveQty(EventUtil.plusInt(newTrack.getLiveQty(), - doctorGroupEvent.getQuantity()));
+                        newTrack.setHealthyQty(newTrack.getLiveQty() - MoreObjects.firstNonNull(newTrack.getWeakQty(), 0));
+                        newTrack.setUnweanQty(EventUtil.plusInt(newTrack.getUnweanQty(), -doctorGroupEvent.getQuantity()));
+                        newTrack.setBirthWeight(EventUtil.plusDouble(newTrack.getBirthWeight(), - doctorGroupEvent.getAvgWeight() * doctorGroupEvent.getQuantity()));
+                    }
+                    newTrack.setQuantity(newTrack.getQuantity() - doctorGroupEvent.getQuantity());
+                    newTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
+                    break;
+                case TURN_SEED:
+                    newTrack.setQuantity(newTrack.getQuantity() - 1);
+                    newTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
+//                    newTrack.setBoarQty(getBoarQty(DoctorPig.PigSex.from(newTrack.getSex()), newTrack.getBoarQty()));
+//                    newTrack.setSowQty(newTrack.getQuantity() - newTrack.getBoarQty());
+                    break;
+                case LIVE_STOCK:
+                    break;
+                case DISEASE:
+                    break;
+                case ANTIEPIDEMIC:
+                    break;
+                case TRANS_FARM:
+                    newTrack.setQuantity(newTrack.getQuantity() - doctorGroupEvent.getQuantity());
+                    newTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
+//                    newTrack.setBoarQty(getBoarQty(DoctorPig.PigSex.from(newTrack.getSex()), newTrack.getBoarQty()));
+//                    newTrack.setSowQty(newTrack.getQuantity() - newTrack.getBoarQty());
+                    break;
+                case CLOSE:
+                    newTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
+                    break;
+                case WEAN:
+                    newTrack.setWeanQty(MoreObjects.firstNonNull(newTrack.getWeanQty(), 0) + doctorGroupEvent.getQuantity());
+                    newTrack.setUnweanQty(newTrack.getUnweanQty() - doctorGroupEvent.getQuantity());
+                    newTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
+                    break;
+            }
+
+            if(newTrack.getQuantity() < 0){
+                log.error("group event info broken, quantity not enough, groupId: {}", groupId);
+                throw new InvalidException("group.quantity.not.enough", groupId);
+            }
+
+            newTrack.setRelEventId(doctorGroupEvent.getId());
+            createSnapshots(fromEventId, doctorGroupEvent, newTrack);
+            fromEventId = doctorGroupEvent.getId();
+        }
+        doctorGroupTrackDao.update(newTrack);
+        //track.quantity == 0 最后一个事件不是关闭猪群事件
+        if(Objects.equals(newTrack.getQuantity(), 0) && !Objects.equals(groupEvents.get(groupEvents.size() - 1).getType(), GroupEventType.CLOSE.getValue())){
+            closeGroupEvent(groupEvents.get(groupEvents.size() - 1));
+        }
+
+    }
+
+    private void createSnapshots(Long fromEventId, DoctorGroupEvent doctorGroupEvent, DoctorGroupTrack newTrack) {
+        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(doctorGroupEvent.getId());
+        if(!Arguments.isNull(snapshot)){
+            doctorGroupSnapshotDao.delete(snapshot.getId());
+        }
+        DoctorGroupSnapshot newSnapshot = new DoctorGroupSnapshot();
+        newSnapshot.setGroupId(doctorGroupEvent.getGroupId());
+        newSnapshot.setFromEventId(fromEventId);
+        newSnapshot.setToEventId(doctorGroupEvent.getId());
+        DoctorGroupSnapShotInfo toInfo = DoctorGroupSnapShotInfo.builder().group(doctorGroupDao.findById(doctorGroupEvent.getGroupId()))
+                .groupEvent(doctorGroupEvent)
+                .groupTrack(newTrack).build();
+        newSnapshot.setToInfo(JSON_MAPPER.toJson(toInfo));
+        doctorGroupSnapshotDao.create(newSnapshot);
+    }
+
+    public void closeGroupEvent(DoctorGroupEvent doctorGroupEvent) {
+        DoctorGroup group = doctorGroupDao.findById(doctorGroupEvent.getGroupId());
+        group.setStatus(DoctorGroup.Status.CLOSED.getValue());
+        doctorGroupDao.update(group);
+        doctorGroupEvent.setType(GroupEventType.CLOSE.getValue());
+        doctorGroupEvent.setName(GroupEventType.CLOSE.getDesc());
+        doctorGroupEvent.setDesc("【系统自动】");
+        doctorGroupEvent.setIsAuto(IsOrNot.YES.getValue());
+        doctorGroupEvent.setRelGroupEventId(doctorGroupEvent.getId());
+        doctorGroupEvent.setExtra(null);
+        doctorGroupEventDao.create(doctorGroupEvent);
+    }
+
+    private void setAvgDayAge(DoctorGroupTrack newTrack, DoctorGroupEvent doctorGroupEvent) {
+        int avgDayAge = getAvgDayAge(newTrack, doctorGroupEvent);
+        newTrack.setBirthDate(new DateTime(doctorGroupEvent.getEventAt()).minusDays(avgDayAge).toDate());
+        newTrack.setAvgDayAge(avgDayAge);
+    }
+
+    public int getAvgDayAge(DoctorGroupTrack newTrack, DoctorGroupEvent doctorGroupEvent){
+        int deltaDays = DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt()));
+        int avgDayAge = EventUtil.getAvgDayAge(MoreObjects.firstNonNull(newTrack.getAvgDayAge(), 0) + deltaDays, MoreObjects.firstNonNull(newTrack.getQuantity(), 0), doctorGroupEvent.getAvgDayAge(), doctorGroupEvent.getQuantity());
+        return avgDayAge;
     }
 
     public Boolean triggerPigEvents(DoctorGroupEvent doctorGroupEvent){

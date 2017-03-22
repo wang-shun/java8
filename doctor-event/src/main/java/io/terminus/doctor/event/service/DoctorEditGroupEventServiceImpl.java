@@ -1,7 +1,10 @@
 package io.terminus.doctor.event.service;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.sun.javadoc.Doc;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
@@ -15,21 +18,22 @@ import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.group.DoctorChangeGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.manager.DoctorEditGroupEventManager;
-import io.terminus.doctor.event.model.DoctorEventRelation;
-import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.beans.BeanMap;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -43,6 +47,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventService{
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
@@ -95,6 +100,24 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
             throw e;
         }
     }
+
+    @Override
+    public Response<Boolean> reElicitGroupEvent(List<Long> groupIds) {
+        try{
+            groupIds.forEach(id -> {
+                doctorEditGroupEventManager.reElicitGroupEventByGroupId(id);
+            });
+        } catch(InvalidException e) {
+            throw e;
+        }catch(Exception e){
+            log.error("elicit group event failed, groupIds: {} , cause: {}", groupIds, Throwables.getStackTraceAsString(e));
+            return Response.fail("elicit.group.event.failed");
+        }
+        return Response.ok();
+    }
+
+
+
 
     private void beforeCheck(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {
         DoctorGroupEvent initGroupEvent = doctorGroupEventDao.findInitGroupEvent(newEvent.getGroupId());
@@ -159,7 +182,7 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
             }
             if(doctorGroupTrack.getQuantity() == 0){
                 DoctorGroupEvent lastEvent = Arguments.isNullOrEmpty(localDoctorGroupEventList) ? doctorGroupEvent : localDoctorGroupEventList.get(localDoctorGroupEventList.size() - 1);
-                closeGroupEvent(lastEvent);
+                doctorEditGroupEventManager.closeGroupEvent(lastEvent);
             }
 
             triggerEvents(oldEvent, doctorGroupEvent, rollbackDoctorGroupTrackList, rollbackDoctorGroupEventList, taskDoctorGroupEventList);
@@ -211,19 +234,6 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
     }
 
 
-    private void closeGroupEvent(DoctorGroupEvent doctorGroupEvent) {
-        DoctorGroup group = doctorGroupDao.findById(doctorGroupEvent.getGroupId());
-        group.setStatus(DoctorGroup.Status.CLOSED.getValue());
-        doctorGroupDao.update(group);
-        doctorGroupEvent.setType(GroupEventType.CLOSE.getValue());
-        doctorGroupEvent.setName(GroupEventType.CLOSE.getDesc());
-        doctorGroupEvent.setDesc("【系统自动】");
-        doctorGroupEvent.setIsAuto(IsOrNot.YES.getValue());
-        doctorGroupEvent.setRelGroupEventId(doctorGroupEvent.getId());
-        doctorGroupEvent.setExtra(null);
-        doctorGroupWriteService.createGroupEvent(doctorGroupEvent);
-    }
-
     private List<DoctorGroupEvent> getTaskGroupEventList(List<DoctorGroupEvent> taskDoctorGroupEventList, DoctorGroupEvent doctorGroupEvent, DoctorGroupTrack doctorGroupTrack) {
 
         List<DoctorGroupEvent> linkedDoctorGroupEventList = Lists.newArrayList();
@@ -266,7 +276,15 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
                     }
                     return status && Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent.getEventAt())) <= 0;
                 })
-                .sorted((doctorGroupEvent1, doctorGroupEvent2)-> doctorGroupEvent2.getId().compareTo(doctorGroupEvent1.getId()))
+                .sorted(
+                        (doctorGroupEvent1, doctorGroupEvent2)-> {
+                            if(Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent2.getEventAt())) == 0){
+                                return doctorGroupEvent2.getId().compareTo(doctorGroupEvent1.getId());
+                            }
+
+                            return doctorGroupEvent2.getEventAt().compareTo(doctorGroupEvent1.getEventAt());
+                        }
+                )
                 .findFirst()
                 .get();
 
