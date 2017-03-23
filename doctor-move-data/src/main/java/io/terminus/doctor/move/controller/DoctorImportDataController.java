@@ -317,11 +317,18 @@ public class DoctorImportDataController {
     }
 
     /**
-     * 没有猪群镜像的生成镜像
+     * 没有猪镜像的生成镜像
+     * @param type 1.猪,2.猪群
      */
-    @RequestMapping(value = "/generateGroupSnapshot", method = RequestMethod.GET)
-    public Boolean generateGroupSnapshot() {
-        doctorImportDataService.generateGroupSnapshot();
+    @RequestMapping(value = "/generateSnapshot", method = RequestMethod.GET)
+    public Boolean generateGroupSnapshot(@RequestParam Integer type) {
+        if (type == 1) {
+            doctorImportDataService.generatePigSnapshot();
+        } else if (type == 2) {
+            doctorImportDataService.generateGroupSnapshot();
+        } else {
+            throw new JsonResponseException("类型错误,type:" + type);
+        }
         return true;
     }
 }
