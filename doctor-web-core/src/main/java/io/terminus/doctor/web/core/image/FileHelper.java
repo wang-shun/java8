@@ -49,8 +49,8 @@ public class FileHelper {
     private ImageServer imageServer;
     @Autowired
     private FileServer fileServer;
-    @Value("${image.max.size:5242880}")
-    private Long imageMaxSize;         //默认5M
+    @Value("${image.max.size:6291456}")
+    private Long imageMaxSize;         //默认6M
     @Value("${image.base.url}")
     private String imageBaseUrl;
 
@@ -99,7 +99,7 @@ public class FileHelper {
                 byte[] imageData = file.getBytes();
                 //if size of the image is more than imgSizeMax,it will raise an 500 error
                 if (imageData.length > imageMaxSize) {
-                    log.debug("image size {} ,maxsize {} ,the upload image is to large", imageData.length, imageMaxSize);
+                    log.error("image size {} ,maxsize {} ,the upload image is to large", imageData.length, imageMaxSize);
                     return new UploadDto(image, get("image.size.exceed", imageMaxSize / (1024 * 1024), "mb"));
                 }
 
