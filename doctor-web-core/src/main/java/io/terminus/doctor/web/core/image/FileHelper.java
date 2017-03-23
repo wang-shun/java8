@@ -7,13 +7,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.lib.file.FileServer;
 import io.terminus.lib.file.ImageServer;
 import io.terminus.lib.file.util.FUtil;
 import io.terminus.pampas.engine.ThreadVars;
-import org.springframework.context.MessageSource;
 import io.terminus.parana.file.enums.FileType;
 import io.terminus.parana.file.model.UserFile;
 import io.terminus.parana.file.service.UserFileService;
@@ -21,6 +19,7 @@ import io.terminus.parana.file.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,8 +49,8 @@ public class FileHelper {
     private ImageServer imageServer;
     @Autowired
     private FileServer fileServer;
-    @Value("${image.max.size:2097152}")
-    private Long imageMaxSize;         //默认2M
+    @Value("${image.max.size:5242880}")
+    private Long imageMaxSize;         //默认5M
     @Value("${image.base.url}")
     private String imageBaseUrl;
 
