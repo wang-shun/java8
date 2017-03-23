@@ -5,10 +5,12 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
@@ -370,15 +372,36 @@ public class DoctorMoveDataController {
     }
 
     @RequestMapping(value = "/updatePigEvents", method = RequestMethod.GET)
-    public Boolean updateParityAndBoarCode(@RequestParam("farmId") Long farmId){
+    public Boolean updateParityAndBoarCode(@RequestParam(value = "farmId", required = false) Long farmId){
         try {
-            DoctorFarm farm = doctorFarmDao.findById(farmId);
-            log.warn("update parity and boarCode start, farmId:{}", farmId);
-            doctorMoveDataService.updateParityAndBoarCode(farm);
-            log.warn("update parity and boarCode end");
+            List<Long> listFarmIds = Lists.newArrayList();
+            if(Arguments.isNull(farmId)){
+                listFarmIds = getAllFarmIds();
+            }else{
+                listFarmIds.add(farmId);
+            }
+            listFarmIds.forEach(id -> {
+                DoctorFarm farm = doctorFarmDao.findById(id);
+                log.warn("{} update parity and boarCode start, farmId:{}", DateUtil.toDateTimeString(new Date()), id);
+                doctorMoveDataService.updateParityAndBoarCode(farm);
+                log.warn("{} update parity and boarCode end", DateUtil.toDateTimeString(new Date()));
+            });
             return true;
         } catch (Exception e) {
             log.error("update parity and boarCode failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    @RequestMapping(value = "/updatePigEventsByPigId", method = RequestMethod.GET)
+    public Boolean updateParityAndBoarCodeByPigId(@RequestParam("pigId") Long pigId){
+        try {
+            log.warn("update parity and boarCode start, pigId:{}", pigId);
+            doctorMoveDataService.updateParityAndBoarCodeByPigId(pigId);
+            log.warn("update parity and boarCode end");
+            return true;
+        } catch (Exception e) {
+            log.error("update parity and boarCode failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

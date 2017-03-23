@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.acl.Group;
 import java.util.List;
 import java.util.Objects;
 
@@ -110,15 +111,17 @@ public class DoctorEditGroupEventManager {
         Long fromEventId = 0L;
         doctorGroupSnapshotDao.deleteByGroupId(groupId);
         for(DoctorGroupEvent doctorGroupEvent: groupEvents) {
+            Long newGroupEventId = null;
             switch(GroupEventType.from(doctorGroupEvent.getType())){
                 case NEW:
                     newTrack.setQuantity(0);
+                    newGroupEventId = doctorGroupEvent.getId();
                     break;
                 case MOVE_IN:
                     setAvgDayAge(newTrack, doctorGroupEvent);
                     newTrack.setQuantity(MoreObjects.firstNonNull(newTrack.getQuantity(), 0) + doctorGroupEvent.getQuantity());
                     DoctorMoveInGroupEvent moveInEvent = JSON_MAPPER.fromJson(doctorGroupEvent.getExtra(), DoctorMoveInGroupEvent.class);
-                    if(!Arguments.isNull(doctorGroupEvent.getRelPigEventId())){
+                    if(!Arguments.isNull(doctorGroupEvent.getRelPigEventId()) || (!Arguments.isNull(doctorGroupEvent.getRelGroupEventId()) && Objects.equals(newGroupEventId, doctorGroupEvent.getRelGroupEventId()))){
                         newTrack.setNest(MoreObjects.firstNonNull(newTrack.getNest(), 0) + 1);
                         newTrack.setLiveQty(MoreObjects.firstNonNull(newTrack.getLiveQty(), 0) + doctorGroupEvent.getQuantity());
                         newTrack.setHealthyQty(MoreObjects.firstNonNull(newTrack.getHealthyQty(), 0) + moveInEvent.getHealthyQty());

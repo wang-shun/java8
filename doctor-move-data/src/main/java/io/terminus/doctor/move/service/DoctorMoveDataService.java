@@ -2323,6 +2323,10 @@ public class DoctorMoveDataService {
     private Integer quantityChange;
     public void updateParityAndBoarCode(DoctorFarm farm) {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1));
+        updateParityAndBoarCodeByEntryEvents(doctorPigEvensList);
+    }
+
+    private void updateParityAndBoarCodeByEntryEvents(List<DoctorPigEvent> doctorPigEvensList) {
         doctorPigEvensList.forEach(doctorPigEvent -> {
             //log.info("update doctor_pig_events start: {}", doctorPigEvent);
             List<DoctorPigEvent> lists = doctorPigEventDao.queryAllEventsByPigIdForASC(doctorPigEvent.getPigId());
@@ -2336,95 +2340,97 @@ public class DoctorMoveDataService {
             lists.stream()
                     .filter(doctorPigEvent1 -> doctorPigEvent1 != null && doctorPigEvent1.getType() != null)
                     .forEach(doctorPigEvent1 -> {
-                statusAfter = statusBefore;
-                switch (doctorPigEvent1.getType()){
-                    case 6:
-                        statusAfter = PigStatus.Removal.getKey();
-                        break;
-                    case 7:
-                        parity = (isNull(doctorPigEvent1.getExtraMap()) || isNull(doctorPigEvent1.getExtraMap().get("parity"))) ? parity : Integer.valueOf(Objects.toString(doctorPigEvent1.getExtraMap().get("parity")));
-                        statusAfter = PigStatus.Entry.getKey();
-                        break;
-                    case 9:
-                        if(!isFirst && doctorPigEvent1.getCurrentMatingCount() == 1){
-                            parity += 1;
-                        }
-                        boarCode = (isNull(doctorPigEvent1.getExtraMap()) || isNull(doctorPigEvent1.getExtraMap().get("matingBoarPigCode"))) ? null : Objects.toString(doctorPigEvent1.getExtraMap().get("matingBoarPigCode"));
-                        isFirst = false;
-                        statusAfter = PigStatus.Mate.getKey();
-                        break;
-                    case 10:
-                        if(statusBefore.equals(PigStatus.Wean.getKey())){
-                            statusAfter = PigStatus.Mate.getKey();
-                        }else if(statusBefore.equals(PigStatus.KongHuai.getKey())){
-                            statusAfter = PigStatus.Entry.getKey();
-                        }else if(statusBefore.equals(PigStatus.Pregnancy.getKey())){
-                            statusAfter = PigStatus.Pregnancy.getKey();
-                        }else if(statusBefore.equals(PigStatus.Mate.getKey())){
-                            statusAfter = PigStatus.Mate.getKey();
-                        }
-                        break;
-                    case 11:
-                        if(!isNull(doctorPigEvent1.getExtraMap()) && !isNull(doctorPigEvent1.getExtraMap().get("checkResult"))){
-                            String checkResult = Objects.toString(doctorPigEvent1.getExtraMap().get("checkResult"));
-                            switch(checkResult){
-                                case "1":
+                        statusAfter = statusBefore;
+                        switch (doctorPigEvent1.getType()){
+                            case 6:
+                                statusAfter = PigStatus.Removal.getKey();
+                                break;
+                            case 7:
+                                if(!isNull(doctorPigEvent1.getExtraMap()) && !isNull(doctorPigEvent1.getExtraMap().get("parity")) && !Objects.equals("0", doctorPigEvent1.getExtraMap().get("parity").toString())){
+                                    parity = Integer.valueOf(Objects.toString(doctorPigEvent1.getExtraMap().get("parity"))) ;
+                                }
+                                statusAfter = PigStatus.Entry.getKey();
+                                break;
+                            case 9:
+                                if(!isFirst && doctorPigEvent1.getCurrentMatingCount() == 1){
+                                    parity += 1;
+                                }
+                                boarCode = (isNull(doctorPigEvent1.getExtraMap()) || isNull(doctorPigEvent1.getExtraMap().get("matingBoarPigCode"))) ? null : Objects.toString(doctorPigEvent1.getExtraMap().get("matingBoarPigCode"));
+                                isFirst = false;
+                                statusAfter = PigStatus.Mate.getKey();
+                                break;
+                            case 10:
+                                if(statusBefore.equals(PigStatus.Wean.getKey())){
+                                    statusAfter = PigStatus.Mate.getKey();
+                                }else if(statusBefore.equals(PigStatus.KongHuai.getKey())){
+                                    statusAfter = PigStatus.Entry.getKey();
+                                }else if(statusBefore.equals(PigStatus.Pregnancy.getKey())){
                                     statusAfter = PigStatus.Pregnancy.getKey();
-                                    break;
-                                case "2":
-                                    statusAfter = PigStatus.KongHuai.getKey();
-                                    break;
-                                case "3":
-                                    statusAfter = PigStatus.KongHuai.getKey();
-                                    break;
-                                case "4":
-                                    statusAfter = PigStatus.KongHuai.getKey();
-                                    break;
-                            }
+                                }else if(statusBefore.equals(PigStatus.Mate.getKey())){
+                                    statusAfter = PigStatus.Mate.getKey();
+                                }
+                                break;
+                            case 11:
+                                if(!isNull(doctorPigEvent1.getExtraMap()) && !isNull(doctorPigEvent1.getExtraMap().get("checkResult"))){
+                                    String checkResult = Objects.toString(doctorPigEvent1.getExtraMap().get("checkResult"));
+                                    switch(checkResult){
+                                        case "1":
+                                            statusAfter = PigStatus.Pregnancy.getKey();
+                                            break;
+                                        case "2":
+                                            statusAfter = PigStatus.KongHuai.getKey();
+                                            break;
+                                        case "3":
+                                            statusAfter = PigStatus.KongHuai.getKey();
+                                            break;
+                                        case "4":
+                                            statusAfter = PigStatus.KongHuai.getKey();
+                                            break;
+                                    }
+                                }
+                                break;
+                            case 12:
+                                statusAfter = PigStatus.Mate.getKey();
+                                break;
+                            case 14:
+                                statusAfter = PigStatus.Farrow.getKey();
+                                break;
+                            case 15:
+                                statusAfter = PigStatus.FEED.getKey();
+                                quantity = doctorPigEvent1.getLiveCount();
+                                quantityChange = 0;
+                                break;
+                            case 16:
+                                boarCode = null;
+                                quantityChange += MoreObjects.firstNonNull(doctorPigEvent1.getWeanCount(), 0);
+                                if(quantity == quantityChange){
+                                    statusAfter = PigStatus.Wean.getKey();
+                                }
+                                break;
+                            case 17:
+                                quantityChange += Integer.parseInt(Objects.toString(doctorPigEvent1.getExtraMap().get("fostersCount")));
+                                if(quantity == quantityChange){
+                                    statusAfter = PigStatus.Wean.getKey();
+                                }
+                                break;
+                            case 18:
+                                quantityChange += Integer.parseInt(Objects.toString(doctorPigEvent1.getExtraMap().get("pigletsCount")));
+                                if(quantity == quantityChange){
+                                    statusAfter = PigStatus.Wean.getKey();
+                                }
+                                break;
+                            case 19:
+                                quantity += Objects.isNull(doctorPigEvent1.getExtraMap().get("fostersCount")) ? 0 : Integer.parseInt(Objects.toString(doctorPigEvent1.getExtraMap().get("fostersCount")));
+                                break;
+                            default:
+                                break;
                         }
-                        break;
-                    case 12:
-                        statusAfter = PigStatus.Mate.getKey();
-                        break;
-                    case 14:
-                        statusAfter = PigStatus.Farrow.getKey();
-                        break;
-                    case 15:
-                        statusAfter = PigStatus.FEED.getKey();
-                        quantity = doctorPigEvent1.getLiveCount();
-                        quantityChange = 0;
-                        break;
-                    case 16:
-                        boarCode = null;
-                        quantityChange += Integer.parseInt(Objects.toString(doctorPigEvent1.getExtraMap().get("partWeanPigletsCount")));
-                        if(quantity == quantityChange){
-                            statusAfter = PigStatus.Wean.getKey();
-                        }
-                        break;
-                    case 17:
-                        quantityChange += Integer.parseInt(Objects.toString(doctorPigEvent1.getExtraMap().get("fostersCount")));
-                        if(quantity == quantityChange){
-                            statusAfter = PigStatus.Wean.getKey();
-                        }
-                        break;
-                    case 18:
-                        quantityChange += Integer.parseInt(Objects.toString(doctorPigEvent1.getExtraMap().get("pigletsCount")));
-                        if(quantity == quantityChange){
-                            statusAfter = PigStatus.Wean.getKey();
-                        }
-                        break;
-                    case 19:
-                        quantity += Integer.parseInt(Objects.toString(doctorPigEvent1.getExtraMap().get("fostersCount")));
-                        break;
-                    default:
-                        break;
-                }
-                doctorPigEvent1.setPigStatusBefore(statusBefore);
-                doctorPigEvent1.setPigStatusAfter(statusAfter);
-                doctorPigEvent1.setParity(parity);
-                doctorPigEvent1.setBoarCode(boarCode);
-                statusBefore = statusAfter;
-            });
+                        doctorPigEvent1.setPigStatusBefore(statusBefore);
+                        doctorPigEvent1.setPigStatusAfter(statusAfter);
+                        doctorPigEvent1.setParity(parity);
+                        doctorPigEvent1.setBoarCode(boarCode);
+                        statusBefore = statusAfter;
+                    });
             Boolean result = doctorPigEventDao.updates(lists);
             if(!result){
                 log.info("update parity boarCode fail: {}", lists);
@@ -2584,5 +2590,10 @@ public class DoctorMoveDataService {
             updateEvent.setGroupId(group.getId());
             doctorPigEventDao.update(updateEvent);
         }
+    }
+
+    public void updateParityAndBoarCodeByPigId(Long pigId) {
+        List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("pigId", pigId , "type", PigEvent.ENTRY.getKey()));
+        updateParityAndBoarCodeByEntryEvents(doctorPigEvensList);
     }
 }

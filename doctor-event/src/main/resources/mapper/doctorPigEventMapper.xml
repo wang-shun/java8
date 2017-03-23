@@ -786,7 +786,7 @@
                 doctor_mate_type = #{item.doctorMateType},
                 boar_code = #{item.boarCode},
                 out_id = #{item.outId},
-                status = #{item.status}
+                status = #{item.status},
                 extra = #{item.extra},
                 remark = #{item.remark},
                 operator_id = #{item.operatorId},
