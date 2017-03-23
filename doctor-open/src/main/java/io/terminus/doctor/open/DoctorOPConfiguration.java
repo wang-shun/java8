@@ -24,7 +24,7 @@ import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
 import io.terminus.parana.auth.role.CustomRoleLoaderRegistry;
 import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
-import io.terminus.zookeeper.common.ZKClientFactory;
+import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

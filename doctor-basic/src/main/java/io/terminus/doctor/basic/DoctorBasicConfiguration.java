@@ -13,7 +13,7 @@ import io.terminus.doctor.basic.handler.out.DoctorMaterialAvgConsumerHandler;
 import io.terminus.doctor.basic.handler.out.DoctorWareHouseTrackConsumeHandler;
 import io.terminus.doctor.basic.handler.out.DoctorWareHouseTypeConsumerHandler;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
-import io.terminus.zookeeper.common.ZKClientFactory;
+import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;

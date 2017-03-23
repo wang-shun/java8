@@ -1,7 +1,6 @@
 package io.terminus.doctor.event;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
@@ -74,7 +73,7 @@ import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
 import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.parana.msg.impl.MessageAutoConfig;
-import io.terminus.zookeeper.common.ZKClientFactory;
+import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;

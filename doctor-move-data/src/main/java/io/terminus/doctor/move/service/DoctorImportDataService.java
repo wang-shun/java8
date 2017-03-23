@@ -77,6 +77,7 @@ import io.terminus.doctor.move.dto.DoctorImportSow;
 import io.terminus.doctor.move.util.ImportExcelUtils;
 import io.terminus.doctor.user.dao.DoctorAddressDao;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
+import io.terminus.doctor.user.dao.DoctorFarmExportDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.dao.DoctorServiceStatusDao;
@@ -91,6 +92,7 @@ import io.terminus.doctor.user.interfaces.event.EventType;
 import io.terminus.doctor.user.interfaces.model.UserDto;
 import io.terminus.doctor.user.manager.UserInterfaceManager;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmExport;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
@@ -219,6 +221,8 @@ public class DoctorImportDataService {
     private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     @Autowired
     private DoctorPigSnapshotDao doctorPigSnapshotDao;
+    @Autowired
+    private DoctorFarmExportDao doctorFarmExportDao;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -1098,7 +1102,11 @@ public class DoctorImportDataService {
                 }
             }
 
-            DoctorPigTrack track = getSowTrack(sow, last, parityMap, barnMap.get(last.getBarnName()));
+            DoctorBarn barn = barnMap.get(last.getBarnName());
+            if (isNull(barn)) {
+                throw new JsonResponseException("根据猪舍名获取猪舍失败,猪舍名:" + last.getBarnName());
+            }
+            DoctorPigTrack track = getSowTrack(sow, last, parityMap, barn);
 
             //创建镜像
             DoctorPigSnapshot pigSnapshot = DoctorPigSnapshot.builder()
@@ -1949,5 +1957,9 @@ public class DoctorImportDataService {
         updateSnapshot.setId(snapshot.getId());
         updateSnapshot.setFromEventId(groupEvent.getId());
         doctorGroupSnapshotDao.update(updateSnapshot);
+    }
+
+    public void createFarmExport(DoctorFarmExport farmExport) {
+        doctorFarmExportDao.create(farmExport);
     }
 }

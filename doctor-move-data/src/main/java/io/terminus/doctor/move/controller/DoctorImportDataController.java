@@ -14,10 +14,13 @@ import io.terminus.doctor.move.service.DoctorGroupBatchFlushService;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
+import io.terminus.doctor.move.util.ImportExcelUtils;
+import io.terminus.doctor.user.model.DoctorFarmExport;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -97,7 +100,7 @@ public class DoctorImportDataController {
                 throw new ServiceException("file.type.error");
             }
             inputStream = new FileInputStream(file);
-            this.importByInputStream(inputStream, fileType);
+            this.importByInputStream(inputStream, fileType, path);
 
             return "true";
         } catch (ServiceException | JsonResponseException e) {
@@ -125,7 +128,7 @@ public class DoctorImportDataController {
         return sheet;
     }
 
-    private void importByInputStream(InputStream inputStream, String fileType) throws IOException {
+    private void importByInputStream(InputStream inputStream, String fileType, String path) throws IOException {
         Workbook workbook;
         switch (fileType) {
             case "xlsx":
@@ -153,6 +156,13 @@ public class DoctorImportDataController {
         sheet.setFeed(getSheet(workbook, "10.饲料"));
         sheet.setConsume(getSheet(workbook, "11.易耗品"));
         Stopwatch watch = Stopwatch.createStarted();
+
+        //创建导入记录
+        Row farmRow = sheet.getFarm().getRow(1);
+        String farmName = ImportExcelUtils.getStringOrThrow(farmRow, 1);
+        DoctorFarmExport farmExport = DoctorFarmExport.builder().farmName(farmName).url(path).build();
+        doctorImportDataService.createFarmExport(farmExport);
+
         this.generateReport(doctorImportDataService.importAll(sheet).getId());
         watch.stop();
         int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
@@ -187,7 +197,7 @@ public class DoctorImportDataController {
         final String redisKey = ImportExcelRedisKey + fileURL;
         try {
             inputStream = new URL(fileURL.replace("https", "http")).openConnection().getInputStream();
-            importByInputStream(inputStream, fileType);
+            importByInputStream(inputStream, fileType, fileURL);
             //  成功
             jedisTemplate.execute(jedis -> {
                jedis.set(redisKey, "true");
