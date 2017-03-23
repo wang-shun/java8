@@ -3,7 +3,7 @@ package io.terminus.doctor.event.test;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
-import io.terminus.zookeeper.ZKClientFactory;
+import io.terminus.zookeeper.common.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
