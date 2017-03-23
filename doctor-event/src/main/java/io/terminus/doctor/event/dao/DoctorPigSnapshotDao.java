@@ -49,4 +49,12 @@ public class DoctorPigSnapshotDao extends MyBatisDao<DoctorPigSnapshot>{
     public DoctorPigSnapshot findByToEventId(Long toEventId) {
         return getSqlSession().selectOne(sqlId("findByToEventId"), toEventId);
     }
+
+    /**
+     * 获取没有镜像的猪id列表
+     * @return 猪id列表
+     */
+    public List<Long> queryNotSnapshotPigId() {
+        return getSqlSession().selectList(sqlId("queryNotSnapshotPigId"));
+    }
 }

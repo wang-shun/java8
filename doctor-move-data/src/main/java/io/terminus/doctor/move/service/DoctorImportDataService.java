@@ -1868,7 +1868,7 @@ public class DoctorImportDataService {
     }
 
     /**
-     * 没有猪群镜像的生成镜像
+     * 猪群生成镜像(修复数据)
      */
     @Transactional
     public void generateGroupSnapshot() {
@@ -1959,6 +1959,41 @@ public class DoctorImportDataService {
         doctorGroupSnapshotDao.update(updateSnapshot);
     }
 
+    /**
+     * 生成猪镜像(修复数据)
+     */
+    @Transactional
+    public void generatePigSnapshot() {
+        List<Long> pigIdList = doctorPigSnapshotDao.queryNotSnapshotPigId();
+        if (!pigIdList.isEmpty()) {
+            pigIdList.forEach(this::notExistPigSnapshot);
+        }
+
+    }
+
+    /**
+     * 猪不存在镜像时生成镜像
+     * @param pigId 猪id
+     */
+    private void notExistPigSnapshot(Long pigId) {
+        DoctorPigTrack currentTrack = doctorPigTrackDao.findByPigId(pigId);
+        DoctorPig pig = doctorPigDao.findById(pigId);
+
+        DoctorPigSnapShotInfo info = DoctorPigSnapShotInfo.builder()
+                .pig(pig).pigTrack(currentTrack).build();
+        DoctorPigSnapshot snapshot = DoctorPigSnapshot.builder()
+                .pigId(pigId)
+                .fromEventId(0L)
+                .toEventId(currentTrack.getCurrentEventId())
+                .toPigInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(info))
+                .build();
+        doctorPigSnapshotDao.create(snapshot);
+    }
+
+    /**
+     * 创建导入记录
+     * @param farmExport 导入记录
+     */
     public void createFarmExport(DoctorFarmExport farmExport) {
         doctorFarmExportDao.create(farmExport);
     }
