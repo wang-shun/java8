@@ -1968,7 +1968,6 @@ public class DoctorImportDataService {
         if (!pigIdList.isEmpty()) {
             pigIdList.forEach(this::notExistPigSnapshot);
         }
-
     }
 
     /**
