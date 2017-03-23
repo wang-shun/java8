@@ -321,7 +321,8 @@ public class DoctorImportDataController {
      * @param type 1.猪,2.猪群
      */
     @RequestMapping(value = "/generateSnapshot", method = RequestMethod.GET)
-    public Boolean generateGroupSnapshot(@RequestParam Integer type) {
+    public Boolean generateSnapshot(@RequestParam Integer type) {
+        log.info("generateSnapshot.starting, type:{}", type);
         if (type == 1) {
             doctorImportDataService.generatePigSnapshot();
         } else if (type == 2) {
@@ -329,6 +330,7 @@ public class DoctorImportDataController {
         } else {
             throw new JsonResponseException("类型错误,type:" + type);
         }
+        log.info("generateSnapshot.ending");
         return true;
     }
 }
