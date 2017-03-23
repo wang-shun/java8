@@ -681,3 +681,17 @@ create table doctor_event_relations (
   key idx_relations_trigger_event_id(trigger_event_id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='事件关联表';
 
+-- 2017-03-23 导入记录表
+drop table if exists `doctor_farm_exports`;
+create table doctor_farm_exports (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场名',
+  `farm_name` VARCHAR(40)  DEFAULT NULL COMMENT '猪场名',
+  `url` VARCHAR(255)  DEFAULT NULL COMMENT '导入的文件地址',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  key idx_farm_exports_farm_id(farm_id)
+
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='导入猪场记录表';
+
