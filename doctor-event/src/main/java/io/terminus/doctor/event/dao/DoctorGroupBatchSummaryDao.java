@@ -19,7 +19,7 @@ public class DoctorGroupBatchSummaryDao extends MyBatisDao<DoctorGroupBatchSumma
      * @return 猪群跟踪
      */
     public DoctorGroupBatchSummary findByGroupId(Long groupId) {
-        return getSqlSession().selectOne("findGroupBatchSummaryByGroupId", groupId);
+        return getSqlSession().selectOne(sqlId("findGroupBatchSummaryByGroupId"), groupId);
     }
 
     /**
@@ -27,6 +27,6 @@ public class DoctorGroupBatchSummaryDao extends MyBatisDao<DoctorGroupBatchSumma
      * @param groupId 猪群id
      */
     public void deleteByGroupId(Long groupId) {
-        getSqlSession().delete("deleteByGroupId", groupId);
+        getSqlSession().delete(sqlId("deleteByGroupId"), groupId);
     }
 }

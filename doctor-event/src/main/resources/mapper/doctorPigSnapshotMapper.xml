@@ -123,4 +123,10 @@
         FROM <include refid="tb"/>
         WHERE to_event_id = #{toEventId}
     </select>
+
+    <select id="queryNotSnapshotPigId" resultType="long" >
+        SELECT a.id
+        FROM doctor_pigs a LEFT JOIN doctor_pig_snapshots b on a.id = b.pig_id
+        WHERE b.pig_id IS NULL AND a.is_removal = 0
+    </select>
 </mapper>
