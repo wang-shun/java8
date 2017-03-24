@@ -159,15 +159,23 @@ public class DoctorImportDataController {
 
         //创建导入记录
         Row farmRow = sheet.getFarm().getRow(1);
-        String farmName = ImportExcelUtils.getStringOrThrow(farmRow, 1);
+        String farmName = ImportExcelUtils.getStringOrThrow(farmRow, 1).replaceAll(" ", "");
         DoctorFarmExport farmExport = DoctorFarmExport.builder().farmName(farmName).url(path).build();
         farmExport.setStatus(DoctorFarmExport.Status.FAILED.getValue());
         doctorImportDataService.createFarmExport(farmExport);
+
+        //数据校验
+        checkImportData(sheet);
+
+        //导入数据
         this.generateReport(doctorImportDataService.importAll(sheet).getId());
+
+        //更新导入状态
         DoctorFarmExport updateFarmExport = new DoctorFarmExport();
         updateFarmExport.setId(farmExport.getId());
         updateFarmExport.setStatus(DoctorFarmExport.Status.SUCCESS.getValue());
         doctorImportDataService.updateFarmExport(updateFarmExport);
+
         watch.stop();
         int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
         log.warn("database data inserted successfully, elapsed {} minutes", minute);
@@ -336,5 +344,15 @@ public class DoctorImportDataController {
         }
         log.info("generateSnapshot.ending");
         return true;
+    }
+
+
+
+    /**
+     * 导入数据校验
+     * @param sheet 表中数据集合
+     */
+    private void checkImportData(DoctorImportSheet sheet) {
+        // TODO: 17/3/24  暂时还不知道要添加什么校验,先放在这 
     }
 }
