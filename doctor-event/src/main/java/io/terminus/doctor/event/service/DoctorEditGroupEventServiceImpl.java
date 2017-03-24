@@ -108,7 +108,10 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         return Response.ok();
     }
 
-
+    @Override
+    public void elicitDoctorGroupTrackRebuildOne(DoctorGroupEvent doctorGroupEvent) {
+        doctorEditGroupEventManager.elicitDoctorGroupTrackRebuildOne(doctorGroupEvent);
+    }
 
 
     private void beforeCheck(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {

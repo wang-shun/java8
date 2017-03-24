@@ -124,7 +124,7 @@ public class DoctorEditGroupEventManager {
                     if(!Arguments.isNull(doctorGroupEvent.getRelPigEventId()) || (!Arguments.isNull(doctorGroupEvent.getRelGroupEventId()) && Objects.equals(newGroupEventId, doctorGroupEvent.getRelGroupEventId()))){
                         newTrack.setNest(MoreObjects.firstNonNull(newTrack.getNest(), 0) + 1);
                         newTrack.setLiveQty(MoreObjects.firstNonNull(newTrack.getLiveQty(), 0) + doctorGroupEvent.getQuantity());
-                        newTrack.setHealthyQty(MoreObjects.firstNonNull(newTrack.getHealthyQty(), 0) + moveInEvent.getHealthyQty());
+                        newTrack.setHealthyQty(MoreObjects.firstNonNull(newTrack.getHealthyQty(), 0) + MoreObjects.firstNonNull(moveInEvent.getHealthyQty(), doctorGroupEvent.getQuantity()));
                         newTrack.setUnweanQty(MoreObjects.firstNonNull(newTrack.getUnweanQty(), 0) + doctorGroupEvent.getQuantity());
                         newTrack.setBirthWeight(MoreObjects.firstNonNull(newTrack.getBirthWeight(), 0d) + doctorGroupEvent.getWeight());
                     }
@@ -297,5 +297,16 @@ public class DoctorEditGroupEventManager {
             return DoctorPig.PigSex.SOW;
         }
         return DoctorPig.PigSex.BOAR;
+    }
+
+    @Transactional
+    public void elicitDoctorGroupTrackRebuildOne(DoctorGroupEvent newEvent) {
+        DoctorGroupEvent oldEvent = doctorGroupEventDao.findById(newEvent.getId());
+        DoctorGroupEvent updateEvent = new DoctorGroupEvent();
+        updateEvent.setId(oldEvent.getId());
+        updateEvent.setStatus(EventStatus.INVALID.getValue());
+        doctorGroupEventDao.update(updateEvent);
+        doctorGroupEventDao.create(newEvent);
+        reElicitGroupEventByGroupId(newEvent.getGroupId());
     }
 }
