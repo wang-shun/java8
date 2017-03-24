@@ -161,9 +161,13 @@ public class DoctorImportDataController {
         Row farmRow = sheet.getFarm().getRow(1);
         String farmName = ImportExcelUtils.getStringOrThrow(farmRow, 1);
         DoctorFarmExport farmExport = DoctorFarmExport.builder().farmName(farmName).url(path).build();
+        farmExport.setStatus(DoctorFarmExport.Status.FAILED.getValue());
         doctorImportDataService.createFarmExport(farmExport);
-
         this.generateReport(doctorImportDataService.importAll(sheet).getId());
+        DoctorFarmExport updateFarmExport = new DoctorFarmExport();
+        updateFarmExport.setId(farmExport.getId());
+        updateFarmExport.setStatus(DoctorFarmExport.Status.SUCCESS.getValue());
+        doctorImportDataService.updateFarmExport(updateFarmExport);
         watch.stop();
         int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
         log.warn("database data inserted successfully, elapsed {} minutes", minute);

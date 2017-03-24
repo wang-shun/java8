@@ -1996,4 +1996,12 @@ public class DoctorImportDataService {
     public void createFarmExport(DoctorFarmExport farmExport) {
         doctorFarmExportDao.create(farmExport);
     }
+
+    /**
+     * 更新导入记录
+     * @param farmExport 导入记录
+     */
+    public void updateFarmExport(DoctorFarmExport farmExport) {
+        doctorFarmExportDao.update(farmExport);
+    }
 }

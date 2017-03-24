@@ -10,6 +10,7 @@
         <result column="farm_id" property="farmId"/>
         <result column="farm_name" property="farmName"/>
         <result column="url" property="url"/>
+        <result column="status" property="status"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
@@ -23,11 +24,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, farm_name, url, created_at, updated_at
+        farm_id, farm_name, url, status, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{farmName}, #{url}, now(), now()
+        #{farmId}, #{farmName}, #{url}, #{status}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorFarmExport" keyProperty="id" useGeneratedKeys="true">
@@ -44,7 +45,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" separator="," item="i">
-            (#{i.farmId}, #{i.farmName}, #{i.url}, now(), now())
+            (#{i.farmId}, #{i.farmName}, #{i.url}, #{i.status}, now(), now())
         </foreach>
     </insert>
 
@@ -61,6 +62,7 @@
             <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="farmName != null">farm_name = #{farmName},</if>
             <if test="url != null">url = #{url},</if>
+            <if test="status != null">status = #{status},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
