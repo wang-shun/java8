@@ -175,7 +175,7 @@ public class DoctorWareHouseEvents {
     }
 
     public List<DoctorWareHouseMaterialData> wareHouseMaterialHandle(Map<String, String> params) {
-        List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData1 = materialExportData(params, 0);
+        List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData1 =    materialExportData(params, 0);
         List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData2 = materialExportData(params, 1);
         List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData = Lists.newArrayList();
         for (DoctorWareHouseMaterialData doctorDate1 : doctorWareHouseMaterialData1) {
@@ -692,7 +692,9 @@ public class DoctorWareHouseEvents {
                 DoctorWareHouseMaterialData date = new DoctorWareHouseMaterialData();
                 date.setMaterialName(listOverride.get(i).getMaterialName());
                 date.setProviderFactoryName(listOverride.get(i).getProviderFactoryName());
-                date.setUnitName(doctorMaterialInWareHouse.getUnitName());
+                if (doctorMaterialInWareHouse != null) {
+                    date.setUnitName(doctorMaterialInWareHouse.getUnitName());
+                }
                 date.setMonthBeginAmount(monthEndAmount - priceIn + priceOut);
                 date.setMonthBeginNumber(monthEndNumber - numberIn + numbersOut);
                 date.setInAmount(priceIn);
