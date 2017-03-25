@@ -172,7 +172,7 @@ public class DoctorImportDataController {
 
     //生成一年的报表
     private void generateReport(Long farmId){
-        DateTime end = DateTime.now().withTimeAtStartOfDay().minusDays(1); //昨天开始时间
+        DateTime end = DateTime.now().withTimeAtStartOfDay(); //昨天开始时间
         DateTime begin = end.minusYears(1);
         new Thread(() -> {
             doctorDailyReportWriteService.createDailyReports(begin.toDate(), end.toDate(), farmId);

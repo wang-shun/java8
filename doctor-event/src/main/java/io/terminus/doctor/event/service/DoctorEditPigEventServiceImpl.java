@@ -147,7 +147,8 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                         newGroupWeanEvent.setId(oldGroupWeanEvent.getId());
 
                         //猪群事件编辑
-                        doctorEditGroupEventService.elicitDoctorGroupTrack(newGroupWeanEvent);
+//                        doctorEditGroupEventService.elicitDoctorGroupTrack(newGroupWeanEvent);
+                        doctorEditGroupEventService.elicitDoctorGroupTrackRebuildOne(newGroupWeanEvent);
                     }
                 }
 
@@ -166,7 +167,8 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                 modifyGroupEvent.setId(oldGroupModifyEvent.getId());
 
                 //猪群事件编辑
-                doctorEditGroupEventService.elicitDoctorGroupTrack(modifyGroupEvent);
+//                doctorEditGroupEventService.elicitDoctorGroupTrack(modifyGroupEvent);
+                doctorEditGroupEventService.elicitDoctorGroupTrackRebuildOne(modifyGroupEvent);
 
             }
         } catch (Exception e) {

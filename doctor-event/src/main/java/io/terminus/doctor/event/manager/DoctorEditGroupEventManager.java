@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.acl.Group;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -109,6 +111,16 @@ public class DoctorEditGroupEventManager {
         newTrack.setId(track.getId());
 
         Long fromEventId = 0L;
+        //按时间,id排序
+        groupEvents = groupEvents.stream().sorted(
+                (doctorGroupEvent1, doctorGroupEvent2)-> {
+                    if(Dates.startOfDay(doctorGroupEvent1.getEventAt()).compareTo(Dates.startOfDay(doctorGroupEvent2.getEventAt())) == 0){
+                        return doctorGroupEvent1.getId().compareTo(doctorGroupEvent2.getId());
+                    }
+
+                    return doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent2.getEventAt());
+                }
+        ).collect(Collectors.toList());
         doctorGroupSnapshotDao.deleteByGroupId(groupId);
         for(DoctorGroupEvent doctorGroupEvent: groupEvents) {
             Long newGroupEventId = null;
@@ -125,6 +137,7 @@ public class DoctorEditGroupEventManager {
                         newTrack.setNest(MoreObjects.firstNonNull(newTrack.getNest(), 0) + 1);
                         newTrack.setLiveQty(MoreObjects.firstNonNull(newTrack.getLiveQty(), 0) + doctorGroupEvent.getQuantity());
                         newTrack.setHealthyQty(MoreObjects.firstNonNull(newTrack.getHealthyQty(), 0) + MoreObjects.firstNonNull(moveInEvent.getHealthyQty(), doctorGroupEvent.getQuantity()));
+                        newTrack.setWeakQty(MoreObjects.firstNonNull(newTrack.getWeakQty(), 0) + MoreObjects.firstNonNull(moveInEvent.getWeakQty(), 0));
                         newTrack.setUnweanQty(MoreObjects.firstNonNull(newTrack.getUnweanQty(), 0) + doctorGroupEvent.getQuantity());
                         newTrack.setBirthWeight(MoreObjects.firstNonNull(newTrack.getBirthWeight(), 0d) + doctorGroupEvent.getWeight());
                     }
@@ -181,6 +194,7 @@ public class DoctorEditGroupEventManager {
             }
 
             newTrack.setRelEventId(doctorGroupEvent.getId());
+            newTrack.setSowQty(newTrack.getQuantity() - MoreObjects.firstNonNull(newTrack.getBoarQty(), 0));
             createSnapshots(fromEventId, doctorGroupEvent, newTrack);
             fromEventId = doctorGroupEvent.getId();
         }
@@ -223,13 +237,13 @@ public class DoctorEditGroupEventManager {
 
     private void setAvgDayAge(DoctorGroupTrack newTrack, DoctorGroupEvent doctorGroupEvent) {
         int avgDayAge = getAvgDayAge(newTrack, doctorGroupEvent);
-        newTrack.setBirthDate(new DateTime(doctorGroupEvent.getEventAt()).minusDays(avgDayAge).toDate());
+        newTrack.setBirthDate(new DateTime(Dates.startOfDay(doctorGroupEvent.getEventAt())).minusDays(avgDayAge).toDate());
         newTrack.setAvgDayAge(avgDayAge);
     }
 
     public int getAvgDayAge(DoctorGroupTrack newTrack, DoctorGroupEvent doctorGroupEvent){
-        int deltaDays = DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt()));
-        int avgDayAge = EventUtil.getAvgDayAge(MoreObjects.firstNonNull(newTrack.getAvgDayAge(), 0) + deltaDays, MoreObjects.firstNonNull(newTrack.getQuantity(), 0), doctorGroupEvent.getAvgDayAge(), doctorGroupEvent.getQuantity());
+        int deltaDays = DateUtil.getDeltaDaysAbs(Dates.startOfDay(doctorGroupEvent.getEventAt()),Dates.startOfDay(MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
+        int avgDayAge = EventUtil.getAvgDayAge(deltaDays, MoreObjects.firstNonNull(newTrack.getQuantity(), 0), doctorGroupEvent.getAvgDayAge(), doctorGroupEvent.getQuantity());
         return avgDayAge;
     }
 

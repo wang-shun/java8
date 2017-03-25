@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ExecutionError;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
@@ -110,7 +111,14 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
     @Override
     public void elicitDoctorGroupTrackRebuildOne(DoctorGroupEvent doctorGroupEvent) {
-        doctorEditGroupEventManager.elicitDoctorGroupTrackRebuildOne(doctorGroupEvent);
+        try{
+            doctorEditGroupEventManager.elicitDoctorGroupTrackRebuildOne(doctorGroupEvent);
+        }catch(InvalidException e){
+            throw e;
+        }catch(Exception e){
+            log.error("elicit group event failed, doctorGroupEvent: {}", doctorGroupEvent);
+            throw e;
+        }
     }
 
 
