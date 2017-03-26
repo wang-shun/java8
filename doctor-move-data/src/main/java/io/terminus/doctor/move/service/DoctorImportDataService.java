@@ -405,7 +405,7 @@ public class DoctorImportDataService {
     private Object[] importOrgFarm(Sheet farmShit){
         Row row1 = farmShit.getRow(1);
         String orgName = ImportExcelUtils.getStringOrThrow(row1, 0);
-        String farmName = ImportExcelUtils.getStringOrThrow(row1, 1);
+        String farmName = ImportExcelUtils.getStringOrThrow(row1, 1).replaceAll(" ", "");
         String loginName = ImportExcelUtils.getStringOrThrow(row1, 2);
         String mobile = ImportExcelUtils.getStringOrThrow(row1, 3);
         String realName = ImportExcelUtils.getStringOrThrow(row1, 4);
@@ -455,6 +455,9 @@ public class DoctorImportDataService {
         if(result.isSuccess() && result.getResult() != null){
             log.warn("primary user has existed, mobile={}", mobile);
             user = result.getResult();
+            if (!Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
+                throw new JsonResponseException("user.type.not.farm.admin.primary");
+            }
             userId = user.getId();
         }else{
             user = new User();
@@ -470,18 +473,17 @@ public class DoctorImportDataService {
             userId = RespHelper.or500(userWriteService.create(user));
             user.setId(userId);
 
-            //主账户关联猪场id
-            PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
-            PrimaryUser updatePrimary = new PrimaryUser();
-            updatePrimary.setId(primaryUser.getId());
-            updatePrimary.setRelFarmId(farm.getId());
-            primaryUserDao.update(updatePrimary);
-
             // 把真实姓名存进 user profile
             UserProfile userProfile = userProfileDao.findByUserId(userId);
             userProfile.setRealName(realName);
             userProfileDao.update(userProfile);
         }
+        //主账户关联猪场id
+        PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
+        PrimaryUser updatePrimary = new PrimaryUser();
+        updatePrimary.setId(primaryUser.getId());
+        updatePrimary.setRelFarmId(farm.getId());
+        primaryUserDao.update(updatePrimary);
 
         DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
         if(permission == null){
@@ -1995,5 +1997,13 @@ public class DoctorImportDataService {
      */
     public void createFarmExport(DoctorFarmExport farmExport) {
         doctorFarmExportDao.create(farmExport);
+    }
+
+    /**
+     * 更新导入记录
+     * @param farmExport 导入记录
+     */
+    public void updateFarmExport(DoctorFarmExport farmExport) {
+        doctorFarmExportDao.update(farmExport);
     }
 }

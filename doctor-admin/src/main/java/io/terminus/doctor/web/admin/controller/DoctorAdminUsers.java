@@ -1,5 +1,7 @@
 package io.terminus.doctor.web.admin.controller;
 
+import com.google.api.client.util.Maps;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
@@ -136,7 +138,8 @@ public class DoctorAdminUsers {
         User user = new User();
         user.setMobile(mobile);
         user.setName(name);
-        user.getExtra().put("realName", realName);
+        Map<String, String> extra = MoreObjects.firstNonNull(user.getExtra(), Maps.newHashMap());
+        extra.put("realName", realName);
 
         //密码默认为手机号
         user.setPassword(StringUtils.hasText(password) ? password : mobile);
