@@ -2006,4 +2006,33 @@ public class DoctorImportDataService {
     public void updateFarmExport(DoctorFarmExport farmExport) {
         doctorFarmExportDao.update(farmExport);
     }
+
+    /**
+     * 更新猪场姓名
+     * @param farmId 猪场id
+     * @param newName 新主场名
+     */
+    @Transactional
+    public void updateFarmName(Long farmId, String newName) {
+        //更新猪场
+        DoctorFarm updateFarm = new DoctorFarm();
+        updateFarm.setId(farmId);
+        updateFarm.setName(newName);
+        doctorFarmDao.update(updateFarm);
+
+        //更新猪舍
+        doctorBarnDao.updateFarmName(farmId, newName);
+
+        //更新猪
+        doctorPigDao.updateFarmName(farmId, newName);
+
+        //更新猪事件
+        doctorPigEventDao.updateFarmName(farmId, newName);
+
+        //更新猪群
+        doctorGroupDao.updateFarmName(farmId, newName);
+
+        //更新猪群事件
+        doctorGroupEventDao.updateFarmName(farmId, newName);
+    }
 }

@@ -381,4 +381,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<Long> findPigIdsBy(Map<String, Object> criteria) {
         return getSqlSession().selectList(sqlId("findPigIdsBy"), criteria);
     }
+
+    /**
+     * 更改猪场名
+     * @param farmId 需要更改的猪场id
+     * @param farmName 新的猪场名
+     */
+    public void updateFarmName(Long farmId, String farmName) {
+        getSqlSession().update(sqlId("updateFarmName"), ImmutableMap.of("farmId", farmId, "farmName", farmName));
+    }
 }
