@@ -89,4 +89,9 @@ public class DoctorBoarConditionDto extends BasePigEventInputDto implements Seri
     public Date eventAt() {
         return this.checkAt;
     }
+
+    @Override
+    public String changeRemark() {
+        return this.remark;
+    }
 }

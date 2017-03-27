@@ -73,4 +73,8 @@ public abstract class BasePigEventInputDto implements Serializable{
         return JsonMapperUtil.nonEmptyMapper().getMapper()
                 .convertValue(this, Map.class);
     }
+    /**
+     * 转换输入数据不一致remark
+     */
+    public abstract String changeRemark();
 }

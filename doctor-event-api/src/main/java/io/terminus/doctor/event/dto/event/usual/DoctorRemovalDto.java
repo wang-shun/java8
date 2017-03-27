@@ -78,4 +78,9 @@ public class DoctorRemovalDto extends BasePigEventInputDto implements Serializab
     public Date eventAt() {
         return this.removalDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return this.remark;
+    }
 }

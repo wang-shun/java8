@@ -68,4 +68,9 @@ public class DoctorPregChkResultDto extends BasePigEventInputDto implements Seri
     public Date eventAt() {
         return this.checkDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return this.checkMark;
+    }
 }

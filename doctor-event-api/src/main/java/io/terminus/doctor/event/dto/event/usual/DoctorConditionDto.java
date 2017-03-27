@@ -59,4 +59,9 @@ public class DoctorConditionDto extends BasePigEventInputDto implements Serializ
     public Date eventAt() {
         return this.conditionDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return this.conditionRemark;
+    }
 }

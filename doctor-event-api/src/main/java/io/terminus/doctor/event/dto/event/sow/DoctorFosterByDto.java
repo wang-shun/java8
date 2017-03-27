@@ -67,4 +67,9 @@ public class DoctorFosterByDto extends BasePigEventInputDto implements Serializa
     public Date eventAt() {
         return fosterByDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return null;
+    }
 }

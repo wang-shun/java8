@@ -118,4 +118,9 @@ public class DoctorFarrowingDto extends BasePigEventInputDto implements Serializ
     public Date eventAt() {
         return this.farrowingDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return this.farrowRemark;
+    }
 }
