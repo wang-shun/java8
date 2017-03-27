@@ -79,4 +79,9 @@ public class DoctorWeanDto extends BasePigEventInputDto implements Serializable{
     public Date eventAt() {
         return this.partWeanDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return this.partWeanRemark;
+    }
 }

@@ -106,4 +106,9 @@ public class DoctorPigletsChgDto extends BasePigEventInputDto implements Seriali
     public Date eventAt() {
         return this.pigletsChangeDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return this.pigletsMark;
+    }
 }

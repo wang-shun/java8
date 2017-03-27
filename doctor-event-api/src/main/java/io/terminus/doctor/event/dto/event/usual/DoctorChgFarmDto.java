@@ -80,4 +80,9 @@ public class DoctorChgFarmDto extends BasePigEventInputDto implements Serializab
     public Date eventAt() {
         return this.chgFarmDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return this.remark;
+    }
 }

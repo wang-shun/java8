@@ -90,4 +90,9 @@ public class DoctorSemenDto extends BasePigEventInputDto implements Serializable
     public Date eventAt() {
         return this.semenDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return this.semenRemark;
+    }
 }
