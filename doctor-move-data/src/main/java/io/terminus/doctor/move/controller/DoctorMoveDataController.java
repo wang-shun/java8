@@ -10,7 +10,6 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
@@ -941,5 +940,19 @@ public class DoctorMoveDataController {
     public boolean updatePigCodes(@RequestParam String pigCodeUpdates) {
         List<DoctorPig> pigs = MAPPER.fromJson(pigCodeUpdates, MAPPER.createCollectionType(List.class, DoctorPig.class));
         return RespHelper.or500(doctorPigWriteService.updatePigCodes(pigs));
+    }
+
+    /**
+     * 更新用户名
+     * @param userId 用户id
+     * @param userName 新用户名
+     * @return 更新是否成功
+     */
+    @RequestMapping(value = "/updateUserName", method = RequestMethod.GET)
+    public Boolean updateUserName(@RequestParam Long userId, @RequestParam String userName) {
+        log.info("update user name starting, userId:{}, userName:{}", userId, userName);
+        doctorMoveDataService.updateUserName(userId, userName);
+        log.info("update user name ending");
+        return true;
     }
 }

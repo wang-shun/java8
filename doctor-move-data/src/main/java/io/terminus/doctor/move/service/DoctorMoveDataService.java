@@ -96,6 +96,9 @@ import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_SowCardList;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.parana.user.impl.dao.UserDao;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -145,6 +148,8 @@ public class DoctorMoveDataService {
     private final DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorPigSnapshotDao doctorPigSnapshotDao;
+    private final UserWriteService<User> userWriteService;
+    private final UserDao userDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -162,7 +167,9 @@ public class DoctorMoveDataService {
                                  DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService,
                                  DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService,
                                  DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                 DoctorPigSnapshotDao doctorPigSnapshotDao) {
+                                 DoctorPigSnapshotDao doctorPigSnapshotDao,
+                                 UserWriteService userWriteService,
+                                 UserDao userDao) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
@@ -179,6 +186,8 @@ public class DoctorMoveDataService {
         this.doctorMaterialConsumeProviderReadService = doctorMaterialConsumeProviderReadService;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorPigSnapshotDao = doctorPigSnapshotDao;
+        this.userWriteService = userWriteService;
+        this.userDao = userDao;
     }
 
     //删除猪场所有猪相关的数据
@@ -2595,5 +2604,16 @@ public class DoctorMoveDataService {
     public void updateParityAndBoarCodeByPigId(Long pigId) {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("pigId", pigId , "type", PigEvent.ENTRY.getKey()));
         updateParityAndBoarCodeByEntryEvents(doctorPigEvensList);
+    }
+
+    /**
+     * 更新用户名
+     * @param userId 用户id
+     * @param newName 用户名
+     */
+    public void updateUserName(Long userId, String newName) {
+        User user = userDao.findById(userId);
+        user.setName(newName);
+        userWriteService.update(user);
     }
 }
