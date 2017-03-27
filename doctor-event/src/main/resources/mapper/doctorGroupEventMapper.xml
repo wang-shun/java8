@@ -483,4 +483,11 @@
         FROM <include refid="tb" />
         WHERE id = #{id}
     </select>
+
+    <update id="updateFarmName" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        SET farm_name = #{farmName}
+        WHERE
+        farm_id = #{farmId}
+    </update>
 </mapper>

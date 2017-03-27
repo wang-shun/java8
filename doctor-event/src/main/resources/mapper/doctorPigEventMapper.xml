@@ -971,4 +971,11 @@
         SELECT pig_id FROM <include refid="tb"/>
         WHERE 1=1 <include refid="criteria"/>
     </select>
+
+    <update id="updateFarmName" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        SET farm_name = #{farmName}
+        WHERE
+        farm_id = #{farmId}
+    </update>
 </mapper>
