@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.rollback;
 
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 
 /**
@@ -47,7 +49,7 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
     @Autowired protected DoctorPigEventDao doctorPigEventDao;
     @Autowired protected DoctorEventRelationDao doctorEventRelationDao;
 
-    static List<Integer> excludeGroupEvent = Lists.newArrayList(GroupEventType.ANTIEPIDEMIC.getValue(), GroupEventType.ANTIEPIDEMIC.getValue());
+    static List<Integer> excludeGroupEvent = Lists.newArrayList(GroupEventType.ANTIEPIDEMIC.getValue(), GroupEventType.DISEASE.getValue());
 
     /**
      * 判断能否回滚(1.手动事件 2.三个月内的事件 3.最新事件 4.子类根据事件类型特殊处理)
@@ -81,7 +83,9 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
      * 是否是最新事件
      */
     protected boolean isLastEvent(DoctorGroupEvent groupEvent) {
-        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventExcludeTypes(groupEvent.getGroupId(), excludeGroupEvent);
+        // TODO: 17/3/27 暂时为所有有效事件中最新包括疾病、防疫
+        //DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventExcludeTypes(groupEvent.getGroupId(), excludeGroupEvent);
+        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(groupEvent.getGroupId());
         if (!Objects.equals(groupEvent.getId(), lastEvent.getId())) {
             return Boolean.FALSE;
         }
@@ -136,5 +140,27 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
             event = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
         }
         return isLastEvent(tmpEvent);
+    }
+
+    /**
+     * 没有镜像事件处理
+     * @param groupEvent 回滚事件
+     * @param operatorId 操作人id
+     * @param operatorName 操作人姓名
+     */
+    protected void handleRollbackWithoutSnapshot(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+        if (!excludeGroupEvent.contains(groupEvent.getType())) {
+            throw new InvalidException("rollback.event.type.error", groupEvent.getId());
+        }
+
+        //旧事件需要删除镜像
+        DoctorGroupSnapshot groupSnapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
+        if (notNull(groupSnapshot)) {
+            sampleRollback(groupEvent, operatorId, operatorName);
+            return;
+        }
+
+        //新生成的疾病、防疫不需要删除镜像
+        doctorGroupEventDao.delete(groupEvent.getId());
     }
 }
