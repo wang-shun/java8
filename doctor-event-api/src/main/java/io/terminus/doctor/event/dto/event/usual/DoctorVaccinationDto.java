@@ -68,4 +68,9 @@ public class DoctorVaccinationDto extends BasePigEventInputDto implements Serial
     public Date eventAt() {
         return this.vaccinationDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return this.vaccinationRemark;
+    }
 }

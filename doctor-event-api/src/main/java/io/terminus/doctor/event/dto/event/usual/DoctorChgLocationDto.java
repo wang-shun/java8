@@ -57,4 +57,9 @@ public class DoctorChgLocationDto extends BasePigEventInputDto implements Serial
     public Date eventAt() {
         return this.changeLocationDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return null;
+    }
 }

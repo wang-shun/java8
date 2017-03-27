@@ -73,4 +73,9 @@ public class DoctorMatingDto extends BasePigEventInputDto implements Serializabl
     public Date eventAt() {
         return this.matingDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return this.mattingMark;
+    }
 }

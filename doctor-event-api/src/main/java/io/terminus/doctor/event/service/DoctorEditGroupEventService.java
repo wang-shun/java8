@@ -16,4 +16,6 @@ public interface DoctorEditGroupEventService {
     void elicitDoctorGroupTrack(DoctorGroupEvent doctorGroupEvent);
 
     Response<Boolean> reElicitGroupEvent(List<Long> groupIds);
+
+    void elicitDoctorGroupTrackRebuildOne(DoctorGroupEvent doctorGroupEvent);
 }

@@ -93,4 +93,9 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
         return this.inFarmDate;
     }
 
+    @Override
+    public String changeRemark() {
+        return this.entryMark;
+    }
+
 }

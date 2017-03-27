@@ -75,4 +75,9 @@ public class DoctorFostersDto extends BasePigEventInputDto implements Serializab
     public Date eventAt() {
         return DateUtil.toDate(fostersDate);
     }
+
+    @Override
+    public String changeRemark() {
+        return this.fosterRemark;
+    }
 }

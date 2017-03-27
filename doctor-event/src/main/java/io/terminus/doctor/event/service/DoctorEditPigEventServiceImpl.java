@@ -3,6 +3,8 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
@@ -147,7 +149,8 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                         newGroupWeanEvent.setId(oldGroupWeanEvent.getId());
 
                         //猪群事件编辑
-                        doctorEditGroupEventService.elicitDoctorGroupTrack(newGroupWeanEvent);
+//                        doctorEditGroupEventService.elicitDoctorGroupTrack(newGroupWeanEvent);
+                        doctorEditGroupEventService.elicitDoctorGroupTrackRebuildOne(newGroupWeanEvent);
                     }
                 }
 
@@ -166,7 +169,8 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                 modifyGroupEvent.setId(oldGroupModifyEvent.getId());
 
                 //猪群事件编辑
-                doctorEditGroupEventService.elicitDoctorGroupTrack(modifyGroupEvent);
+//                doctorEditGroupEventService.elicitDoctorGroupTrack(modifyGroupEvent);
+                doctorEditGroupEventService.elicitDoctorGroupTrackRebuildOne(modifyGroupEvent);
 
             }
         } catch (Exception e) {
@@ -226,6 +230,11 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
         }
         expectNotNull(lastPigSnapshot, "find.per.pig.snapshot.failed", oldEventId);
         DoctorPigTrack fromTrack = JSON_MAPPER.fromJson(lastPigSnapshot.getToPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack();
+        if(Arguments.isNull(fromTrack.getCurrentEventId()) && Arguments.isNull(lastPigSnapshot.getFromEventId())){
+            log.error("find pig snapshot info failed, pigId: {}", modifyEvent.getPigId());
+            throw new InvalidException("pig.snapshot.info.broken", modifyEvent.getPigId());
+        }
+        fromTrack.setCurrentEventId(lastPigSnapshot.getToEventId());
         expectNotNull(fromTrack, "find.pig.track.from.snapshot.failed", lastPigSnapshot.getId());
         //可能后续有转舍事件,所以还是将所在猪舍重新设置一下
         modifyEvent.setBarnId(fromTrack.getCurrentBarnId());

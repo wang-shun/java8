@@ -56,4 +56,9 @@ public class DoctorDiseaseDto extends BasePigEventInputDto implements Serializab
     public Date eventAt() {
         return this.diseaseDate;
     }
+
+    @Override
+    public String changeRemark() {
+        return this.diseaseRemark;
+    }
 }

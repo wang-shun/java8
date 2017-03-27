@@ -695,5 +695,10 @@ create table doctor_farm_exports (
 
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='导入猪场记录表';
 
+
 -- 2017-03-24 导入状态
 ALTER TABLE doctor_farm_exports ADD COLUMN status tinyint(4) DEFAULT NULL COMMENT 'Excel导入状态, ' after url;
+
+
+-- 2017-03-25 修改数据权限表farm_ids类型
+ALTER TABLE doctor_user_data_permissions MODIFY COLUMN farm_ids TEXT DEFAULT NULL COMMENT '猪场ids,逗号分隔';
