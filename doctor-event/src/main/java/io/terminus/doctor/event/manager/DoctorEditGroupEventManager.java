@@ -128,6 +128,7 @@ public class DoctorEditGroupEventManager {
                 case NEW:
                     newTrack.setQuantity(0);
                     newGroupEventId = doctorGroupEvent.getId();
+                    newTrack.setRelEventId(doctorGroupEvent.getId());
                     break;
                 case MOVE_IN:
                     setAvgDayAge(newTrack, doctorGroupEvent);
@@ -141,6 +142,7 @@ public class DoctorEditGroupEventManager {
                         newTrack.setUnweanQty(MoreObjects.firstNonNull(newTrack.getUnweanQty(), 0) + doctorGroupEvent.getQuantity());
                         newTrack.setBirthWeight(MoreObjects.firstNonNull(newTrack.getBirthWeight(), 0d) + doctorGroupEvent.getWeight());
                     }
+                    newTrack.setRelEventId(doctorGroupEvent.getId());
                     break;
                 case CHANGE:
                     if(!Arguments.isNull(doctorGroupEvent.getRelPigEventId())){
@@ -148,6 +150,7 @@ public class DoctorEditGroupEventManager {
                     }
                     newTrack.setQuantity(newTrack.getQuantity() - doctorGroupEvent.getQuantity());
                     newTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
+                    newTrack.setRelEventId(doctorGroupEvent.getId());
                     break;
                 case TRANS_GROUP:
                     if(!Arguments.isNull(doctorGroupEvent.getRelPigEventId())){
@@ -159,12 +162,14 @@ public class DoctorEditGroupEventManager {
                     }
                     newTrack.setQuantity(newTrack.getQuantity() - doctorGroupEvent.getQuantity());
                     newTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
+                    newTrack.setRelEventId(doctorGroupEvent.getId());
                     break;
                 case TURN_SEED:
                     newTrack.setQuantity(newTrack.getQuantity() - 1);
                     newTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
 //                    newTrack.setBoarQty(getBoarQty(DoctorPig.PigSex.from(newTrack.getSex()), newTrack.getBoarQty()));
 //                    newTrack.setSowQty(newTrack.getQuantity() - newTrack.getBoarQty());
+                    newTrack.setRelEventId(doctorGroupEvent.getId());
                     break;
                 case LIVE_STOCK:
                     break;
@@ -177,14 +182,17 @@ public class DoctorEditGroupEventManager {
                     newTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
 //                    newTrack.setBoarQty(getBoarQty(DoctorPig.PigSex.from(newTrack.getSex()), newTrack.getBoarQty()));
 //                    newTrack.setSowQty(newTrack.getQuantity() - newTrack.getBoarQty());
+                    newTrack.setRelEventId(doctorGroupEvent.getId());
                     break;
                 case CLOSE:
                     newTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
+                    newTrack.setRelEventId(doctorGroupEvent.getId());
                     break;
                 case WEAN:
                     newTrack.setWeanQty(MoreObjects.firstNonNull(newTrack.getWeanQty(), 0) + doctorGroupEvent.getQuantity());
                     newTrack.setUnweanQty(newTrack.getUnweanQty() - doctorGroupEvent.getQuantity());
                     newTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(doctorGroupEvent.getEventAt(), MoreObjects.firstNonNull(newTrack.getBirthDate(), doctorGroupEvent.getEventAt())));
+                    newTrack.setRelEventId(doctorGroupEvent.getId());
                     break;
             }
 
@@ -193,7 +201,6 @@ public class DoctorEditGroupEventManager {
                 throw new InvalidException("group.quantity.not.enough", groupId);
             }
 
-            newTrack.setRelEventId(doctorGroupEvent.getId());
             newTrack.setSowQty(newTrack.getQuantity() - MoreObjects.firstNonNull(newTrack.getBoarQty(), 0));
             createSnapshots(fromEventId, doctorGroupEvent, newTrack);
             fromEventId = doctorGroupEvent.getId();
