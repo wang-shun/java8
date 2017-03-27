@@ -167,12 +167,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         if (doctorPigTrack != null) {
             doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
             doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
-            doctorPigEvent.setRemark(doctorPigTrack.getRemark());
         }
-
         doctorPigEvent.setRemark(inputDto.changeRemark());
-        System.out.println(inputDto.getClass().getSimpleName());
-
         doctorPigEvent.setExtraMap(inputDto.toMap());
         return doctorPigEvent;
     }
