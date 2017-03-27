@@ -38,6 +38,7 @@ import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.time.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -151,11 +152,53 @@ public class DoctorWareHouseEvents {
                                         HttpServletRequest request,
                                         HttpServletResponse response) {
         try {
-            exporter.export(materialExportData(params), "web-material-export", request, response);
+            exporter.export(wareHouseMaterialHandle(params), "web-material-export", request, response);
         } catch (Exception e) {
             log.error("ware.house.event.export.failed, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException("ware.house.material.export.fail");
         }
+    }
+
+    /**
+     * @param params
+     * @return
+     */
+
+    @RequestMapping(value = "/material/message", method = RequestMethod.GET)
+    @ResponseBody
+    public Paging<DoctorWareHouseMaterialData> wareHouseMaterialMessage(@RequestParam Map<String, String> params) {
+
+        List<DoctorWareHouseMaterialData> doctorWareHouseMaterialDatas = wareHouseMaterialHandle(params);
+
+        return new Paging<>((long)doctorWareHouseMaterialDatas.size(), doctorWareHouseMaterialDatas);
+
+    }
+
+    public List<DoctorWareHouseMaterialData> wareHouseMaterialHandle(Map<String, String> params) {
+        List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData1 =    materialExportData(params, 0);
+        List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData2 = materialExportData(params, 1);
+        List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData = Lists.newArrayList();
+        for (DoctorWareHouseMaterialData doctorDate1 : doctorWareHouseMaterialData1) {
+            int number = 0;
+            for (DoctorWareHouseMaterialData doctorDate2 : doctorWareHouseMaterialData2) {
+                if (doctorDate1.getMaterialName().equals(doctorDate2.getMaterialName())) {
+                    doctorDate1.setCurrentAmount(doctorDate2.getMonthBeginAmount());
+                    doctorDate1.setLotNumber(doctorDate2.getMonthBeginNumber());
+                    doctorDate1.setInAmount(doctorDate1.getInAmount() - doctorDate2.getInAmount());
+                    doctorDate1.setInCount(doctorDate1.getInCount() - doctorDate2.getInCount());
+                    doctorDate1.setOutCount(doctorDate1.getOutCount() - doctorDate2.getOutCount());
+                    doctorDate1.setOutAmount(doctorDate1.getOutAmount() - doctorDate2.getOutAmount());
+                    doctorWareHouseMaterialData.add(doctorDate1);
+                    break;
+                }
+                number++;
+            }
+            if (number == doctorWareHouseMaterialData2.size()) {
+                doctorWareHouseMaterialData.add(doctorDate1);
+            }
+        }
+        
+        return doctorWareHouseMaterialData;
     }
 
     @RequestMapping(value = "/materialInWareHouse/delete", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -540,8 +583,24 @@ public class DoctorWareHouseEvents {
      * @param criteriaMap 查询条件
      * @return 导出数据集
      */
-    public List<DoctorWareHouseMaterialData> materialExportData(Map<String, String> criteriaMap) {
+    public List<DoctorWareHouseMaterialData> materialExportData(Map<String, String> criteriaMap, Integer num) {
+        Date startDate = null;
+        Date endDate = null;
+        String eventDate = criteriaMap.get("startAt") + "-01 00:00:00";
+        if (num == 1) {
+
+            startDate = DateUtil.monthStart(DateUtil.stringToDate(eventDate));
+            startDate = DateUtils.addMonths(startDate, 1);
+            endDate = DateUtil.monthEnd(DateUtil.stringToDate(eventDate));
+        }
+        if (num == 0) {
+            startDate = DateUtil.monthStart(DateUtil.stringToDate(eventDate));
+            endDate = DateUtil.monthEnd(DateUtil.stringToDate(eventDate));
+
+        }
         DoctorWareHouseMaterialCriteria criteria = BeanMapper.map(criteriaMap, DoctorWareHouseMaterialCriteria.class);
+        criteria.setStartDate(DateUtil.toDateTimeString(startDate));
+        criteria.setEndDate(DateUtil.toDateTimeString(endDate));
         List<DoctorWareHouseMaterialData> listDate = Lists.newArrayList();
         List<DoctorMaterialConsumeProvider> listOverride = Lists.newArrayList();
 
@@ -594,21 +653,21 @@ public class DoctorWareHouseEvents {
         //处理dto中数据统计相同物料的出入库
         for (int i = 0; i < listOverride.size(); i++) {
             if (i != (listOverride.size()-1) && listOverride.get(i).getMaterialId().equals(listOverride.get(i+1).getMaterialId())) {
-                if (DoctorMaterialConsumeProvider.EVENT_TYPE.from(listOverride.get(i+1).getEventType()).isOut()) {
+                if (DoctorMaterialConsumeProvider.EVENT_TYPE.from(listOverride.get(i).getEventType()).isOut()) {
                     numbersOut += listOverride.get(i).getEventCount();
-                    priceOut += listOverride.get(i).getUnitPrice() / 100 * listOverride.get(i).getEventCount();
+                    priceOut += listOverride.get(i).getUnitPrice() * listOverride.get(i).getEventCount();
                 } else {
                     numberIn += listOverride.get(i).getEventCount();
-                    priceIn += listOverride.get(i).getUnitPrice() / 100 * listOverride.get(i).getEventCount();
+                    priceIn += listOverride.get(i).getUnitPrice() * listOverride.get(i).getEventCount();
                 }
             } else{
                 //最后一次数据处理
                 if (DoctorMaterialConsumeProvider.EVENT_TYPE.from(listOverride.get(i).getEventType()).isOut()) {
                     numbersOut += listOverride.get(i).getEventCount();
-                    priceOut += listOverride.get(i).getUnitPrice() / 100 * listOverride.get(i).getEventCount();
+                    priceOut += listOverride.get(i).getUnitPrice() * listOverride.get(i).getEventCount();
                 } else {
                     numberIn += listOverride.get(i).getEventCount();
-                    priceIn += listOverride.get(i).getUnitPrice() /100 * listOverride.get(i).getEventCount();
+                    priceIn += listOverride.get(i).getUnitPrice() * listOverride.get(i).getEventCount();
                 }
                 //数据塞入
                 List<DoctorMaterialPriceInWareHouse> doctorMaterialPriceInWareHouses = RespHelper.or500(materialPriceInWareHouseReadService.findMaterialData(
@@ -616,13 +675,13 @@ public class DoctorWareHouseEvents {
                         listOverride.get(i).getMaterialId(),
                         criteria.getWareHouseId(),
                         DateUtil.stringToDate(criteria.getEndDate())));
-                if (doctorMaterialPriceInWareHouses == null) {
+                if (doctorMaterialPriceInWareHouses.size() == 0) {
                     monthEndNumber = 0;
                     monthEndAmount = 0;
                 }else {
                     for (DoctorMaterialPriceInWareHouse doctorMaterialPriceInWareHouse : doctorMaterialPriceInWareHouses) {
                         monthEndNumber += doctorMaterialPriceInWareHouse.getRemainder();
-                        monthEndAmount += doctorMaterialPriceInWareHouse.getRemainder() * doctorMaterialPriceInWareHouse.getUnitPrice() / 100;
+                        monthEndAmount += doctorMaterialPriceInWareHouse.getRemainder() * doctorMaterialPriceInWareHouse.getUnitPrice();
                     }
                 }
                 DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.findMaterialUnits(
@@ -633,7 +692,9 @@ public class DoctorWareHouseEvents {
                 DoctorWareHouseMaterialData date = new DoctorWareHouseMaterialData();
                 date.setMaterialName(listOverride.get(i).getMaterialName());
                 date.setProviderFactoryName(listOverride.get(i).getProviderFactoryName());
-                date.setUnitName(doctorMaterialInWareHouse.getUnitName());
+                if (doctorMaterialInWareHouse != null) {
+                    date.setUnitName(doctorMaterialInWareHouse.getUnitName());
+                }
                 date.setMonthBeginAmount(monthEndAmount - priceIn + priceOut);
                 date.setMonthBeginNumber(monthEndNumber - numberIn + numbersOut);
                 date.setInAmount(priceIn);
@@ -649,6 +710,9 @@ public class DoctorWareHouseEvents {
                 priceOut = 0;
                 numberIn = 0;
                 priceIn = 0;
+                monthEndNumber = 0;
+                monthEndAmount = 0;
+
             }
         }
 
