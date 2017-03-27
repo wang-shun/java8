@@ -346,7 +346,20 @@ public class DoctorImportDataController {
         return true;
     }
 
-
+    /**
+     * 修改猪场名
+     * @param farmId 猪场id
+     * @param farmName 新猪场名
+     * @return 更新是否成功
+     */
+    @RequestMapping(value = "/updateFarmName", method = RequestMethod.GET)
+    public Boolean updateFarmName(@RequestParam Long farmId,
+                                  @RequestParam String farmName) {
+        log.info("updateFarmName.starting, farmId:{}, farmName:{}", farmId, farmName);
+        doctorImportDataService.updateFarmName(farmId, farmName);
+        log.info("updateFarmName.ending");
+        return true;
+    }
 
     /**
      * 导入数据校验

@@ -174,4 +174,13 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public DoctorGroupEvent findEventById(Long id) {
         return getSqlSession().selectOne(sqlId("findEventById"), id);
     }
+
+    /**
+     * 更改猪场名
+     * @param farmId 需要更改的猪场id
+     * @param farmName 新的猪场名
+     */
+    public void updateFarmName(Long farmId, String farmName) {
+        getSqlSession().update(sqlId("updateFarmName"), ImmutableMap.of("farmId", farmId, "farmName", farmName));
+    }
 }
