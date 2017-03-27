@@ -1430,7 +1430,7 @@ public class DoctorImportDataService {
         event.setPregDays(DateUtil.getDeltaDaysAbs(info.getPrePregDate(), info.getPregDate())); //日期差
         event.setFarrowWeight(info.getNestWeight());
         event.setLiveCount(info.getLiveCount());
-        event.setHealthCount(info.getLiveCount() + info.getWeakCount());
+        event.setHealthCount(info.getLiveCount() - info.getWeakCount());
         event.setWeakCount(info.getWeakCount());
         event.setMnyCount(info.getMummyCount());
         event.setJxCount(info.getJixingCount());
