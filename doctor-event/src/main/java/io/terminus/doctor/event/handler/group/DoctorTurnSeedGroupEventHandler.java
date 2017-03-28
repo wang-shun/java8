@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
@@ -81,7 +82,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
     }
 
     @Override
-    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
+    public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorTurnSeedGroupEvent doctorTurnSeedGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTurnSeedGroupEvent.class);
         if(Arguments.isNull(doctorTurnSeedGroupEvent)) {
             log.error("parse doctorTurnSeedGroupEvent faild, doctorGroupEvent = {}", event);
@@ -191,11 +192,4 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         return oldQty;
     }
 
-    @Override
-    public boolean checkDoctorGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent) {
-        if(doctorGroupTrack.getQuantity() < 1){
-            return false;
-        }
-        return true;
-    }
 }
