@@ -37,7 +37,7 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+    public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         //DoctorRemovalDto removalDto = (DoctorRemovalDto) inputDto;
         toTrack.setGroupId(-1L);

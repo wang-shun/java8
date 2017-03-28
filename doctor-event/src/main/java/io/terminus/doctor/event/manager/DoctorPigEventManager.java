@@ -102,8 +102,30 @@ public class DoctorPigEventManager {
      * @return 编辑事件
      */
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
+        DoctorPigEventHandler handler = getHandler(inputDto.getEventType());
         return handler.buildPigEvent(basic, inputDto);
+    }
+
+    /**
+     * 构建事件执行后track
+     * @param executeEvent 需要执行事件
+     * @param fromTrack 执行前track
+     * @return 事件执行后track
+     */
+    public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        DoctorPigEventHandler handler = getHandler(executeEvent.getType());
+        return handler.buildPigTrack(executeEvent, fromTrack);
+    }
+
+    /**
+     *  创建猪跟踪和镜像表
+     *  @param toTrack 事件发生导致track
+     *  @param executeEvent 发生事件
+     *  @param lastEventId 上一次事件id
+     *
+     */
+    public void createPigSnapshot(DoctorPigTrack toTrack, DoctorPigEvent executeEvent, Long lastEventId){
+        getHandler(executeEvent.getType()).createPigSnapshot(toTrack, executeEvent, lastEventId);
     }
 
     @Transactional

@@ -17,12 +17,10 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -222,7 +220,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
      * @param fromTrack 事件发生前的track
      * @return 事件发生后track
      */
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+    public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         fromTrack.setCurrentEventId(executeEvent.getId());
         return fromTrack;
     }
@@ -234,7 +232,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
      *  @param lastEventId 上一次事件id
      *
      */
-    protected void createPigSnapshot(DoctorPigTrack toTrack, DoctorPigEvent executeEvent, Long lastEventId) {
+    public void createPigSnapshot(DoctorPigTrack toTrack, DoctorPigEvent executeEvent, Long lastEventId) {
         DoctorPig snapshotPig = doctorPigDao.findById(toTrack.getPigId());
         expectTrue(notNull(snapshotPig), "pig.not.null", toTrack.getPigId());
 

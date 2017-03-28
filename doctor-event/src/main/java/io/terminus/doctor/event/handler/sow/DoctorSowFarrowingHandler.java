@@ -102,7 +102,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+    public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         Map<String, Object> extra = isNull(toTrack.getExtraMap()) ? Maps.newHashMap() : toTrack.getExtraMap();
         // 对应的 仔猪 猪舍的 信息
