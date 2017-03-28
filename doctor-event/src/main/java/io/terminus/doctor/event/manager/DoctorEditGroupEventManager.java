@@ -92,7 +92,7 @@ public class DoctorEditGroupEventManager {
         Long fromEventId = 0L;
         for(DoctorGroupEvent doctorGroupEvent: groupEvents) {
             newTrack = doctorGroupEventHandlers.getEventHandlerMap().get(doctorGroupEvent.getType()).elicitGroupTrack(doctorGroupEvent, newTrack);
-            if(checkTrack(newTrack)){
+            if(!checkTrack(newTrack)){
                 throw new InvalidException("group.track.info.broken", groupId);
             }
             createSnapshots(fromEventId, doctorGroupEvent, newTrack);
