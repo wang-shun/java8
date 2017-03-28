@@ -14,4 +14,10 @@ public interface DoctorEditPigEventService {
      * @return
      */
     void modifyPigEventHandle(DoctorPigEvent modifyEvent);
+
+    /**
+     * 推演猪track
+     * @param pigId 猪id
+     */
+    void elicitPigTrack(Long pigId);
 }
