@@ -45,6 +45,7 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
     public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.ANTIEPIDEMIC.getValue());
         DoctorAntiepidemicGroupInput antiepidemic = (DoctorAntiepidemicGroupInput) input;
+        checkQuantity(groupTrack.getQuantity(), antiepidemic.getQuantity());
         //1.转换下防疫信息
         DoctorAntiepidemicGroupEvent antiEvent = BeanMapper.map(antiepidemic, DoctorAntiepidemicGroupEvent.class);
 
@@ -59,7 +60,6 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
     @Override
     public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
-        checkQuantity(track.getQuantity(), event.getQuantity());
         return track;
     }
 
