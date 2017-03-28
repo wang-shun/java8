@@ -176,7 +176,6 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             } else {
                 //处理猪群事件修改
                 DoctorGroupEvent modifyEvent = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(modifyRequest.getContent(), DoctorGroupEvent.class);
-//                doctorEditGroupEventService.elicitDoctorGroupTrack(modifyEvent);            //重新生成修改后的所有事件,然后推导track
                 doctorEditGroupEventService.elicitDoctorGroupTrackRebuildOne(modifyEvent);  //只重新生成修改的事件,然后推导track
             }
 
