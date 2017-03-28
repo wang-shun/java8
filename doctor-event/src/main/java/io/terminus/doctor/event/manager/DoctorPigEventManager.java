@@ -352,9 +352,12 @@ public class DoctorPigEventManager {
      * @param inputList 批量事件输入
      */
     private void eventRepeatCheck(List<BasePigEventInputDto> inputList) {
-        Set<String> inputSet = inputList.stream().map(BasePigEventInputDto::getPigCode).collect(Collectors.toSet());
-        if (inputList.size() != inputSet.size()) {
-            throw new ServiceException("batch.event.pigCode.not.repeat");
+        List<String> inputPigCodeList = inputList.stream().map(BasePigEventInputDto::getPigCode).sorted().collect(Collectors.toList());
+
+        for (int i = 0; i< inputPigCodeList.size()-1; i++) {
+            if (inputPigCodeList.get(i).equals(inputPigCodeList.get(i+1))) {
+                throw new InvalidException("batch.event.pigCode.not.repeat", inputPigCodeList.get(i));
+            }
         }
     }
 }
