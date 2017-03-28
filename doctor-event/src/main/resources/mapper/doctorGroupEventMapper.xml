@@ -38,6 +38,7 @@
         <result column="rel_pig_event_id" property="relPigEventId"/>
         <result column="out_id" property="outId"/>
         <result column="status" property="status"/>
+        <result column="event_source" property="eventSource"/>
         <result column="remark" property="remark"/>
         <result column="extra" property="extra"/>
         <result column="created_at" property="createdAt"/>
@@ -88,6 +89,7 @@
         rel_pig_event_id,
         out_id,
         status,
+        event_source,
         remark,
         extra,
         created_at,
@@ -130,6 +132,7 @@
         #{relPigEventId},
         #{outId},
         #{status},
+        #{eventSource},
         #{remark},
         #{extra},
         now(),
@@ -175,6 +178,7 @@
         <if test="relPigEventId != null">AND rel_pig_event_id = #{relPigEventId}</if>
         <if test="outId != null">AND out_id = #{outId}</if>
         <if test="remark != null">AND remark = #{remark}</if>
+        <if test="eventSource != null">AND event_source = #{eventSource}</if>
         <if test="extra != null">AND extra = #{extra}</if>
         <if test="creatorId != null">AND creator_id = #{creatorId}</if>
         <if test="creatorName != null">AND creator_name = #{creatorName}</if>
@@ -239,6 +243,7 @@
             <if test="relPigEventId != null">rel_pig_event_id = #{relPigEventId},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="eventSource != null">event_source = #{eventSource},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="creatorId != null">creator_id = #{creatorId},</if>
@@ -343,6 +348,8 @@
             #{item.relPigEventId},
             #{item.outId},
             #{item.remark},
+            #{item.status},
+            #{item.eventSource},
             #{item.extra},
             now(),
             #{item.creatorId},

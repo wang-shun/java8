@@ -702,3 +702,7 @@ ALTER TABLE doctor_farm_exports ADD COLUMN status tinyint(4) DEFAULT NULL COMMEN
 
 -- 2017-03-25 修改数据权限表farm_ids类型
 ALTER TABLE doctor_user_data_permissions MODIFY COLUMN farm_ids TEXT DEFAULT NULL COMMENT '猪场ids,逗号分隔';
+
+-- 2017-03-28 增加事件来源字段
+ALTER TABLE doctor_pig_events ADD COLUMN event_source tinyint(4)  DEFAULT NULL COMMENT '事件来源' after status;
+ALTER TABLE doctor_group_events ADD COLUMN event_source tinyint(4)  DEFAULT NULL COMMENT '事件来源' after status;

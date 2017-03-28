@@ -61,6 +61,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.DoctorMatingType;
+import io.terminus.doctor.event.enums.EventSource;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -813,6 +814,7 @@ public class DoctorMoveDataService {
         sowEvent.setDesc(event.getEventDesc());
         sowEvent.setOutId(event.getEventOutId());
         sowEvent.setRemark(event.getRemark());
+        sowEvent.setEventSource(EventSource.IMPORT.getValue());
 
         //事件类型, (如果是转舍类型, 重新判断后还会覆盖掉)
         PigEvent eventType = PigEvent.from(event.getEventName());
@@ -1661,6 +1663,7 @@ public class DoctorMoveDataService {
         boarEvent.setOutId(event.getEventOutId());
         boarEvent.setRemark(event.getRemark());
         boarEvent.setStatus(EventStatus.VALID.getValue());
+        boarEvent.setEventSource(EventSource.IMPORT.getValue());
 
         //事件类型
         PigEvent eventType = PigEvent.from(event.getEventName());
@@ -1893,6 +1896,7 @@ public class DoctorMoveDataService {
         event.setGroupCode(group.getGroupCode());
         event.setEventAt(gainEvent.getEventAt());
         event.setStatus(EventStatus.VALID.getValue());
+        event.setEventSource(EventSource.IMPORT.getValue());
 
         //转换事件类型
         GroupEventType type = GroupEventType.from(gainEvent.getEventTypeName());

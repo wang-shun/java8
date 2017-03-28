@@ -8,6 +8,8 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
@@ -44,6 +46,10 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     private DoctorEditPigEventService doctorEditPigEventService;
     @Autowired
     private DoctorEditGroupEventService doctorEditGroupEventService;
+    @Autowired
+    private DoctorPigEventDao doctorPigEventDao;
+    @Autowired
+    private DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired
     private DoctorMessageSourceHelper messageSourceHelper;
@@ -65,6 +71,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     public Response<Long> createPigModifyEventRequest(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto,Long eventId, Long userId, String realName) {
         try {
             DoctorPigEvent modifyEvent = pigEventManager.buildPigEvent(basic, inputDto);
+            DoctorPigEvent oldEvent = doctorPigEventDao.findById(eventId);
+            modifyEvent.setEventSource(oldEvent.getEventSource());
             log.info("build modifyEvent, modifyEvent = {}", modifyEvent);
             modifyEvent.setId(eventId);
             DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest
@@ -92,6 +100,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     public Response<Long> createGroupModifyEventRequest(DoctorGroupInputInfo inputInfo, Long eventId, Integer eventType, Long userId, String realName) {
         try {
             DoctorGroupEvent modifyEvent = groupEventManager.buildGroupEvent(inputInfo, eventType);
+            DoctorGroupEvent oldEvent = doctorGroupEventDao.findById(eventId);
+            modifyEvent.setEventSource(oldEvent.getEventSource());
             String extra = modifyEvent.getExtra();
             //将extraMap置null,往外拿的时候不会报错
             modifyEvent.setExtraMap(null);

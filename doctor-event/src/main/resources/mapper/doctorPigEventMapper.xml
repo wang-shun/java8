@@ -66,6 +66,7 @@
         <result column="boar_code" property="boarCode"/>
         <result column="out_id" property="outId"/>
         <result column="status" property="status"/>
+        <result column="event_source" property="eventSource"/>
         <result column="extra" property="extra"/>
         <result column="remark" property="remark"/>
         <result column="operator_id" property="operatorId"/>
@@ -143,6 +144,7 @@
         boar_code,
         out_id,
         status,
+        event_source,
         extra,
         remark,
         operator_id,
@@ -214,6 +216,7 @@
         #{boarCode},
         #{outId},
         #{status},
+        #{eventSource},
         #{extra},
         #{remark},
         #{operatorId},
@@ -287,6 +290,7 @@
         <if test="boarCode != null">AND boar_code = #{boarCode}</if>
         <if test="outId != null">AND out_id = #{outId}</if>
         <if test="extra != null">AND extra = #{extra}</if>
+        <if test="eventSource != null">AND event_source = #{eventSource}</if>
         <if test="remark != null">AND remark = #{remark}</if>
         <if test="operatorId != null">AND operator_id = #{operatorId}</if>
         <if test="operatorName != null">AND operator_name = #{operatorName}</if>
@@ -374,6 +378,7 @@
             #{item.boarCode},
             #{item.outId},
             #{item.status},
+            #{item.eventSource},
             #{item.extra},
             #{item.remark},
             #{item.operatorId},
@@ -631,6 +636,7 @@
             <if test="boarCode != null">boar_code = #{boarCode},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="eventSource != null">event_source = #{eventSource},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="operatorId != null">operator_id = #{operatorId},</if>
@@ -787,6 +793,7 @@
                 boar_code = #{item.boarCode},
                 out_id = #{item.outId},
                 status = #{item.status},
+                event_source = #{item.eventSource},
                 extra = #{item.extra},
                 remark = #{item.remark},
                 operator_id = #{item.operatorId},
