@@ -2316,11 +2316,11 @@ public class DoctorMoveDataService {
 
     private Integer parity;
     private String boarCode;
-    private Boolean isFirst;
     private Integer statusBefore;
     private Integer statusAfter;
     private Integer quantity;
     private Integer quantityChange;
+    private Boolean isWeanToMate;
     public void updateParityAndBoarCode(DoctorFarm farm) {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1));
         updateParityAndBoarCodeByEntryEvents(doctorPigEvensList);
@@ -2332,11 +2332,11 @@ public class DoctorMoveDataService {
             List<DoctorPigEvent> lists = doctorPigEventDao.queryAllEventsByPigIdForASC(doctorPigEvent.getPigId());
             parity = 1;
             boarCode = null;
-            isFirst = true;  //判断是否是进场之后第一次配种,第一次配种,胎次不加1
             statusBefore = null;
             statusAfter = PigStatus.Entry.getKey();
             quantity = 1000; //一个胎次中分娩的活仔数, 默认1000,为了与quantityChange 不相等
             quantityChange = 0; //在一个胎次中仔猪变化的数量
+            isWeanToMate = false; //判断是否是断奶到配种,断奶到配种才+1
             lists.stream()
                     .filter(doctorPigEvent1 -> doctorPigEvent1 != null && doctorPigEvent1.getType() != null)
                     .forEach(doctorPigEvent1 -> {
@@ -2352,12 +2352,12 @@ public class DoctorMoveDataService {
                                 statusAfter = PigStatus.Entry.getKey();
                                 break;
                             case 9:
-                                if(!isFirst && doctorPigEvent1.getCurrentMatingCount() == 1){
+                                if(isWeanToMate && doctorPigEvent1.getCurrentMatingCount() == 1){
                                     parity += 1;
                                 }
                                 boarCode = (isNull(doctorPigEvent1.getExtraMap()) || isNull(doctorPigEvent1.getExtraMap().get("matingBoarPigCode"))) ? null : Objects.toString(doctorPigEvent1.getExtraMap().get("matingBoarPigCode"));
-                                isFirst = false;
                                 statusAfter = PigStatus.Mate.getKey();
+                                isWeanToMate = false;
                                 break;
                             case 10:
                                 if(statusBefore.equals(PigStatus.Wean.getKey())){
@@ -2406,6 +2406,7 @@ public class DoctorMoveDataService {
                                 if(quantity == quantityChange){
                                     statusAfter = PigStatus.Wean.getKey();
                                 }
+                                isWeanToMate = true;
                                 break;
                             case 17:
                                 quantityChange += Integer.parseInt(Objects.toString(doctorPigEvent1.getExtraMap().get("fostersCount")));
