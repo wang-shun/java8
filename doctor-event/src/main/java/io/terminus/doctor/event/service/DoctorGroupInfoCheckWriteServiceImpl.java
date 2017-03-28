@@ -1,12 +1,12 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
-import com.oracle.javafx.jmx.json.JSONException;
-import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupInfoCheckDao;
+import io.terminus.doctor.event.manager.DoctorEditGroupEventManager;
 import io.terminus.doctor.event.model.DoctorGroupInfoCheck;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +27,12 @@ public class DoctorGroupInfoCheckWriteServiceImpl implements DoctorGroupInfoChec
 
     private final DoctorGroupInfoCheckDao doctorGroupInfoCheckDao;
 
+    private final DoctorEditGroupEventManager doctorEditGroupEventManage;
+
     @Autowired
-    public DoctorGroupInfoCheckWriteServiceImpl(DoctorGroupInfoCheckDao doctorGroupInfoCheckDao) {
+    public DoctorGroupInfoCheckWriteServiceImpl(DoctorGroupInfoCheckDao doctorGroupInfoCheckDao, DoctorEditGroupEventManager doctorEditGroupEventManage) {
         this.doctorGroupInfoCheckDao = doctorGroupInfoCheckDao;
+        this.doctorEditGroupEventManage = doctorEditGroupEventManage;
     }
 
     @Override
@@ -88,14 +91,27 @@ public class DoctorGroupInfoCheckWriteServiceImpl implements DoctorGroupInfoChec
                 if(lists.size() > 0){
                     offset += 1;
                     doctorGroupInfoCheckDao.creates(lists);
+                    continue;
                 }
                 hasNext = false;
             }
+            //修复这些错误的数据
+//            repairGroupTrack();
             log.info("generate group check data end, now is: {}", DateUtil.toDateTimeString(new Date()));
         }catch(Exception e){
             log.info("generate group check data failed, cause: {}", Throwables.getStackTraceAsString(e));
             throw e;
         }
 
+    }
+
+    private void repairGroupTrack() {
+        DoctorGroupInfoCheck search = new DoctorGroupInfoCheck();
+        search.setStatus(DoctorGroupInfoCheck.DataCheckStatus.ERROR.getValue());
+        search.setSumAt(Dates.startOfDay(new Date()));
+        List<DoctorGroupInfoCheck> needRepairList = doctorGroupInfoCheckDao.list(search);
+        needRepairList.forEach(doctorGroupInfoCheck -> {
+            doctorEditGroupEventManage.reElicitGroupEventByGroupId(doctorGroupInfoCheck.getGroupId());
+        });
     }
 }
