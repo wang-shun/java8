@@ -12,6 +12,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.enums.EventRequestStatus;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.helper.DoctorMessageSourceHelper;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
@@ -63,6 +64,10 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
 
     @Override
     public Response<Long> createPigModifyEventRequest(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto,Long eventId, Long userId, String realName) {
+
+        if (Objects.equals(eventId, IsOrNot.YES)) {
+            throw new InvalidException("不能编辑自动创建事件");
+        }
         try {
             DoctorPigEvent modifyEvent = pigEventManager.buildPigEvent(basic, inputDto);
             log.info("build modifyEvent, modifyEvent = {}", modifyEvent);
@@ -90,6 +95,10 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
 
     @Override
     public Response<Long> createGroupModifyEventRequest(DoctorGroupInputInfo inputInfo, Long eventId, Integer eventType, Long userId, String realName) {
+
+        if (Objects.equals(eventId, IsOrNot.YES)) {
+            throw new InvalidException("不能编辑自动创建事件");
+        }
         try {
             DoctorGroupEvent modifyEvent = groupEventManager.buildGroupEvent(inputInfo, eventType);
             String extra = modifyEvent.getExtra();
