@@ -55,6 +55,12 @@ public class DoctorFarm implements Serializable {
      * 外部id
      */
     private String outId;
+
+    /**
+     * 来源
+     * @see io.terminus.doctor.common.enums.SourceType
+     */
+    private Integer source;
     
     /**
      * 附加字段
