@@ -104,6 +104,22 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     }
 
     @Override
+    public Response<List<DoctorBasic>> findValidBasicByTypeAndSrm(Integer type, String srm) {
+        try {
+            List<DoctorBasic> basics = doctorBasicDao.findValidByType(type);
+            if (isEmpty(srm)) {
+                return Response.ok(basics);
+            }
+            return Response.ok(basics.stream()
+                    .filter(basic -> notEmpty(basic.getSrm()) && basic.getSrm().toLowerCase().contains(srm.toLowerCase()))
+                    .collect(Collectors.toList()));
+        } catch (Exception e) {
+            log.error("find basic by type and srm failed, type:{}, srm:{}, cause:{}", type, srm, Throwables.getStackTraceAsString(e));
+            return Response.fail("basic.find.fail");
+        }
+    }
+
+    @Override
     public Response<List<DoctorBasic>> findBasicByTypeAndSrmWithCache(Integer type, String srm) {
         try {
             List<DoctorBasic> basics = doctorBasicCacher.getBasicCache().getUnchecked(type);
@@ -136,7 +152,7 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     @Override
     public Response<List<DoctorBasic>> findBasicByTypeAndSrmFilterByFarmId(Long farmId, Integer type, String srm) {
         try {
-            List<DoctorBasic> basics = RespHelper.orServEx(findBasicByTypeAndSrm(type, srm));
+            List<DoctorBasic> basics = RespHelper.orServEx(findValidBasicByTypeAndSrm(type, srm));
             return Response.ok(filterBasicByFarmAuth(farmId, basics));
         } catch (Exception e) {
             log.error("find basic by type and srm failed, farmId:{}, type:{}, srm:{}, cause:{}", farmId, type, srm, Throwables.getStackTraceAsString(e));

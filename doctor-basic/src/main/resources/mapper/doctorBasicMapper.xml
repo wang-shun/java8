@@ -77,6 +77,12 @@
     <select id="findByType" parameterType="int" resultMap="DoctorBasicMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
+        WHERE type = #{type}
+    </select>
+
+    <select id="findValidByType" parameterType="int" resultMap="DoctorBasicMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
         WHERE type = #{type} AND is_valid = 1
     </select>
 

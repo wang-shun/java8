@@ -52,6 +52,16 @@ public interface DoctorBasicReadService {
                                                       @Nullable String srm);
 
     /**
+     * 根据基础数据类型和输入码查询(非缓存)
+     * @param type  类型
+     * @see io.terminus.doctor.basic.model.DoctorBasic.Type
+     * @param srm   输入码
+     * @return 基础数据信息
+     */
+    Response<List<DoctorBasic>> findValidBasicByTypeAndSrm(@NotNull(message = "type.not.null") Integer type,
+                                                      @Nullable String srm);
+
+    /**
      * 根据基础数据类型和输入码查询(缓存)
      * @param type  类型
      * @see io.terminus.doctor.basic.model.DoctorBasic.Type

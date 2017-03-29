@@ -364,7 +364,7 @@ public class DoctorGroupEvents {
                 return Lists.newArrayList(breed);
             }
         }
-        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCache(DoctorBasic.Type.BREED.getValue(), null));
+        return RespHelper.or500(doctorBasicReadService.findValidBasicByTypeAndSrm(DoctorBasic.Type.BREED.getValue(), null));
     }
 
     /**

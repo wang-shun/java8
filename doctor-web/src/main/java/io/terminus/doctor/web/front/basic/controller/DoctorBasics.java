@@ -81,10 +81,7 @@ public class DoctorBasics {
                                                             @RequestParam("type") Integer type,
                                                             @RequestParam(value = "srm", required = false) String srm,
                                                             @RequestParam(value = "enable", defaultValue = "true") Boolean enable) {
-        if (!enable) {
-            return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCache(type, srm));
-        }
-        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCacheFilterByFarmId(farmId, type, srm));
+        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmFilterByFarmId(farmId, type, srm));
     }
 
     /**

@@ -18,4 +18,9 @@ public class DoctorBasicDao extends MyBatisDao<DoctorBasic> {
     public List<DoctorBasic> findByType(Integer type) {
         return getSqlSession().selectList(sqlId("findByType"), type);
     }
+
+    public List<DoctorBasic> findValidByType(Integer type) {
+        return getSqlSession().selectList(sqlId("findValidByType"), type);
+    }
+
 }
