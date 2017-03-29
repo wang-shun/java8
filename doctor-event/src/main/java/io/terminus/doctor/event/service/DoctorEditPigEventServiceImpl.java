@@ -149,6 +149,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
             try {
                 lastEventId = notNull(fromTrack) ? fromTrack.getCurrentEventId() : 0L;
                 fromTrack = doctorPigEventManager.buildPigTrack(pigEvent, fromTrack);
+                fromTrack.setId(oldTrack.getId());
                 if(Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey())
                         && Objects.equals(pigEvent.getType(), PigEvent.CHG_LOCATION.getKey())) {
                     DoctorChgLocationDto chgLocationDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorChgLocationDto.class);
