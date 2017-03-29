@@ -729,7 +729,6 @@ key `idx_doctor_group_info_checks_group_id` (`group_id`)
 )CHARSET=utf8 COMMENT='猪群数据校验表';
 
 -- 2017-03-28 增加事件来源字段
-ALTER TABLE doctor_pig_events ADD COLUMN event_source tinyint(4)  DEFAULT NULL COMMENT '事件来源' after status;
-ALTER TABLE doctor_group_events ADD COLUMN event_source tinyint(4)  DEFAULT NULL COMMENT '事件来源' after status;
-
 ALTER TABLE doctor_farms ADD COLUMN  source tinyint(4) DEFAULT NULL COMMENT '来源,1:软件录入,2:excel导入,3:旧软件迁移，' after out_id;
+ALTER TABLE doctor_pig_events ADD COLUMN event_source tinyint(4)  DEFAULT NULL COMMENT '事件来源,1、软件录入,2、excel导入,3、旧场迁移' after status;
+ALTER TABLE doctor_group_events ADD COLUMN event_source tinyint(4)  DEFAULT NULL COMMENT '事件来源,1、软件录入,2、excel导入,3、旧场迁移' after status;
