@@ -13,14 +13,9 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
-import io.terminus.doctor.event.model.DoctorEventRelation;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
-import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.model.DoctorRevertLog;
+import io.terminus.doctor.event.model.*;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -118,6 +113,16 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         JsonMapperUtil jsonMapperUtil = JsonMapperUtil.nonEmptyMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
         DoctorPigSnapShotInfo info = jsonMapperUtil.fromJson(snapshot.getToPigInfo(), DoctorPigSnapShotInfo.class);
         doctorPigEventDao.delete(pigEvent.getId());
+        //处理分娩回滚事件
+        if (Objects.equals(pigEvent.getType(), PigEvent.FARROWING.getKey())) {
+            info.getPigTrack().setFarrowAvgWeight(0.0);
+            info.getPigTrack().setFarrowQty(0);
+            info.getPigTrack().setWeanQty(0);
+            info.getPigTrack().setUnweanQty(0);
+            info.getPigTrack().setWeight(0.0);
+            info.getPigTrack().setWeanAvgWeight(0.0);
+            info.getPigTrack().setGroupId(-1L);
+        }
         doctorPigTrackDao.update(info.getPigTrack());
         doctorPigDao.update(info.getPig());
         doctorPigSnapshotDao.deleteByEventId(pigEvent.getId());

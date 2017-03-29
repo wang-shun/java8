@@ -68,7 +68,11 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
 
     @Override
     public Response<Long> createPigModifyEventRequest(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto,Long eventId, Long userId, String realName) {
+
         try {
+            if (Objects.equals(eventId, IsOrNot.YES)) {
+                throw new ServiceException("event.not.allow.modify");
+            }
             DoctorPigEvent oldEvent = doctorPigEventDao.findById(eventId);
             DoctorPigEvent modifyEvent = pigEventManager.buildPigEvent(basic, inputDto);
             modifyEvent.setGroupId(oldEvent.getGroupId());
@@ -91,6 +95,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             log.info("build modifyRequest, modifyRequest = {}", modifyRequest);
             eventModifyRequestDao.create(modifyRequest);
             return Response.ok(modifyRequest.getId());
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create request failed, basic:{}, inputDto:{}, eventId:{}, userId:{}, userName:{}, cause:{}", basic, inputDto, eventId, userId, realName, Throwables.getStackTraceAsString(e));
             return Response.fail("create.pig.modify.event.request.failed");
@@ -99,8 +105,11 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
 
     @Override
     public Response<Long> createGroupModifyEventRequest(DoctorGroupInputInfo inputInfo, Long eventId, Integer eventType, Long userId, String realName) {
-        try {
 
+        try {
+            if (Objects.equals(eventId, IsOrNot.YES)) {
+                throw new ServiceException("event.not.allow.modify");
+            }
             DoctorGroupEvent modifyEvent = groupEventManager.buildGroupEvent(inputInfo, eventType);
             String extra = modifyEvent.getExtra();
             //将extraMap置null,往外拿的时候不会报错
@@ -121,6 +130,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
                     .build();
             eventModifyRequestDao.create(modifyRequest);
             return Response.ok(modifyRequest.getId());
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create request failed, inputInfo:{}, eventId:{}, eventType:{}, userId:{}, userName:{}, cause:{}", inputInfo, eventId, eventType, userId, realName, Throwables.getStackTraceAsString(e));
             return Response.fail("create.group.modify.event.request.failed");
