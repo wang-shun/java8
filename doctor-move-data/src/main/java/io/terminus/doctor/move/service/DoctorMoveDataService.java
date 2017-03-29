@@ -2442,6 +2442,9 @@ public class DoctorMoveDataService {
 
     public void updateExcelImportErrorPigEvents(DoctorFarm farm) {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1, "createdAtEnd", "2017-03-20 23:59:59"));
+        if (doctorPigEvensList.isEmpty()) {
+            return;
+        }
         List<List<DoctorPigEvent>> lists = Lists.partition(doctorPigEvensList, 1000);
         lists.forEach(list -> {
             for(DoctorPigEvent doctorPigEvent: list) {
@@ -2454,7 +2457,7 @@ public class DoctorMoveDataService {
                     map.put("importParity", map.get("parity"));
                     map.replace("parity", Integer.valueOf(map.get("parity").toString()) + 1);
                 }else{
-                    map.put("pairty", 1);
+                    map.put("parity", 1);
                 }
 
                 doctorPigEvent.setExtraMap(map);
