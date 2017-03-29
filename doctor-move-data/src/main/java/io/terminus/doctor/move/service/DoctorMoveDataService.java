@@ -2462,7 +2462,9 @@ public class DoctorMoveDataService {
 
                 doctorPigEvent.setExtraMap(map);
             }
-            doctorPigEventDao.updates(list);
+            if (!list.isEmpty()) {
+                doctorPigEventDao.updates(list);
+            }
         });
     }
 
