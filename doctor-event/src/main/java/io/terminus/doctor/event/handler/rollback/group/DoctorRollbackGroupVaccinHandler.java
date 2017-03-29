@@ -28,7 +28,8 @@ public class DoctorRollbackGroupVaccinHandler extends DoctorAbstractRollbackGrou
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a vacc event:{}", groupEvent);
-        sampleRollback(groupEvent, operatorId, operatorName);
+        //sampleRollback(groupEvent, operatorId, operatorName);
+        handleRollbackWithoutSnapshot(groupEvent, operatorId, operatorName);
     }
 
     @Override
