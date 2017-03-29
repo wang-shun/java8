@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -65,10 +66,10 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     @Override
     public Response<Long> createPigModifyEventRequest(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto,Long eventId, Long userId, String realName) {
 
-        if (Objects.equals(eventId, IsOrNot.YES)) {
-            throw new InvalidException("不能编辑自动创建事件");
-        }
         try {
+            if (Objects.equals(eventId, IsOrNot.YES)) {
+                throw new ServiceException("event.not.allow.modify");
+            }
             DoctorPigEvent modifyEvent = pigEventManager.buildPigEvent(basic, inputDto);
             log.info("build modifyEvent, modifyEvent = {}", modifyEvent);
             modifyEvent.setId(eventId);
@@ -87,6 +88,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             log.info("build modifyRequest, modifyRequest = {}", modifyRequest);
             eventModifyRequestDao.create(modifyRequest);
             return Response.ok(modifyRequest.getId());
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create request failed, basic:{}, inputDto:{}, eventId:{}, userId:{}, userName:{}, cause:{}", basic, inputDto, eventId, userId, realName, Throwables.getStackTraceAsString(e));
             return Response.fail("create.pig.modify.event.request.failed");
@@ -96,10 +99,11 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     @Override
     public Response<Long> createGroupModifyEventRequest(DoctorGroupInputInfo inputInfo, Long eventId, Integer eventType, Long userId, String realName) {
 
-        if (Objects.equals(eventId, IsOrNot.YES)) {
-            throw new InvalidException("不能编辑自动创建事件");
-        }
         try {
+
+            if (Objects.equals(eventId, IsOrNot.YES)) {
+                throw new ServiceException("event.not.allow.modify");
+            }
             DoctorGroupEvent modifyEvent = groupEventManager.buildGroupEvent(inputInfo, eventType);
             String extra = modifyEvent.getExtra();
             //将extraMap置null,往外拿的时候不会报错
@@ -120,6 +124,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
                     .build();
             eventModifyRequestDao.create(modifyRequest);
             return Response.ok(modifyRequest.getId());
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create request failed, inputInfo:{}, eventId:{}, eventType:{}, userId:{}, userName:{}, cause:{}", inputInfo, eventId, eventType, userId, realName, Throwables.getStackTraceAsString(e));
             return Response.fail("create.group.modify.event.request.failed");
