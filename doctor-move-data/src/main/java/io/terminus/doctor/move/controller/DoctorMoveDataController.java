@@ -957,4 +957,14 @@ public class DoctorMoveDataController {
         RespWithExHelper.or500(doctorEventModifyRequestWriteService.elicitPigTrack(pigId));
         return true;
     }
+
+    /**
+     * 推演一个猪场的猪track
+     * @param farmId 猪场id
+     */
+    @RequestMapping(value = "/batchElicitPigTrack", method = RequestMethod.GET)
+    public Boolean batchElicitPigTrack(@RequestParam Long farmId) {
+        doctorEventModifyRequestWriteService.batchElicitPigTrack(farmId);
+        return true;
+    }
 }

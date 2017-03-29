@@ -94,4 +94,13 @@ public class DoctorPigDao extends MyBatisDao<DoctorPig> {
     public void updateFarmName(Long farmId, String farmName) {
         getSqlSession().update(sqlId("updateFarmName"), ImmutableMap.of("farmId", farmId, "farmName", farmName));
     }
+
+    /**
+     * 根据猪场id查询所属猪id列表
+     * @param farmId 猪场id
+     * @return 猪id列表
+     */
+    public List<Long> findPigIdsByFarmId(Long farmId) {
+        return getSqlSession().selectList(sqlId("findPigIdsByFarmId"), farmId);
+    }
 }

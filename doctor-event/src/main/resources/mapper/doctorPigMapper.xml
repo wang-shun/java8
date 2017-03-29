@@ -258,4 +258,11 @@
         WHERE
         farm_id = #{farmId}
     </update>
+
+    <select id="findPigIdsByFarmId" parameterType="long" resultType="long" >
+        SELECT id
+        FROM <include refid="tb" />
+        WHERE
+        farm_id = #{farmId}
+    </select>
 </mapper>

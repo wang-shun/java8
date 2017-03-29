@@ -13,6 +13,7 @@ import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.dao.DoctorPigElicitRecordDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
@@ -40,6 +41,7 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigElicitRecord;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -89,6 +91,8 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
     private DoctorEditGroupEventService doctorEditGroupEventService;
     @Autowired
     private DoctorMessageSourceHelper messageSourceHelper;
+    @Autowired
+    private DoctorPigElicitRecordDao doctorPigElicitRecordDao;
 
     private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
@@ -105,10 +109,27 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
     }
 
     @Override
-    @Transactional
     public void elicitPigTrack(Long pigId) {
         log.info("elicitPigTrack starting, pigId:{}", pigId);
+        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigId);
+        try {
+            elicitPigTrackImpl(pigId);
+        } catch (InvalidException e) {
+            createELicitPigTrackRecord(pigId, pigTrack, pigTrack, DoctorPigElicitRecord.Status.FAIL.getKey(), messageSourceHelper.getMessage(e.getError(), e.getParams()));
+        } catch (ServiceException e) {
+            createELicitPigTrackRecord(pigId, pigTrack, pigTrack, DoctorPigElicitRecord.Status.FAIL.getKey(), e.getMessage());
+        } catch (Exception e) {
+            createELicitPigTrackRecord(pigId, pigTrack, pigTrack, DoctorPigElicitRecord.Status.FAIL.getKey(), Throwables.getStackTraceAsString(e));
+        }
+        log.info("elicitPigTrack ending");
+    }
 
+    /**
+     * 事物实现
+     * @param pigId 猪id
+     */
+    @Transactional
+    private void elicitPigTrackImpl(Long pigId) {
         //校验源数据
         DoctorPigTrack oldTrack = doctorPigTrackDao.findByPigId(pigId);
         expectNotNull(oldTrack, "pig.track.not.null", pigId);
@@ -134,9 +155,13 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                     DoctorGroup group = doctorGroupDao.findByFarmIdAndBarnIdAndDate(pigEvent.getFarmId(), chgLocationDto.getChgLocationToBarnId(), pigEvent.getEventAt());
                     fromTrack.setGroupId(group.getId());
                 }
+                //TODO: 17/3/29 由于拼窝现在不会触发转群,暂时不考虑
+
                 doctorPigEventManager.createPigSnapshot(fromTrack, pigEvent, lastEventId);
             } catch (InvalidException e) {
                 throw new ServiceException(messageSourceHelper.getMessage(e.getError(), e.getParams()) + ", 事件id:" + pigEvent.getId());
+            } catch (Exception e) {
+                throw new ServiceException( "事件id:" + pigEvent.getId() + Throwables.getStackTraceAsString(e));
             }
         }
 
@@ -145,7 +170,34 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
         fromTrack.setId(oldTrack.getId());
         doctorPigTrackDao.update(fromTrack);
 
-        log.info("elicitPigTrack ending");
+        //4.记录
+        createELicitPigTrackRecord(pigId, oldTrack, fromTrack, DoctorPigElicitRecord.Status.SUCCESS.getKey(), null);
+    }
+
+    /**
+     * 创建推演记录
+     * @param pigId 猪id
+     * @param fromTrack 原track
+     * @param toTrack 推演后track
+     * @param status 状态
+     * @param errorReason 错误原因
+     */
+    private void createELicitPigTrackRecord(Long pigId, DoctorPigTrack fromTrack, DoctorPigTrack toTrack, Integer status, String errorReason) {
+        Integer version = doctorPigElicitRecordDao.findLastVersion(pigId);
+        DoctorPig pig = doctorPigDao.findById(pigId);
+        DoctorPigElicitRecord pigElicitRecord = DoctorPigElicitRecord
+                .builder()
+                .farmId(pig.getFarmId())
+                .farmName(pig.getFarmName())
+                .pigId(pig.getId())
+                .pigCode(pig.getPigCode())
+                .fromTrack(JSON_MAPPER.toJson(fromTrack))
+                .toTrack(JSON_MAPPER.toJson(toTrack))
+                .status(status)
+                .errorReason(errorReason)
+                .version(++version)
+                .build();
+        doctorPigElicitRecordDao.create(pigElicitRecord);
     }
 
     /**
