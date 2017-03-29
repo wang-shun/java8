@@ -8,9 +8,9 @@ import lombok.Getter;
  * 事件来源
  */
 public enum EventSource {
-    INPUT(0, "软件录入"),
-    IMPORT(1, "导入数据"),
-    MOVE(2, "迁移数据");
+    INPUT(1, "软件录入"),
+    IMPORT(2, "导入数据"),
+    MOVE(3, "迁移数据");
 
     @Getter
     private Integer value;
