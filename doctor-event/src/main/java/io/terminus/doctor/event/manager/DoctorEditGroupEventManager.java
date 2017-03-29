@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.manager;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
@@ -21,7 +22,6 @@ import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
 import io.terminus.doctor.event.model.*;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Arg;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -328,6 +328,30 @@ public class DoctorEditGroupEventManager {
         updateEvent.setStatus(EventStatus.INVALID.getValue());
         doctorGroupEventDao.update(updateEvent);
         doctorGroupEventDao.create(newEvent);
+        updateRelation(oldEvent, newEvent); //更新事件关联关系
         reElicitGroupEventByGroupId(newEvent.getGroupId());
+    }
+
+    /**
+     * 更新事件关联关系
+     * @param oldEvent
+     * @param newEvent
+     */
+    private void updateRelation(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {
+        List<DoctorEventRelation> oldOriginRelations = doctorEventRelationDao.findByOrigin(oldEvent.getId());
+        if(!Arguments.isNullOrEmpty(oldOriginRelations)){
+            oldOriginRelations.forEach(doctorEventRelation -> {
+                doctorEventRelation.setOriginEventId(newEvent.getId());
+            });
+            doctorEventRelationDao.batchUpdateStatus(oldOriginRelations.stream().map(DoctorEventRelation::getId).collect(Collectors.toList()), DoctorEventRelation.Status.INVALID.getValue());
+            doctorEventRelationDao.creates(oldOriginRelations);
+        }
+
+        DoctorEventRelation oldTriggerRelation = doctorEventRelationDao.findByTrigger(oldEvent.getId());
+        if(!Arguments.isNull(oldTriggerRelation)){
+            doctorEventRelationDao.batchUpdateStatus(Lists.newArrayList(oldTriggerRelation.getId()), DoctorEventRelation.Status.INVALID.getValue());
+            oldTriggerRelation.setTriggerEventId(newEvent.getId());
+            doctorEventRelationDao.create(oldTriggerRelation);
+        }
     }
 }
