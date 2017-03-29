@@ -9,6 +9,7 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
+import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -50,6 +51,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     private DoctorEditGroupEventService doctorEditGroupEventService;
     @Autowired
     private DoctorPigEventDao doctorPigEventDao;
+    @Autowired
+    private DoctorPigDao doctorPigDao;
     @Autowired
     private DoctorMessageSourceHelper messageSourceHelper;
     @Autowired(required = false)
@@ -194,6 +197,29 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
             log.error("elicit pig track failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail("elicit.pig.track.failed");
+        }
+    }
+
+    @Override
+    public RespWithEx<Boolean> batchElicitPigTrack(@NotNull(message = "farm.id.not.null") Long farmId) {
+        try {
+            List<Long> pigIdList = doctorPigDao.findPigIdsByFarmId(farmId);
+            if (pigIdList.isEmpty()) {
+                return RespWithEx.ok(Boolean.TRUE);
+            }
+            pigIdList.forEach(pigId -> {
+                doctorEditPigEventService.elicitPigTrack(pigId);
+            });
+            return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            log.error("batch elicit pig track failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return RespWithEx.exception(e);
+        }catch (ServiceException e) {
+            log.error("batch elicit pig track failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("batch elicit pig track failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("elicit.pig.track.failed");
         }
     }
