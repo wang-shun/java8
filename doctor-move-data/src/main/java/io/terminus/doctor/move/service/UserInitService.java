@@ -10,6 +10,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -131,6 +132,7 @@ public class UserInitService {
                     farm.setFarmCode(member.getLoginName());
                     farm.setOrgId(org.getId());
                     farm.setOrgName(org.getName());
+                    farm.setSource(SourceType.MOVE.getValue());
                     doctorFarmDao.create(farm);
 
                     //创建staff

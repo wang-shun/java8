@@ -442,6 +442,7 @@ public class DoctorImportDataService {
             farm.setDistrictId(getAddressId(district, farm.getCityId()));
             farm.setDistrictName(district);
             farm.setDetailAddress(detail);
+            farm.setSource(SourceType.IMPORT.getValue());
             doctorFarmDao.create(farm);
             RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
         }else{
