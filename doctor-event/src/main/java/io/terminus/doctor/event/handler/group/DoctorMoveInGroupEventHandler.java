@@ -1,11 +1,11 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -31,7 +31,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -132,6 +131,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
 
         event.setExtraMap(moveInEvent);
+        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 

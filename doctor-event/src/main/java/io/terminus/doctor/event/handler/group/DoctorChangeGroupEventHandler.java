@@ -3,9 +3,9 @@ package io.terminus.doctor.event.handler.group;
 import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.event.enums.DoctorBasicEnums;
+import io.terminus.doctor.common.enums.SourceType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorChangeGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
+import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -25,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -86,6 +86,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         setSaleEvent(event, change, group.getPigType());
 
         event.setExtraMap(changeEvent);
+        event.setEventSource(SourceType.INPUT.getValue());
         doctorGroupEventDao.create(event);
 
         //创建关联关系
