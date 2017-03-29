@@ -258,7 +258,4 @@ public class DoctorGroupEventManager {
         }
     }
 
-    public int calculateAvgDay(Long id){
-        return handlerMapping.get(DoctorMoveInGroupEventHandler.class).getGroupAvgDayAge(id, null);
-    }
 }

@@ -1,8 +1,10 @@
 package io.terminus.doctor.event.handler.group;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -23,11 +25,13 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -55,7 +59,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
-        log.info("========================handler doctor group movein,eventInfoList = {}, DoctorGroup = {}, groupTrack = {} ", eventInfoList, group, groupTrack);
         DoctorGroupEvent event = buildGroupEvent(group, groupTrack, input);
         doctorGroupEventDao.create(event);
 
@@ -133,17 +136,28 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
     }
 
     @Override
-    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
+    protected void updateAvgDayAge(DoctorGroupEvent event, DoctorGroupTrack track){
+        int deltaDays = DateUtil.getDeltaDaysAbs(Dates.startOfDay(event.getEventAt()),Dates.startOfDay(MoreObjects.firstNonNull(track.getBirthDate(), event.getEventAt())));
+        int avgDayAge = EventUtil.getAvgDayAge(deltaDays, MoreObjects.firstNonNull(track.getQuantity(), 0), event.getAvgDayAge(), event.getQuantity());
+        track.setBirthDate(new DateTime(Dates.startOfDay(event.getEventAt())).minusDays(avgDayAge).toDate());
+        track.setAvgDayAge(avgDayAge);
+    }
+
+    @Override
+    public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorMoveInGroupEvent doctorMoveInGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorMoveInGroupEvent.class);
         if(Arguments.isNull(doctorMoveInGroupEvent)) {
             log.error("parse doctorMoveInGroupEvent faild, doctorGroupEvent = {}", event);
             throw new InvalidException("movein.group.event.info.broken", event.getId());
         }
         //1.更新猪群跟踪
-        Integer oldQty = track.getQuantity();
         track.setQuantity(EventUtil.plusInt(track.getQuantity(), event.getQuantity()));
-        track.setBoarQty(EventUtil.plusInt(track.getBoarQty(), doctorMoveInGroupEvent.getBoarQty()));
-        track.setSowQty(track.getQuantity() - track.getBoarQty());
+        if(!Arguments.isNull(track.getBoarQty()) || !Arguments.isNull(doctorMoveInGroupEvent.getBoarQty())){
+            track.setBoarQty(EventUtil.plusInt(track.getBoarQty(), doctorMoveInGroupEvent.getBoarQty()));
+        }
+        if(!Arguments.isNull(track.getSowQty()) || !Arguments.isNull(doctorMoveInGroupEvent.getSowQty())){
+            track.setSowQty(EventUtil.plusInt(track.getSowQty(),  doctorMoveInGroupEvent.getSowQty()));
+        }
 
         //空降产房仔猪，断奶统计要重新计算
         if (doctorMoveInGroupEvent.getFromBarnId() == null && Objects.equals(event.getPigType(), PigType.DELIVER_SOW.getValue())) {
@@ -151,13 +165,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
             track.setWeanQty(EventUtil.plusInt(track.getWeanQty(), event.getQuantity()));
             track.setWeanWeight(EventUtil.plusDouble(track.getWeanWeight(), event.getAvgWeight() * event.getQuantity()));
         }
-
-
-        //重新计算日龄, 按照事件录入日期计算
-        Integer oldAvgDayAge = track.getAvgDayAge();
-        Integer avgDayAgePlus = DateUtil.getDeltaDaysAbs(preEvent.getEventAt(), event.getEventAt());
-        Integer newAvgDayAge = EventUtil.getAvgDayAge(oldAvgDayAge + avgDayAgePlus, oldQty, event.getAvgDayAge(), event.getQuantity());
-        track.setAvgDayAge(newAvgDayAge);
 
         //如果是母猪分娩转入或母猪转舍转入，窝数，分娩统计字段需要累加
         if (event.getIsAuto() == IsOrNot.YES.getValue()) {
@@ -169,8 +176,8 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
             track.setBirthWeight(EventUtil.plusDouble(track.getBirthWeight(), event.getWeight()));
         }
 
-
         track.setSex(DoctorGroupTrack.Sex.MIX.getValue());
         return track;
     }
+
 }

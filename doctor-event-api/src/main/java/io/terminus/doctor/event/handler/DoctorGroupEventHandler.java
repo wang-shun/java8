@@ -8,6 +8,7 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 猪群事件处理器
@@ -38,15 +39,10 @@ public interface DoctorGroupEventHandler {
 
     /**
      * 推演DcotorGroupTrack
-     * @param preEvent
      * @param event
      * @param track
      * @return
      */
-    DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track);
+    DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent event, DoctorGroupTrack track);
 
-
-    DoctorGroupTrack editGroupEvent(List<DoctorGroupEvent> triggerGroupEventList, List<Long> doctorGroupEventList, DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent);
-
-    int getGroupAvgDayAge(Long groupId, DoctorGroupEvent doctorGroupEvent);
 }

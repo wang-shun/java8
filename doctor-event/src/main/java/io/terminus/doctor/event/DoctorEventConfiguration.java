@@ -13,17 +13,7 @@ import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
-import io.terminus.doctor.event.handler.group.DoctorAntiepidemicGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorCloseGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorDiseaseGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorGroupEventHandlers;
-import io.terminus.doctor.event.handler.group.DoctorLiveStockGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorMoveInGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorWeanGroupEventHandler;
+import io.terminus.doctor.event.handler.group.*;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgFarmEventHandler;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgLocationEventHandler;
@@ -246,8 +236,10 @@ public class  DoctorEventConfiguration {
                                                              DoctorTransFarmGroupEventHandler doctorTransFarmGroupEventHandler,
                                                              DoctorTransGroupEventHandler doctorTransGroupEventHandler,
                                                              DoctorTurnSeedGroupEventHandler doctorTurnSeedGroupEventHandler,
-                                                             DoctorWeanGroupEventHandler doctorWeanGroupEventHandler){
+                                                             DoctorWeanGroupEventHandler doctorWeanGroupEventHandler,
+                                                             DoctorNewGroupEventHandler doctorNewGroupEventHandler){
         Map<Integer, DoctorGroupEventHandler> handlerMap = Maps.newHashMap();
+        handlerMap.put(GroupEventType.NEW.getValue(), doctorNewGroupEventHandler);
         handlerMap.put(GroupEventType.ANTIEPIDEMIC.getValue(),doctorAntiepidemicGroupEventHandler);
         handlerMap.put(GroupEventType.CHANGE.getValue(),doctorChangeGroupEventHandler);
         handlerMap.put(GroupEventType.CLOSE.getValue(),doctorCloseGroupEventHandler);

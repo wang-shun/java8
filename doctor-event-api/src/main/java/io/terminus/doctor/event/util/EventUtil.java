@@ -43,6 +43,10 @@ public class EventUtil {
         return MoreObjects.firstNonNull(aq, 0) + MoreObjects.firstNonNull(bq, 0);
     }
 
+    public static int minusInt(Integer aq, Integer bq) {
+        return MoreObjects.firstNonNull(aq, 0) - MoreObjects.firstNonNull(bq, 0);
+    }
+
     public static double plusDouble(Double aq, Double bq) {
         return MoreObjects.firstNonNull(aq, 0D) + MoreObjects.firstNonNull(bq, 0D);
     }

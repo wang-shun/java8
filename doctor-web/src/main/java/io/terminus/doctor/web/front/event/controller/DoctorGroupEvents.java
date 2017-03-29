@@ -79,7 +79,7 @@ public class DoctorGroupEvents {
     private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
     @RpcConsumer
     private DoctorEventModifyRequestReadService doctorEventModifyRequestReadService;
-    @RpcConsumer
+    @RpcConsumer(timeout = "30000")
     private DoctorEditGroupEventService doctorEditGroupEventService;
 
     @Autowired
@@ -479,10 +479,10 @@ public class DoctorGroupEvents {
                 log.error("no groups find, farmId: {}", farmId);
             }
             doctorEditGroupEventService.reElicitGroupEvent(groupIds);
-            return Response.ok("处理成功");
         }catch (Exception e){
             log.error("fix group event error, cause by {}", Throwables.getStackTraceAsString(e));
             return Response.fail(Throwables.getStackTraceAsString(e));
         }
+        return Response.ok("处理成功!!!");
     }
 }
