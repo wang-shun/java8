@@ -53,7 +53,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+    public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         // validate extra 配种日期信息
         DateTime matingDate = new DateTime(executeEvent.getEventAt());
@@ -93,7 +93,6 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         Integer currentBoarParity = MoreObjects.firstNonNull(boarPigTrack.getCurrentParity(), 0) + 1;
         boarPigTrack.setCurrentParity(currentBoarParity);
         doctorPigTrackDao.update(boarPigTrack);
-
     }
 
     @Override
