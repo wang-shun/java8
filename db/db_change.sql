@@ -734,6 +734,8 @@ ALTER TABLE doctor_pig_events ADD COLUMN event_source tinyint(4)  DEFAULT NULL C
 ALTER TABLE doctor_group_events ADD COLUMN event_source tinyint(4)  DEFAULT NULL COMMENT '事件来源,1、软件录入,2、excel导入,3、旧场迁移' after status;
 
 -- 修复2017-03-20之前excel导入的母猪,进场胎次多减了1
+update doctor_farms set source = 3 where out_id is not null;
+update doctor_farms set source = 2 where out_id is null;
 -- 迁移
 update doctor_pig_events set event_source = 3 where out_id  is not null;
 -- excel导入
