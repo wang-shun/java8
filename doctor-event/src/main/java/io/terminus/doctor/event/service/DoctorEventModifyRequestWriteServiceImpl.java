@@ -9,10 +9,12 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.enums.EventRequestStatus;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.helper.DoctorMessageSourceHelper;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
@@ -46,7 +48,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     private DoctorEditPigEventService doctorEditPigEventService;
     @Autowired
     private DoctorEditGroupEventService doctorEditGroupEventService;
-
+    @Autowired
+    private DoctorPigEventDao doctorPigEventDao;
     @Autowired
     private DoctorMessageSourceHelper messageSourceHelper;
     @Autowired(required = false)
@@ -66,10 +69,13 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     @Override
     public Response<Long> createPigModifyEventRequest(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto,Long eventId, Long userId, String realName) {
         try {
-
+            DoctorPigEvent oldEvent = doctorPigEventDao.findById(eventId);
             DoctorPigEvent modifyEvent = pigEventManager.buildPigEvent(basic, inputDto);
-            log.info("build modifyEvent, modifyEvent = {}", modifyEvent);
+            modifyEvent.setGroupId(oldEvent.getGroupId());
+            modifyEvent.setIsModify(IsOrNot.YES.getValue());
             modifyEvent.setId(eventId);
+            log.info("build modifyEvent, modifyEvent = {}", modifyEvent);
+
             DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest
                     .builder()
                     .farmId(basic.getFarmId())
@@ -124,7 +130,10 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     @Override
     public RespWithEx<Boolean> modifyEventHandle(DoctorEventModifyRequest modifyRequest) {
         try {
-            modifyEventRequestHandleImpl(modifyRequest);
+            List<DoctorEventModifyRequest> handlingList = eventModifyRequestDao.listByStatus(EventRequestStatus.HANDLING.getValue());
+            if (handlingList.isEmpty()) {
+                modifyEventRequestHandleImpl(modifyRequest);
+            }
         } catch (Exception e) {
             log.error("modify.pig.event.handle.failed, modifyRequest:{}, cause by :{}", modifyRequest, Throwables.getStackTraceAsString(e));
         }

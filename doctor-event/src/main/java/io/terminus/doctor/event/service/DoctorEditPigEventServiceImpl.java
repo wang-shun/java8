@@ -9,6 +9,7 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -23,6 +24,7 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -34,6 +36,7 @@ import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorEventRelation;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -79,6 +82,8 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
     @Autowired
     private DoctorPigDao doctorPigDao;
     @Autowired
+    private DoctorGroupDao doctorGroupDao;
+    @Autowired
     private DoctorEventRelationDao doctorEventRelationDao;
     @Autowired
     private DoctorEditGroupEventService doctorEditGroupEventService;
@@ -123,6 +128,12 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
             try {
                 lastEventId = notNull(fromTrack) ? fromTrack.getCurrentEventId() : 0L;
                 fromTrack = doctorPigEventManager.buildPigTrack(pigEvent, fromTrack);
+                if(Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey())
+                        && Objects.equals(pigEvent.getType(), PigEvent.CHG_LOCATION.getKey())) {
+                    DoctorChgLocationDto chgLocationDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorChgLocationDto.class);
+                    DoctorGroup group = doctorGroupDao.findByFarmIdAndBarnIdAndDate(pigEvent.getFarmId(), chgLocationDto.getChgLocationToBarnId(), pigEvent.getEventAt());
+                    fromTrack.setGroupId(group.getId());
+                }
                 doctorPigEventManager.createPigSnapshot(fromTrack, pigEvent, lastEventId);
             } catch (InvalidException e) {
                 throw new ServiceException(messageSourceHelper.getMessage(e.getError(), e.getParams()) + ", 事件id:" + pigEvent.getId());
