@@ -185,7 +185,10 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
      */
     @Override
     public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
-        DoctorFarmEntryDto farmEntryDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFarmEntryDto.class);
+        DoctorFarmEntryDto farmEntryDto = new DoctorFarmEntryDto();
+        if (notNull(executeEvent.getExtra())) {
+            farmEntryDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFarmEntryDto.class);
+        }
         DoctorBarn doctorBarn = doctorBarnDao.findById(executeEvent.getBarnId());
         expectTrue(notNull(doctorBarn), "barn.not.null", executeEvent.getBarnId());
         DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(executeEvent.getFarmId())
