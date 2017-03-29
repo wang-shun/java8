@@ -119,7 +119,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         toTrack.setExtraMap(extra);
         toTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
-
+        toTrack.setGroupId(executeEvent.getGroupId());
         return toTrack;
     }
 
