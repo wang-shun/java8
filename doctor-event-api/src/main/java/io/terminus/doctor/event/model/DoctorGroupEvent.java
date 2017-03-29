@@ -244,7 +244,7 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
 
     /**
      * 事件来源
-     * @see io.terminus.doctor.event.enums.EventSource
+     * @see io.terminus.doctor.common.enums.SourceType
      */
     private Integer eventSource;
 

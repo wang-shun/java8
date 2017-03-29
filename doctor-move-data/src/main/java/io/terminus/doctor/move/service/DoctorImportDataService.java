@@ -26,6 +26,7 @@ import io.terminus.doctor.basic.service.DoctorMaterialInWareHouseWriteService;
 import io.terminus.doctor.basic.service.DoctorWareHouseTypeWriteService;
 import io.terminus.doctor.basic.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -53,7 +54,6 @@ import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.DoctorMatingType;
-import io.terminus.doctor.event.enums.EventSource;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -712,7 +712,7 @@ public class DoctorImportDataService {
                     .operatorId(boar.getCreatorId())
                     .operatorName(boar.getCreatorName())
                     .status(EventStatus.VALID.getValue())
-                    .eventSource(EventSource.IMPORT.getValue())
+                    .eventSource(SourceType.IMPORT.getValue())
                     .npd(0)
                     .dpnpd(0)
                     .pfnpd(0)
@@ -892,7 +892,7 @@ public class DoctorImportDataService {
         event.setIsAuto(IsOrNot.YES.getValue());
         event.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
         event.setStatus(EventStatus.VALID.getValue());
-        event.setEventSource(EventSource.IMPORT.getValue());
+        event.setEventSource(SourceType.IMPORT.getValue());
         doctorGroupEventDao.create(event);
         return event;
     }
@@ -1313,7 +1313,7 @@ public class DoctorImportDataService {
 
         //描述
         event.setDesc(getEventDesc(entry.descMap()));
-        event.setEventSource(EventSource.IMPORT.getValue());
+        event.setEventSource(SourceType.IMPORT.getValue());
         event.setExtra(MAPPER.toJson(entry));
         if(event.getEventAt() == null){
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取进场事件时间，请检查数据");
@@ -1339,7 +1339,7 @@ public class DoctorImportDataService {
 
         DoctorChgLocationDto extra = new DoctorChgLocationDto();
         extra.setChgLocationToBarnName(info.getBarnName());
-        event.setEventSource(EventSource.IMPORT.getValue());
+        event.setEventSource(SourceType.IMPORT.getValue());
         event.setExtra(MAPPER.toJson(extra));
         event.setDesc(getEventDesc(extra.descMap()));
         if(event.getEventAt() == null){
@@ -1368,7 +1368,7 @@ public class DoctorImportDataService {
         event.setBoarCode(info.getBoarCode());
         event.setIsImpregnation(isPreg);        //是否受胎
         event.setIsDelivery(isDevelivery);      //是否分娩
-        event.setEventSource(EventSource.IMPORT.getValue());
+        event.setEventSource(SourceType.IMPORT.getValue());
 
         DoctorMatingDto mate = new DoctorMatingDto();
         mate.setMatingBoarPigCode(info.getBoarCode());
@@ -1393,7 +1393,7 @@ public class DoctorImportDataService {
         event.setName(PigEvent.PREG_CHECK.getName());
         event.setRelEventId(beforeEvent.getId());
         event.setPigStatusBefore(PigStatus.Mate.getKey());
-        event.setEventSource(EventSource.IMPORT.getValue());
+        event.setEventSource(SourceType.IMPORT.getValue());
 
         //妊娠检查
         if (checkResult == PregCheckResult.YANG) {
@@ -1444,7 +1444,7 @@ public class DoctorImportDataService {
         event.setDeadCount(info.getDeadCount());
         event.setBlackCount(info.getBlackCount());
         event.setFarrowingDate(event.getEventAt());
-        event.setEventSource(EventSource.IMPORT.getValue());
+        event.setEventSource(SourceType.IMPORT.getValue());
 
         //分娩extra
         DoctorFarrowingDto farrow = new DoctorFarrowingDto();
@@ -1496,7 +1496,7 @@ public class DoctorImportDataService {
         event.setWeanAvgWeight(MoreObjects.firstNonNull(info.getWeanWeight(), 0D) / (event.getWeanCount() == 0 ? 1 : event.getWeanCount()));
         event.setPartweanDate(event.getEventAt());
         event.setBoarCode(info.getBoarCode());
-        event.setEventSource(EventSource.IMPORT.getValue());
+        event.setEventSource(SourceType.IMPORT.getValue());
 
         //断奶extra
         DoctorWeanDto wean = new DoctorWeanDto();
