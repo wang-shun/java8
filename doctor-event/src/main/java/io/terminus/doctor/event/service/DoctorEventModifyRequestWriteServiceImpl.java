@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -14,6 +15,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.enums.EventRequestStatus;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.helper.DoctorMessageSourceHelper;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
@@ -25,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -50,7 +53,6 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     private DoctorPigEventDao doctorPigEventDao;
     @Autowired
     private DoctorGroupEventDao doctorGroupEventDao;
-
     @Autowired
     private DoctorMessageSourceHelper messageSourceHelper;
     @Autowired(required = false)
@@ -70,11 +72,15 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     @Override
     public Response<Long> createPigModifyEventRequest(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto,Long eventId, Long userId, String realName) {
         try {
-            DoctorPigEvent modifyEvent = pigEventManager.buildPigEvent(basic, inputDto);
             DoctorPigEvent oldEvent = doctorPigEventDao.findById(eventId);
-            modifyEvent.setEventSource(oldEvent.getEventSource());
-            log.info("build modifyEvent, modifyEvent = {}", modifyEvent);
+            DoctorPigEvent modifyEvent = pigEventManager.buildPigEvent(basic, inputDto);
+
+            modifyEvent.setGroupId(oldEvent.getGroupId());
+            modifyEvent.setIsModify(IsOrNot.YES.getValue());
+
             modifyEvent.setId(eventId);
+            log.info("build modifyEvent, modifyEvent = {}", modifyEvent);
+
             DoctorEventModifyRequest modifyRequest = DoctorEventModifyRequest
                     .builder()
                     .farmId(basic.getFarmId())
@@ -99,6 +105,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     @Override
     public Response<Long> createGroupModifyEventRequest(DoctorGroupInputInfo inputInfo, Long eventId, Integer eventType, Long userId, String realName) {
         try {
+
             DoctorGroupEvent modifyEvent = groupEventManager.buildGroupEvent(inputInfo, eventType);
             DoctorGroupEvent oldEvent = doctorGroupEventDao.findById(eventId);
             modifyEvent.setEventSource(oldEvent.getEventSource());
@@ -130,7 +137,10 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     @Override
     public RespWithEx<Boolean> modifyEventHandle(DoctorEventModifyRequest modifyRequest) {
         try {
-            modifyEventRequestHandleImpl(modifyRequest);
+            List<DoctorEventModifyRequest> handlingList = eventModifyRequestDao.listByStatus(EventRequestStatus.HANDLING.getValue());
+            if (handlingList.isEmpty()) {
+                modifyEventRequestHandleImpl(modifyRequest);
+            }
         } catch (Exception e) {
             log.error("modify.pig.event.handle.failed, modifyRequest:{}, cause by :{}", modifyRequest, Throwables.getStackTraceAsString(e));
         }
@@ -167,6 +177,23 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
         }
     }
 
+    @Override
+    public RespWithEx<Boolean> elicitPigTrack(@NotNull(message = "pig.id.not.null") Long pigId) {
+        try {
+            doctorEditPigEventService.elicitPigTrack(pigId);
+            return RespWithEx.ok(Boolean.TRUE);
+        } catch (InvalidException e) {
+            log.error("elicit pig track failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
+            return RespWithEx.exception(e);
+        }catch (ServiceException e) {
+            log.error("elicit pig track failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("elicit pig track failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail("elicit.pig.track.failed");
+        }
+    }
+
     /**
      * 通过编辑事件请求处理猪事件编辑请求
      *
@@ -186,7 +213,6 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             } else {
                 //处理猪群事件修改
                 DoctorGroupEvent modifyEvent = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(modifyRequest.getContent(), DoctorGroupEvent.class);
-//                doctorEditGroupEventService.elicitDoctorGroupTrack(modifyEvent);            //重新生成修改后的所有事件,然后推导track
                 doctorEditGroupEventService.elicitDoctorGroupTrackRebuildOne(modifyEvent);  //只重新生成修改的事件,然后推导track
             }
 

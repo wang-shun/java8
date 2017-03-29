@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.enums.PigType;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -124,14 +126,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     }
 
     @Override
-    public boolean checkDoctorGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent) {
-        if(doctorGroupTrack.getQuantity() < doctorGroupEvent.getQuantity()){
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.CHANGE.getValue());
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
@@ -155,40 +149,26 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
 
     @Override
-    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack groupTrack) {
+    public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorChangeGroupEvent changeEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorChangeGroupEvent.class);
-        groupTrack.setQuantity(EventUtil.minusQuantity(groupTrack.getQuantity(), event.getQuantity()));
+        track.setQuantity(EventUtil.minusQuantity(track.getQuantity(), event.getQuantity()));
 
-        //如果公猪数量 lt 0 按 0 计算
-//        Integer boarQty = EventUtil.minusQuantity(groupTrack.getBoarQty(), changeEvent.getBoarQty());
-//        boarQty = boarQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : boarQty;
-//        groupTrack.setBoarQty(boarQty < 0 ? 0 : boarQty);
-//        groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
+        //计算公猪、母猪数量
+        if(!Arguments.isNull(track.getBoarQty()) || !Arguments.isNull(changeEvent.getBoarQty())){
+            track.setBoarQty(EventUtil.minusInt(track.getBoarQty(), changeEvent.getBoarQty()));
+        }
+        if(!Arguments.isNull(track.getSowQty()) || !Arguments.isNull(changeEvent.getSowQty())){
+            track.setSowQty(EventUtil.minusInt(track.getSowQty(), changeEvent.getSowQty()));
+        }
 
         //母猪触发的变动，要减掉未断奶数
         if (Objects.nonNull(event.getRelPigEventId())) {
-            if (groupTrack.getUnweanQty() == null || groupTrack.getUnweanQty() <= 0) {
-                groupTrack.setUnweanQty(0);
+            if (track.getUnweanQty() == null || track.getUnweanQty() <= 0) {
+                track.setUnweanQty(0);
             }
-            groupTrack.setUnweanQty(groupTrack.getUnweanQty() - event.getQuantity());
+            track.setUnweanQty(track.getUnweanQty() - event.getQuantity());
         }
-        return groupTrack;
-    }
-
-    private void checkGroupEvent(DoctorGroup group, DoctorGroupEvent event, DoctorGroupTrack groupTrack) {
-        DoctorChangeGroupEvent changeEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorChangeGroupEvent.class);
-        checkQuantity(groupTrack.getQuantity(), event.getQuantity());
-        checkQuantityEqual(event.getQuantity(), changeEvent.getBoarQty(), changeEvent.getSowQty());
-
-        //非母猪触发事件
-        if (Objects.isNull(event.getRelPigEventId())) {
-            checkUnweanTrans(group.getPigType(), null, groupTrack, event.getQuantity());
-        }
-
-        if(Objects.equals(group.getPigType(), PigType.NURSERY_PIGLET.getValue())){
-            checkSalePrice(event.getChangeTypeId(), event.getPrice(), event.getBaseWeight(), event.getOverPrice());
-        }
-
+        return track;
     }
 
     //校验金额不能为空, 基础重量不能为空

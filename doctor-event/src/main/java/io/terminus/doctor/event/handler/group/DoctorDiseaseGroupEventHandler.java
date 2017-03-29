@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 疾病事件处理器
@@ -62,7 +63,7 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
     }
 
     @Override
-    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack groupTrack) {
+    public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack groupTrack) {
         checkQuantity(groupTrack.getQuantity(), event.getQuantity());
         return groupTrack;
     }

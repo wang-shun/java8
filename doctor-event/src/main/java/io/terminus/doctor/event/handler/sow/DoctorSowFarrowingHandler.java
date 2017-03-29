@@ -102,7 +102,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+    public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         Map<String, Object> extra = isNull(toTrack.getExtraMap()) ? Maps.newHashMap() : toTrack.getExtraMap();
         // 对应的 仔猪 猪舍的 信息
@@ -119,7 +119,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         toTrack.setExtraMap(extra);
         toTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
-
+        toTrack.setGroupId(executeEvent.getGroupId());
         return toTrack;
     }
 

@@ -84,7 +84,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+    public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         DoctorChgLocationDto chgLocationDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorChgLocationDto.class);
         Long toBarnId = chgLocationDto.getChgLocationToBarnId();

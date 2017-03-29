@@ -45,7 +45,7 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+    public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         DoctorFostersDto fostersDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFostersDto.class);
         expectTrue(Objects.equals(toTrack.getStatus(), PigStatus.FEED.getKey()), "foster.currentSowStatus.error");

@@ -129,4 +129,10 @@
         FROM doctor_pigs a LEFT JOIN doctor_pig_snapshots b on a.id = b.pig_id
         WHERE b.pig_id IS NULL AND a.is_removal = 0
     </select>
+
+    <delete id="deleteForPigId" parameterType="long" >
+        DELETE
+        FROM <include refid="tb"/>
+        WHERE pig_id = #{pigId}
+    </delete>
 </mapper>
