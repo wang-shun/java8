@@ -9,6 +9,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
@@ -105,11 +106,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.*;
@@ -2442,6 +2439,32 @@ public class DoctorMoveDataService {
             }
         });
     }
+
+
+    public void updateExcelImportErrorPigEvents(DoctorFarm farm) {
+        List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1, "createdAtEnd", "2017-03-20 23:59:59"));
+        List<List<DoctorPigEvent>> lists = Lists.partition(doctorPigEvensList, 1000);
+        lists.forEach(list -> {
+            for(DoctorPigEvent doctorPigEvent: list) {
+                Map<String, Object> map = new HashMap<String, Object>();
+                if(!isNull(doctorPigEvent.getExtraMap()) && !isNull(doctorPigEvent.getExtraMap().get("importParity"))){
+                    continue;
+                }
+                if(!isNull(doctorPigEvent.getExtraMap()) && !isNull(doctorPigEvent.getExtraMap().get("parity")) ){
+                    map = doctorPigEvent.getExtraMap();
+                    map.put("importParity", map.get("parity"));
+                    map.replace("parity", Integer.valueOf(map.get("parity").toString()) + 1);
+                }else{
+                    map.put("pairty", 1);
+                }
+
+                doctorPigEvent.setExtraMap(map);
+            }
+            doctorPigEventDao.updates(list);
+        });
+    }
+
+
 
     public void updateFosterSowCode(DoctorFarm farm){
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.FOSTERS.getKey(), "kind", 1));

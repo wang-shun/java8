@@ -732,3 +732,15 @@ key `idx_doctor_group_info_checks_group_id` (`group_id`)
 ALTER TABLE doctor_farms ADD COLUMN  source tinyint(4) DEFAULT NULL COMMENT '来源,1:软件录入,2:excel导入,3:旧软件迁移，' after out_id;
 ALTER TABLE doctor_pig_events ADD COLUMN event_source tinyint(4)  DEFAULT NULL COMMENT '事件来源,1、软件录入,2、excel导入,3、旧场迁移' after status;
 ALTER TABLE doctor_group_events ADD COLUMN event_source tinyint(4)  DEFAULT NULL COMMENT '事件来源,1、软件录入,2、excel导入,3、旧场迁移' after status;
+
+-- 修复2017-03-20之前excel导入的母猪,进场胎次多减了1
+-- 迁移
+update doctor_pig_events set event_source = 3 where out_id  is not null;
+-- excel导入
+update doctor_pig_events a, doctor_farms b
+set a.event_source = 2
+where a.farm_id = b.id
+and b.source = 2
+and a.created_at <= date_add(b.created_at, INTERVAL 2 minute);
+-- 系统录入
+update doctor_pig_events set event_source = 1 where event_source is null;

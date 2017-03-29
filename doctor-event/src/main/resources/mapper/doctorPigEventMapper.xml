@@ -304,6 +304,8 @@
                 #{i}
             </foreach>
         </if>
+        <if test="createdAtStart != null">AND created_at &gt;= #{createdAtStart}</if>
+        <if test="createdAtEnd != null">AND created_at &lt;= #{createdAtEnd}</if>
         AND status =1
     </sql>
 

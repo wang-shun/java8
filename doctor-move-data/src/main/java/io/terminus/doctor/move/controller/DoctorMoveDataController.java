@@ -7,6 +7,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
@@ -33,6 +34,7 @@ import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jetty.servlet.BaseHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -410,6 +412,30 @@ public class DoctorMoveDataController {
         }
     }
 
+    @RequestMapping(value = "/updateExcelImportErrorPigEvents", method = RequestMethod.GET)
+    public Boolean updateExcelImportErrorPigEvents(@RequestParam(value = "farmId", required = false) Long farmId){
+        try {
+            List<Long> listFarmIds = getExcelImportFarmIds();
+            if(!Arguments.isNull(farmId) && listFarmIds.contains(farmId)){
+                listFarmIds = Lists.newArrayList(farmId);
+            }
+            if(!Arguments.isNull(farmId) && !listFarmIds.contains(farmId)){
+                log.info("farmId not import by excel, farmId: {}", farmId);
+                return false;
+            }
+                listFarmIds.forEach(id -> {
+                DoctorFarm farm = doctorFarmDao.findById(id);
+                log.warn("{} update parity and boarCode start, farmId:{}", DateUtil.toDateTimeString(new Date()), id);
+                doctorMoveDataService.updateExcelImportErrorPigEvents(farm);
+                log.warn("{} update parity and boarCode end", DateUtil.toDateTimeString(new Date()));
+            });
+            return true;
+        } catch (Exception e) {
+            log.error("update parity and boarCode failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
     @RequestMapping(value = "/updatePigEventExtra", method = RequestMethod.GET)
     public Boolean updatePigEventExtra(@RequestParam("farmId") Long farmId){
         try {
@@ -449,6 +475,14 @@ public class DoctorMoveDataController {
 
     private List<Long> getAllFarmIds() {
         return doctorFarmDao.findAll().stream().map(DoctorFarm::getId).collect(Collectors.toList());
+    }
+
+    private List<Long> getExcelImportFarmIds() {
+        List<DoctorFarm> farmList = doctorFarmDao.findBySource(SourceType.IMPORT.getValue());
+        if(Arguments.isNullOrEmpty(farmList)){
+            return Lists.newArrayList();
+        }
+        return farmList.stream().map(DoctorFarm::getId).collect(Collectors.toList());
     }
 
     /**
