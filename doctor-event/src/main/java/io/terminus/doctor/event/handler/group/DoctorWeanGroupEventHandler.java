@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -58,7 +59,7 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
     }
 
     @Override
-    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
+    public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorWeanGroupEvent weanGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorWeanGroupEvent.class);
         track.setUnqQty(EventUtil.plusInt(track.getUnqQty(), weanGroupEvent.getNotQualifiedCount()));
         track.setQuaQty(EventUtil.minusQuantity(track.getQuantity(), track.getUnqQty()));

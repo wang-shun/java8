@@ -57,4 +57,12 @@ public class DoctorPigSnapshotDao extends MyBatisDao<DoctorPigSnapshot>{
     public List<Long> queryNotSnapshotPigId() {
         return getSqlSession().selectList(sqlId("queryNotSnapshotPigId"));
     }
+
+    /**
+     * 删除猪镜像
+     * @param pigId 猪id
+     */
+    public void deleteForPigId(Long pigId) {
+        getSqlSession().delete(sqlId("deleteForPigId"), pigId);
+    }
 }

@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -89,7 +90,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
     }
 
     @Override
-    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
+    public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorTransFarmGroupEvent doctorTransFarmGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransFarmGroupEvent.class);
         if(Arguments.isNull(doctorTransFarmGroupEvent)) {
             log.error("parse doctorTransFarmGroupEvent faild, doctorGroupEvent = {}", event);

@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.rollback;
 
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -25,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
 import static io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler.excludeGroupEvent;
 
@@ -125,6 +127,28 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         doctorPigDao.update(info.getPig());
         doctorPigSnapshotDao.deleteByEventId(pigEvent.getId());
         createDoctorRevertLog(pigEvent, doctorPigTrack, doctorPig, operatorId, operatorName);
+    }
+
+    /**
+     * 没有镜像事件处理
+     * @param pigEvent 回滚事件
+     * @param operatorId 操作人id
+     * @param operatorName 操作人姓名
+     */
+    protected void handleRollbackWithoutSnapshot(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+        if (!IGNORE_EVENT.contains(pigEvent.getType())) {
+            throw new InvalidException("rollback.event.type.error", pigEvent.getId());
+        }
+
+        //旧事件需要删除镜像
+        DoctorPigSnapshot pigSnapshot = doctorPigSnapshotDao.findByToEventId(pigEvent.getId());
+        if (notNull(pigSnapshot)) {
+            handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
+            return;
+        }
+
+        //新生成的疾病、防疫、采精事件不需要删除镜像
+        doctorPigEventDao.delete(pigEvent.getId());
     }
 
     /**

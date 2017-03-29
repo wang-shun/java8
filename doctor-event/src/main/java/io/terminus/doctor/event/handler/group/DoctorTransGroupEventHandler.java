@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -112,7 +113,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     }
 
     @Override
-    public DoctorGroupTrack elicitGroupTrack(DoctorGroupEvent preEvent, DoctorGroupEvent event, DoctorGroupTrack track) {
+    public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorTransGroupEvent doctorTransGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
         if(Arguments.isNull(doctorTransGroupEvent)) {
             log.error("parse doctorTransGroupEvent faild, doctorGroupEvent = {}", event);
@@ -294,18 +295,4 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         return doctorBarnDao.findById(barnId);
     }
 
-
-    @Override
-    public boolean checkDoctorGroupEvent(DoctorGroupTrack doctorGroupTrack, DoctorGroupEvent doctorGroupEvent) {
-        if(doctorGroupTrack.getQuantity() < doctorGroupEvent.getQuantity()){
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public List<DoctorGroupEvent> triggerGroupEvent(List<DoctorGroupEvent> triggerDoctorGroupEventList,DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent){
-        //修改转入猪舍,影响原猪舍
-        return triggerDoctorGroupEventList;
-    }
 }

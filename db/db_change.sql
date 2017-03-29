@@ -702,3 +702,28 @@ ALTER TABLE doctor_farm_exports ADD COLUMN status tinyint(4) DEFAULT NULL COMMEN
 
 -- 2017-03-25 修改数据权限表farm_ids类型
 ALTER TABLE doctor_user_data_permissions MODIFY COLUMN farm_ids TEXT DEFAULT NULL COMMENT '猪场ids,逗号分隔';
+
+
+drop table if exists `doctor_group_info_checks`;
+create table `doctor_group_info_checks`(
+`id` bigint(20) unsigned not null auto_increment,
+`farm_id` bigint(20) default null comment '猪场id',
+`farm_name` varchar(64) default null comment '猪场名称',
+`group_id` bigint(20) default null comment '猪群id',
+`group_code` varchar(512) default null comment '猪群code',
+`event_count` int(11) default null comment '根据时间算出的猪群数量',
+`track_count` int(11) default null comment 'track中的数量',
+`sum_at` date default null comment '日期',
+`status` tinyint(4) default null comment '状态，-1：track数据不正确，0：正在处理，1：track数据正确， 2：已处理正确',
+`extra` text default null comment '',
+`remark` varchar(256) default null comment '备注',
+`created_at` datetime DEFAULT NULL COMMENT '创建时间',
+`creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+`creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
+`updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+`updator_id` bigint(20) DEFAULT NULL COMMENT '更新人id',
+`updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+primary key(`id`),
+key `idx_doctor_group_info_checks_farm_id` (`farm_id`),
+key `idx_doctor_group_info_checks_group_id` (`group_id`)
+)CHARSET=utf8 COMMENT='猪群数据校验表';

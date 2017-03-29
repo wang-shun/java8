@@ -7,6 +7,7 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -61,4 +62,11 @@ public interface DoctorEventModifyRequestWriteService {
      * @return
      */
     Response<Boolean> modifyRequestHandleJob(List<DoctorEventModifyRequest> requestList);
+
+    /**
+     * 推演猪track
+     * @param pigId 猪id
+     * @return 是否成功
+     */
+    RespWithEx<Boolean> elicitPigTrack(@NotNull(message = "pig.id.not.null") Long pigId);
 }
