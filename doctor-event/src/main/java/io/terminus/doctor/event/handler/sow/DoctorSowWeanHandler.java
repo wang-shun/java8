@@ -103,7 +103,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+    public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         expectTrue(Objects.equals(toTrack.getStatus(), PigStatus.FEED.getKey()), "sow.status.not.feed", PigStatus.from(toTrack.getStatus()).getName());
 

@@ -3,11 +3,13 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -22,16 +24,19 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
+import io.terminus.doctor.event.helper.DoctorMessageSourceHelper;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorEventRelation;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -41,11 +46,13 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
@@ -75,9 +82,13 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
     @Autowired
     private DoctorPigDao doctorPigDao;
     @Autowired
+    private DoctorGroupDao doctorGroupDao;
+    @Autowired
     private DoctorEventRelationDao doctorEventRelationDao;
     @Autowired
     private DoctorEditGroupEventService doctorEditGroupEventService;
+    @Autowired
+    private DoctorMessageSourceHelper messageSourceHelper;
 
     private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
@@ -91,6 +102,50 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
     @Override
     public void modifyPigEventHandle(DoctorPigEvent modifyEvent) {
         modifyPigEventHandleImpl(modifyEvent);
+    }
+
+    @Override
+    @Transactional
+    public void elicitPigTrack(Long pigId) {
+        log.info("elicitPigTrack starting, pigId:{}", pigId);
+
+        //校验源数据
+        DoctorPigTrack oldTrack = doctorPigTrackDao.findByPigId(pigId);
+        expectNotNull(oldTrack, "pig.track.not.null", pigId);
+        List<DoctorPigEvent> pigEventList = doctorPigEventDao.queryAllEventsByPigIdForASC(pigId);
+        if (pigEventList.isEmpty() || !Objects.equals(pigEventList.get(0).getType(), PigEvent.ENTRY.getKey())) {
+            throw new InvalidException("elicit.pig.track.data.source.error", pigId);
+        }
+
+        DoctorPigTrack fromTrack = null;
+        Long lastEventId;
+
+        //1.删除猪的所有镜像
+        doctorPigSnapshotDao.deleteForPigId(pigId);
+
+        //2.推演track和生成镜像
+        for (DoctorPigEvent pigEvent : pigEventList) {
+            try {
+                lastEventId = notNull(fromTrack) ? fromTrack.getCurrentEventId() : 0L;
+                fromTrack = doctorPigEventManager.buildPigTrack(pigEvent, fromTrack);
+                if(Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey())
+                        && Objects.equals(pigEvent.getType(), PigEvent.CHG_LOCATION.getKey())) {
+                    DoctorChgLocationDto chgLocationDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorChgLocationDto.class);
+                    DoctorGroup group = doctorGroupDao.findByFarmIdAndBarnIdAndDate(pigEvent.getFarmId(), chgLocationDto.getChgLocationToBarnId(), pigEvent.getEventAt());
+                    fromTrack.setGroupId(group.getId());
+                }
+                doctorPigEventManager.createPigSnapshot(fromTrack, pigEvent, lastEventId);
+            } catch (InvalidException e) {
+                throw new ServiceException(messageSourceHelper.getMessage(e.getError(), e.getParams()) + ", 事件id:" + pigEvent.getId());
+            }
+        }
+
+        //3.更新track
+        expectNotNull(fromTrack, "elicit.pig.track.failed", pigId);
+        fromTrack.setId(oldTrack.getId());
+        doctorPigTrackDao.update(fromTrack);
+
+        log.info("elicitPigTrack ending");
     }
 
     /**

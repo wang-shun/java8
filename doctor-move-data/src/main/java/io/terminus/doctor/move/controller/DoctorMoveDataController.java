@@ -9,11 +9,12 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -74,6 +75,7 @@ public class DoctorMoveDataController {
     private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
     private final DoctorImportDataService doctorImportDataService;
     private final DoctorPigWriteService doctorPigWriteService;
+    private final DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
 
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
@@ -90,7 +92,8 @@ public class DoctorMoveDataController {
                                     DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
                                     DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService,
                                     DoctorImportDataService doctorImportDataService,
-                                    DoctorPigWriteService doctorPigWriteService) {
+                                    DoctorPigWriteService doctorPigWriteService,
+                                    DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -106,6 +109,7 @@ public class DoctorMoveDataController {
         this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
         this.doctorImportDataService = doctorImportDataService;
         this.doctorPigWriteService = doctorPigWriteService;
+        this.doctorEventModifyRequestWriteService = doctorEventModifyRequestWriteService;
     }
 
     /**
@@ -941,5 +945,16 @@ public class DoctorMoveDataController {
     public boolean updatePigCodes(@RequestParam String pigCodeUpdates) {
         List<DoctorPig> pigs = MAPPER.fromJson(pigCodeUpdates, MAPPER.createCollectionType(List.class, DoctorPig.class));
         return RespHelper.or500(doctorPigWriteService.updatePigCodes(pigs));
+    }
+
+    /**
+     * 推演track
+     * @param pigId 猪id
+     * @return
+     */
+    @RequestMapping(value = "/elicitPigTrack", method = RequestMethod.GET)
+    public Boolean elicitPigTrack(@RequestParam Long pigId){
+        RespWithExHelper.or500(doctorEventModifyRequestWriteService.elicitPigTrack(pigId));
+        return true;
     }
 }

@@ -48,7 +48,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+    public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         DoctorPigletsChgDto pigletsChgDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorPigletsChgDto.class);
 

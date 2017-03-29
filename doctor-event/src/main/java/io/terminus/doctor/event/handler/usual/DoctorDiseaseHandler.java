@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DoctorDiseaseHandler extends DoctorAbstractEventHandler{
     @Override
-    protected DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+    public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         return fromTrack;
     }
 }

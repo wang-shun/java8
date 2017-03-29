@@ -6,12 +6,15 @@ import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
+
+import static java.util.Objects.isNull;
 
 /**
  * Created by xiao on 16/9/22.
@@ -27,10 +30,15 @@ public class DoctorRollbackSowMatingEventHandler extends DoctorAbstractRollbackP
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         handleRollbackWithStatus(pigEvent, operatorId, operatorName);
         DoctorMatingDto dto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorMatingDto.class);
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(dto.getMatingBoarPigId());
-        if (doctorPigTrack.getCurrentParity() > 0){
-            doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() -1);
-            doctorPigTrackDao.update(doctorPigTrack);
+        Long boarId = dto.getMatingBoarPigId();
+        if (isNull(boarId)) {
+            boarId = doctorPigDao.findPigByFarmIdAndPigCodeAndSex(pigEvent.getFarmId(), pigEvent.getBoarCode(), DoctorPig.PigSex.BOAR.getKey()).getId();
+        }
+        DoctorPigTrack boarTrack = doctorPigTrackDao.findByPigId(boarId);
+
+        if (boarTrack.getCurrentParity() > 0){
+            boarTrack.setCurrentParity(boarTrack.getCurrentParity() -1);
+            doctorPigTrackDao.update(boarTrack);
         }
     }
 
