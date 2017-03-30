@@ -746,3 +746,22 @@ primary key(`id`),
 key `idx_doctor_pig_elicit_records_farm_id` (`farm_id`),
 key `idx_doctor_pig_elicit_records_pig_id` (`pig_id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪数据推演记录表';
+
+-- 2017-03-30 猪群track推演记录表
+drop table if exists `doctor_group_elicit_records`;
+create table `doctor_group_elicit_records`(
+`id` bigint(20) unsigned not null auto_increment,
+`farm_id` bigint(20) default null comment '猪场id',
+`farm_name` varchar(64) default null comment '猪场名称',
+`group_id` bigint(20) default null comment '猪群id',
+`group_code` varchar(512) default null comment '猪群code',
+`status` tinyint(4) default null comment '状态，-1：错误，1：成功',
+`from_track` text default null comment '原track',
+`to_track` text default null comment '推演后track',
+`error_reason` text default null comment '推演时错误原因',
+`version` int(11) NOT NULL DEFAULT 1 comment '版本',
+`created_at` datetime DEFAULT NULL COMMENT '创建时间',
+primary key(`id`),
+key `idx_doctor_group_elicit_records_farm_id` (`farm_id`),
+key `idx_doctor_group_elicit_records_group_id` (`group_id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪群数据推演记录表';

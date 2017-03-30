@@ -5,16 +5,20 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorEditGroupEventService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -76,7 +80,8 @@ public class DoctorMoveDataController {
     private final DoctorImportDataService doctorImportDataService;
     private final DoctorPigWriteService doctorPigWriteService;
     private final DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
-
+    private final DoctorEditGroupEventService doctorEditGroupEventService;
+    private final DoctorGroupReadService doctorGroupReadService;
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
                                     WareHouseInitService wareHouseInitService,
@@ -93,7 +98,9 @@ public class DoctorMoveDataController {
                                     DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService,
                                     DoctorImportDataService doctorImportDataService,
                                     DoctorPigWriteService doctorPigWriteService,
-                                    DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService) {
+                                    DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService,
+                                    DoctorEditGroupEventService doctorEditGroupEventService,
+                                    DoctorGroupReadService doctorGroupReadService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -110,6 +117,8 @@ public class DoctorMoveDataController {
         this.doctorImportDataService = doctorImportDataService;
         this.doctorPigWriteService = doctorPigWriteService;
         this.doctorEventModifyRequestWriteService = doctorEventModifyRequestWriteService;
+        this.doctorEditGroupEventService = doctorEditGroupEventService;
+        this.doctorGroupReadService = doctorGroupReadService;
     }
 
     /**
@@ -966,5 +975,36 @@ public class DoctorMoveDataController {
     public Boolean batchElicitPigTrack(@RequestParam Long farmId) {
         doctorEventModifyRequestWriteService.batchElicitPigTrack(farmId);
         return true;
+    }
+
+    /**
+     * 猪群推演
+     * @param farmId 猪场id
+     * @param groupId 猪群id
+     * @return
+     */
+    @RequestMapping(value = "/fix-events", method = RequestMethod.GET)
+    public Response<String> reElicitGroupEvent(@RequestParam(required = false) Long farmId, @RequestParam(required = false) Long groupId){
+        try{
+            if(Arguments.isNull(farmId) && Arguments.isNull(groupId)){
+                log.error("farmId, groupId need one ");
+                return Response.fail("farmId, groupId need one");
+            }
+            List<Long> groupIds = Lists.newArrayList();
+            if(Arguments.isNull(groupId) && !Arguments.isNull(farmId)){
+                List<DoctorGroup> groupList = RespHelper.orServEx(doctorGroupReadService.findGroupsByFarmId(farmId));
+                groupIds = groupList.stream().map(DoctorGroup::getId).collect(Collectors.toList());
+            }else{
+                groupIds.add(groupId);
+            }
+            if(Arguments.isNullOrEmpty(groupIds)){
+                log.error("no groups find, farmId: {}", farmId);
+            }
+            doctorEditGroupEventService.reElicitGroupEvent(groupIds);
+        }catch (Exception e){
+            log.error("fix group event error, cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail(Throwables.getStackTraceAsString(e));
+        }
+        return Response.ok("处理成功!!!");
     }
 }

@@ -106,7 +106,6 @@ public class DoctorEditGroupEventManager {
         if(!Objects.equals(newTrack.getQuantity(), 0) && Objects.equals(lastEvent.getType(), GroupEventType.CLOSE.getValue())){
             deleteCloseGroupEvent(lastEvent);
         }
-
     }
 
     private boolean checkTrack(DoctorGroupTrack newTrack) {

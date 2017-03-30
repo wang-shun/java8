@@ -1,12 +1,10 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -31,7 +29,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -147,8 +144,9 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
     public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorMoveInGroupEvent doctorMoveInGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorMoveInGroupEvent.class);
         if(Arguments.isNull(doctorMoveInGroupEvent)) {
-            log.error("parse doctorMoveInGroupEvent faild, doctorGroupEvent = {}", event);
-            throw new InvalidException("movein.group.event.info.broken", event.getId());
+            log.info("parse doctorMoveInGroupEvent faild, doctorGroupEvent = {}", event);
+            //throw new InvalidException("movein.group.event.info.broken", event.getId());
+            doctorMoveInGroupEvent = new DoctorMoveInGroupEvent();
         }
         //1.更新猪群跟踪
         track.setQuantity(EventUtil.plusInt(track.getQuantity(), event.getQuantity()));
