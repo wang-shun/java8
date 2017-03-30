@@ -147,7 +147,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             });
             return Response.ok(pigEvents.stream().map(PigEvent::getKey).collect(Collectors.toList()));
         }catch (Exception e){
-            log.error("query pig events fail, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("query pig events fail, pigId:{}, cause:{}", pigIds, Throwables.getStackTraceAsString(e));
             return Response.fail("query.pigEvents.fail");
         }
     }
@@ -181,7 +181,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         try{
             // 获取母猪Track 信息
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
-            checkState(!isNull(doctorPigTrack), "input.pigIdCode.error");
+            checkState(!isNull(doctorPigTrack), "pig.track.not.find");
             checkState(Objects.equals(doctorPigTrack.getPigType(), DoctorPig.PigSex.SOW.getKey()), "count.pigType.error");
 
             // 获取Pig 所有的 EventId
@@ -194,10 +194,10 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             );
             return Response.ok(doctorSowParityCounts);
         }catch (IllegalStateException se){
-            log.warn("query sow parity illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
+            log.error("query sow parity illegal state fail, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(se));
             return Response.fail(se.getMessage());
         }catch (Exception e){
-            log.error("query sow parity fail, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("query sow parity fail, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
             return Response.fail("query.sowParityCount.fail");
         }
     }
