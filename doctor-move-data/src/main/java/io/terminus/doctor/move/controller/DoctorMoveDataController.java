@@ -8,6 +8,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
@@ -419,6 +420,30 @@ public class DoctorMoveDataController {
         }
     }
 
+    @RequestMapping(value = "/updateExcelImportErrorPigEvents", method = RequestMethod.GET)
+    public Boolean updateExcelImportErrorPigEvents(@RequestParam(value = "farmId", required = false) Long farmId){
+        try {
+            List<Long> listFarmIds = getExcelImportFarmIds();
+            if(!Arguments.isNull(farmId) && listFarmIds.contains(farmId)){
+                listFarmIds = Lists.newArrayList(farmId);
+            }
+            if(!Arguments.isNull(farmId) && !listFarmIds.contains(farmId)){
+                log.info("farmId not import by excel, farmId: {}", farmId);
+                return false;
+            }
+                listFarmIds.forEach(id -> {
+                DoctorFarm farm = doctorFarmDao.findById(id);
+                log.warn("{} update parity and boarCode start, farmId:{}", DateUtil.toDateTimeString(new Date()), id);
+                doctorMoveDataService.updateExcelMOVEErrorPigEvents(farm);
+                log.warn("{} update parity and boarCode end", DateUtil.toDateTimeString(new Date()));
+            });
+            return true;
+        } catch (Exception e) {
+            log.error("update parity and boarCode failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
     @RequestMapping(value = "/updatePigEventExtra", method = RequestMethod.GET)
     public Boolean updatePigEventExtra(@RequestParam("farmId") Long farmId){
         try {
@@ -458,6 +483,14 @@ public class DoctorMoveDataController {
 
     private List<Long> getAllFarmIds() {
         return doctorFarmDao.findAll().stream().map(DoctorFarm::getId).collect(Collectors.toList());
+    }
+
+    private List<Long> getExcelImportFarmIds() {
+        List<DoctorFarm> farmList = doctorFarmDao.findBySource(SourceType.IMPORT.getValue());
+        if(Arguments.isNullOrEmpty(farmList)){
+            return Lists.newArrayList();
+        }
+        return farmList.stream().map(DoctorFarm::getId).collect(Collectors.toList());
     }
 
     /**

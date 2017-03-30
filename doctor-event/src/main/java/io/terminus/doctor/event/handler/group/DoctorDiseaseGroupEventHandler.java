@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -19,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Desc: 疾病事件处理器
@@ -58,6 +58,7 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
 
         event.setQuantity(disease.getQuantity());
         event.setExtraMap(diseaseEvent);
+        event.setEventSource(SourceType.INPUT.getValue());
 
         return event;
     }

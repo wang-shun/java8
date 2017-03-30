@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.model;
 
 import com.google.common.base.Objects;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dto.event.group.BaseGroupEvent;
 import lombok.AccessLevel;
@@ -242,6 +241,12 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
      * 结束时间
      */
     private String endDate;
+
+    /**
+     * 事件来源
+     * @see io.terminus.doctor.common.enums.SourceType
+     */
+    private Integer eventSource;
 
     @SneakyThrows
     public void setExtraMap(T extraMap){

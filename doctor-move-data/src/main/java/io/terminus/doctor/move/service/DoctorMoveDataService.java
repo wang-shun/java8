@@ -16,6 +16,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -104,11 +105,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.*;
@@ -813,6 +810,7 @@ public class DoctorMoveDataService {
         sowEvent.setDesc(event.getEventDesc());
         sowEvent.setOutId(event.getEventOutId());
         sowEvent.setRemark(event.getRemark());
+        sowEvent.setEventSource(SourceType.MOVE.getValue());
 
         //事件类型, (如果是转舍类型, 重新判断后还会覆盖掉)
         PigEvent eventType = PigEvent.from(event.getEventName());
@@ -1661,6 +1659,7 @@ public class DoctorMoveDataService {
         boarEvent.setOutId(event.getEventOutId());
         boarEvent.setRemark(event.getRemark());
         boarEvent.setStatus(EventStatus.VALID.getValue());
+        boarEvent.setEventSource(SourceType.MOVE.getValue());
 
         //事件类型
         PigEvent eventType = PigEvent.from(event.getEventName());
@@ -1893,6 +1892,7 @@ public class DoctorMoveDataService {
         event.setGroupCode(group.getGroupCode());
         event.setEventAt(gainEvent.getEventAt());
         event.setStatus(EventStatus.VALID.getValue());
+        event.setEventSource(SourceType.MOVE.getValue());
 
         //转换事件类型
         GroupEventType type = GroupEventType.from(gainEvent.getEventTypeName());
@@ -2438,6 +2438,37 @@ public class DoctorMoveDataService {
             }
         });
     }
+
+
+    public void updateExcelMOVEErrorPigEvents(DoctorFarm farm) {
+        List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1, "createdAtEnd", "2017-03-20 23:59:59"));
+        if (doctorPigEvensList.isEmpty()) {
+            return;
+        }
+        List<List<DoctorPigEvent>> lists = Lists.partition(doctorPigEvensList, 1000);
+        lists.forEach(list -> {
+            for(DoctorPigEvent doctorPigEvent: list) {
+                Map<String, Object> map = new HashMap<String, Object>();
+                if(!isNull(doctorPigEvent.getExtraMap()) && !isNull(doctorPigEvent.getExtraMap().get("importParity"))){
+                    continue;
+                }
+                if(!isNull(doctorPigEvent.getExtraMap()) && !isNull(doctorPigEvent.getExtraMap().get("parity")) ){
+                    map = doctorPigEvent.getExtraMap();
+                    map.put("importParity", map.get("parity"));
+                    map.replace("parity", Integer.valueOf(map.get("parity").toString()) + 1);
+                }else{
+                    map.put("parity", 1);
+                }
+
+                doctorPigEvent.setExtraMap(map);
+            }
+            if (!list.isEmpty()) {
+                doctorPigEventDao.updates(list);
+            }
+        });
+    }
+
+
 
     public void updateFosterSowCode(DoctorFarm farm){
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.FOSTERS.getKey(), "kind", 1));

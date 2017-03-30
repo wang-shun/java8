@@ -5,6 +5,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -130,6 +131,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
 
         event.setExtraMap(moveInEvent);
+        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 

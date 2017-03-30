@@ -26,6 +26,7 @@ import io.terminus.doctor.basic.service.DoctorMaterialInWareHouseWriteService;
 import io.terminus.doctor.basic.service.DoctorWareHouseTypeWriteService;
 import io.terminus.doctor.basic.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -441,6 +442,7 @@ public class DoctorImportDataService {
             farm.setDistrictId(getAddressId(district, farm.getCityId()));
             farm.setDistrictName(district);
             farm.setDetailAddress(detail);
+            farm.setSource(SourceType.IMPORT.getValue());
             doctorFarmDao.create(farm);
             RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
         }else{
@@ -711,6 +713,7 @@ public class DoctorImportDataService {
                     .operatorId(boar.getCreatorId())
                     .operatorName(boar.getCreatorName())
                     .status(EventStatus.VALID.getValue())
+                    .eventSource(SourceType.IMPORT.getValue())
                     .npd(0)
                     .dpnpd(0)
                     .pfnpd(0)
@@ -844,7 +847,7 @@ public class DoctorImportDataService {
                 groupTrack.setQuaQty(groupTrack.getQuantity());
             }
             doctorGroupTrackDao.create(groupTrack);
-            DoctorGroupEvent moveInEvent = createMoveInGroupEvent(group, groupTrack, dayAge, avgWeight);
+            DoctorGroupEvent moveInEvent = createMoveInGroupEvent(group, groupTrack, dayAge, avgWeight, false);
 
             //groupTrack关联最新事件
             groupTrack.setRelEventId(moveInEvent.getId());
@@ -868,7 +871,7 @@ public class DoctorImportDataService {
     /**
      * 创建默认的转入事件
      */
-    private DoctorGroupEvent createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, Integer dayAge, Double avgWeight) {
+    private DoctorGroupEvent createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, Integer dayAge, Double avgWeight, boolean isSowEvent) {
         DoctorGroupEvent event = new DoctorGroupEvent();
         event.setOrgId(group.getOrgId());
         event.setOrgName(group.getOrgName());
@@ -890,6 +893,12 @@ public class DoctorImportDataService {
         event.setIsAuto(IsOrNot.YES.getValue());
         event.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
         event.setStatus(EventStatus.VALID.getValue());
+        event.setEventSource(SourceType.IMPORT.getValue());
+        if (isSowEvent) {
+            event.setRelPigEventId(-1L);
+        } else {
+            event.setRelGroupEventId(-1L);
+        }
         doctorGroupEventDao.create(event);
         return event;
     }
@@ -956,7 +965,7 @@ public class DoctorImportDataService {
             }
 
             doctorGroupTrackDao.create(groupTrack);
-            DoctorGroupEvent moveInEvent = createMoveInGroupEvent(group, groupTrack, 1, MoreObjects.firstNonNull(groupTrack.getBirthWeight(), 7D) / groupTrack.getQuantity());
+            DoctorGroupEvent moveInEvent = createMoveInGroupEvent(group, groupTrack, 1, MoreObjects.firstNonNull(groupTrack.getBirthWeight(), 7D) / groupTrack.getQuantity(), true);
 
             //groupTrack关联最新事件
             groupTrack.setRelEventId(moveInEvent.getId());
@@ -1310,6 +1319,7 @@ public class DoctorImportDataService {
 
         //描述
         event.setDesc(getEventDesc(entry.descMap()));
+        event.setEventSource(SourceType.IMPORT.getValue());
         event.setExtra(MAPPER.toJson(entry));
         if(event.getEventAt() == null){
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取进场事件时间，请检查数据");
@@ -1335,6 +1345,7 @@ public class DoctorImportDataService {
 
         DoctorChgLocationDto extra = new DoctorChgLocationDto();
         extra.setChgLocationToBarnName(info.getBarnName());
+        event.setEventSource(SourceType.IMPORT.getValue());
         event.setExtra(MAPPER.toJson(extra));
         event.setDesc(getEventDesc(extra.descMap()));
         if(event.getEventAt() == null){
@@ -1363,6 +1374,7 @@ public class DoctorImportDataService {
         event.setBoarCode(info.getBoarCode());
         event.setIsImpregnation(isPreg);        //是否受胎
         event.setIsDelivery(isDevelivery);      //是否分娩
+        event.setEventSource(SourceType.IMPORT.getValue());
 
         DoctorMatingDto mate = new DoctorMatingDto();
         mate.setMatingBoarPigCode(info.getBoarCode());
@@ -1387,6 +1399,7 @@ public class DoctorImportDataService {
         event.setName(PigEvent.PREG_CHECK.getName());
         event.setRelEventId(beforeEvent.getId());
         event.setPigStatusBefore(PigStatus.Mate.getKey());
+        event.setEventSource(SourceType.IMPORT.getValue());
 
         //妊娠检查
         if (checkResult == PregCheckResult.YANG) {
@@ -1437,6 +1450,7 @@ public class DoctorImportDataService {
         event.setDeadCount(info.getDeadCount());
         event.setBlackCount(info.getBlackCount());
         event.setFarrowingDate(event.getEventAt());
+        event.setEventSource(SourceType.IMPORT.getValue());
 
         //分娩extra
         DoctorFarrowingDto farrow = new DoctorFarrowingDto();
@@ -1488,6 +1502,7 @@ public class DoctorImportDataService {
         event.setWeanAvgWeight(MoreObjects.firstNonNull(info.getWeanWeight(), 0D) / (event.getWeanCount() == 0 ? 1 : event.getWeanCount()));
         event.setPartweanDate(event.getEventAt());
         event.setBoarCode(info.getBoarCode());
+        event.setEventSource(SourceType.IMPORT.getValue());
 
         //断奶extra
         DoctorWeanDto wean = new DoctorWeanDto();

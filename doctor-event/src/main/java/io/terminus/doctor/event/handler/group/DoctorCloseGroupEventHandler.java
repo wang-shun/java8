@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Desc: 关闭猪群事件处理器
@@ -75,6 +75,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         DoctorGroupEvent<DoctorCloseGroupEvent> event = dozerGroupEvent(group, GroupEventType.CLOSE, close);
 
         event.setExtraMap(closeEvent);
+        event.setEventSource(SourceType.INPUT.getValue());
         doctorGroupEventDao.create(event);
 
         //创建关联关系
