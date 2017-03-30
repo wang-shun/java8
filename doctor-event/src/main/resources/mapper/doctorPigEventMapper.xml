@@ -807,7 +807,7 @@
                 created_at = #{item.createdAt},
                 updated_at = now()
             </set>
-            where id = ${item.id}
+            where id = #{item.id}
         </foreach>
     </update>
 
