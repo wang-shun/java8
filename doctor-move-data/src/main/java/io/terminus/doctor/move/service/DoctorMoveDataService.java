@@ -2445,7 +2445,7 @@ public class DoctorMoveDataService {
         if (doctorPigEvensList.isEmpty()) {
             return;
         }
-        List<List<DoctorPigEvent>> lists = Lists.partition(doctorPigEvensList, 10);
+        List<List<DoctorPigEvent>> lists = Lists.partition(doctorPigEvensList, 1000);
         lists.forEach(list -> {
             for(DoctorPigEvent doctorPigEvent: list) {
                 Map<String, Object> map = new HashMap<String, Object>();
