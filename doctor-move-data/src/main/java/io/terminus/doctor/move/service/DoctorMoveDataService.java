@@ -96,6 +96,7 @@ import io.terminus.doctor.move.model.View_EventListGain;
 import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_SowCardList;
+import io.terminus.doctor.move.util.JsonFormatUtils;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -2597,5 +2598,28 @@ public class DoctorMoveDataService {
     public void updateParityAndBoarCodeByPigId(Long pigId) {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("pigId", pigId , "type", PigEvent.ENTRY.getKey()));
         updateParityAndBoarCodeByEntryEvents(doctorPigEvensList);
+    }
+
+    public void flushGroupEventExtraDateFormat(Long farmId) {
+        List<DoctorGroupEvent> eventList = doctorGroupEventDao.findByFarmId(farmId);
+        List<List<DoctorGroupEvent>> eventLists = Lists.partition(eventList, 1000);
+        eventLists.forEach(list -> {
+            list.forEach(doctorGroupEvent -> {
+            });
+        });
+
+    }
+
+    public void flushGroupSnapshotsToInfoDateFormat(Long farmId) {
+        List<DoctorGroup> groupList = doctorGroupDao.findByFarmId(farmId);
+        groupList.forEach(group -> {
+            List<DoctorGroupSnapshot> snapshots = doctorGroupSnapshotDao.findByGroupId(group.getId());
+            snapshots.forEach( doctorGroupSnapshot -> {
+                DoctorGroupSnapShotInfo info = JsonFormatUtils.JSON_NON_EMPTY_MAPPER.fromJson(doctorGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
+                doctorGroupSnapshot.setToInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(info));
+            });
+//            doctorGroupSnapshotDao.deleteByGroupId(group.getId());
+            doctorGroupSnapshotDao.creates(snapshots);
+        });
     }
 }

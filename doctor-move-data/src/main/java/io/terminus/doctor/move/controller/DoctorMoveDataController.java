@@ -8,8 +8,10 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
@@ -33,6 +35,7 @@ import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -40,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -965,6 +969,30 @@ public class DoctorMoveDataController {
     @RequestMapping(value = "/batchElicitPigTrack", method = RequestMethod.GET)
     public Boolean batchElicitPigTrack(@RequestParam Long farmId) {
         doctorEventModifyRequestWriteService.batchElicitPigTrack(farmId);
+        return true;
+    }
+
+    @RequestMapping(value = "/group/snapshots")
+    public Boolean flushGroupDateFormat(@RequestParam(required = false) Long farmId){
+        log.warn("{} flush group dateformat start", DateUtil.toDateTimeString(new Date()));
+        List<Long> farmIds = Lists.newArrayList();
+        try{
+            if(Arguments.isNull(farmId)){
+                farmIds = getAllFarmIds();
+            }else{
+                farmIds.add(farmId);
+            }
+            farmIds.forEach(id -> {
+                log.warn("{} flush farm {} group dateformat start", DateUtil.toDateTimeString(new Date()), id);
+//                doctorMoveDataService.flushGroupEventExtraDateFormat(id);
+                doctorMoveDataService.flushGroupSnapshotsToInfoDateFormat(id);
+            });
+        }catch(Exception e){
+            log.error("flush group dateformat failed, cause: {}", Throwables.getStackTraceAsString(e));
+            return false;
+        }
+
+        log.warn("{} flush group dateformat end", DateUtil.toDateTimeString(new Date()));
         return true;
     }
 }

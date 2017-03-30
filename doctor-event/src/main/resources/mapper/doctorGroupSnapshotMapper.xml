@@ -94,4 +94,10 @@
         where group_id = #{group_id}
     </delete>
 
+    <select id="getSnapshotsByGroupId" resultMap="DoctorGroupSnapshotMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb" />
+        WHERE group_id = #{groupId}
+    </select>
+
 </mapper>

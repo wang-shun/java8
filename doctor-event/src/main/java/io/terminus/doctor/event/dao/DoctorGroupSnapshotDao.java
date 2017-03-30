@@ -47,4 +47,8 @@ public class DoctorGroupSnapshotDao extends MyBatisDao<DoctorGroupSnapshot> {
     public Boolean deleteByGroupId(Long groupId) {
         return getSqlSession().delete(sqlId("deleteByGroupId"), groupId) == 1;
     }
+
+    public List<DoctorGroupSnapshot> findByGroupId(Long groupId) {
+        return getSqlSession().selectList(sqlId("getSnapshotsByGroupId"), groupId);
+    }
 }
