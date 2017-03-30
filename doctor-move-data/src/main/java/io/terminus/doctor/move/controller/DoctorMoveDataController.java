@@ -34,7 +34,6 @@ import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jetty.servlet.BaseHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -426,7 +425,7 @@ public class DoctorMoveDataController {
                 listFarmIds.forEach(id -> {
                 DoctorFarm farm = doctorFarmDao.findById(id);
                 log.warn("{} update parity and boarCode start, farmId:{}", DateUtil.toDateTimeString(new Date()), id);
-                doctorMoveDataService.updateExcelImportErrorPigEvents(farm);
+                doctorMoveDataService.updateExcelMOVEErrorPigEvents(farm);
                 log.warn("{} update parity and boarCode end", DateUtil.toDateTimeString(new Date()));
             });
             return true;
