@@ -190,14 +190,6 @@ public class JsonMapperUtil {
      * 取出Mapper做进一步的设置或使用其他序列化API.
      */
     public ObjectMapper getMapper() {
-        return mapper;
-    }
-
-    /**
-     * 取出Mapper做进一步的设置或使用其他序列化API.
-     */
-    public ObjectMapper getNewMapper() {
-
         ObjectMapper newMapper = new ObjectMapper();
         //设置输出时包含属性的风格
         newMapper.setSerializationInclusion(include);
@@ -208,4 +200,5 @@ public class JsonMapperUtil {
 
         return newMapper;
     }
+
 }
