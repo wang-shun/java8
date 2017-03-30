@@ -847,7 +847,7 @@ public class DoctorImportDataService {
                 groupTrack.setQuaQty(groupTrack.getQuantity());
             }
             doctorGroupTrackDao.create(groupTrack);
-            DoctorGroupEvent moveInEvent = createMoveInGroupEvent(group, groupTrack, dayAge, avgWeight);
+            DoctorGroupEvent moveInEvent = createMoveInGroupEvent(group, groupTrack, dayAge, avgWeight, false);
 
             //groupTrack关联最新事件
             groupTrack.setRelEventId(moveInEvent.getId());
@@ -871,7 +871,7 @@ public class DoctorImportDataService {
     /**
      * 创建默认的转入事件
      */
-    private DoctorGroupEvent createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, Integer dayAge, Double avgWeight) {
+    private DoctorGroupEvent createMoveInGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, Integer dayAge, Double avgWeight, boolean isSowEvent) {
         DoctorGroupEvent event = new DoctorGroupEvent();
         event.setOrgId(group.getOrgId());
         event.setOrgName(group.getOrgName());
@@ -894,6 +894,11 @@ public class DoctorImportDataService {
         event.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
         event.setStatus(EventStatus.VALID.getValue());
         event.setEventSource(SourceType.IMPORT.getValue());
+        if (isSowEvent) {
+            event.setRelPigEventId(-1L);
+        } else {
+            event.setRelGroupEventId(-1L);
+        }
         doctorGroupEventDao.create(event);
         return event;
     }
@@ -960,7 +965,7 @@ public class DoctorImportDataService {
             }
 
             doctorGroupTrackDao.create(groupTrack);
-            DoctorGroupEvent moveInEvent = createMoveInGroupEvent(group, groupTrack, 1, MoreObjects.firstNonNull(groupTrack.getBirthWeight(), 7D) / groupTrack.getQuantity());
+            DoctorGroupEvent moveInEvent = createMoveInGroupEvent(group, groupTrack, 1, MoreObjects.firstNonNull(groupTrack.getBirthWeight(), 7D) / groupTrack.getQuantity(), true);
 
             //groupTrack关联最新事件
             groupTrack.setRelEventId(moveInEvent.getId());
