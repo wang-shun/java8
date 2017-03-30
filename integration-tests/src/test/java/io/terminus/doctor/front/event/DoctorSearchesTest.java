@@ -5,6 +5,7 @@ import configuration.front.FrontWebConfiguration;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dto.search.SearchedGroupDto;
 import io.terminus.doctor.event.dto.search.SearchedPigDto;
 import io.terminus.doctor.front.BaseFrontWebTest;
@@ -36,7 +37,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         System.out.println(body.getPigs().getTotal());
         System.out.println(body.getPigs().getData());
         System.out.println(body.getSowStatuses());
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     /**
@@ -47,7 +48,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
     public void test_QUERY_SowSuggest() {
         String url = "/api/doctor/search/sowpigs/suggest";
         List body = getForEntity(url, ImmutableMap.of("farmId", 12355, "size", 2, "q", "lY1"), List.class).getBody();
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     /**
@@ -58,7 +59,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
     public void test_QUERY_SowStatuses() {
         String url = "/api/doctor/search/sowpigs";
         Paging paging = getForEntity(url, ImmutableMap.of("farmId", 12355, "statuses", "1_3_4"), Paging.class).getBody();
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(paging.getData()));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(paging.getData()));
     }
 
     /**
@@ -84,7 +85,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         System.out.println(body.getGroups().getTotal());
         System.out.println(body.getGroups().getData());
         System.out.println(body.getAggPigTypes());
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     /**
@@ -95,7 +96,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
     public void test_QUERY_PigGroups() {
         String url = "/api/doctor/search/groups";
         Paging body = getForEntity(url, ImmutableMap.of("farmId", 12355, "q", "yy"), Paging.class).getBody();
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     /**
@@ -106,7 +107,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
     public void test_QUERY_GroupStatuses() {
         String url = "/api/doctor/search/groups";
         Paging body = getForEntity(url, ImmutableMap.of("farmId", 12355, "pigTypes", "1_2"), Paging.class).getBody();
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     /**
@@ -118,14 +119,14 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         String url = "/api/doctor/search/barns";
         // Object body = getForEntity(url, ImmutableMap.of("farmId", 12355, "pigType", "3"), Object.class).getBody();
         Object body = getForEntity(url, ImmutableMap.of("farmId", 12355, "pigTypes", "1_2"), Object.class).getBody();
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     @Test
     public void test_QUERY_BarnsByKeyWord() {
         String url = "/api/doctor/search/barns";
         Object body = getForEntity(url, ImmutableMap.of("farmId", 12355, "q", "2"), Object.class).getBody();
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     /**
@@ -137,7 +138,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         String url = "/api/doctor/search/barns/all";
         List body = getForEntity(url, ImmutableMap.of("farmId", 12355), List.class).getBody();
         System.out.println(body.size());
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     /**
@@ -149,7 +150,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         String url = "/api/doctor/search/materials/all";
         List body = getForEntity(url, ImmutableMap.of("farmId", 12355), List.class).getBody();
         System.out.println(body.size());
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     /**
@@ -161,7 +162,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         String url = "/api/doctor/search/materials/all";
         List body = getForEntity(url, ImmutableMap.of("farmId", 12355, "exIds", "19,14"), List.class).getBody();
         System.out.println(body.size());
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     /**
@@ -175,7 +176,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         String q = "物料测试material";
         List body = getForEntity(url, ImmutableMap.of("q", q,"farmId", 12355), List.class).getBody();
         System.out.println(body.size());
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     /**
@@ -188,7 +189,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         String q = "物料测试ma";
         List body = getForEntity(url, ImmutableMap.of("farmId", 12355, "size", 2 ,"q", q), List.class).getBody();
         System.out.println(body.size());
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     /**
@@ -200,27 +201,27 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         String url = "/api/doctor/pigs/notify/message";
         List messages = getForEntity(url, ImmutableMap.of("pigId", "144"), List.class).getBody();
         System.out.println(messages.size());
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(messages));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(messages));
     }
 
     @Test
     public void test_Report() {
         String url = "/api/doctor/report/daily";
         Object body = getForEntity(url, ImmutableMap.of("farmId", 12355, "date", "2016-07-25"), Object.class).getBody();
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     @Test
     public void test_Msg() {
         String url = "/api/doctor/msg/rule/farmId";
         Object body = getForEntity(url, ImmutableMap.of("farmId", 12399,"templateName","待配种警示"), Object.class).getBody();
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
     @Test
     public void test_BoarDetial() {
         String url = "/api/doctor/pigs//getSowPigDetail";
         Object body = getForEntity(url, ImmutableMap.of("pigId",14,"farmId", 12399), Object.class).getBody();
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(body));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 }

@@ -8,6 +8,7 @@ import io.terminus.doctor.basic.dto.EventHandlerContext;
 import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.basic.model.DoctorWarehouseSnapshot;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +47,7 @@ public class DoctorWareHouseHandlerInvocation {
             doctorWarehouseSnapshotDao.create(
                     DoctorWarehouseSnapshot.builder()
                             .eventId(context.getEventId())
-                            .beforeEvent(JsonMapperUtil.JSON_NON_EMPTY_MAPPER.toJson(context.getSnapshot()))
+                            .beforeEvent(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(context.getSnapshot()))
                             .build()
             );
         }

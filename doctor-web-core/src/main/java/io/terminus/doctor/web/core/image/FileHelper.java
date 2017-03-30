@@ -8,6 +8,7 @@ import com.google.common.io.Files;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.lib.file.FileServer;
 import io.terminus.lib.file.ImageServer;
 import io.terminus.lib.file.util.FUtil;
@@ -200,7 +201,7 @@ public class FileHelper {
             Integer width = originalImage.getWidth();
             Integer height = originalImage.getHeight();
 
-            return JsonMapperUtil.nonEmptyMapper().toJson(ImmutableMap.of("width", width, "height", height));
+            return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(ImmutableMap.of("width", width, "height", height));
         }catch(IOException e){
             log.error("Read image size failed, Error code={}", Throwables.getStackTraceAsString(e));
             return "";

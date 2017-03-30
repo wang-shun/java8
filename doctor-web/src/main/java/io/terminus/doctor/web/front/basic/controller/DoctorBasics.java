@@ -9,6 +9,7 @@ import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.user.service.DoctorAddressReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.pampas.common.UserUtil;
@@ -201,6 +202,6 @@ public class DoctorBasics {
      */
     @RequestMapping(value = "/addressTree", method = RequestMethod.GET)
     public String findAddressTree() {
-        return JSON_MAPPER.toJson(RespHelper.or500(doctorAddressReadService.findAllAddress()));
+        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(RespHelper.or500(doctorAddressReadService.findAllAddress()));
     }
 }

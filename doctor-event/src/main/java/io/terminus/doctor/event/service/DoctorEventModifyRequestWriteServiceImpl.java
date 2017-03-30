@@ -8,6 +8,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -91,7 +92,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
                     .eventId(eventId)
                     .status(EventRequestStatus.WAITING.getValue())
                     .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
-                    .content(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(modifyEvent))
+                    .content(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(modifyEvent))
                     .userId(userId)
                     .userName(realName)
                     .build();
@@ -127,7 +128,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
                     .eventId(eventId)
                     .status(EventRequestStatus.WAITING.getValue())
                     .type(DoctorEventModifyRequest.TYPE.GROUP.getValue())
-                    .content(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(modifyEvent))
+                    .content(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(modifyEvent))
                     .userId(userId)
                     .userName(realName)
                     .build();

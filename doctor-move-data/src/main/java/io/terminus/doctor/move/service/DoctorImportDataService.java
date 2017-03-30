@@ -32,6 +32,7 @@ import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -748,7 +749,7 @@ public class DoctorImportDataService {
                     .pigId(boar.getId())
                     .fromEventId(0L)
                     .toEventId(boarTrack.getCurrentEventId())
-                    .toPigInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(new DoctorPigSnapShotInfo(boar, boarTrack)))
+                    .toPigInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(new DoctorPigSnapShotInfo(boar, boarTrack)))
                     .build();
             doctorPigSnapshotDao.create(pigSnapshot);
 
@@ -860,7 +861,7 @@ public class DoctorImportDataService {
                     .groupTrack(groupTrack)
                     .groupEvent(moveInEvent)
                     .build();
-            groupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
+            groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
             doctorGroupSnapshotDao.create(groupSnapshot);
         }
     }
@@ -972,7 +973,7 @@ public class DoctorImportDataService {
                     .groupTrack(groupTrack)
                     .groupEvent(moveInEvent)
                     .build();
-            groupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
+            groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
             doctorGroupSnapshotDao.create(groupSnapshot);
 
             // 把 产房仔猪群 的groupId 存入相应猪舍的所有母猪
@@ -1115,7 +1116,7 @@ public class DoctorImportDataService {
                     .pigId(sow.getId())
                     .fromEventId(0L)
                     .toEventId(track.getCurrentEventId())
-                    .toPigInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(new DoctorPigSnapShotInfo(sow, track)))
+                    .toPigInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(new DoctorPigSnapShotInfo(sow, track)))
                     .build();
             doctorPigSnapshotDao.create(pigSnapshot);
 
@@ -1229,7 +1230,7 @@ public class DoctorImportDataService {
         Map<Integer, String> relMap = Maps.newHashMap();
         parityMap.entrySet().forEach(map -> relMap.put(map.getKey(), Joiners.COMMA.join(map.getValue())));
 
-        sowTrack.setRelEventIds(MAPPER.toJson(relMap));
+        sowTrack.setRelEventIds(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(relMap));
         sowTrack.setCurrentMatingCount(0);       //当前配种次数0 查询的时候自动加1
         sowTrack.setFarrowQty(0);
         sowTrack.setUnweanQty(0);
@@ -1310,7 +1311,7 @@ public class DoctorImportDataService {
 
         //描述
         event.setDesc(getEventDesc(entry.descMap()));
-        event.setExtra(MAPPER.toJson(entry));
+        event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(entry));
         if(event.getEventAt() == null){
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取进场事件时间，请检查数据");
         }
@@ -1335,7 +1336,7 @@ public class DoctorImportDataService {
 
         DoctorChgLocationDto extra = new DoctorChgLocationDto();
         extra.setChgLocationToBarnName(info.getBarnName());
-        event.setExtra(MAPPER.toJson(extra));
+        event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(extra));
         event.setDesc(getEventDesc(extra.descMap()));
         if(event.getEventAt() == null){
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取去分娩舍事件时间，请检查数据");
@@ -1368,7 +1369,7 @@ public class DoctorImportDataService {
         mate.setMatingBoarPigCode(info.getBoarCode());
         mate.setJudgePregDate(info.getPrePregDate());
         event.setDesc(getEventDesc(mate.descMap()));
-        event.setExtra(MAPPER.toJson(mate));
+        event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(mate));
         if(event.getEventAt() == null){
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取配种事件时间，请检查数据");
         }
@@ -1406,7 +1407,7 @@ public class DoctorImportDataService {
         result.setCheckMark(info.getRemark());
 
         event.setDesc(getEventDesc(result.descMap()));
-        event.setExtra(MAPPER.toJson(result));
+        event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(result));
         if(event.getEventAt() == null){
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取妊娠检查事件时间，请检查数据");
         }
@@ -1462,7 +1463,7 @@ public class DoctorImportDataService {
         farrow.setFarrowRemark(info.getRemark());
 
         event.setDesc("分娩");
-        event.setExtra(MAPPER.toJson(farrow));
+        event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farrow));
         if(event.getEventAt() == null){
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取分娩事件时间，请检查数据");
         }
@@ -1501,7 +1502,7 @@ public class DoctorImportDataService {
         wean.setWeanPigletsCount(0);
 
         event.setDesc(getEventDesc(wean.descMap()));
-        event.setExtra(MAPPER.toJson(wean));
+        event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(wean));
         if(event.getEventAt() == null){
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取断奶事件时间，请检查数据");
         }
@@ -1903,7 +1904,7 @@ public class DoctorImportDataService {
         groupSnapshot.setFromEventId(0L);
         groupSnapshot.setToEventId(lastEvent.getId());
         DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder().group(group).groupTrack(groupTrack).groupEvent(lastEvent).build();
-        groupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
+        groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
         doctorGroupSnapshotDao.create(groupSnapshot);
     }
 
@@ -1952,7 +1953,7 @@ public class DoctorImportDataService {
         groupSnapshot.setFromEventId(0L);
         groupSnapshot.setToEventId(groupEvent.getId());
         DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder().group(group).groupTrack(groupTrack).groupEvent(groupEvent).build();
-        groupSnapshot.setToInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
+        groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
         doctorGroupSnapshotDao.create(groupSnapshot);
 
         DoctorGroupSnapshot updateSnapshot = new DoctorGroupSnapshot();
@@ -1986,7 +1987,7 @@ public class DoctorImportDataService {
                 .pigId(pigId)
                 .fromEventId(0L)
                 .toEventId(currentTrack.getCurrentEventId())
-                .toPigInfo(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(info))
+                .toPigInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info))
                 .build();
         doctorPigSnapshotDao.create(snapshot);
     }

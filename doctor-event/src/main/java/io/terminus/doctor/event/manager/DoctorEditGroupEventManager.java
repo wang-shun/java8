@@ -5,6 +5,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.enums.*;
@@ -133,7 +134,7 @@ public class DoctorEditGroupEventManager {
         DoctorGroupSnapShotInfo toInfo = DoctorGroupSnapShotInfo.builder().group(doctorGroupDao.findById(doctorGroupEvent.getGroupId()))
                 .groupEvent(doctorGroupEvent)
                 .groupTrack(newTrack).build();
-        newSnapshot.setToInfo(JSON_MAPPER.toJson(toInfo));
+        newSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(toInfo));
         doctorGroupSnapshotDao.create(newSnapshot);
     }
 

@@ -1,10 +1,8 @@
 package io.terminus.doctor.web.core.msg.email;
 
-import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.lib.email.EmailException;
 import io.terminus.lib.email.EmailService;

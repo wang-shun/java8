@@ -8,6 +8,7 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -213,7 +214,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         groupSnapshot.setGroupId(newShot.getGroup().getId());
         groupSnapshot.setFromEventId(oldShot.getGroupEvent().getId());
         groupSnapshot.setToEventId(newShot.getGroupEvent().getId());
-        groupSnapshot.setToInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
+        groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
                 .group(newShot.getGroup())
                 .groupEvent(newShot.getGroupEvent())
                 .groupTrack(newShot.getGroupTrack())

@@ -11,6 +11,7 @@ import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -127,7 +128,7 @@ public class DoctorGroupManager {
         groupSnapshot.setGroupId(groupEvent.getGroupId());
         groupSnapshot.setFromEventId(0L);
         groupSnapshot.setToEventId(groupEvent.getId());
-        groupSnapshot.setToInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
+        groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
                 .group(group)
                 .groupEvent(shotEvent)
                 .groupTrack(groupTrack)

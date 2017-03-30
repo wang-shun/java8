@@ -5,6 +5,7 @@ import configuration.front.FrontWebConfiguration;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
@@ -45,7 +46,7 @@ import static org.junit.Assert.assertThat;
 @SpringApplicationConfiguration(FrontWebConfiguration.class)
 public class DoctorGroupEventsTest extends BaseFrontWebTest {
 
-    private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.nonEmptyMapper();
+    private static final ToJsonMapper JSON_MAPPER = ToJsonMapper.JSON_NON_EMPTY_MAPPER;
 
     /**
      * 新建猪群测试

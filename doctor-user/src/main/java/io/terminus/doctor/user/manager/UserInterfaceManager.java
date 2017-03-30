@@ -6,6 +6,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.interfaces.event.EventType;
@@ -67,7 +68,7 @@ public class UserInterfaceManager {
      */
     public void pulishZkEvent(UserDto user, EventType eventType, String systemCode) throws Exception {
         try {
-            publisher.publish(JsonMapperUtil.nonEmptyMapper().toJson(new UserEvent(user, eventType, systemCode)).getBytes());
+            publisher.publish(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(new UserEvent(user, eventType, systemCode)).getBytes());
         } catch(Exception e) {
             log.info("throw a error when publish event, user:{}, eventType:{}, systemCode:{}", user, eventType.name(), systemCode);
             if(!e.getMessage().equals("no subscribers exists")){

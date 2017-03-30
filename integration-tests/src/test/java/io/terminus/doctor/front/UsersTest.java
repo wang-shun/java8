@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import configuration.front.FrontPrimaryWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.constant.Front;
 import io.terminus.doctor.user.model.DoctorUser;
 import org.junit.Test;
@@ -33,7 +34,7 @@ public class UsersTest extends BaseFrontWebTest {
         ResponseEntity<DoctorUser> result = restTemplate.getForEntity("http://localhost:{port}/api/user",
                 DoctorUser.class, ImmutableMap.of("port", port));
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
-        System.out.println(JsonMapperUtil.JSON_NON_EMPTY_MAPPER.toJson(result.getBody()));
+        System.out.println(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(result.getBody()));
     }
 
 

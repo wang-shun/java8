@@ -25,9 +25,11 @@ public class JsonMapperUtil {
     private static Logger logger = LoggerFactory.getLogger(JsonMapperUtil.class);
     public static final JsonMapperUtil JSON_NON_EMPTY_MAPPER = new JsonMapperUtil(JsonInclude.Include.NON_EMPTY);
     public static final JsonMapperUtil JSON_NON_DEFAULT_MAPPER = new JsonMapperUtil(JsonInclude.Include.NON_DEFAULT);
+    private JsonInclude.Include include;
     private ObjectMapper mapper;
 
     private JsonMapperUtil(JsonInclude.Include include) {
+        this.include = include;
         mapper = new ObjectMapper();
         //设置输出时包含属性的风格
         mapper.setSerializationInclusion(include);
@@ -72,20 +74,20 @@ public class JsonMapperUtil {
         return format != null? jsonMapperUtil.setDateFormat(format) : jsonMapperUtil;
     }
 
-    /**
-     * Object可以是POJO，也可以是Collection或数组。
-     * 如果对象为Null, 返回"null".
-     * 如果集合为空集合, 返回"[]".
-     */
-    public String toJson(Object object) {
-
-        try {
-            return mapper.writeValueAsString(object);
-        } catch (IOException e) {
-            logger.warn("write to json string error:" + object, e);
-            return null;
-        }
-    }
+//    /**
+//     * Object可以是POJO，也可以是Collection或数组。
+//     * 如果对象为Null, 返回"null".
+//     * 如果集合为空集合, 返回"[]".
+//     */
+//    public String toJson(Object object) {
+//
+//        try {
+//            return mapper.writeValueAsString(object);
+//        } catch (IOException e) {
+//            logger.warn("write to json string error:" + object, e);
+//            return null;
+//        }
+//    }
 
     /**
      * 反序列化POJO或简单Collection如List<String>.
@@ -162,12 +164,12 @@ public class JsonMapperUtil {
         return null;
     }
 
-    /**
-     * 輸出JSONP格式數據.
-     */
-    public String toJsonP(String functionName, Object object) {
-        return toJson(new JSONPObject(functionName, object));
-    }
+//    /**
+//     * 輸出JSONP格式數據.
+//     */
+//    public String toJsonP(String functionName, Object object) {
+//        return toJson(new JSONPObject(functionName, object));
+//    }
 
     /**
      * 設定是否使用Enum的toString函數來讀寫Enum,
@@ -189,5 +191,21 @@ public class JsonMapperUtil {
      */
     public ObjectMapper getMapper() {
         return mapper;
+    }
+
+    /**
+     * 取出Mapper做进一步的设置或使用其他序列化API.
+     */
+    public ObjectMapper getNewMapper() {
+
+        ObjectMapper newMapper = new ObjectMapper();
+        //设置输出时包含属性的风格
+        newMapper.setSerializationInclusion(include);
+        //设置输入时忽略在JSON字符串中存在但Java对象实际没有的属性
+        newMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        newMapper.registerModule(new GuavaModule());
+
+        return newMapper;
     }
 }

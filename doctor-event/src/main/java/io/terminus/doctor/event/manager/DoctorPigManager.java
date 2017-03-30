@@ -2,6 +2,7 @@ package io.terminus.doctor.event.manager;
 
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorMessageDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -71,7 +72,7 @@ public class DoctorPigManager {
             DoctorPigSnapShotInfo info = MAPPER.fromJson(snapshot.getToPigInfo(), DoctorPigSnapShotInfo.class);
             info.getPig().setPigCode(pigCode);
             //info.getPigEvent().setPigCode(pigCode);
-            snapshot.setToPigInfo(IN_JSON_MAPPER.toJson(info));
+            snapshot.setToPigInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info));
             doctorPigSnapshotDao.update(snapshot);
         });
 

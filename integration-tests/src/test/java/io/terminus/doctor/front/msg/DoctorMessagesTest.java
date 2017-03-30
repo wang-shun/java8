@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.event.model.DoctorMessage;
 import io.terminus.doctor.event.model.DoctorMessageRuleTemplate;
@@ -48,7 +49,7 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
                 .params("pageSize", 5)
                 .build();
         Object object = this.restTemplate.getForObject(url, Object.class, ImmutableMap.of("port", this.port));
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(object));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(object));
     }
 
     /**
@@ -62,7 +63,7 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
                 .params("pageSize", 5)
                 .build();
         Object object = this.restTemplate.getForObject(url, Object.class, ImmutableMap.of("port", this.port));
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(object));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(object));
     }
 
     /**
@@ -140,7 +141,7 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
         // 更新
         url = "http://localhost:"+ this.port +"/api/doctor/msg/template";
         this.restTemplate.postForObject(url,
-                HttpPostRequest.bodyRequest().params(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(template)),
+                HttpPostRequest.bodyRequest().params(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(template)),
                 Object.class);
 
         // 查询

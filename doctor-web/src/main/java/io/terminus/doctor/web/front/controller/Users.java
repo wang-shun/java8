@@ -20,6 +20,7 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.enums.SmsCodeType;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorRoleContent;
@@ -132,7 +133,7 @@ public class Users {
             BaseUser user = UserUtil.getCurrentUser();
             PermissionData perm = permissionHelper.getPermissions(acl, user, true);
             perm.setAllRequests(null); // empty it
-            doctorUser.setAuth(JsonMapperUtil.nonEmptyMapper().toJson(perm));
+            doctorUser.setAuth(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(perm));
             return doctorUser;
         } catch (Exception e) {
             Throwables.propagateIfInstanceOf(e, JsonResponseException.class);

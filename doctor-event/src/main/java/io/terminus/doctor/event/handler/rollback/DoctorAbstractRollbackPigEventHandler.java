@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.rollback;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -186,8 +187,8 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         revertLog.setFarmId(fromPigEvent.getFarmId());
         revertLog.setPigId(fromPigEvent.getPigId());
         revertLog.setType(fromPigEvent.getKind());
-        revertLog.setFromInfo(JSON_MAPPER.toJson(fromInfo));
-        revertLog.setToInfo(JSON_MAPPER.toJson(toInfo));
+        revertLog.setFromInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(fromInfo));
+        revertLog.setToInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(toInfo));
         revertLog.setReverterId(operatorId);
         revertLog.setReverterName(operatorName);
         RespHelper.orServEx(doctorRevertLogWriteService.createRevertLog(revertLog));

@@ -3,6 +3,7 @@ package io.terminus.doctor.event.model;
 import com.google.common.base.Objects;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dto.event.group.BaseGroupEvent;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -25,6 +26,7 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
     private static final long serialVersionUID = 2651236908562482893L;
 
     private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.nonEmptyMapper();
+    private static final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_EMPTY_MAPPER;
 
     private Long id;
     
@@ -249,7 +251,7 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
         if(extraMap == null){
             this.extra = null;
         }else {
-            this.extra = JSON_MAPPER.toJson(extraMap);
+            this.extra = TO_JSON_MAPPER.toJson(extraMap);
         }
     }
 

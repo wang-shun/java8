@@ -2,9 +2,8 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dto.msg.Rule;
 import io.terminus.doctor.event.model.DoctorMessageRule;
 import io.terminus.doctor.event.model.DoctorMessageRuleTemplate;
@@ -59,7 +58,7 @@ public class DoctorMessageRuleWriteServiceTest extends BaseServiceTest {
             template = BeanMapper.map(template, DoctorMessageRuleTemplate.class);
             Rule rule = template.getRule();
             rule.setChannels("0,1,2");
-            template.setRuleValue(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(rule));
+            template.setRuleValue(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(rule));
             // 更新(记录历史)
             doctorMessageRuleTemplateWriteService.updateMessageRuleTemplate(template);
         }

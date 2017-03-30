@@ -7,6 +7,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -192,8 +193,8 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
                 .farmName(pig.getFarmName())
                 .pigId(pig.getId())
                 .pigCode(pig.getPigCode())
-                .fromTrack(JSON_MAPPER.toJson(fromTrack))
-                .toTrack(JSON_MAPPER.toJson(toTrack))
+                .fromTrack(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(fromTrack))
+                .toTrack(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(toTrack))
                 .status(status)
                 .errorReason(errorReason)
                 .version(++version)
@@ -381,7 +382,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
         if (Objects.equals(executeEvent.getType(), PigEvent.WEAN.getKey())) {
             DoctorWeanDto weanDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorWeanDto.class);
             weanDto.setPartWeanPigletsCount(fromTrack.getUnweanQty());
-            executeEvent.setExtra(JSON_MAPPER.toJson(weanDto));
+            executeEvent.setExtra(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(weanDto));
             executeEvent.setWeanCount(fromTrack.getUnweanQty());
             executeEvent.setDesc(Joiner.on("#").withKeyValueSeparator("：").join(weanDto.descMap()));
         }

@@ -10,6 +10,7 @@ import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorBoarMonthlyReportDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorMonthlyReportDao;
@@ -46,7 +47,7 @@ import java.util.stream.Collectors;
 @RpcProvider
 public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportReadService {
 
-    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.nonEmptyMapper();
     private static final int MONTH_INDEX = 12;
     private static final int WEEK_INDEX = 20;
 

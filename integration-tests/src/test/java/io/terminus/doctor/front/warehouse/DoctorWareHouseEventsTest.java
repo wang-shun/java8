@@ -3,6 +3,7 @@ package io.terminus.doctor.front.warehouse;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.basic.dao.DoctorFarmWareHouseTypeDao;
 import io.terminus.doctor.basic.dao.DoctorMaterialConsumeAvgDao;
@@ -39,7 +40,7 @@ public class DoctorWareHouseEventsTest extends BaseFrontWebTest{
         String url = "http://localhost:"+this.port+"/api/doctor/warehouse/event/list";
         String urlWithParam = HttpGetRequest.url(url).params("farmId",12345l).params("wareHouseId",8l).build();
         Object o  = this.restTemplate.getForObject(urlWithParam, Object.class);
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(o));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(o));
     }
 
     @Test
@@ -47,7 +48,7 @@ public class DoctorWareHouseEventsTest extends BaseFrontWebTest{
         String url = "http://localhost:"+this.port+"/api/doctor/warehouse/event/paging";
         String urlWithParam = HttpGetRequest.url(url).params("farmId", 12345l).params("wareHouseId", 6).params("pageNo",1).params("pageSize",3).build();
         Object o  = this.restTemplate.getForObject(urlWithParam, Object.class);
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(o));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(o));
     }
 
     @Test
@@ -62,7 +63,7 @@ public class DoctorWareHouseEventsTest extends BaseFrontWebTest{
         List<DoctorMaterialInWareHouse> doctorMaterialInWareHouseList =
                 doctorMaterialInWareHouseDao.queryByFarmAndWareHouseId(12345l, 2l);
 
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialInWareHouseList));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialInWareHouseList));
     }
 
     /**
@@ -81,6 +82,6 @@ public class DoctorWareHouseEventsTest extends BaseFrontWebTest{
 
 //        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(doctorFarmWareHouseTypeDao.findByFarmId(12345l)));
 //        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialInWareHouseDao.queryByFarmAndWareHouseId(12345l, 2l)));
-        System.out.println(JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialConsumeAvgDao.listAll()));
+        System.out.println(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialConsumeAvgDao.listAll()));
     }
 }

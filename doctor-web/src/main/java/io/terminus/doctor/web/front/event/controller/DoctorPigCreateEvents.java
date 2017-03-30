@@ -25,6 +25,7 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorEventModifyRequestDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -947,7 +948,7 @@ public class DoctorPigCreateEvents {
                         DoctorPigEvent updateEvent = new DoctorPigEvent();
                         updateEvent.setId(pigEvent.getId());
                         updateEvent.setName(pigEvent.getName());
-                        updateEvent.setExtra(jsonMapperUtil1.toJson(jsonMapperUtil.fromJson(pigEvent.getExtra(), clazz)));
+                        updateEvent.setExtra(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(jsonMapperUtil.fromJson(pigEvent.getExtra(), clazz)));
                         RespHelper.or500(doctorPigEventWriteService.updatePigEvents(updateEvent));
                     } catch (Exception e) {
                         log.error("id:{}, cause:{}", pigEvent.getId(), Throwables.getStackTraceAsString(e));

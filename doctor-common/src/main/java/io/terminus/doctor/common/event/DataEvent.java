@@ -3,6 +3,7 @@ package io.terminus.doctor.common.event;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,7 @@ import static java.util.Objects.isNull;
 public class DataEvent {
 
     private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
+    private static final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
 
     private Integer eventType;     // 事件类型
 
@@ -35,12 +37,12 @@ public class DataEvent {
     public static <T> DataEvent make(Integer eventType, T content){
         return DataEvent.builder()
                 .eventType(eventType)
-                .content(JSON_MAPPER.toJson(content))
+                .content(TO_JSON_MAPPER.toJson(content))
                 .build();
     }
 
     public static byte[] toBytes(DataEvent dataEvent){
-        return JSON_MAPPER.toJson(dataEvent).getBytes();
+        return TO_JSON_MAPPER.toJson(dataEvent).getBytes();
     }
 
     public static <T> byte[] toBytes(Integer eventType, T context){

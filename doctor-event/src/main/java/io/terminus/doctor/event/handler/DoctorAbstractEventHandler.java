@@ -6,6 +6,7 @@ import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -239,7 +240,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .pigId(snapshotPig.getId())
                 .fromEventId(lastEventId)
                 .toEventId(executeEvent.getId())
-                .toPigInfo(JSON_MAPPER.toJson(
+                .toPigInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(
                         DoctorPigSnapShotInfo.builder().pig(snapshotPig).pigTrack(toTrack).build()))
                 .build();
         doctorPigSnapshotDao.create(snapshot);

@@ -7,6 +7,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorMonthlyReport;
@@ -92,7 +93,7 @@ public class PhoenixCrmReports {
             doctorDailyReportOpen.getLiveStock().setFattenOut(fattenOutMap.containsKey(doctorDailyReport.getFarmId()) ? fattenOutMap.get(doctorDailyReport.getFarmId()) : 0);
             return doctorDailyReportOpen;
         }).collect(Collectors.toList());
-        return MAPPER.toJson(doctorDailyReportDtos);
+        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(doctorDailyReportDtos);
     }
 
     /**
@@ -118,7 +119,7 @@ public class PhoenixCrmReports {
             doctorMonthlyReportOpen.setFarmName(farmMap.get(doctorMonthlyReport.getFarmId()));
             return doctorMonthlyReportOpen;
         }).collect(Collectors.toList());
-        return MAPPER.toJson(doctorCommonReportDtos);
+        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(doctorCommonReportDtos);
     }
 
     /**
@@ -137,7 +138,7 @@ public class PhoenixCrmReports {
                 .collect(Collectors.toList());
         DoctorGroupLiveStockDetailOpen doctorGroupLiveStockDetailOpen = new DoctorGroupLiveStockDetailOpen();
         BeanMapper.copy(detailDtoResponse.getResult(), doctorGroupLiveStockDetailOpen);
-        return MAPPER.toJson(liveStockDetailOpenList);
+        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(liveStockDetailOpenList);
     }
 
     /**

@@ -17,6 +17,7 @@ import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.web.core.util.DoctorUserMaker;
@@ -98,7 +99,7 @@ public class Users {
             BaseUser user = UserUtil.getCurrentUser();
             PermissionData perm = permissionHelper.getPermissions(acl, user, true);
             perm.setAllRequests(null); // empty it
-            doctorUser.setAuth(JsonMapperUtil.nonEmptyMapper().toJson(perm));
+            doctorUser.setAuth(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(perm));
         } catch (Exception e) {
             Throwables.propagateIfInstanceOf(e, JsonResponseException.class);
             log.error("get permissions of user failed, cause:{}", Throwables.getStackTraceAsString(e));

@@ -14,6 +14,7 @@ import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.user.service.DoctorAddressReadService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -101,7 +102,7 @@ public class DoctorBasics {
      */
     @RequestMapping(value = "/addressTree", method = RequestMethod.GET)
     public String findAddressTree() {
-        return JsonMapperUtil.nonEmptyMapper().toJson(RespHelper.or500(doctorAddressReadService.findAllAddress()));
+        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(RespHelper.or500(doctorAddressReadService.findAllAddress()));
     }
 
     /**
