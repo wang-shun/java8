@@ -784,3 +784,25 @@ and b.source = 2
 and a.created_at <= date_add(b.created_at, INTERVAL 2 minute);
 -- 系统录入
 update doctor_pig_events set event_source = 1 where event_source is null;
+
+-- 猪群的事件来源
+update doctor_group_events
+set event_source = 2
+where id in (select id from
+(select a.* from
+  (select id, created_at from doctor_farms where source = 2) b
+  left join doctor_group_events a
+  on a.farm_id = b.id
+  where a.farm_id not in (2,81)
+  and type =2
+  and a.created_at <= date_add(b.created_at, INTERVAL 3 minute)
+  and is_auto = 1
+  -- and event_source is null
+  and extra is null
+  or remark = 'excel导入'
+  ) t1
+  )
+  ;
+-- 导入的猪群事件的初始转入事件有谁触发
+update doctor_group_events set rel_pig_event_id = -1, rel_group_event_id = null where pig_type = 7 and event_source = 2;
+update doctor_group_events set rel_group_event_id = -1 , rel_pig_event_id = null where pig_type <> 7 and event_source = 2;

@@ -1040,4 +1040,14 @@ public class DoctorMoveDataController {
         }
         return Response.ok("处理成功!!!");
     }
+
+    /**
+     * 旧数据,生成相对应得猪群断奶事件
+     * @param farmId 猪场id -1时所有猪场
+     */
+    @RequestMapping(value = "/generateGroupWeanEvent", method = RequestMethod.GET)
+    public Boolean generateGroupWeanEvent(@RequestParam Long farmId) {
+        doctorMoveDataService.generateGroupWeanEvent(farmId);
+        return true;
+    }
 }

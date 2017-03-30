@@ -46,6 +46,8 @@ import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
+import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
+import io.terminus.doctor.event.dto.event.group.input.DoctorWeanGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -72,7 +74,9 @@ import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
+import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorGroupReportManager;
+import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
@@ -142,6 +146,10 @@ public class DoctorMoveDataService {
     private final DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorPigSnapshotDao doctorPigSnapshotDao;
+    @Autowired
+    private DoctorPigEventManager doctorPigEventManager;
+    @Autowired
+    private DoctorGroupEventManager doctorGroupEventManager;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -2627,5 +2635,34 @@ public class DoctorMoveDataService {
     public void updateParityAndBoarCodeByPigId(Long pigId) {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("pigId", pigId , "type", PigEvent.ENTRY.getKey()));
         updateParityAndBoarCodeByEntryEvents(doctorPigEvensList);
+    }
+
+    /**
+     * 生成猪群断奶事件
+     */
+    @Transactional
+    public void generateGroupWeanEvent(Long farmId){
+        List<Long> excludeIds = doctorGroupEventDao.queryRelPigEventIdsByGroupWeanEvent(farmId);
+        int offset = 0;
+        int limit = 1000;
+        while (true) {
+            List<DoctorPigEvent> doctorPigEventList = doctorPigEventDao.queryWeansWithoutGroupWean(excludeIds, farmId, offset, limit);
+            doctorPigEventList.forEach(pigWeanEvent -> {
+                try {
+                    DoctorWeanGroupInput groupInput = (DoctorWeanGroupInput) doctorPigEventManager.getHandler(PigEvent.WEAN.getKey()).buildTriggerGroupEventInput(pigWeanEvent);
+                    DoctorGroupTrack doctorGroupTrack = doctorGroupTrackDao.findByGroupId(groupInput.getGroupId());
+                    DoctorGroup doctorGroup = doctorGroupDao.findById(groupInput.getGroupId());
+                    DoctorGroupEvent groupWeanEvent = doctorGroupEventManager.buildGroupEvent(new DoctorGroupInputInfo(new DoctorGroupDetail(doctorGroup, doctorGroupTrack), groupInput), GroupEventType.WEAN.getValue());
+                    groupWeanEvent.setEventSource(SourceType.ADD.getValue());
+                    doctorGroupEventDao.create(groupWeanEvent);
+                } catch (Exception e) {
+                    log.error("pigEventId:{}", pigWeanEvent.getId());
+                    //throw e;
+                }
+            });
+            if (doctorPigEventList.size() < 1000) {
+                break;
+            }
+        }
     }
 }
