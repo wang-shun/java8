@@ -44,6 +44,8 @@ import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
 import io.terminus.parana.common.utils.RespHelper;
+import io.terminus.parana.user.address.model.Address;
+import io.terminus.parana.user.impl.address.dao.AddressDao;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
@@ -96,6 +98,8 @@ public class UserInitService {
     @Autowired
     private SubDao subDao;
     @Autowired
+    private AddressDao addressDao;
+    @Autowired
     private PrimaryUserDao primaryUserDao;
     @Autowired
     private DoctorMessageRuleWriteService doctorMessageRuleWriteService;
@@ -118,6 +122,7 @@ public class UserInitService {
         List<View_FarmMember> list = allList.stream()
                 .filter(view_farmMember -> includeFarmList.contains(view_farmMember.getFarmName()))
                 .collect(Collectors.toList());
+        log.info("===list{}", list);
         checkFarmNameRepeat(list);
 
         List<DoctorFarm> farms = new ArrayList<>();
@@ -142,6 +147,10 @@ public class UserInitService {
             org = this.createOrg(moveFarmInfoList.get(0).getOrgName(), admin.getMobilPhone(), null, admin.getOID());
         }
 
+        Address province = addressDao.findByName(moveFarmInfoList.get(0).getProvince());
+        Address city = addressDao.findByName(moveFarmInfoList.get(0).getCity());;
+        Address region = addressDao.findByName(moveFarmInfoList.get(0).getRegion());
+        String detailAddress = moveFarmInfoList.get(0).getProvince();
         for (DoctorMoveFarmInfo farmInfo : moveFarmInfoList) {
             log.info("===farmInfo:{}", farmInfo);
             // 主账号注册,内含事务
@@ -157,6 +166,13 @@ public class UserInitService {
             farm.setFarmCode(farmInfo.getLoginName());
             farm.setOrgId(org.getId());
             farm.setOrgName(org.getName());
+            farm.setProvinceId(province.getId());
+            farm.setProvinceName(province.getName());
+            farm.setCityId(city.getId());
+            farm.setCityName(city.getName());
+            farm.setDistrictId(region.getId());
+            farm.setDistrictName(region.getName());
+            farm.setDetailAddress(detailAddress);
             doctorFarmDao.create(farm);
             farmList.add(new DoctorFarmWithMobile(farm, primaryUser.getMobile()));
 

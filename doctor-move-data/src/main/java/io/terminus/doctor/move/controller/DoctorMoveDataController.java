@@ -363,10 +363,11 @@ public class DoctorMoveDataController {
     @RequestMapping(value = "/farm", method = RequestMethod.GET)
     public Boolean moveUserFarm(@RequestParam("mobile") String mobile,
                                 @RequestParam("loginName") String loginName,
-                                @RequestParam("moveId") Long moveId) {
+                                @RequestParam("moveId") Long moveId,
+                                @RequestParam("path") String path) {
         try {
             log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
-            userInitService.init(loginName, mobile, moveId, null);
+            userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
             log.warn("move user farm end");
             return Boolean.TRUE;
         } catch (Exception e) {
