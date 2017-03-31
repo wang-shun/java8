@@ -211,24 +211,26 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     }
 
     @Override
-    public RespWithEx<Boolean> batchElicitPigTrack(@NotNull(message = "farm.id.not.null") Long farmId) {
+    public RespWithEx<Boolean> batchElicitPigTrack(List<Long> farmIds) {
         try {
-            List<Long> pigIdList = doctorPigDao.findPigIdsByFarmId(farmId);
-            if (pigIdList.isEmpty()) {
-                return RespWithEx.ok(Boolean.TRUE);
+            for (Long farmId : farmIds) {
+                List<Long> pigIdList = doctorPigDao.findPigIdsByFarmId(farmId);
+                if (pigIdList.isEmpty()) {
+                    return RespWithEx.ok(Boolean.TRUE);
+                }
+                pigIdList.forEach(pigId -> {
+                    doctorEditPigEventService.elicitPigTrack(pigId);
+                });
             }
-            pigIdList.forEach(pigId -> {
-                doctorEditPigEventService.elicitPigTrack(pigId);
-            });
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
-            log.error("batch elicit pig track failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            log.error("batch elicit pig track failed, farmIds:{}, cause:{}", farmIds, Throwables.getStackTraceAsString(e));
             return RespWithEx.exception(e);
         }catch (ServiceException e) {
-            log.error("batch elicit pig track failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            log.error("batch elicit pig track failed, farmIds:{}, cause:{}", farmIds, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail(e.getMessage());
         } catch (Exception e) {
-            log.error("batch elicit pig track failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            log.error("batch elicit pig track failed, farmIds:{}, cause:{}", farmIds, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("elicit.pig.track.failed");
         }
     }

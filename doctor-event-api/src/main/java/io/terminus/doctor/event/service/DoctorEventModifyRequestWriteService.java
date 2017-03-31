@@ -72,8 +72,8 @@ public interface DoctorEventModifyRequestWriteService {
 
     /**
      * 推演猪track
-     * @param farmId 猪id
+     * @param farmIds 猪场ids
      * @return 是否成功
      */
-    RespWithEx<Boolean> batchElicitPigTrack(@NotNull(message = "farm.id.not.null") Long farmId);
+    RespWithEx<Boolean> batchElicitPigTrack(List<Long> farmIds);
 }
