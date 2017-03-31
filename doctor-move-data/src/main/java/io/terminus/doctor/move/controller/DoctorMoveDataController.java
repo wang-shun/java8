@@ -1132,6 +1132,37 @@ public class DoctorMoveDataController {
         return Response.ok("处理成功!!!");
     }
 
+    @RequestMapping(value = "/fix-all-events", method = RequestMethod.GET)
+    public Response<String> reElicitAllGroupEvent(@RequestParam(required = false) Long farmId){
+        log.info("elicit group start, now is : {}", DateUtil.toDateTimeString(new Date()));
+        try{
+            List<Long> farmIds = Lists.newArrayList();
+            if(Arguments.isNull(farmId)){
+                farmIds = getAllFarmIds();
+            }else{
+                farmIds.add(farmId);
+            }
+            farmIds.forEach(id -> {
+                log.info("{} elicit group start, farmId : {}", DateUtil.toDateTimeString(new Date()), id);
+                List<Long> groupIds = Lists.newArrayList();
+                List<DoctorGroup> groupList = RespHelper.orServEx(doctorGroupReadService.findGroupsByFarmId(farmId));
+                groupIds = groupList.stream().map(DoctorGroup::getId).collect(Collectors.toList());
+
+                if(Arguments.isNullOrEmpty(groupIds)){
+                    log.error("no groups find, farmId: {}", farmId);
+                }
+                doctorEditGroupEventService.reElicitGroupEvent(groupIds);
+                log.info("{} elicit group end, farmId : {}", DateUtil.toDateTimeString(new Date()), id);
+            });
+
+        }catch (Exception e){
+            log.error("fix group event error, cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail(Throwables.getStackTraceAsString(e));
+        }
+        log.info("elicit group end, now is : {}", DateUtil.toDateTimeString(new Date()));
+        return Response.ok("处理成功!!!");
+    }
+
     /**
      * 旧数据,生成相对应得猪群断奶事件
      * @param farmId 猪场id -1时所有猪场
