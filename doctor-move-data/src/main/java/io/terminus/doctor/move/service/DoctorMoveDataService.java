@@ -2600,16 +2600,6 @@ public class DoctorMoveDataService {
         updateParityAndBoarCodeByEntryEvents(doctorPigEvensList);
     }
 
-    public void flushGroupEventExtraDateFormat(Long farmId) {
-        List<DoctorGroupEvent> eventList = doctorGroupEventDao.findByFarmId(farmId);
-        List<List<DoctorGroupEvent>> eventLists = Lists.partition(eventList, 1000);
-        eventLists.forEach(list -> {
-            list.forEach(doctorGroupEvent -> {
-            });
-        });
-
-    }
-
     public void flushGroupSnapshotsToInfoDateFormat(Long farmId) {
         List<DoctorGroup> groupList = doctorGroupDao.findByFarmId(farmId);
         groupList.forEach(group -> {

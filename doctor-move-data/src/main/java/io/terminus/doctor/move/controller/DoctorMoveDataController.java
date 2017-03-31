@@ -984,7 +984,6 @@ public class DoctorMoveDataController {
             }
             farmIds.forEach(id -> {
                 log.warn("{} flush farm {} group dateformat start", DateUtil.toDateTimeString(new Date()), id);
-//                doctorMoveDataService.flushGroupEventExtraDateFormat(id);
                 doctorMoveDataService.flushGroupSnapshotsToInfoDateFormat(id);
             });
         }catch(Exception e){
