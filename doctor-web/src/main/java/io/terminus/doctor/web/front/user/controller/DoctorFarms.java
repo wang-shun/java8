@@ -99,6 +99,21 @@ public class DoctorFarms {
         return filterFarm(RespHelper.or500(doctorFarmReadService.findFarmsByUserId(UserUtil.getUserId())), farmIds, excludeFarmIds);
     }
 
+    /**
+     *
+     *
+     * @return 猪场list
+     */
+    @RequestMapping(value = "/toFarms", method = RequestMethod.GET)
+    public List<DoctorFarm> findToFarmsByFarm(@RequestParam(value = "farmId") Long farmId) {
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+        if(Arguments.isNull(farm)){
+            log.error("no farm find, farmId: {}", farmId);
+            throw new JsonResponseException("no.farm.find");
+        }
+        return filterFarm(RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(farm.getOrgId())), null, String.valueOf(farmId));
+    }
+
     private List<DoctorFarm> filterFarm(List<DoctorFarm> farms, String farmIds, String excludeFarmIds) {
         //保留的字段
         if (notEmpty(farmIds)) {
