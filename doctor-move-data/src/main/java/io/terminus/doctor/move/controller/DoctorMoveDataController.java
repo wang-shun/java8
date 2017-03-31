@@ -1154,7 +1154,7 @@ public class DoctorMoveDataController {
             farmIds.forEach(id -> {
                 log.info("{} elicit group start, farmId : {}", DateUtil.toDateTimeString(new Date()), id);
                 List<Long> groupIds = Lists.newArrayList();
-                List<DoctorGroup> groupList = RespHelper.orServEx(doctorGroupReadService.findGroupsByFarmId(farmId));
+                List<DoctorGroup> groupList = RespHelper.orServEx(doctorGroupReadService.findGroupsByFarmId(id));
                 groupIds = groupList.stream().map(DoctorGroup::getId).collect(Collectors.toList());
 
                 if(Arguments.isNullOrEmpty(groupIds)){
