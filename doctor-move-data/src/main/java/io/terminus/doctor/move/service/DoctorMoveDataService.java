@@ -594,7 +594,6 @@ public class DoctorMoveDataService {
             DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder()
                     .group(group)
                     .groupTrack(groupTrack)
-                    .groupEvent(groupEvent)
                     .build();
             groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
             doctorGroupSnapshotDao.create(groupSnapshot);

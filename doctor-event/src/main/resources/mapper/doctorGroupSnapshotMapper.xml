@@ -100,4 +100,15 @@
         WHERE group_id = #{groupId}
     </select>
 
+    <insert id="creates" parameterType="list"  useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        <foreach collection="list" separator="," item="item">
+            (#{item.groupId}, #{item.fromEventId}, #{item.toEventId}, #{item.toInfo}, now())
+        </foreach>
+
+    </insert>
+
 </mapper>

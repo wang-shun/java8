@@ -100,7 +100,7 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.MOVE_IN);
+        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.MOVE_IN);
 
     }
 

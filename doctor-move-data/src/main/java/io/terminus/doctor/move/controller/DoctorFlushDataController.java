@@ -64,6 +64,9 @@ public class DoctorFlushDataController {
         String jsonString = ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info);
         String jsonString1 = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info);
 
+        String json2 = "{\"group\":{\"id\":3290,\"orgId\":97,\"orgName\":\"湖北新今农农牧股份有限公司\",\"farmId\":94,\"farmName\":\"湖北新今农农牧股份有限公司\",\"groupCode\":\"后备11舍20170116\",\"openAt\":1484496000000,\"status\":1,\"initBarnId\":2534,\"initBarnName\":\"后备11舍\",\"currentBarnId\":2534,\"currentBarnName\":\"后备11舍\",\"pigType\":4,\"creatorId\":10403,\"creatorName\":\"cyq@hbxjn\",\"createdAt\":1484700147000,\"updatedAt\":1487428342000},\"groupTrack\":{\"id\":3290,\"groupId\":3290,\"relEventId\":87637,\"sex\":2,\"quantity\":128,\"boarQty\":0,\"sowQty\":128,\"birthDate\":1471786570741,\"avgDayAge\":195,\"weanWeight\":0.0,\"birthWeight\":0.0,\"nest\":0,\"liveQty\":0,\"healthyQty\":0,\"weakQty\":0,\"unweanQty\":0,\"weanQty\":0,\"quaQty\":0,\"unqQty\":0,\"extra\":\"{\\\"newAt\\\":\\\"2017-01-16 00:00:00\\\",\\\"moveInAt\\\":\\\"2017-01-16 00:00:00\\\",\\\"changeAt\\\":\\\"2017-01-18 00:00:00\\\",\\\"turnSeedAt\\\":\\\"2017-02-03 20:58:18\\\"}\",\"creatorId\":10403,\"creatorName\":\"cyq@hbxjn\",\"updatorId\":10403,\"updatorName\":\"cyq@hbxjn\",\"createdAt\":1484700147000,\"updatedAt\":1488548170000}}";
+        DoctorGroupSnapShotInfo info1 = JsonMapperUtil.JSON_NON_EMPTY_MAPPER.fromJson(json2, DoctorGroupSnapShotInfo.class);
+
         System.out.print("===============");
 
 

@@ -127,8 +127,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         try {
             DoctorGroup group = checkGroupExist(groupId);
             DoctorGroupTrack groupTrack = checkGroupTrackExist(groupId);
-            DoctorGroupEvent event = doctorGroupEventDao.findById(groupTrack.getRelEventId());
-            return Response.ok(new DoctorGroupSnapShotInfo(group, event, groupTrack));
+            return Response.ok(new DoctorGroupSnapShotInfo(group, groupTrack));
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
