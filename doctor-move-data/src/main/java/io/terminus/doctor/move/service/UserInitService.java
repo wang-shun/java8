@@ -96,6 +96,17 @@ public class UserInitService {
     private DoctorBarnDao doctorBarnDao;
     @Autowired
     private SubRoleWriteService subRoleWriteService;
+    private final static List<String> INCLUDE_FARM = Lists.newArrayList("郭店四季发养殖合作社", "陕县综合场", "新郑市合利养殖合作社", "新郑市万鑫美养殖专业合作社", "新郑市湛张辉杰养殖合作社", "新郑市众旺养殖合作社");
+    private final static Map<String, String> FARM_NAME_MAP = Maps.newHashMap();
+    static {
+        FARM_NAME_MAP.put("郭店四季发养殖合作社", "雏鹰农牧第十二种猪场");
+        FARM_NAME_MAP.put("陕县综合场", "雏鹰农牧第十五种猪场");
+        FARM_NAME_MAP.put("新郑市合利养殖合作社", "雏鹰农牧三元仔猪二场");
+        FARM_NAME_MAP.put("新郑市万鑫美养殖专业合作社", "雏鹰农牧第九种猪场");
+        FARM_NAME_MAP.put("新郑市湛张辉杰养殖合作社", "雏鹰农牧第七种猪场");
+        FARM_NAME_MAP.put("新郑市众旺养殖合作社", "雏鹰农牧第二十育肥场");
+    }
+
 
     @Transactional
     public void init(String loginName, String mobile, Long dataSourceId){
@@ -103,9 +114,11 @@ public class UserInitService {
         checkFarmNameRepeat(list);
 
         List<DoctorFarm> farms = new ArrayList<>();
-        RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo)).forEach(farmInfo -> {
+        RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo)).stream().filter(view_farmInfo -> INCLUDE_FARM.contains(view_farmInfo.getFarmName())).forEach(farmInfo -> {
             if (farmInfo.getLevels() == 1) {
-                farms.add(makeFarm(farmInfo));
+                DoctorFarm doctorFarm = makeFarm(farmInfo);
+                doctorFarm.setName(FARM_NAME_MAP.get(doctorFarm.getName()));
+                farms.add(doctorFarm);
             }
         });
 
