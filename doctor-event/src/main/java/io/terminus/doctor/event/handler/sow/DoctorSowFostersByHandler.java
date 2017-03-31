@@ -51,19 +51,18 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
     public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         DoctorFosterByDto fosterByDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFosterByDto.class);
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(fosterByDto.getPigId());
-        DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
-        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) ||
-                (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()) && Objects.equals(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue())), "被拼窝母猪状态错误,被拼窝猪号:" + fosterByDto.getPigCode());
+        DoctorBarn doctorBarn = doctorBarnDao.findById(toTrack.getCurrentBarnId());
+        checkState(Objects.equals(toTrack.getStatus(), PigStatus.FEED.getKey()) ||
+                (Objects.equals(toTrack.getStatus(), PigStatus.Wean.getKey()) && Objects.equals(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue())), "被拼窝母猪状态错误,被拼窝猪号:" + fosterByDto.getPigCode());
 
         //被拼窝数量
         Integer fosterCount = fosterByDto.getFosterByCount();
-        doctorPigTrack.setUnweanQty(MoreObjects.firstNonNull(doctorPigTrack.getUnweanQty(), 0) + fosterCount);  //未断奶数
-        doctorPigTrack.setWeanQty(MoreObjects.firstNonNull(doctorPigTrack.getWeanQty(), 0));    //断奶数不变
+        toTrack.setUnweanQty(MoreObjects.firstNonNull(toTrack.getUnweanQty(), 0) + fosterCount);  //未断奶数
+        toTrack.setWeanQty(MoreObjects.firstNonNull(toTrack.getWeanQty(), 0));    //断奶数不变
 
         // 修改当前的母猪状态信息
-        doctorPigTrack.setStatus(PigStatus.FEED.getKey());
-        return doctorPigTrack;
+        toTrack.setStatus(PigStatus.FEED.getKey());
+        return toTrack;
     }
 
     @Override

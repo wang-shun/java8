@@ -5,8 +5,10 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -35,6 +37,7 @@ import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.helper.DoctorMessageSourceHelper;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -85,6 +88,8 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
     private DoctorPigDao doctorPigDao;
     @Autowired
     private DoctorGroupDao doctorGroupDao;
+    @Autowired
+    private DoctorBarnDao doctorBarnDao;
     @Autowired
     private DoctorEventRelationDao doctorEventRelationDao;
     @Autowired
@@ -148,8 +153,22 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
         for (DoctorPigEvent pigEvent : pigEventList) {
             try {
                 lastEventId = notNull(fromTrack) ? fromTrack.getCurrentEventId() : 0L;
-                fromTrack = doctorPigEventManager.buildPigTrack(pigEvent, fromTrack);
-                fromTrack.setId(oldTrack.getId());
+                //导入的转舍事件特殊处理
+                if (Objects.equals(pigEvent.getType(), PigEvent.TO_FARROWING.getKey())
+                        && Objects.equals(pigEvent.getEventSource(), SourceType.IMPORT.getValue())) {
+                    fromTrack.setStatus(PigStatus.Farrow.getKey());
+                    fromTrack.setCurrentEventId(pigEvent.getId());
+                    fromTrack.setCurrentBarnId(pigEvent.getBarnId());
+                    fromTrack.setCurrentBarnName(pigEvent.getBarnName());
+                    DoctorBarn doctorBarn = doctorBarnDao.findById(fromTrack.getCurrentBarnId());
+                    fromTrack.setCurrentBarnType(doctorBarn.getPigType());
+                    fromTrack.setCurrentEventId(pigEvent.getId());
+                } else {
+                    fromTrack = doctorPigEventManager.buildPigTrack(pigEvent, fromTrack);
+                    fromTrack.setId(oldTrack.getId());
+                }
+
+                //哺乳转舍时,需要在事件里记录转入猪群的id
                 if(Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey())
                         && Objects.equals(pigEvent.getType(), PigEvent.CHG_LOCATION.getKey())) {
                     DoctorChgLocationDto chgLocationDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorChgLocationDto.class);

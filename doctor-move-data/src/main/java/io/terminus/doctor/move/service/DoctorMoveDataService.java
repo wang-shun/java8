@@ -5,6 +5,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
@@ -109,7 +110,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.*;
@@ -2647,11 +2653,11 @@ public class DoctorMoveDataService {
 
         //2.查询已经有相应断奶事件的猪断奶事件ids
         List<Long> excludeIds = doctorGroupEventDao.queryRelPigEventIdsByGroupWeanEvent(farmId);
-        int offset = 0;
-        int limit = 1000;
+        int pageNo = 1;
+        int pageSize = 1000;
         while (true) {
-            List<DoctorPigEvent> doctorPigEventList = doctorPigEventDao.queryWeansWithoutGroupWean(excludeIds, farmId, offset, limit);
-//                    .stream().filter(pigEvent -> notNull(pigEvent.getGroupId())) .collect(Collectors.toList());
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            List<DoctorPigEvent> doctorPigEventList = doctorPigEventDao.queryWeansWithoutGroupWean(excludeIds, farmId, pageInfo.getOffset(), pageInfo.getLimit());
             doctorPigEventList.forEach(pigWeanEvent -> {
                 try {
                     //3.生成猪群断奶事件
@@ -2666,6 +2672,7 @@ public class DoctorMoveDataService {
                     //throw e;
                 }
             });
+            pageNo++;
             if (doctorPigEventList.size() < 1000) {
                 break;
             }
