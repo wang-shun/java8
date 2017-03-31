@@ -381,7 +381,7 @@
         FROM <include refid="tb" />
         WHERE status = 1
         AND group_id = #{groupId}
-        ORDER BY event_at DESC, id DESC limit 1
+        ORDER BY date_format(event_at, '%Y-%m-%d') DESC, id DESC limit 1
     </select>
 
     <select id="findLastEventExcludeTypes" parameterType="map" resultMap="DoctorGroupEventMap" >
@@ -395,7 +395,7 @@
                 #{i}
             </foreach>
         </if>
-        ORDER BY event_at DESC, id DESC limit 1
+        ORDER BY date_format(event_at, '%Y-%m-%d') DESC, id DESC limit 1
     </select>
 
     <select id="findLastManualEventByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
@@ -403,7 +403,7 @@
         FROM <include refid="tb" />
         WHERE status = 1
         AND group_id = #{groupId} AND is_auto = 0
-        ORDER BY event_at DESC, id DESC limit 1
+        ORDER BY date_format(event_at, '%Y-%m-%d') DESC, id DESC limit 1
     </select>
 
     <select id="findByRelGroupEventIdAndType" parameterType="map" resultMap="DoctorGroupEventMap" >
@@ -427,7 +427,7 @@
         <include refid="tb"/>
         where status = 1
         <include refid="criteria"/>
-        order by event_at desc ,id DESC limit 1;
+        order by date_format(event_at, '%Y-%m-%d') desc ,id DESC limit 1;
     </select>
 
     <select id="findOperators" parameterType="map" resultType="io.terminus.doctor.event.dto.event.DoctorEventOperator">
@@ -453,7 +453,7 @@
         WHERE status = 1
         AND group_id = #{groupId}
         AND `type` = #{type}
-        ORDER BY event_at DESC, id DESC limit 1
+        ORDER BY date_format(event_at, '%Y-%m-%d') DESC, id DESC limit 1
     </select>
 
     <select id="findInitGroupEvent" parameterType="long" resultMap="DoctorGroupEventMap" >
@@ -463,7 +463,7 @@
         <include refid="tb"/>
         WHERE status = 1
         AND group_id = #{groupId}
-        ORDER BY event_at ASC , id ASC limit 1
+        ORDER BY date_format(event_at, '%Y-%m-%d') ASC , id ASC limit 1
     </select>
 
     <select id="findLinkedGroupEventsByGroupId" parameterType="long" resultMap="DoctorGroupEventMap">
@@ -473,7 +473,7 @@
         <include refid="tb"/>
         WHERE status = 1
         AND group_id = #{groupId}
-        ORDER BY event_at asc, id asc
+        ORDER BY date_format(event_at, '%Y-%m-%d') asc, id asc
     </select>
 
     <update id="updateGroupEventStatus" parameterType="map">

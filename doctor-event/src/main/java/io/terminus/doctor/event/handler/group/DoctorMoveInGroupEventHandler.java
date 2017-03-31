@@ -168,7 +168,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
 
         //如果是母猪分娩转入或母猪转舍转入，窝数，分娩统计字段需要累加
-        if (notNull(event.getRelPigEventId())) {
+        if (notNull(event.getRelPigEventId()) || checkFirstMoveIn(event)) {
             track.setNest(EventUtil.plusInt(track.getNest(), 1));  //窝数加 1
             track.setLiveQty(EventUtil.plusInt(track.getLiveQty(), event.getQuantity()));
             track.setWeakQty(EventUtil.plusInt(track.getWeakQty(), doctorMoveInGroupEvent.getWeakQty()));
