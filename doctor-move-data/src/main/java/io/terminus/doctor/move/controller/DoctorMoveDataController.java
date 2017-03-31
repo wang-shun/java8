@@ -59,6 +59,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 迁移数据总控入口
@@ -1096,8 +1097,16 @@ public class DoctorMoveDataController {
      * @param farmId 猪场id
      */
     @RequestMapping(value = "/batchElicitPigTrack", method = RequestMethod.GET)
-    public Boolean batchElicitPigTrack(@RequestParam Long farmId) {
-        doctorEventModifyRequestWriteService.batchElicitPigTrack(farmId);
+    public Boolean batchElicitPigTrack(@RequestParam(required = false) Long farmId) {
+        log.info("batchElicitPigTrack starting, farmId:{}", farmId);
+        List<Long> farmIds;
+        if (notNull(farmId)) {
+            farmIds = Lists.newArrayList(farmId);
+        } else {
+            farmIds = doctorFarmDao.findAll().stream().map(DoctorFarm::getId).collect(Collectors.toList());
+        }
+        doctorEventModifyRequestWriteService.batchElicitPigTrack(farmIds);
+        log.info("batchElicitPigTrack ending");
         return true;
     }
 
