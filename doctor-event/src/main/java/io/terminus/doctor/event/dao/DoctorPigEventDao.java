@@ -390,4 +390,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public void updateFarmName(Long farmId, String farmName) {
         getSqlSession().update(sqlId("updateFarmName"), ImmutableMap.of("farmId", farmId, "farmName", farmName));
     }
+
+    /**
+     * 查询没有相对应猪群断奶事件的猪断奶事件
+     * @param excludeIds 过滤的事件ids
+     * @return 猪断奶事件
+     */
+    public List<DoctorPigEvent> queryWeansWithoutGroupWean(List<Long> excludeIds, Long farmId, Integer offset, Integer limit) {
+        return getSqlSession().selectList(sqlId("queryWeansWithoutGroupWean"), ImmutableMap.of("excludeIds", excludeIds, "farmId", farmId, "offset", offset, "limit", limit));
+    }
 }

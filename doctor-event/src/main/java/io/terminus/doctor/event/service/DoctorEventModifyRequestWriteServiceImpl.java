@@ -10,6 +10,7 @@ import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 
 /**
  * Created by xjn on 17/3/10.
+ * 编辑请求service
  */
 @Slf4j
 @Service
@@ -54,6 +56,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     private DoctorPigEventDao doctorPigEventDao;
     @Autowired
     private DoctorPigDao doctorPigDao;
+    @Autowired
+    private DoctorGroupEventDao doctorGroupEventDao;
     @Autowired
     private DoctorMessageSourceHelper messageSourceHelper;
     @Autowired(required = false)
@@ -79,8 +83,10 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             }
             DoctorPigEvent oldEvent = doctorPigEventDao.findById(eventId);
             DoctorPigEvent modifyEvent = pigEventManager.buildPigEvent(basic, inputDto);
+
             modifyEvent.setGroupId(oldEvent.getGroupId());
             modifyEvent.setIsModify(IsOrNot.YES.getValue());
+
             modifyEvent.setId(eventId);
             log.info("build modifyEvent, modifyEvent = {}", modifyEvent);
 
@@ -115,6 +121,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
                 throw new ServiceException("event.not.allow.modify");
             }
             DoctorGroupEvent modifyEvent = groupEventManager.buildGroupEvent(inputInfo, eventType);
+            DoctorGroupEvent oldEvent = doctorGroupEventDao.findById(eventId);
+            modifyEvent.setEventSource(oldEvent.getEventSource());
             String extra = modifyEvent.getExtra();
             //将extraMap置null,往外拿的时候不会报错
             modifyEvent.setExtraMap(null);

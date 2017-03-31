@@ -9,12 +9,17 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupElicitRecordDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.helper.DoctorMessageSourceHelper;
 import io.terminus.doctor.event.manager.DoctorEditGroupEventManager;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupElicitRecord;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,22 +41,25 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
-    private DoctorGroupReadService doctorGroupReadService;
+    private final DoctorGroupReadService doctorGroupReadService;
 
-    private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
 
-    private DoctorEditGroupEventManager doctorEditGroupEventManager;
+    private final DoctorEditGroupEventManager doctorEditGroupEventManager;
 
-    private DoctorGroupTrackDao doctorGroupTrackDao;
+    private final DoctorGroupTrackDao doctorGroupTrackDao;
 
-    private DoctorGroupWriteService doctorGroupWriteService;
+    private final DoctorGroupWriteService doctorGroupWriteService;
 
-    private DoctorGroupEventDao doctorGroupEventDao;
+    private final DoctorGroupEventDao doctorGroupEventDao;
 
-    private DoctorEventRelationDao doctorEventRelationDao;
+    private final DoctorEventRelationDao doctorEventRelationDao;
 
-    private DoctorGroupDao doctorGroupDao;
+    private final DoctorGroupDao doctorGroupDao;
 
+    private final DoctorGroupElicitRecordDao doctorGroupElicitRecordDao;
+
+    private final DoctorMessageSourceHelper messageSourceHelper;
 
     @Autowired
     public DoctorEditGroupEventServiceImpl(DoctorGroupReadService doctorGroupReadService,
@@ -61,7 +69,9 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
                                            DoctorGroupWriteService doctorGroupWriteService,
                                            DoctorGroupEventDao doctorGroupEventDao,
                                            DoctorEventRelationDao doctorEventRelationDao,
-                                           DoctorGroupDao doctorGroupDao){
+                                           DoctorGroupDao doctorGroupDao,
+                                           DoctorGroupElicitRecordDao doctorGroupElicitRecordDao,
+                                           DoctorMessageSourceHelper messageSourceHelper){
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorEditGroupEventManager = doctorEditGroupEventManager;
@@ -70,13 +80,24 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorEventRelationDao = doctorEventRelationDao;
         this.doctorGroupDao = doctorGroupDao;
+        this.doctorGroupElicitRecordDao = doctorGroupElicitRecordDao;
+        this.messageSourceHelper = messageSourceHelper;
     }
 
     @Override
     public Response<Boolean> reElicitGroupEvent(List<Long> groupIds) {
         try{
             groupIds.forEach(id -> {
-                doctorEditGroupEventManager.reElicitGroupEventByGroupId(id);
+                DoctorGroupTrack fromTrack = doctorGroupTrackDao.findByGroupId(id);
+                try {
+                    doctorEditGroupEventManager.reElicitGroupEventByGroupId(id);
+                    DoctorGroupTrack toTrack = doctorGroupTrackDao.findByGroupId(id);
+                    createELicitPigTrackRecord(id, fromTrack, toTrack, DoctorGroupElicitRecord.Status.SUCCESS.getKey(), null);
+                } catch (InvalidException e) {
+                    createELicitPigTrackRecord(id, fromTrack, fromTrack, DoctorGroupElicitRecord.Status.FAIL.getKey(), messageSourceHelper.getMessage(e.getError(), e.getParams()));
+                } catch (Exception e) {
+                    createELicitPigTrackRecord(id, fromTrack, fromTrack, DoctorGroupElicitRecord.Status.FAIL.getKey(), Throwables.getStackTraceAsString(e));
+                }
             });
         } catch(InvalidException e) {
             throw e;
@@ -98,6 +119,24 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
             log.error("elicit group event failed, doctorGroupEvent: {}", doctorGroupEvent);
             throw e;
         }
+    }
+
+    private void createELicitPigTrackRecord(Long groupId, DoctorGroupTrack fromTrack, DoctorGroupTrack toTrack, Integer status, String errorReason) {
+        Integer version = doctorGroupElicitRecordDao.findLastVersion(groupId);
+        DoctorGroup group = doctorGroupDao.findById(groupId);
+        DoctorGroupElicitRecord groupElicitRecord = DoctorGroupElicitRecord
+                .builder()
+                .farmId(group.getFarmId())
+                .farmName(group.getFarmName())
+                .groupId(group.getId())
+                .groupCode(group.getGroupCode())
+                .fromTrack(JSON_MAPPER.toJson(fromTrack))
+                .toTrack(JSON_MAPPER.toJson(toTrack))
+                .status(status)
+                .errorReason(errorReason)
+                .version(++version)
+                .build();
+        doctorGroupElicitRecordDao.create(groupElicitRecord);
     }
 
     private void beforeCheck(DoctorGroupEvent newEvent) {

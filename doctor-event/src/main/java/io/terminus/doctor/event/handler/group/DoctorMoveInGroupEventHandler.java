@@ -1,12 +1,11 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -18,7 +17,6 @@ import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -31,8 +29,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 转入猪群事件处理器
@@ -132,6 +131,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
 
         event.setExtraMap(moveInEvent);
+        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 
@@ -147,8 +147,9 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
     public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorMoveInGroupEvent doctorMoveInGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorMoveInGroupEvent.class);
         if(Arguments.isNull(doctorMoveInGroupEvent)) {
-            log.error("parse doctorMoveInGroupEvent faild, doctorGroupEvent = {}", event);
-            throw new InvalidException("movein.group.event.info.broken", event.getId());
+            log.info("parse doctorMoveInGroupEvent faild, doctorGroupEvent = {}", event);
+            //throw new InvalidException("movein.group.event.info.broken", event.getId());
+            doctorMoveInGroupEvent = new DoctorMoveInGroupEvent();
         }
         //1.更新猪群跟踪
         track.setQuantity(EventUtil.plusInt(track.getQuantity(), event.getQuantity()));
@@ -167,7 +168,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
 
         //如果是母猪分娩转入或母猪转舍转入，窝数，分娩统计字段需要累加
-        if (event.getIsAuto() == IsOrNot.YES.getValue()) {
+        if (notNull(event.getRelPigEventId()) || checkFirstMoveIn(event)) {
             track.setNest(EventUtil.plusInt(track.getNest(), 1));  //窝数加 1
             track.setLiveQty(EventUtil.plusInt(track.getLiveQty(), event.getQuantity()));
             track.setWeakQty(EventUtil.plusInt(track.getWeakQty(), doctorMoveInGroupEvent.getWeakQty()));

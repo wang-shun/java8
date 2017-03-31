@@ -183,4 +183,21 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public void updateFarmName(Long farmId, String farmName) {
         getSqlSession().update(sqlId("updateFarmName"), ImmutableMap.of("farmId", farmId, "farmName", farmName));
     }
+
+    /**
+     * 获取已有相应断奶事件的猪断奶事件ids
+     * @param farmId 猪场id
+     * @return 猪断奶事件列表
+     */
+    public List<Long> queryRelPigEventIdsByGroupWeanEvent(Long farmId) {
+        return getSqlSession().selectList(sqlId("queryRelPigEventIdsByGroupWeanEvent"), ImmutableMap.of("farmId", farmId));
+    }
+
+    /**
+     * 删除猪场后面补录的断奶事件
+     * @param farmId 猪场id
+     */
+    public void deleteAddWeanEvents(Long farmId) {
+        getSqlSession().delete(sqlId("deleteAddWeanEvents"), farmId);
+    }
 }

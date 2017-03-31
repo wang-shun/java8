@@ -19,6 +19,7 @@
         <result column="district_name" property="districtName"/>
         <result column="detail_address" property="detailAddress"/>
         <result column="out_id" property="outId"/>
+        <result column="source" property="source"/>
         <result column="extra" property="extra"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
@@ -33,11 +34,18 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        name, farm_code, org_id, org_name, province_id, province_name, city_id, city_name, district_id, district_name, detail_address, out_id, extra, created_at, updated_at
+        name, farm_code, org_id, org_name, province_id, province_name, city_id, city_name, district_id, district_name, detail_address, out_id, source, extra, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{farmCode}, #{orgId}, #{orgName}, #{provinceId}, #{provinceName}, #{cityId}, #{cityName}, #{districtId}, #{districtName}, #{detailAddress}, #{outId}, #{extra}, now(), now()
+        #{name}, #{farmCode}, #{orgId}, #{orgName}, #{provinceId}, #{provinceName}, #{cityId}, #{cityName}, #{districtId}, #{districtName}, #{detailAddress}, #{outId}, #{source}, #{extra}, now(), now()
+    </sql>
+
+    <sql id="criteria">
+        <if test="name != null">AND name = #{name}</if>
+        <if test="farmCode != null">AND farm_code = #{farmCode}</if>
+        <if test="orgId != null">AND org_id = #{orgId}</if>
+        <if test="source != null">AND source = #{source}</if>
     </sql>
 
     <insert id="create" parameterType="DoctorFarm" keyProperty="id" useGeneratedKeys="true">
@@ -54,7 +62,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" separator="," item="i">
-            (#{i.name}, #{i.farmCode}, #{i.orgId}, #{i.orgName}, #{i.provinceId}, #{i.provinceName}, #{i.cityId}, #{i.cityName}, #{i.districtId}, #{i.districtName}, #{i.detailAddress}, #{i.outId}, #{i.extra}, now(), now())
+            (#{i.name}, #{i.farmCode}, #{i.orgId}, #{i.orgName}, #{i.provinceId}, #{i.provinceName}, #{i.cityId}, #{i.cityName}, #{i.districtId}, #{i.districtName}, #{i.detailAddress}, #{i.outId}, #{i.source} #{i.extra}, now(), now())
         </foreach>
     </insert>
 
@@ -101,6 +109,7 @@
             <if test="districtName != null">district_name = #{districtName},</if>
             <if test="detailAddress != null">detail_address = #{detailAddress},</if>
             <if test="outId != null">out_id = #{outId},</if>
+            <if test="source != null">source = #{source},</if>
             <if test="extra != null">extra = #{extra},</if>
             updated_at=now()
         </set>
@@ -115,5 +124,13 @@
     <select id="findAll" resultMap="DoctorFarmMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
+    </select>
+
+    <select id="findByParams" parameterType="map" resultMap="DoctorFarmMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        <where>
+            <include refid="criteria" />
+        </where>
     </select>
 </mapper>

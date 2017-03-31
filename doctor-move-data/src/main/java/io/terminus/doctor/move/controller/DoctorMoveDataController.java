@@ -5,16 +5,21 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorEditGroupEventService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -76,7 +81,8 @@ public class DoctorMoveDataController {
     private final DoctorImportDataService doctorImportDataService;
     private final DoctorPigWriteService doctorPigWriteService;
     private final DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
-
+    private final DoctorEditGroupEventService doctorEditGroupEventService;
+    private final DoctorGroupReadService doctorGroupReadService;
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
                                     WareHouseInitService wareHouseInitService,
@@ -93,7 +99,9 @@ public class DoctorMoveDataController {
                                     DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService,
                                     DoctorImportDataService doctorImportDataService,
                                     DoctorPigWriteService doctorPigWriteService,
-                                    DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService) {
+                                    DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService,
+                                    DoctorEditGroupEventService doctorEditGroupEventService,
+                                    DoctorGroupReadService doctorGroupReadService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -110,6 +118,8 @@ public class DoctorMoveDataController {
         this.doctorImportDataService = doctorImportDataService;
         this.doctorPigWriteService = doctorPigWriteService;
         this.doctorEventModifyRequestWriteService = doctorEventModifyRequestWriteService;
+        this.doctorEditGroupEventService = doctorEditGroupEventService;
+        this.doctorGroupReadService = doctorGroupReadService;
     }
 
     /**
@@ -410,6 +420,30 @@ public class DoctorMoveDataController {
         }
     }
 
+    @RequestMapping(value = "/updateExcelImportErrorPigEvents", method = RequestMethod.GET)
+    public Boolean updateExcelImportErrorPigEvents(@RequestParam(value = "farmId", required = false) Long farmId){
+        try {
+            List<Long> listFarmIds = getExcelImportFarmIds();
+            if(!Arguments.isNull(farmId) && listFarmIds.contains(farmId)){
+                listFarmIds = Lists.newArrayList(farmId);
+            }
+            if(!Arguments.isNull(farmId) && !listFarmIds.contains(farmId)){
+                log.info("farmId not import by excel, farmId: {}", farmId);
+                return false;
+            }
+                listFarmIds.forEach(id -> {
+                DoctorFarm farm = doctorFarmDao.findById(id);
+                log.warn("{} update parity and boarCode start, farmId:{}", DateUtil.toDateTimeString(new Date()), id);
+                doctorMoveDataService.updateExcelMOVEErrorPigEvents(farm);
+                log.warn("{} update parity and boarCode end", DateUtil.toDateTimeString(new Date()));
+            });
+            return true;
+        } catch (Exception e) {
+            log.error("update parity and boarCode failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
     @RequestMapping(value = "/updatePigEventExtra", method = RequestMethod.GET)
     public Boolean updatePigEventExtra(@RequestParam("farmId") Long farmId){
         try {
@@ -449,6 +483,14 @@ public class DoctorMoveDataController {
 
     private List<Long> getAllFarmIds() {
         return doctorFarmDao.findAll().stream().map(DoctorFarm::getId).collect(Collectors.toList());
+    }
+
+    private List<Long> getExcelImportFarmIds() {
+        List<DoctorFarm> farmList = doctorFarmDao.findBySource(SourceType.IMPORT.getValue());
+        if(Arguments.isNullOrEmpty(farmList)){
+            return Lists.newArrayList();
+        }
+        return farmList.stream().map(DoctorFarm::getId).collect(Collectors.toList());
     }
 
     /**
@@ -965,6 +1007,49 @@ public class DoctorMoveDataController {
     @RequestMapping(value = "/batchElicitPigTrack", method = RequestMethod.GET)
     public Boolean batchElicitPigTrack(@RequestParam Long farmId) {
         doctorEventModifyRequestWriteService.batchElicitPigTrack(farmId);
+        return true;
+    }
+
+    /**
+     * 猪群推演
+     * @param farmId 猪场id
+     * @param groupId 猪群id
+     * @return
+     */
+    @RequestMapping(value = "/fix-events", method = RequestMethod.GET)
+    public Response<String> reElicitGroupEvent(@RequestParam(required = false) Long farmId, @RequestParam(required = false) Long groupId){
+        try{
+            if(Arguments.isNull(farmId) && Arguments.isNull(groupId)){
+                log.error("farmId, groupId need one ");
+                return Response.fail("farmId, groupId need one");
+            }
+            List<Long> groupIds = Lists.newArrayList();
+            if(Arguments.isNull(groupId) && !Arguments.isNull(farmId)){
+                List<DoctorGroup> groupList = RespHelper.orServEx(doctorGroupReadService.findGroupsByFarmId(farmId));
+                groupIds = groupList.stream().map(DoctorGroup::getId).collect(Collectors.toList());
+            }else{
+                groupIds.add(groupId);
+            }
+            if(Arguments.isNullOrEmpty(groupIds)){
+                log.error("no groups find, farmId: {}", farmId);
+            }
+            doctorEditGroupEventService.reElicitGroupEvent(groupIds);
+        }catch (Exception e){
+            log.error("fix group event error, cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail(Throwables.getStackTraceAsString(e));
+        }
+        return Response.ok("处理成功!!!");
+    }
+
+    /**
+     * 旧数据,生成相对应得猪群断奶事件
+     * @param farmId 猪场id -1时所有猪场
+     */
+    @RequestMapping(value = "/generateGroupWeanEvent", method = RequestMethod.GET)
+    public Boolean generateGroupWeanEvent(@RequestParam Long farmId) {
+        log.info("generateGroupWeanEvent starting, farmId:{}", farmId);
+        doctorMoveDataService.generateGroupWeanEvent(farmId);
+        log.info("generateGroupWeanEvent ending");
         return true;
     }
 }

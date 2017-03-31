@@ -5,6 +5,7 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -45,7 +46,9 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         if (Objects.equals(executeEvent.getPregCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
             expectTrue(notNull(pregChkResultDto.getAbortionReasonId()), "liuchan.reason.not.null", pregChkResultDto.getPigCode());
         }
-        checkCanPregCheckResult(fromTrack.getStatus(), pregChkResultDto.getCheckResult(), pregChkResultDto.getPigCode());
+        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
+            checkCanPregCheckResult(fromTrack.getStatus(), pregChkResultDto.getCheckResult(), pregChkResultDto.getPigCode());
+        }
     }
 
     @Override

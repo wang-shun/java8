@@ -38,6 +38,7 @@
         <result column="rel_pig_event_id" property="relPigEventId"/>
         <result column="out_id" property="outId"/>
         <result column="status" property="status"/>
+        <result column="event_source" property="eventSource"/>
         <result column="remark" property="remark"/>
         <result column="extra" property="extra"/>
         <result column="created_at" property="createdAt"/>
@@ -88,6 +89,7 @@
         rel_pig_event_id,
         out_id,
         status,
+        event_source,
         remark,
         extra,
         created_at,
@@ -130,6 +132,7 @@
         #{relPigEventId},
         #{outId},
         #{status},
+        #{eventSource},
         #{remark},
         #{extra},
         now(),
@@ -175,6 +178,7 @@
         <if test="relPigEventId != null">AND rel_pig_event_id = #{relPigEventId}</if>
         <if test="outId != null">AND out_id = #{outId}</if>
         <if test="remark != null">AND remark = #{remark}</if>
+        <if test="eventSource != null">AND event_source = #{eventSource}</if>
         <if test="extra != null">AND extra = #{extra}</if>
         <if test="creatorId != null">AND creator_id = #{creatorId}</if>
         <if test="creatorName != null">AND creator_name = #{creatorName}</if>
@@ -239,6 +243,7 @@
             <if test="relPigEventId != null">rel_pig_event_id = #{relPigEventId},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="eventSource != null">event_source = #{eventSource},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="creatorId != null">creator_id = #{creatorId},</if>
@@ -343,6 +348,8 @@
             #{item.relPigEventId},
             #{item.outId},
             #{item.remark},
+            #{item.status},
+            #{item.eventSource},
             #{item.extra},
             now(),
             #{item.creatorId},
@@ -374,7 +381,7 @@
         FROM <include refid="tb" />
         WHERE status = 1
         AND group_id = #{groupId}
-        ORDER BY event_at DESC, id DESC limit 1
+        ORDER BY date_format(event_at, '%Y-%m-%d') DESC, id DESC limit 1
     </select>
 
     <select id="findLastEventExcludeTypes" parameterType="map" resultMap="DoctorGroupEventMap" >
@@ -388,7 +395,7 @@
                 #{i}
             </foreach>
         </if>
-        ORDER BY event_at DESC, id DESC limit 1
+        ORDER BY date_format(event_at, '%Y-%m-%d') DESC, id DESC limit 1
     </select>
 
     <select id="findLastManualEventByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
@@ -396,7 +403,7 @@
         FROM <include refid="tb" />
         WHERE status = 1
         AND group_id = #{groupId} AND is_auto = 0
-        ORDER BY event_at DESC, id DESC limit 1
+        ORDER BY date_format(event_at, '%Y-%m-%d') DESC, id DESC limit 1
     </select>
 
     <select id="findByRelGroupEventIdAndType" parameterType="map" resultMap="DoctorGroupEventMap" >
@@ -420,7 +427,7 @@
         <include refid="tb"/>
         where status = 1
         <include refid="criteria"/>
-        order by event_at desc ,id DESC limit 1;
+        order by date_format(event_at, '%Y-%m-%d') desc ,id DESC limit 1;
     </select>
 
     <select id="findOperators" parameterType="map" resultType="io.terminus.doctor.event.dto.event.DoctorEventOperator">
@@ -446,7 +453,7 @@
         WHERE status = 1
         AND group_id = #{groupId}
         AND `type` = #{type}
-        ORDER BY event_at DESC, id DESC limit 1
+        ORDER BY date_format(event_at, '%Y-%m-%d') DESC, id DESC limit 1
     </select>
 
     <select id="findInitGroupEvent" parameterType="long" resultMap="DoctorGroupEventMap" >
@@ -456,7 +463,7 @@
         <include refid="tb"/>
         WHERE status = 1
         AND group_id = #{groupId}
-        ORDER BY event_at ASC , id ASC limit 1
+        ORDER BY date_format(event_at, '%Y-%m-%d') ASC , id ASC limit 1
     </select>
 
     <select id="findLinkedGroupEventsByGroupId" parameterType="long" resultMap="DoctorGroupEventMap">
@@ -466,7 +473,7 @@
         <include refid="tb"/>
         WHERE status = 1
         AND group_id = #{groupId}
-        ORDER BY event_at asc, id asc
+        ORDER BY date_format(event_at, '%Y-%m-%d') asc, id asc
     </select>
 
     <update id="updateGroupEventStatus" parameterType="map">
@@ -490,4 +497,20 @@
         WHERE
         farm_id = #{farmId}
     </update>
+
+    <select id="queryRelPigEventIdsByGroupWeanEvent" parameterType="map" resultType="long">
+        SELECT rel_pig_event_id
+        FROM <include refid="tb" />
+        WHERE
+        status =1
+        AND type = 11
+        <if test="farmId != -1" > AND farm_id = #{farmId}</if>
+    </select>
+
+    <delete id="deleteAddWeanEvents" parameterType="long" >
+        DELETE
+        FROM <include refid="tb" />
+        WHERE
+        farm_id = #{farmId} AND event_source = 4
+    </delete>
 </mapper>

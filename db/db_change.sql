@@ -703,7 +703,7 @@ ALTER TABLE doctor_farm_exports ADD COLUMN status tinyint(4) DEFAULT NULL COMMEN
 -- 2017-03-25 修改数据权限表farm_ids类型
 ALTER TABLE doctor_user_data_permissions MODIFY COLUMN farm_ids TEXT DEFAULT NULL COMMENT '猪场ids,逗号分隔';
 
-
+-- 2017-03-26 校验猪群数量
 drop table if exists `doctor_group_info_checks`;
 create table `doctor_group_info_checks`(
 `id` bigint(20) unsigned not null auto_increment,
@@ -746,3 +746,63 @@ primary key(`id`),
 key `idx_doctor_pig_elicit_records_farm_id` (`farm_id`),
 key `idx_doctor_pig_elicit_records_pig_id` (`pig_id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪数据推演记录表';
+
+-- 2017-03-30 猪群track推演记录表
+drop table if exists `doctor_group_elicit_records`;
+create table `doctor_group_elicit_records`(
+`id` bigint(20) unsigned not null auto_increment,
+`farm_id` bigint(20) default null comment '猪场id',
+`farm_name` varchar(64) default null comment '猪场名称',
+`group_id` bigint(20) default null comment '猪群id',
+`group_code` varchar(512) default null comment '猪群code',
+`status` tinyint(4) default null comment '状态，-1：错误，1：成功',
+`from_track` text default null comment '原track',
+`to_track` text default null comment '推演后track',
+`error_reason` text default null comment '推演时错误原因',
+`version` int(11) NOT NULL DEFAULT 1 comment '版本',
+`created_at` datetime DEFAULT NULL COMMENT '创建时间',
+primary key(`id`),
+key `idx_doctor_group_elicit_records_farm_id` (`farm_id`),
+key `idx_doctor_group_elicit_records_group_id` (`group_id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪群数据推演记录表';
+
+-- 2017-03-28 增加事件来源字段
+ALTER TABLE doctor_farms ADD COLUMN  source tinyint(4) DEFAULT NULL COMMENT '来源,1:软件录入,2:excel导入,3:旧软件迁移，' after out_id;
+ALTER TABLE doctor_pig_events ADD COLUMN event_source tinyint(4)  DEFAULT NULL COMMENT '事件来源,1、软件录入,2、excel导入,3、旧场迁移' after status;
+ALTER TABLE doctor_group_events ADD COLUMN event_source tinyint(4)  DEFAULT NULL COMMENT '事件来源,1、软件录入,2、excel导入,3、旧场迁移' after status;
+
+-- 修复2017-03-20之前excel导入的母猪,进场胎次多减了1
+update doctor_farms set source = 3 where out_id is not null;
+update doctor_farms set source = 2 where out_id is null;
+-- 迁移
+update doctor_pig_events set event_source = 3 where out_id  is not null;
+-- excel导入
+update doctor_pig_events a, doctor_farms b
+set a.event_source = 2
+where a.farm_id = b.id
+and b.source = 2
+and a.created_at <= date_add(b.created_at, INTERVAL 2 minute);
+-- 系统录入
+update doctor_pig_events set event_source = 1 where event_source is null;
+
+-- 猪群的事件来源
+update doctor_group_events
+set event_source = 2
+where id in (select id from
+(select a.* from
+  (select id, created_at from doctor_farms where source = 2) b
+  left join doctor_group_events a
+  on a.farm_id = b.id
+  where a.farm_id not in (2,81)
+  and type =2
+  and a.created_at <= date_add(b.created_at, INTERVAL 3 minute)
+  and is_auto = 1
+  -- and event_source is null
+  and extra is null
+  or remark = 'excel导入'
+  ) t1
+  )
+  ;
+-- 导入的猪群事件的初始转入事件有谁触发
+update doctor_group_events set rel_pig_event_id = -1, rel_group_event_id = null where pig_type = 7 and event_source = 2;
+update doctor_group_events set rel_group_event_id = -1 , rel_pig_event_id = null where pig_type <> 7 and event_source = 2;

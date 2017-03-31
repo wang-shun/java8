@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
@@ -25,7 +24,6 @@ import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.service.DoctorEditGroupEventService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -79,8 +77,6 @@ public class DoctorGroupEvents {
     private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
     @RpcConsumer
     private DoctorEventModifyRequestReadService doctorEventModifyRequestReadService;
-    @RpcConsumer(timeout = "30000")
-    private DoctorEditGroupEventService doctorEditGroupEventService;
 
     @Autowired
     public DoctorGroupEvents(DoctorGroupWebService doctorGroupWebService,
@@ -458,31 +454,5 @@ public class DoctorGroupEvents {
             log.error("fix group event extra error, cause by {}", Throwables.getStackTraceAsString(e));
             return Boolean.FALSE;
         }
-
-    }
-
-    @RequestMapping(value = "/fix-events", method = RequestMethod.GET)
-    public Response<String> reElicitGroupEvent(@RequestParam(required = false) Long farmId, @RequestParam(required = false) Long groupId){
-        try{
-            if(Arguments.isNull(farmId) && Arguments.isNull(groupId)){
-                log.error("farmId, groupId need one ");
-                return Response.fail("farmId, groupId need one");
-            }
-            List<Long> groupIds = Lists.newArrayList();
-            if(Arguments.isNull(groupId) && !Arguments.isNull(farmId)){
-                List<DoctorGroup> groupList = RespHelper.orServEx(doctorGroupReadService.findGroupsByFarmId(farmId));
-                groupIds = groupList.stream().map(DoctorGroup::getId).collect(Collectors.toList());
-            }else{
-                groupIds.add(groupId);
-            }
-            if(Arguments.isNullOrEmpty(groupIds)){
-                log.error("no groups find, farmId: {}", farmId);
-            }
-            doctorEditGroupEventService.reElicitGroupEvent(groupIds);
-        }catch (Exception e){
-            log.error("fix group event error, cause by {}", Throwables.getStackTraceAsString(e));
-            return Response.fail(Throwables.getStackTraceAsString(e));
-        }
-        return Response.ok("处理成功!!!");
     }
 }

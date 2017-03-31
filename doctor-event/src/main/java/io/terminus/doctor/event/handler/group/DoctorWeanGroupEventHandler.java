@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -20,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -52,9 +52,8 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         DoctorGroupEvent<DoctorWeanGroupEvent> event = dozerGroupEvent(group, GroupEventType.WEAN, weanInput);
         event.setQuantity(weanInput.getPartWeanPigletsCount());
         event.setAvgWeight(weanInput.getPartWeanAvgWeight());
-
-
         event.setExtraMap(weanGroupEvent);
+        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 
@@ -62,9 +61,9 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
     public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorWeanGroupEvent weanGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorWeanGroupEvent.class);
         track.setUnqQty(EventUtil.plusInt(track.getUnqQty(), weanGroupEvent.getNotQualifiedCount()));
-        track.setQuaQty(EventUtil.minusQuantity(track.getQuantity(), track.getUnqQty()));
+        track.setQuaQty(EventUtil.minusInt(track.getQuantity(), track.getUnqQty()));
         track.setWeanQty(EventUtil.plusInt(track.getWeanQty(), weanGroupEvent.getPartWeanPigletsCount()));
-        track.setUnweanQty(EventUtil.minusQuantity(track.getQuantity(), track.getWeanQty()));
+        track.setUnweanQty(EventUtil.minusQuantity(track.getUnweanQty(), weanGroupEvent.getPartWeanPigletsCount()));
         track.setWeanWeight(EventUtil.plusDouble(track.getWeanWeight(), weanGroupEvent.getPartWeanAvgWeight() * weanGroupEvent.getPartWeanPigletsCount()));
         return track;
     }
@@ -92,9 +91,9 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
 
         //3.更新猪群跟踪
         groupTrack.setUnqQty(EventUtil.plusInt(groupTrack.getUnqQty(), weanInput.getNotQualifiedCount()));
-        groupTrack.setQuaQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getUnqQty()));
+        groupTrack.setQuaQty(EventUtil.minusInt(groupTrack.getQuantity(), groupTrack.getUnqQty()));
         groupTrack.setWeanQty(EventUtil.plusInt(groupTrack.getWeanQty(), weanInput.getPartWeanPigletsCount()));
-        groupTrack.setUnweanQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getWeanQty()));
+        groupTrack.setUnweanQty(EventUtil.minusQuantity(groupTrack.getUnweanQty(), weanInput.getPartWeanPigletsCount()));
         groupTrack.setWeanWeight(EventUtil.plusDouble(groupTrack.getWeanWeight(), weanInput.getPartWeanAvgWeight() * weanInput.getPartWeanPigletsCount()));
 
         updateGroupTrack(groupTrack, event);

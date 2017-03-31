@@ -320,6 +320,12 @@ public class DoctorPigEvent implements Serializable {
      */
     private Integer isModify;
 
+    /**
+     * 事件来源
+     * @see io.terminus.doctor.common.enums.SourceType
+     */
+    private Integer eventSource;
+
     @SneakyThrows
     public void setExtra(String extra) {
         this.extra = extra;
@@ -339,4 +345,6 @@ public class DoctorPigEvent implements Serializable {
             this.extra = OBJECT_MAPPER.writeValueAsString(this.extraMap);
         }
     }
+
+
 }

@@ -5,6 +5,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
@@ -16,6 +17,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -46,6 +48,8 @@ import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
+import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
+import io.terminus.doctor.event.dto.event.group.input.DoctorWeanGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -72,7 +76,9 @@ import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
+import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorGroupReportManager;
+import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
@@ -107,6 +113,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -146,6 +153,10 @@ public class DoctorMoveDataService {
     private final DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorPigSnapshotDao doctorPigSnapshotDao;
+    @Autowired
+    private DoctorPigEventManager doctorPigEventManager;
+    @Autowired
+    private DoctorGroupEventManager doctorGroupEventManager;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -814,6 +825,7 @@ public class DoctorMoveDataService {
         sowEvent.setDesc(event.getEventDesc());
         sowEvent.setOutId(event.getEventOutId());
         sowEvent.setRemark(event.getRemark());
+        sowEvent.setEventSource(SourceType.MOVE.getValue());
 
         //事件类型, (如果是转舍类型, 重新判断后还会覆盖掉)
         PigEvent eventType = PigEvent.from(event.getEventName());
@@ -1662,6 +1674,7 @@ public class DoctorMoveDataService {
         boarEvent.setOutId(event.getEventOutId());
         boarEvent.setRemark(event.getRemark());
         boarEvent.setStatus(EventStatus.VALID.getValue());
+        boarEvent.setEventSource(SourceType.MOVE.getValue());
 
         //事件类型
         PigEvent eventType = PigEvent.from(event.getEventName());
@@ -1894,6 +1907,7 @@ public class DoctorMoveDataService {
         event.setGroupCode(group.getGroupCode());
         event.setEventAt(gainEvent.getEventAt());
         event.setStatus(EventStatus.VALID.getValue());
+        event.setEventSource(SourceType.MOVE.getValue());
 
         //转换事件类型
         GroupEventType type = GroupEventType.from(gainEvent.getEventTypeName());
@@ -2440,6 +2454,37 @@ public class DoctorMoveDataService {
         });
     }
 
+
+    public void updateExcelMOVEErrorPigEvents(DoctorFarm farm) {
+        List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1, "createdAtEnd", "2017-03-20 23:59:59"));
+        if (doctorPigEvensList.isEmpty()) {
+            return;
+        }
+        List<List<DoctorPigEvent>> lists = Lists.partition(doctorPigEvensList, 1000);
+        lists.forEach(list -> {
+            for(DoctorPigEvent doctorPigEvent: list) {
+                Map<String, Object> map = new HashMap<String, Object>();
+                if(!isNull(doctorPigEvent.getExtraMap()) && !isNull(doctorPigEvent.getExtraMap().get("importParity"))){
+                    continue;
+                }
+                if(!isNull(doctorPigEvent.getExtraMap()) && !isNull(doctorPigEvent.getExtraMap().get("parity")) ){
+                    map = doctorPigEvent.getExtraMap();
+                    map.put("importParity", map.get("parity"));
+                    map.replace("parity", Integer.valueOf(map.get("parity").toString()) + 1);
+                }else{
+                    map.put("parity", 1);
+                }
+
+                doctorPigEvent.setExtraMap(map);
+            }
+            if (!list.isEmpty()) {
+                doctorPigEventDao.updates(list);
+            }
+        });
+    }
+
+
+
     public void updateFosterSowCode(DoctorFarm farm){
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.FOSTERS.getKey(), "kind", 1));
         List<List<DoctorPigEvent>> lists = Lists.partition(doctorPigEvensList, 1000);
@@ -2597,5 +2642,41 @@ public class DoctorMoveDataService {
     public void updateParityAndBoarCodeByPigId(Long pigId) {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("pigId", pigId , "type", PigEvent.ENTRY.getKey()));
         updateParityAndBoarCodeByEntryEvents(doctorPigEvensList);
+    }
+
+    /**
+     * 生成猪群断奶事件
+     */
+    @Transactional
+    public void generateGroupWeanEvent(Long farmId){
+//        //1.删除之前添加的断奶事件
+//        doctorGroupEventDao.deleteAddWeanEvents(farmId);
+
+        //2.查询已经有相应断奶事件的猪断奶事件ids
+        List<Long> excludeIds = doctorGroupEventDao.queryRelPigEventIdsByGroupWeanEvent(farmId);
+        int pageNo = 1;
+        int pageSize = 1000;
+        while (true) {
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            List<DoctorPigEvent> doctorPigEventList = doctorPigEventDao.queryWeansWithoutGroupWean(excludeIds, farmId, pageInfo.getOffset(), pageInfo.getLimit());
+            doctorPigEventList.forEach(pigWeanEvent -> {
+                try {
+                    //3.生成猪群断奶事件
+                    DoctorWeanGroupInput groupInput = (DoctorWeanGroupInput) doctorPigEventManager.getHandler(PigEvent.WEAN.getKey()).buildTriggerGroupEventInput(pigWeanEvent);
+                    DoctorGroupTrack doctorGroupTrack = doctorGroupTrackDao.findByGroupId(groupInput.getGroupId());
+                    DoctorGroup doctorGroup = doctorGroupDao.findById(groupInput.getGroupId());
+                    DoctorGroupEvent groupWeanEvent = doctorGroupEventManager.buildGroupEvent(new DoctorGroupInputInfo(new DoctorGroupDetail(doctorGroup, doctorGroupTrack), groupInput), GroupEventType.WEAN.getValue());
+                    groupWeanEvent.setEventSource(SourceType.ADD.getValue());
+                    doctorGroupEventDao.create(groupWeanEvent);
+                } catch (Exception e) {
+                    log.error("pigEventId:{}", pigWeanEvent.getId());
+                    //throw e;
+                }
+            });
+            pageNo++;
+            if (doctorPigEventList.size() < 1000) {
+                break;
+            }
+        }
     }
 }
