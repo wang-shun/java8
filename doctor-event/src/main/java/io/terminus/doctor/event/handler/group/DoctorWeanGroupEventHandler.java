@@ -61,9 +61,9 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
     public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorWeanGroupEvent weanGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorWeanGroupEvent.class);
         track.setUnqQty(EventUtil.plusInt(track.getUnqQty(), weanGroupEvent.getNotQualifiedCount()));
-        track.setQuaQty(EventUtil.minusQuantity(track.getQuantity(), track.getUnqQty()));
+        track.setQuaQty(EventUtil.minusInt(track.getQuantity(), track.getUnqQty()));
         track.setWeanQty(EventUtil.plusInt(track.getWeanQty(), weanGroupEvent.getPartWeanPigletsCount()));
-        track.setUnweanQty(EventUtil.minusQuantity(track.getUnweanQty(), weanGroupEvent.getPartWeanPigletsCount()));
+        track.setUnweanQty(EventUtil.minusInt(track.getUnweanQty(), weanGroupEvent.getPartWeanPigletsCount()));
         track.setWeanWeight(EventUtil.plusDouble(track.getWeanWeight(), weanGroupEvent.getPartWeanAvgWeight() * weanGroupEvent.getPartWeanPigletsCount()));
         return track;
     }
@@ -91,9 +91,9 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
 
         //3.更新猪群跟踪
         groupTrack.setUnqQty(EventUtil.plusInt(groupTrack.getUnqQty(), weanInput.getNotQualifiedCount()));
-        groupTrack.setQuaQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getUnqQty()));
+        groupTrack.setQuaQty(EventUtil.minusInt(groupTrack.getQuantity(), groupTrack.getUnqQty()));
         groupTrack.setWeanQty(EventUtil.plusInt(groupTrack.getWeanQty(), weanInput.getPartWeanPigletsCount()));
-        groupTrack.setUnweanQty(EventUtil.minusQuantity(groupTrack.getUnweanQty(), weanInput.getPartWeanPigletsCount()));
+        groupTrack.setUnweanQty(EventUtil.minusInt(groupTrack.getUnweanQty(), weanInput.getPartWeanPigletsCount()));
         groupTrack.setWeanWeight(EventUtil.plusDouble(groupTrack.getWeanWeight(), weanInput.getPartWeanAvgWeight() * weanInput.getPartWeanPigletsCount()));
 
         updateGroupTrack(groupTrack, event);
