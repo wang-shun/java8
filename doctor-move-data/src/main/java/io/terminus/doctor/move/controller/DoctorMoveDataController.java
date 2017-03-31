@@ -1032,4 +1032,18 @@ public class DoctorMoveDataController {
         List<DoctorPig> pigs = MAPPER.fromJson(pigCodeUpdates, MAPPER.createCollectionType(List.class, DoctorPig.class));
         return RespHelper.or500(doctorPigWriteService.updatePigCodes(pigs));
     }
+
+    /**
+     * 更新用户名
+     * @param userId 用户id
+     * @param userName 新用户名
+     * @return 更新是否成功
+     */
+    @RequestMapping(value = "/updateUserName", method = RequestMethod.GET)
+    public Boolean updateUserName(@RequestParam Long userId, @RequestParam String userName) {
+        log.info("update user name starting, userId:{}, userName:{}", userId, userName);
+        doctorMoveDataService.updateUserName(userId, userName);
+        log.info("update user name ending");
+        return true;
+    }
 }
