@@ -105,6 +105,9 @@ import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_SowCardList;
 import io.terminus.doctor.move.util.JsonFormatUtils;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.parana.user.impl.dao.UserDao;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -159,6 +162,8 @@ public class DoctorMoveDataService {
     private DoctorPigEventManager doctorPigEventManager;
     @Autowired
     private DoctorGroupEventManager doctorGroupEventManager;
+    private final UserWriteService<User> userWriteService;
+    private final UserDao userDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -176,7 +181,9 @@ public class DoctorMoveDataService {
                                  DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService,
                                  DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService,
                                  DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                 DoctorPigSnapshotDao doctorPigSnapshotDao) {
+                                 DoctorPigSnapshotDao doctorPigSnapshotDao,
+                                 UserWriteService userWriteService,
+                                 UserDao userDao) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
@@ -193,6 +200,8 @@ public class DoctorMoveDataService {
         this.doctorMaterialConsumeProviderReadService = doctorMaterialConsumeProviderReadService;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorPigSnapshotDao = doctorPigSnapshotDao;
+        this.userWriteService = userWriteService;
+        this.userDao = userDao;
     }
 
     //删除猪场所有猪相关的数据
@@ -709,6 +718,7 @@ public class DoctorMoveDataService {
         });
 
         //4. 更新公猪的全部配种次数
+
         updateBoarCurrentParity(sowEvents);
 
         //更新母猪胎次,配种的公猪号
@@ -2646,6 +2656,7 @@ public class DoctorMoveDataService {
     }
 
     /**
+<<<<<<< HEAD
      * 生成猪群断奶事件
      */
     @Transactional
@@ -2686,7 +2697,7 @@ public class DoctorMoveDataService {
         List<DoctorGroup> groupList = doctorGroupDao.findByFarmId(farmId);
         groupList.forEach(group -> {
             List<DoctorGroupSnapshot> snapshots = doctorGroupSnapshotDao.findByGroupId(group.getId());
-            snapshots.forEach( doctorGroupSnapshot -> {
+            snapshots.forEach(doctorGroupSnapshot -> {
                 DoctorGroupSnapShotInfo info = JsonFormatUtils.JSON_NON_EMPTY_MAPPER.fromJson(doctorGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
                 String jsonInfo = ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info);
                 doctorGroupSnapshot.setToInfo(jsonInfo);
@@ -2694,5 +2705,15 @@ public class DoctorMoveDataService {
 //            doctorGroupSnapshotDao.deleteByGroupId(group.getId());
             doctorGroupSnapshotDao.creates(snapshots);
         });
+    }
+
+     /** 更新用户名
+     * @param userId 用户id
+     * @param newName 用户名
+     */
+    public void updateUserName(Long userId, String newName) {
+        User user = userDao.findById(userId);
+        user.setName(newName);
+        userWriteService.update(user);
     }
 }

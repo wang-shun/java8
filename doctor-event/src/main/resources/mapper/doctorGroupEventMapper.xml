@@ -347,6 +347,7 @@
             #{item.relGroupEventId},
             #{item.relPigEventId},
             #{item.outId},
+            #{item.status},
             #{item.remark},
             #{item.status},
             #{item.eventSource},

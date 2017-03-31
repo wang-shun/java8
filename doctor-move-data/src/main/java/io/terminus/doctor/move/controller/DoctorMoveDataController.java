@@ -23,6 +23,7 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
@@ -38,15 +39,20 @@ import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.text.SimpleDateFormat;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -157,7 +163,7 @@ public class DoctorMoveDataController {
         try {
             //1.迁移猪场信息
             log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
-            userInitService.init(loginName, mobile, moveId);
+            userInitService.init(loginName, mobile, moveId, null);
             log.warn("move user farm end");
 
             //多个猪场遍历插入
@@ -173,6 +179,87 @@ public class DoctorMoveDataController {
         }
     }
 
+    /**
+     * 迁移全部数据
+     * @param mobile 注册的手机号
+     * @param moveId 数据源id
+     * @param index  日报数据天数(默认365天)
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/moveAllWithExcel", method = RequestMethod.GET)
+    public Boolean moveAllWithExcel(@RequestParam("mobile") String mobile,
+                                    @RequestParam("loginName") String loginName,
+                                    @RequestParam("moveId") Long moveId,
+                                    @RequestParam("path") String path,
+                                    @RequestParam(value = "index", required = false) Integer index,
+                                    @RequestParam(value = "monthIndex", required = false) Integer monthIndex) {
+        try {
+            //1.迁移猪场信息
+            log.warn("move user farm start, mobile:{}, moveId:{}, path:{}", mobile, moveId, path);
+
+            List<DoctorFarmWithMobile> farmList = userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
+            log.warn("move user farm end");
+
+            //多个猪场遍历插入
+            farmList.forEach(farmWithMobile -> moveAllExclude(moveId, farmWithMobile.getDoctorFarm(), farmWithMobile.getMobile(), index, monthIndex));
+
+            //把所有猪舍添加到所有用户的权限里去
+            farmList.forEach(farmWithMobile -> userInitService.updatePermissionBarn(farmWithMobile.getMobile()));
+            log.warn("all data moved successfully, CONGRATULATIONS!!!");
+            return true;
+        } catch (Exception e) {
+            log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    private Sheet importFarmInfoExcel(String path) {
+        log.info("importFarmInfoExcel path:{}", path);
+        InputStream inputStream = null;
+        try {
+            File file = new File(path);
+            String fileType;
+            if (file.getName().endsWith(".xlsx")) {
+                fileType = "xlsx";
+            } else if (file.getName().endsWith(".xls")) {
+                fileType = "xls";
+            } else {
+                throw new ServiceException("file.type.error");
+            }
+            inputStream = new FileInputStream(file);
+            Workbook workbook;
+            switch (fileType) {
+                case "xlsx":
+                    workbook = new XSSFWorkbook(inputStream);  //2007
+                    break;
+                case "xls":
+                    workbook = new HSSFWorkbook(inputStream);  //2003
+                    break;
+                default:
+                    throw new ServiceException("file.type.error");
+            }
+            return getSheet(workbook, "猪场");
+        } catch (Exception e) {
+            log.error("import farm info excel failed, path:{}, cause:{}", path, Throwables.getStackTraceAsString(e));
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    //ignore this exception
+                }
+            }
+        }
+        return null;
+    }
+
+    private Sheet getSheet(Workbook wk, String name) {
+        Sheet sheet = wk.getSheet(name);
+        if (sheet == null) {
+            throw new JsonResponseException("sheet.not.found：" + name);
+        }
+        return sheet;
+    }
     //获取刚才创建的猪场
     private List<DoctorFarm> getFarms(String mobile) {
         User user = RespHelper.orServEx(doctorUserReadService.findBy(mobile, LoginType.MOBILE));
@@ -221,27 +308,27 @@ public class DoctorMoveDataController {
 
         //首页统计
         movePigTypeStatistic(farm);
-
-        //6.迁移猪场日报
-        log.warn("move daily start, moveId:{}", moveId);
-        doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
-        log.warn("move daily end");
-
-        //7.迁移猪场周报
-        log.warn("move weekly start, moveId:{}", moveId);
-        doctorMoveReportService.moveWeeklyReport(farm.getId(), monthIndex == null ? null : monthIndex * 4);
-        log.warn("move weekly end");
-
-
-        //7.迁移猪场月报
-        log.warn("move monthly start, moveId:{}", moveId);
-        doctorMoveReportService.moveMonthlyReport(farm.getId(), monthIndex);
-        log.warn("move monthly end");
-
-        //8.迁移猪场胎次分析月报
-        log.warn("move parity monthly start, moveId:{}", moveId);
-        doctorMoveReportService.moveParityMonthlyReport(farm.getId(), monthIndex);
-        log.warn("move parity monthly end");
+// TODO: 17/3/31 先注释掉 
+//        //6.迁移猪场日报
+//        log.warn("move daily start, moveId:{}", moveId);
+//        doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
+//        log.warn("move daily end");
+//
+//        //7.迁移猪场周报
+//        log.warn("move weekly start, moveId:{}", moveId);
+//        doctorMoveReportService.moveWeeklyReport(farm.getId(), monthIndex == null ? null : monthIndex * 4);
+//        log.warn("move weekly end");
+//
+//
+//        //7.迁移猪场月报
+//        log.warn("move monthly start, moveId:{}", moveId);
+//        doctorMoveReportService.moveMonthlyReport(farm.getId(), monthIndex);
+//        log.warn("move monthly end");
+//
+//        //8.迁移猪场胎次分析月报
+//        log.warn("move parity monthly start, moveId:{}", moveId);
+//        doctorMoveReportService.moveParityMonthlyReport(farm.getId(), monthIndex);
+//        log.warn("move parity monthly end");
 
         //迁移仓库/物料
         log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
@@ -290,10 +377,11 @@ public class DoctorMoveDataController {
     @RequestMapping(value = "/farm", method = RequestMethod.GET)
     public Boolean moveUserFarm(@RequestParam("mobile") String mobile,
                                 @RequestParam("loginName") String loginName,
-                                @RequestParam("moveId") Long moveId) {
+                                @RequestParam("moveId") Long moveId,
+                                @RequestParam("path") String path) {
         try {
             log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
-            userInitService.init(loginName, mobile, moveId);
+            userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
             log.warn("move user farm end");
             return Boolean.TRUE;
         } catch (Exception e) {
@@ -992,6 +1080,7 @@ public class DoctorMoveDataController {
     }
 
     /**
+<<<<<<< HEAD
      * 推演track
      * @param pigId 猪id
      * @return
@@ -1057,25 +1146,37 @@ public class DoctorMoveDataController {
 
 
     @RequestMapping(value = "/group/snapshots")
-    public Boolean flushGroupDateFormat(@RequestParam(required = false) Long farmId){
+    public Boolean flushGroupDateFormat(@RequestParam(required = false) Long farmId) {
         log.warn("{} flush group dateformat start", DateUtil.toDateTimeString(new Date()));
         List<Long> farmIds = Lists.newArrayList();
-        try{
-            if(Arguments.isNull(farmId)){
+        try {
+            if (Arguments.isNull(farmId)) {
                 farmIds = getAllFarmIds();
-            }else{
+            } else {
                 farmIds.add(farmId);
             }
             farmIds.forEach(id -> {
                 log.warn("{} flush farm {} group dateformat start", DateUtil.toDateTimeString(new Date()), id);
                 doctorMoveDataService.flushGroupSnapshotsToInfoDateFormat(id);
             });
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("flush group dateformat failed, cause: {}", Throwables.getStackTraceAsString(e));
             return false;
         }
-
         log.warn("{} flush group dateformat end", DateUtil.toDateTimeString(new Date()));
+        return true;
+    }
+    /**
+     * 更新用户名
+     * @param userId 用户id
+     * @param userName 新用户名
+     * @return 更新是否成功
+     */
+    @RequestMapping(value = "/updateUserName", method = RequestMethod.GET)
+    public Boolean updateUserName(@RequestParam Long userId, @RequestParam String userName) {
+        log.info("update user name starting, userId:{}, userName:{}", userId, userName);
+        doctorMoveDataService.updateUserName(userId, userName);
+        log.info("update user name ending");
         return true;
     }
 }
