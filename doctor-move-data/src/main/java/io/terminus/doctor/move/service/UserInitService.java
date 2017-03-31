@@ -7,7 +7,6 @@ import com.google.common.collect.Sets;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -61,6 +60,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -112,7 +112,9 @@ public class UserInitService {
         List<String> includeFarmList = moveFarmInfoList.stream().map(DoctorMoveFarmInfo::getOldFarmName).collect(Collectors.toList());
         Map<String, String> farmNameMap = moveFarmInfoList.stream().collect(Collectors.toMap(k -> k.getOldFarmName(), v -> v.getNewFarmName()));
 
-        List<View_FarmMember> list = getFarmMember(dataSourceId).stream()
+        List<View_FarmMember> allList = getFarmMember(dataSourceId);
+        View_FarmMember admin = allList.stream().filter(farmMember -> farmMember.getLevels() == 0 && "admin".equals(farmMember.getLoginName())).collect(Collectors.toList()).get(0);
+        List<View_FarmMember> list = allList.stream()
                 .filter(view_farmMember -> includeFarmList.contains(view_farmMember.getFarmName()))
                 .collect(Collectors.toList());
         checkFarmNameRepeat(list);
@@ -130,6 +132,12 @@ public class UserInitService {
         Map<String, DoctorFarm> nameFarmMap = farms.stream().collect(Collectors.toMap(k -> k.getName(), v ->v));
 
         List<DoctorFarmWithMobile> farmList = Lists.newArrayList();
+        //创建org
+        DoctorOrg org = doctorOrgDao.findByName(moveFarmInfoList.get(0).getOrgName());
+        if (isNull(org)) {
+            org = this.createOrg(moveFarmInfoList.get(0).getOrgName(), admin.getMobilPhone(), null, admin.getOID());
+        }
+
         for (DoctorMoveFarmInfo farmInfo : moveFarmInfoList) {
             // 主账号注册,内含事务
             User primaryUser = this.registerByMobile(farmInfo.getMobile(), "123456", farmInfo.getLoginName(), farmInfo.getRealName());
@@ -139,11 +147,7 @@ public class UserInitService {
             //初始化服务的申请审批状态
             this.initServiceReview(userId, primaryUser.getMobile(), primaryUser.getName());
             DoctorFarm farm = nameFarmMap.get(farmInfo.getNewFarmName());
-            //创建org
-            DoctorOrg org = this.createOrg(farmInfo.getNewFarmName(), primaryUser.getMobile(), null, farm.getOutId());
-
             //创建猪场
-
             farm.setFarmCode(farmInfo.getLoginName());
             farm.setOrgId(org.getId());
             farm.setOrgName(org.getName());
@@ -408,7 +412,7 @@ public class UserInitService {
             List<DoctorUserDataPermission> permissions = doctorUserDataPermissionDao.findByOrgId(orgId);
             permissions.forEach(permission -> {
                 List<Long> barnIds = permission.getBarnIdsList();
-                if(Arguments.isNull(barnIds)) {
+                if(isNull(barnIds)) {
                     barnIds = Lists.newArrayList();
                 }
                 barnIds.addAll(barns);
