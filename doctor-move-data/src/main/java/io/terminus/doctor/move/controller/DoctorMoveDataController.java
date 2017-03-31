@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
@@ -225,7 +226,15 @@ public class DoctorMoveDataController {
             }
             return getSheet(workbook, "猪场");
         } catch (Exception e) {
-            log.error("importFarmInfoExcel failed, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("import farm info excel failed, path:{}, cause:{}", path, Throwables.getStackTraceAsString(e));
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    //ignore this exception
+                }
+            }
         }
         return null;
     }
