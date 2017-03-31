@@ -114,13 +114,16 @@ public class UserInitService {
 
         List<View_FarmMember> allList = getFarmMember(dataSourceId);
         View_FarmMember admin = allList.stream().filter(farmMember -> farmMember.getLevels() == 0 && "admin".equals(farmMember.getLoginName())).collect(Collectors.toList()).get(0);
+        log.info("===admin:{}", admin);
         List<View_FarmMember> list = allList.stream()
                 .filter(view_farmMember -> includeFarmList.contains(view_farmMember.getFarmName()))
                 .collect(Collectors.toList());
         checkFarmNameRepeat(list);
 
         List<DoctorFarm> farms = new ArrayList<>();
-        RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo)).stream().filter(view_farmInfo -> includeFarmList.contains(view_farmInfo.getFarmName())).forEach(farmInfo -> {
+        List<View_FarmInfo> allViewFarmInfoList = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo));
+        log.info("===allViewFarmInfoList:{}", allViewFarmInfoList);
+        allViewFarmInfoList.stream().filter(view_farmInfo -> includeFarmList.contains(view_farmInfo.getFarmName())).forEach(farmInfo -> {
             if (farmInfo.getLevels() == 1) {
                 DoctorFarm doctorFarm = makeFarm(farmInfo);
                 doctorFarm.setName(farmNameMap.get(doctorFarm.getName()));
@@ -149,6 +152,7 @@ public class UserInitService {
             //初始化服务的申请审批状态
             this.initServiceReview(userId, primaryUser.getMobile(), primaryUser.getName());
             DoctorFarm farm = nameFarmMap.get(farmInfo.getNewFarmName());
+            log.info("===farm:{}", farm);
             //创建猪场
             farm.setFarmCode(farmInfo.getLoginName());
             farm.setOrgId(org.getId());
