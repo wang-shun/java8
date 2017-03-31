@@ -10,13 +10,13 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
@@ -32,6 +32,10 @@ import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,6 +43,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -141,7 +148,7 @@ public class DoctorMoveDataController {
         try {
             //1.迁移猪场信息
             log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
-            userInitService.init(loginName, mobile, moveId);
+            userInitService.init(loginName, mobile, moveId, null);
             log.warn("move user farm end");
 
             //多个猪场遍历插入
@@ -157,6 +164,78 @@ public class DoctorMoveDataController {
         }
     }
 
+    /**
+     * 迁移全部数据
+     * @param mobile 注册的手机号
+     * @param moveId 数据源id
+     * @param index  日报数据天数(默认365天)
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/moveAllWithExcel", method = RequestMethod.GET)
+    public Boolean moveAllWithExcel(@RequestParam("mobile") String mobile,
+                                    @RequestParam("loginName") String loginName,
+                                    @RequestParam("moveId") Long moveId,
+                                    @RequestParam("path") String path,
+                                    @RequestParam(value = "index", required = false) Integer index,
+                                    @RequestParam(value = "monthIndex", required = false) Integer monthIndex) {
+        try {
+            //1.迁移猪场信息
+            log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
+
+            List<DoctorFarmWithMobile> farmList = userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
+            log.warn("move user farm end");
+
+            //多个猪场遍历插入
+            farmList.forEach(farmWithMobile -> moveAllExclude(moveId, farmWithMobile.getDoctorFarm(), farmWithMobile.getMobile(), index, monthIndex));
+
+            //把所有猪舍添加到所有用户的权限里去
+            farmList.forEach(farmWithMobile -> userInitService.updatePermissionBarn(farmWithMobile.getMobile()));
+            log.warn("all data moved successfully, CONGRATULATIONS!!!");
+            return true;
+        } catch (Exception e) {
+            log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    private Sheet importFarmInfoExcel(String path) {
+        InputStream inputStream = null;
+        try {
+            File file = new File(path);
+            String fileType;
+            if (file.getName().endsWith(".xlsx")) {
+                fileType = "xlsx";
+            } else if (file.getName().endsWith(".xls")) {
+                fileType = "xls";
+            } else {
+                throw new ServiceException("file.type.error");
+            }
+            inputStream = new FileInputStream(file);
+            Workbook workbook;
+            switch (fileType) {
+                case "xlsx":
+                    workbook = new XSSFWorkbook(inputStream);  //2007
+                    break;
+                case "xls":
+                    workbook = new HSSFWorkbook(inputStream);  //2003
+                    break;
+                default:
+                    throw new ServiceException("file.type.error");
+            }
+            return getSheet(workbook, "猪场");
+        } catch (Exception e) {
+
+        }
+        return null;
+    }
+
+    private Sheet getSheet(Workbook wk, String name) {
+        Sheet sheet = wk.getSheet(name);
+        if (sheet == null) {
+            throw new JsonResponseException("sheet.not.found：" + name);
+        }
+        return sheet;
+    }
     //获取刚才创建的猪场
     private List<DoctorFarm> getFarms(String mobile) {
         User user = RespHelper.orServEx(doctorUserReadService.findBy(mobile, LoginType.MOBILE));
@@ -277,7 +356,7 @@ public class DoctorMoveDataController {
                                 @RequestParam("moveId") Long moveId) {
         try {
             log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
-            userInitService.init(loginName, mobile, moveId);
+            userInitService.init(loginName, mobile, moveId, null);
             log.warn("move user farm end");
             return Boolean.TRUE;
         } catch (Exception e) {
