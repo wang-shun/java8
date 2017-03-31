@@ -1151,7 +1151,7 @@ public class DoctorMoveDataController {
             }else{
                 farmIds.add(farmId);
             }
-            farmIds.forEach(id -> {
+            for(Long id : farmIds){
                 log.info("{} elicit group start, farmId : {}", DateUtil.toDateTimeString(new Date()), id);
                 List<Long> groupIds = Lists.newArrayList();
                 List<DoctorGroup> groupList = RespHelper.orServEx(doctorGroupReadService.findGroupsByFarmId(id));
@@ -1160,9 +1160,14 @@ public class DoctorMoveDataController {
                 if(Arguments.isNullOrEmpty(groupIds)){
                     log.error("no groups find, farmId: {}", farmId);
                 }
-                doctorEditGroupEventService.reElicitGroupEvent(groupIds);
+                try{
+                    doctorEditGroupEventService.reElicitGroupEvent(groupIds);
+                }catch(Exception e){
+                    continue;
+                }
+
                 log.info("{} elicit group end, farmId : {}", DateUtil.toDateTimeString(new Date()), id);
-            });
+            }
 
         }catch (Exception e){
             log.error("fix group event error, cause by {}", Throwables.getStackTraceAsString(e));

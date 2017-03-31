@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.handler.group;
 
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.SourceType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -60,6 +62,10 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
     @Override
     public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
         DoctorWeanGroupEvent weanGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorWeanGroupEvent.class);
+        if(Arguments.isNull(weanGroupEvent)){
+            log.error("parse doctorTransGroupEvent faild, doctorGroupEvent = {}", event);
+            throw new InvalidException("wean.group.event.info.broken", event.getId());
+        }
         track.setUnqQty(EventUtil.plusInt(track.getUnqQty(), weanGroupEvent.getNotQualifiedCount()));
         track.setQuaQty(EventUtil.minusInt(track.getQuantity(), track.getUnqQty()));
         track.setWeanQty(EventUtil.plusInt(track.getWeanQty(), weanGroupEvent.getPartWeanPigletsCount()));
