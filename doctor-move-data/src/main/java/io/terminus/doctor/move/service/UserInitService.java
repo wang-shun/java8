@@ -127,9 +127,10 @@ public class UserInitService {
                 farms.add(doctorFarm);
             }
         });
-
+        log.info("===farms:{}", farms);
         //猪场名称与猪场映射
         Map<String, DoctorFarm> nameFarmMap = farms.stream().collect(Collectors.toMap(k -> k.getName(), v ->v));
+        log.info("===nameFarmMap:{}", nameFarmMap);
 
         List<DoctorFarmWithMobile> farmList = Lists.newArrayList();
         //创建org
@@ -139,6 +140,7 @@ public class UserInitService {
         }
 
         for (DoctorMoveFarmInfo farmInfo : moveFarmInfoList) {
+            log.info("===farmInfo:{}", farmInfo);
             // 主账号注册,内含事务
             User primaryUser = this.registerByMobile(farmInfo.getMobile(), "123456", farmInfo.getLoginName(), farmInfo.getRealName());
             Long userId = primaryUser.getId();
@@ -182,7 +184,7 @@ public class UserInitService {
                 }
             }
         }
-
+        log.info("===farmList:{}", farmList);
         return farmList;
     }
 
