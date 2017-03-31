@@ -192,4 +192,12 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public List<Long> queryRelPigEventIdsByGroupWeanEvent(Long farmId) {
         return getSqlSession().selectList(sqlId("queryRelPigEventIdsByGroupWeanEvent"), ImmutableMap.of("farmId", farmId));
     }
+
+    /**
+     * 删除猪场后面补录的断奶事件
+     * @param farmId 猪场id
+     */
+    public void deleteAddWeanEvents(Long farmId) {
+        getSqlSession().delete(sqlId("deleteAddWeanEvents"), farmId);
+    }
 }

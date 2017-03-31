@@ -2642,13 +2642,19 @@ public class DoctorMoveDataService {
      */
     @Transactional
     public void generateGroupWeanEvent(Long farmId){
+//        //1.删除之前添加的断奶事件
+//        doctorGroupEventDao.deleteAddWeanEvents(farmId);
+
+        //2.查询已经有相应断奶事件的猪断奶事件ids
         List<Long> excludeIds = doctorGroupEventDao.queryRelPigEventIdsByGroupWeanEvent(farmId);
         int offset = 0;
         int limit = 1000;
         while (true) {
             List<DoctorPigEvent> doctorPigEventList = doctorPigEventDao.queryWeansWithoutGroupWean(excludeIds, farmId, offset, limit);
+//                    .stream().filter(pigEvent -> notNull(pigEvent.getGroupId())) .collect(Collectors.toList());
             doctorPigEventList.forEach(pigWeanEvent -> {
                 try {
+                    //3.生成猪群断奶事件
                     DoctorWeanGroupInput groupInput = (DoctorWeanGroupInput) doctorPigEventManager.getHandler(PigEvent.WEAN.getKey()).buildTriggerGroupEventInput(pigWeanEvent);
                     DoctorGroupTrack doctorGroupTrack = doctorGroupTrackDao.findByGroupId(groupInput.getGroupId());
                     DoctorGroup doctorGroup = doctorGroupDao.findById(groupInput.getGroupId());

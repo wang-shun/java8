@@ -993,6 +993,7 @@
         FROM <include refid="tb"/>
         WHERE `type` = 16
         AND status = 1
+        AND group_id is not null
         <if test="farmId != -1" >AND farm_id = #{farmId}</if>
         <if test="excludeIds != null &amp;&amp; excludeIds.size() > 0">
             AND id NOT IN

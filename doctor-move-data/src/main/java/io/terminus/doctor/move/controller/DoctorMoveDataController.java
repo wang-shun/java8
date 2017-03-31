@@ -1047,7 +1047,9 @@ public class DoctorMoveDataController {
      */
     @RequestMapping(value = "/generateGroupWeanEvent", method = RequestMethod.GET)
     public Boolean generateGroupWeanEvent(@RequestParam Long farmId) {
+        log.info("generateGroupWeanEvent starting, farmId:{}", farmId);
         doctorMoveDataService.generateGroupWeanEvent(farmId);
+        log.info("generateGroupWeanEvent ending");
         return true;
     }
 }
