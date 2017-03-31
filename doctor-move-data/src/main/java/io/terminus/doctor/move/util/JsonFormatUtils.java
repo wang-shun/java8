@@ -54,13 +54,16 @@ public class JsonFormatUtils {
             JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
         }
         T result = null;
-        for(DateFormat dateFormat : formatList) {
+        for(int i = 0; i < formatList.size(); i++) {
+            DateFormat dateFormat = formatList.get(i);
             try {
                 JSON_MAPPER.getInnerMapper().setDateFormat(dateFormat);
                 result = JSON_MAPPER.getInnerMapper().readValue(jsonString, clazz);
                 break;
             } catch (InvalidFormatException e){
-                logger.warn("parse json string error:" + jsonString, e);
+                if(Objects.equals(i, formatList.size() - 1)){
+                    logger.warn("parse json string error:" + jsonString, e);
+                }
                 continue;
             } catch (IOException e) {
                 logger.warn("parse json string error:" + jsonString, e);

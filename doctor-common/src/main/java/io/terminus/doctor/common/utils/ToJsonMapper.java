@@ -16,7 +16,7 @@ import java.io.IOException;
  */
 
 public class ToJsonMapper {
-    private static Logger logger = LoggerFactory.getLogger(JsonMapper.class);
+    private static Logger logger = LoggerFactory.getLogger(ToJsonMapper.class);
     public static final ToJsonMapper JSON_NON_EMPTY_MAPPER;
     public static final ToJsonMapper JSON_NON_DEFAULT_MAPPER;
     private ObjectMapper mapper = new ObjectMapper();

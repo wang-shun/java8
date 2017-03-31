@@ -10,6 +10,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
@@ -2616,7 +2617,8 @@ public class DoctorMoveDataService {
             List<DoctorGroupSnapshot> snapshots = doctorGroupSnapshotDao.findByGroupId(group.getId());
             snapshots.forEach( doctorGroupSnapshot -> {
                 DoctorGroupSnapShotInfo info = JsonFormatUtils.JSON_NON_EMPTY_MAPPER.fromJson(doctorGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
-                doctorGroupSnapshot.setToInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(info));
+                String jsonInfo = ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info);
+                doctorGroupSnapshot.setToInfo(jsonInfo);
             });
 //            doctorGroupSnapshotDao.deleteByGroupId(group.getId());
             doctorGroupSnapshotDao.creates(snapshots);
