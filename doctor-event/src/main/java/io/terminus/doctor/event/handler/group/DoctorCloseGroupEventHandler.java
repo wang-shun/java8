@@ -89,7 +89,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         doctorGroupDao.update(group);
 
         //5.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.CLOSE);
+        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.CLOSE);
 
         //发布统计事件
         //publistGroupAndBarn(event);

@@ -221,7 +221,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
-        DoctorGroupSnapshot doctorGroupSnapshot = createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.TRANS_GROUP);
+        DoctorGroupSnapshot doctorGroupSnapshot = createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.TRANS_GROUP);
 
         //5.判断转群数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, transGroup.getQuantity())) {
@@ -244,7 +244,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
             //更新镜像
             DoctorGroupSnapShotInfo toInfo = JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(doctorGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
-            toInfo.setGroupEvent(event);
+//            toInfo.setGroupEvent(event);
             doctorGroupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(toInfo));
             doctorGroupSnapshotDao.update(doctorGroupSnapshot);
 

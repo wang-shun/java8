@@ -159,7 +159,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.TRANS_FARM);
+        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.TRANS_FARM);
 
         //5.判断转场数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, transFarm.getQuantity())) {

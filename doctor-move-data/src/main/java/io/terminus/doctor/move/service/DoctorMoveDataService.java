@@ -11,6 +11,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
@@ -102,6 +103,7 @@ import io.terminus.doctor.move.model.View_EventListGain;
 import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_SowCardList;
+import io.terminus.doctor.move.util.JsonFormatUtils;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -603,7 +605,6 @@ public class DoctorMoveDataService {
             DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder()
                     .group(group)
                     .groupTrack(groupTrack)
-                    .groupEvent(groupEvent)
                     .build();
             groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
             doctorGroupSnapshotDao.create(groupSnapshot);
@@ -2678,5 +2679,20 @@ public class DoctorMoveDataService {
                 break;
             }
         }
+    }
+
+
+    public void flushGroupSnapshotsToInfoDateFormat(Long farmId) {
+        List<DoctorGroup> groupList = doctorGroupDao.findByFarmId(farmId);
+        groupList.forEach(group -> {
+            List<DoctorGroupSnapshot> snapshots = doctorGroupSnapshotDao.findByGroupId(group.getId());
+            snapshots.forEach( doctorGroupSnapshot -> {
+                DoctorGroupSnapShotInfo info = JsonFormatUtils.JSON_NON_EMPTY_MAPPER.fromJson(doctorGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
+                String jsonInfo = ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info);
+                doctorGroupSnapshot.setToInfo(jsonInfo);
+            });
+//            doctorGroupSnapshotDao.deleteByGroupId(group.getId());
+            doctorGroupSnapshotDao.creates(snapshots);
+        });
     }
 }

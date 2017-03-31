@@ -25,7 +25,7 @@ public class DoctorGroupSnapShotInfo implements Serializable {
 
     private DoctorGroup group;
 
-    private DoctorGroupEvent groupEvent;
+//    private DoctorGroupEvent groupEvent;
 
     private DoctorGroupTrack groupTrack;
 }

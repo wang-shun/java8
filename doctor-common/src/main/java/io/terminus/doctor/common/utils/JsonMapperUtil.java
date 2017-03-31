@@ -201,4 +201,8 @@ public class JsonMapperUtil {
         return newMapper;
     }
 
+    public ObjectMapper getInnerMapper() {
+        return mapper;
+    }
+
 }

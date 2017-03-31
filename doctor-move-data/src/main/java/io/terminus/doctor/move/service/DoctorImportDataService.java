@@ -862,7 +862,6 @@ public class DoctorImportDataService {
             DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder()
                     .group(group)
                     .groupTrack(groupTrack)
-                    .groupEvent(moveInEvent)
                     .build();
             groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
             doctorGroupSnapshotDao.create(groupSnapshot);
@@ -980,7 +979,6 @@ public class DoctorImportDataService {
             DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder()
                     .group(group)
                     .groupTrack(groupTrack)
-                    .groupEvent(moveInEvent)
                     .build();
             groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
             doctorGroupSnapshotDao.create(groupSnapshot);
@@ -1918,7 +1916,7 @@ public class DoctorImportDataService {
         groupSnapshot.setGroupId(groupId);
         groupSnapshot.setFromEventId(0L);
         groupSnapshot.setToEventId(lastEvent.getId());
-        DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder().group(group).groupTrack(groupTrack).groupEvent(lastEvent).build();
+        DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder().group(group).groupTrack(groupTrack).build();
         groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
         doctorGroupSnapshotDao.create(groupSnapshot);
     }
@@ -1967,7 +1965,7 @@ public class DoctorImportDataService {
         groupSnapshot.setGroupId(groupId);
         groupSnapshot.setFromEventId(0L);
         groupSnapshot.setToEventId(groupEvent.getId());
-        DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder().group(group).groupTrack(groupTrack).groupEvent(groupEvent).build();
+        DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder().group(group).groupTrack(groupTrack).build();
         groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
         doctorGroupSnapshotDao.create(groupSnapshot);
 

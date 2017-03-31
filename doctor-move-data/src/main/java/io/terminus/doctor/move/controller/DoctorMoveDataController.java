@@ -38,6 +38,7 @@ import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -45,6 +46,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -1050,6 +1052,30 @@ public class DoctorMoveDataController {
         log.info("generateGroupWeanEvent starting, farmId:{}", farmId);
         doctorMoveDataService.generateGroupWeanEvent(farmId);
         log.info("generateGroupWeanEvent ending");
+        return true;
+    }
+
+
+    @RequestMapping(value = "/group/snapshots")
+    public Boolean flushGroupDateFormat(@RequestParam(required = false) Long farmId){
+        log.warn("{} flush group dateformat start", DateUtil.toDateTimeString(new Date()));
+        List<Long> farmIds = Lists.newArrayList();
+        try{
+            if(Arguments.isNull(farmId)){
+                farmIds = getAllFarmIds();
+            }else{
+                farmIds.add(farmId);
+            }
+            farmIds.forEach(id -> {
+                log.warn("{} flush farm {} group dateformat start", DateUtil.toDateTimeString(new Date()), id);
+                doctorMoveDataService.flushGroupSnapshotsToInfoDateFormat(id);
+            });
+        }catch(Exception e){
+            log.error("flush group dateformat failed, cause: {}", Throwables.getStackTraceAsString(e));
+            return false;
+        }
+
+        log.warn("{} flush group dateformat end", DateUtil.toDateTimeString(new Date()));
         return true;
     }
 }

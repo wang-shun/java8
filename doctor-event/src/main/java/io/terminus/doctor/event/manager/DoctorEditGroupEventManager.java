@@ -131,7 +131,6 @@ public class DoctorEditGroupEventManager {
         newSnapshot.setFromEventId(fromEventId);
         newSnapshot.setToEventId(doctorGroupEvent.getId());
         DoctorGroupSnapShotInfo toInfo = DoctorGroupSnapShotInfo.builder().group(doctorGroupDao.findById(doctorGroupEvent.getGroupId()))
-                .groupEvent(doctorGroupEvent)
                 .groupTrack(newTrack).build();
         newSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(toInfo));
         doctorGroupSnapshotDao.create(newSnapshot);

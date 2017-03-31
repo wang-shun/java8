@@ -190,33 +190,26 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //获取旧镜像
     protected DoctorGroupSnapShotInfo getOldSnapShotInfo(DoctorGroup group, DoctorGroupTrack groupTrack) {
-        DoctorGroupEvent event = doctorGroupEventDao.findById(groupTrack.getRelEventId());
-        if (event == null) {
-            log.warn("this group has no relEventId, groupId:{}", group.getId());
-            event = new DoctorGroupEvent();
-        }
+//        DoctorGroupEvent event = doctorGroupEventDao.findById(groupTrack.getRelEventId());
+//        if (event == null) {
+//            log.warn("this group has no relEventId, groupId:{}", group.getId());
+//            event = new DoctorGroupEvent();
+//        }
         return new DoctorGroupSnapShotInfo(
                 BeanMapper.map(group, DoctorGroup.class),
-                BeanMapper.map(event, DoctorGroupEvent.class),
+//                BeanMapper.map(event, DoctorGroupEvent.class),
                 BeanMapper.map(groupTrack, DoctorGroupTrack.class));
     }
 
     //创建猪群镜像信息
     protected DoctorGroupSnapshot createGroupSnapShot(DoctorGroupSnapShotInfo oldShot, DoctorGroupSnapShotInfo newShot, GroupEventType eventType) {
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-        String oldExtra = oldShot.getGroupEvent().getExtra();
-        String newExtra = newShot.getGroupEvent().getExtra();
-        oldShot.getGroupEvent().setExtraMap(null);
-        newShot.getGroupEvent().setExtraMap(null);
-        oldShot.getGroupEvent().setExtra(oldExtra);
-        newShot.getGroupEvent().setExtra(newExtra);
         //录入前的数据
         groupSnapshot.setGroupId(newShot.getGroup().getId());
-        groupSnapshot.setFromEventId(oldShot.getGroupEvent().getId());
-        groupSnapshot.setToEventId(newShot.getGroupEvent().getId());
+        groupSnapshot.setFromEventId(oldShot.getGroupTrack().getRelEventId());
+        groupSnapshot.setToEventId(newShot.getGroupTrack().getRelEventId());
         groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
                 .group(newShot.getGroup())
-                .groupEvent(newShot.getGroupEvent())
                 .groupTrack(newShot.getGroupTrack())
                 .build()));
         doctorGroupSnapshotDao.create(groupSnapshot);
