@@ -180,7 +180,7 @@ public class DoctorMoveDataController {
                                     @RequestParam(value = "monthIndex", required = false) Integer monthIndex) {
         try {
             //1.迁移猪场信息
-            log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
+            log.warn("move user farm start, mobile:{}, moveId:{}, path:{}", mobile, moveId, path);
 
             List<DoctorFarmWithMobile> farmList = userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
             log.warn("move user farm end");
@@ -199,6 +199,7 @@ public class DoctorMoveDataController {
     }
 
     private Sheet importFarmInfoExcel(String path) {
+        log.info("importFarmInfoExcel path:{}", path);
         InputStream inputStream = null;
         try {
             File file = new File(path);
@@ -224,7 +225,7 @@ public class DoctorMoveDataController {
             }
             return getSheet(workbook, "猪场");
         } catch (Exception e) {
-
+            log.error("importFarmInfoExcel failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
         return null;
     }

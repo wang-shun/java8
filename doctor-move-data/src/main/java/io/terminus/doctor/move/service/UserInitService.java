@@ -107,6 +107,8 @@ public class UserInitService {
     @Transactional
     public List<DoctorFarmWithMobile> init(String loginName, String mobile, Long dataSourceId, Sheet sheet){
         List<DoctorMoveFarmInfo> moveFarmInfoList = analyzeExcelForFarmInfo(sheet);
+        log.info("===moveFarmInfoList:{}", moveFarmInfoList);
+
         List<String> includeFarmList = moveFarmInfoList.stream().map(DoctorMoveFarmInfo::getOldFarmName).collect(Collectors.toList());
         Map<String, String> farmNameMap = moveFarmInfoList.stream().collect(Collectors.toMap(k -> k.getOldFarmName(), v -> v.getNewFarmName()));
 
