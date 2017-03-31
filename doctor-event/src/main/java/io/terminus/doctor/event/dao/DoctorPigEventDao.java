@@ -256,7 +256,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     public Boolean updates(List<DoctorPigEvent> lists){
-        return  Boolean.valueOf(sqlSession.update(sqlId("updates"), lists) == 1);
+        // TODO: 17/3/31 先注释掉后面自己涮
+        return  true;//Boolean.valueOf(sqlSession.update(sqlId("updates"), lists) == 1);
     }
 
     /**

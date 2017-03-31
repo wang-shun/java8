@@ -696,6 +696,7 @@ public class DoctorMoveDataService {
         });
 
         //4. 更新公猪的全部配种次数
+
         updateBoarCurrentParity(sowEvents);
 
         //更新母猪胎次,配种的公猪号
