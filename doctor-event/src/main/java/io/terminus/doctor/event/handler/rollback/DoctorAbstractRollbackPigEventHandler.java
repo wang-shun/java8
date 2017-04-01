@@ -199,8 +199,8 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         DoctorGroupEvent tmpEvent = event;
         while (event != null) {
             tmpEvent = event;
-            DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
-            event = isNull(eventRelation)? null :doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+            DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByGroupOrigin(event.getId());
+            event = isNull(eventRelation)? null :doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
         }
         DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(tmpEvent.getGroupId());
         if (!Objects.equals(tmpEvent.getId(), lastEvent.getId())) {

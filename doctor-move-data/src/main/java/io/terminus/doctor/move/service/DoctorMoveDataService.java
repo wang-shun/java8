@@ -1,5 +1,6 @@
 package io.terminus.doctor.move.service;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -11,7 +12,6 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
@@ -2680,7 +2680,7 @@ public class DoctorMoveDataService {
                     groupWeanEvent.setEventSource(SourceType.ADD.getValue());
                     doctorGroupEventDao.create(groupWeanEvent);
                 } catch (Exception e) {
-                    log.error("pigEventId:{}", pigWeanEvent.getId());
+                    log.error("pigEventId:{}, cause:{}", pigWeanEvent.getId(), Throwables.getStackTraceAsString(e));
                     //throw e;
                 }
             });
@@ -2714,5 +2714,54 @@ public class DoctorMoveDataService {
         User user = userDao.findById(userId);
         user.setName(newName);
         userWriteService.update(user);
+    }
+
+    @Transactional
+    public void fixAddPigWean() {
+        List<DoctorPigEvent> pigEventList = doctorPigEventDao.queryOldAddWeanEvent();
+        pigEventList.forEach(pigEvent -> {
+            DoctorWeanDto weanDto = DoctorWeanDto.builder()
+                    .partWeanDate(pigEvent.getEventAt())
+                    .partWeanPigletsCount(0)
+                    .partWeanAvgWeight(0D)
+                    .farrowingLiveCount(0)
+                    .build();
+            weanDto.setBarnId(pigEvent.getBarnId());
+            weanDto.setBarnName(pigEvent.getBarnName());
+            pigEvent.setExtra(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(weanDto));
+            pigEvent.setDesc(Joiner.on("#").withKeyValueSeparator("：").join(weanDto.descMap()));
+            pigEvent.setRelPigEventId(null);
+            pigEvent.setWeanCount(0);
+            pigEvent.setIsAuto(IsOrNot.NO.getValue());
+            pigEvent.setOutId(null);
+            pigEvent.setEventSource(SourceType.ADD.getValue());
+        });
+        doctorPigEventDao.updates(pigEventList);
+    }
+
+    /**
+     * 修复之前有仔猪变动、拼窝触断奶事件
+     */
+    @Transactional
+    public void fixTriggerPigWean() {
+        List<DoctorPigEvent> pigEventList = doctorPigEventDao.queryTriggerWeanEvent();
+        pigEventList.forEach(pigEvent -> {
+            DoctorWeanDto weanDto = DoctorWeanDto.builder()
+                    .partWeanDate(pigEvent.getEventAt())
+                    .partWeanPigletsCount(0)
+                    .partWeanAvgWeight(0D)
+                    .farrowingLiveCount(0)
+                    .build();
+            weanDto.setBarnId(pigEvent.getBarnId());
+            weanDto.setBarnName(pigEvent.getBarnName());
+            pigEvent.setExtra(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(weanDto));
+            pigEvent.setDesc(Joiner.on("#").withKeyValueSeparator("：").join(weanDto.descMap()));
+            pigEvent.setRelPigEventId(null);
+            pigEvent.setIsAuto(IsOrNot.NO.getValue());
+            pigEvent.setOutId(null);
+            pigEvent.setWeanCount(0);
+            pigEvent.setEventSource(SourceType.ADD.getValue());
+        });
+        doctorPigEventDao.updates(pigEventList);
     }
 }

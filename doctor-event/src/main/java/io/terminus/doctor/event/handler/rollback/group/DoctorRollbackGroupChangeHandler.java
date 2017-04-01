@@ -38,8 +38,8 @@ public class DoctorRollbackGroupChangeHandler extends DoctorAbstractRollbackGrou
         }
 
         //如果变动后关闭猪群
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
-        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByGroupOrigin(groupEvent.getId());
+        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
         if (isCloseEvent(close)) {
             return doctorRollbackGroupCloseHandler.handleCheck(close);
         }
@@ -49,8 +49,8 @@ public class DoctorRollbackGroupChangeHandler extends DoctorAbstractRollbackGrou
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a change event:{}", groupEvent);
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
-        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByGroupOrigin(groupEvent.getId());
+        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
         if (isCloseEvent(close)) {
             doctorRollbackGroupCloseHandler.rollback(close, operatorId, operatorName);
         }

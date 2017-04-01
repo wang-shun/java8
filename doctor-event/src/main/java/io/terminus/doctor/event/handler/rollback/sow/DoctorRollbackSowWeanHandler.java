@@ -47,9 +47,9 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
         }
         boolean canRollback = true;
         //断奶后如果转舍，判断转舍是否是最新事件
-        DoctorEventRelation chgLocationRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.PIG.getValue());
+        DoctorEventRelation chgLocationRelation = doctorEventRelationDao.findPigEventByPigOrigin(pigEvent.getId());
         if (notNull(chgLocationRelation)) {
-            DoctorPigEvent toPigEvent = doctorPigEventDao.findById(chgLocationRelation.getTriggerEventId());
+            DoctorPigEvent toPigEvent = doctorPigEventDao.findById(chgLocationRelation.getTriggerPigEventId());
             expectTrue(notNull(toPigEvent), "relate.pig.event.not.null", pigEvent.getId());
 
             DoctorWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorWeanDto.class);
@@ -60,20 +60,19 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
                 canRollback = doctorRollbackSowChgLocationEventHandler.handleCheck(toPigEvent);
             }
         }
-        DoctorEventRelation weanGroupRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorEventRelation weanGroupRelation = doctorEventRelationDao.findGroupEventByPigOrigin(pigEvent.getId());
         expectTrue(notNull(weanGroupRelation), "relate.group.event.not.null", pigEvent.getId());
-        DoctorGroupEvent relGroupEvent = doctorGroupEventDao.findById(weanGroupRelation.getTriggerEventId());
+        DoctorGroupEvent relGroupEvent = doctorGroupEventDao.findById(weanGroupRelation.getTriggerGroupEventId());
         return canRollback && isLastGroupEvent(relGroupEvent);
     }
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //如果断奶后转舍， 先回滚转舍
-        DoctorEventRelation chgLocationRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.PIG.getValue());
+        DoctorEventRelation chgLocationRelation = doctorEventRelationDao.findPigEventByPigOrigin(pigEvent.getId());
         if (notNull(chgLocationRelation)) {
             DoctorWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorWeanDto.class);
-            Long toPigEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.PIG.getValue()).getTriggerEventId();
-            DoctorPigEvent toPigEvent = doctorPigEventDao.findById(toPigEventId);
+            DoctorPigEvent toPigEvent = doctorPigEventDao.findById(chgLocationRelation.getTriggerPigEventId());
 
             DoctorBarn doctorBarn = doctorBarnDao.findById(weanDto.getChgLocationToBarnId());
             if (Objects.equals(doctorBarn.getPigType(), PigType.MATE_SOW.getValue()) || Objects.equals(doctorBarn.getPigType(), PigType.PREG_SOW.getValue())){
@@ -84,9 +83,9 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
         }
 
         //回群猪群断奶事件
-        DoctorEventRelation weanGroupRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorEventRelation weanGroupRelation = doctorEventRelationDao.findGroupEventByPigOrigin(pigEvent.getId());
         expectTrue(notNull(weanGroupRelation), "relate.group.event.not.null", pigEvent.getId());
-        DoctorGroupEvent relGroupEvent = doctorGroupEventDao.findById(weanGroupRelation.getTriggerEventId());
+        DoctorGroupEvent relGroupEvent = doctorGroupEventDao.findById(weanGroupRelation.getTriggerGroupEventId());
         doctorRollbackGroupWeanHandler.rollback(relGroupEvent, operatorId, operatorName);
 
         //如果成功断奶，需要回滚状态

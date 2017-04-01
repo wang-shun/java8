@@ -46,7 +46,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -160,11 +159,11 @@ public class DoctorPigEventManager {
         doctorPigDao.update(oldPig);
         //5.还原之前的关联关系
         if (!Arguments.isNullOrEmpty(pigNewEventIdList)) {
-            doctorEventRelationDao.batchUpdateStatus(pigNewEventIdList, DoctorEventRelation.Status.INVALID.getValue());
+            doctorEventRelationDao.updatePigEventStatus(pigNewEventIdList, DoctorEventRelation.Status.INVALID.getValue());
             List<Long> pigCreateOldEventIdList = doctorEventInfoList.stream()
                     .filter(doctorEventInfo -> Objects.equals(doctorEventInfo.getBusinessType(), DoctorEventInfo.Business_Type.PIG.getValue()))
                     .map(DoctorEventInfo::getOldEventId).collect(Collectors.toList());
-            doctorEventRelationDao.updateStatusUnderHandling(pigCreateOldEventIdList, DoctorEventRelation.Status.VALID.getValue());
+            doctorEventRelationDao.updatePigEventStatusUnderHandling(pigCreateOldEventIdList, DoctorEventRelation.Status.VALID.getValue());
         }
         log.info("rollback.modify.failed, ending");
     }

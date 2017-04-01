@@ -1224,4 +1224,28 @@ public class DoctorMoveDataController {
         log.info("update user name ending");
         return true;
     }
+
+    /**
+     * 修复之前手动添加的数据有误的断奶
+     * @return
+     */
+    @RequestMapping(value = "/fixAddPigWean", method = RequestMethod.GET)
+    public Boolean fixAddPigWean(){
+        log.info("fixAddPigWean starting");
+        doctorMoveDataService.fixAddPigWean();
+        log.info("fixAddPigWean ending");
+        return true;
+    }
+
+    /**
+     * 修复之前有仔猪变动、拼窝触断奶事件
+     * @return
+     */
+    @RequestMapping(value = "/fixTriggerPigWean", method = RequestMethod.GET)
+    public Boolean fixTriggerPigWean() {
+        log.info("fixTriggerPigWean starting");
+        doctorMoveDataService.fixTriggerPigWean();
+        log.info("fixTriggerPigWean ending");
+        return true;
+    }
 }

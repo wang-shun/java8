@@ -39,9 +39,9 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
 //            return false;
 //        }
 
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByGroupOrigin(groupEvent.getId());
         expectTrue(notNull(eventRelation), "relate.group.event.not.null" , groupEvent.getId());
-        DoctorGroupEvent moveInEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        DoctorGroupEvent moveInEvent = doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
         boolean canRollback = isLastEvent(moveInEvent);
         //如果触发关闭猪群事件，说明此事件肯定不是最新事件
         DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventIdAndType(groupEvent.getId(), GroupEventType.CLOSE.getValue());
@@ -56,9 +56,9 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
     public void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a trans event:{}", groupEvent);
         //1.回滚转入时间
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByGroupOrigin(groupEvent.getId());
         expectTrue(notNull(eventRelation), "relate.group.event.not.null" , groupEvent.getId());
-        DoctorGroupEvent moveIn = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        DoctorGroupEvent moveIn = doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
         doctorRollbackGroupMoveInHandler.rollback(moveIn, operatorId, operatorName);
 
         //2.如果有新建,回滚新建

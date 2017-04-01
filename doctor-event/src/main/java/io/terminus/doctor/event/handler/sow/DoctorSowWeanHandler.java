@@ -144,9 +144,9 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         if (Objects.equals(partWeanDto.getPartWeanPigletsCount(), partWeanDto.getFarrowingLiveCount()) && partWeanDto.getChgLocationToBarnId() != null) {
             DoctorBarn doctorBarn = doctorBarnDao.findById(partWeanDto.getChgLocationToBarnId());
             DoctorChgLocationDto chgLocationDto = DoctorChgLocationDto.builder()
-                    .changeLocationDate(partWeanDto.getPartWeanDate())
-                    .chgLocationFromBarnId(partWeanDto.getBarnId())
-                    .chgLocationFromBarnName(partWeanDto.getBarnName())
+                    .changeLocationDate(doctorPigEvent.getEventAt())
+                    .chgLocationFromBarnId(doctorPigEvent.getBarnId())
+                    .chgLocationFromBarnName(doctorPigEvent.getBarnName())
                     .chgLocationToBarnId(partWeanDto.getChgLocationToBarnId())
                     .chgLocationToBarnName(doctorBarn.getName())
                     .build();
@@ -171,7 +171,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     public BaseGroupInput buildTriggerGroupEventInput(DoctorPigEvent pigEvent) {
         DoctorWeanDto partWeanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorWeanDto.class);
         DoctorWeanGroupInput input = new DoctorWeanGroupInput();
-        input.setPartWeanDate(partWeanDto.getPartWeanDate());
+        input.setPartWeanDate(pigEvent.getEventAt());
         input.setPartWeanPigletsCount(partWeanDto.getPartWeanPigletsCount());
         input.setPartWeanAvgWeight(partWeanDto.getPartWeanAvgWeight());
         input.setQualifiedCount(partWeanDto.getQualifiedCount());
