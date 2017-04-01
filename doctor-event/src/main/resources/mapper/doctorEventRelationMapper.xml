@@ -159,6 +159,7 @@
         FROM <include refid="tb"/>
         WHERE
         origin_group_event_id = #{triggerGroupEventId}
+        AND trigger_group_event_id is not null
         AND status = 1
     </select>
 
@@ -167,6 +168,7 @@
         FROM <include refid="tb"/>
         WHERE
         origin_group_event_id = #{triggerPigEventId}
+        AND trigger_pig_event_id is not null
         AND status = 1
     </select>
 
@@ -175,6 +177,7 @@
         FROM <include refid="tb"/>
         WHERE
         origin_pig_event_id = #{triggerGroupEventId}
+        AND trigger_group_event_id is not null
         AND status = 1
     </select>
 
@@ -183,6 +186,7 @@
         FROM <include refid="tb"/>
         WHERE
         origin_pig_event_id = #{triggerPigEventId}
+        AND trigger_pig_event_id is not null
         AND status = 1
     </select>
 
