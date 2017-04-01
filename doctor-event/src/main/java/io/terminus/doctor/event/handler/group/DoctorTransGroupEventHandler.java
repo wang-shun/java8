@@ -120,6 +120,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         if(Arguments.isNull(doctorTransGroupEvent)) {
             log.error("parse doctorTransGroupEvent faild, doctorGroupEvent = {}", event);
             throw new InvalidException("transgroup.event.info.broken", event.getId());
+//            doctorTransGroupEvent = new DoctorTransGroupEvent();
         }
 
         //更新quanity

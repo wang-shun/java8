@@ -2656,7 +2656,6 @@ public class DoctorMoveDataService {
     }
 
     /**
-<<<<<<< HEAD
      * 生成猪群断奶事件
      */
     @Transactional

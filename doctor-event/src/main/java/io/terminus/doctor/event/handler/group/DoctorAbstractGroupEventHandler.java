@@ -382,8 +382,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     protected boolean checkFirstMoveIn(DoctorGroupEvent event){
         if(notNull(event.getRelGroupEventId())){
+            if(Objects.equals(event.getRelGroupEventId(), -1)){
+                return true;
+            }
             DoctorGroupEvent newEvent = doctorGroupEventDao.findById(event.getRelGroupEventId());
-            if(Objects.equals(newEvent.getType(), GroupEventType.NEW.getValue())){
+            if(Objects.nonNull(newEvent) && Objects.equals(newEvent.getType(), GroupEventType.NEW.getValue())){
                 return true;
             }
         }
