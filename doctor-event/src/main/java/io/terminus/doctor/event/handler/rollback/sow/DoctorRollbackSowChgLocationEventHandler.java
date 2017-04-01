@@ -37,10 +37,10 @@ public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRoll
 //        DoctorChgLocationDto dto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorChgLocationDto.class);
 //        DoctorBarn toBarn = doctorBarnDao.findById(dto.getChgLocationToBarnId());
 //        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByPigOrigin(pigEvent.getId());
 
         if (notNull(eventRelation)) {
-            DoctorGroupEvent relGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+            DoctorGroupEvent relGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
             doctorRollbackGroupTransHandler.handleRollback(relGroupEvent, operatorId, operatorName);
         }
         handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);

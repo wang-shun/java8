@@ -1,5 +1,6 @@
 package io.terminus.doctor.move.service;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -11,7 +12,6 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
@@ -2714,5 +2714,25 @@ public class DoctorMoveDataService {
         User user = userDao.findById(userId);
         user.setName(newName);
         userWriteService.update(user);
+    }
+
+    @Transactional
+    public void fixAddPigWean() {
+        List<DoctorPigEvent> pigEventList = doctorPigEventDao.queryOldAddWeanEvent();
+        pigEventList.forEach(pigEvent -> {
+            DoctorWeanDto weanDto = DoctorWeanDto.builder()
+                    .partWeanDate(pigEvent.getEventAt())
+                    .partWeanPigletsCount(0)
+                    .partWeanAvgWeight(0D)
+                    .farrowingLiveCount(0)
+                    .build();
+            //weanDto.setp
+            pigEvent.setExtra(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(weanDto));
+            pigEvent.setDesc(Joiner.on("#").withKeyValueSeparator("：").join(weanDto.descMap()));
+            pigEvent.setRelPigEventId(-1L);
+            pigEvent.setOutId(null);
+            pigEvent.setEventSource(SourceType.ADD.getValue());
+        });
+        doctorPigEventDao.updates(pigEventList);
     }
 }

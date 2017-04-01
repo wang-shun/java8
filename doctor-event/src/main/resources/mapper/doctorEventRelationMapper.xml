@@ -7,9 +7,10 @@
 <mapper namespace="DoctorEventRelation">
     <resultMap id="DoctorEventRelationMap" type="DoctorEventRelation">
         <id column="id" property="id"/>
-        <result column="origin_event_id" property="originEventId"/>
-        <result column="trigger_event_id" property="triggerEventId"/>
-        <result column="trigger_target_type" property="triggerTargetType"/>
+        <result column="origin_pig_event_id" property="originPigEventId"/>
+        <result column="origin_group_event_id" property="originGroupEventId"/>
+        <result column="trigger_pig_event_id" property="triggerPigEventId"/>
+        <result column="trigger_group_event_id" property="triggerGroupEventId"/>
         <result column="status" property="status"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
@@ -24,11 +25,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-       origin_event_id, trigger_event_id, trigger_target_type, status, created_at, updated_at
+       origin_pig_event_id, origin_group_event_id, trigger_pig_event_id, trigger_group_event_id, status, created_at, updated_at
     </sql>
 
     <sql id="vals">
-       #{originEventId}, #{triggerEventId}, #{triggerTargetType}, #{status}, now(), now()
+       #{originPigEventId}, #{originGroupEventId}, #{triggerPigEventId}, #{triggerGroupEventId}, #{status}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorEventRelation" keyProperty="id" useGeneratedKeys="true">
@@ -45,7 +46,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" item="i" separator=",">
-            (#{i.originEventId}, #{i.triggerEventId},  #{i.triggerTargetType}, #{i.status}, now(), now())
+            (#{i.originPigEventId}, #{i.originGroupEventId}, #{i.triggerPigEventId},  #{i.triggerGroupEventId}, #{i.status}, now(), now())
         </foreach>
     </insert>
 
@@ -68,9 +69,10 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="originEventId != null">origin_event_id = #{originEventId},</if>
-            <if test="triggerEventId != null">trigger_event_id = #{triggerEventId},</if>
-            <if test="triggerTargetType != null">trigger_target_type = #{triggerTargetType},</if>
+            <if test="originPigEventId != null">origin_pig_event_id = #{originPigEventId},</if>
+            <if test="originGroupEventId != null">origin_group_event_id = #{originGroupEventId},</if>
+            <if test="triggerPigEventId != null">trigger_pig_event_id = #{triggerPigEventId},</if>
+            <if test="triggerGroupEventId != null">trigger_group_target_type = #{triggerGroupEventId},</if>
             <if test="status != null">status = #{status},</if>
             updated_at=now()
         </set>
@@ -92,9 +94,10 @@
 
     <sql id="criteria">
         <where>
-            <if test="originEventId != null">AND origin_event_id = #{originEventId}</if>
-            <if test="triggerEventId != null">AND trigger_event_id = #{triggerEventId}</if>
-            <if test="triggerTargetType != null">AND trigger_target = #{triggerTargetType}</if>
+            <if test="originPigEventId != null">AND origin_pig_event_id = #{originPigEventId}</if>
+            <if test="originGroupEventId != null">AND origin_group_event_id = #{originGroupEventId}</if>
+            <if test="triggerPigEventId != null">AND trigger_pig_event_id = #{triggerPigEventId}</if>
+            <if test="triggerGroupEventId != null">AND trigger_group_event_id = #{triggerGroupEventId}</if>
             <if test="status != null">AND status = #{status}</if>
         </where>
     </sql>
@@ -118,57 +121,113 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="findByOriginAndType" parameterType="map" resultMap="DoctorEventRelationMap">
+
+    <select id="findByPigTrigger" parameterType="long" resultMap="DoctorEventRelationMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE
-        origin_event_id = #{originEventId}
-        AND trigger_target_type = #{triggerTargetType}
+        trigger_pig_event_id = #{triggerPigEventId}
         AND status = 1
     </select>
 
-    <select id="findByTrigger" parameterType="long" resultMap="DoctorEventRelationMap">
+    <select id="findByGroupTrigger" parameterType="long" resultMap="DoctorEventRelationMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE
-        trigger_event_id = #{triggerEventId}
+        trigger_group_event_id = #{triggerGroupEventId}
         AND status = 1
     </select>
 
-    <select id="findByOrigin" parameterType="long" resultMap="DoctorEventRelationMap">
+    <select id="findByPigOrigin" parameterType="long" resultMap="DoctorEventRelationMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE
-        origin_event_id = #{originEventId}
+        origin_pig_event_id = #{originPigEventId}
         AND status = 1
     </select>
 
-    <update id="batchUpdateStatus" parameterType="map" >
+    <select id="findByGroupOrigin" parameterType="long" resultMap="DoctorEventRelationMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE
+        origin_group_event_id = #{originGroupEventId}
+        AND status = 1
+    </select>
+
+    <select id="findGroupEventByGroupOrigin" parameterType="long" resultMap="DoctorEventRelationMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE
+        origin_group_event_id = #{triggerGroupEventId}
+        AND status = 1
+    </select>
+
+    <select id="findPigEventByGroupOrigin" parameterType="long" resultMap="DoctorEventRelationMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE
+        origin_group_event_id = #{triggerPigEventId}
+        AND status = 1
+    </select>
+
+    <select id="findGroupEventByPigOrigin" parameterType="long" resultMap="DoctorEventRelationMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE
+        origin_pig_event_id = #{triggerGroupEventId}
+        AND status = 1
+    </select>
+
+    <select id="findPigEventByPigOrigin" parameterType="long" resultMap="DoctorEventRelationMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE
+        origin_pig_event_id = #{triggerPigEventId}
+        AND status = 1
+    </select>
+
+
+    <update id="updateGroupEventStatus" parameterType="map" >
         UPDATE <include refid="tb"/>
         set status = #{status}
         WHERE
-        origin_event_id IN
+        origin_group_event_id IN
         <foreach collection="list" item="i" open="(" separator="," close=")" >
             #{i}
         </foreach>
         OR
-        trigger_event_id IN
+        trigger_group_event_id IN
         <foreach collection="list" item="i" open="(" separator="," close=")" >
             #{i}
         </foreach>
     </update>
 
-    <update id="updateStatusUnderHandling" parameterType="map" >
+    <update id="updatePigEventStatus" parameterType="map" >
         UPDATE <include refid="tb"/>
         set status = #{status}
         WHERE
-        status = 0 AND
-        origin_event_id IN
+        origin_pig_event_id IN
         <foreach collection="list" item="i" open="(" separator="," close=")" >
             #{i}
         </foreach>
         OR
-        trigger_event_id IN
+        trigger_pig_event_id IN
+        <foreach collection="list" item="i" open="(" separator="," close=")" >
+            #{i}
+        </foreach>
+    </update>
+
+    <update id="updatePigEventStatusUnderHandling" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        set status = #{status}
+        WHERE
+        status = 0 AND
+        origin_pig_event_id IN
+        <foreach collection="list" item="i" open="(" separator="," close=")" >
+            #{i}
+        </foreach>
+        OR
+        trigger_pig_event_id IN
         <foreach collection="list" item="i" open="(" separator="," close=")" >
             #{i}
         </foreach>

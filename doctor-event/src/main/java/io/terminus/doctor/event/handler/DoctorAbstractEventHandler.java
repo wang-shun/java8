@@ -181,33 +181,33 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.YES.getValue())
                 && Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
             DoctorEventRelation eventRelation = DoctorEventRelation.builder()
-                    .originEventId(MoreObjects.firstNonNull(executeEvent.getRelPigEventId(), executeEvent.getRelGroupEventId()))
-                    .triggerEventId(executeEvent.getId())
-                    .triggerTargetType(DoctorEventRelation.TargetType.PIG.getValue())
+                    .originGroupEventId(executeEvent.getRelGroupEventId())
+                    .originPigEventId(executeEvent.getRelPigEventId())
+                    .triggerPigEventId(executeEvent.getId())
                     .status(DoctorEventRelation.Status.VALID.getValue())
                     .build();
             doctorEventRelationDao.create(eventRelation);
         } else {
             //1.为原事件时
-            List<DoctorEventRelation> eventRelationList = doctorEventRelationDao.findByOrigin(oldEventId);
+            List<DoctorEventRelation> eventRelationList = doctorEventRelationDao.findByPigOrigin(oldEventId);
             if (!eventRelationList.isEmpty()) {
                 eventRelationList.forEach(doctorEventRelation -> {
                     DoctorEventRelation updateEventRelation = new DoctorEventRelation();
                     updateEventRelation.setId(doctorEventRelation.getId());
                     updateEventRelation.setStatus(DoctorEventRelation.Status.HANDLING.getValue());
                     doctorEventRelationDao.update(updateEventRelation);
-                    doctorEventRelation.setOriginEventId(executeEvent.getId());
+                    doctorEventRelation.setOriginPigEventId(executeEvent.getId());
                     doctorEventRelationDao.create(doctorEventRelation);
                 });
             }
             //2.为触发事件时
-            DoctorEventRelation eventRelation = doctorEventRelationDao.findByTrigger(oldEventId);
+            DoctorEventRelation eventRelation = doctorEventRelationDao.findByPigTrigger(oldEventId);
             if (notNull(eventRelation)) {
                 DoctorEventRelation updateEventRelation = new DoctorEventRelation();
                 updateEventRelation.setId(eventRelation.getId());
                 updateEventRelation.setStatus(DoctorEventRelation.Status.HANDLING.getValue());
                 doctorEventRelationDao.update(updateEventRelation);
-                eventRelation.setTriggerEventId(executeEvent.getId());
+                eventRelation.setTriggerPigEventId(executeEvent.getId());
                 doctorEventRelationDao.create(eventRelation);
             }
         }

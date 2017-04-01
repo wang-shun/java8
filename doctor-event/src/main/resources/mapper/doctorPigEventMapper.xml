@@ -1003,4 +1003,10 @@
         </if>
         limit #{offset}, #{limit}
     </select>
+
+    <select id="queryOldAddWeanEvent" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE extra = '{"#":"#"}'
+    </select>
 </mapper>
