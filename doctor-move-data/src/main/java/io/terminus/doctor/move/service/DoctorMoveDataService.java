@@ -2680,7 +2680,7 @@ public class DoctorMoveDataService {
                     groupWeanEvent.setEventSource(SourceType.ADD.getValue());
                     doctorGroupEventDao.create(groupWeanEvent);
                 } catch (Exception e) {
-                    log.error("pigEventId:{}", pigWeanEvent.getId());
+                    log.error("pigEventId:{}, cause:{}", pigWeanEvent.getId(), Throwables.getStackTraceAsString(e));
                     //throw e;
                 }
             });
@@ -2726,11 +2726,40 @@ public class DoctorMoveDataService {
                     .partWeanAvgWeight(0D)
                     .farrowingLiveCount(0)
                     .build();
-            //weanDto.setp
+            weanDto.setBarnId(pigEvent.getBarnId());
+            weanDto.setBarnName(pigEvent.getBarnName());
             pigEvent.setExtra(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(weanDto));
             pigEvent.setDesc(Joiner.on("#").withKeyValueSeparator("：").join(weanDto.descMap()));
-            pigEvent.setRelPigEventId(-1L);
+            pigEvent.setRelPigEventId(null);
+            pigEvent.setWeanCount(0);
+            pigEvent.setIsAuto(IsOrNot.NO.getValue());
             pigEvent.setOutId(null);
+            pigEvent.setEventSource(SourceType.ADD.getValue());
+        });
+        doctorPigEventDao.updates(pigEventList);
+    }
+
+    /**
+     * 修复之前有仔猪变动、拼窝触断奶事件
+     */
+    @Transactional
+    public void fixTriggerPigWean() {
+        List<DoctorPigEvent> pigEventList = doctorPigEventDao.queryTriggerWeanEvent();
+        pigEventList.forEach(pigEvent -> {
+            DoctorWeanDto weanDto = DoctorWeanDto.builder()
+                    .partWeanDate(pigEvent.getEventAt())
+                    .partWeanPigletsCount(0)
+                    .partWeanAvgWeight(0D)
+                    .farrowingLiveCount(0)
+                    .build();
+            weanDto.setBarnId(pigEvent.getBarnId());
+            weanDto.setBarnName(pigEvent.getBarnName());
+            pigEvent.setExtra(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(weanDto));
+            pigEvent.setDesc(Joiner.on("#").withKeyValueSeparator("：").join(weanDto.descMap()));
+            pigEvent.setRelPigEventId(null);
+            pigEvent.setIsAuto(IsOrNot.NO.getValue());
+            pigEvent.setOutId(null);
+            pigEvent.setWeanCount(0);
             pigEvent.setEventSource(SourceType.ADD.getValue());
         });
         doctorPigEventDao.updates(pigEventList);

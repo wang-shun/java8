@@ -1236,4 +1236,16 @@ public class DoctorMoveDataController {
         log.info("fixAddPigWean ending");
         return true;
     }
+
+    /**
+     * 修复之前有仔猪变动、拼窝触断奶事件
+     * @return
+     */
+    @RequestMapping(value = "/fixTriggerPigWean", method = RequestMethod.GET)
+    public Boolean fixTriggerPigWean() {
+        log.info("fixTriggerPigWean starting");
+        doctorMoveDataService.fixTriggerPigWean();
+        log.info("fixTriggerPigWean ending");
+        return true;
+    }
 }

@@ -408,4 +408,12 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<DoctorPigEvent> queryOldAddWeanEvent() {
         return getSqlSession().selectList(sqlId("queryOldAddWeanEvent"));
     }
+
+    /**
+     * 查询之前拼窝、仔猪变动触发的断奶事件
+     * @return 断奶事件列表
+     */
+    public List<DoctorPigEvent> queryTriggerWeanEvent() {
+        return getSqlSession().selectList(sqlId("queryTriggerWeanEvent"));
+    }
 }

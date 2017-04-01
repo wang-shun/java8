@@ -1007,6 +1007,19 @@
     <select id="queryOldAddWeanEvent" resultMap="DoctorPigEventMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb"/>
-        WHERE extra = '{"#":"#"}'
+        WHERE
+        type = 16
+        AND status = 1
+        AND extra = '{"#":"#"}'
+    </select>
+
+    <select id="queryTriggerWeanEvent" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        type = 16
+        AND status = 1
+        AND is_auto = 1
+        AND extra is NULL
     </select>
 </mapper>
