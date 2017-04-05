@@ -321,9 +321,10 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
      * @return 能否编辑
      */
     private Boolean canModify(DoctorPigEvent modifyEvent) {
+        DoctorPigEvent oldEvent = doctorPigEventDao.findEventById(modifyEvent.getId());
         return Objects.equals(modifyEvent.getKind(), DoctorEventModifyRequest.TYPE.PIG.getValue())
                 && !NOT_MODIFY_EVENT.contains(modifyEvent.getType())
-                && Objects.equals(modifyEvent.getStatus(), EventStatus.VALID.getValue());
+                && Objects.equals(oldEvent.getStatus(), EventStatus.VALID.getValue());
     }
 
     /**
