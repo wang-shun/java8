@@ -233,6 +233,26 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         }
     }
 
+    @Override
+    public Response<Paging<DoctorGroupEvent>> pagingGroupEventDelWean(Long farmId, Long groupId, Integer type, Integer pageNo, Integer size, String startDate, String endDate) {
+        try {
+            PageInfo pageInfo = PageInfo.of(pageNo, size);
+            Date endAt = DateUtil.toDate(endDate);
+            if (notNull(endDate)) {
+                endAt = new DateTime(endAt).plusDays(1).minusMillis(1).toDate();
+            }
+            Paging<DoctorGroupEvent> paging = doctorGroupEventDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
+                    MapBuilder.<String, Object>of().put("farmId", farmId).put("groupId", groupId).put("type", type).put("tag", GroupEventType.WEAN.getValue()).put("beginDate", startDate).put("endDate", endAt).map());
+            paging.setData(setExtraData(paging.getData()));
+            return Response.ok(paging);
+        } catch (Exception e) {
+            log.error("paging group event failed, farmId:{}, groupId:{}, type:{}, pageNo:{}, size:{}, cause:{}",
+                    farmId, groupId, type, pageNo, size, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.paging.fail");
+        }
+    }
+
+
     private List<DoctorGroupEvent> setExtraData(List<DoctorGroupEvent> events) {
         return events.stream().map(e -> {
             e.setExtraData(JSON_MAPPER.fromJson(e.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class)));
