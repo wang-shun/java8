@@ -225,7 +225,7 @@ public class DoctorGroupEvents {
         DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
 
         //查询猪群的事件, 默认3条
-        List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(
+        List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEventDelWean(
                 groupDetail.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3), null, null)).getData();
 
         transFromUtil.transFromGroupEvents(groupEvents);
@@ -234,10 +234,7 @@ public class DoctorGroupEvents {
         if (groupEventResponse.isSuccess() && groupEventResponse.getResult() != null) {
             canRollback = groupEventResponse.getResult().getId();
         }
-
-        List<DoctorGroupEvent> groupEvent = groupEvents.stream().filter(doctorGroupEvent -> !Objects.equals(doctorGroupEvent.getType(), GroupEventType.WEAN.getValue())).collect(Collectors.toList());
-
-        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvent, canRollback);
+        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents, canRollback);
     }
 
     /**
