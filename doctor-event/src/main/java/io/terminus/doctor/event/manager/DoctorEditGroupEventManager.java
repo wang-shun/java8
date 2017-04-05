@@ -152,6 +152,10 @@ public class DoctorEditGroupEventManager {
     @Transactional
     public void elicitDoctorGroupTrackRebuildOne(DoctorGroupEvent newEvent) {
         DoctorGroupEvent oldEvent = doctorGroupEventDao.findById(newEvent.getId());
+        if(Objects.equals(EventStatus.INVALID.getValue(), oldEvent.getStatus()) || Objects.equals(EventStatus.HANDLING.getValue(), oldEvent.getStatus())){
+            log.error("event has been handled, eventId: {}", oldEvent.getId());
+            throw new InvalidException("event.has.been.handled", oldEvent.getId());
+        }
         DoctorGroupEvent updateEvent = new DoctorGroupEvent();
         updateEvent.setId(oldEvent.getId());
         updateEvent.setStatus(EventStatus.INVALID.getValue());
