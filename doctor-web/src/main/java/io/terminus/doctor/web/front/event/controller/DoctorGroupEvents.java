@@ -234,7 +234,10 @@ public class DoctorGroupEvents {
         if (groupEventResponse.isSuccess() && groupEventResponse.getResult() != null) {
             canRollback = groupEventResponse.getResult().getId();
         }
-        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents, canRollback);
+
+        List<DoctorGroupEvent> groupEvent = groupEvents.stream().filter(doctorGroupEvent -> !Objects.equals(doctorGroupEvent.getType(), GroupEventType.WEAN.getValue())).collect(Collectors.toList());
+
+        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvent, canRollback);
     }
 
     /**
