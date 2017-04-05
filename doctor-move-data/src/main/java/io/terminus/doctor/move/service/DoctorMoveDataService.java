@@ -454,7 +454,7 @@ public class DoctorMoveDataService {
         //转舍事件
         List<Integer> tarnsBarnTypes = Lists.newArrayList(
                 PigEvent.CHG_LOCATION.getKey(),
-                PigEvent.TO_PREG.getKey(),
+//                PigEvent.TO_PREG.getKey(),
                 PigEvent.TO_MATING.getKey(),
                 PigEvent.TO_FARROWING.getKey()
         );
@@ -483,9 +483,9 @@ public class DoctorMoveDataService {
             return PigEvent.TO_MATING;
         }
         //转入妊娠舍
-        if (Objects.equals(toBarnType, PigType.PREG_SOW.getValue()) && !Objects.equals(fromBarnType, toBarnType)) {
-            return PigEvent.TO_PREG;
-        }
+//        if (Objects.equals(toBarnType, PigType.PREG_SOW.getValue()) && !Objects.equals(fromBarnType, toBarnType)) {
+//            return PigEvent.TO_PREG;
+//        }
         //去分娩
         if (Objects.equals(toBarnType, PigType.DELIVER_SOW.getValue()) && !Objects.equals(fromBarnType, toBarnType)) {
             return PigEvent.TO_FARROWING;

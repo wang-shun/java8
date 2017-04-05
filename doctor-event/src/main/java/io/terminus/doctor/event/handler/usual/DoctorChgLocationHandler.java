@@ -90,8 +90,8 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         Long toBarnId = chgLocationDto.getChgLocationToBarnId();
 
         //校验猪舍类型是否相同, 只有同类型才可以普通转舍
-        DoctorBarn fromBarn = doctorBarnDao.findById(chgLocationDto.getChgLocationFromBarnId());
-        expectTrue(notNull(fromBarn), "barn.not.null", chgLocationDto.getChgLocationFromBarnId());
+        DoctorBarn fromBarn = doctorBarnDao.findById(fromTrack.getCurrentBarnId());
+        expectTrue(notNull(fromBarn), "barn.not.null", fromTrack.getCurrentBarnId());
         DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
         expectTrue(notNull(toBarn), "barn.not.null", chgLocationDto.getChgLocationToBarnId());
         expectTrue(checkBarnTypeEqual(fromBarn.getPigType(), toTrack.getStatus(), toBarn.getPigType()), "not.trans.barn.type", PigType.from(fromBarn.getPigType()).getDesc(), PigType.from(toBarn.getPigType()).getDesc());
