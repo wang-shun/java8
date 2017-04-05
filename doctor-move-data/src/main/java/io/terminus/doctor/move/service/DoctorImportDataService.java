@@ -325,7 +325,7 @@ public class DoctorImportDataService {
         // key = roleName, value = roleId
         Map<String, Long> existRole = existRoles.stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
 
-        List<String> existSubName = subDao.findByParentUserId(primaryUser.getId()).stream().map(Sub::getRealName).collect(Collectors.toList());
+        List<String> existSubName = subDao.findSubsByFarmId(farm.getId()).stream().map(Sub::getRealName).collect(Collectors.toList());
 
         // 主账号的 staff 信息
         String farmIds = Joiner.on(",").join(doctorFarmDao.findByOrgId(farm.getOrgId()).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
@@ -371,6 +371,7 @@ public class DoctorImportDataService {
                         .put("realName", realName)
                         .map());
                 Long subUserId = RespHelper.or500(userWriteService.create(subUser));
+
                 //设置子账号关联猪场
                 io.terminus.doctor.user.model.Sub sub = subDao.findByUserId(subUserId);
                 io.terminus.doctor.user.model.Sub updateSub = new io.terminus.doctor.user.model.Sub();
@@ -458,9 +459,20 @@ public class DoctorImportDataService {
         if(result.isSuccess() && result.getResult() != null){
             log.warn("primary user has existed, mobile={}", mobile);
             user = result.getResult();
-            if (!Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
-                throw new JsonResponseException("user.type.not.farm.admin.primary");
+            DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(user.getId());
+            if (notNull(permission)) {
+                throw new JsonResponseException("user.has.related.farm");
             }
+            //更新用户信息
+            user.setPassword("123456");
+            user.setName(loginName);
+            user.setStatus(UserStatus.NORMAL.value());
+            user.setType(UserType.FARM_ADMIN_PRIMARY.value());
+            user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
+            Map<String, String> userExtraMap = Maps.newHashMap();
+            userExtraMap.put("realName", realName);
+            user.setExtra(userExtraMap);
+            userWriteService.update(user);
             userId = user.getId();
         }else{
             user = new User();
@@ -475,12 +487,12 @@ public class DoctorImportDataService {
             user.setExtra(userExtraMap);
             userId = RespHelper.or500(userWriteService.create(user));
             user.setId(userId);
-
-            // 把真实姓名存进 user profile
-            UserProfile userProfile = userProfileDao.findByUserId(userId);
-            userProfile.setRealName(realName);
-            userProfileDao.update(userProfile);
         }
+        // 把真实姓名存进 user profile
+        UserProfile userProfile = userProfileDao.findByUserId(userId);
+        userProfile.setRealName(realName);
+        userProfileDao.update(userProfile);
+
         //主账户关联猪场id
         PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
         PrimaryUser updatePrimary = new PrimaryUser();
