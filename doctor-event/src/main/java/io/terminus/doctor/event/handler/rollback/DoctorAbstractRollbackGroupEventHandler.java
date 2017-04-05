@@ -136,8 +136,8 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
         DoctorGroupEvent tmpEvent = event;
         while (event != null) {
             tmpEvent = event;
-            DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
-            event = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+            DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByGroupOrigin(event.getId());
+            event = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
         }
         return isLastEvent(tmpEvent);
     }

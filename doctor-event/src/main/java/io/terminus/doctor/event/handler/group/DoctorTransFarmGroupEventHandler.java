@@ -19,7 +19,6 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -165,7 +164,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         if (Objects.equals(oldQuantity, transFarm.getQuantity())) {
             doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, transFarm, event.getEventAt(), transFarm.getFcrFeed());
 
-            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+            Long toGroupEventId = doctorEventRelationDao.findGroupEventByGroupOrigin(event.getId()).getTriggerGroupEventId();
             DoctorGroupEvent closeEvent = doctorGroupEventDao.findById(toGroupEventId);
             transFarm.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }

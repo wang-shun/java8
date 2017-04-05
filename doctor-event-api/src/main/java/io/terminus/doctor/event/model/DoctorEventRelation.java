@@ -23,20 +23,24 @@ public class DoctorEventRelation implements Serializable{
     private Long id;
 
     /**
-     * 原事件id
+     * 原猪事件id
      */
-    private Long originEventId;
+    private Long originPigEventId;
 
     /**
-     * 触发事件id
+     * 原猪群事件id
      */
-    private Long triggerEventId;
+    private Long originGroupEventId;
 
     /**
-     * 触发的事件的目标类型
-     * @see TargetType
+     * 触发猪事件id
      */
-    private Integer triggerTargetType;
+    private Long triggerPigEventId;
+
+    /**
+     * 触发猪群事件
+     */
+    private Long triggerGroupEventId;
 
     /**
      * 状态
@@ -67,31 +71,6 @@ public class DoctorEventRelation implements Serializable{
             for (Status status : Status.values()) {
                 if (status.getValue().equals(value)) {
                     return status;
-                }
-            }
-            return null;
-        }
-
-    }
-
-    public enum TargetType{
-        PIG(1, "猪事件"),
-        GROUP(2, "猪群事件");
-
-        TargetType(Integer value, String name) {
-            this.value = value;
-            this.name = name;
-        }
-        @Getter
-        Integer value;
-
-        @Getter
-        String name;
-
-        public TargetType from(Integer value) {
-            for (TargetType tt : TargetType.values()) {
-                if (tt.getValue().equals(value)) {
-                    return tt;
                 }
             }
             return null;

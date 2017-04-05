@@ -256,8 +256,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     public Boolean updates(List<DoctorPigEvent> lists){
-        // TODO: 17/3/31 先注释掉后面自己涮
-        return  true;//Boolean.valueOf(sqlSession.update(sqlId("updates"), lists) == 1);
+        return Boolean.valueOf(sqlSession.update(sqlId("updates"), lists) == 1);
     }
 
     /**
@@ -399,5 +398,21 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      */
     public List<DoctorPigEvent> queryWeansWithoutGroupWean(List<Long> excludeIds, Long farmId, Integer offset, Integer limit) {
         return getSqlSession().selectList(sqlId("queryWeansWithoutGroupWean"), ImmutableMap.of("excludeIds", excludeIds, "farmId", farmId, "offset", offset, "limit", limit));
+    }
+
+    /**
+     * 查询之前手动添加的断奶事件
+     * @return 断奶事件列表
+     */
+    public List<DoctorPigEvent> queryOldAddWeanEvent() {
+        return getSqlSession().selectList(sqlId("queryOldAddWeanEvent"));
+    }
+
+    /**
+     * 查询之前拼窝、仔猪变动触发的断奶事件
+     * @return 断奶事件列表
+     */
+    public List<DoctorPigEvent> queryTriggerWeanEvent() {
+        return getSqlSession().selectList(sqlId("queryTriggerWeanEvent"));
     }
 }

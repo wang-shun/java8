@@ -41,15 +41,15 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
         }
 
         //如果触发关闭猪群事件
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
-        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByGroupOrigin(groupEvent.getId());
+        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
 
         if (isCloseEvent(close) && !doctorRollbackGroupCloseHandler.handleCheck(close)) {
             return false;
         }
 
         //商品猪转种猪会触发猪的进场事件，所以需要校验猪的进场事件是否是最新事件
-        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.PIG.getValue()).getTriggerEventId();
+        Long toPigEventId = doctorEventRelationDao.findPigEventByGroupOrigin(groupEvent.getId()).getTriggerPigEventId();
         DoctorPigEvent toPigEvent = doctorPigEventDao.findById(toPigEventId);
         DoctorPigEvent lastPigEvent = doctorPigEventDao.queryLastPigEventById(toPigEvent.getPigId());
         return Objects.equals(lastPigEvent.getId(), toPigEvent.getId());
@@ -75,7 +75,7 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
 
     private void rollbackEntry(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         //先回滚猪的进场事件(判断公猪还是母猪进场)
-        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.PIG.getValue()).getTriggerEventId();
+        Long toPigEventId = doctorEventRelationDao.findPigEventByGroupOrigin(groupEvent.getId()).getTriggerPigEventId();
         DoctorPigEvent toPigEvent = doctorPigEventDao.findById(toPigEventId);
         if (Objects.equals(toPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             doctorRollbackSowEntryEventHandler.rollback(toPigEvent, operatorId, operatorName);

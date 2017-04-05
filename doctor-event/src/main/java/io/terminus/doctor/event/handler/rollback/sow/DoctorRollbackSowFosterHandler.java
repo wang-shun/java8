@@ -7,7 +7,6 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransHandler;
-import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -43,12 +42,12 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
             return false;
         }
         //判断母猪被拼窝事件是最新事件 && 判断仔猪转群事件之后的仔猪转入是否是最新事件
-        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.PIG.getValue()).getTriggerEventId();
+        Long toPigEventId = doctorEventRelationDao.findPigEventByPigOrigin(pigEvent.getId()).getTriggerPigEventId();
         DoctorPigEvent toPigEvent = doctorPigEventDao.findById(toPigEventId);
         expectTrue(notNull(toPigEvent), "relate.pig.event.not.null" , pigEvent.getId());
         if (!Objects.equals(pigEvent.getBarnId(), toPigEvent.getBarnId())) {
             //查找由被拼窝触发的转群事件及其关联事件
-            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+            Long toGroupEventId = doctorEventRelationDao.findGroupEventByPigOrigin(pigEvent.getId()).getOriginGroupEventId();
             DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(toGroupEventId);
             expectTrue(notNull(toGroupEvent), "relate.group.event.not.null" , pigEvent.getId());
             return isRelLastGroupEvent(toGroupEvent);
@@ -58,12 +57,12 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        Long toPigEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.PIG.getValue()).getTriggerEventId();
+        Long toPigEventId = doctorEventRelationDao.findPigEventByPigOrigin(pigEvent.getId()).getTriggerPigEventId();
         DoctorPigEvent toPigEvent = doctorPigEventDao.findById(toPigEventId);
 
         //1. 不同猪舍是回滚仔猪转群
         if (!Objects.equals(pigEvent.getBarnId(), toPigEvent.getBarnId())) {
-            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
+            Long toGroupEventId = doctorEventRelationDao.findGroupEventByPigOrigin(pigEvent.getId()).getTriggerGroupEventId();
             DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(toGroupEventId);
             doctorRollbackGroupTransHandler.rollback(toGroupEvent, operatorId, operatorName);
         }
