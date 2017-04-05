@@ -11,7 +11,6 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
@@ -104,7 +103,12 @@ import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_SowCardList;
 import io.terminus.doctor.move.util.JsonFormatUtils;
+import io.terminus.doctor.user.dao.DoctorFarmDao;
+import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
+import io.terminus.doctor.user.dao.PrimaryUserDao;
+import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.Sub;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
@@ -158,12 +162,20 @@ public class DoctorMoveDataService {
     private final DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorPigSnapshotDao doctorPigSnapshotDao;
+    private final UserWriteService<User> userWriteService;
+    private final UserDao userDao;
     @Autowired
     private DoctorPigEventManager doctorPigEventManager;
     @Autowired
     private DoctorGroupEventManager doctorGroupEventManager;
-    private final UserWriteService<User> userWriteService;
-    private final UserDao userDao;
+    @Autowired
+    private DoctorFarmDao doctorFarmDao;
+    @Autowired
+    private SubDao subDao;
+    @Autowired
+    private PrimaryUserDao primaryUserDao;
+    @Autowired
+    private DoctorUserDataPermissionDao doctorUserDataPermissionDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -2714,5 +2726,22 @@ public class DoctorMoveDataService {
         User user = userDao.findById(userId);
         user.setName(newName);
         userWriteService.update(user);
+    }
+
+    /**
+     * 删除猪场
+     * @param farmId 猪场id
+     */
+    @Transactional
+    public void deleteFarm(Long farmId) {
+        //1.删除猪场
+        doctorFarmDao.delete(farmId);
+        //2.删除猪场主账户以及员工的权限
+        List<Long> userIdList = Lists.newArrayList();
+        userIdList.addAll(subDao.findSubsByFarmId(farmId).stream().map(Sub::getUserId).collect(Collectors.toList()));
+        userIdList.add(primaryUserDao.findPrimaryByFarmId(farmId).getUserId());
+        if (!userIdList.isEmpty()) {
+            doctorUserDataPermissionDao.deletesByUserIds(userIdList);
+        }
     }
 }

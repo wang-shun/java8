@@ -9,7 +9,6 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.MapBuilder;
-import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -413,35 +412,22 @@ public class UserInitService {
 
     /**
      * 把所有猪舍添加到所有用户的权限里去
-     * @param mobile 主账号的登录手机号
+     *
+     * @param farmId 猪场id
      */
     @Transactional
-    public void updatePermissionBarn(String mobile){
-        User user = RespHelper.or500(doctorUserReadService.findBy(mobile, LoginType.MOBILE));
-        // 主账号的id
-        Long userId = user.getId();
+    public void updatePermissionBarn(Long farmId) {
+        List<Long> barnIdList = doctorBarnDao.findByFarmId(farmId).stream().map(DoctorBarn::getId).collect(Collectors.toList());
+        List<DoctorUserDataPermission> permissionList = doctorUserDataPermissionDao.findByFarmId(farmId);
 
-        DoctorUserDataPermission primaryPermission = doctorUserDataPermissionDao.findByUserId(userId);
-
-        if (primaryPermission == null || primaryPermission.getOrgIdsList() == null) {
-            log.error("this user do not have org permission, user:{}", user);
-            return;
-        }
-
-        primaryPermission.getOrgIdsList().forEach(orgId -> {
-            List<Long> barns = doctorBarnDao.findByOrgId(orgId).stream().map(DoctorBarn::getId).collect(Collectors.toList());
-
-            //所有员工，包括主账号
-            List<DoctorUserDataPermission> permissions = doctorUserDataPermissionDao.findByOrgId(orgId);
-            permissions.forEach(permission -> {
-                List<Long> barnIds = permission.getBarnIdsList();
-                if(isNull(barnIds)) {
-                    barnIds = Lists.newArrayList();
-                }
-                barnIds.addAll(barns);
-                permission.setBarnIds(Joiners.COMMA.join(Sets.newHashSet(barnIds)));
-                doctorUserDataPermissionDao.update(permission);
-            });
+        permissionList.forEach(permission -> {
+            List<Long> barnIds = permission.getBarnIdsList();
+            if (isNull(barnIds)) {
+                barnIds = Lists.newArrayList();
+            }
+            barnIds.addAll(barnIdList);
+            permission.setBarnIds(Joiners.COMMA.join(Sets.newHashSet(barnIds)));
+            doctorUserDataPermissionDao.update(permission);
         });
     }
 }
