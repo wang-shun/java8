@@ -214,6 +214,7 @@
           ,0) as event_count
         from doctor_group_events
         where type in(2,3,4,5,9)
+        and status = 1
         <if test="farmId != null">and farm_id = #{farmId}</if>
         group by group_id
         ) t12
