@@ -148,37 +148,37 @@ public class DoctorMoveDataController {
         }
     }
 
-    /**
-     * 迁移全部数据
-     * @param mobile 注册的手机号
-     * @param moveId 数据源id
-     * @param index  日报数据天数(默认365天)
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/all", method = RequestMethod.GET)
-    public Boolean moveAll(@RequestParam("mobile") String mobile,
-                           @RequestParam("loginName") String loginName,
-                           @RequestParam("moveId") Long moveId,
-                           @RequestParam(value = "index", required = false) Integer index,
-                           @RequestParam(value = "monthIndex", required = false) Integer monthIndex) {
-        try {
-            //1.迁移猪场信息
-            log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
-            userInitService.init(loginName, mobile, moveId, null);
-            log.warn("move user farm end");
-
-            //多个猪场遍历插入
-            getFarms(mobile).forEach(farm -> moveAllExclude(moveId, farm, mobile, index, monthIndex));
-
-            //把所有猪舍添加到所有用户的权限里去
-            userInitService.updatePermissionBarn(mobile);
-            log.warn("all data moved successfully, CONGRATULATIONS!!!");
-            return true;
-        } catch (Exception e) {
-            log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
-            return false;
-        }
-    }
+//    /**
+//     * 迁移全部数据
+//     * @param mobile 注册的手机号
+//     * @param moveId 数据源id
+//     * @param index  日报数据天数(默认365天)
+//     * @return 是否成功
+//     */
+//    @RequestMapping(value = "/all", method = RequestMethod.GET)
+//    public Boolean moveAll(@RequestParam("mobile") String mobile,
+//                           @RequestParam("loginName") String loginName,
+//                           @RequestParam("moveId") Long moveId,
+//                           @RequestParam(value = "index", required = false) Integer index,
+//                           @RequestParam(value = "monthIndex", required = false) Integer monthIndex) {
+//        try {
+//            //1.迁移猪场信息
+//            log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
+//            List<DoctorFarmWithMobile> farmList = userInitService.init(loginName, mobile, moveId, null);
+//            log.warn("move user farm end");
+//
+//            //多个猪场遍历插入
+//            getFarms(mobile).forEach(farm -> moveAllExclude(moveId, farm, mobile, index, monthIndex));
+//
+//            //把所有猪舍添加到所有用户的权限里去
+//            userInitService.updatePermissionBarn(mobile);
+//            log.warn("all data moved successfully, CONGRATULATIONS!!!");
+//            return true;
+//        } catch (Exception e) {
+//            log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
+//            return false;
+//        }
+//    }
 
     /**
      * 迁移全部数据
@@ -205,7 +205,7 @@ public class DoctorMoveDataController {
             farmList.forEach(farmWithMobile -> moveAllExclude(moveId, farmWithMobile.getDoctorFarm(), farmWithMobile.getMobile(), index, monthIndex));
 
             //把所有猪舍添加到所有用户的权限里去
-            farmList.forEach(farmWithMobile -> userInitService.updatePermissionBarn(farmWithMobile.getMobile()));
+            farmList.forEach(farmWithMobile -> userInitService.updatePermissionBarn(farmWithMobile.getDoctorFarm().getId()));
             log.warn("all data moved successfully, CONGRATULATIONS!!!");
             return true;
         } catch (Exception e) {
@@ -1225,6 +1225,13 @@ public class DoctorMoveDataController {
         return true;
     }
 
+    @RequestMapping(value = "/deleteFarm", method = RequestMethod.GET)
+    public Boolean deleteFarm(@RequestParam Long farmId) {
+        log.info("delete farm starting, farmId:{}");
+        doctorMoveDataService.deleteFarm(farmId);
+        log.info("delete farm ending");
+        return true;
+    }
     /**
      * 修复之前手动添加的数据有误的断奶
      * @return

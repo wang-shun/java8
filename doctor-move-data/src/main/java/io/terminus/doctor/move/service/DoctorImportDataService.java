@@ -101,10 +101,10 @@ import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.PrimaryUser;
-import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
+import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.user.address.model.Address;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.LoginType;
@@ -241,7 +241,7 @@ public class DoctorImportDataService {
 
             importBarn(farm, userMap, shit.getBarn());
             //把所有猪舍添加到所有用户的权限里去
-            userInitService.updatePermissionBarn(primaryUser.getMobile());
+            userInitService.updatePermissionBarn(farm.getId());
 
             importBreed(shit.getBreed());
 
@@ -325,11 +325,6 @@ public class DoctorImportDataService {
         // key = roleName, value = roleId
         Map<String, Long> existRole = existRoles.stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
 
-        List<String> existSubName = subDao.findByParentUserId(primaryUser.getId()).stream().map(Sub::getRealName).collect(Collectors.toList());
-
-        // 主账号的 staff 信息
-        String farmIds = Joiner.on(",").join(doctorFarmDao.findByOrgId(farm.getOrgId()).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
-
         for(Row row : staffShit){
             if(canImport(row)){
                 String realName = ImportExcelUtils.getStringOrThrow(row, 0);
@@ -337,40 +332,72 @@ public class DoctorImportDataService {
                 String contact = ImportExcelUtils.getStringOrThrow(row, 2);
                 String roleName = ImportExcelUtils.getStringOrThrow(row, 3);
 
-                // 用 realName 判断下这个员工是否已存在
-                if(existSubName.contains(realName)){
-                    log.warn("staff {} has existed", realName);
-                    continue;
+                User subUser = userDaoExt.findByMobile(contact);
+                Long subUserId;
+                if (notNull(subUser)) {
+                    DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(subUser.getId());
+                    if (notNull(permission)) {
+                        throw new JsonResponseException("user.has.related.farm");
+                    }
+
+                    subUser.setName(loginName + "@" + farm.getFarmCode());
+                    subUser.setMobile(contact);
+                    subUser.setPassword(EncryptUtil.encrypt("123456"));
+                    subUser.setType(UserType.FARM_SUB.value());
+                    subUser.setStatus(UserStatus.NORMAL.value());
+
+                    if (existRole.get(roleName) == null) {
+                        SubRole subRole = new SubRole();
+                        subRole.setName(roleName);
+                        subRole.setUserId(primaryUser.getId());
+                        subRole.setFarmId(farm.getId());
+                        subRole.setAppKey(appKey);
+                        subRole.setStatus(1);
+                        subRole.setAllowJson("[]");
+                        subRole.setExtraJson("{}");
+                        subRoleDao.create(subRole);
+                        existRole.put(roleName, subRole.getId());
+                    }
+                    List<String> roles = Lists.newArrayList("SUB", "SUB(SUB(" + existRole.get(roleName) + "))");
+                    subUser.setRoles(roles);
+
+                    subUser.setExtra(MapBuilder.<String, String>of()
+                            .put("pid", primaryUser.getId().toString())
+                            .put("contact", contact)
+                            .put("realName", realName)
+                            .map());
+                    userWriteService.update(subUser);
+                    subUserId = subUser.getId();
+                } else {
+                    subUser = new User();
+                    subUser.setName(loginName + "@" + farm.getFarmCode());
+                    subUser.setMobile(contact);
+                        subUser.setPassword("123456");
+                    subUser.setType(UserType.FARM_SUB.value());
+                    subUser.setStatus(UserStatus.NORMAL.value());
+
+                    if (existRole.get(roleName) == null) {
+                        SubRole subRole = new SubRole();
+                        subRole.setName(roleName);
+                        subRole.setUserId(primaryUser.getId());
+                        subRole.setFarmId(farm.getId());
+                        subRole.setAppKey(appKey);
+                        subRole.setStatus(1);
+                        subRole.setAllowJson("[]");
+                        subRole.setExtraJson("{}");
+                        subRoleDao.create(subRole);
+                        existRole.put(roleName, subRole.getId());
+                    }
+                    List<String> roles = Lists.newArrayList("SUB", "SUB(SUB(" + existRole.get(roleName) + "))");
+                    subUser.setRoles(roles);
+
+                    subUser.setExtra(MapBuilder.<String, String>of()
+                            .put("pid", primaryUser.getId().toString())
+                            .put("contact", contact)
+                            .put("realName", realName)
+                            .map());
+                    subUserId = RespHelper.or500(userWriteService.create(subUser));
                 }
-
-                User subUser = new User();
-                subUser.setName(loginName + "@" + farm.getFarmCode());
-                subUser.setMobile(contact);
-                subUser.setPassword("123456");
-                subUser.setType(UserType.FARM_SUB.value());
-                subUser.setStatus(UserStatus.NORMAL.value());
-
-                if(existRole.get(roleName) == null){
-                    SubRole subRole = new SubRole();
-                    subRole.setName(roleName);
-                    subRole.setUserId(primaryUser.getId());
-                    subRole.setFarmId(farm.getId());
-                    subRole.setAppKey(appKey);
-                    subRole.setStatus(1);
-                    subRole.setAllowJson("[]");
-                    subRole.setExtraJson("{}");
-                    subRoleDao.create(subRole);
-                    existRole.put(roleName, subRole.getId());
-                }
-                List<String> roles = Lists.newArrayList("SUB", "SUB(SUB(" + existRole.get(roleName) + "))");
-                subUser.setRoles(roles);
-
-                subUser.setExtra(MapBuilder.<String, String>of()
-                        .put("pid", primaryUser.getId().toString())
-                        .put("contact", contact)
-                        .put("realName", realName)
-                        .map());
-                Long subUserId = RespHelper.or500(userWriteService.create(subUser));
                 //设置子账号关联猪场
                 io.terminus.doctor.user.model.Sub sub = subDao.findByUserId(subUserId);
                 io.terminus.doctor.user.model.Sub updateSub = new io.terminus.doctor.user.model.Sub();
@@ -379,12 +406,12 @@ public class DoctorImportDataService {
                 subDao.update(updateSub);
 
                 // 创建子账号员工
-                this.createStaff(subUser, farm);
+                //this.createStaff(subUser, farm);
 
                 //现在是数据权限
                 DoctorUserDataPermission permission = new DoctorUserDataPermission();
                 permission.setUserId(subUserId);
-                permission.setFarmIds(farmIds);
+                permission.setFarmIds(farm.getId().toString());
                 permission.setOrgIds(farm.getOrgId().toString());
                 doctorUserDataPermissionDao.create(permission);
             }
@@ -458,9 +485,20 @@ public class DoctorImportDataService {
         if(result.isSuccess() && result.getResult() != null){
             log.warn("primary user has existed, mobile={}", mobile);
             user = result.getResult();
-            if (!Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
-                throw new JsonResponseException("user.type.not.farm.admin.primary");
+            DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(user.getId());
+            if (notNull(permission)) {
+                throw new JsonResponseException("user.has.related.farm");
             }
+            //更新用户信息
+            user.setPassword(EncryptUtil.encrypt("123456"));
+            user.setName(loginName);
+            user.setStatus(UserStatus.NORMAL.value());
+            user.setType(UserType.FARM_ADMIN_PRIMARY.value());
+            user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
+            Map<String, String> userExtraMap = Maps.newHashMap();
+            userExtraMap.put("realName", realName);
+            user.setExtra(userExtraMap);
+            userWriteService.update(user);
             userId = user.getId();
         }else{
             user = new User();
@@ -475,12 +513,12 @@ public class DoctorImportDataService {
             user.setExtra(userExtraMap);
             userId = RespHelper.or500(userWriteService.create(user));
             user.setId(userId);
-
-            // 把真实姓名存进 user profile
-            UserProfile userProfile = userProfileDao.findByUserId(userId);
-            userProfile.setRealName(realName);
-            userProfileDao.update(userProfile);
         }
+        // 把真实姓名存进 user profile
+        UserProfile userProfile = userProfileDao.findByUserId(userId);
+        userProfile.setRealName(realName);
+        userProfileDao.update(userProfile);
+
         //主账户关联猪场id
         PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
         PrimaryUser updatePrimary = new PrimaryUser();
@@ -509,7 +547,7 @@ public class DoctorImportDataService {
 
         if(doctorStaffDao.findByFarmIdAndUserId(farm.getId(), userId) == null){
             // 主账号的staff
-            this.createStaff(user, farm);
+            //this.createStaff(user, farm);
         }
 
         DoctorServiceStatus serviceStatus = doctorServiceStatusDao.findByUserId(userId);

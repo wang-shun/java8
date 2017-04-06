@@ -34,4 +34,12 @@ public class DoctorUserDataPermissionDao extends MyBatisDao<DoctorUserDataPermis
     public List<DoctorUserDataPermission> findByFarmId(Long farmId) {
         return sqlSession.selectList(sqlId("findByFarmId"), farmId);
     }
+
+    /**
+     * 根据用户列表删除
+     * @param list 用户id列表
+     */
+    public void deletesByUserIds(List<Long> list) {
+        getSqlSession().delete(sqlId("deletesByUserIds"), list);
+    }
 }
