@@ -74,6 +74,21 @@ public class DoctorEditGroupEventManager {
         }
         DoctorGroupTrack newTrack = new DoctorGroupTrack();
         newTrack.setId(track.getId());
+        newTrack.setQuantity(0);
+        newTrack.setSowQty(0);
+        newTrack.setBoarQty(0);
+        newTrack.setAvgDayAge(0);
+        newTrack.setBirthWeight(0d);
+        newTrack.setWeanWeight(0d);
+        newTrack.setNest(0);
+        newTrack.setLiveQty(0);
+        newTrack.setHealthyQty(0);
+        newTrack.setWeanQty(0);
+        newTrack.setUnweanQty(0);
+        newTrack.setUnqQty(0);
+        newTrack.setQuaQty(0);
+        newTrack.setUnqQty(0);
+
 
         //按时间,id排序
         groupEvents = groupEvents.stream().sorted(

@@ -380,13 +380,10 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         return eventAge;
     }
 
-    protected boolean checkFirstMoveIn(DoctorGroupEvent event){
+    protected boolean checkFarrowFirstMoveIn(DoctorGroupEvent event){
         if(notNull(event.getRelGroupEventId())){
-            if(Objects.equals(event.getRelGroupEventId(), -1)){
-                return true;
-            }
             DoctorGroupEvent newEvent = doctorGroupEventDao.findById(event.getRelGroupEventId());
-            if(Objects.nonNull(newEvent) && Objects.equals(newEvent.getType(), GroupEventType.NEW.getValue())){
+            if(Objects.nonNull(newEvent) && Objects.equals(newEvent.getType(), GroupEventType.NEW.getValue()) && notNull(newEvent.getRelPigEventId())){
                 return true;
             }
         }
