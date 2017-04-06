@@ -102,4 +102,13 @@
         FROM <include refid="tb" />
         WHERE find_in_set(#{farmId}, farm_ids)
     </select>
+
+    <delete id="deletesByUserIds" parameterType="long" >
+        DELETE
+        FROM <include refid="tb" />
+        WHERE user_id IN
+        <foreach collection="list" item="userId" open="(" separator="," close=")" >
+            #{userId}
+        </foreach>
+    </delete>
 </mapper>
