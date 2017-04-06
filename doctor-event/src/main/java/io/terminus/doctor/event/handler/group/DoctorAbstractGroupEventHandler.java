@@ -128,9 +128,9 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             return;
         }
         DoctorEventRelation eventRelation = DoctorEventRelation.builder()
-                .originEventId(MoreObjects.firstNonNull(groupEvent.getRelPigEventId(), groupEvent.getRelGroupEventId()))
-                .triggerEventId(groupEvent.getId())
-                .triggerTargetType(DoctorEventRelation.TargetType.GROUP.getValue())
+                .originGroupEventId(groupEvent.getRelGroupEventId())
+                .originPigEventId(groupEvent.getRelPigEventId())
+                .triggerGroupEventId(groupEvent.getId())
                 .status(DoctorEventRelation.Status.VALID.getValue())
                 .build();
         doctorEventRelationDao.create(eventRelation);

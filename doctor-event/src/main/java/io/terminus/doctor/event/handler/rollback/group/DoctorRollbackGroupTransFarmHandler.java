@@ -43,8 +43,8 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         }
 
         //如果触发关闭猪群事件，说明此事件肯定不是最新事件
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
-        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByGroupOrigin(groupEvent.getId());
+        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
         if (isCloseEvent(close)) {
             return doctorRollbackGroupCloseHandler.handleCheck(close);
         }

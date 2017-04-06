@@ -44,18 +44,18 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
         }
 
         //母猪分娩会触发转入猪群事件，如果有新建猪群，还要校验最新事件(分娩)
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByPigOrigin(pigEvent.getId());
         expectTrue(notNull(eventRelation), "relate.group.event.not.null" , pigEvent.getId());
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
         return isLastPigEvent(pigEvent) && isLastGroupEvent(toGroupEvent);
     }
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //1.回滚转入事件
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByPigOrigin(pigEvent.getId());
         expectTrue(notNull(eventRelation), "relate.group.event.not.null" , pigEvent.getId());
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
         doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
 
         //2.如果有新建猪群,则会滚

@@ -40,18 +40,18 @@ public class DoctorRollbackSowPigletChangeEventHandler extends DoctorAbstractRol
         }
 
         //母猪仔猪变动会触发猪群变动事件，校验猪群变动事件是否是最新事件
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByPigOrigin(pigEvent.getId());
         expectTrue(notNull(eventRelation), "relate.group.event.not.null" , pigEvent.getId());
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
         return isLastGroupEvent(toGroupEvent);
     }
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //1. 回滚猪群变动
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(pigEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
+        DoctorEventRelation eventRelation = doctorEventRelationDao.findGroupEventByPigOrigin(pigEvent.getId());
         expectTrue(notNull(eventRelation), "relate.group.event.not.null" , pigEvent.getId());
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findById(eventRelation.getTriggerGroupEventId());
         doctorRollbackGroupChangeHandler.rollback(toGroupEvent, operatorId, operatorName);
         //3. 回滚母猪仔猪变动
         handleRollbackWithStatus(pigEvent, operatorId, operatorName);

@@ -6,7 +6,6 @@ import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
-import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
-
-import static io.terminus.common.utils.Arguments.isNull;
 
 /**
  * Desc: 猪群变动回滚
@@ -38,8 +35,7 @@ public class DoctorRollbackGroupChangeHandler extends DoctorAbstractRollbackGrou
         }
 
         //如果变动后关闭猪群
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
-        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventIdAndType(groupEvent.getId(), GroupEventType.CLOSE.getValue());
         if (isCloseEvent(close)) {
             return doctorRollbackGroupCloseHandler.handleCheck(close);
         }
@@ -49,8 +45,7 @@ public class DoctorRollbackGroupChangeHandler extends DoctorAbstractRollbackGrou
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a change event:{}", groupEvent);
-        DoctorEventRelation eventRelation = doctorEventRelationDao.findByOriginAndType(groupEvent.getId(), DoctorEventRelation.TargetType.GROUP.getValue());
-        DoctorGroupEvent close = isNull(eventRelation) ? null : doctorGroupEventDao.findById(eventRelation.getTriggerEventId());
+        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventIdAndType(groupEvent.getId(), GroupEventType.CLOSE.getValue());
         if (isCloseEvent(close)) {
             doctorRollbackGroupCloseHandler.rollback(close, operatorId, operatorName);
         }

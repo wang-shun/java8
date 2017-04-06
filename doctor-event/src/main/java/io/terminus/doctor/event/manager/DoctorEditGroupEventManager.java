@@ -152,6 +152,10 @@ public class DoctorEditGroupEventManager {
     @Transactional
     public void elicitDoctorGroupTrackRebuildOne(DoctorGroupEvent newEvent) {
         DoctorGroupEvent oldEvent = doctorGroupEventDao.findById(newEvent.getId());
+        if(Objects.equals(EventStatus.INVALID.getValue(), oldEvent.getStatus()) || Objects.equals(EventStatus.HANDLING.getValue(), oldEvent.getStatus())){
+            log.error("event has been handled, eventId: {}", oldEvent.getId());
+            throw new InvalidException("event.has.been.handled", oldEvent.getId());
+        }
         DoctorGroupEvent updateEvent = new DoctorGroupEvent();
         updateEvent.setId(oldEvent.getId());
         updateEvent.setStatus(EventStatus.INVALID.getValue());
@@ -167,19 +171,19 @@ public class DoctorEditGroupEventManager {
      * @param newEvent
      */
     private void updateRelation(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {
-        List<DoctorEventRelation> oldOriginRelations = doctorEventRelationDao.findByOrigin(oldEvent.getId());
+        List<DoctorEventRelation> oldOriginRelations = doctorEventRelationDao.findByGroupOrigin(oldEvent.getId());
         if(!Arguments.isNullOrEmpty(oldOriginRelations)){
             oldOriginRelations.forEach(doctorEventRelation -> {
-                doctorEventRelation.setOriginEventId(newEvent.getId());
+                doctorEventRelation.setOriginGroupEventId(newEvent.getId());
             });
-            doctorEventRelationDao.batchUpdateStatus(oldOriginRelations.stream().map(DoctorEventRelation::getId).collect(Collectors.toList()), DoctorEventRelation.Status.INVALID.getValue());
+            doctorEventRelationDao.updateGroupEventStatus(oldOriginRelations.stream().map(DoctorEventRelation::getId).collect(Collectors.toList()), DoctorEventRelation.Status.INVALID.getValue());
             doctorEventRelationDao.creates(oldOriginRelations);
         }
 
-        DoctorEventRelation oldTriggerRelation = doctorEventRelationDao.findByTrigger(oldEvent.getId());
+        DoctorEventRelation oldTriggerRelation = doctorEventRelationDao.findByGroupTrigger(oldEvent.getId());
         if(!Arguments.isNull(oldTriggerRelation)){
-            doctorEventRelationDao.batchUpdateStatus(Lists.newArrayList(oldTriggerRelation.getId()), DoctorEventRelation.Status.INVALID.getValue());
-            oldTriggerRelation.setTriggerEventId(newEvent.getId());
+            doctorEventRelationDao.updateGroupEventStatus(Lists.newArrayList(oldTriggerRelation.getId()), DoctorEventRelation.Status.INVALID.getValue());
+            oldTriggerRelation.setTriggerGroupEventId(newEvent.getId());
             doctorEventRelationDao.create(oldTriggerRelation);
         }
     }

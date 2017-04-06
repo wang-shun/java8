@@ -309,27 +309,27 @@ public class DoctorMoveDataController {
 
         //首页统计
         movePigTypeStatistic(farm);
-// TODO: 17/3/31 先注释掉 
-//        //6.迁移猪场日报
-//        log.warn("move daily start, moveId:{}", moveId);
-//        doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
-//        log.warn("move daily end");
-//
-//        //7.迁移猪场周报
-//        log.warn("move weekly start, moveId:{}", moveId);
-//        doctorMoveReportService.moveWeeklyReport(farm.getId(), monthIndex == null ? null : monthIndex * 4);
-//        log.warn("move weekly end");
-//
-//
-//        //7.迁移猪场月报
-//        log.warn("move monthly start, moveId:{}", moveId);
-//        doctorMoveReportService.moveMonthlyReport(farm.getId(), monthIndex);
-//        log.warn("move monthly end");
-//
-//        //8.迁移猪场胎次分析月报
-//        log.warn("move parity monthly start, moveId:{}", moveId);
-//        doctorMoveReportService.moveParityMonthlyReport(farm.getId(), monthIndex);
-//        log.warn("move parity monthly end");
+
+        //6.迁移猪场日报
+        log.warn("move daily start, moveId:{}", moveId);
+        doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
+        log.warn("move daily end");
+
+        //7.迁移猪场周报
+        log.warn("move weekly start, moveId:{}", moveId);
+        doctorMoveReportService.moveWeeklyReport(farm.getId(), monthIndex == null ? null : monthIndex * 4);
+        log.warn("move weekly end");
+
+
+        //7.迁移猪场月报
+        log.warn("move monthly start, moveId:{}", moveId);
+        doctorMoveReportService.moveMonthlyReport(farm.getId(), monthIndex);
+        log.warn("move monthly end");
+
+        //8.迁移猪场胎次分析月报
+        log.warn("move parity monthly start, moveId:{}", moveId);
+        doctorMoveReportService.moveParityMonthlyReport(farm.getId(), monthIndex);
+        log.warn("move parity monthly end");
 
         //迁移仓库/物料
         log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
@@ -1230,6 +1230,29 @@ public class DoctorMoveDataController {
         log.info("delete farm starting, farmId:{}");
         doctorMoveDataService.deleteFarm(farmId);
         log.info("delete farm ending");
+        return true;
+    }
+    /**
+     * 修复之前手动添加的数据有误的断奶
+     * @return
+     */
+    @RequestMapping(value = "/fixAddPigWean", method = RequestMethod.GET)
+    public Boolean fixAddPigWean(){
+        log.info("fixAddPigWean starting");
+        doctorMoveDataService.fixAddPigWean();
+        log.info("fixAddPigWean ending");
+        return true;
+    }
+
+    /**
+     * 修复之前有仔猪变动、拼窝触断奶事件
+     * @return
+     */
+    @RequestMapping(value = "/fixTriggerPigWean", method = RequestMethod.GET)
+    public Boolean fixTriggerPigWean() {
+        log.info("fixTriggerPigWean starting");
+        doctorMoveDataService.fixTriggerPigWean();
+        log.info("fixTriggerPigWean ending");
         return true;
     }
 }

@@ -212,11 +212,12 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
 
     @Override
     public RespWithEx<Boolean> batchElicitPigTrack(List<Long> farmIds) {
+        log.info("batch elicit pig track starting, farmId:{}", farmIds);
         try {
             for (Long farmId : farmIds) {
                 List<Long> pigIdList = doctorPigDao.findPigIdsByFarmId(farmId);
                 if (pigIdList.isEmpty()) {
-                    return RespWithEx.ok(Boolean.TRUE);
+                    continue;
                 }
                 pigIdList.forEach(pigId -> {
                     doctorEditPigEventService.elicitPigTrack(pigId);

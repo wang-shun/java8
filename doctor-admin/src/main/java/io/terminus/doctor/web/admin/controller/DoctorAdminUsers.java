@@ -131,12 +131,12 @@ public class DoctorAdminUsers {
     //拼接集团用户数据
     private User checkGroupUser(String mobile, String name, String realName, String password) {
         Response<Boolean> mobileResponse = doctorUserReadService.checkExist(mobile, LoginType.MOBILE);
-        if(mobileResponse.isSuccess()){
+        if(mobileResponse.isSuccess() && mobileResponse.getResult()){
             log.error("user existed, user:{}", mobileResponse.getResult());
             throw new JsonResponseException("duplicated.mobile");
         }
         Response<Boolean> nameResponse = doctorUserReadService.checkExist(name, LoginType.NAME);
-        if(nameResponse.isSuccess()){
+        if(nameResponse.isSuccess() && nameResponse.getResult()){
             log.error("user existed, user:{}", nameResponse.getResult());
             throw new JsonResponseException("duplicated.name");
         }

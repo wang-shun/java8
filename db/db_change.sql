@@ -806,3 +806,21 @@ where id in (select id from
 -- 导入的猪群事件的初始转入事件有谁触发
 update doctor_group_events set rel_pig_event_id = -1, rel_group_event_id = null where pig_type = 7 and event_source = 2;
 update doctor_group_events set rel_group_event_id = -1 , rel_pig_event_id = null where pig_type <> 7 and event_source = 2;
+
+-- 2017-04-01 关联关系
+drop table if exists `doctor_event_relations`;
+CREATE TABLE `doctor_event_relations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `origin_pig_event_id` bigint(20) DEFAULT NULL COMMENT '原猪事件id',
+  `origin_group_event_id` bigint(20) DEFAULT NULL COMMENT '原猪群事件id',
+  `trigger_pig_event_id` bigint(20) DEFAULT NULL COMMENT '触发猪事件id',
+  `trigger_group_event_id` bigint(20) DEFAULT NULL COMMENT '触发猪事件id',
+  `status` tinyint(4) NOT NULL COMMENT '1有效、0正在处理、 -1无效',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_relations_origin_pig_event_id` (`origin_pig_event_id`),
+  KEY `idx_relations_origin_group_event_id` (`origin_group_event_id`),
+  KEY `idx_relations_trigger_pig_event_id` (`trigger_pig_event_id`),
+  KEY `idx_relations_trigger_group_event_id` (`trigger_group_event_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='事件关联表';
