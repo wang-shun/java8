@@ -121,8 +121,8 @@
         <if test="farmId != null"> AND farm_id = #{farmId}</if>
         <if test="materialId != null"> AND material_id = #{materialId}</if>
         <if test="wareHouseId != null"> AND ware_house_id = #{wareHouseId}</if>
-        <if test="startDate != null"> and event_time &gt;= #{startAt} </if>
-        <if test="endDate != null"> and event_time &lt; endAt </if>
+        <if test="startDate != null"> and event_time &gt;= #{startDate} </if>
+        <if test="endDate != null"> and event_time &lt; #{endDate} </if>
     </select>
 
 </mapper>
