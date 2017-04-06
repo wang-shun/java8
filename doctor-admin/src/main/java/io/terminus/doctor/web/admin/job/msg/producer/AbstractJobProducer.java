@@ -12,25 +12,22 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.enums.PregCheckResult;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorPigEventReadService;
-import io.terminus.doctor.event.service.DoctorPigReadService;
-import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.event.dto.msg.DoctorMessageSearchDto;
 import io.terminus.doctor.event.dto.msg.RuleValue;
 import io.terminus.doctor.event.dto.msg.SubUser;
 import io.terminus.doctor.event.enums.Category;
+import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorMessage;
 import io.terminus.doctor.event.model.DoctorMessageRule;
 import io.terminus.doctor.event.model.DoctorMessageRuleRole;
 import io.terminus.doctor.event.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.event.model.DoctorMessageUser;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorMessageReadService;
 import io.terminus.doctor.event.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.event.service.DoctorMessageRuleRoleReadService;
@@ -38,12 +35,13 @@ import io.terminus.doctor.event.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.event.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.event.service.DoctorMessageUserWriteService;
 import io.terminus.doctor.event.service.DoctorMessageWriteService;
-import io.terminus.doctor.web.admin.job.msg.dto.DoctorMessageInfo;
+import io.terminus.doctor.event.service.DoctorPigEventReadService;
+import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
-import io.terminus.doctor.user.model.PrimaryUser;
-import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
+import io.terminus.doctor.web.admin.job.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -179,35 +177,23 @@ public abstract class AbstractJobProducer {
      */
     private List<SubUser> getUsersHasFarm(Long farmId){
         List<SubUser> subUsers = Lists.newArrayList();
-        List<Long> userIds = Lists.newArrayList();
-        List<Sub> subs = RespHelper.orServEx(primaryUserReadService.findAllActiveSubs());
-        if (!Arguments.isNullOrEmpty(subs)){
-            userIds.addAll(subs.stream().map(sub -> sub.getUserId()).collect(Collectors.toList()));
-        }
-        List<PrimaryUser> primaryUsers = RespHelper.orServEx(primaryUserReadService.findAllPrimaryUser());
-        if (!Arguments.isNullOrEmpty(primaryUsers)){
-            userIds.addAll(primaryUsers.stream().map(sub -> sub.getUserId()).collect(Collectors.toList()));
-        }
-        userIds.forEach(userId -> {
+        List<DoctorUserDataPermission> permissionList = RespHelper.orServEx(doctorUserDataPermissionReadService.listAll());
+        permissionList.forEach(dataPermission -> {
             SubUser subUser = SubUser.builder()
-                    .userId(userId)
+                    .userId(dataPermission.getUserId())
                     .farmIds(Lists.newArrayList())
                     .barnIds(Lists.newArrayList())
                     .build();
             if (farmId == null){
                 subUsers.add(subUser);
-            }
-            else {
+            } else {
                 // 获取猪场权限
-                DoctorUserDataPermission dataPermission = RespHelper.orServEx(
-                        doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
-                if (dataPermission != null) {
-                    dataPermission.setFarmIds(dataPermission.getFarmIds());
-                    if (dataPermission.getFarmIdsList().contains(farmId)){
-                        dataPermission.setBarnIds(dataPermission.getBarnIds());
-                        subUser.getBarnIds().addAll(dataPermission.getBarnIdsList());
-                        subUsers.add(subUser);
-                    }
+                dataPermission.setFarmIds(dataPermission.getFarmIds());
+                if (dataPermission.getFarmIdsList().contains(farmId)) {
+                    dataPermission.setBarnIds(dataPermission.getBarnIds());
+                    subUser.getFarmIds().addAll(dataPermission.getFarmIdsList());
+                    subUser.getBarnIds().addAll(dataPermission.getBarnIdsList());
+                    subUsers.add(subUser);
                 }
             }
 

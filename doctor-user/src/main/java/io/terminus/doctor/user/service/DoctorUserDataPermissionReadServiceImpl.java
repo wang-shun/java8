@@ -63,4 +63,14 @@ public class DoctorUserDataPermissionReadServiceImpl implements DoctorUserDataPe
         }
         return response;
     }
+
+    @Override
+    public Response<List<DoctorUserDataPermission>> listAll() {
+        try {
+            return Response.ok(doctorUserDataPermissionDao.findAll());
+        } catch (Exception e) {
+            log.error("list all failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("list.all.failed");
+        }
+    }
 }
