@@ -50,6 +50,7 @@ public interface DoctorMaterialPriceInWareHouseReadService {
     Response<List<DoctorMaterialPriceInWareHouse>> findMaterialData(@NotNull(message = "input.farmId.empty") Long farmId,
                                                               @NotNull(message = "input.materialId.empty") Long materialId,
                                                               @NotNull(message = "input.wareHouseId.empty")Long wareHouseId,
+                                                                    Date startDate,
                                                               Date endDate);
 
 }

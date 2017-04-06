@@ -45,6 +45,53 @@ export.tables:
         format: priceFormatter
       - name: providerFactoryName
         display: 供应商
+
+  web-wareHouse-details:
+    display: 物料明细报表
+    columns:
+      - name: materialName
+        display: 物料名
+      - name: typeName
+        display: 类型
+      - name: unitName
+        display: 单位
+      - name: updatedAt
+        display: 日期
+        format: isoDateFormatter
+      - name: number
+        display: 数量
+      - name: price
+        display: 单价
+      - name: priceSum
+        display: 金额
+      - name: barnName
+        display: 猪舍
+      - name: groupName
+        display: 猪群
+      - name: wareHouseName
+        display: 仓库
+
+  web-wareHouse-use:
+    display: 猪舍物料领用统计
+    columns:
+      - name: barnName
+        display: 猪舍
+      - name: people
+        display: 饲养员
+      - name: materialName
+        display: 物料名称
+      - name: materialType
+        display: 物料类别
+      - name: unitName
+        display: 单位
+      - name: number
+        display: 数量
+      - name: price
+        display: 单价
+      - name: priceSum
+        display: 金额
+
+
   web-message-breeding:
     display: 待配种消息导出
     columns:
