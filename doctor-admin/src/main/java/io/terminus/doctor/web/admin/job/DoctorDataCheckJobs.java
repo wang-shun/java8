@@ -5,7 +5,6 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.service.DoctorGroupInfoCheckWriteService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.leader.HostLeader;

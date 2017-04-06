@@ -83,13 +83,13 @@ public class DoctorGroupInfoCheckWriteServiceImpl implements DoctorGroupInfoChec
         log.info("generate group check data start, farmId: {}, now is: {}", farmId, DateUtil.toDateTimeString(new Date()));
         try{
             doctorGroupInfoCheckDao.deletebyFarmIdAndSumAt(farmId, new Date());
-            Integer offset = 1;
+            Integer offset = 0;
             Integer limit = 500;
             Boolean hasNext = true;
             while(hasNext){
                 List<DoctorGroupInfoCheck> lists = doctorGroupInfoCheckDao.getGroupCheckDatas(offset, limit, farmId);
                 if(lists.size() > 0){
-                    offset += 1;
+                    offset += limit;
                     doctorGroupInfoCheckDao.creates(lists);
                     continue;
                 }

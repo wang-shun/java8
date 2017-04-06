@@ -34,4 +34,10 @@ public interface DoctorUserDataPermissionReadService {
      * @return 数据权限
      */
     Response<DoctorUserDataPermission> findDataPermissionById(Long permissionId);
+
+    /**
+     * 查询所有权限
+     * @return
+     */
+    Response<List<DoctorUserDataPermission>> listAll();
 }

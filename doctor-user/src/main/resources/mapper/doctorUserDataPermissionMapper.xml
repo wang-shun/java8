@@ -103,6 +103,11 @@
         WHERE find_in_set(#{farmId}, farm_ids)
     </select>
 
+    <select id="findAll" resultMap="DoctorUserDataPermissionMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+    </select>
+
     <delete id="deletesByUserIds" parameterType="long" >
         DELETE
         FROM <include refid="tb" />

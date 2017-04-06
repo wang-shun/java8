@@ -42,4 +42,8 @@ public class DoctorUserDataPermissionDao extends MyBatisDao<DoctorUserDataPermis
     public void deletesByUserIds(List<Long> list) {
         getSqlSession().delete(sqlId("deletesByUserIds"), list);
     }
+
+    public List<DoctorUserDataPermission> findAll() {
+        return getSqlSession().selectList(sqlId("findAll"));
+    }
 }
