@@ -6,6 +6,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -59,6 +60,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
     @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         DoctorGroupEvent event = buildGroupEvent(group, groupTrack, input);
+        checkEventAt(event);
         doctorGroupEventDao.create(event);
 
         //创建关联关系
@@ -98,6 +100,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
     @Override
     public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+
         input.setEventType(GroupEventType.MOVE_IN.getValue());
         DoctorMoveInGroupInput moveIn = (DoctorMoveInGroupInput) input;
 
@@ -181,4 +184,10 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         return track;
     }
 
+    private void checkEventAt(DoctorGroupEvent groupEvent){
+        DoctorGroupEvent newEvent = doctorGroupEventDao.findNewGroupByGroupId(groupEvent.getGroupId());
+        if (notNull(newEvent) && !Dates.startOfDay(newEvent.getEventAt()).before(Dates.startOfDay(groupEvent.getEventAt()))){
+            throw new InvalidException("move.in.event.at.before.new.event.at", groupEvent.getEventAt().toString(), newEvent.getEventAt().toString());
+        }
+    }
 }
