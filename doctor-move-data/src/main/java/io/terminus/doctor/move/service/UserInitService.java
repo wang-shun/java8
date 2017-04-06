@@ -177,7 +177,7 @@ public class UserInitService {
             farmList.add(new DoctorFarmWithMobile(farm, primaryUser.getMobile()));
 
             //创建staff
-            this.createStaff(primaryUser, farm, farm.getOutId());
+            //this.createStaff(primaryUser, farm, farm.getOutId());
 
             RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
 

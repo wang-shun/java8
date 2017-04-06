@@ -2736,6 +2736,7 @@ public class DoctorMoveDataService {
     public void deleteFarm(Long farmId) {
         //1.删除猪场
         doctorFarmDao.delete(farmId);
+
         //2.删除猪场主账户以及员工的权限
         List<Long> userIdList = Lists.newArrayList();
         userIdList.addAll(subDao.findSubsByFarmId(farmId).stream().map(Sub::getUserId).collect(Collectors.toList()));

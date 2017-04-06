@@ -406,7 +406,7 @@ public class DoctorImportDataService {
                 subDao.update(updateSub);
 
                 // 创建子账号员工
-                this.createStaff(subUser, farm);
+                //this.createStaff(subUser, farm);
 
                 //现在是数据权限
                 DoctorUserDataPermission permission = new DoctorUserDataPermission();
@@ -547,7 +547,7 @@ public class DoctorImportDataService {
 
         if(doctorStaffDao.findByFarmIdAndUserId(farm.getId(), userId) == null){
             // 主账号的staff
-            this.createStaff(user, farm);
+            //this.createStaff(user, farm);
         }
 
         DoctorServiceStatus serviceStatus = doctorServiceStatusDao.findByUserId(userId);
