@@ -286,8 +286,10 @@
         1 = 1
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="wareHouseId != null"> AND ware_house_id = #{wareHouseId}</if>
+        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="type != null">AND `type` = #{type}</if>
         <if test="startDate != null" > <![CDATA[ AND `event_time` >= #{startDate} ]]> </if>
-        <!--<if test="endDate != null" > <![CDATA[ AND `event_time` < #{endDate} ]]> </if>-->
+        <if test="endDate != null" > <![CDATA[ AND `event_time` < #{endDate} ]]> </if>
         ORDER BY material_id ASC
     </select>
 </mapper>

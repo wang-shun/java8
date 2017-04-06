@@ -168,7 +168,7 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
      * @param farmId 公司Id
      */
     public List<DoctorMaterialConsumeProvider> findMaterialConsumeReports(Long farmId, Long wareHouseId, Long materialId, String materialName,
-                                                                          Date startDate, Date endDate, Integer pageNo, Integer size) {
+                                                                          Long barnId, Long type, Date startDate, Date endDate, Integer pageNo, Integer size) {
 
         if (farmId == null) {
             throw new ServiceException("farmId.not.null");
@@ -179,6 +179,8 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
                 .put("wareHouseId", wareHouseId)
                 .put("materialId", materialId)
                 .put("materialName", materialName)
+                .put("barnId", barnId)
+                .put("type", type)
                 .put("startDate", startDate)
                 .put("endDate", endDate)
                 .put("pageNo", pageNo)

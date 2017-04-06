@@ -207,9 +207,9 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
 
     @Override
     public Response<List<DoctorMaterialConsumeProvider>> findMaterialConsume(Long farmId, Long wareHouseId, Long materialId, String materialName,
-                                                                             Date startDate, Date endDate, Integer pageNo, Integer size) {
+                                                                             Long barnId, Long type, Date startDate, Date endDate, Integer pageNo, Integer size) {
         try {
-            return Response.ok(doctorMaterialConsumeProviderDao.findMaterialConsumeReports(farmId, wareHouseId, materialId, materialName, startDate, endDate, pageNo, size));
+            return Response.ok(doctorMaterialConsumeProviderDao.findMaterialConsumeReports(farmId, wareHouseId, materialId, materialName, barnId, type, startDate, endDate, pageNo, size));
         }catch (Exception e){
             log.error("findMaterialConsume failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("findMaterialConsume.fail");
