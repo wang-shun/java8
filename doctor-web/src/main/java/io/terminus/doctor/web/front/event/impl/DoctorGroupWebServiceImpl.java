@@ -57,7 +57,6 @@ import io.terminus.doctor.web.front.event.dto.DoctorBatchGroupEventDto;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchNewGroupEventDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

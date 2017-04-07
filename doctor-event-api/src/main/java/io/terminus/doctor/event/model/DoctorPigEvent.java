@@ -291,6 +291,83 @@ public class DoctorPigEvent implements Serializable {
     @JsonIgnore
     private String extra;
 
+    /**
+     * 进场来源
+     * @see io.terminus.doctor.event.enums.PigSource
+     */
+    private Integer source;
+
+    /**
+     * 品种
+     */
+    private Long breedId;
+
+    /**
+     * 品种名
+     */
+    private String breedName;
+
+    /**
+     * 品系id
+     */
+    private Long breedTypeId;
+
+    /**
+     * 品系名
+     */
+    private String breedTypeName;
+
+    /**
+     * 公猪进场类型
+     * @see io.terminus.doctor.event.enums.BoarEntryType
+     */
+    private Integer boarType;
+
+    /**
+     * 预产期
+     */
+    private Date judgePregDate;
+
+    /**
+     * 基础数据id(流产原因id,疾病id,防疫项目id)
+     */
+    private Long basicId;
+
+    /**
+     * 基础数据名(流产原因,疾病,防疫)
+     */
+    private String basicName;
+
+    /**
+     * 数量(拼窝数量,被拼窝数量,仔猪变动数量)
+     */
+    private Integer quantity;
+
+    /**
+     * 重量(变动重量)
+     */
+    private Double weight;
+
+    /**
+     * 客户id
+     */
+    private Long customerId;
+
+    /**
+     * 客户名
+     */
+    private String customerName;
+
+    /**
+     *疫苗
+     */
+    private Long vaccinationId;
+
+    /**
+     * 疫苗名称
+     */
+    private String vaccinationName;
+
     private String remark;
 
     /**
@@ -315,7 +392,7 @@ public class DoctorPigEvent implements Serializable {
     private Date updatedAt;
 
     /**
-     * 事件来源(不存到数据库中,只在事件处理时有效)
+     * 是否是编辑事件(不存于数据库)
      * @see io.terminus.doctor.event.enums.IsOrNot
      */
     private Integer isModify;

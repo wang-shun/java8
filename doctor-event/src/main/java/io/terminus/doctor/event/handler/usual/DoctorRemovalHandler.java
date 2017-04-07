@@ -66,9 +66,13 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
     @Override
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        DoctorRemovalDto removalDto = (DoctorRemovalDto) inputDto;
+        doctorPigEvent.setWeight(removalDto.getWeight());
+        doctorPigEvent.setCustomerId(removalDto.getCustomerId());
+        doctorPigEvent.setCustomerName(removalDto.getCustomerName());
+
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
-        DoctorRemovalDto removalDto = (DoctorRemovalDto) inputDto;
 
         doctorPigEvent.setChangeTypeId(removalDto.getChgTypeId());   //变动类型id
         doctorPigEvent.setPrice(removalDto.getPrice());      //销售单价(分)

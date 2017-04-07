@@ -2,6 +2,8 @@ package io.terminus.doctor.event.handler.sow;
 
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
@@ -40,6 +42,18 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
 
     @Autowired
     private DoctorSowWeanHandler doctorSowWeanHandler;
+
+    @Override
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) inputDto;
+        doctorPigEvent.setQuantity(pigletsChgDto.getPigletsCount());
+        doctorPigEvent.setWeight(pigletsChgDto.getPigletsWeight());
+        doctorPigEvent.setPrice(pigletsChgDto.getPigletsPrice());
+        doctorPigEvent.setCustomerId(pigletsChgDto.getPigletsCustomerId());
+        doctorPigEvent.setCustomerName(pigletsChgDto.getPigletsCustomerName());
+        return doctorPigEvent;
+    }
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {

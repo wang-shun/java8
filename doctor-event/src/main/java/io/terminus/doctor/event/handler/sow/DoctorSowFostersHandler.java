@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.sow;
 import com.google.common.base.MoreObjects;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.sow.DoctorFosterByDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
@@ -36,6 +37,14 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
     
     @Autowired
     private DoctorSowFostersByHandler doctorSowFostersByHandler;
+
+    @Override
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
+        doctorPigEvent.setQuantity(fostersDto.getFostersCount());
+        return doctorPigEvent;
+    }
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {

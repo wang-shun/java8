@@ -204,6 +204,62 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
     private String extra;
 
     /**
+     * 有母猪触发的事件关联的猪id
+     */
+    private Long sowId;
+
+    /**
+     * 有母猪触发的事件关联的猪code
+     */
+    private Long sowCode;
+
+    /**
+     * 销售时客户id
+     */
+    private Long customerId;
+
+    /**
+     * 销售时客户名
+     */
+    private String customerName;
+
+    /**
+     * 基础数据id(疾病id,防疫项目id)
+     */
+    private Long basicId;
+
+    /**
+     * 基础数据名(疾病,防疫)
+     */
+    private String basicName;
+
+    /**
+     * 防疫结果
+     * @see io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent.VaccinResult
+     */
+    private Integer vaccinResult;
+
+    /**
+     * 疫苗
+     */
+    private Long vaccinationId;
+
+    /**
+     * 疫苗名称
+     */
+    private String vaccinationName;
+
+    /**
+     * 操作人
+     */
+    private Long operatorId;
+
+    /**
+     * 操作人姓名
+     */
+    private String operatorName;
+
+    /**
      * 具体事件转换成的实体类
      * @see io.terminus.doctor.event.dto.event.group.BaseGroupEvent
      */

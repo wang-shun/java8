@@ -753,6 +753,12 @@ public class DoctorImportDataService {
                     .operatorName(boar.getCreatorName())
                     .status(EventStatus.VALID.getValue())
                     .eventSource(SourceType.IMPORT.getValue())
+                    .source(boar.getSource())
+                    .breedId(boar.getBreedId())
+                    .breedName(boar.getBreedName())
+                    .breedTypeId(boar.getGeneticId())
+                    .breedTypeName(boar.getGeneticName())
+                    .boarType(boar.getBoarType())
                     .npd(0)
                     .dpnpd(0)
                     .pfnpd(0)
@@ -1355,6 +1361,11 @@ public class DoctorImportDataService {
         entry.setParity(event.getParity());
 
         //描述
+        event.setSource(entry.getSource());
+        event.setBreedId(entry.getBreed());
+        event.setBreedName(entry.getBreedName());
+        event.setBreedTypeId(entry.getBreedType());
+        event.setBreedTypeName(entry.getBreedTypeName());
         event.setDesc(getEventDesc(entry.descMap()));
         event.setEventSource(SourceType.IMPORT.getValue());
         event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(entry));
@@ -1416,6 +1427,7 @@ public class DoctorImportDataService {
         DoctorMatingDto mate = new DoctorMatingDto();
         mate.setMatingBoarPigCode(info.getBoarCode());
         mate.setJudgePregDate(info.getPrePregDate());
+        event.setJudgePregDate(mate.getJudgePregDate());
         event.setDesc(getEventDesc(mate.descMap()));
         event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(mate));
         if(event.getEventAt() == null){

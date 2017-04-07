@@ -40,7 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -165,6 +164,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setIsAuto(baseInput.getIsAuto());
         event.setCreatorId(baseInput.getCreatorId());   //创建人
         event.setCreatorName(baseInput.getCreatorName());
+        event.setOperatorId(baseInput.getCreatorId());
+        event.setOperatorName(baseInput.getCreatorName());
         event.setDesc(baseInput.generateEventDesc());
         event.setRemark(baseInput.getRemark());
         event.setRelGroupEventId(baseInput.getRelGroupEventId());

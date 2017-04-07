@@ -174,6 +174,12 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         farmEntryDto.setPigId(doctorPig.getId());
         DoctorPigEvent doctorPigEvent =  super.buildPigEvent(basic, farmEntryDto);
         doctorPigEvent.setParity(farmEntryDto.getParity());
+        doctorPigEvent.setSource(farmEntryDto.getSource());
+        doctorPigEvent.setBoarType(farmEntryDto.getBoarType());
+        doctorPigEvent.setBreedId(farmEntryDto.getBreed());
+        doctorPigEvent.setBreedName(farmEntryDto.getBreedName());
+        doctorPigEvent.setBreedTypeId(farmEntryDto.getBreedType());
+        doctorPigEvent.setBreedTypeName(farmEntryDto.getBreedTypeName());
         return doctorPigEvent;
     }
 

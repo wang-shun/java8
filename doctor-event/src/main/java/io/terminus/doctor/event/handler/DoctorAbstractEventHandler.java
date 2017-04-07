@@ -157,14 +157,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .isAuto(MoreObjects.firstNonNull(inputDto.getIsAuto(), IsOrNot.NO.getValue()))
                 .status(EventStatus.VALID.getValue()).eventSource(SourceType.INPUT.getValue()).isModify(IsOrNot.NO.getValue())
-                .npd(0)
-                .dpnpd(0)
-                .pfnpd(0)
-                .plnpd(0)
-                .psnpd(0)
-                .pynpd(0)
-                .ptnpd(0)
-                .jpnpd(0)
+                .npd(0).dpnpd(0).pfnpd(0).plnpd(0).psnpd(0).pynpd(0).ptnpd(0).jpnpd(0)
                 .build();
         doctorPigEvent.setRemark(inputDto.changeRemark());
         doctorPigEvent.setExtraMap(inputDto.toMap());

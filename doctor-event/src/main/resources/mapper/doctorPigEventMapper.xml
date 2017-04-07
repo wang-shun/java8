@@ -68,6 +68,21 @@
         <result column="status" property="status"/>
         <result column="event_source" property="eventSource"/>
         <result column="extra" property="extra"/>
+        <result column="source" property="source"/>
+        <result column="breed_id" property="breedId"/>
+        <result column="breed_name" property="breedName"/>
+        <result column="breed_type_id" property="breedTypeId"/>
+        <result column="breed_type_name" property="breedTypeName"/>
+        <result column="boar_type" property="boarType"/>
+        <result column="judge_preg_date" property="judgePregDate"/>
+        <result column="quantity" property="quantity"/>
+        <result column="weight" property="weight"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="customer_name" property="customerName"/>
+        <result column="basic_id" property="basicId"/>
+        <result column="basic_name" property="basicName"/>
+        <result column="vaccination_id" property="vaccinationId"/>
+        <result column="vaccination_name" property="vaccinationName"/>
         <result column="remark" property="remark"/>
         <result column="operator_id" property="operatorId"/>
         <result column="operator_name" property="operatorName"/>
@@ -146,6 +161,21 @@
         status,
         event_source,
         extra,
+        source,
+        breed_id,
+        breed_name,
+        breed_type_id,
+        breed_type_name,
+        boar_type,
+        judge_preg_date,
+        quantity,
+        weight,
+        customer_id,
+        customer_name,
+        basic_id,
+        basic_name,
+        vaccination_id,
+        vaccination_name,
         remark,
         operator_id,
         operator_name,
@@ -218,6 +248,21 @@
         #{status},
         #{eventSource},
         #{extra},
+        #{source},
+        #{breedId},
+        #{breedName},
+        #{breedTypeId},
+        #{breedTypeName},
+        #{boarType},
+        #{judgePregDate},
+        #{quantity},
+        #{weight},
+        #{customerId},
+        #{customerName},
+        #{basicId},
+        #{basicName},
+        #{vaccinationId},
+        #{vaccinationName},
         #{remark},
         #{operatorId},
         #{operatorName},
@@ -290,6 +335,21 @@
         <if test="boarCode != null">AND boar_code = #{boarCode}</if>
         <if test="outId != null">AND out_id = #{outId}</if>
         <if test="extra != null">AND extra = #{extra}</if>
+        <if test="source != null">AND source = #{source}</if>
+        <if test="breedId != null">AND breed_id = #{breedId}</if>
+        <if test="breedName != null">AND breed_name = #{breedName}</if>
+        <if test="breedTypeId != null">AND breed_type_id = #{breedTypeId}</if>
+        <if test="breedTypeName != null">AND breed_type_name = #{breedTypeName}</if>
+        <if test="boarType != null">AND boar_type = #{boarType}</if>
+        <if test="judgePregDate != null">AND judge_preg_date = #{judgePregDate}</if>
+        <if test="quantity != null">AND quantity = #{quantity}</if>
+        <if test="weight != null">AND weight = #{weight}</if>
+        <if test="customerId != null">AND customer_id = #{customerId}</if>
+        <if test="customerName != null">AND customer_name = #{customerName}</if>
+        <if test="basicId != null">AND basic_id = #{basicId}</if>
+        <if test="basicName != null">AND basic_name = #{basicName}</if>
+        <if test="vaccinationId != null">AND vaccination_id = #{vaccinationId}</if>
+        <if test="vaccinationName != null">AND vaccination_name = #{vaccinationName}</if>
         <if test="eventSource != null">AND event_source = #{eventSource}</if>
         <if test="remark != null">AND remark = #{remark}</if>
         <if test="operatorId != null">AND operator_id = #{operatorId}</if>
@@ -381,7 +441,21 @@
             #{item.outId},
             #{item.status},
             #{item.eventSource},
-            #{item.extra},
+            #{item.source},
+            #{item.breedId},
+            #{item.breedName},
+            #{item.breedTypeId},
+            #{item.breedTypeName},
+            #{item.boarType},
+            #{item.judgePregDate},
+            #{item.quantity},
+            #{item.weight},
+            #{item.customerId},
+            #{item.customerName},
+            #{item.basicId},
+            #{item.basicName},
+            #{item.vaccinationId},
+            #{item.vaccinationName},
             #{item.remark},
             #{item.operatorId},
             #{item.operatorName},
@@ -639,6 +713,21 @@
             <if test="outId != null">out_id = #{outId},</if>
             <if test="status != null">status = #{status},</if>
             <if test="eventSource != null">event_source = #{eventSource},</if>
+            <if test="source != null">source = #{source},</if>
+            <if test="breedId != null">breed_id = #{breedId},</if>
+            <if test="breedName != null">breed_name = #{breedName},</if>
+            <if test="breedTypeId != null">breed_type_id = #{breedTypeId},</if>
+            <if test="breedTypeName != null">breed_type_name = #{breedTypeName},</if>
+            <if test="boarType != null">boar_type = #{boarType},</if>
+            <if test="judgePregDate != null">judge_preg_date = #{judgePregDate},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="weight != null">weight = #{weight},</if>
+            <if test="customerId != null">customer_id = #{customerId},</if>
+            <if test="customerName != null">customer_name = #{customerName},</if>
+            <if test="basicId != null">basicId = #{basicId},</if>
+            <if test="basicName != null">basic_name = #{basicName},</if>
+            <if test="vaccinationId != null">vaccination_id = #{vaccinationId},</if>
+            <if test="vaccinationName != null">vaccination_name = #{vaccinationName},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="operatorId != null">operator_id = #{operatorId},</if>
@@ -797,6 +886,21 @@
                 status = #{item.status},
                 event_source = #{item.eventSource},
                 extra = #{item.extra},
+                source = #{item.source},
+                breed_id = #{item.breedId},
+                breed_name = #{item.breedName},
+                breed_type_id = #{item.breedTypeId},
+                breed_type_name = #{item.breedTypeName},
+                boar_type = #{item.boarType},
+                judge_preg_date = #{item.judgePregDate},
+                quantity = #{item.quantity},
+                weight = #{item.weight},
+                customer_id = #{item.customerId},
+                customer_name = #{item.customerName},
+                basic_id = #{item.basicId},
+                basic_name = #{item.basicName},
+                vaccination_id = #{item.vaccinationId},
+                vaccination_name = #{item.vaccinationName},
                 remark = #{item.remark},
                 operator_id = #{item.operatorId},
                 operator_name = #{item.operatorName},
