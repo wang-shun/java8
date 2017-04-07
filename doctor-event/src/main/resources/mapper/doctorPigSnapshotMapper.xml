@@ -135,4 +135,11 @@
         FROM <include refid="tb"/>
         WHERE pig_id = #{pigId}
     </delete>
+
+    <delete id="deleteAfterAndInclude" parameterType="map" >
+        DELETE
+        FROM <include refid="tb"/>
+        WHERE pig_id = #{pigId}
+        AND id >= #{id}
+    </delete>
 </mapper>
