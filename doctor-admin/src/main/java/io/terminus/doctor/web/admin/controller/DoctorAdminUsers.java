@@ -14,6 +14,8 @@ import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
@@ -70,6 +72,8 @@ public class DoctorAdminUsers {
     private DoctorServiceReviewReadService doctorServiceReviewReadService;
     @RpcConsumer
     private DoctorOrgReadService doctorOrgReadService;
+    @RpcConsumer
+    private DoctorBarnReadService doctorBarnReadService;
 
     /**
      * 新增集团用户
@@ -181,8 +185,19 @@ public class DoctorAdminUsers {
         permission.setUserId(userId);
         permission.setOrgIds(orgIds);
         permission.setFarmIds(notEmpty(farmIds) ? farmIds : getFarmIds(Splitters.splitToLong(orgIds, Splitters.COMMA)));
+        permission.setBarnIds(notEmpty(permission.getFarmIds()) ? getBarnIds(Splitters.splitToLong(permission.getFarmIds(), Splitters.COMMA)) : null);
         return permission;
     }
+
+    private String getBarnIds(List<Long> farmIds) {
+        List<Long> barnIds = Lists.newArrayList();
+        farmIds.forEach(farmId -> {
+            List<DoctorBarn> barns = RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId));
+            barnIds.addAll(barns.stream().map(DoctorBarn::getId).collect(Collectors.toList()));
+        });
+        return Joiners.COMMA.join(barnIds);
+    }
+
 
     private String getFarmIds(List<Long> orgIds) {
         List<Long> farmIds = Lists.newArrayList();

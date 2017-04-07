@@ -515,4 +515,13 @@
         WHERE
         farm_id = #{farmId} AND event_source = 4
     </delete>
+
+    <select id="findNewGroupByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE group_id = #{groupId}
+        AND type = 1
+    </select>
 </mapper>
