@@ -724,7 +724,7 @@
             <if test="weight != null">weight = #{weight},</if>
             <if test="customerId != null">customer_id = #{customerId},</if>
             <if test="customerName != null">customer_name = #{customerName},</if>
-            <if test="basicId != null">basicId = #{basicId},</if>
+            <if test="basicId != null">basic_id = #{basicId},</if>
             <if test="basicName != null">basic_name = #{basicName},</if>
             <if test="vaccinationId != null">vaccination_id = #{vaccinationId},</if>
             <if test="vaccinationName != null">vaccination_name = #{vaccinationName},</if>

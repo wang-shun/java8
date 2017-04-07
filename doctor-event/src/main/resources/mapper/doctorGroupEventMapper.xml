@@ -102,6 +102,7 @@
         status,
         event_source,
         remark,
+        extra,
         sow_id,
         sow_code,
         customer_id,
