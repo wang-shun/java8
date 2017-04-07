@@ -273,7 +273,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
         }catch (ServiceException e) {
             log.info("modify event request handle failed, cause by:{}", Throwables.getStackTraceAsString(e));
             modifyRequest.setStatus(EventRequestStatus.FAILED.getValue());
-            modifyRequest.setReason(e.getMessage());
+            modifyRequest.setErrorStack(e.getMessage());
             eventModifyRequestDao.update(modifyRequest);
         } catch (Exception e) {
             log.info("modify event request handle failed, cause by:{}", Throwables.getStackTraceAsString(e));

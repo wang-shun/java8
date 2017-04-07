@@ -206,7 +206,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
 
                 doctorPigEventManager.createPigSnapshot(fromTrack, pigEvent, lastEventId);
             } catch (InvalidException e) {
-                throw new ServiceException(messageSourceHelper.getMessage(e.getError(), e.getParams()) + ", 事件id:" + pigEvent.getId());
+                throw new InvalidException(messageSourceHelper.getMessage(e.getError(), e.getParams()) + ", 事件id:" + pigEvent.getId());
             } catch (Exception e) {
                 throw new ServiceException( "事件id:" + pigEvent.getId() + Throwables.getStackTraceAsString(e));
             }
