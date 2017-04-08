@@ -46,6 +46,7 @@ public class DoctorDailyReportManager {
         report.setFarrowCount(dto.getLiveStock().getFarrow());      //产房仔猪
         report.setNurseryCount(dto.getLiveStock().getNursery());    //保育猪
         report.setFattenCount(dto.getLiveStock().getFatten());      //育肥猪
+        report.setHoubeiCount(dto.getLiveStock().getHoubei());      //后备猪
         report.setReportData(dto);
         doctorDailyReportDao.deleteByFarmIdAndSumAt(farmId, sumAt);
         doctorDailyReportDao.create(report);
