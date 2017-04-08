@@ -135,7 +135,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
             DateTime lastEnterTime = new DateTime(lastEnter.getEventAt());
 
             Integer jpNPD = Math.abs(Days.daysBetween(lastEnterTime, new DateTime(doctorPigEvent.getEventAt())).getDays());
-            doctorPigEvent.setDpnpd(doctorPigEvent.getJpnpd() + jpNPD);
+            doctorPigEvent.setJpnpd(doctorPigEvent.getJpnpd() + jpNPD);
             doctorPigEvent.setNpd(doctorPigEvent.getNpd() + jpNPD);
         }
 
