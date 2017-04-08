@@ -162,20 +162,20 @@ public class DoctorDailyReportCache {
         liveStock.setFatten(doctorKpiDao.realTimeLiveStockFatten(farmId, startAt));
 
         //后备猪
-        DoctorHoubeiReport buckup = new DoctorHoubeiReport();
-        buckup.setHoubeiCount(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId,startAt));
-        buckup.setHoubeiIn(doctorKpiDao.getMonthlyLiveStockChangeIn(farmId,startAt,endAt).getPeiHuaiBegin());
-        buckup.setChangeSeed(doctorKpiDao.getMonthlyLiveStockChangeToSeed(farmId,startAt,endAt));
-        buckup.setDead(doctorKpiDao.getDeadHoubei(farmId,startAt,endAt));
-        buckup.setSales(doctorKpiDao.getSaleHoubei(farmId,startAt,endAt));
-        buckup.setEliminate(doctorKpiDao.getWeedOutHoubei(farmId,startAt,endAt));
-        buckup.setChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupHoubeiNumber(farmId,startAt,endAt));
-        buckup.setOther(doctorKpiDao.getMonthlyLiveStockChangeGroupHoubeiOtherNumber(farmId,startAt,endAt));
-        buckup.setMaterial(doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId,startAt,endAt).getHoubeiFeedCount());
-        buckup.setMedicinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiDrugAmount());
-        buckup.setConsumablesPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiConsumerAmount());
-        buckup.setVaccinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiVaccineAmount());
-        buckup.setMaterialPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiFeedAmount());
+        DoctorHoubeiReport houbei = new DoctorHoubeiReport();
+        houbei.setHoubeiCount(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId,startAt));
+        houbei.setHoubeiIn(doctorKpiDao.getMonthlyLiveStockChangeIn(farmId,startAt,endAt).getPeiHuaiBegin());
+        houbei.setChangeSeed(doctorKpiDao.getMonthlyLiveStockChangeToSeed(farmId,startAt,endAt));
+        houbei.setDead(doctorKpiDao.getDeadHoubei(farmId,startAt,endAt));
+        houbei.setSales(doctorKpiDao.getSaleHoubei(farmId,startAt,endAt));
+        houbei.setEliminate(doctorKpiDao.getWeedOutHoubei(farmId,startAt,endAt));
+        houbei.setChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupHoubeiNumber(farmId,startAt,endAt));
+        houbei.setOther(doctorKpiDao.getMonthlyLiveStockChangeGroupHoubeiOtherNumber(farmId,startAt,endAt));
+        houbei.setMaterial(doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId,startAt,endAt).getHoubeiFeedCount());
+        houbei.setMedicinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiDrugAmount());
+        houbei.setConsumablesPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiConsumerAmount());
+        houbei.setVaccinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiVaccineAmount());
+        houbei.setMaterialPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiFeedAmount());
 
         //育肥猪
         DoctorFatteningReport fattening = new DoctorFatteningReport();
@@ -217,7 +217,7 @@ public class DoctorDailyReportCache {
         report.setMating(mating);
         report.setSale(sale);
 
-        report.setHoubei(buckup);
+        report.setHoubei(houbei);
         report.setNursery(nursery);
         report.setFattening(fattening);
 

@@ -18,9 +18,11 @@ public class DoctorLiveStockChangeCommonReport implements Serializable {
      * 后备舍
      */
     private int houbeiBegin;               //期初
+    private int houbeiEnd;                 //末期
     private int houbeiIn;                  //转入
     private int houbeiToSeed;              //转种猪
-    private int houbeiDead;                //死淘
+    private int houbeiDead;                //死亡
+    private int houbeiEliminate;           //淘汰
     private int houbeiSale;                //销售
     private int houbeiChangeSeed;          //转种猪
     private int houbeiChangeFarm;          //转场
@@ -76,12 +78,14 @@ public class DoctorLiveStockChangeCommonReport implements Serializable {
      * 保育猪
      */
     private int nurseryBegin;              //期初
+    private int nurseryEnd;                //末期
     private int nurseryIn;                 //转入
     private int nurseryToFatten;           //转育肥
-    private int nurseryDead;               //死淘
+    private int nurseryDead;               //死亡
+    private int nurseryEliminate;          //淘汰
     private int nurserySale;               //销售
     private int nurseryChangeFatten;       //转种猪
-    private int nurseryChangeFarm;        //转场
+    private int nurseryChangeFarm;         //转场
     private int nurseryOther;              //其他
     private double nurseryFeedCount;       //饲料数量(重量)
     private long nurseryFeedAmount;        //饲料金额
@@ -93,8 +97,10 @@ public class DoctorLiveStockChangeCommonReport implements Serializable {
      * 育肥猪
      */
     private int fattenBegin;               //期初
+    private int fattenEnd;                 //末期
     private int fattenIn;                  //转入
-    private int fattenDead;                //死淘
+    private int fattenDead;                //死亡
+    private int fattenEliminate;           //淘汰
     private int fattenSale;                //销售
     private int fattenChangeHoubei;        //转后备
     private int fattenChangeFarm;          //转场
