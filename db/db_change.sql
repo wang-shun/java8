@@ -844,9 +844,9 @@ alter table doctor_pig_events add column mate_type tinyint(4) default null comme
 alter table doctor_pig_events add column judge_preg_date date default null comment '预产期' after partwean_date;
 
 -- 2017-04-07 猪群拆分
-ALTER TABLE doctor_group_events ADD COLUMN sow_id bigint(20) DEFAULT NULL comment '有母猪触发的事件关联的猪id' after extra;
+ALTER TABLE doctor_group_events ADD COLUMN sow_id bigint(20) DEFAULT NULL comment '有母猪触发的事件关联的猪id' after barn_name;
 ALTER TABLE doctor_group_events ADD COLUMN sow_code varchar(32) DEFAULT NULL comment '有母猪触发的事件关联的猪code' after sow_id;
-ALTER TABLE doctor_group_events ADD COLUMN customer_id bigint(20) DEFAULT NULL comment '销售时客户id' after sow_code;
+ALTER TABLE doctor_group_events ADD COLUMN customer_id bigint(20) DEFAULT NULL comment '销售时客户id' after over_price;
 ALTER TABLE doctor_group_events ADD COLUMN customer_name varchar(32) DEFAULT NULL comment '销售时客户名' after customer_id;
 ALTER TABLE doctor_group_events ADD COLUMN basic_id bigint(20) DEFAULT NULL comment '基础数据id(疾病id,防疫项目id)' after customer_name;
 ALTER TABLE doctor_group_events ADD COLUMN basic_name varchar(32) DEFAULT NULL comment '基础数据名(疾病,防疫)' after basic_id;
