@@ -245,7 +245,6 @@ public class DoctorGroupEventListener implements EventListener {
             doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoHoubei);
             return;
         }
-
         int nursery = doctorKpiDao.getSaleNursery(farmId, startAt, endAt);
         long base10 = doctorKpiDao.getGroupSaleBasePrice10(farmId, startAt, endAt);
         long base15 = doctorKpiDao.getGroupSaleBasePrice15(farmId, startAt, endAt);
@@ -255,10 +254,5 @@ public class DoctorGroupEventListener implements EventListener {
         reportDtoNursery.getSale().setBasePrice10(base10);
         reportDtoNursery.getSale().setBasePrice15(base15);
         doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoNursery);
-    }
-    //处理保育猪
-    private void getN(PigType pigType, Long farmId, Date startAt, Date endAt) {
-        log.info("handle group conservation type:{}, startAt:{}, endAt:{}", pigType, startAt, endAt);
-
     }
 }
