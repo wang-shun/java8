@@ -481,4 +481,10 @@ public class DoctorPigEvents {
                 .stream().map(doctorGroupEventDetail -> OBJECT_MAPPER.convertValue(doctorGroupEventDetail, DoctorGroupEventExportData.class)).collect(toList());
         return new Paging<>(groupEventPaging.getTotal(), list);
     }
+    /**
+     * 非生产天数的报表导出
+     */
+
+
+
 }

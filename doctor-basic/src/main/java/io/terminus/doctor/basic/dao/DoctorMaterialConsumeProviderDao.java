@@ -189,4 +189,32 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
         criteriaMap = ImmutableMap.copyOf(Params.filterNullOrEmpty((criteriaMap)));
         return sqlSession.selectList(sqlId("findMaterialConsumeReport"), criteriaMap);
     }
+    public Paging<DoctorMaterialConsumeProvider> pagingFindMaterialConsumeReports(Long farmId, Long wareHouseId, Long materialId, String materialName,
+                                                                          Long barnId, Long type, Date startDate, Date endDate, Integer offset, Integer limit) {
+
+        if (farmId == null) {
+            throw new ServiceException("farmId.not.null");
+        }
+
+        Map<String, Object> criteriaMap = MapBuilder.<String, Object>of()
+                .put("farmId", farmId)
+                .put("wareHouseId", wareHouseId)
+                .put("materialId", materialId)
+                .put("materialName", materialName)
+                .put("barnId", barnId)
+                .put("type", type)
+                .put("startDate", startDate)
+                .put("endDate", endDate)
+                .put("offset", offset)
+                .put("limit", limit)
+                .map();
+        criteriaMap = ImmutableMap.copyOf(Params.filterNullOrEmpty((criteriaMap)));
+
+        long total = sqlSession.selectOne(sqlId("countMaterialConsumeReport"), criteriaMap);
+        if (total <= 0){
+            return new Paging<>(0L, Collections.<DoctorMaterialConsumeProvider>emptyList());
+        }
+        List<DoctorMaterialConsumeProvider> datas = sqlSession.selectList(sqlId("pagingFindMaterialConsumeReport"), criteriaMap);
+        return new Paging<>(total, datas);
+    }
 }

@@ -176,7 +176,7 @@ public class DoctorWareHouseEvents {
     }
 
     public List<DoctorWareHouseMaterialData> wareHouseMaterialHandle(Map<String, String> params) {
-        List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData1 =    materialExportData(params, 0);
+        List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData1 = materialExportData(params, 0);
         List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData2 = materialExportData(params, 1);
         List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData = Lists.newArrayList();
         for (DoctorWareHouseMaterialData doctorDate1 : doctorWareHouseMaterialData1) {
@@ -778,10 +778,25 @@ public class DoctorWareHouseEvents {
 
     @RequestMapping(value = "/ware/details", method = RequestMethod.GET)
     @ResponseBody
-    public void pagingWareHouseMaterialDetails(@RequestParam Map<String, String> params,
+    public Paging<DoctorMaterialDatailsExportDto> pagingWareHouseMaterialDetails(@RequestParam Map<String, String> params,
                                           HttpServletRequest request,
                                           HttpServletResponse response) {
 
+        return wareHouseMaterExport(params);
+    }
+
+    /**
+     * 物料的详细情况导出
+     * @param params
+     * @param request
+     * @param response
+     */
+
+    @RequestMapping(value = "/ware/details/export", method = RequestMethod.GET)
+    @ResponseBody
+    public void pagingWareHouseMaterialDetailsExport(@RequestParam Map<String, String> params,
+                                               HttpServletRequest request,
+                                               HttpServletResponse response) {
         exporter.export("web-wareHouse-details", params, 1, 500, this::wareHouseMaterExport, request, response);
 
     }
@@ -795,9 +810,24 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/ware/use", method = RequestMethod.GET)
     @ResponseBody
-    public void pagingWareHouseMaterialUse(@RequestParam Map<String, String> params,
+    public Paging<DoctorMaterialDatailsExportDto> pagingWareHouseMaterialUse(@RequestParam Map<String, String> params,
                                                                                  HttpServletRequest request,
                                                                                  HttpServletResponse response) {
+         return wareHouseMaterExport(params);
+    }
+
+    /**
+     *
+     * @param params
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping(value = "/ware/use/export", method = RequestMethod.GET)
+    @ResponseBody
+    public void pagingWareHouseMaterialUseExport(@RequestParam Map<String, String> params,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response) {
 
         exporter.export("web-wareHouse-use", params, 1, 500, this::wareHouseMaterExport, request, response);
     }
@@ -811,7 +841,7 @@ public class DoctorWareHouseEvents {
         criteria.setEndDate(DateUtil.toDateTimeString(endDate));
         List<DoctorMaterialConsumeProvider> listOverride = Lists.newArrayList();
 
-        List<DoctorMaterialConsumeProvider> list = RespHelper.or500(materialConsumeProviderReadService.findMaterialConsume(
+        Paging<DoctorMaterialConsumeProvider> paginglist = RespHelper.or500(materialConsumeProviderReadService.pagingfindMaterialConsume(
 
                 criteria.getFarmId(),
                 criteria.getWareHouseId(),
@@ -823,6 +853,7 @@ public class DoctorWareHouseEvents {
                 DateUtil.stringToDate(criteria.getEndDate()),
                 criteria.getPageNo(), criteria.getSize()));
         //处理不同事件时间出现的价格不一致问题，进行重建DoctorMaterialConsumeProvider数据加入不同事件时间的价格不同
+        List<DoctorMaterialConsumeProvider> list = paginglist.getData();
         for (int i = 0; i < list.size(); i++) {
 
             if(list.get(i).getExtra() != null && list.get(i).getExtraMap().containsKey("consumePrice")) {
