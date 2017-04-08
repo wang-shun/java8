@@ -256,4 +256,5 @@ public class DoctorGroupEventListener implements EventListener {
         reportDtoNursery.getSale().setBasePrice15(base15);
         doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoNursery);
     }
+    //处理保育猪
 }

@@ -6,14 +6,7 @@ import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
-import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
-import io.terminus.doctor.event.dto.report.daily.DoctorDeadDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorDeliverDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorSaleDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
+import io.terminus.doctor.event.dto.report.daily.*;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -168,11 +161,66 @@ public class DoctorDailyReportCache {
         liveStock.setNursery(doctorKpiDao.realTimeLiveStockNursery(farmId, startAt));
         liveStock.setFatten(doctorKpiDao.realTimeLiveStockFatten(farmId, startAt));
 
+        //后备猪
+        DoctorBackupReport buckup = new DoctorBackupReport();
+        buckup.setBackupCount(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId,startAt));
+        buckup.setBackupIn(doctorKpiDao.getMonthlyLiveStockChangeIn(farmId,startAt,endAt).getPeiHuaiBegin());
+        buckup.setChangeSeed(doctorKpiDao.getMonthlyLiveStockChangeToSeed(farmId,startAt,endAt));
+        buckup.setDead(doctorKpiDao.getDeadHoubei(farmId,startAt,endAt));
+        buckup.setSales(doctorKpiDao.getSaleHoubei(farmId,startAt,endAt));
+        buckup.setEliminate(doctorKpiDao.getWeedOutHoubei(farmId,startAt,endAt));
+        buckup.setChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupHoubeiNumber(farmId,startAt,endAt));
+        buckup.setOther(doctorKpiDao.getMonthlyLiveStockChangeGroupHoubeiOtherNumber(farmId,startAt,endAt));
+        buckup.setMaterial(doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId,startAt,endAt).getHoubeiFeedCount());
+        buckup.setMedicinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiDrugAmount());
+        buckup.setConsumablesPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiConsumerAmount());
+        buckup.setVaccinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiVaccineAmount());
+        buckup.setMaterialPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiFeedAmount());
+
+        //育肥猪
+        DoctorFatteningReport fattening = new DoctorFatteningReport();
+        fattening.setFattenCount(doctorKpiDao.realTimeLiveStockFatten(farmId,startAt));
+        fattening.setFattenIn(doctorKpiDao.getMonthlyLiveStockChangeIn(farmId,startAt,endAt).getFattenIn());
+        fattening.setDead(doctorKpiDao.getDeadFatten(farmId,startAt,endAt));
+        fattening.setEliminate(doctorKpiDao.getWeedOutFatten(farmId,startAt,endAt));
+        fattening.setSales(doctorKpiDao.getSaleFatten(farmId,startAt,endAt));
+        fattening.setChangeBackup(doctorKpiDao.getMonthlyLiveStockChangeToHoubei(farmId,startAt,endAt));
+        fattening.setChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupFattenNumber(farmId,startAt,endAt));
+        fattening.setOther(doctorKpiDao.getMonthlyLiveStockChangeGroupFattenOtherNumber(farmId,startAt,endAt));
+        fattening.setMaterial(doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId,startAt,endAt).getFarrowFeedCount());
+        fattening.setMedicinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getFattenDrugAmount());
+        fattening.setConsumablesPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getFattenConsumerAmount());
+        fattening.setVaccinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getFattenVaccineAmount());
+        fattening.setMaterialPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getFattenFeedAmount());
+
+        //保育猪
+        DoctorConservationReport conservation = new DoctorConservationReport();
+        conservation.setNursery(doctorKpiDao.realTimeLiveStockNursery(farmId,startAt));
+        conservation.setNurseryIn(doctorKpiDao.getMonthlyLiveStockChangeIn(farmId,startAt,endAt).getNurseryIn());
+        conservation.setDead(doctorKpiDao.getDeadNursery(farmId,startAt,endAt));
+        conservation.setEliminate(doctorKpiDao.getWeedOutNursery(farmId,startAt,endAt));
+        conservation.setSales(doctorKpiDao.getSaleNursery(farmId,startAt,endAt));
+        conservation.setChangeFattening(doctorKpiDao.getMonthlyLiveStockChangeToFatten(farmId,startAt,endAt));
+        conservation.setChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupNuseryNumber(farmId,startAt,endAt));
+        conservation.setOther(doctorKpiDao.getMonthlyLiveStockChangeGroupNuseryOtherNumber(farmId,startAt,endAt));
+        conservation.setMaterial(doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId,startAt,endAt).getNurseryFeedCount());
+        conservation.setMedicinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryDrugAmount());
+        conservation.setConsumablesPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryConsumerAmount());
+        conservation.setVaccinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryVaccineAmount());
+        conservation.setMaterialPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryFeedAmount());
+
+
+
         report.setCheckPreg(checkPreg);
         report.setDead(dead);
         report.setDeliver(deliver);
         report.setMating(mating);
         report.setSale(sale);
+
+        report.setBackup(buckup);
+        report.setConservation(conservation);
+        report.setFattening(fattening);
+
         report.setWean(wean);
         report.setLiveStock(liveStock);
         report.setFarmId(farmId);

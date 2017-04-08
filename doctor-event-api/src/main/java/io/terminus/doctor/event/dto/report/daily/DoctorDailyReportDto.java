@@ -53,6 +53,19 @@ public class DoctorDailyReportDto implements Serializable {
     private DoctorWeanDailyReport wean = new DoctorWeanDailyReport();
 
     /**
+     * 保育日报表
+     */
+    private DoctorConservationReport conservation = new DoctorConservationReport();
+
+    /**
+     * 育肥日报表
+     */
+    private DoctorFatteningReport fattening = new DoctorFatteningReport();
+    /**
+     * 后备日报表
+     */
+    private DoctorBackupReport backup = new DoctorBackupReport();
+    /**
      * 每个猪群的存栏
      */
     private Map<Long, Integer> groupCountMap = Maps.newHashMap();

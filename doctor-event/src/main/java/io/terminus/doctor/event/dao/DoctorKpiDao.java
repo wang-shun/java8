@@ -217,6 +217,50 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 育肥猪转后备猪
+     */
+    public int getMonthlyLiveStockChangeToHoubei(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeToHoubei"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+    /**
+     * 保育猪转场
+     */
+    public int getMonthlyLiveStockChangeGroupNuseryNumber(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeGroupNuseryNumber"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+    /**
+     * 育肥转场
+     */
+    public int getMonthlyLiveStockChangeGroupFattenNumber(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeGroupFattenNumber"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+    /**
+     * 后备转场
+     */
+    public int getMonthlyLiveStockChangeGroupHoubeiNumber(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeGroupHoubeiNumber"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 保育猪转场
+     */
+    public int getMonthlyLiveStockChangeGroupNuseryOtherNumber(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeGroupNuseryOtherNumber"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+    /**
+     * 育肥转场
+     */
+    public int getMonthlyLiveStockChangeGroupFattenOtherNumber(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeGroupFattenOtherNumber"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+    /**
+     * 后备转场
+     */
+    public int getMonthlyLiveStockChangeGroupHoubeiOtherNumber(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeGroupHoubeiOtherNumber"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 销售情况: 母猪
      */
     public int getSaleSow(Long farmId, Date startAt, Date endAt) {

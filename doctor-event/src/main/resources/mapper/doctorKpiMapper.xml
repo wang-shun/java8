@@ -926,6 +926,7 @@
         FROM DUAL
     </select>
 
+
     <!-- 实时存栏: 后备母猪 -->
     <select id="realTimeLiveStockHoubeiSow" parameterType="map" resultType="int">
         SELECT
@@ -1338,6 +1339,75 @@
         ) AS a
         LEFT JOIN doctor_barns b ON a.other_barn_id = b.id
         WHERE b.pig_type = 3
+    </select>
+
+    <!--育肥转后备-->
+    <select id="getMonthlyLiveStockChangeToHoubei" parameterType="map" resultType="int">
+        SELECT ifnull(sum(a.quantity), 0)
+        FROM
+        (
+        SELECT other_barn_id, quantity
+        FROM doctor_group_events
+        WHERE `type` = 4 AND  -- 转群事件
+        pig_type = 3
+        <include refid="criteria"/>
+        ) AS a
+        LEFT JOIN doctor_barns b ON a.other_barn_id = b.id
+        WHERE b.pig_type = 4
+
+    </select>
+
+    <!--转场事件-->
+    <select id="getMonthlyLiveStockChangeGroupNuseryNumber" parameterType="map" resultType="int">
+        SELECT ifnull(sum(quantity), 0)
+        FROM doctor_group_events
+        WHERE `type` = 9 AND
+        pig_type = 2
+        <include refid="criteria"/>
+    </select>
+
+    <select id="getMonthlyLiveStockChangeGroupFattenNumber" parameterType="map" resultType="int">
+        SELECT ifnull(sum(quantity), 0)
+        FROM doctor_group_events
+        WHERE `type` = 9 AND
+        pig_type = 3
+        <include refid="criteria"/>
+    </select>
+
+    <select id="getMonthlyLiveStockChangeGroupHoubeiNumber" parameterType="map" resultType="int">
+        SELECT ifnull(sum(quantity), 0)
+        FROM doctor_group_events
+        WHERE `type` = 9 AND
+        pig_type = 4
+        <include refid="criteria"/>
+    </select>
+
+    <!--猪离开的其他事件数量-->
+    <select id="getMonthlyLiveStockChangeGroupHoubeiOtherNumber" parameterType="map" resultType="int">
+        SELECT ifnull(sum(quantity), 0)
+        FROM doctor_group_events
+        WHERE `type` IN (7, 11)
+        AND
+        pig_type = 4
+        <include refid="criteria"/>
+    </select>
+
+    <select id="getMonthlyLiveStockChangeGroupNuseryOtherNumber" parameterType="map" resultType="int">
+        SELECT ifnull(sum(quantity), 0)
+        FROM doctor_group_events
+        WHERE `type` IN (7, 11)
+        AND
+        pig_type = 2
+        <include refid="criteria"/>
+    </select>
+
+    <select id="getMonthlyLiveStockChangeGroupFattenOtherNumber" parameterType="map" resultType="int">
+        SELECT ifnull(sum(quantity), 0)
+        FROM doctor_group_events
+        WHERE `type` IN (7, 11)
+        AND
+        pig_type = 3
+        <include refid="criteria"/>
     </select>
 
     <!--存栏变动月报: 死淘(后备,产房仔猪,保育,育肥)-->
