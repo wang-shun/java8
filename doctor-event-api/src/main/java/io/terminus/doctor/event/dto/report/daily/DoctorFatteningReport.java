@@ -33,7 +33,7 @@ public class DoctorFatteningReport implements Serializable{
     /**
      * 转后备
      */
-    private int changeBackup;
+    private int changeHoubei;
     /**
      * 转场
      */

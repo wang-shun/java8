@@ -184,7 +184,7 @@ public class DoctorDailyReportCache {
         fattening.setDead(doctorKpiDao.getDeadFatten(farmId,startAt,endAt));
         fattening.setEliminate(doctorKpiDao.getWeedOutFatten(farmId,startAt,endAt));
         fattening.setSales(doctorKpiDao.getSaleFatten(farmId,startAt,endAt));
-        fattening.setChangeBackup(doctorKpiDao.getMonthlyLiveStockChangeToHoubei(farmId,startAt,endAt));
+        fattening.setChangeHoubei(doctorKpiDao.getMonthlyLiveStockChangeToHoubei(farmId,startAt,endAt));
         fattening.setChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupFattenNumber(farmId,startAt,endAt));
         fattening.setOther(doctorKpiDao.getMonthlyLiveStockChangeGroupFattenOtherNumber(farmId,startAt,endAt));
         fattening.setMaterial(doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId,startAt,endAt).getFarrowFeedCount());

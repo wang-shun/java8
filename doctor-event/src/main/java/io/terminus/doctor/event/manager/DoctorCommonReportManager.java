@@ -118,45 +118,48 @@ public class DoctorCommonReportManager {
         DoctorLiveStockChangeCommonReport amount = doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId, startAt, endAt);
 
         //后备舍
-        report.setHoubeiBegin(begin.getHoubeiBegin());                                                      //期初
-        report.setHoubeiIn(in.getHoubeiIn());                                                               //转入
-        report.setHoubeiToSeed(doctorKpiDao.getMonthlyLiveStockChangeToSeed(farmId, startAt, endAt));       //转种猪
-        report.setHoubeiDead(groupDead.getHoubeiDead());                                                    //死淘
-        report.setHoubeiSale(sale.getHoubeiSale());                                                         //销售
-        report.setHoubeiFeedCount(feedCount.getHoubeiFeedCount());                                          //饲料数量
-        report.setHoubeiFeedAmount(amount.getHoubeiFeedAmount());                                           //饲料金额
-        report.setHoubeiDrugAmount(amount.getHoubeiDrugAmount());                                           //药品金额
-        report.setHoubeiVaccineAmount(amount.getHoubeiVaccineAmount());                                     //疫苗金额
-        report.setHoubeiConsumerAmount(amount.getHoubeiConsumerAmount());                                   //易耗品金额
+        report.setHoubeiBegin(begin.getHoubeiBegin());                                                             //期初
+        report.setHoubeiIn(in.getHoubeiIn());                                                                      //转入
+        report.setHoubeiToSeed(doctorKpiDao.getMonthlyLiveStockChangeToSeed(farmId, startAt, endAt));              //转种猪
+        report.setHoubeiDead(groupDead.getHoubeiDead());                                                           //死淘
+        report.setHoubeiSale(sale.getHoubeiSale());                                                                //销售
+        report.setHoubeiChangeSeed(doctorKpiDao.getMonthlyLiveStockChangeToHoubei(farmId,startAt,endAt));          //
+        report.setHoubeiChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupFattenNumber(farmId,startAt,endAt)); //
+        report.setHoubeiOther(doctorKpiDao.getMonthlyLiveStockChangeGroupFattenOtherNumber(farmId,startAt,endAt)); //
+        report.setHoubeiFeedCount(feedCount.getHoubeiFeedCount());                                                 //饲料数量
+        report.setHoubeiFeedAmount(amount.getHoubeiFeedAmount());                                                  //饲料金额
+        report.setHoubeiDrugAmount(amount.getHoubeiDrugAmount());                                                  //药品金额
+        report.setHoubeiVaccineAmount(amount.getHoubeiVaccineAmount());                                            //疫苗金额
+        report.setHoubeiConsumerAmount(amount.getHoubeiConsumerAmount());                                          //易耗品金额
 
         //配怀舍
-        report.setPeiHuaiBegin(begin.getPeiHuaiBegin());                                                    //期初
-        report.setPeiHuaiToFarrow(doctorKpiDao.getMonthlyLiveStockChangeToFarrow(farmId, startAt, endAt));  //转产房
-        report.setPeiHuaiIn(doctorKpiDao.getMonthlyLiveStockChangeSowIn(farmId, startAt, endAt));           //进场
-        report.setPeiHuaiWeanIn(doctorKpiDao.getMonthlyLiveStockChangeWeanIn(farmId, startAt, endAt));      //断奶转入 = 断奶转出
-        report.setPeiHuaiDead(sowDead.getPeiHuaiDead());                                                    //死淘
-        report.setPeiHuaiFeedCount(feedCount.getPeiHuaiFeedCount());                                        //饲料数量
-        report.setPeiHuaiFeedAmount(amount.getPeiHuaiFeedAmount());                                         //饲料金额
-        report.setPeiHuaiDrugAmount(amount.getPeiHuaiDrugAmount());                                         //药品金额
-        report.setPeiHuaiVaccineAmount(amount.getPeiHuaiVaccineAmount());                                   //疫苗金额
-        report.setPeiHuaiConsumerAmount(amount.getPeiHuaiConsumerAmount());                                 //易耗品金额
+        report.setPeiHuaiBegin(begin.getPeiHuaiBegin());                                                           //期初
+        report.setPeiHuaiToFarrow(doctorKpiDao.getMonthlyLiveStockChangeToFarrow(farmId, startAt, endAt));         //转产房
+        report.setPeiHuaiIn(doctorKpiDao.getMonthlyLiveStockChangeSowIn(farmId, startAt, endAt));                  //进场
+        report.setPeiHuaiWeanIn(doctorKpiDao.getMonthlyLiveStockChangeWeanIn(farmId, startAt, endAt));             //断奶转入 = 断奶转出
+        report.setPeiHuaiDead(sowDead.getPeiHuaiDead());                                                           //死淘
+        report.setPeiHuaiFeedCount(feedCount.getPeiHuaiFeedCount());                                               //饲料数量
+        report.setPeiHuaiFeedAmount(amount.getPeiHuaiFeedAmount());                                                //饲料金额
+        report.setPeiHuaiDrugAmount(amount.getPeiHuaiDrugAmount());                                                //药品金额
+        report.setPeiHuaiVaccineAmount(amount.getPeiHuaiVaccineAmount());                                          //疫苗金额
+        report.setPeiHuaiConsumerAmount(amount.getPeiHuaiConsumerAmount());                                        //易耗品金额
 
         //产房母猪
-        report.setFarrowSowBegin(begin.getFarrowSowBegin());                                                //期初
-        report.setFarrowSowIn(report.getPeiHuaiToFarrow());                                                 //转入 = 转产房
-        report.setFarrowSowWeanOut(report.getPeiHuaiWeanIn());                                              //断奶转出 = 断奶转入
-        report.setFarrowSowDead(sowDead.getFarrowSowDead());                                                //死淘
-        report.setFarrowSowFeedCount(feedCount.getFarrowSowFeedCount());                                    //饲料数量
-        report.setFarrowSowFeedAmount(amount.getFarrowSowFeedAmount());                                     //饲料金额
-        report.setFarrowSowDrugAmount(amount.getFarrowSowDrugAmount());                                     //药品金额
-        report.setFarrowSowVaccineAmount(amount.getFarrowSowVaccineAmount());                               //疫苗金额
-        report.setFarrowSowConsumerAmount(amount.getFarrowSowConsumerAmount());                             //易耗品金额
+        report.setFarrowSowBegin(begin.getFarrowSowBegin());                                                       //期初
+        report.setFarrowSowIn(report.getPeiHuaiToFarrow());                                                        //转入 = 转产房
+        report.setFarrowSowWeanOut(report.getPeiHuaiWeanIn());                                                     //断奶转出 = 断奶转入
+        report.setFarrowSowDead(sowDead.getFarrowSowDead());                                                       //死淘
+        report.setFarrowSowFeedCount(feedCount.getFarrowSowFeedCount());                                           //饲料数量
+        report.setFarrowSowFeedAmount(amount.getFarrowSowFeedAmount());                                            //饲料金额
+        report.setFarrowSowDrugAmount(amount.getFarrowSowDrugAmount());                                            //药品金额
+        report.setFarrowSowVaccineAmount(amount.getFarrowSowVaccineAmount());                                      //疫苗金额
+        report.setFarrowSowConsumerAmount(amount.getFarrowSowConsumerAmount());                                    //易耗品金额
 
         //产房仔猪
-        report.setFarrowBegin(begin.getFarrowBegin());                                                      //期初
-        report.setFarrowIn(in.getFarrowIn());                                                               //转入
-        report.setFarrowToNursery(doctorKpiDao.getMonthlyLiveStockChangeToNursery(farmId, startAt, endAt)); //转保育
-        report.setFarrowDead(groupDead.getFarrowDead());                                                    //死淘
+        report.setFarrowBegin(begin.getFarrowBegin());                                                             //期初
+        report.setFarrowIn(in.getFarrowIn());                                                                      //转入
+        report.setFarrowToNursery(doctorKpiDao.getMonthlyLiveStockChangeToNursery(farmId, startAt, endAt));        //转保育
+        report.setFarrowDead(groupDead.getFarrowDead());                                                           //死淘
         report.setFarrowSale(sale.getFarrowSale());                                                         //销售
         report.setFarrowFeedCount(feedCount.getFarrowFeedCount());                                          //饲料数量
         report.setFarrowFeedAmount(amount.getFarrowFeedAmount());                                           //饲料金额
@@ -170,6 +173,9 @@ public class DoctorCommonReportManager {
         report.setNurseryToFatten(doctorKpiDao.getMonthlyLiveStockChangeToFatten(farmId, startAt, endAt));  //转育肥
         report.setNurseryDead(groupDead.getNurseryDead());                                                  //死淘
         report.setNurserySale(sale.getNurserySale());                                                       //销售
+        report.setNurseryChangeFatten(doctorKpiDao.getMonthlyLiveStockChangeToFatten(farmId,startAt,endAt));
+        report.setNurseryChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupNuseryNumber(farmId,startAt,endAt));
+        report.setNurseryOther(doctorKpiDao.getMonthlyLiveStockChangeGroupNuseryOtherNumber(farmId,startAt,endAt));
         report.setNurseryFeedCount(feedCount.getNurseryFeedCount());                                        //饲料数量
         report.setNurseryFeedAmount(amount.getNurseryFeedAmount());                                         //饲料金额
         report.setNurseryDrugAmount(amount.getNurseryDrugAmount());                                         //药品金额
@@ -181,6 +187,9 @@ public class DoctorCommonReportManager {
         report.setFattenIn(report.getNurseryToFatten());                                                               //转入
         report.setFattenDead(groupDead.getFattenDead());                                                    //死淘
         report.setFattenSale(sale.getFattenSale());                                                         //销售
+        report.setFattenChangeHoubei(doctorKpiDao.getMonthlyLiveStockChangeToHoubei(farmId,startAt,endAt));
+        report.setFattenOther(doctorKpiDao.getMonthlyLiveStockChangeGroupFattenOtherNumber(farmId,startAt,endAt));
+        report.setFattenChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupFattenNumber(farmId,startAt,endAt));
         report.setFattenFeedCount(feedCount.getFattenFeedCount());                                          //饲料数量
         report.setFattenFeedAmount(amount.getFattenFeedAmount());                                           //饲料金额
         report.setFattenDrugAmount(amount.getFattenDrugAmount());                                           //药品金额
