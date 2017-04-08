@@ -804,8 +804,8 @@ public class DoctorWareHouseEvents {
 
     public Paging<DoctorMaterialDatailsExportDto> wareHouseMaterExport(Map<String, String> params) {
 
-        Date startDate = DateUtil.stringToDate(params.get("startDate") + " 00:00:00");
-        Date endDate = DateUtil.stringToDate(params.get("endDate") + " 59:59:59");
+        Date startDate = DateUtil.toDate(params.get("startDate"));
+        Date endDate = DateUtil.toDate(params.get("endDate"));
         DoctorWareHouseMaterialCriteria criteria = BeanMapper.map(params, DoctorWareHouseMaterialCriteria.class);
         criteria.setStartDate(DateUtil.toDateTimeString(startDate));
         criteria.setEndDate(DateUtil.toDateTimeString(endDate));
