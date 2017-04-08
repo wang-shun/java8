@@ -833,13 +833,13 @@ alter table doctor_pig_events add column breed_type_id tinyint(4) default null c
 alter table doctor_pig_events add column breed_type_name varchar(32) default null comment '品系' after breed_type_id;
 alter table doctor_pig_events add column boar_type tinyint(4) default null comment '公猪类型,1：活公猪，2：冷冻精液，3：新鲜精液' after breed_type_name;
 alter table doctor_pig_events add column judge_preg_date date default null comment '预产期' after boar_type;
-alter table doctor_pig_events add column quantity int(11) default null comment '数量(拼窝数量,被拼窝数量,仔猪变动数量)' after change_type_id;
+alter table doctor_pig_events add column quantity int(11) default null comment '数量(拼窝数量,被拼窝数量,仔猪变动数量)' after judge_preg_date;
 alter table doctor_pig_events add column weight DOUBLE default null comment '重量(变动重量)' after quantity;
 alter table doctor_pig_events add column customer_id bigint(20) default null comment '客户id' after weight;
 alter table doctor_pig_events add column customer_name varchar(32) default null comment '客户名' after customer_id;
-alter table doctor_pig_events add column basic_id bigint(20) default null comment '基础数据id(流产原因id,疾病id,防疫项目id)' after abortion_reason_id;
-alter table doctor_pig_events add column basic_name varchar(32) default null comment '基础数据名(流产原因,疾病,防疫)' after disease_id;
-alter table doctor_pig_events add column vaccination_id bigint(20) default null comment '疫苗' after disease_name;
+alter table doctor_pig_events add column basic_id bigint(20) default null comment '基础数据id(流产原因id,疾病id,防疫项目id)' after customer_name;
+alter table doctor_pig_events add column basic_name varchar(32) default null comment '基础数据名(流产原因,疾病,防疫)' after basic_id;
+alter table doctor_pig_events add column vaccination_id bigint(20) default null comment '疫苗' after basic_name;
 alter table doctor_pig_events add column vaccination_name varchar(32) default null comment '疫苗名称' after vaccination_id;
 
 -- 2017-04-07 猪群拆分
