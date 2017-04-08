@@ -25,15 +25,13 @@ import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
-import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
-import io.terminus.doctor.web.front.warehouse.dto.DoctorInventoryInputDto;
-import io.terminus.doctor.web.front.warehouse.dto.DoctorMoveMaterialInputDto;
-import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseMaterialCriteria;
-import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseMaterialData;
+import io.terminus.doctor.web.front.warehouse.dto.*;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
@@ -81,6 +79,8 @@ public class DoctorWareHouseEvents {
 
     private final DoctorGroupWebService doctorGroupWebService;
 
+    private final DoctorBarnReadService doctorBarnReadService;
+
     @Autowired
     private Exporter exporter;
 
@@ -97,7 +97,7 @@ public class DoctorWareHouseEvents {
                                  DoctorWareHouseReadService doctorWareHouseReadService,
                                  DoctorFarmReadService doctorFarmReadService,
                                  DoctorBasicReadService doctorBasicReadService,
-                                 DoctorGroupWebService doctorGroupWebService){
+                                 DoctorGroupWebService doctorGroupWebService, DoctorBarnReadService doctorBarnReadService){
         this.doctorMaterialInWareHouseWriteService = doctorMaterialInWareHouseWriteService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
         this.userReadService = userReadService;
@@ -106,6 +106,7 @@ public class DoctorWareHouseEvents {
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorBasicReadService = doctorBasicReadService;
         this.doctorGroupWebService = doctorGroupWebService;
+        this.doctorBarnReadService = doctorBarnReadService;
     }
 
     /**
@@ -591,16 +592,13 @@ public class DoctorWareHouseEvents {
 
             startDate = DateUtil.monthStart(DateUtil.stringToDate(eventDate));
             startDate = DateUtils.addMonths(startDate, 1);
-            endDate = DateUtil.monthEnd(DateUtil.stringToDate(eventDate));
         }
         if (num == 0) {
             startDate = DateUtil.monthStart(DateUtil.stringToDate(eventDate));
-            endDate = DateUtil.monthEnd(DateUtil.stringToDate(eventDate));
-
         }
         DoctorWareHouseMaterialCriteria criteria = BeanMapper.map(criteriaMap, DoctorWareHouseMaterialCriteria.class);
         criteria.setStartDate(DateUtil.toDateTimeString(startDate));
-        criteria.setEndDate(DateUtil.toDateTimeString(endDate));
+        criteria.setEndDate(null);
         List<DoctorWareHouseMaterialData> listDate = Lists.newArrayList();
         List<DoctorMaterialConsumeProvider> listOverride = Lists.newArrayList();
 
@@ -616,6 +614,8 @@ public class DoctorWareHouseEvents {
                 criteria.getWareHouseId(),
                 criteria.getMaterialId(),
                 criteria.getMaterialName(),
+                criteria.getBarnId(),
+                criteria.getType(),
                 DateUtil.stringToDate(criteria.getStartDate()),
                 DateUtil.stringToDate(criteria.getEndDate()),
                 criteria.getPageNo(), criteria.getSize()));
@@ -674,7 +674,8 @@ public class DoctorWareHouseEvents {
                         criteria.getFarmId(),
                         listOverride.get(i).getMaterialId(),
                         criteria.getWareHouseId(),
-                        DateUtil.stringToDate(criteria.getEndDate())));
+                        null,
+                        null));
                 if (doctorMaterialPriceInWareHouses.size() == 0) {
                     monthEndNumber = 0;
                     monthEndAmount = 0;
@@ -766,5 +767,130 @@ public class DoctorWareHouseEvents {
                 })
                 .collect(Collectors.toList());
         return new Paging<>(result.getTotal(), list);
+    }
+
+    /**
+     * 物料的详细情况导出
+     * @param params
+     * @param request
+     * @param response
+     */
+
+    @RequestMapping(value = "/ware/details", method = RequestMethod.GET)
+    @ResponseBody
+    public void pagingWareHouseMaterialDetails(@RequestParam Map<String, String> params,
+                                          HttpServletRequest request,
+                                          HttpServletResponse response) {
+
+        exporter.export("web-wareHouse-details", params, 1, 500, this::wareHouseMaterExport, request, response);
+
+    }
+
+    /**
+     *
+     * @param params
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping(value = "/ware/use", method = RequestMethod.GET)
+    @ResponseBody
+    public void pagingWareHouseMaterialUse(@RequestParam Map<String, String> params,
+                                                                                 HttpServletRequest request,
+                                                                                 HttpServletResponse response) {
+
+        exporter.export("web-wareHouse-use", params, 1, 500, this::wareHouseMaterExport, request, response);
+    }
+
+    public Paging<DoctorMaterialDatailsExportDto> wareHouseMaterExport(Map<String, String> params) {
+
+        Date startDate = DateUtil.stringToDate(params.get("startDate"));
+        Date endDate = DateUtil.stringToDate(params.get("endDate"));
+        DoctorWareHouseMaterialCriteria criteria = BeanMapper.map(params, DoctorWareHouseMaterialCriteria.class);
+        criteria.setStartDate(DateUtil.toDateTimeString(startDate));
+        criteria.setEndDate(DateUtil.toDateTimeString(endDate));
+        List<DoctorMaterialConsumeProvider> listOverride = Lists.newArrayList();
+
+        List<DoctorMaterialConsumeProvider> list = RespHelper.or500(materialConsumeProviderReadService.findMaterialConsume(
+
+                criteria.getFarmId(),
+                criteria.getWareHouseId(),
+                criteria.getMaterialId(),
+                criteria.getMaterialName(),
+                criteria.getBarnId(),
+                criteria.getType(),
+                DateUtil.stringToDate(criteria.getStartDate()),
+                DateUtil.stringToDate(criteria.getEndDate()),
+                criteria.getPageNo(), criteria.getSize()));
+        //处理不同事件时间出现的价格不一致问题，进行重建DoctorMaterialConsumeProvider数据加入不同事件时间的价格不同
+        for (int i = 0; i < list.size(); i++) {
+
+            if(list.get(i).getExtra() != null && list.get(i).getExtraMap().containsKey("consumePrice")) {
+
+                List<Map<String, Object>> priceCompose = (ArrayList) list.get(i).getExtraMap().get("consumePrice");
+                for(Map<String, Object> eachPrice : priceCompose) {
+                    DoctorMaterialConsumeProvider doctorMaterialConsumeProviderOverride = new DoctorMaterialConsumeProvider();
+                    Long providerIdfd = Long.valueOf(eachPrice.get("providerId").toString());
+                    if (isNull(providerIdfd)) {
+                        providerIdfd = -1L;
+                    }
+                    Long unitPrice = Long.valueOf(eachPrice.get("unitPrice").toString());
+                    Double count = Double.valueOf(eachPrice.get("count").toString());
+                    doctorMaterialConsumeProviderOverride.setMaterialName(list.get(i).getMaterialName());
+                    doctorMaterialConsumeProviderOverride.setUnitPrice(unitPrice);
+                    doctorMaterialConsumeProviderOverride.setMaterialId(list.get(i).getMaterialId());
+                    doctorMaterialConsumeProviderOverride.setWareHouseId(list.get(i).getWareHouseId());
+                    doctorMaterialConsumeProviderOverride.setBarnName(list.get(i).getBarnName());
+                    doctorMaterialConsumeProviderOverride.setEventTime(list.get(i).getEventTime());
+                    doctorMaterialConsumeProviderOverride.setGroupCode(list.get(i).getGroupCode());
+                    doctorMaterialConsumeProviderOverride.setWareHouseName(list.get(i).getWareHouseName());
+                    doctorMaterialConsumeProviderOverride.setEventCount(count);
+                    doctorMaterialConsumeProviderOverride.setType(list.get(i).getType());
+                    doctorMaterialConsumeProviderOverride.setProvider(providerIdfd);
+                    doctorMaterialConsumeProviderOverride.setEventType(list.get(i).getEventType());
+                    listOverride.add(doctorMaterialConsumeProviderOverride);
+
+                }
+            }else {
+                if (isNull(list.get(i).getProviderFactoryId())) {
+                    list.get(i).setProvider(-1L);
+                }
+                listOverride.add(list.get(i));
+            }
+        }
+
+        List<DoctorMaterialDatailsExportDto> doctorMaterialDatails = Lists.newArrayList();
+
+        for (DoctorMaterialConsumeProvider lists : listOverride) {
+            DoctorMaterialDatailsExportDto doctorMaterialDatail = new DoctorMaterialDatailsExportDto();
+
+            doctorMaterialDatail.setBarnName(lists.getBarnName());
+            doctorMaterialDatail.setMaterialName(lists.getMaterialName());
+            doctorMaterialDatail.setTypeName(DoctorMaterialConsumeProvider.EVENT_TYPE.from(lists.getEventType()).getDesc());
+            DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.findMaterialUnits(
+                    criteria.getFarmId(),
+                    lists.getMaterialId(),
+                    lists.getWareHouseId()));
+            if (doctorMaterialInWareHouse != null) {
+                doctorMaterialDatail.setUnitName(doctorMaterialInWareHouse.getUnitName());
+            }
+
+            DoctorBarn doctorBarn = RespHelper.or500(doctorBarnReadService.findBarnById(lists.getBarnId()));
+            if (doctorBarn != null) {
+                doctorMaterialDatail.setPeople(doctorBarn.getStaffName());
+            }
+            doctorMaterialDatail.setMaterialType(WareHouseType.from(lists.getType()).getDesc());
+            doctorMaterialDatail.setUpdatedAt(lists.getEventTime());
+            doctorMaterialDatail.setGroupName(lists.getGroupCode());
+            doctorMaterialDatail.setPrice(lists.getUnitPrice());
+            doctorMaterialDatail.setNumber(lists.getEventCount());
+            doctorMaterialDatail.setPriceSum(lists.getUnitPrice() * lists.getEventCount());
+            doctorMaterialDatail.setWareHouseName(lists.getWareHouseName());
+            doctorMaterialDatails.add(doctorMaterialDatail);
+        }
+
+        doctorMaterialDatails.stream().collect(Collectors.toList());
+
+        return new Paging<>((long) doctorMaterialDatails.size(), doctorMaterialDatails);
     }
 }

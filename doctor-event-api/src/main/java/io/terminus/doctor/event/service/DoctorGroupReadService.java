@@ -115,6 +115,19 @@ public interface DoctorGroupReadService {
                                                         Long groupId, Integer type, Integer pageNo, Integer size, String startDate, String endDate);
 
     /**
+     * 分页查询猪群历史事件（去除断奶）
+     * @param farmId    猪场id
+     * @param groupId   猪群id
+     * @param type      事件类型
+     * @param pageNo    分页大小
+     * @param size      当前页码
+     * @return  分页结果
+     */
+    Response<Paging<DoctorGroupEvent>> pagingGroupEventDelWean(@NotNull(message = "farmId.not.null") Long farmId,
+                                                        Long groupId, Integer type, Integer pageNo, Integer size, String startDate, String endDate);
+
+
+    /**
      * 根据事件id查询猪群事件
      * @param eventId    事件id
      * @return 猪群事件

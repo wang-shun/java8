@@ -78,9 +78,9 @@ public class DoctorMaterialPriceInWareHouseDao extends MyBatisDao<DoctorMaterial
         return map;
     }
 
-    public List<DoctorMaterialPriceInWareHouse> findMaterialDatas(Long farmId, Long materialId, Long wareHouseId, Date endDate) {
+    public List<DoctorMaterialPriceInWareHouse> findMaterialDatas(Long farmId, Long materialId, Long wareHouseId, Date startDate, Date endDate) {
 
-        return sqlSession.selectList(sqlId("findMaterialData"), ImmutableMap.of("farmId", farmId, "materialId", materialId, "wareHouseId", wareHouseId, "endDate", endDate));
+        return sqlSession.selectList(sqlId("findMaterialData"), ImmutableMap.of("farmId", farmId, "materialId", materialId, "wareHouseId", wareHouseId, "startDate", startDate, "endDate", endDate));
     }
 
 }

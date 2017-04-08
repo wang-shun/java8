@@ -117,5 +117,5 @@ public interface DoctorMaterialConsumeProviderReadService {
      * @param farmId 公司Id
      */
     Response<List<DoctorMaterialConsumeProvider>> findMaterialConsume(Long farmId, Long wareHouseId, Long materialId, String materialName,
-                                                                      Date startDate, Date endDate ,Integer pageNo, Integer size);
+                                                                      Long barnId, Long type, Date startDate, Date endDate ,Integer pageNo, Integer size);
 }
