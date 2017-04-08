@@ -162,9 +162,9 @@ public class DoctorDailyReportCache {
         liveStock.setFatten(doctorKpiDao.realTimeLiveStockFatten(farmId, startAt));
 
         //后备猪
-        DoctorBackupReport buckup = new DoctorBackupReport();
-        buckup.setBackupCount(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId,startAt));
-        buckup.setBackupIn(doctorKpiDao.getMonthlyLiveStockChangeIn(farmId,startAt,endAt).getPeiHuaiBegin());
+        DoctorHoubeiReport buckup = new DoctorHoubeiReport();
+        buckup.setHoubeiCount(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId,startAt));
+        buckup.setHoubeiIn(doctorKpiDao.getMonthlyLiveStockChangeIn(farmId,startAt,endAt).getPeiHuaiBegin());
         buckup.setChangeSeed(doctorKpiDao.getMonthlyLiveStockChangeToSeed(farmId,startAt,endAt));
         buckup.setDead(doctorKpiDao.getDeadHoubei(farmId,startAt,endAt));
         buckup.setSales(doctorKpiDao.getSaleHoubei(farmId,startAt,endAt));
@@ -194,20 +194,20 @@ public class DoctorDailyReportCache {
         fattening.setMaterialPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getFattenFeedAmount());
 
         //保育猪
-        DoctorConservationReport conservation = new DoctorConservationReport();
-        conservation.setNursery(doctorKpiDao.realTimeLiveStockNursery(farmId,startAt));
-        conservation.setNurseryIn(doctorKpiDao.getMonthlyLiveStockChangeIn(farmId,startAt,endAt).getNurseryIn());
-        conservation.setDead(doctorKpiDao.getDeadNursery(farmId,startAt,endAt));
-        conservation.setEliminate(doctorKpiDao.getWeedOutNursery(farmId,startAt,endAt));
-        conservation.setSales(doctorKpiDao.getSaleNursery(farmId,startAt,endAt));
-        conservation.setChangeFattening(doctorKpiDao.getMonthlyLiveStockChangeToFatten(farmId,startAt,endAt));
-        conservation.setChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupNuseryNumber(farmId,startAt,endAt));
-        conservation.setOther(doctorKpiDao.getMonthlyLiveStockChangeGroupNuseryOtherNumber(farmId,startAt,endAt));
-        conservation.setMaterial(doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId,startAt,endAt).getNurseryFeedCount());
-        conservation.setMedicinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryDrugAmount());
-        conservation.setConsumablesPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryConsumerAmount());
-        conservation.setVaccinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryVaccineAmount());
-        conservation.setMaterialPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryFeedAmount());
+        DoctorNurseryReport nursery = new DoctorNurseryReport();
+        nursery.setNursery(doctorKpiDao.realTimeLiveStockNursery(farmId,startAt));
+        nursery.setNurseryIn(doctorKpiDao.getMonthlyLiveStockChangeIn(farmId,startAt,endAt).getNurseryIn());
+        nursery.setDead(doctorKpiDao.getDeadNursery(farmId,startAt,endAt));
+        nursery.setEliminate(doctorKpiDao.getWeedOutNursery(farmId,startAt,endAt));
+        nursery.setSales(doctorKpiDao.getSaleNursery(farmId,startAt,endAt));
+        nursery.setChangeFattening(doctorKpiDao.getMonthlyLiveStockChangeToFatten(farmId,startAt,endAt));
+        nursery.setChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupNuseryNumber(farmId,startAt,endAt));
+        nursery.setOther(doctorKpiDao.getMonthlyLiveStockChangeGroupNuseryOtherNumber(farmId,startAt,endAt));
+        nursery.setMaterial(doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId,startAt,endAt).getNurseryFeedCount());
+        nursery.setMedicinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryDrugAmount());
+        nursery.setConsumablesPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryConsumerAmount());
+        nursery.setVaccinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryVaccineAmount());
+        nursery.setMaterialPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryFeedAmount());
 
 
 
@@ -217,8 +217,8 @@ public class DoctorDailyReportCache {
         report.setMating(mating);
         report.setSale(sale);
 
-        report.setBackup(buckup);
-        report.setConservation(conservation);
+        report.setHoubei(buckup);
+        report.setNursery(nursery);
         report.setFattening(fattening);
 
         report.setWean(wean);

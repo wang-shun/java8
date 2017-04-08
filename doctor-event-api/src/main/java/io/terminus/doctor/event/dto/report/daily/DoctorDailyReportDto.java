@@ -55,7 +55,7 @@ public class DoctorDailyReportDto implements Serializable {
     /**
      * 保育日报表
      */
-    private DoctorConservationReport conservation = new DoctorConservationReport();
+    private DoctorNurseryReport nursery = new DoctorNurseryReport();
 
     /**
      * 育肥日报表
@@ -64,7 +64,7 @@ public class DoctorDailyReportDto implements Serializable {
     /**
      * 后备日报表
      */
-    private DoctorBackupReport backup = new DoctorBackupReport();
+    private DoctorHoubeiReport houbei = new DoctorHoubeiReport();
     /**
      * 每个猪群的存栏
      */

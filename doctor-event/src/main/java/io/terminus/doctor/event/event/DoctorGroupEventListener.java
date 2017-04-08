@@ -257,4 +257,7 @@ public class DoctorGroupEventListener implements EventListener {
         doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoNursery);
     }
     //处理保育猪
+    private void getConservation(PigType pigType, Long farmId, Date startAt, Date endAt) {
+        log.info("handle group conservation type:{}, startAt:{}, endAt:{}", pigType, startAt, endAt);
+    }
 }

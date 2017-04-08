@@ -8,17 +8,16 @@ import java.io.Serializable;
  * Created by terminus on 2017/4/7.
  */
 @Data
-public class DoctorConservationReport implements Serializable{
-    private static final long serialVersionUID = -7241647415493283967L;
-
+public class DoctorHoubeiReport implements Serializable{
+    private static final long serialVersionUID = 4291047218557067691L;
     /**
      * 存栏
      */
-    private int nursery;
+    private int HoubeiCount;
     /**
      * 转入
      */
-    private int nurseryIn;
+    private int HoubeiIn;
     /**
      * 死亡
      */
@@ -32,9 +31,9 @@ public class DoctorConservationReport implements Serializable{
      */
     private int sales;
     /**
-     * 转育肥
+     * 转种猪
      */
-    private int changeFattening;
+    private int changeSeed;
     /**
      * 转场
      */
@@ -63,5 +62,4 @@ public class DoctorConservationReport implements Serializable{
      * 易耗品金额
      */
     private double consumablesPrice;
-
 }
