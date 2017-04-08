@@ -106,6 +106,11 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
     /**
      * 触发猪群变动的母猪号
      */
+    private Long sowId;
+
+    /**
+     * 触发猪群变动的母猪号
+     */
     private String sowCode;
 
     @Override

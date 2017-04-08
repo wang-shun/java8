@@ -272,6 +272,12 @@ public class DoctorPigEvent implements Serializable {
     private Integer doctorMateType;
 
     /**
+     * 配种(人工、自然)
+     * @see io.terminus.doctor.event.enums.MatingType
+     */
+    private Integer mateType;
+
+    /**
      * 配种公猪
      */
     private String boarCode;

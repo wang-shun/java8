@@ -211,7 +211,7 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
     /**
      * 有母猪触发的事件关联的猪code
      */
-    private Long sowCode;
+    private String sowCode;
 
     /**
      * 销售时客户id

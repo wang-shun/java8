@@ -120,6 +120,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
         DoctorPigletsChgDto dto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorPigletsChgDto.class);
         DoctorChangeGroupInput doctorChangeGroupInput = new DoctorChangeGroupInput();
         doctorChangeGroupInput.setSowCode(pigEvent.getPigCode());
+        doctorChangeGroupInput.setSowId(pigEvent.getPigId());
         doctorChangeGroupInput.setEventType(GroupEventType.CHANGE.getValue());
         doctorChangeGroupInput.setEventAt(DateUtil.toDateString(dto.getPigletsChangeDate()));
         doctorChangeGroupInput.setChangeTypeId(dto.getPigletsChangeType());             //变动类型id

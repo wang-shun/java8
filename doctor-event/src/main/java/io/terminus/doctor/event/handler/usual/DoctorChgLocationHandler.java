@@ -138,6 +138,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         expectTrue(notNull(pigTrack.getGroupId()), "farrow.groupId.not.null", pigTrack.getPigId());
         //未断奶仔猪id
         DoctorTransGroupInput input = new DoctorTransGroupInput();
+        input.setSowId(chgLocationDto.getPigId());
         input.setSowCode(chgLocationDto.getPigCode());
         input.setToBarnId(doctorToBarn.getId());
         input.setToBarnName(doctorToBarn.getName());

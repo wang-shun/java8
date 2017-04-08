@@ -63,6 +63,7 @@
         <result column="abortion_date" property="abortionDate"/>
         <result column="partwean_date" property="partweanDate"/>
         <result column="doctor_mate_type" property="doctorMateType"/>
+        <result column="mate_type" property="mateType"/>
         <result column="boar_code" property="boarCode"/>
         <result column="out_id" property="outId"/>
         <result column="status" property="status"/>
@@ -156,6 +157,7 @@
         abortion_date,
         partwean_date,
         doctor_mate_type,
+        mate_type,
         boar_code,
         out_id,
         status,
@@ -243,6 +245,7 @@
         #{abortionDate},
         #{partweanDate},
         #{doctorMateType},
+        #{mateType},
         #{boarCode},
         #{outId},
         #{status},
@@ -332,6 +335,7 @@
         <if test="abortionDate != null">AND abortion_date = #{abortionDate}</if>
         <if test="partweanDate != null">AND partwean_date = #{partweanDate}</if>
         <if test="doctorMateType != null">AND doctor_mate_type = #{doctorMateType}</if>
+        <if test="mateType != null">AND mate_type = #{mateType}</if>
         <if test="boarCode != null">AND boar_code = #{boarCode}</if>
         <if test="outId != null">AND out_id = #{outId}</if>
         <if test="extra != null">AND extra = #{extra}</if>
@@ -437,6 +441,7 @@
             #{item.abortionDate},
             #{item.partweanDate},
             #{item.doctorMateType},
+            #{item.mateType},
             #{item.boarCode},
             #{item.outId},
             #{item.status},
@@ -709,6 +714,7 @@
             <if test="abortionDate != null">abortion_date = #{abortionDate},</if>
             <if test="partweanDate != null">partwean_date = #{partweanDate},</if>
             <if test="doctorMateType != null">doctor_mate_type = #{doctorMateType},</if>
+            <if test="mateType != null">mate_type = #{mateType},</if>
             <if test="boarCode != null">boar_code = #{boarCode},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="status != null">status = #{status},</if>
@@ -881,6 +887,7 @@
                 abortion_date = #{item.abortionDate},
                 partwean_date = #{item.partweanDate},
                 doctor_mate_type = #{item.doctorMateType},
+                mate_type = #{item.mateType},
                 boar_code = #{item.boarCode},
                 out_id = #{item.outId},
                 status = #{item.status},

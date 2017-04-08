@@ -957,6 +957,7 @@ public class DoctorMoveDataService {
                 DoctorMatingDto mating = getSowMatingExtra(event, boarMap, subMap);
                 sowEvent.setMattingDate(event.getEventAt());                //配种时间
                 sowEvent.setJudgePregDate(mating.getJudgePregDate());
+                sowEvent.setMateType(mating.getMatingType());
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(mating));
                 break;
             case PREG_CHECK:    //妊娠检查
