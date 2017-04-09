@@ -853,7 +853,7 @@ ALTER TABLE doctor_group_events ADD COLUMN basic_name varchar(32) DEFAULT NULL c
 ALTER TABLE doctor_group_events ADD COLUMN vaccin_result tinyint(4) DEFAULT NULL comment '防疫结果' after basic_name;
 alter table doctor_group_events add column vaccination_id bigint(20) default null comment '疫苗' after vaccin_result;
 alter table doctor_group_events add column vaccination_name varchar(32) default null comment '疫苗名称' after vaccination_id;
-ALTER TABLE doctor_group_events ADD COLUMN operator_id bigint(20) DEFAULT NULL comment '操作人id' after vaccination_name;
+ALTER TABLE doctor_group_events ADD COLUMN operator_id bigint(20) DEFAULT NULL comment '操作人id' after creator_name;
 ALTER TABLE doctor_group_events ADD COLUMN operator_name varchar(32) DEFAULT NULL comment '操作人姓名' after operator_id;
 
 
