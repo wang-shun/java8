@@ -216,4 +216,15 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
         }
     }
 
+    @Override
+    public Response<Paging<DoctorMaterialConsumeProvider>> pagingfindMaterialConsume(Long farmId, Long wareHouseId, Long materialId, String materialName, Long barnId, Long type, Date startDate, Date endDate, Integer pageNo, Integer size) {
+        try {
+            PageInfo pageInfo = new PageInfo(pageNo, size);
+            return Response.ok(doctorMaterialConsumeProviderDao.pagingFindMaterialConsumeReports(farmId, wareHouseId, materialId, materialName, barnId, type, startDate, endDate, pageInfo.getOffset(), pageInfo.getLimit()));
+        }catch (Exception e){
+            log.error("findMaterialConsume failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("findMaterialConsume.fail");
+        }
+    }
+
 }
