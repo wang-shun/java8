@@ -1,6 +1,5 @@
 package io.terminus.doctor.move.service;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -63,8 +62,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.*;
 
 /**
  * Created by chenzenghui on 16/8/3.
@@ -385,15 +383,19 @@ public class UserInitService {
 
     private void createSubUser(View_FarmMember member, Map<String, Long> roleIdMap, Long primaryUserId, String primaryUserMobile, Long farmId, String staffoutId){
         User subUser;
+        DoctorFarm farm = doctorFarmDao.findById(farmId);
+        String name = member.getLoginName() + "@" + farm.getFarmCode();
 
         Response<User> result = doctorUserReadService.findBy(member.getMobilPhone(), LoginType.MOBILE);
+        Response<User> userResponse = doctorUserReadService.findBy(name, LoginType.NAME);
         if(result.isSuccess() && result.getResult() != null) {
             subUser = result.getResult();
+        } else if(userResponse.isSuccess() && userResponse.getResult() != null) {
+            subUser = userResponse.getResult();
         } else {
             subUser = new User();
         }
-        DoctorFarm farm = doctorFarmDao.findById(farmId);
-        subUser.setName(member.getLoginName() + "@" + farm.getFarmCode());
+        subUser.setName(name);
         subUser.setPassword("123456");
         subUser.setType(UserType.FARM_SUB.value());
         if (Objects.equals(member.getIsStopUse(), "true")) {
@@ -410,7 +412,7 @@ public class UserInitService {
                 .put("contact", "")
                 .put("realName", member.getOrganizeName())
                 .map());
-        if(result.isSuccess() && result.getResult() != null) {
+        if(notNull(subUser.getId())) {
             userWriteService.update(subUser);
         } else {
             userWriteService.create(subUser);
@@ -426,7 +428,7 @@ public class UserInitService {
         //现在是数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
         permission.setUserId(subUserId);
-        permission.setFarmIds(Joiner.on(",").join(Lists.newArrayList(farmId)));
+        permission.setFarmIds(farmId.toString());
         doctorUserDataPermissionDao.create(permission);
     }
 
