@@ -828,9 +828,9 @@ CREATE TABLE `doctor_event_relations` (
 -- 2017-04-07 猪事件拆分
 alter table doctor_pig_events add column source tinyint(4) default null comment '进场来源，1：本场，2：外购' after extra;
 alter table doctor_pig_events add column boar_type tinyint(4) default null comment '公猪类型,1：活公猪，2：冷冻精液，3：新鲜精液' after source;
-alter table doctor_pig_events add column breed_id tinyint(4) default null comment '品种' after source;
+alter table doctor_pig_events add column breed_id bigint(20) default null comment '品种' after source;
 alter table doctor_pig_events add column breed_name varchar(32) default null comment '品种' after breed_id;
-alter table doctor_pig_events add column breed_type_id tinyint(4) default null comment '品系' after breed_name;
+alter table doctor_pig_events add column breed_type_id bigint(20) default null comment '品系' after breed_name;
 alter table doctor_pig_events add column breed_type_name varchar(32) default null comment '品系' after breed_type_id;
 alter table doctor_pig_events add column quantity int(11) default null comment '数量(拼窝数量,被拼窝数量,仔猪变动数量)' after amount;
 alter table doctor_pig_events add column weight DOUBLE default null comment '重量(变动重量)' after quantity;
