@@ -125,7 +125,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
 
         Integer pregCheckResult = executeEvent.getPregCheckResult();
 
-        //如果妊娠检查非阳性, 置当前配种数为0
+        //置当前配种数为0
         toTrack.setCurrentMatingCount(0);
 
         Map<String, Object> extra = toTrack.getExtraMap();
