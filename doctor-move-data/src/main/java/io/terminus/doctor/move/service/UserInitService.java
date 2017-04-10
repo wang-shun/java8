@@ -382,7 +382,7 @@ public class UserInitService {
     }
 
     private void createSubUser(View_FarmMember member, Map<String, Long> roleIdMap, Long primaryUserId, String primaryUserMobile, Long farmId, String staffoutId){
-        log.info("createSubUser:primaryUserId:{}, farm:{}", primaryUserId, farmId);
+        log.info("createSubUser:member:{}, primaryUserId:{}, farm:{}", member, primaryUserId, farmId);
         User subUser;
         DoctorFarm farm = doctorFarmDao.findById(farmId);
         String name = member.getLoginName() + "@" + farm.getFarmCode();
@@ -410,7 +410,7 @@ public class UserInitService {
 
         subUser.setExtra(MapBuilder.<String, String>of()
                 .put("pid", primaryUserId.toString())
-                .put("contact", "")
+                .put("contact", member.getMobilPhone())
                 .put("realName", member.getOrganizeName())
                 .map());
         log.info("subUser:{}", subUser);
