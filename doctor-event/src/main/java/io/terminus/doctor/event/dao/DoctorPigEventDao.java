@@ -2,18 +2,17 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
+import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.event.dto.DoctorNpdExportDto;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by yaoqijun.
@@ -414,5 +413,34 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      */
     public List<DoctorPigEvent> queryTriggerWeanEvent() {
         return getSqlSession().selectList(sqlId("queryTriggerWeanEvent"));
+    }
+
+    /**
+     * 计算npd的数量用于计算分页数据
+     * @param maps
+     * @return
+     */
+    public Long countNpdWeanEvent(Map<String, Object> maps) {
+        return getSqlSession().selectOne(sqlId("countNpdWeanEvent"), maps);
+    }
+
+    /**
+     * npd的计算
+     * @param maps
+     * @param offset
+     * @param limit
+     * @return
+     */
+    public Paging<DoctorNpdExportDto> sumNpdWeanEvent(Map<String, Object> maps, Integer offset, Integer limit) {
+        maps.put("offset", offset);
+        maps.put("limit", limit);
+
+        maps = ImmutableMap.copyOf(Params.filterNullOrEmpty((maps)));
+        long total = countNpdWeanEvent(maps);
+        if (total <= 0){
+            return new Paging<>(0L, Collections.<DoctorNpdExportDto>emptyList());
+        }
+        List<DoctorNpdExportDto> doctorNpdExportDtos = getSqlSession().selectList(sqlId("sumPngWeanEvent"), maps);
+        return new Paging<>(total, doctorNpdExportDtos);
     }
 }

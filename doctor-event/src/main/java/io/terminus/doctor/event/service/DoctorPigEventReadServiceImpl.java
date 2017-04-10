@@ -31,17 +31,14 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.dto.DoctorNpdExportDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -367,6 +364,17 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         } catch (Exception e) {
             log.error("find.pigIds.by.event, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find pigIds by type failed");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorNpdExportDto>> pagingFindNpd(Map<String, Object> map, Integer offset, Integer limit) {
+        try {
+            PageInfo pageInfo = new PageInfo(offset, limit);
+            return Response.ok(doctorPigEventDao.sumNpdWeanEvent(map, pageInfo.getOffset(), pageInfo.getLimit()));
+        }catch (Exception e) {
+            log.error("find.npd.event, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find npd event fail");
         }
     }
 }
