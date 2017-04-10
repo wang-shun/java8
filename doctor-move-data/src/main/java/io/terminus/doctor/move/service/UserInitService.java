@@ -382,6 +382,7 @@ public class UserInitService {
     }
 
     private void createSubUser(View_FarmMember member, Map<String, Long> roleIdMap, Long primaryUserId, String primaryUserMobile, Long farmId, String staffoutId){
+        log.info("createSubUser:primaryUserId:{}, farm:{}", primaryUserId, farmId);
         User subUser;
         DoctorFarm farm = doctorFarmDao.findById(farmId);
         String name = member.getLoginName() + "@" + farm.getFarmCode();
