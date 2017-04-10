@@ -156,7 +156,7 @@ public class UserInitService {
             log.info("===farmInfo:{}", farmInfo);
             // 主账号注册,内含事务
             User primaryUser;
-            Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
+            Response<User> result = doctorUserReadService.findBy(farmInfo.getMobile(), LoginType.MOBILE);
             if(result.isSuccess() && result.getResult() != null){
                 primaryUser = result.getResult();
                 primaryUser.setName(farmInfo.getLoginName());
