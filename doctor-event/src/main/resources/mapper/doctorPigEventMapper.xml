@@ -1035,19 +1035,6 @@
         AND extra is NULL
     </select>
 
-
-    <resultMap id="DoctorPigEventNpdMap" type="DoctorPigEvent">
-        <result column="barn_name" property="barnName"/>
-        <result column="pig_code" property="pigCode"/>
-        <result column="dp_npd" property="dpnpd"/>
-        <result column="pf_npd" property="pfnpd"/>
-        <result column="pl_npd" property="plnpd"/>
-        <result column="ps_npd" property="psnpd"/>
-        <result column="pt_npd" property="ptnpd"/>
-        <result column="jp_npd" property="jpnpd"/>
-        <result column="npd" property="npd"/>
-    </resultMap>
-
     <select id="sumPngWeanEvent" parameterType="map" resultMap="DoctorPigEventNpdMap" >
         SELECT
         ifnull(sum(dpndp), 0),
