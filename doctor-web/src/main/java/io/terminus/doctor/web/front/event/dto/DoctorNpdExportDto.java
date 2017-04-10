@@ -1,6 +1,5 @@
 package io.terminus.doctor.web.front.event.dto;
 
-import io.terminus.doctor.event.enums.MatingType;
 import lombok.Data;
 
 import java.io.Serializable;
