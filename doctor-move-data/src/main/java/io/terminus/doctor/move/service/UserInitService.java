@@ -170,12 +170,12 @@ public class UserInitService {
                 userWriteService.update(primaryUser);
             } else {
                 primaryUser = this.registerByMobile(farmInfo.getMobile(), "123456", farmInfo.getLoginName(), farmInfo.getRealName());
+                //初始化服务状态
+                this.initDefaultServiceStatus(primaryUser.getId());
+                //初始化服务的申请审批状态
+                this.initServiceReview(primaryUser.getId(), primaryUser.getMobile(), primaryUser.getName());
             }
             Long userId = primaryUser.getId();
-            //初始化服务状态
-            this.initDefaultServiceStatus(userId);
-            //初始化服务的申请审批状态
-            this.initServiceReview(userId, primaryUser.getMobile(), primaryUser.getName());
             DoctorFarm farm = nameFarmMap.get(farmInfo.getNewFarmName());
             log.info("===farm:{}", farm);
             //创建猪场
