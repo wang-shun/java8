@@ -7,6 +7,18 @@
 
 <mapper namespace="DoctorPigEvent">
 
+    <resultMap id="DoctorPigEventNpdMap" type="DoctorPigEvent">
+        <result column="barn_name" property="barnName"/>
+        <result column="pig_code" property="pigCode"/>
+        <result column="dp_npd" property="dpnpd"/>
+        <result column="pf_npd" property="pfnpd"/>
+        <result column="pl_npd" property="plnpd"/>
+        <result column="ps_npd" property="psnpd"/>
+        <result column="pt_npd" property="ptnpd"/>
+        <result column="jp_npd" property="jpnpd"/>
+        <result column="npd" property="npd"/>
+    </resultMap>
+
     <resultMap id="DoctorPigEventMap" type="DoctorPigEvent">
         <id column="id" property="id"/>
         <result column="org_id" property="orgId"/>
@@ -1021,5 +1033,30 @@
         AND status = 1
         AND is_auto = 1
         AND extra is NULL
+    </select>
+
+
+    <resultMap id="DoctorPigEventNpdMap" type="DoctorPigEvent">
+        <result column="barn_name" property="barnName"/>
+        <result column="pig_code" property="pigCode"/>
+        <result column="dp_npd" property="dpnpd"/>
+        <result column="pf_npd" property="pfnpd"/>
+        <result column="pl_npd" property="plnpd"/>
+        <result column="ps_npd" property="psnpd"/>
+        <result column="pt_npd" property="ptnpd"/>
+        <result column="jp_npd" property="jpnpd"/>
+        <result column="npd" property="npd"/>
+    </resultMap>
+
+    <select id="sumPngWeanEvent" parameterType="map" resultMap="DoctorPigEventNpdMap" >
+        SELECT
+        ifnull(sum(dpndp), 0),
+        ifnull(sum(pfndp), 0),
+        ifnull(sum(plndp), 0),
+        ifnull(sum(psndp), 0),
+        ifnull(sum(ptndp), 0),
+        ifnull(sum(jpndp), 0)
+        FROM <include refid="tb"/>
+        WHERE
     </select>
 </mapper>

@@ -484,7 +484,20 @@ public class DoctorPigEvents {
     /**
      * 非生产天数的报表导出
      */
+    @RequestMapping(value = "/eventNpd/export", method = RequestMethod.GET)
+    public Paging<DoctorNpdExportDto> pagingNpdExport(Map<String, String> pigEventCriteria,
+                                                      HttpServletRequest request, HttpServletResponse response) {
+        return null;
+    }
+    @RequestMapping(value = "/eventNpd", method = RequestMethod.GET)
+    public Paging<DoctorNpdExportDto> pagingNpd(Map<String, String> pigEventCriteria) {
+        return null;
+    }
 
+    private Paging<DoctorNpdExportDto> pagingNpdPigEvent(Map<String, String> pigEventCriteria) {
+        Map<String, Object> criteria = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
 
+        return null;
+    }
 
 }
