@@ -12,14 +12,17 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
@@ -100,6 +103,15 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
 
             //上一次妊娠检查事件
             doctorPigEventDao.delete(lastPregEvent.getId());
+            //更新镜像
+            DoctorPigSnapshot pregSnapshot = doctorPigSnapshotDao.findByToEventId(lastPregEvent.getId());
+            List<DoctorPigSnapshot> snapshotList = doctorPigSnapshotDao.findByFromEventId(lastPregEvent.getId());
+            if (snapshotList.isEmpty()) {
+                doctorPigTrack.setCurrentEventId(pregSnapshot.getFromEventId());
+                doctorPigTrackDao.update(doctorPigTrack);
+            } else {
+                doctorPigSnapshotDao.updateFromEventIdByFromEventId(snapshotList.stream().map(DoctorPigSnapshot::getId).collect(Collectors.toList()), pregSnapshot.getFromEventId());
+            }
             //删掉镜像里的数据
             doctorPigSnapshotDao.deleteByEventId(lastPregEvent.getId());
         }
