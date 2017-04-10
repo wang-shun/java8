@@ -1240,6 +1240,7 @@ public class DoctorMoveDataService {
         if (barn != null) {
             track.setCurrentBarnId(barn.getId());
             track.setCurrentBarnName(barn.getName());
+            track.setCurrentBarnType(barn.getPigType());
         }
         return track;
     }
