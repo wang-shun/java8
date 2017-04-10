@@ -43,6 +43,7 @@ import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
+import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.address.model.Address;
 import io.terminus.parana.user.impl.address.dao.AddressDao;
@@ -154,7 +155,22 @@ public class UserInitService {
         for (DoctorMoveFarmInfo farmInfo : moveFarmInfoList) {
             log.info("===farmInfo:{}", farmInfo);
             // 主账号注册,内含事务
-            User primaryUser = this.registerByMobile(farmInfo.getMobile(), "123456", farmInfo.getLoginName(), farmInfo.getRealName());
+            User primaryUser;
+            Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
+            if(result.isSuccess() && result.getResult() != null){
+                primaryUser = result.getResult();
+                primaryUser.setName(farmInfo.getLoginName());
+                primaryUser.setPassword(EncryptUtil.encrypt("123456"));
+                primaryUser.setStatus(UserStatus.NORMAL.value());
+                primaryUser.setType(UserType.FARM_ADMIN_PRIMARY.value());
+                primaryUser.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
+                Map<String, String> userExtraMap = Maps.newHashMap();
+                userExtraMap.put("realName", farmInfo.getRealName());
+                primaryUser.setExtra(userExtraMap);
+                userWriteService.update(primaryUser);
+            } else {
+                primaryUser = this.registerByMobile(farmInfo.getMobile(), "123456", farmInfo.getLoginName(), farmInfo.getRealName());
+            }
             Long userId = primaryUser.getId();
             //初始化服务状态
             this.initDefaultServiceStatus(userId);
@@ -368,14 +384,21 @@ public class UserInitService {
     }
 
     private void createSubUser(View_FarmMember member, Map<String, Long> roleIdMap, Long primaryUserId, String primaryUserMobile, Long farmId, String staffoutId){
-        User subUser = new User();
+        User subUser;
+
+        Response<User> result = doctorUserReadService.findBy(member.getMobilPhone(), LoginType.MOBILE);
+        if(result.isSuccess() && result.getResult() != null) {
+            subUser = result.getResult();
+        } else {
+            subUser = new User();
+        }
         DoctorFarm farm = doctorFarmDao.findById(farmId);
         subUser.setName(member.getLoginName() + "@" + farm.getFarmCode());
         subUser.setPassword("123456");
         subUser.setType(UserType.FARM_SUB.value());
-        if(Objects.equals(member.getIsStopUse(), "true")){
+        if (Objects.equals(member.getIsStopUse(), "true")) {
             subUser.setStatus(UserStatus.LOCKED.value());
-        }else{
+        } else {
             subUser.setStatus(UserStatus.NORMAL.value());
         }
 
@@ -387,8 +410,12 @@ public class UserInitService {
                 .put("contact", "")
                 .put("realName", member.getOrganizeName())
                 .map());
-        Long subUserId = RespHelper.or500(userWriteService.create(subUser));
-
+        if(result.isSuccess() && result.getResult() != null) {
+            userWriteService.update(subUser);
+        } else {
+            userWriteService.create(subUser);
+        }
+        Long subUserId = subUser.getId();
         // 设置下子账号的状态
         if(Objects.equals(member.getIsStopUse(), "true")){
             Sub sub = subDao.findByUserId(subUserId);
