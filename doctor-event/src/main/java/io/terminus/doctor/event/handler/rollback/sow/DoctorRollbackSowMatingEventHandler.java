@@ -32,13 +32,18 @@ public class DoctorRollbackSowMatingEventHandler extends DoctorAbstractRollbackP
         DoctorMatingDto dto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorMatingDto.class);
         Long boarId = dto.getMatingBoarPigId();
         if (isNull(boarId)) {
-            boarId = doctorPigDao.findPigByFarmIdAndPigCodeAndSex(pigEvent.getFarmId(), pigEvent.getBoarCode(), DoctorPig.PigSex.BOAR.getKey()).getId();
+            DoctorPig pig = doctorPigDao.findPigByFarmIdAndPigCodeAndSex(pigEvent.getFarmId(), pigEvent.getBoarCode(), DoctorPig.PigSex.BOAR.getKey());
+            if(!isNull(pig)){
+                boarId = pig.getId();
+            }
         }
-        DoctorPigTrack boarTrack = doctorPigTrackDao.findByPigId(boarId);
+        if(!isNull(boarId)){
+            DoctorPigTrack boarTrack = doctorPigTrackDao.findByPigId(boarId);
 
-        if (boarTrack.getCurrentParity() > 0){
-            boarTrack.setCurrentParity(boarTrack.getCurrentParity() -1);
-            doctorPigTrackDao.update(boarTrack);
+            if (boarTrack.getCurrentParity() > 0){
+                boarTrack.setCurrentParity(boarTrack.getCurrentParity() -1);
+                doctorPigTrackDao.update(boarTrack);
+            }
         }
     }
 

@@ -97,8 +97,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         if (!IGNORE_EVENT.contains(executeEvent.getType())) {
             //2.更新track
             doctorPigTrackDao.update(toTrack);
-            //3.创建镜像
-            createPigSnapshot(toTrack, executeEvent, currentEventId);
         }
 
         //4.特殊处理
@@ -128,6 +126,11 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         //6.触发事件
         if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
             triggerEvent(doctorEventInfoList, executeEvent, toTrack);
+        }
+
+        if (!IGNORE_EVENT.contains(executeEvent.getType())) {
+            //创建镜像
+            createPigSnapshot(toTrack, executeEvent, currentEventId);
         }
     }
 
