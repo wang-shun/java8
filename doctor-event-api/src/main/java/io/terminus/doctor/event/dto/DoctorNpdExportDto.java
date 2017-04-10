@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.front.event.dto;
+package io.terminus.doctor.event.dto;
 
 import lombok.Data;
 
@@ -12,13 +12,14 @@ public class DoctorNpdExportDto implements Serializable{
 
     private static final long serialVersionUID = 966209148511871287L;
 
+    private Long pigId;
     private String pigCode;
     private String barnName;
 
     /**
      * 进场到配种
      */
-    private Integer jpndp = 0;
+    private Integer jpnpd = 0;
     /**
      * 断奶到配种的非生产天数
      */
