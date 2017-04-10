@@ -412,6 +412,7 @@ public class UserInitService {
                 .put("contact", "")
                 .put("realName", member.getOrganizeName())
                 .map());
+        log.info("subUser:{}", subUser);
         if(notNull(subUser.getId())) {
             userWriteService.update(subUser);
         } else {
