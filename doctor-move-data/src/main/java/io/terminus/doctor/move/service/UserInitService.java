@@ -362,7 +362,7 @@ public class UserInitService {
         final String appKey = "MOBILE";
         RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUserId, farmId));
         // key = roleName, value = roleId
-        Map<String, Long> existRole = subRoleDao.findByUserIdAndStatus(appKey, primaryUserId, 1).stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
+        Map<String, Long> existRole = subRoleDao.findByFarmIdAndStatus(appKey, farmId, 1).stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
 
         List<RoleTemplate> roleTemplates = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, RoleTemplate.class, DoctorMoveTableEnum.RoleTemplate));
 
