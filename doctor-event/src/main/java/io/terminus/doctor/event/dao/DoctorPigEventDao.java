@@ -7,6 +7,7 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dto.DoctorNpdExportDto;
+import io.terminus.doctor.event.dto.DoctorPigSalesExportDto;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -435,12 +436,34 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         maps.put("offset", offset);
         maps.put("limit", limit);
 
-        maps = ImmutableMap.copyOf(Params.filterNullOrEmpty((maps)));
+        maps = ImmutableMap.copyOf(Params.filterNullOrEmpty(maps));
         long total = countNpdWeanEvent(maps);
         if (total <= 0){
             return new Paging<>(0L, Collections.<DoctorNpdExportDto>emptyList());
         }
         List<DoctorNpdExportDto> doctorNpdExportDtos = getSqlSession().selectList(sqlId("sumPngWeanEvent"), maps);
         return new Paging<>(total, doctorNpdExportDtos);
+    }
+
+
+    public Long countSaleEvent(Map<String, Object> maps) {
+        return getSqlSession().selectOne(sqlId("countSales"), maps);
+    }
+    /**
+     * 销售情况
+     * @param maps
+     * @param offset
+     * @param limit
+     * @return
+     */
+    public Paging<DoctorPigSalesExportDto> findSalesEvent(Map<String, Object> maps, Integer offset, Integer limit) {
+        maps.put("offset", offset);
+        maps.put("limit", limit);
+        long total = countSaleEvent(maps);
+        if (total <= 0) {
+            return new Paging<>(0L, Collections.<DoctorPigSalesExportDto>emptyList());
+        }
+        List<DoctorPigSalesExportDto> doctorPigSalesExportDtos = getSqlSession().selectList(sqlId("findSalesEvent"), maps);
+        return new Paging<>(total, doctorPigSalesExportDtos);
     }
 }

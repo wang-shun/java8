@@ -14,13 +14,11 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dto.DoctorNpdExportDto;
-import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
-import io.terminus.doctor.event.dto.DoctorSowParityCount;
+import io.terminus.doctor.event.dto.*;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -39,6 +37,7 @@ import io.terminus.doctor.web.front.event.dto.*;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -486,6 +485,21 @@ public class DoctorPigEvents {
         Integer pageNo = Integer.parseInt((String)criteria.get("pageNo"));
         Integer size = Integer.parseInt((String)criteria.get("size"));
         return RespHelper.or500(doctorPigEventReadService.pagingFindNpd(criteria, pageNo, size));
+    }
+
+    /**
+     * 猪的销售表
+     */
+    @RequestMapping(value = "/sales", method = RequestMethod.GET)
+    @ResponseBody
+    public Paging<DoctorPigSalesExportDto> pagingPigSales(@RequestParam Map<String, Object> pigEventCriteria, Integer pageNo, Integer pageSize, String date) {
+
+        Date startDate = DateUtil.toYYYYMM(date);
+        Date endDate = DateUtils.addMonths(startDate, 1);
+        endDate = DateUtils.addSeconds(endDate, -1);
+        pigEventCriteria.put("startDate", startDate);
+        pigEventCriteria.put("endDate", endDate);
+        return RespHelper.or500(doctorPigEventReadService.pagingFindSales(pigEventCriteria, pageNo, pageSize));
     }
 
 }
