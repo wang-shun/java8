@@ -842,6 +842,7 @@ alter table doctor_pig_events add column vaccination_id bigint(20) default null 
 alter table doctor_pig_events add column vaccination_name varchar(32) default null comment '疫苗名称' after vaccination_id;
 alter table doctor_pig_events add column mate_type tinyint(4) default null comment '配种类型(人工、自然)' after doctor_mate_type;
 alter table doctor_pig_events add column judge_preg_date date default null comment '预产期' after partwean_date;
+alter table doctor_pig_events add column barn_type tinyint(4) default null comment '猪舍类型' after barn_name;
 
 -- 2017-04-07 猪群拆分
 ALTER TABLE doctor_group_events ADD COLUMN sow_id bigint(20) DEFAULT NULL comment '有母猪触发的事件关联的猪id' after barn_name;

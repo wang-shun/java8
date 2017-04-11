@@ -205,6 +205,7 @@
         <if test="overPrice != null">AND over_price = #{overPrice}</if>
         <if test="transGroupType != null">AND trans_group_type = #{transGroupType}</if>
         <if test="inType != null">AND in_type = #{inType}</if>
+        <if test="notInType != null">AND in_type != #{notInType}</if>
         <if test="otherBarnId != null">AND other_barn_id = #{otherBarnId}</if>
         <if test="otherBarnType != null">AND other_barn_type = #{otherBarnType},</if>
         <if test="relGroupEventId != null">AND rel_group_event_id = #{relGroupEventId}</if>

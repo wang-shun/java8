@@ -23,6 +23,7 @@
         <result column="desc" property="desc"/>
         <result column="barn_id" property="barnId"/>
         <result column="barn_name" property="barnName"/>
+        <result column="barn_type" property="barnType"/>
         <result column="rel_event_id" property="relEventId"/>
         <result column="rel_group_event_id" property="relGroupEventId"/>
         <result column="rel_pig_event_id" property="relPigEventId"/>
@@ -117,6 +118,7 @@
         `desc`,
         barn_id,
         barn_name,
+        barn_type,
         rel_event_id,
         rel_group_event_id,
         rel_pig_event_id,
@@ -205,6 +207,7 @@
         #{desc},
         #{barnId},
         #{barnName},
+        #{barnType},
         #{relEventId},
         #{relGroupEventId},
         #{relPigEventId},
@@ -295,6 +298,7 @@
         <if test="desc != null">AND `desc` = #{desc}</if>
         <if test="barnId != null">AND barn_id = #{barnId}</if>
         <if test="barnName != null">AND barn_name = #{barnName}</if>
+        <if test="barnType != null">AND barn_Type = #{barnType}</if>
         <if test="relEventId != null">AND rel_event_id = #{relEventId}</if>
         <if test="relGroupEventId != null">AND rel_group_event_id = #{relGroupEventId}</if>
         <if test="relPigEventId != null">AND rel_pig_event_id = #{relPigEventId}</if>
@@ -368,6 +372,12 @@
                 #{i}
             </foreach>
         </if>
+        <if test="barnTypes != null &amp;&amp; barnTypes.size() > 0">
+            AND `barn_type` IN
+            <foreach collection="barnTypes" item="barnType" open="(" close=")" separator=",">
+                #{barnType}
+            </foreach>
+        </if>
         <if test="createdAtStart != null">AND created_at &gt;= #{createdAtStart}</if>
         <if test="createdAtEnd != null">AND created_at &lt;= #{createdAtEnd}</if>
         AND status =1
@@ -401,6 +411,7 @@
             #{item.desc},
             #{item.barnId},
             #{item.barnName},
+            #{item.barnType},
             #{item.relEventId},
             #{item.relGroupEventId},
             #{item.relPigEventId},
@@ -674,6 +685,7 @@
             <if test="desc != null">`desc` = #{desc},</if>
             <if test="barnId != null">barn_id = #{barnId},</if>
             <if test="barnName != null">barn_name = #{barnName},</if>
+            <if test="barnType != null">barn_name = #{barnType},</if>
             <if test="relEventId != null">rel_event_id = #{relEventId},</if>
             <if test="relGroupEventId != null">rel_group_event_id = #{relGroupEventId},</if>
             <if test="relPigEventId != null">rel_pig_event_id = #{relPigEventId},</if>
@@ -847,6 +859,7 @@
                 `desc` = #{item.desc},
                 barn_id = #{item.barnId},
                 barn_name = #{item.barnName},
+                barn_type = #{item.barnType},
                 rel_event_id = #{item.relEventId},
                 rel_group_event_id = #{item.relGroupEventId},
                 rel_pig_event_id = #{item.relPigEventId},

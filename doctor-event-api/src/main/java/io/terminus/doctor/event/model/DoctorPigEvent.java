@@ -65,6 +65,12 @@ public class DoctorPigEvent implements Serializable {
 
     private String barnName;
 
+    /**
+     * 猪舍类型
+     * @see io.terminus.doctor.common.enums.PigType
+     */
+    private Integer barnType;
+
     private Long relEventId;
 
     /**

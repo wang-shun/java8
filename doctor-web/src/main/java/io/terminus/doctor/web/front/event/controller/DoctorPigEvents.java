@@ -239,6 +239,10 @@ public class DoctorPigEvents {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
+
+        if (StringUtils.isNotBlank((String)params.get("barnTypes"))) {
+            params.put("barnTypes", Splitters.UNDERSCORE.splitToList((String) params.get("barnTypes")));
+        }
         if (StringUtils.isNotBlank((String) params.get("endDate"))) {
             params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusMillis(1).toDate());
         }
