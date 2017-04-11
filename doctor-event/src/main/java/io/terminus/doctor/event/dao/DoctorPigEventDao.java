@@ -459,8 +459,6 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public Paging<DoctorPigSalesExportDto> findSalesEvent(Map<String, Object> maps, Integer offset, Integer limit) {
         maps.put("offset", offset);
         maps.put("limit", limit);
-        maps = ImmutableMap.copyOf(Params.filterNullOrEmpty(maps));
-
         long total = countSaleEvent(maps);
         if (total <= 0) {
             return new Paging<>(0L, Collections.<DoctorPigSalesExportDto>emptyList());
