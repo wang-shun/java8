@@ -585,16 +585,12 @@ public class DoctorWareHouseEvents {
      * @return 导出数据集
      */
     public List<DoctorWareHouseMaterialData> materialExportData(Map<String, String> criteriaMap, Integer num) {
-        Date startDate = null;
+
+        Date startDate = DateUtil.toYYYYMM(criteriaMap.get("startAt"));
         Date endDate = null;
-        String eventDate = criteriaMap.get("startAt") + "-01 00:00:00";
         if (num == 1) {
 
-            startDate = DateUtil.monthStart(DateUtil.stringToDate(eventDate));
             startDate = DateUtils.addMonths(startDate, 1);
-        }
-        if (num == 0) {
-            startDate = DateUtil.monthStart(DateUtil.stringToDate(eventDate));
         }
         DoctorWareHouseMaterialCriteria criteria = BeanMapper.map(criteriaMap, DoctorWareHouseMaterialCriteria.class);
         criteria.setStartDate(DateUtil.toDateTimeString(startDate));

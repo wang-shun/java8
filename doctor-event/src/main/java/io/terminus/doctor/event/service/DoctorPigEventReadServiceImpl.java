@@ -17,10 +17,7 @@ import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
-import io.terminus.doctor.event.dto.DoctorSowParityCount;
-import io.terminus.doctor.event.dto.DoctorSuggestPig;
-import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
+import io.terminus.doctor.event.dto.*;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -31,7 +28,6 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.dto.DoctorNpdExportDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -375,6 +371,17 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }catch (Exception e) {
             log.error("find.npd.event, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find npd event fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorPigSalesExportDto>> pagingFindSales(Map<String, Object> map, Integer offset, Integer limit) {
+        try {
+            PageInfo pageInfo = new PageInfo(offset, limit);
+            return Response.ok(doctorPigEventDao.findSalesEvent(map, pageInfo.getOffset(), pageInfo.getLimit()));
+        }catch (Exception e) {
+            log.error("find.sales.event, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find sales fail");
         }
     }
 }
