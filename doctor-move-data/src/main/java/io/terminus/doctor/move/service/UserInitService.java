@@ -400,6 +400,7 @@ public class UserInitService {
             subUser = new User();
         }
         subUser.setName(name);
+        subUser.setMobile(member.getMobilPhone());
         subUser.setPassword(EncryptUtil.encrypt("123456"));
         subUser.setType(UserType.FARM_SUB.value());
         if (Objects.equals(member.getIsStopUse(), "true")) {
@@ -435,6 +436,7 @@ public class UserInitService {
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
         permission.setUserId(subUserId);
         permission.setFarmIds(farmId.toString());
+        permission.setOrgIds(farm.getOrgId().toString());
         doctorUserDataPermissionDao.create(permission);
     }
 

@@ -1255,4 +1255,15 @@ public class DoctorMoveDataController {
         log.info("fixTriggerPigWean ending");
         return true;
     }
+
+    /**
+     * 更新某个猪场猪舍权限
+     * @param farmId 猪场id
+     * @return
+     */
+    @RequestMapping(value = "/updatePermissionBarn", method = RequestMethod.GET)
+    public Boolean updatePermissionBarn(@RequestParam Long farmId){
+        userInitService.updatePermissionBarn(farmId);
+        return true;
+    }
 }
