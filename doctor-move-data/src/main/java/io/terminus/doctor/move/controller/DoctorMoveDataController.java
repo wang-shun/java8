@@ -188,8 +188,8 @@ public class DoctorMoveDataController {
      * @return 是否成功
      */
     @RequestMapping(value = "/moveAllWithExcel", method = RequestMethod.GET)
-    public Boolean moveAllWithExcel(@RequestParam("mobile") String mobile,
-                                    @RequestParam("loginName") String loginName,
+    public Boolean moveAllWithExcel(@RequestParam(value = "mobile", required = false) String mobile,
+                                    @RequestParam(value = "loginName", required = false) String loginName,
                                     @RequestParam("moveId") Long moveId,
                                     @RequestParam("path") String path,
                                     @RequestParam(value = "index", required = false) Integer index,
