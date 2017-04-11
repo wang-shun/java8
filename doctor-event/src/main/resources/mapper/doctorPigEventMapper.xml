@@ -7,6 +7,7 @@
 
 <mapper namespace="DoctorPigEvent">
 
+
     <resultMap id="DoctorPigEventMap" type="DoctorPigEvent">
         <id column="id" property="id"/>
         <result column="org_id" property="orgId"/>
@@ -1145,5 +1146,92 @@
         AND status = 1
         AND is_auto = 1
         AND extra is NULL
+    </select>
+
+    <select id="countNpdWeanEvent" parameterType="map" resultType="long">
+        SELECT ifnull(count( * ), 0)
+        FROM (
+        SELECT pig_id
+        FROM <include refid="tb"/>
+        WHERE
+        1 = 1
+        <include refid="criteria"/>
+        AND kind = 1
+        GROUP BY pig_id
+        ) number , `doctor_pig_tracks` tracks
+        WHERE number.pig_id = tracks.`pig_id`
+        <if test="barnId != null">AND tracks.current_barn_id = #{barnId}</if>
+        <if test="barnName != null">AND tracks.current_barn_name = #{barnName}</if>
+
+    </select>
+
+    <select id="sumPngWeanEvent" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorNpdExportDto" >
+
+        select dd.pig_id as pigId,dd.pig_code as pigCode,tracks.current_barn_name as barnName,dd.dpnpd,dd.pfnpd,dd.plnpd,dd.ptnpd,dd.jpnpd,dd.npd
+        from (
+        SELECT	pig_id,
+        pig_code,
+        sum(dp_npd) as dpnpd,
+        sum(pf_npd) as pfnpd,
+        sum(pl_npd) as plnpd,
+        sum(ps_npd) as psnpd,
+        sum(pt_npd) as ptnpd,
+        sum(jp_npd) as jpnpd,
+        sum(npd) as npd
+        FROM `doctor_pig_events`
+        WHERE
+        kind = 1
+        <if test="orgId != null">AND org_id = #{orgId}</if>
+        <if test="orgName != null">AND org_name = #{orgName}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="farmName != null">AND farm_name = #{farmName}</if>
+        <if test="pigId != null">AND pig_id = #{pigId}</if>
+        <if test="pigCode != null">AND pig_code = #{pigCode}</if>
+        <if test="isAuto != null">AND is_auto = #{isAuto}</if>
+        <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+        <if test="type != null">AND type = #{type}</if>
+        GROUP BY pig_id,pig_code
+        ) dd , `doctor_pig_tracks` tracks
+        WHERE
+        dd.pig_id = tracks.`pig_id`
+        <if test="barnId != null">AND tracks.current_barn_id = #{barnId}</if>
+        <if test="barnName != null">AND tracks.current_barn_name = #{barnName}</if>
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="countSales" parameterType="map" resultType="long">
+        SELECT count(*)
+        FROM v_doctor_sales
+        WHERE 1 = 1
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="batch != null">AND batch_no = #{batch}</if>
+        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="barnName != null">AND barn_name = #{barnName}</if>
+        <if test="client != null">AND customer_id = #{client}</if>
+        <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+    </select>
+
+    <select id="findSalesEvent" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
+        SELECT
+        batch_no AS batch,
+        barn_name AS barnName,
+        event_at AS salesDate,
+        quantity AS pigNumber,
+        weight AS pigWeight,
+        price AS pigPrice,
+        amount AS pigAmount,
+        customer_name AS client
+        FROM v_doctor_sales
+        WHERE 1 =1
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="batch != null">AND batch_no = #{batch}</if>
+        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="barnName != null">AND barn_name = #{barnName}</if>
+        <if test="client != null">AND customer_id = #{client}</if>
+        <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+        limit #{offset}, #{limit}
     </select>
 </mapper>

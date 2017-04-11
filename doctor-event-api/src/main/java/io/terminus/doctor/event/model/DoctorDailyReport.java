@@ -60,7 +60,12 @@ public class DoctorDailyReport implements Serializable {
      * 育肥猪存栏
      */
     private int fattenCount;
-    
+
+    /**
+     * 后备猪存栏
+     */
+    private int houbeiCount;
+
     /**
      * 日报数据，json存储
      * @see DoctorDailyReportDto

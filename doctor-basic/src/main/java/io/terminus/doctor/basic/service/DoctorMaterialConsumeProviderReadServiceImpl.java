@@ -207,9 +207,20 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
 
     @Override
     public Response<List<DoctorMaterialConsumeProvider>> findMaterialConsume(Long farmId, Long wareHouseId, Long materialId, String materialName,
-                                                                             Long barnId, Long type, Date startDate, Date endDate, Integer pageNo, Integer size) {
+                                                                             Long barnId, Long materialType, String barnName, Long type, Date startDate, Date endDate, Integer pageNo, Integer size) {
         try {
-            return Response.ok(doctorMaterialConsumeProviderDao.findMaterialConsumeReports(farmId, wareHouseId, materialId, materialName, barnId, type, startDate, endDate, pageNo, size));
+            return Response.ok(doctorMaterialConsumeProviderDao.findMaterialConsumeReports(farmId, wareHouseId, materialId, materialName, barnId, materialType, barnName, type, startDate, endDate, pageNo, size));
+        }catch (Exception e){
+            log.error("findMaterialConsume failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("findMaterialConsume.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorMaterialConsumeProvider>> pagingfindMaterialConsume(Long farmId, Long wareHouseId, Long materialId, String materialName, Long barnId, Long type, Date startDate, Date endDate, Integer pageNo, Integer size) {
+        try {
+            PageInfo pageInfo = new PageInfo(pageNo, size);
+            return Response.ok(doctorMaterialConsumeProviderDao.pagingFindMaterialConsumeReports(farmId, wareHouseId, materialId, materialName, barnId, type, startDate, endDate, pageInfo.getOffset(), pageInfo.getLimit()));
         }catch (Exception e){
             log.error("findMaterialConsume failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("findMaterialConsume.fail");

@@ -3,9 +3,7 @@ package io.terminus.doctor.event.service;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespWithEx;
-import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
-import io.terminus.doctor.event.dto.DoctorSowParityCount;
-import io.terminus.doctor.event.dto.DoctorSuggestPig;
+import io.terminus.doctor.event.dto.*;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
@@ -179,4 +177,22 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<List<Long>> findPigIdsBy(Map<String, Object> criteria);
+
+    /**
+     * 获取母猪事件的npd
+     * @param map
+     * @param offset
+     * @param limit
+     * @return
+     */
+    Response<Paging<DoctorNpdExportDto>> pagingFindNpd(Map<String, Object> map, Integer offset, Integer limit);
+
+    /**
+     * 查询猪的销售情况
+     * @param map
+     * @param offset
+     * @param limit
+     * @return
+     */
+    Response<Paging<DoctorPigSalesExportDto>> pagingFindSales(Map<String, Object> map, Integer offset, Integer limit);
 }

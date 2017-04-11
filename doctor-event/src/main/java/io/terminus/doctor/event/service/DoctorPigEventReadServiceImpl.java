@@ -17,10 +17,7 @@ import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
-import io.terminus.doctor.event.dto.DoctorSowParityCount;
-import io.terminus.doctor.event.dto.DoctorSuggestPig;
-import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
+import io.terminus.doctor.event.dto.*;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -37,11 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -367,6 +360,28 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         } catch (Exception e) {
             log.error("find.pigIds.by.event, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find pigIds by type failed");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorNpdExportDto>> pagingFindNpd(Map<String, Object> map, Integer offset, Integer limit) {
+        try {
+            PageInfo pageInfo = new PageInfo(offset, limit);
+            return Response.ok(doctorPigEventDao.sumNpdWeanEvent(map, pageInfo.getOffset(), pageInfo.getLimit()));
+        }catch (Exception e) {
+            log.error("find.npd.event, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find npd event fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorPigSalesExportDto>> pagingFindSales(Map<String, Object> map, Integer offset, Integer limit) {
+        try {
+            PageInfo pageInfo = new PageInfo(offset, limit);
+            return Response.ok(doctorPigEventDao.findSalesEvent(map, pageInfo.getOffset(), pageInfo.getLimit()));
+        }catch (Exception e) {
+            log.error("find.sales.event, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find sales fail");
         }
     }
 }

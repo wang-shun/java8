@@ -245,7 +245,6 @@ public class DoctorGroupEventListener implements EventListener {
             doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoHoubei);
             return;
         }
-
         int nursery = doctorKpiDao.getSaleNursery(farmId, startAt, endAt);
         long base10 = doctorKpiDao.getGroupSaleBasePrice10(farmId, startAt, endAt);
         long base15 = doctorKpiDao.getGroupSaleBasePrice15(farmId, startAt, endAt);

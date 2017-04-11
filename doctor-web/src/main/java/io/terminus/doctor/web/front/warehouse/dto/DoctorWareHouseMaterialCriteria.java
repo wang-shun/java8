@@ -20,9 +20,13 @@ public class DoctorWareHouseMaterialCriteria implements Serializable {
 
     private String materialName;
 
+    private Long materialType;
+
     private Long type;
 
     private Long barnId;
+
+    private String barnName;
 
     private String startDate;
 

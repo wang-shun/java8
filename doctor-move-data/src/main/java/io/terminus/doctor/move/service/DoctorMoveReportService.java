@@ -135,6 +135,7 @@ public class DoctorMoveReportService {
         report.setFarrowCount(group.getFarrowCount());      // 当天产房仔猪存栏
         report.setNurseryCount(group.getNurseryCount());    // 当天保育猪存栏
         report.setFattenCount(group.getFattenCount());      // 当天育肥猪存栏
+        report.setHoubeiCount(group.getHoubeiCount());      // 当天后备猪的存栏
         report.setSowCount(sow.getBuruSow() + sow.getKonghuaiSow() + sow.getPeihuaiSow());     // 当天母猪存栏
         report.setData(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(getDailyReportDto(farmId, group, sow, boar)));
         return report;
@@ -149,6 +150,7 @@ public class DoctorMoveReportService {
         dto.getLiveStock().setFarrow(group.getFarrowCount());
         dto.getLiveStock().setNursery(group.getNurseryCount());
         dto.getLiveStock().setFatten(group.getFattenCount());
+        dto.getLiveStock().setHoubeiBoar(group.getHoubeiCount());
 
         //注意下面的存栏都是当天的存栏
         dto.getLiveStock().setBoar(boar.getQuantity());

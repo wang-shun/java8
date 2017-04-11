@@ -117,5 +117,15 @@ public interface DoctorMaterialConsumeProviderReadService {
      * @param farmId 公司Id
      */
     Response<List<DoctorMaterialConsumeProvider>> findMaterialConsume(Long farmId, Long wareHouseId, Long materialId, String materialName,
-                                                                      Long barnId, Long type, Date startDate, Date endDate ,Integer pageNo, Integer size);
+                                                                      Long barnId, Long materialType, String barnName, Long type, Date startDate, Date endDate ,Integer pageNo, Integer size);
+
+    /**
+     * 根据事件的时间查询事件中物料的统计数据
+     * 添加分页
+     * @param startDate 事件开始时间
+     * @param endDate 事件结束时间
+     * @param farmId 公司Id
+     */
+    Response<Paging<DoctorMaterialConsumeProvider>> pagingfindMaterialConsume(Long farmId, Long wareHouseId, Long materialId, String materialName,
+                                                                              Long barnId, Long type, Date startDate, Date endDate ,Integer pageNo, Integer size);
 }

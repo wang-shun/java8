@@ -46,6 +46,28 @@ export.tables:
       - name: providerFactoryName
         display: 供应商
 
+  web-sow-npd:
+    display: 非生产天数明细表
+    columns:
+      - name: pigCode
+        display: 猪号
+      - name: barnName
+        display: 猪舍
+      - name: jpnpd
+        display: 进场到配种
+      - name: dpnpd
+        display: 断奶到配种
+      - name: pfnpd
+        display: 配种到返情
+      - name: plnpd
+        display: 配种到流产
+      - name: psnpd
+        display: 配种到死亡
+      - name: ptnpd
+        display: 配种到淘汰
+      - name: npd
+        display: 总和
+
   web-wareHouse-details:
     display: 物料明细报表
     columns:

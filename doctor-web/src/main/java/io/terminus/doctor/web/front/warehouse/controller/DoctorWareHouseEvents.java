@@ -176,7 +176,7 @@ public class DoctorWareHouseEvents {
     }
 
     public List<DoctorWareHouseMaterialData> wareHouseMaterialHandle(Map<String, String> params) {
-        List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData1 =    materialExportData(params, 0);
+        List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData1 = materialExportData(params, 0);
         List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData2 = materialExportData(params, 1);
         List<DoctorWareHouseMaterialData> doctorWareHouseMaterialData = Lists.newArrayList();
         for (DoctorWareHouseMaterialData doctorDate1 : doctorWareHouseMaterialData1) {
@@ -585,16 +585,12 @@ public class DoctorWareHouseEvents {
      * @return 导出数据集
      */
     public List<DoctorWareHouseMaterialData> materialExportData(Map<String, String> criteriaMap, Integer num) {
-        Date startDate = null;
+
+        Date startDate = DateUtil.toYYYYMM(criteriaMap.get("startAt"));
         Date endDate = null;
-        String eventDate = criteriaMap.get("startAt") + "-01 00:00:00";
         if (num == 1) {
 
-            startDate = DateUtil.monthStart(DateUtil.stringToDate(eventDate));
             startDate = DateUtils.addMonths(startDate, 1);
-        }
-        if (num == 0) {
-            startDate = DateUtil.monthStart(DateUtil.stringToDate(eventDate));
         }
         DoctorWareHouseMaterialCriteria criteria = BeanMapper.map(criteriaMap, DoctorWareHouseMaterialCriteria.class);
         criteria.setStartDate(DateUtil.toDateTimeString(startDate));
@@ -615,6 +611,8 @@ public class DoctorWareHouseEvents {
                 criteria.getMaterialId(),
                 criteria.getMaterialName(),
                 criteria.getBarnId(),
+                criteria.getMaterialType(),
+                criteria.getBarnName(),
                 criteria.getType(),
                 DateUtil.stringToDate(criteria.getStartDate()),
                 DateUtil.stringToDate(criteria.getEndDate()),
@@ -772,18 +770,40 @@ public class DoctorWareHouseEvents {
     /**
      * 物料的详细情况导出
      * @param params
-     * @param request
-     * @param response
      */
 
     @RequestMapping(value = "/ware/details", method = RequestMethod.GET)
     @ResponseBody
-    public void pagingWareHouseMaterialDetails(@RequestParam Map<String, String> params,
-                                          HttpServletRequest request,
-                                          HttpServletResponse response) {
+    public Paging<DoctorMaterialDatailsExportDto> pagingWareHouseMaterialDetails(@RequestParam Map<String, String> params) {
 
+        return wareHouseMaterExport(params);
+    }
+
+    /**
+     * 物料的详细情况导出
+     * @param params
+     * @param request
+     * @param response
+     */
+
+    @RequestMapping(value = "/ware/details/export", method = RequestMethod.GET)
+    @ResponseBody
+    public void pagingWareHouseMaterialDetailsExport(@RequestParam Map<String, String> params,
+                                               HttpServletRequest request,
+                                               HttpServletResponse response) {
         exporter.export("web-wareHouse-details", params, 1, 500, this::wareHouseMaterExport, request, response);
 
+    }
+
+    /**
+     *
+     * @param params
+     * @return
+     */
+    @RequestMapping(value = "/ware/use", method = RequestMethod.GET)
+    @ResponseBody
+    public Paging<DoctorMaterialDatailsExportDto> pagingWareHouseMaterialUse(@RequestParam Map<String, String> params) {
+         return wareHouseMaterExport(params);
     }
 
     /**
@@ -793,19 +813,20 @@ public class DoctorWareHouseEvents {
      * @param response
      * @return
      */
-    @RequestMapping(value = "/ware/use", method = RequestMethod.GET)
+    @RequestMapping(value = "/ware/use/export", method = RequestMethod.GET)
     @ResponseBody
-    public void pagingWareHouseMaterialUse(@RequestParam Map<String, String> params,
-                                                                                 HttpServletRequest request,
-                                                                                 HttpServletResponse response) {
+    public void pagingWareHouseMaterialUseExport(@RequestParam Map<String, String> params,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response) {
 
         exporter.export("web-wareHouse-use", params, 1, 500, this::wareHouseMaterExport, request, response);
+
     }
 
     public Paging<DoctorMaterialDatailsExportDto> wareHouseMaterExport(Map<String, String> params) {
 
-        Date startDate = DateUtil.stringToDate(params.get("startDate"));
-        Date endDate = DateUtil.stringToDate(params.get("endDate"));
+        Date startDate = DateUtil.toDate(params.get("startDate"));
+        Date endDate = DateUtil.toDate(params.get("endDate"));
         DoctorWareHouseMaterialCriteria criteria = BeanMapper.map(params, DoctorWareHouseMaterialCriteria.class);
         criteria.setStartDate(DateUtil.toDateTimeString(startDate));
         criteria.setEndDate(DateUtil.toDateTimeString(endDate));
@@ -818,6 +839,8 @@ public class DoctorWareHouseEvents {
                 criteria.getMaterialId(),
                 criteria.getMaterialName(),
                 criteria.getBarnId(),
+                criteria.getMaterialType(),
+                criteria.getBarnName(),
                 criteria.getType(),
                 DateUtil.stringToDate(criteria.getStartDate()),
                 DateUtil.stringToDate(criteria.getEndDate()),
