@@ -196,7 +196,9 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     @Override
     public RespWithEx<Boolean> elicitPigTrack(@NotNull(message = "pig.id.not.null") Long pigId) {
         try {
-            doctorEditPigEventService.elicitPigTrack(pigId);
+            try {
+                doctorEditPigEventService.elicitPigTrack(pigId);
+            } catch (Exception e) {}
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
             log.error("elicit pig track failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
@@ -219,8 +221,9 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
                 if (pigIdList.isEmpty()) {
                     continue;
                 }
-                pigIdList.forEach(pigId -> {
+                pigIdList.forEach(pigId -> { try {
                     doctorEditPigEventService.elicitPigTrack(pigId);
+                } catch (Exception e) {}
                 });
             }
             return RespWithEx.ok(Boolean.TRUE);

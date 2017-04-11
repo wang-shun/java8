@@ -251,6 +251,9 @@ public class DoctorPigEvents {
                         if (Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK.getKey()) && doctorPigEvent.getPregCheckResult() != null) {
                             extraMap.put("checkResult", PregCheckResult.from(doctorPigEvent.getPregCheckResult()).getDesc());
                         }
+                        if( Objects.equals(doctorPigEvent.getType(), PigEvent.ENTRY.getKey()) && doctorPigEvent.getExtraMap().containsKey("boarType")){
+                            extraMap.put("boarTypeName", BoarEntryType.from(Integer.valueOf(extraMap.get("boarType").toString())).getDesc());
+                        }
                         doctorPigEvent.setExtraMap(extraMap);
                         DoctorPigEventDetail detail = OBJECT_MAPPER.convertValue(doctorPigEvent, DoctorPigEventDetail.class);
 

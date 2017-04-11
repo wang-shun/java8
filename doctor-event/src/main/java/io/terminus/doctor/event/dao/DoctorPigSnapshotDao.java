@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import org.springframework.stereotype.Repository;
@@ -64,5 +65,23 @@ public class DoctorPigSnapshotDao extends MyBatisDao<DoctorPigSnapshot>{
      */
     public void deleteForPigId(Long pigId) {
         getSqlSession().delete(sqlId("deleteForPigId"), pigId);
+    }
+
+    /**
+     * 从这个事件来的镜像列表
+     * @param fromEventId 原事件
+     * @return 镜像列表
+     */
+    public List<DoctorPigSnapshot> findByFromEventId(Long fromEventId) {
+        return getSqlSession().selectList(sqlId("findByFromEventId"), fromEventId);
+    }
+
+    /**
+     *
+     * @param ids
+     * @param newFromEventId
+     */
+    public void updateFromEventIdByFromEventId(List<Long> ids, Long newFromEventId) {
+        getSqlSession().update(sqlId("updateFromEventIdByFromEventId"), ImmutableMap.of("ids", ids, "newFromEventId", newFromEventId));
     }
 }

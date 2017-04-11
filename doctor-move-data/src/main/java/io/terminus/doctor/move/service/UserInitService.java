@@ -1,6 +1,5 @@
 package io.terminus.doctor.move.service;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -43,6 +42,7 @@ import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
+import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.address.model.Address;
 import io.terminus.parana.user.impl.address.dao.AddressDao;
@@ -62,8 +62,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.*;
 
 /**
  * Created by chenzenghui on 16/8/3.
@@ -154,12 +153,27 @@ public class UserInitService {
         for (DoctorMoveFarmInfo farmInfo : moveFarmInfoList) {
             log.info("===farmInfo:{}", farmInfo);
             // 主账号注册,内含事务
-            User primaryUser = this.registerByMobile(farmInfo.getMobile(), "123456", farmInfo.getLoginName(), farmInfo.getRealName());
+            User primaryUser;
+            Response<User> result = doctorUserReadService.findBy(farmInfo.getMobile(), LoginType.MOBILE);
+            if(result.isSuccess() && result.getResult() != null){
+                primaryUser = result.getResult();
+                primaryUser.setName(farmInfo.getLoginName());
+                primaryUser.setPassword(EncryptUtil.encrypt("123456"));
+                primaryUser.setStatus(UserStatus.NORMAL.value());
+                primaryUser.setType(UserType.FARM_ADMIN_PRIMARY.value());
+                primaryUser.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
+                Map<String, String> userExtraMap = Maps.newHashMap();
+                userExtraMap.put("realName", farmInfo.getRealName());
+                primaryUser.setExtra(userExtraMap);
+                userWriteService.update(primaryUser);
+            } else {
+                primaryUser = this.registerByMobile(farmInfo.getMobile(), "123456", farmInfo.getLoginName(), farmInfo.getRealName());
+                //初始化服务状态
+                this.initDefaultServiceStatus(primaryUser.getId());
+                //初始化服务的申请审批状态
+                this.initServiceReview(primaryUser.getId(), primaryUser.getMobile(), primaryUser.getName());
+            }
             Long userId = primaryUser.getId();
-            //初始化服务状态
-            this.initDefaultServiceStatus(userId);
-            //初始化服务的申请审批状态
-            this.initServiceReview(userId, primaryUser.getMobile(), primaryUser.getName());
             DoctorFarm farm = nameFarmMap.get(farmInfo.getNewFarmName());
             log.info("===farm:{}", farm);
             //创建猪场
@@ -199,7 +213,10 @@ public class UserInitService {
             Map<String, Long> roleId = this.createSubRole(farm.getId(), primaryUser.getId(), dataSourceId);
             //现在轮到子账号了
             for (View_FarmMember member : list) {
-                if(member.getLevels() == 1 && Objects.equals(member.getFarmName(), farmInfo.getOldFarmName())){
+                if(member.getLevels() == 1
+                        && Objects.equals(member.getFarmName(), farmInfo.getOldFarmName())
+                        && !Objects.equals(member.getMobilPhone(), primaryUser.getMobile())
+                        && !Objects.equals(member.getMobilPhone(), "13523756995")){
                     this.createSubUser(member, roleId, primaryUser.getId(), primaryUser.getMobile(), farm.getId(), farm.getOutId());
                 }
             }
@@ -346,7 +363,7 @@ public class UserInitService {
         final String appKey = "MOBILE";
         RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUserId, farmId));
         // key = roleName, value = roleId
-        Map<String, Long> existRole = subRoleDao.findByUserIdAndStatus(appKey, primaryUserId, 1).stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
+        Map<String, Long> existRole = subRoleDao.findByFarmIdAndStatus(appKey, farmId, 1).stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
 
         List<RoleTemplate> roleTemplates = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, RoleTemplate.class, DoctorMoveTableEnum.RoleTemplate));
 
@@ -368,14 +385,27 @@ public class UserInitService {
     }
 
     private void createSubUser(View_FarmMember member, Map<String, Long> roleIdMap, Long primaryUserId, String primaryUserMobile, Long farmId, String staffoutId){
-        User subUser = new User();
+        log.info("createSubUser:member:{}, primaryUserId:{}, farm:{}", member, primaryUserId, farmId);
+        User subUser;
         DoctorFarm farm = doctorFarmDao.findById(farmId);
-        subUser.setName(member.getLoginName() + "@" + farm.getFarmCode());
-        subUser.setPassword("123456");
+        String name = member.getLoginName() + "@" + farm.getFarmCode();
+
+        Response<User> result = doctorUserReadService.findBy(member.getMobilPhone(), LoginType.MOBILE);
+        Response<User> userResponse = doctorUserReadService.findBy(name, LoginType.NAME);
+        if(result.isSuccess() && result.getResult() != null) {
+            subUser = result.getResult();
+        } else if(userResponse.isSuccess() && userResponse.getResult() != null) {
+            subUser = userResponse.getResult();
+        } else {
+            subUser = new User();
+        }
+        subUser.setName(name);
+        subUser.setMobile(member.getMobilPhone());
+        subUser.setPassword(EncryptUtil.encrypt("123456"));
         subUser.setType(UserType.FARM_SUB.value());
-        if(Objects.equals(member.getIsStopUse(), "true")){
+        if (Objects.equals(member.getIsStopUse(), "true")) {
             subUser.setStatus(UserStatus.LOCKED.value());
-        }else{
+        } else {
             subUser.setStatus(UserStatus.NORMAL.value());
         }
 
@@ -384,22 +414,29 @@ public class UserInitService {
 
         subUser.setExtra(MapBuilder.<String, String>of()
                 .put("pid", primaryUserId.toString())
-                .put("contact", "")
+                .put("contact", member.getMobilPhone())
                 .put("realName", member.getOrganizeName())
                 .map());
-        Long subUserId = RespHelper.or500(userWriteService.create(subUser));
-
-        // 设置下子账号的状态
-        if(Objects.equals(member.getIsStopUse(), "true")){
-            Sub sub = subDao.findByUserId(subUserId);
-            sub.setStatus(Sub.Status.ABSENT.value());
-            subDao.update(sub);
+        log.info("subUser:{}", subUser);
+        if(notNull(subUser.getId())) {
+            userWriteService.update(subUser);
+        } else {
+            userWriteService.create(subUser);
         }
+        Long subUserId = subUser.getId();
+        // 设置下子账号的状态和关联猪场
+        Sub sub = subDao.findByUserId(subUserId);
+        sub.setFarmId(farmId);
+        if(Objects.equals(member.getIsStopUse(), "true")){
+            sub.setStatus(Sub.Status.ABSENT.value());
+        }
+        subDao.update(sub);
 
         //现在是数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
         permission.setUserId(subUserId);
-        permission.setFarmIds(Joiner.on(",").join(Lists.newArrayList(farmId)));
+        permission.setFarmIds(farmId.toString());
+        permission.setOrgIds(farm.getOrgId().toString());
         doctorUserDataPermissionDao.create(permission);
     }
 
