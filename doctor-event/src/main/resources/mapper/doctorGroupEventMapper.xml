@@ -235,6 +235,20 @@
                 #{i}
             </foreach>
         </if>
+
+        <if test="pigTypes != null &amp;&amp; pigTypes.size() > 0">
+            AND `pig_type` IN
+            <foreach collection="pigTypes" item="pigType" open="(" close=")" separator=",">
+                #{pigType}
+            </foreach>
+        </if>
+
+        <if test="changeTypeIds != null &amp;&amp; changeTypeIds.size() > 0">
+            AND `change_type_id` IN
+            <foreach collection="changeTypeIds" item="changeTypeId" open="(" close=")" separator=",">
+                #{changeTypeId}
+            </foreach>
+        </if>
     </sql>
     <insert id="create" parameterType="DoctorGroupEvent" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
