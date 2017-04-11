@@ -420,12 +420,13 @@ public class UserInitService {
             userWriteService.create(subUser);
         }
         Long subUserId = subUser.getId();
-        // 设置下子账号的状态
+        // 设置下子账号的状态和关联猪场
+        Sub sub = subDao.findByUserId(subUserId);
+        sub.setFarmId(farmId);
         if(Objects.equals(member.getIsStopUse(), "true")){
-            Sub sub = subDao.findByUserId(subUserId);
             sub.setStatus(Sub.Status.ABSENT.value());
-            subDao.update(sub);
         }
+        subDao.update(sub);
 
         //现在是数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
