@@ -397,7 +397,7 @@ public class UserInitService {
             subUser = new User();
         }
         subUser.setName(name);
-        subUser.setPassword("123456");
+        subUser.setPassword(EncryptUtil.encrypt("123456"));
         subUser.setType(UserType.FARM_SUB.value());
         if (Objects.equals(member.getIsStopUse(), "true")) {
             subUser.setStatus(UserStatus.LOCKED.value());
