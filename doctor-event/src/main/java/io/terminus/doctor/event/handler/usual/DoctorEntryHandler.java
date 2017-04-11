@@ -63,7 +63,6 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.YES.getValue())) {
             createEventRelation(executeEvent, oldEventId);
         }
-
         //2.创建或更新track
         DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
         if (Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
@@ -72,12 +71,10 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         } else {
             doctorPigTrackDao.create(toTrack);
         }
-        //3.创建镜像
-        createPigSnapshot(toTrack, executeEvent, 0L);
-
-        //4.特殊处理
+        //3.特殊处理
         specialHandle(executeEvent, toTrack);
-
+        //4.创建镜像
+        createPigSnapshot(toTrack, executeEvent, 0L);
         //5.记录发生的事件信息
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(executeEvent.getOrgId())
