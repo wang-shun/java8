@@ -865,6 +865,7 @@ public class DoctorMoveDataService {
         if (barn != null) {
             sowEvent.setBarnId(barn.getId());
             sowEvent.setBarnName(barn.getName());
+            sowEvent.setBarnType(barn.getPigType());
         }
         return getSowEventExtra(eventType, sowEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap, boarMap, vaccMap);
     }
@@ -921,6 +922,9 @@ public class DoctorMoveDataService {
                 disease.setDiseaseName(event.getDiseaseName());
                 disease.setDiseaseStaff(event.getStaffName());
                 disease.setDiseaseRemark(event.getRemark());
+                DoctorBasicMaterial vaccBasic1 = vaccMap.get(event.getDisease());
+                sowEvent.setBasicId(notNull(vaccBasic1) ? vaccBasic1.getId() : null);
+                sowEvent.setBasicName(event.getDisease());
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(disease));
                 break;
             case VACCINATION:   //防疫
@@ -934,6 +938,10 @@ public class DoctorMoveDataService {
                 vacc.setVaccinationStaffId(subMap.get(event.getChgReason()));
                 vacc.setVaccinationStaffName(event.getStaffName());
                 vacc.setVaccinationRemark(event.getRemark());
+                sowEvent.setVaccinationId(vacc.getVaccinationId());
+                sowEvent.setVaccinationName(vacc.getVaccinationName());
+                sowEvent.setOperatorId(vacc.getVaccinationStaffId());
+                sowEvent.setOperatorName(vacc.getVaccinationStaffName());
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(vacc));
                 break;
             case REMOVAL:       //离场
@@ -944,17 +952,27 @@ public class DoctorMoveDataService {
                 sowEvent.setAmount(removal.getSum());
                 break;
             case ENTRY:         //进场
+                DoctorFarmEntryDto farmEntryDto = getSowEntryExtra(event, basicMap, barnMap);
+                sowEvent.setSource(farmEntryDto.getSource());
+                sowEvent.setBreedId(farmEntryDto.getBreed());
+                sowEvent.setBreedName(farmEntryDto.getBreedName());
+                sowEvent.setBreedTypeId(farmEntryDto.getBreedType());
+                sowEvent.setBreedTypeName(farmEntryDto.getBreedTypeName());
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(getSowEntryExtra(event, basicMap, barnMap)));
                 break;
             case MATING:        //配种
                 DoctorMatingDto mating = getSowMatingExtra(event, boarMap, subMap);
                 sowEvent.setMattingDate(event.getEventAt());                //配种时间
+                sowEvent.setJudgePregDate(mating.getJudgePregDate());
+                sowEvent.setMateType(mating.getMatingType());
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(mating));
                 break;
             case PREG_CHECK:    //妊娠检查
                 DoctorPregChkResultDto checkResult = getSowPregCheckExtra(event);
                 sowEvent.setPregCheckResult(checkResult.getCheckResult());  //妊娠检查结果
                 sowEvent.setCheckDate(event.getEventAt());                  //检查时间
+                sowEvent.setBasicId(checkResult.getAbortionReasonId());
+                sowEvent.setBasicName(checkResult.getAbortionReasonName());
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(checkResult));
                 break;
             case FARROWING:     //分娩
@@ -978,12 +996,22 @@ public class DoctorMoveDataService {
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(wean));
                 break;
             case FOSTERS:       //拼窝
-                sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(getSowFosterExtra(event, basicMap)));
+                DoctorFostersDto fostersDto = getSowFosterExtra(event, basicMap);
+                sowEvent.setQuantity(fostersDto.getFostersCount());
+                sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(fostersDto));
                 break;
             case FOSTERS_BY:    //被拼窝
+                DoctorFostersDto fostersDto1 = getSowFosterExtra(event, basicMap);
+                sowEvent.setQuantity(fostersDto1.getFostersCount());
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(getSowFosterExtra(event, basicMap)));
                 break;
             case PIGLETS_CHG:   //仔猪变动
+                DoctorPigletsChgDto pigletsChgDto = getSowPigletChangeExtra(event, basicMap, changeReasonMap, customerMap);
+                sowEvent.setQuantity(pigletsChgDto.getPigletsCount());
+                sowEvent.setWeight(pigletsChgDto.getPigletsWeight());
+                sowEvent.setPrice(pigletsChgDto.getPigletsPrice());
+                sowEvent.setCustomerId(pigletsChgDto.getPigletsCustomerId());
+                sowEvent.setCustomerName(pigletsChgDto.getPigletsCustomerName());
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(getSowPigletChangeExtra(event, basicMap, changeReasonMap, customerMap)));
                 break;
             default:
@@ -1715,6 +1743,7 @@ public class DoctorMoveDataService {
         if (barn != null) {
             boarEvent.setBarnId(barn.getId());
             boarEvent.setBarnName(barn.getName());
+            boarEvent.setBarnType(barn.getPigType());
         }
         return getBoarEventExtra(eventType, boarEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap, vaccMap);
     }

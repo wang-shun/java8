@@ -70,7 +70,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
 
         //查找最近一次配种事件
         DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-        expectTrue(notNull(doctorPigTrack), "preg.last.mate.not.null", inputDto.getPigId());
+        expectTrue(notNull(lastMate), "preg.last.mate.not.null", inputDto.getPigId());
         if (!Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
             DateTime mattingDate = new DateTime(lastMate.getEventAt());
             int npd = Math.abs(Days.daysBetween(checkDate, mattingDate).getDays());
@@ -85,6 +85,8 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
                 doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
             } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
                 //流产对应的plNPD
+                doctorPigEvent.setBasicId(pregChkResultDto.getAbortionReasonId());
+                doctorPigEvent.setBasicName(pregChkResultDto.getAbortionReasonName());
                 doctorPigEvent.setPlnpd(doctorPigEvent.getPlnpd() + npd);
                 doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
             }

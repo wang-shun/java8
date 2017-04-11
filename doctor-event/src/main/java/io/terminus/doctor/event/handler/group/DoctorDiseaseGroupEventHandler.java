@@ -55,11 +55,13 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         //2.创建疾病事件
         DoctorGroupEvent<DoctorDiseaseGroupEvent> event = dozerGroupEvent(group, GroupEventType.DISEASE, disease);
 
-
+        event.setBasicId(disease.getDiseaseId());
+        event.setBasicName(disease.getDiseaseName());
         event.setQuantity(disease.getQuantity());
         event.setExtraMap(diseaseEvent);
         event.setEventSource(SourceType.INPUT.getValue());
-
+        event.setOperatorId(disease.getDoctorId());
+        event.setOperatorName(disease.getDoctorName());
         return event;
     }
 

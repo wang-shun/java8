@@ -102,6 +102,8 @@ public class DoctorGroupManager {
         //2. 创建新建猪群事件
         DoctorGroupEvent<DoctorNewGroupEvent> groupEvent = getNewGroupEvent(group, newGroupInput);
         groupEvent.setEventSource(SourceType.INPUT.getValue());
+        groupEvent.setSowId(newGroupInput.getSowId());
+        groupEvent.setSowCode(newGroupInput.getSowCode());
         doctorGroupEventDao.create(groupEvent);
 
         //3. 创建猪群跟踪

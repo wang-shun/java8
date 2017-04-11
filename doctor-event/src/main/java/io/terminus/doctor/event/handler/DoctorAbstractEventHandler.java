@@ -152,7 +152,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
                 .pigId(inputDto.getPigId()).pigCode(inputDto.getPigCode())
                 .eventAt(generateEventAt(inputDto.eventAt())).type(inputDto.getEventType())
-                .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName())
+                .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName()).barnType(inputDto.getBarnType())
                 .kind(inputDto.getPigType()).relPigEventId(inputDto.getRelPigEventId()).relGroupEventId(inputDto.getRelGroupEventId())
                 .name(inputDto.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))
                 .operatorId(MoreObjects.firstNonNull(inputDto.getOperatorId(), basic.getStaffId()))
@@ -160,14 +160,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .isAuto(MoreObjects.firstNonNull(inputDto.getIsAuto(), IsOrNot.NO.getValue()))
                 .status(EventStatus.VALID.getValue()).eventSource(SourceType.INPUT.getValue()).isModify(IsOrNot.NO.getValue())
-                .npd(0)
-                .dpnpd(0)
-                .pfnpd(0)
-                .plnpd(0)
-                .psnpd(0)
-                .pynpd(0)
-                .ptnpd(0)
-                .jpnpd(0)
+                .npd(0).dpnpd(0).pfnpd(0).plnpd(0).psnpd(0).pynpd(0).ptnpd(0).jpnpd(0)
                 .build();
         doctorPigEvent.setRemark(inputDto.changeRemark());
         doctorPigEvent.setExtraMap(inputDto.toMap());

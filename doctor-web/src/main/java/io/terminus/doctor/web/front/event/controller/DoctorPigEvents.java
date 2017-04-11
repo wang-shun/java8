@@ -18,7 +18,11 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dto.*;
+import io.terminus.doctor.event.dto.DoctorNpdExportDto;
+import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.DoctorPigSalesExportDto;
+import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
+import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.MatingType;
@@ -34,7 +38,11 @@ import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.core.export.Exporter;
-import io.terminus.doctor.web.front.event.dto.*;
+import io.terminus.doctor.web.front.event.dto.DoctorGroupEventDetail;
+import io.terminus.doctor.web.front.event.dto.DoctorGroupEventExportData;
+import io.terminus.doctor.web.front.event.dto.DoctorPigEventDetail;
+import io.terminus.doctor.web.front.event.dto.DoctorPigEventExportData;
+import io.terminus.doctor.web.front.event.dto.DoctorPigEventPagingDto;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -236,6 +244,10 @@ public class DoctorPigEvents {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
+
+        if (StringUtils.isNotBlank((String)params.get("barnTypes"))) {
+            params.put("barnTypes", Splitters.UNDERSCORE.splitToList((String) params.get("barnTypes")));
+        }
         if (StringUtils.isNotBlank((String) params.get("endDate"))) {
             params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusMillis(1).toDate());
         }
@@ -422,6 +434,13 @@ public class DoctorPigEvents {
         }
         if (StringUtils.isNotBlank((String) params.get("endDate"))) {
             params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusMillis(1).toDate());
+        }
+        if (StringUtils.isNotBlank((String) params.get("pigTypes"))) {
+            params.put("pigTypes", Splitters.UNDERSCORE.splitToList((String)params.get("pigTypes")));
+        }
+
+        if (StringUtils.isNotBlank((String) params.get("changeTypeIds"))) {
+            params.put("changeTypeIds", Splitters.UNDERSCORE.splitToList((String)params.get("changeTypeIds")));
         }
         Response<Paging<DoctorGroupEvent>> pagingResponse = doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize);
         if (!pagingResponse.isSuccess()) {

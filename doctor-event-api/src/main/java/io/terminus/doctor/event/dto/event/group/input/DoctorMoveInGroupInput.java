@@ -115,6 +115,11 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     private Integer weakQty;
 
     /**
+     * 触发转入事件的母猪id
+     */
+    private Long sowId;
+
+    /**
      * 触发转入事件的母猪号
      */
     private String sowCode;

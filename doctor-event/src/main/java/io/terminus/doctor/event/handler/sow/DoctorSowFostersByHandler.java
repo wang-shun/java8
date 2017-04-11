@@ -5,6 +5,8 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFosterByDto;
@@ -48,6 +50,14 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
     private DoctorGroupDao doctorGroupDao;
 
     @Override
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        DoctorFosterByDto fosterByDto = (DoctorFosterByDto) inputDto;
+        doctorPigEvent.setQuantity(fosterByDto.getFosterByCount());
+        return doctorPigEvent;
+    }
+
+    @Override
     public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
         DoctorFosterByDto fosterByDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFosterByDto.class);
@@ -84,6 +94,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
     private Long groupSowEventCreate(List<DoctorEventInfo> eventInfoList, DoctorPigTrack pigTrack, DoctorFosterByDto fosterByDto, DoctorPigEvent doctorPigEvent) {
         //未断奶仔猪id
         DoctorTransGroupInput input = new DoctorTransGroupInput();
+        input.setSowId(fosterByDto.getFromSowId());
         input.setSowCode(fosterByDto.getFromSowCode());
         input.setToBarnId(pigTrack.getCurrentBarnId());
         input.setToBarnName(pigTrack.getCurrentBarnName());

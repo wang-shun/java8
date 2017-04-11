@@ -77,6 +77,8 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         //2.创建猪群变动事件
         DoctorGroupEvent<DoctorChangeGroupEvent> event = dozerGroupEvent(group, GroupEventType.CHANGE, change);
         event.setQuantity(change.getQuantity());
+        event.setCustomerId(change.getCustomerId());
+        event.setCustomerName(change.getCustomerName());
 
         event.setWeight(change.getWeight());            //总重
         event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
@@ -137,6 +139,8 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         DoctorGroupEvent<DoctorChangeGroupEvent> event = dozerGroupEvent(group, GroupEventType.CHANGE, change);
         event.setQuantity(change.getQuantity());
 
+        event.setSowId(change.getSowId());
+        event.setSowCode(change.getSowCode());
         event.setWeight(change.getWeight());            //总重
         event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
         event.setChangeTypeId(changeEvent.getChangeTypeId());   //变动类型id

@@ -112,6 +112,8 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         //2.创建转入猪群事件
         DoctorGroupEvent<DoctorMoveInGroupEvent> event = dozerGroupEvent(group, GroupEventType.MOVE_IN, moveIn);
+        event.setSowId(moveIn.getSowId());
+        event.setSowCode(moveIn.getSowCode());
         event.setQuantity(moveIn.getQuantity());
         event.setAvgDayAge(moveIn.getAvgDayAge());
         event.setAvgWeight(moveIn.getAvgWeight());
