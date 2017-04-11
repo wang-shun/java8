@@ -213,7 +213,10 @@ public class UserInitService {
             Map<String, Long> roleId = this.createSubRole(farm.getId(), primaryUser.getId(), dataSourceId);
             //现在轮到子账号了
             for (View_FarmMember member : list) {
-                if(member.getLevels() == 1 && Objects.equals(member.getFarmName(), farmInfo.getOldFarmName()) && !Objects.equals(member.getMobilPhone(), primaryUser.getMobile())){
+                if(member.getLevels() == 1
+                        && Objects.equals(member.getFarmName(), farmInfo.getOldFarmName())
+                        && !Objects.equals(member.getMobilPhone(), primaryUser.getMobile())
+                        && !Objects.equals(member.getMobilPhone(), "13523756995")){
                     this.createSubUser(member, roleId, primaryUser.getId(), primaryUser.getMobile(), farm.getId(), farm.getOutId());
                 }
             }
