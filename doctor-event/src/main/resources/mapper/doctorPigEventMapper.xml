@@ -1034,7 +1034,10 @@
         <include refid="criteria"/>
         AND kind = 1
         GROUP BY pig_id
-        ) number
+        ) number , `doctor_pig_tracks` tracks
+        WHERE number.pig_id = tracks.`pig_id`
+        <if test="barnId != null">AND tracks.current_barn_id = #{barnId}</if>
+        <if test="barnName != null">AND tracks.current_barn_name = #{barnName}</if>
 
     </select>
 
@@ -1068,6 +1071,7 @@
         ) dd , `doctor_pig_tracks` tracks
         WHERE
         dd.pig_id = tracks.`pig_id`
+        <if test="barnId != null">AND tracks.current_barn_id = #{barnId}</if>
         <if test="barnName != null">AND tracks.current_barn_name = #{barnName}</if>
         limit #{offset}, #{limit}
     </select>
