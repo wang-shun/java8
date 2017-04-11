@@ -853,6 +853,12 @@ public class DoctorMoveDataService {
 
         //事件类型, (如果是转舍类型, 重新判断后还会覆盖掉)
         PigEvent eventType = PigEvent.from(event.getEventName());
+        if (Objects.equals(event.getEventName(), "去分娩")) {
+            eventType = PigEvent.TO_FARROWING;
+        }
+        if (Objects.equals(event.getEventName(), "转入配种舍")) {
+            eventType = PigEvent.TO_MATING;
+        }
         sowEvent.setType(eventType == null ? null : eventType.getKey());
 
         DoctorBarn barn = barnMap.get(event.getBarnOutId());
