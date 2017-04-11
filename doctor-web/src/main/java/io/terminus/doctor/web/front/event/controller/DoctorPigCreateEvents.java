@@ -610,6 +610,7 @@ public class DoctorPigCreateEvents {
         inputDto.setPigType(pigDto.getPigType());
         inputDto.setBarnId(pigDto.getBarnId());
         inputDto.setBarnName(pigDto.getBarnName());
+        inputDto.setBarnType(pigDto.getBarnType());
         inputDto.setEventType(pigEvent.getKey());
         inputDto.setEventName(pigEvent.getName());
         inputDto.setEventDesc(pigEvent.getDesc());
@@ -623,6 +624,8 @@ public class DoctorPigCreateEvents {
      * @return
      */
     private BasePigEventInputDto buildEntryEventInput(BasePigEventInputDto inputDto, PigEvent pigEvent) {
+        DoctorBarn doctorBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(inputDto.getBarnId()));
+        inputDto.setBarnType(doctorBarn.getPigType());
         inputDto.setEventType(pigEvent.getKey());
         inputDto.setEventName(pigEvent.getName());
         inputDto.setEventDesc(pigEvent.getDesc());

@@ -733,6 +733,7 @@ public class DoctorImportDataService {
             doctorPigDao.create(boar);
 
             //公猪进场事件
+            DoctorBarn doctorBarn = doctorBarnDao.findById(boar.getInitBarnId());
             DoctorPigEvent boarEntryEvent = DoctorPigEvent.builder()
                     .orgId(boar.getOrgId())
                     .orgName(boar.getOrgName())
@@ -747,6 +748,7 @@ public class DoctorImportDataService {
                     .eventAt(boar.getInFarmDate())
                     .barnId(boar.getInitBarnId())
                     .barnName(boar.getInitBarnName())
+                    .barnType(doctorBarn.getPigType())
                     .creatorId(boar.getCreatorId())
                     .creatorName(boar.getCreatorName())
                     .operatorId(boar.getCreatorId())
@@ -1330,6 +1332,8 @@ public class DoctorImportDataService {
         event.setKind(DoctorPig.PigSex.SOW.getKey());
         event.setBarnId(sow.getInitBarnId());
         event.setBarnName(sow.getInitBarnName());
+        DoctorBarn doctorBarn = doctorBarnDao.findById(sow.getInitBarnId());
+        event.setBarnType(doctorBarn.getPigType());
         event.setRemark(info.getRemark());
         event.setStatus(EventStatus.VALID.getValue());
         return event;

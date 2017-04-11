@@ -48,6 +48,12 @@ public abstract class BasePigEventInputDto implements Serializable{
     private String barnName;
 
     /**
+     * 猪舍类型
+     * @see io.terminus.doctor.common.enums.PigType
+     */
+    private Integer barnType;
+
+    /**
      * @see io.terminus.doctor.event.enums.PigEvent
      */
     private Integer eventType;

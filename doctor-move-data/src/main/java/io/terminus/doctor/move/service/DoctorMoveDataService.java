@@ -859,6 +859,7 @@ public class DoctorMoveDataService {
         if (barn != null) {
             sowEvent.setBarnId(barn.getId());
             sowEvent.setBarnName(barn.getName());
+            sowEvent.setBarnType(barn.getPigType());
         }
         return getSowEventExtra(eventType, sowEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap, boarMap, vaccMap);
     }
@@ -1735,6 +1736,7 @@ public class DoctorMoveDataService {
         if (barn != null) {
             boarEvent.setBarnId(barn.getId());
             boarEvent.setBarnName(barn.getName());
+            boarEvent.setBarnType(barn.getPigType());
         }
         return getBoarEventExtra(eventType, boarEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap, vaccMap);
     }
