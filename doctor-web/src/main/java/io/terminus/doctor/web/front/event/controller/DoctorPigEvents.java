@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.std.DateTimeSerializerBase;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
@@ -516,13 +517,11 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/sales", method = RequestMethod.GET)
     @ResponseBody
     public Paging<DoctorPigSalesExportDto> pagingPigSales(@RequestParam Map<String, Object> pigEventCriteria, Integer pageNo, Integer pageSize, String date) {
-
-        Date startDate = DateUtil.toYYYYMM(date);
-        Date endDate = DateUtils.addMonths(startDate, 1);
-        endDate = DateUtils.addSeconds(endDate, -1);
+        DateTime dateTime = DateTime.parse(date);
+        String startDate = dateTime.toString(DateUtil.DATE);
+        String endDate = DateUtil.getMonthEnd(dateTime).toString(DateUtil.DATE);
         pigEventCriteria.put("startDate", startDate);
         pigEventCriteria.put("endDate", endDate);
         return RespHelper.or500(doctorPigEventReadService.pagingFindSales(pigEventCriteria, pageNo, pageSize));
     }
-
 }

@@ -1208,6 +1208,7 @@
         <if test="batch != null">AND batch_no = #{batch}</if>
         <if test="barnId != null">AND barn_id = #{barnId}</if>
         <if test="barnName != null">AND barn_name = #{barnName}</if>
+        <if test="pigTypeId != null">AND pig_type = #{pigTypeId}</if>
         <if test="client != null">AND customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
@@ -1229,6 +1230,7 @@
         <if test="batch != null">AND batch_no = #{batch}</if>
         <if test="barnId != null">AND barn_id = #{barnId}</if>
         <if test="barnName != null">AND barn_name = #{barnName}</if>
+        <if test="pigTypeId != null">AND pig_type = #{pigTypeId}</if>
         <if test="client != null">AND customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
