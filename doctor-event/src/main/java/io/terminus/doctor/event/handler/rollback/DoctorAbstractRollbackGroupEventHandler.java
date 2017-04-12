@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.rollback;
 
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
@@ -56,9 +57,10 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
      */
     @Override
     public final boolean canRollback(DoctorGroupEvent groupEvent) {
-        return Objects.equals(groupEvent.getIsAuto(), IsOrNot.NO.getValue()) &&
-                groupEvent.getEventAt().after(DateTime.now().plusMonths(-12).toDate()) &&
-                handleCheck(groupEvent);
+        return Objects.equals(groupEvent.getIsAuto(), IsOrNot.NO.getValue())
+                && Objects.equals(groupEvent.getEventSource(), SourceType.INPUT.getValue())
+                && groupEvent.getEventAt().after(DateTime.now().plusMonths(-12).toDate())
+                && handleCheck(groupEvent);
     }
 
     /**
