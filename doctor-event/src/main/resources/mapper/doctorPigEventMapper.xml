@@ -458,6 +458,7 @@
             #{item.outId},
             #{item.status},
             #{item.eventSource},
+            #{item.extra},
             #{item.source},
             #{item.breedId},
             #{item.breedName},
