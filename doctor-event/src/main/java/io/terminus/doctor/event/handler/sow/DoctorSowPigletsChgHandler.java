@@ -50,6 +50,8 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setQuantity(pigletsChgDto.getPigletsCount());
         doctorPigEvent.setWeight(pigletsChgDto.getPigletsWeight());
         doctorPigEvent.setPrice(pigletsChgDto.getPigletsPrice());
+        Double amount = doctorPigEvent.getPrice() * doctorPigEvent.getWeight();
+        doctorPigEvent.setAmount(amount.longValue());
         doctorPigEvent.setCustomerId(pigletsChgDto.getPigletsCustomerId());
         doctorPigEvent.setCustomerName(pigletsChgDto.getPigletsCustomerName());
         return doctorPigEvent;
