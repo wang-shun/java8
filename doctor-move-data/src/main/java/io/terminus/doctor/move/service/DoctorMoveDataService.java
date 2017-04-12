@@ -109,7 +109,9 @@ import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
+import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
@@ -2751,7 +2753,10 @@ public class DoctorMoveDataService {
         //2.删除猪场主账户以及员工的权限
         List<Long> userIdList = Lists.newArrayList();
         userIdList.addAll(subDao.findSubsByFarmId(farmId).stream().map(Sub::getUserId).collect(Collectors.toList()));
-        userIdList.add(primaryUserDao.findPrimaryByFarmId(farmId).getUserId());
+        PrimaryUser primaryUser = primaryUserDao.findPrimaryByFarmId(farmId);
+        if (notNull(primaryUser)) {
+            userIdList.add(primaryUserDao.findPrimaryByFarmId(farmId).getUserId());
+        }
         if (!userIdList.isEmpty()) {
             doctorUserDataPermissionDao.deletesByUserIds(userIdList);
         }
