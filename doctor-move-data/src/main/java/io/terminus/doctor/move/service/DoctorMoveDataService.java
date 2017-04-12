@@ -33,6 +33,7 @@ import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
@@ -111,7 +112,6 @@ import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
-import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
@@ -179,6 +179,8 @@ public class DoctorMoveDataService {
     private PrimaryUserDao primaryUserDao;
     @Autowired
     private DoctorUserDataPermissionDao doctorUserDataPermissionDao;
+    @Autowired
+    private DoctorPigTypeStatisticDao doctorPigTypeStatisticDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -2760,6 +2762,9 @@ public class DoctorMoveDataService {
         if (!userIdList.isEmpty()) {
             doctorUserDataPermissionDao.deletesByUserIds(userIdList);
         }
+
+        //3.删除statistics
+        doctorPigTypeStatisticDao.deleteByFarmId(farmId);
     }
 
     @Transactional
