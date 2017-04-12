@@ -8,6 +8,7 @@
 
     <sql id="criteria">
         AND status = 1
+        AND event_source != 5
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
         <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
