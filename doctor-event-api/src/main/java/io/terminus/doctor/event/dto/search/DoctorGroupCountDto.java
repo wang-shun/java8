@@ -11,6 +11,9 @@ import java.io.Serializable;
 public class DoctorGroupCountDto implements Serializable{
     private static final long serialVersionUID = 317216605312132405L;
 
+    /**
+     * 产房仔猪
+     */
     private Integer deliverPigCount;
 
     /**
@@ -18,7 +21,18 @@ public class DoctorGroupCountDto implements Serializable{
      */
     private Integer nurseryPigletCount;
 
+    /**
+     * 后备猪
+     */
     private Integer reserveCount;
 
+    /**
+     * 育肥猪
+     */
     private Integer fattenPigCount;
+
+    /**
+     * 上面总和
+     */
+    private Integer groupTotalCount;
 }
