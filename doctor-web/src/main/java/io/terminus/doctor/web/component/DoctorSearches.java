@@ -16,7 +16,6 @@ import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
@@ -25,6 +24,10 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorSuggestPig;
 import io.terminus.doctor.event.dto.GroupPigPaging;
+import io.terminus.doctor.event.dto.msg.DoctorMessageUserDto;
+import io.terminus.doctor.event.dto.search.DoctorGroupCountDto;
+import io.terminus.doctor.event.dto.search.DoctorLiveStockDto;
+import io.terminus.doctor.event.dto.search.DoctorPigCountDto;
 import io.terminus.doctor.event.dto.search.SearchedBarn;
 import io.terminus.doctor.event.dto.search.SearchedBarnDto;
 import io.terminus.doctor.event.dto.search.SearchedGroup;
@@ -37,10 +40,9 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorMessageUserReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
-import io.terminus.doctor.event.dto.msg.DoctorMessageUserDto;
-import io.terminus.doctor.event.service.DoctorMessageUserReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -105,6 +107,18 @@ public class DoctorSearches {
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorMessageUserReadService = doctorMessageUserReadService;
         this.doctorPigReadService = doctorPigReadService;
+    }
+
+    /**
+     * 获取猪场存栏状况
+     * @param farmId 猪场id
+     * @return 猪场存栏
+     */
+    @RequestMapping(value = "/getFarmLiveStock", method = RequestMethod.GET)
+    public DoctorLiveStockDto getFarmLiveStock(@RequestParam Long farmId) {
+        DoctorPigCountDto pigCountDto = RespHelper.or500(doctorPigReadService.getPigCount(farmId));
+        DoctorGroupCountDto groupCountDto = RespHelper.or500(doctorGroupReadService.findGroupCount(farmId));
+        return new DoctorLiveStockDto(pigCountDto, groupCountDto);
     }
 
     @RequestMapping(value = "/suggest/event", method = RequestMethod.GET)

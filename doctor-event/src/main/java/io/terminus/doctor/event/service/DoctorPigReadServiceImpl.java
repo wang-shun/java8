@@ -23,6 +23,7 @@ import io.terminus.doctor.event.dao.DoctorPigJoinDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.search.DoctorPigCountDto;
 import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -448,6 +449,20 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         } catch (Exception e) {
             log.error("getPigCountByBarnPigTypes failed, farmId:{}, pigTypes:{}, cause:{}", farmId, pigTypes, Throwables.getStackTraceAsString(e));
             return Response.ok(0L);
+        }
+    }
+
+    @Override
+    public Response<DoctorPigCountDto> getPigCount(@NotNull(message = "farmId.not.null") Long farmId) {
+        try {
+            DoctorPigCountDto pigCountDto = doctorPigJoinDao.findPigCount(farmId);
+            Integer sowTotalCount = pigCountDto.getFarrowCount() + pigCountDto.getKonghuaiCount() + pigCountDto.getPregCount();
+            pigCountDto.setBoarCount(doctorPigJoinDao.findBoarPigCount(farmId));
+            pigCountDto.setSowTotalCount(sowTotalCount);
+            return Response.ok(pigCountDto);
+        } catch (Exception e) {
+            log.error("getPigCount.failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("get.pig.count.failed");
         }
     }
 }
