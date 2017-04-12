@@ -87,4 +87,27 @@
         pig_code ASC
         LIMIT #{offset}, #{limit}
     </select>
+
+    <select id="findPigCount" parameterType="long" resultType="io.terminus.doctor.event.dto.search.DoctorPigCountDto">
+        select
+        ifnull(max(pregCount), 0) pregCount,
+        ifnull(max(konghuaiCount),0) konghuaiCount,
+        ifnull(max(farrowCount),0) farrowCount
+        from (
+        SELECT
+        (case status when 4 then count(1) end) pregCount,
+        (case status when 5 then count(1) end) konghuaiCount ,
+        (case status when 8 then count(1) end) farrowCount
+        FROM doctor_pig_tracks
+        WHERE farm_id = #{farmId}
+        GROUP BY status) t
+    </select>
+
+    <select id="findBoarPigCount" parameterType="long" resultType="int" >
+        SELECT count(1)
+        FROM doctor_pig_tracks
+        WHERE farm_id = #{farmId}
+        AND pig_type = 2
+        AND is_removal = 0
+    </select>
 </mapper>

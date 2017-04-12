@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.Constants;
+import io.terminus.doctor.event.dto.search.DoctorPigCountDto;
 import io.terminus.doctor.event.dto.search.SearchedPig;
 import org.springframework.stereotype.Repository;
 
@@ -33,5 +34,21 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
         params.put(Constants.VAR_LIMIT, limit);
         List<SearchedPig> datas = sqlSession.selectList(sqlId(PAGING), params);
         return new Paging<>(total, datas);
+    }
+
+    /**
+     * 获取状态母猪数量
+     * @param farmId 猪场id
+     * @return 母猪数量
+     */
+    public DoctorPigCountDto findPigCount(Long farmId) {
+        return getSqlSession().selectOne(sqlId("findPigCount"), farmId);
+    }
+
+    /**
+     * 公猪存栏数量
+     */
+    public Integer findBoarPigCount(Long farmId) {
+        return getSqlSession().selectOne(sqlId("findBoarPigCount"), farmId);
     }
 }

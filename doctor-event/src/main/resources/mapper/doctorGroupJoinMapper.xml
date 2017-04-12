@@ -50,5 +50,23 @@
             <include refid="criteria"/>
         </where>
     </select>
+    
+    
+    <select id="findGroupCount" parameterType="long" resultType="io.terminus.doctor.event.dto.search.DoctorGroupCountDto" >
+        select
+        ifnull(max(nurseryPigletCount),0) nurseryPigletCount,
+        ifnull(max(fattenPigCount),0) fattenPigCount,
+        ifnull(max(reserveCount),0) reserveCount,
+        ifnull(max(deliverPigCount),0) deliverPigCount
+        from(
+        select
+        (case pig_type when 2 then sum(quantity) end) nurseryPigletCount,
+        (case pig_type when 3 then sum(quantity) end) fattenPigCount,
+        (case pig_type when 4 then sum(quantity) end) reserveCount,
+        (case pig_type when 7 then sum(quantity) end) deliverPigCount
+        from doctor_group_tracks a left join doctor_groups b on a.group_id = b.id
+        where b.status != -1 and farm_id = #{farmId}
+        group by pig_type) t;
+    </select>
 
 </mapper>

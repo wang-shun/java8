@@ -7,6 +7,7 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
+import io.terminus.doctor.event.dto.search.DoctorGroupCountDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -255,4 +256,11 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<List<DoctorGroupEvent>> findLinkedGroupEventsByGroupId(@NotNull(message = "groupId.not.null") Long groupId);
+
+    /**
+     * 获取猪场各个类型猪的存栏
+     * @param farmId 猪场id
+     * @return
+     */
+    Response<DoctorGroupCountDto> findGroupCount(@NotNull(message = "farmId.not.null") Long farmId);
 }

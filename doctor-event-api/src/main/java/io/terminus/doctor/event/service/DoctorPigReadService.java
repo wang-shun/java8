@@ -5,6 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.search.DoctorPigCountDto;
 import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -159,4 +160,11 @@ public interface DoctorPigReadService {
      */
     Response<Long> getPigCountByBarnPigTypes(@NotNull(message = "farmId.not.null") Long farmId,
                                              @NotEmpty(message = "pigTypes.not.empty") List<Integer> pigTypes);
+
+    /**
+     * 获取猪场,各个状态猪的存栏数量
+     * @param farmId 猪场id
+     * @return
+     */
+    Response<DoctorPigCountDto> getPigCount(@NotNull(message = "farmId.not.null") Long farmId);
 }
