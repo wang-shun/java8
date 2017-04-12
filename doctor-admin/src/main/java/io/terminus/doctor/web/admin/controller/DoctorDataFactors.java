@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.admin.user;
+package io.terminus.doctor.web.admin.controller;
 
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
@@ -21,7 +21,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping
+@RequestMapping("/api/doctor/admin/data-factor")
 public class DoctorDataFactors {
 
     @RpcConsumer
@@ -30,6 +30,11 @@ public class DoctorDataFactors {
     @RpcConsumer
     private DoctorDataFactorReadService doctorDataFactorReadService;
 
+    /**
+     * 查询详情
+     * @param id
+     * @return
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public DoctorDataFactor findDoctorDataFactor(@PathVariable Long id) {
         Response<DoctorDataFactor> response =  doctorDataFactorReadService.findById(id);
@@ -39,6 +44,12 @@ public class DoctorDataFactors {
         return response.getResult();
     }
 
+    /**
+     * 分页
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
     @RequestMapping(value = "/paging", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Paging<DoctorDataFactor> pagingDoctorDataFactor(@RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                  @RequestParam(value = "pageSize", required = false) Integer pageSize) {
@@ -57,8 +68,13 @@ public class DoctorDataFactors {
      * @param
      */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Long createDoctorDataFactor(@RequestBody DoctorDataFactor doctorDataFactor) {
-        Response<Long> response = doctorDataFactorWriteService.create(doctorDataFactor);
+    public Long createDoctorDataFactor(@RequestBody DoctorDataFactor factor) {
+        if(factor.getFactor() == null){
+            throw new JsonResponseException(500,"doctor.data.factor.invalid");
+        }
+        rangeVerify(factor);
+        factor.setIsDelete(0);
+        Response<Long> response = doctorDataFactorWriteService.create(factor);
         if (!response.isSuccess()) {
             throw new JsonResponseException(500, response.getError());
         }
@@ -70,17 +86,40 @@ public class DoctorDataFactors {
      * @param
      */
     @RequestMapping(method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean updateDoctorDataFactor(@RequestBody DoctorDataFactor doctorDataFactor) {
-        Response<Boolean> response = doctorDataFactorWriteService.update(doctorDataFactor);
+    public Boolean updateDoctorDataFactor(@RequestBody DoctorDataFactor factor) {
+        if(factor.getFactor() == null){
+            throw new JsonResponseException(500,"doctor.data.factor.invalid");
+        }
+        rangeVerify(factor);
+        Response<Boolean> response = doctorDataFactorWriteService.update(factor);
         if (!response.isSuccess()) {
             throw new JsonResponseException(500, response.getError());
         }
         return response.getResult();
     }
 
+    private void rangeVerify(DoctorDataFactor factor){
+        if(factor.getRangeFrom() == null && factor.getRangeTo() == null){
+            factor.setRangeFrom(factor.getFactor());
+            factor.setRangeTo(factor.getRangeTo());
+        }else if(factor.getRangeFrom() == null){
+            factor.setRangeFrom(Double.MIN_VALUE);
+        }else if(factor.getRangeTo() == null){
+            factor.setRangeFrom(Double.MAX_VALUE);
+        }
+    }
+
+    /**
+     * 逻辑删除
+     * @param id
+     * @return
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean deleteDoctorDataFactor(@PathVariable Long id) {
-        Response<Boolean> response = doctorDataFactorWriteService.delete(id);
+        DoctorDataFactor factor = new DoctorDataFactor();
+        factor.setId(id);
+        factor.setIsDelete(1);
+        Response<Boolean> response = doctorDataFactorWriteService.update(factor);
         if (!response.isSuccess()) {
             throw new JsonResponseException(500, response.getError());
         }

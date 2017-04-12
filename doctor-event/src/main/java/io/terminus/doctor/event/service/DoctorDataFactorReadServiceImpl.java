@@ -6,8 +6,6 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorDataFactorDao;
-import io.terminus.doctor.event.dao.DoctorGroupInfoCheckDao;
-import io.terminus.doctor.event.manager.DoctorEditGroupEventManager;
 import io.terminus.doctor.event.model.DoctorDataFactor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

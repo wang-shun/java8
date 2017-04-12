@@ -58,7 +58,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="load" parameterType="long" resultMap="DoctorDataFactorMap">
+    <select id="findById" parameterType="long" resultMap="DoctorDataFactorMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -66,7 +66,7 @@
         WHERE id = #{id} LIMIT 1
     </select>
 
-    <select id="loads" parameterType="list" resultMap="DoctorDataFactorMap">
+    <select id="findByIds" parameterType="list" resultMap="DoctorDataFactorMap">
         SELECT
         <include refid="cols_all"/>
         FROM
