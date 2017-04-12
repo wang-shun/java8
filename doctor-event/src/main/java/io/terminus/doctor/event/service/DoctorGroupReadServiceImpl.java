@@ -491,7 +491,13 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     @Override
     public Response<DoctorGroupCountDto> findGroupCount(@NotNull(message = "farmId.not.null") Long farmId) {
         try {
-            return Response.ok(doctorGroupJoinDao.findGroupCount(farmId));
+            DoctorGroupCountDto groupCountDto = doctorGroupJoinDao.findGroupCount(farmId);
+            groupCountDto.setGroupTotalCount(groupCountDto.getReserveCount()
+                    + groupCountDto.getDeliverPigCount()
+                    + groupCountDto.getFattenPigCount()
+                    + groupCountDto.getNurseryPigletCount());
+
+            return Response.ok(groupCountDto);
         } catch (Exception e) {
             log.error("get group count failed, farmId:{}, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("get.group.count.failed");
