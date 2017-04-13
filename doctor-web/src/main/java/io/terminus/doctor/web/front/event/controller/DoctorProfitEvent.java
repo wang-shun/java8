@@ -1,6 +1,8 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorProfitMaterialOrPig;
 import io.terminus.doctor.event.service.DoctorProfitMaterOrPigReadServer;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Date;
 
 /**
  * Created by terminus on 2017/4/13.
@@ -23,15 +26,13 @@ public class DoctorProfitEvent {
 
     @RpcConsumer
     private DoctorProfitMaterOrPigReadServer doctorParityMonthlyReportReadService;
-
-//    @Autowired
-//    public DoctorProfitEvent(DoctorProfitMaterOrPigReadServer doctorParityMonthlyReportReadService) {
-//        this.doctorParityMonthlyReportReadService = doctorParityMonthlyReportReadService;
-//    }
-
+    
     @RequestMapping(value = "/materOrPig", method = RequestMethod.GET)
     @ResponseBody
-    public List<DoctorProfitMaterialOrPig> getMaterOrPig(@RequestParam Map<String, Object> map, @RequestParam Long farmId){
+    public List<DoctorProfitMaterialOrPig> getMaterOrPig(@RequestParam Map<String, Object> map, @RequestParam String date, @RequestParam Long farmId){
+        map = Params.filterNullOrEmpty(map);
+        Date startDate = DateUtil.toYYYYMM(date);
+        map.put("date", startDate);
         return RespHelper.or500(doctorParityMonthlyReportReadService.findProfitMaterialOrPig(farmId , map));
     }
 }

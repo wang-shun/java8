@@ -144,7 +144,8 @@
         FROM <include refid="tb"/>
         WHERE
         1 = 1
-        <if test="sumTime != null">AND sum_time = #{sumTime} </if>
+        <if test="date != null">AND sum_time = #{date} </if>
+        <if test="pigTypeId != null">AND pig_type_name_id = #{pigTypeId}</if>
         <if test="farmId != null">AND farm_id = #{farmId}</if>
     </select>
 
