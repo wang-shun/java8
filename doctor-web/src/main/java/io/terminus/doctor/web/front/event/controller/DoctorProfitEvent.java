@@ -26,7 +26,7 @@ public class DoctorProfitEvent {
 
     @RpcConsumer
     private DoctorProfitMaterOrPigReadServer doctorParityMonthlyReportReadService;
-    
+
     @RequestMapping(value = "/materOrPig", method = RequestMethod.GET)
     @ResponseBody
     public List<DoctorProfitMaterialOrPig> getMaterOrPig(@RequestParam Map<String, Object> map, @RequestParam String date, @RequestParam Long farmId){

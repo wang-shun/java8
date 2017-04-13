@@ -75,7 +75,6 @@ public class DoctorProfitJobs {
             log.info("daily profit job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
             Date startDate = DateUtil.monthStart(new Date());
-            startDate = DateUtils.addMonths(startDate, -3);
             Date endDate = DateUtil.getMonthEnd(new DateTime(startDate)).toDate();
 
             doctorProfitMaterOrPigWriteServer.deleteDoctorProfitMaterialOrPig(startDate);
@@ -99,15 +98,16 @@ public class DoctorProfitJobs {
                         doctorProfitMaterialOrPig = sumMaterialAmount(startDate, endDate, farmId, doctorProfitExportDto.getBarnId(), doctorProfitMaterialOrPig);
                         amountPig += doctorProfitExportDto.getAmount();
                     }
-                    doctorProfitMaterialOrPig.setFarmId(farmId);
-                    doctorProfitMaterialOrPig.setPigTypeNameId(pigs);
+
                     if (!profitExportDto.isEmpty()) {
+                        doctorProfitMaterialOrPig.setFarmId(farmId);
+                        doctorProfitMaterialOrPig.setPigTypeNameId(pigs);
                         doctorProfitMaterialOrPig.setPigTypeName(profitExportDto.get(0).getPigTypeName());
+                        doctorProfitMaterialOrPig.setAmountPig(amountPig);
+                        doctorProfitMaterialOrPig.setSumTime(startDate);
+                        doctorProfitMaterialOrPig.setRefreshTime(DateUtil.toDateTimeString(new Date()));
+                        doctorProfitMaterialOrPigList.add(doctorProfitMaterialOrPig);
                     }
-                    doctorProfitMaterialOrPig.setAmountPig(amountPig);
-                    doctorProfitMaterialOrPig.setSumTime(startDate);
-                    doctorProfitMaterialOrPig.setRefreshTime(DateUtil.toDateTimeString(new Date()));
-                    doctorProfitMaterialOrPigList.add(doctorProfitMaterialOrPig);
                 }
             }
             doctorProfitMaterOrPigWriteServer.insterDoctorProfitMaterialOrPig(doctorProfitMaterialOrPigList);
