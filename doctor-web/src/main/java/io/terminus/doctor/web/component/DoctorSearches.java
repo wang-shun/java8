@@ -402,6 +402,50 @@ public class DoctorSearches {
         return SearchedBarnDto.builder().barns(this.searchBarnsPC(pageNo, pageSize, params)).build();
     }
 
+
+    /**
+     * 猪舍搜索方法
+     *
+     * @param pageNo   起始页
+     * @param pageSize 页大小
+     * @param params   搜索参数
+     *                 搜索参数可以参照:
+     * @return
+     */
+    @RequestMapping(value = "/wsn/barns", method = RequestMethod.GET)
+    public SearchedBarnDto searchWsnBarn(@RequestParam(required = false) Integer pageNo,
+                                         @RequestParam(required = false) Integer pageSize,
+                                         @RequestParam Map<String, String> params) {
+        DoctorBarnDto barnDto = new DoctorBarnDto();
+        if (Params.containsNotEmpty(params, "barnIds")){
+            List<Long> barnIds = Splitters.splitToLong(params.get("barnIds").toString(), Splitters.COMMA);
+            barnDto.setBarnIds(barnIds);
+        }
+
+        if (Params.containsNotEmpty(params, "q")) {
+            barnDto.setName(params.get("q"));
+        }
+        if (Params.containsNotEmpty(params, "farmId")) {
+            barnDto.setFarmId(Long.valueOf(params.get("farmId")));
+        }
+        if (Params.containsNotEmpty(params, "pigType")) {
+            barnDto.setPigType(Integer.valueOf(params.get("pigType")));
+        }
+        if (Params.containsNotEmpty(params, "pigTypes")) {
+            barnDto.setPigTypes(Splitters.splitToInteger(params.get("pigTypes"), Splitters.COMMA));
+        }
+        if (Params.containsNotEmpty(params, "status")) {
+            barnDto.setStatus(Integer.valueOf(params.get("status")));
+        }
+        if (barnDto.getFarmId() == null) {
+            return new SearchedBarnDto();
+        }
+
+        Paging<DoctorBarn> barns = RespHelper.or500(doctorBarnReadService.pagingBarn(barnDto, pageNo, pageSize));
+        Paging<SearchedBarn> result = new Paging<>(barns.getTotal(), getSearchedBarn(barns.getData()));
+        return SearchedBarnDto.builder().barns(result).build();
+    }
+
     /**
      * PC端猪舍搜索方法(每个猪舍里要有根据状态聚合的数据)
      *
