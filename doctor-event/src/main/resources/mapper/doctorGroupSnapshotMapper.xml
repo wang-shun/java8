@@ -111,4 +111,18 @@
 
     </insert>
 
+    <update id="updates" parameterType="list">
+        <foreach collection="list" separator=";" item="item">
+            UPDATE <include refid="tb"/>
+            SET
+              group_id = #{item.groupId},
+              from_event_id = #{item.fromEventId},
+              to_event_id = #{item.toEventId},
+              to_info = #{item.toInfo},
+              created_at = now()
+            WHERE
+              id = #{item.id}
+        </foreach>
+    </update>
+
 </mapper>

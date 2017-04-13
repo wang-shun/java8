@@ -84,4 +84,9 @@ public class DoctorPigSnapshotDao extends MyBatisDao<DoctorPigSnapshot>{
     public void updateFromEventIdByFromEventId(List<Long> ids, Long newFromEventId) {
         getSqlSession().update(sqlId("updateFromEventIdByFromEventId"), ImmutableMap.of("ids", ids, "newFromEventId", newFromEventId));
     }
+
+
+    public void updates(List<DoctorPigSnapshot> snapshots){
+        getSqlSession().update(sqlId("updates"), snapshots);
+    }
 }

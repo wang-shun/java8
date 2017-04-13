@@ -1211,6 +1211,29 @@ public class DoctorMoveDataController {
         log.warn("{} flush group dateformat end", DateUtil.toDateTimeString(new Date()));
         return true;
     }
+
+    @RequestMapping(value = "/pig/snapshots")
+    public Boolean flushPigDateFormat(@RequestParam(required = false) Long farmId) {
+        log.warn("{} flush pig dateformat start", DateUtil.toDateTimeString(new Date()));
+        List<Long> farmIds = Lists.newArrayList();
+        try {
+            if (Arguments.isNull(farmId)) {
+                farmIds = getAllFarmIds();
+            } else {
+                farmIds.add(farmId);
+            }
+            farmIds.forEach(id -> {
+                log.warn("{} flush farm {} pig dateformat start", DateUtil.toDateTimeString(new Date()), id);
+                doctorMoveDataService.flushPigSnapshotsToInfoDateFormat(id);
+            });
+        } catch (Exception e) {
+            log.error("flush pig dateformat failed, cause: {}", Throwables.getStackTraceAsString(e));
+            return false;
+        }
+        log.warn("{} flush pig dateformat end", DateUtil.toDateTimeString(new Date()));
+        return true;
+    }
+
     /**
      * 更新用户名
      * @param userId 用户id
