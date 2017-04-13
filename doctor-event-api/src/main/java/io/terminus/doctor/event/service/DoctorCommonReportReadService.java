@@ -7,7 +7,9 @@ import io.terminus.doctor.event.model.DoctorMonthlyReport;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 猪场报表读服务
@@ -55,4 +57,6 @@ public interface DoctorCommonReportReadService {
      * 根据日期获取当时猪群的情况
      */
     Response<List<DoctorGroupLiveStockDetailDto>> findEveryGroupInfo(@NotNull(message = "date.not.null") String sumAt);
+
+    Response<Map<String, Integer>> findBarnLiveStock(Long barnId, Date date, Integer index);
 }
