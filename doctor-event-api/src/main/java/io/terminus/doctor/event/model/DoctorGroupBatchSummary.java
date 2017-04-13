@@ -207,4 +207,22 @@ public class DoctorGroupBatchSummary implements Serializable {
      * 修改时间
      */
     private Date updatedAt;
+
+    /**
+     * 疫苗金额
+     */
+    private Double vaccineAmount;
+
+    /**
+     * 药品金额
+     */
+    private Double medicineAmount;
+    /**
+     * 易耗品金额
+     */
+    private Double consumablesAmount;
+    /**
+     * 饲料金额+数量
+     */
+//    private Double
 }
