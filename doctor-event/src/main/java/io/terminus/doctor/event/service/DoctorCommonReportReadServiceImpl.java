@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
@@ -182,6 +181,28 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             return Response.fail("find every group info failed");
         }
     }
+
+    @Override
+    public Response<Map<String, Integer>> findBarnLiveStock(Long barnId, Date date, Integer index) {
+        try {
+            Integer currentLiveStock = doctorKpiDao.getBarnLiveStock(barnId);
+            Map<String, Integer> liveStockMap = Maps.newLinkedHashMap();
+            liveStockMap.put(DateUtil.toDateString(date), currentLiveStock);
+            int i = 1;
+            while (i != index) {
+                Integer liveStock = currentLiveStock
+                        - doctorKpiDao.getBarnChangeCount(barnId, date, i)
+                        - doctorKpiDao.getOutTrasGroup(barnId, date, i);
+                liveStockMap.put(DateUtil.toDateString(new DateTime(date).minusWeeks(i).toDate()), liveStock);
+                i++;
+            }
+            return Response.ok(liveStockMap);
+        }catch (Exception e) {
+            log.error("find barn live stock failed, barnId:{}, date:{}, index:{}, cause:{}", barnId, date.toString(), index, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.barn.live.stock");
+        }
+    }
+
     //查询趋势图
     private List<DoctorCommonReportDto> getMonthlyReportByIndex(Long farmId, Date date, Integer index) {
         return DateUtil.getBeforeMonthEnds(date, MoreObjects.firstNonNull(index, MONTH_INDEX)).stream()
