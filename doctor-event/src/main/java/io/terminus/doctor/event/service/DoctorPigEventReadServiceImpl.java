@@ -13,6 +13,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -382,6 +383,17 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }catch (Exception e) {
             log.error("find.sales.event, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find sales fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorProfitExportDto>> sumProfitAmount(Map<String, Object> map) {
+        try {
+            map = Params.filterNullOrEmpty(map);
+            return Response.ok(doctorPigEventDao.sumProfitPigType(map));
+        }catch (Exception e) {
+            log.error("find.sum.profit.amount, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find sum profit amount");
         }
     }
 }

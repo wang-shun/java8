@@ -1096,8 +1096,10 @@
         barn_name AS barnName,
         event_at AS salesDate,
         quantity AS pigNumber,
+        pig_type_name AS pigTypeName,
         weight AS pigWeight,
         price AS pigPrice,
+        day_age AS ages,
         amount AS pigAmount,
         customer_name AS client
         FROM v_doctor_sales
@@ -1111,5 +1113,19 @@
         <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
         limit #{offset}, #{limit}
+    </select>
+    
+    <select id="sumProFitPigType" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorProfitExportDto">
+        SELECT
+        pig_type AS pigType,
+        pig_type_name AS pigTypeName,
+        barn_id AS barnId,
+        amount as amount
+        FROM v_doctor_sales
+        WHERE 1 = 1
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="pigTypeId != null">AND pig_type = #{pigTypeId}</if>
+        <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
     </select>
 </mapper>

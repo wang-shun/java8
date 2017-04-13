@@ -121,11 +121,21 @@ public interface DoctorMaterialConsumeProviderReadService {
 
     /**
      * 根据事件的时间查询事件中物料的统计数据
-     * 添加分页
+     * 带有分页
      * @param startDate 事件开始时间
      * @param endDate 事件结束时间
      * @param farmId 公司Id
      */
     Response<Paging<DoctorMaterialConsumeProvider>> pagingfindMaterialConsume(Long farmId, Long wareHouseId, Long materialId, String materialName,
                                                                               Long barnId, Long type, Date startDate, Date endDate ,Integer pageNo, Integer size);
+
+    /**
+     * 根据事件时间段的不同查询物料的消耗情况
+     * @param farmId 猪场ID
+     * @param type 物料类型
+     * @param startDate 开始时间
+     * @param endDate 结束时间
+     * @return
+     */
+    Response<List<DoctorMaterialConsumeProvider>> findMaterialProfit(Long farmId, Long type, Long barnId, Date startDate, Date endDate );
 }
