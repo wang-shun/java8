@@ -192,11 +192,11 @@ public class DoctorProfitJobs {
                     barnId,
                     startDate,
                     endDate));
-            amount += doctorProfitMaterialOrPig.getAmountYearMaterial();
+            amount += builderDoctorMaterialConumeProvider(doctorMaterialConsumeProviders);
         }
         return doctorProfitMaterialOrPig;
     }
-
+    
     private Double builderDoctorMaterialConumeProvider(List<DoctorMaterialConsumeProvider> doctorMaterialConsumeProviders) {
 
         Double acmunt = 0.0;
