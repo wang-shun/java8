@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.service;
 
-import com.alibaba.dubbo.config.annotation.Service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -12,6 +11,7 @@ import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 
 /**

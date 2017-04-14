@@ -34,6 +34,9 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
 
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
+
+    protected final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
+
     @Override
     public void modifyHandleCheck(DoctorPigEvent oldPigEvent, DoctorEventChangeDto changeDto) {
 
@@ -70,6 +73,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         //6.更新每日数据记录
 
         //7.调用触发事件的编辑
+        triggerEventModifyHandle(newEvent);
 
         log.info("modify pig event handler ending");
     }
@@ -88,6 +92,12 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     public DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto) {
         return null;
     }
+
+    /**
+     * 触发事件的处理
+     * @param newPigEvent 猪事件
+     */
+    protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent){};
 
     /**
      * 是否需要更新猪

@@ -16,6 +16,7 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created by xjn on 17/4/13.
@@ -35,7 +36,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     protected final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
+
     @Override
+    @Transactional
     public void modifyHandle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         log.info("modify pig event handler starting, oldGroupEvent:{}, input:{}", oldGroupEvent, input);
 

@@ -1,20 +1,32 @@
 package io.terminus.doctor.event.editHandler.pig;
 
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.utils.ToJsonMapper;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyMoveInEventHandler;
+import io.terminus.doctor.event.handler.sow.DoctorSowFarrowingHandler;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
  * Created by xjn on 17/4/14.
+ * 分娩编辑和回滚
  */
 @Component
 public class DoctorModifyFarrowEventHandler extends DoctorAbstractModifyPigEventHandler {
+
+    @Autowired
+    private DoctorModifyMoveInEventHandler doctorModifyMoveInEventHandler;
+    @Autowired
+    private DoctorSowFarrowingHandler doctorSowFarrowingHandler;
+    @Autowired
+    private DoctorGroupEventDao doctorGroupEventDao;
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
@@ -37,7 +49,7 @@ public class DoctorModifyFarrowEventHandler extends DoctorAbstractModifyPigEvent
         DoctorFarrowingDto newFarrowingDto = (DoctorFarrowingDto) inputDto;
         DoctorPigEvent newEvent = new DoctorPigEvent();
         BeanMapper.copy(oldPigEvent, newEvent);
-        newEvent.setExtra(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(newFarrowingDto));
+        newEvent.setExtra(TO_JSON_MAPPER.toJson(newFarrowingDto));
         newEvent.setFarrowWeight(newFarrowingDto.getBirthNestAvg());
         newEvent.setLiveCount(newFarrowingDto.getFarrowingLiveCount());
         newEvent.setHealthCount(newFarrowingDto.getHealthCount());
@@ -57,5 +69,11 @@ public class DoctorModifyFarrowEventHandler extends DoctorAbstractModifyPigEvent
         oldPigTrack.setFarrowAvgWeight(EventUtil.plusDouble(oldPigTrack.getFarrowAvgWeight(),
                 EventUtil.getAvgWeight(changeDto.getFarrowWeightChange(), changeDto.getLiveCountChange())));
         return oldPigTrack;
+    }
+
+    @Override
+    protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent) {
+        DoctorGroupEvent oldGroupEvent = doctorGroupEventDao.findByRelPigEventId(newPigEvent.getId());
+        doctorModifyMoveInEventHandler.modifyHandle(oldGroupEvent, doctorSowFarrowingHandler.buildTriggerGroupEventInput(newPigEvent));
     }
 }

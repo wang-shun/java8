@@ -8,11 +8,14 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Created by xjn on 17/4/14.
+ * 转入编辑和回滚
  */
+@Slf4j
 @Component
 public class DoctorModifyMoveInEventHandler extends DoctorAbstractModifyGroupEventHandler {
 

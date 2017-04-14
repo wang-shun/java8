@@ -270,6 +270,7 @@ public class  DoctorEventConfiguration {
         return modifyPigEventHandlers;
     }
 
+    @Bean
     public DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers(DoctorModifyMoveInEventHandler modifyMoveInEventHandler) {
         Map<Integer, DoctorModifyGroupEventHandler> modifyGroupEventHandlerMap = Maps.newHashMap();
         modifyGroupEventHandlerMap.put(GroupEventType.MOVE_IN.getValue(), modifyMoveInEventHandler);
