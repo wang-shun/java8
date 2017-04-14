@@ -219,4 +219,24 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
         List<DoctorMaterialConsumeProvider> datas = sqlSession.selectList(sqlId("pagingFindMaterialConsumeReport"), criteriaMap);
         return new Paging<>(total, datas);
     }
+
+    public List<DoctorMaterialConsumeProvider> findMaterialWithGroupId(Long farmId, Long groupId, Long materialId, Long type, Long wareHouseId, Long barnId, Long materialType, Date startDate, Date endDate) {
+        if (farmId == null) {
+            throw new ServiceException("farmId.not.null");
+        }
+
+        Map<String, Object> criteriaMap = MapBuilder.<String, Object>of()
+                .put("farmId", farmId)
+                .put("wareHouseId", wareHouseId)
+                .put("materialId", materialId)
+                .put("materialType", materialType)
+                .put("groupId", groupId)
+                .put("barnId", barnId)
+                .put("type", type)
+                .put("startDate", startDate)
+                .put("endDate", endDate)
+                .map();
+        return sqlSession.selectList(sqlId("findMaterialByGroupId"), criteriaMap);
+    }
+
 }

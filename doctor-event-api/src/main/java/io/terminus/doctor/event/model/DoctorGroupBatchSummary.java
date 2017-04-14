@@ -224,5 +224,6 @@ public class DoctorGroupBatchSummary implements Serializable {
     /**
      * 饲料金额+数量
      */
-//    private Double
+    private Double fendNumber;
+    private Double feedAmount;
 }

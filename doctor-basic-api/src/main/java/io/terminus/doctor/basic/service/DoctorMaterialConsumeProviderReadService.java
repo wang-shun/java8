@@ -128,4 +128,17 @@ public interface DoctorMaterialConsumeProviderReadService {
      */
     Response<Paging<DoctorMaterialConsumeProvider>> pagingfindMaterialConsume(Long farmId, Long wareHouseId, Long materialId, String materialName,
                                                                               Long barnId, Long type, Date startDate, Date endDate ,Integer pageNo, Integer size);
+
+    /**
+     * 根据groupID来获取批次数据统计的物料数据
+     * @param farmId
+     * @param groupId
+     * @param wareHouseId
+     * @param barnId
+     * @param materialType
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    Response<List<DoctorMaterialConsumeProvider>> findMaterialByGroupId(Long farmId, Long groupId, Long materialId, Long type, Long wareHouseId, Long barnId, Long materialType, Date startDate, Date endDate);
 }
