@@ -2,13 +2,14 @@ package io.terminus.doctor.event.editHandler;
 
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 
 /**
  * Created by xjn on 17/4/13.
- * 猪事件编辑接口
+ * 猪事件编辑和回滚接口
  */
 public interface DoctorModifyPigEventHandler {
 
@@ -51,13 +52,20 @@ public interface DoctorModifyPigEventHandler {
      * @param oldPigEvent 原事件
      * @param changeDto 变化
      */
-    void handleCheck(DoctorPigEvent oldPigEvent, DoctorEventChangeDto changeDto);
+    void modifyHandleCheck(DoctorPigEvent oldPigEvent, DoctorEventChangeDto changeDto);
 
     /**
      * 编辑处理
      * @param oldPigEvent 原事件
      * @param inputDto 编辑后输入
      */
-    void handle(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto);
+    void modifyHandle(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto);
 
+    /**
+     * 事件回滚处理
+     * @param groupEvent 回滚事件
+     * @param operatorId 操作人id
+     * @param operatorName 操作人姓名
+     */
+    void rollbackHandle(DoctorGroupEvent groupEvent, Long operatorId, String operatorName);
 }

@@ -186,12 +186,7 @@ public class DoctorEventChangeDto {
     /**
      * 猪群初生重变化量
      */
-    private Integer groupBirthWeightChange;
-
-    /**
-     * 猪群
-     */
-    private Integer groupQuantity;
+    private Double groupBirthWeightChange;
 
     private Integer groupLiveQtyChange;
 

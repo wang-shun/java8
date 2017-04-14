@@ -11,7 +11,6 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
-import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
@@ -57,18 +56,17 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
+import io.terminus.doctor.event.service.DoctorModifyEventService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.core.aspects.DoctorValidService;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchPigEventDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +86,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.*;
+import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.PigType.*;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
@@ -133,6 +132,8 @@ public class DoctorPigCreateEvents {
     private DoctorEventModifyRequestReadService doctorEventModifyRequestReadService;
     @RpcConsumer
     private DoctorUserProfileReadService doctorUserProfileReadService;
+    @RpcConsumer
+    private DoctorModifyEventService doctorModifyEventService;
 
     private static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
 
@@ -524,28 +525,29 @@ public class DoctorPigCreateEvents {
         PigEvent pigEvent = PigEvent.from(eventType);
         DoctorBasicInputInfoDto basic = buildBasicInputInfoDto(farmId, pigEvent);
         BasePigEventInputDto inputDto = eventInput(pigEvent, input, farmId, pigSex, null);
-        if (Objects.equals(eventType, PigEvent.ENTRY.getKey())) {
-            inputDto = buildEntryEventInput(inputDto, pigEvent);
-        } else {
-            inputDto = buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
-        }
-
-        //获取编辑人信息
-        DoctorUser user = UserUtil.getCurrentUser();
-        if (isNull(user)) {
-            throw new JsonResponseException("user.not.login");
-        }
-        //获取真实姓名
-        String userName = user.getName();
-        Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(user.getId());
-        if (userProfileResponse.isSuccess() && notNull(userProfileResponse.getResult())) {
-            userName = userProfileResponse.getResult().getRealName();
-        }
-
-        Long requestId = RespHelper.or500(doctorEventModifyRequestWriteService.createPigModifyEventRequest(basic, inputDto, eventId, user.getId(), userName));
-
-        DoctorEventModifyRequest modifyRequest = RespHelper.or500(doctorEventModifyRequestReadService.findById(requestId));
-        RespWithExHelper.orInvalid(doctorEventModifyRequestWriteService.modifyEventHandle(modifyRequest));
+//        if (Objects.equals(eventType, PigEvent.ENTRY.getKey())) {
+//            inputDto = buildEntryEventInput(inputDto, pigEvent);
+//        } else {
+//            inputDto = buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
+//        }
+//
+//        //获取编辑人信息
+//        DoctorUser user = UserUtil.getCurrentUser();
+//        if (isNull(user)) {
+//            throw new JsonResponseException("user.not.login");
+//        }
+//        //获取真实姓名
+//        String userName = user.getName();
+//        Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(user.getId());
+//        if (userProfileResponse.isSuccess() && notNull(userProfileResponse.getResult())) {
+//            userName = userProfileResponse.getResult().getRealName();
+//        }
+//
+//        Long requestId = RespHelper.or500(doctorEventModifyRequestWriteService.createPigModifyEventRequest(basic, inputDto, eventId, user.getId(), userName));
+//
+//        DoctorEventModifyRequest modifyRequest = RespHelper.or500(doctorEventModifyRequestReadService.findById(requestId));
+//        RespWithExHelper.orInvalid(doctorEventModifyRequestWriteService.modifyEventHandle(modifyRequest));
+        RespWithExHelper.orInvalid(doctorModifyEventService.modifyPigEvent(inputDto, eventId ,eventType));
     }
 
     /**

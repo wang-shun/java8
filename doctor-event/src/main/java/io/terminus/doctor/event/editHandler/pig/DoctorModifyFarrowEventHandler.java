@@ -8,10 +8,12 @@ import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by xjn on 17/4/14.
  */
+@Component
 public class DoctorModifyFarrowEventHandler extends DoctorAbstractModifyPigEventHandler {
 
     @Override

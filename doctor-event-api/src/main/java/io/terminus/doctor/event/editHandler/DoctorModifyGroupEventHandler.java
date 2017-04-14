@@ -8,7 +8,7 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 
 /**
  * Created by xjn on 17/4/13.
- * 猪群编辑处理接口
+ * 猪群编辑和回滚处理接口
  */
 public interface DoctorModifyGroupEventHandler {
 
@@ -51,12 +51,20 @@ public interface DoctorModifyGroupEventHandler {
      * @param oldGroupEvent 原事件
      * @param changeDto 变化
      */
-    void handleCheck(DoctorGroupEvent oldGroupEvent, DoctorEventChangeDto changeDto);
+    void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, DoctorEventChangeDto changeDto);
 
     /**
      * 编辑处理
      * @param oldGroupEvent 原事件
      * @param input 编辑输入
      */
-    void handle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input);
+    void modifyHandle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input);
+
+    /**
+     * 事件回滚处理
+     * @param groupEvent 回滚事件
+     * @param operatorId 操作人id
+     * @param operatorName 操作人姓名
+     */
+    void rollbackHandle(DoctorGroupEvent groupEvent, Long operatorId, String operatorName);
 }

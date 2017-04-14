@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.editHandler.group;
 
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -13,12 +14,14 @@ import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Created by xjn on 17/4/13.
  * 猪群编辑抽象实现
  */
+@Slf4j
 public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorModifyGroupEventHandler{
     @Autowired
     private DoctorGroupDao doctorGroupDao;
@@ -29,13 +32,18 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     @Autowired
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
 
+    protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
+
+    protected final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
     @Override
-    public void handle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+    public void modifyHandle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        log.info("modify pig event handler starting, oldGroupEvent:{}, input:{}", oldGroupEvent, input);
+
         //1.构建变化记录
         DoctorEventChangeDto changeDto = buildEventChange(oldGroupEvent, input);
 
         //2.校验
-        handleCheck(oldGroupEvent, changeDto);
+        modifyHandleCheck(oldGroupEvent, changeDto);
 
         //3.更新事件
         DoctorGroupEvent newEvent = buildNewEvent(oldGroupEvent, input);
@@ -58,11 +66,16 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         //6.更新每日数据记录
 
         //7.调用触发事件的编辑
+        log.info("modify pig event handler ending");
+    }
+
+    @Override
+    public void rollbackHandle(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
 
     }
 
     @Override
-    public void handleCheck(DoctorGroupEvent oldGroupEvent, DoctorEventChangeDto changeDto) {
+    public void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, DoctorEventChangeDto changeDto) {
 
     }
 

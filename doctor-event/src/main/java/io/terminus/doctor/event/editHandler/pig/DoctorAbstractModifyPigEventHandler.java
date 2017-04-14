@@ -11,15 +11,18 @@ import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Created by xjn on 17/4/13.
  * 猪事件编辑抽象实现
  */
+@Slf4j
 public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModifyPigEventHandler{
     @Autowired
     private DoctorPigEventDao doctorPigEventDao;
@@ -32,17 +35,19 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
     @Override
-    public void handleCheck(DoctorPigEvent oldPigEvent, DoctorEventChangeDto changeDto) {
+    public void modifyHandleCheck(DoctorPigEvent oldPigEvent, DoctorEventChangeDto changeDto) {
 
     }
 
     @Override
-    public void handle(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+    public void modifyHandle(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+       log.info("modify pig event handler starting, oldPigEvent:{}, inputDto:{}", oldPigEvent, inputDto);
+
         //1.构建变化量
         DoctorEventChangeDto changeDto = buildEventChange(oldPigEvent, inputDto);
 
         //2.校验
-        handleCheck(oldPigEvent, changeDto);
+        modifyHandleCheck(oldPigEvent, changeDto);
 
         //3.更新事件
         DoctorPigEvent newEvent = buildNewEvent(oldPigEvent, inputDto);
@@ -65,6 +70,12 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         //6.更新每日数据记录
 
         //7.调用触发事件的编辑
+
+        log.info("modify pig event handler ending");
+    }
+
+    @Override
+    public void rollbackHandle(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
 
     }
 

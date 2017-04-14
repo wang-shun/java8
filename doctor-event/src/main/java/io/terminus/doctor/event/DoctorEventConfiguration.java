@@ -5,6 +5,12 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
+import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
+import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyMoveInEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyFarrowEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
@@ -255,6 +261,22 @@ public class  DoctorEventConfiguration {
         return doctorGroupEventHandlers;
     }
 
+    @Bean
+    public DoctorModifyPigEventHandlers doctorModifyPigEventHandlers(DoctorModifyFarrowEventHandler modifyFarrowEventHandler) {
+        Map<Integer, DoctorModifyPigEventHandler> modifyPigEventHandlerMap = Maps.newHashMap();
+        modifyPigEventHandlerMap.put(PigEvent.FARROWING.getKey(), modifyFarrowEventHandler);
+        DoctorModifyPigEventHandlers modifyPigEventHandlers = new DoctorModifyPigEventHandlers();
+        modifyPigEventHandlers.setModifyPigEventHandlerMap(modifyPigEventHandlerMap);
+        return modifyPigEventHandlers;
+    }
+
+    public DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers(DoctorModifyMoveInEventHandler modifyMoveInEventHandler) {
+        Map<Integer, DoctorModifyGroupEventHandler> modifyGroupEventHandlerMap = Maps.newHashMap();
+        modifyGroupEventHandlerMap.put(GroupEventType.MOVE_IN.getValue(), modifyMoveInEventHandler);
+        DoctorModifyGroupEventHandlers modifyGroupEventHandlers = new DoctorModifyGroupEventHandlers();
+        modifyGroupEventHandlers.setModifyGroupEventHandlerMap(modifyGroupEventHandlerMap);
+        return modifyGroupEventHandlers;
+    }
 
     @Configuration
     public static class ZookeeperConfiguration{
