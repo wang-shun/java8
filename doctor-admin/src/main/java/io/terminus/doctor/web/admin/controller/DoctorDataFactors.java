@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.admin.controller;
 
+import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
@@ -77,6 +78,27 @@ public class DoctorDataFactors {
             throw new JsonResponseException(result.getError());
         }
         return result.getResult();
+    }
+
+    @RequestMapping(value = "/map-list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<Integer, List<DoctorDataFactor>> mapListDoctorDataFactor() {
+        Map<String, Object> criteria = Maps.newHashMap();
+        Response<List<DoctorDataFactor>> result =  doctorDataFactorReadService.list(criteria);
+        if(!result.isSuccess()){
+            throw new JsonResponseException(result.getError());
+        }
+        Map<Integer, List<DoctorDataFactor>> map = Maps.newHashMap();
+        for(DoctorDataFactor factor: result.getResult()){
+            List<DoctorDataFactor> list;
+            if(map.containsKey(factor.getType())){
+                 list = map.get(factor.getType());
+            }else{
+                 list = Lists.newArrayList();
+            }
+            list.add(factor);
+            map.put(factor.getType(), list);
+        }
+        return map;
     }
 
     /**
