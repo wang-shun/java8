@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.List;
 
 /**
  * Desc: 信用模型计算因子 API
@@ -57,6 +58,20 @@ public class DoctorDataFactors {
         Map<String, Object> criteria = Maps.newHashMap();
 
         Response<Paging<DoctorDataFactor>> result =  doctorDataFactorReadService.paging(pageNo, pageSize, criteria);
+        if(!result.isSuccess()){
+            throw new JsonResponseException(result.getError());
+        }
+        return result.getResult();
+    }
+
+    /**
+     * 列表
+     * @return
+     */
+    @RequestMapping(value = "/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<DoctorDataFactor> listDoctorDataFactor() {
+        Map<String, Object> criteria = Maps.newHashMap();
+        Response<List<DoctorDataFactor>> result =  doctorDataFactorReadService.list(criteria);
         if(!result.isSuccess()){
             throw new JsonResponseException(result.getError());
         }
