@@ -857,4 +857,19 @@ alter table doctor_group_events add column vaccination_name varchar(32) default 
 ALTER TABLE doctor_group_events ADD COLUMN operator_id bigint(20) DEFAULT NULL comment '操作人id' after creator_name;
 ALTER TABLE doctor_group_events ADD COLUMN operator_name varchar(32) DEFAULT NULL comment '操作人姓名' after operator_id;
 
-
+-- 2017-04-06 编辑事件记录
+drop table if exists `doctor_event_modify_logs`;
+CREATE TABLE `doctor_event_modify_logs` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `farm_id` bigint(20) NOT NULL COMMENT '猪场ID',
+  `business_id` bigint(20) NOT NULL COMMENT '猪/猪群id',
+  `business_code` varchar(64) NOT NULL COMMENT '猪/猪群code',
+  `type` tinyint(4) NOT NULL COMMENT '处理的事件类型1：猪事件，2：猪群事件',
+  `modify_request_id` bigint(20) NOT NULL COMMENT '编辑申请id',
+  `from_event` text NOT NULL COMMENT '修改前事件',
+  `to_event` text NOT NULL COMMENT '修改后事件',
+  `created_at` datetime NOT NULL COMMENT '创建时间',
+  `updated_at` datetime NOT NULL COMMENT '更新事件',
+  PRIMARY KEY (`id`),
+  KEY `doctor_event_modify_logs_farm_id` (`farm_id`)
+) DEFAULT CHARSET=utf8;

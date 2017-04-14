@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 
 import java.util.List;
@@ -15,5 +16,5 @@ public interface DoctorEditGroupEventService {
 
     Response<Boolean> reElicitGroupEvent(List<Long> groupIds);
 
-    void elicitDoctorGroupTrackRebuildOne(DoctorGroupEvent doctorGroupEvent);
+    List<DoctorEventInfo> elicitDoctorGroupTrackRebuildOne(DoctorGroupEvent doctorGroupEvent, Long modifyRequestId);
 }

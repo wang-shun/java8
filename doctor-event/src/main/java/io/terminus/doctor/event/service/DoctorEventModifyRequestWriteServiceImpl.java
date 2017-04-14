@@ -1,10 +1,12 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
@@ -15,6 +17,7 @@ import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.enums.EventRequestStatus;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -24,7 +27,6 @@ import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,8 +62,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
     private DoctorGroupEventDao doctorGroupEventDao;
     @Autowired
     private DoctorMessageSourceHelper messageSourceHelper;
-    @Autowired(required = false)
-    private Publisher publisher;
+    @Autowired
+    private CoreEventDispatcher coreEventDispatcher;
 
     @Override
     public Response<Boolean> createRequest(DoctorEventModifyRequest modifyRequest) {
@@ -155,7 +157,8 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
         try {
             List<DoctorEventModifyRequest> handlingList = eventModifyRequestDao.listByStatus(EventRequestStatus.HANDLING.getValue());
             if (handlingList.isEmpty()) {
-                modifyEventRequestHandleImpl(modifyRequest);
+                List<DoctorEventInfo> doctorEventInfoList = modifyEventRequestHandleImpl(modifyRequest);
+                DoctorPigEventManager.checkAndPublishEvent(doctorEventInfoList, coreEventDispatcher, null);
             }
         } catch (Exception e) {
             log.error("modify.pig.event.handle.failed, modifyRequest:{}, cause by :{}", modifyRequest, Throwables.getStackTraceAsString(e));
@@ -244,8 +247,9 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
      *
      * @param modifyRequest 编辑事件请求
      */
-    private boolean modifyEventRequestHandleImpl(DoctorEventModifyRequest modifyRequest) {
+    private List<DoctorEventInfo> modifyEventRequestHandleImpl(DoctorEventModifyRequest modifyRequest) {
         log.info("modify event handle starting, modifyRequest:{}", modifyRequest);
+        List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
         try {
             modifyRequest.setStatus(EventRequestStatus.HANDLING.getValue());
             eventModifyRequestDao.update(modifyRequest);
@@ -254,21 +258,25 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             if (Objects.equals(modifyRequest.getType(), DoctorEventModifyRequest.TYPE.PIG.getValue())) {
                 //处理猪事件修改
                 DoctorPigEvent modifyEvent = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(modifyRequest.getContent(), DoctorPigEvent.class);
-                doctorEditPigEventService.modifyPigEventHandle(modifyEvent);
+                doctorEventInfoList.addAll(doctorEditPigEventService.modifyPigEventHandle(modifyEvent, modifyRequest.getId()));
             } else {
                 //处理猪群事件修改
                 DoctorGroupEvent modifyEvent = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER.fromJson(modifyRequest.getContent(), DoctorGroupEvent.class);
-                doctorEditGroupEventService.elicitDoctorGroupTrackRebuildOne(modifyEvent);  //只重新生成修改的事件,然后推导track
+                doctorEventInfoList.addAll(doctorEditGroupEventService.elicitDoctorGroupTrackRebuildOne(modifyEvent, modifyRequest.getId()));  //只重新生成修改的事件,然后推导track
             }
 
             //更新修改请求的状态
             modifyRequest.setStatus(EventRequestStatus.SUCCESS.getValue());
             eventModifyRequestDao.update(modifyRequest);
-            return true;
         } catch (InvalidException e) {
             log.info("modify event request handle failed, cause by:{}", Throwables.getStackTraceAsString(e));
             modifyRequest.setStatus(EventRequestStatus.FAILED.getValue());
             modifyRequest.setReason(messageSourceHelper.getMessage(e.getError(), e.getParams()));
+            eventModifyRequestDao.update(modifyRequest);
+        }catch (ServiceException e) {
+            log.info("modify event request handle failed, cause by:{}", Throwables.getStackTraceAsString(e));
+            modifyRequest.setStatus(EventRequestStatus.FAILED.getValue());
+            modifyRequest.setErrorStack(e.getMessage());
             eventModifyRequestDao.update(modifyRequest);
         } catch (Exception e) {
             log.info("modify event request handle failed, cause by:{}", Throwables.getStackTraceAsString(e));
@@ -278,7 +286,7 @@ public class DoctorEventModifyRequestWriteServiceImpl implements DoctorEventModi
             eventModifyRequestDao.update(modifyRequest);
         }
         log.info("modify event handle ending");
-        return false;
+        return doctorEventInfoList;
     }
 // TODO: 17/3/17 刷新报表 
 //    private void publishReport(List<DoctorEventModifyRequest> requestList) {

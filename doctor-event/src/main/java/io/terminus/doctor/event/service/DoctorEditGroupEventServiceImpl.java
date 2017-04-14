@@ -13,6 +13,7 @@ import io.terminus.doctor.event.dao.DoctorGroupElicitRecordDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.helper.DoctorMessageSourceHelper;
 import io.terminus.doctor.event.manager.DoctorEditGroupEventManager;
@@ -109,10 +110,10 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
     }
 
     @Override
-    public void elicitDoctorGroupTrackRebuildOne(DoctorGroupEvent doctorGroupEvent) {
+    public List<DoctorEventInfo> elicitDoctorGroupTrackRebuildOne(DoctorGroupEvent doctorGroupEvent, Long modifyRequestId) {
         try{
             beforeCheck(doctorGroupEvent);
-            doctorEditGroupEventManager.elicitDoctorGroupTrackRebuildOne(doctorGroupEvent);
+            return doctorEditGroupEventManager.elicitDoctorGroupTrackRebuildOne(doctorGroupEvent, modifyRequestId);
         }catch(InvalidException e){
             throw e;
         }catch(Exception e){
