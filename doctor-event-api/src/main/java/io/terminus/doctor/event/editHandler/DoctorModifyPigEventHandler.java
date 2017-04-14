@@ -31,10 +31,10 @@ public interface DoctorModifyPigEventHandler {
     /**
      * 根据原事件和变化构建新事件
      * @param oldPigEvent 原事件
-     * @param changeDto 变化
+     * @param inputDto 编辑后输入
      * @return 新事件
      */
-    DoctorPigEvent buildNewEvent(DoctorPigEvent oldPigEvent, DoctorEventChangeDto changeDto);
+    DoctorPigEvent buildNewEvent(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto);
 
     /**
      * 根据原track和变化构建新track
@@ -56,8 +56,8 @@ public interface DoctorModifyPigEventHandler {
     /**
      * 编辑处理
      * @param oldPigEvent 原事件
-     * @param changeDto 变化
+     * @param inputDto 编辑后输入
      */
-    void handle(DoctorPigEvent oldPigEvent, DoctorEventChangeDto changeDto);
+    void handle(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto);
 
 }

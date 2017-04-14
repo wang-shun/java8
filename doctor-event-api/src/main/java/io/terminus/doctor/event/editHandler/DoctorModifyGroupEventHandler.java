@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.editHandler;
 
-import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
+import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -15,18 +15,18 @@ public interface DoctorModifyGroupEventHandler {
     /**
      * 构建编辑的变化结果
      * @param oldGroupEvent 原事件
-     * @param inputDto 编辑输入
+     * @param input 编辑输入
      * @return 变化结果
      */
-    DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BasePigEventInputDto inputDto);
+    DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input);
 
     /**
      * 根据原事件和变化构建新事件
      * @param oldGroupEvent 原事件
-     * @param changeDto 变化
+     * @param input 编辑输入
      * @return 新事件
      */
-    DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, DoctorEventChangeDto changeDto);
+    DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, BaseGroupInput input);
 
     /**
      * 构建新猪群信息
@@ -56,7 +56,7 @@ public interface DoctorModifyGroupEventHandler {
     /**
      * 编辑处理
      * @param oldGroupEvent 原事件
-     * @param changeDto 变化
+     * @param input 编辑输入
      */
-    void handle(DoctorGroupEvent oldGroupEvent, DoctorEventChangeDto changeDto);
+    void handle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input);
 }

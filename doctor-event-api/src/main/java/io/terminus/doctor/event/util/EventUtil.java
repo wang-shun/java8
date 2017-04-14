@@ -51,6 +51,10 @@ public class EventUtil {
         return MoreObjects.firstNonNull(aq, 0D) + MoreObjects.firstNonNull(bq, 0D);
     }
 
+    public static double minusDouble(Double aq, Double bq) {
+        return MoreObjects.firstNonNull(aq, 0D) - MoreObjects.firstNonNull(bq, 0D);
+    }
+
     public static int minusQuantity(int aq, int bq) {
         return aq - bq;
     }
