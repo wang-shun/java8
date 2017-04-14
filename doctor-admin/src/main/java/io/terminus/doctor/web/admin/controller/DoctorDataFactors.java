@@ -8,6 +8,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.event.model.DoctorDataFactor;
 import io.terminus.doctor.event.service.DoctorDataFactorReadService;
 import io.terminus.doctor.event.service.DoctorDataFactorWriteService;
+import io.terminus.doctor.web.admin.dto.DoctorDataFactorDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -101,16 +102,19 @@ public class DoctorDataFactors {
      * @param
      */
     @RequestMapping(method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean updateDoctorDataFactor(@RequestBody DoctorDataFactor factor) {
-        if(factor.getFactor() == null){
-            throw new JsonResponseException(500,"doctor.data.factor.invalid");
+    public Boolean updateDoctorDataFactor(@RequestBody DoctorDataFactorDto datas) {
+        for (DoctorDataFactor factor: datas.getDatas()) {
+
+            if (factor.getFactor() == null) {
+                throw new JsonResponseException(500, "doctor.data.factor.invalid");
+            }
+            rangeVerify(factor);
+            Response<Boolean> response = doctorDataFactorWriteService.update(factor);
+            if (!response.isSuccess()) {
+                throw new JsonResponseException(500, response.getError());
+            }
         }
-        rangeVerify(factor);
-        Response<Boolean> response = doctorDataFactorWriteService.update(factor);
-        if (!response.isSuccess()) {
-            throw new JsonResponseException(500, response.getError());
-        }
-        return response.getResult();
+        return true;
     }
 
     private void rangeVerify(DoctorDataFactor factor){
