@@ -125,16 +125,9 @@ public class DoctorDataFactors {
      */
     @RequestMapping(method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean updateDoctorDataFactor(@RequestBody DoctorDataFactorDto datas) {
-        for (DoctorDataFactor factor: datas.getDatas()) {
-
-            if (factor.getFactor() == null) {
-                throw new JsonResponseException(500, "doctor.data.factor.invalid");
-            }
-            rangeVerify(factor);
-            Response<Boolean> response = doctorDataFactorWriteService.update(factor);
-            if (!response.isSuccess()) {
-                throw new JsonResponseException(500, response.getError());
-            }
+        Response<Boolean> response = doctorDataFactorWriteService.batchUpdate(datas.getDatas());
+        if (!response.isSuccess()) {
+            throw new JsonResponseException(500, response.getError());
         }
         return true;
     }
