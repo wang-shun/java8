@@ -215,8 +215,7 @@ public class UserInitService {
             for (View_FarmMember member : list) {
                 if(member.getLevels() == 1
                         && Objects.equals(member.getFarmName(), farmInfo.getOldFarmName())
-                        && !Objects.equals(member.getMobilPhone(), primaryUser.getMobile())
-                        && !Objects.equals(member.getMobilPhone(), "13523756995")){
+                        && (!Objects.equals(member.getMobilPhone(), primaryUser.getMobile()))) {
                     this.createSubUser(member, roleId, primaryUser.getId(), primaryUser.getMobile(), farm.getId(), farm.getOutId());
                 }
             }
@@ -237,7 +236,7 @@ public class UserInitService {
     private List<DoctorMoveFarmInfo> analyzeExcelForFarmInfo(Sheet sheet) {
         List<DoctorMoveFarmInfo> infoList = Lists.newArrayList();
         for (Row row : sheet) {
-            if (row.getRowNum() > 1 && notEmpty(ImportExcelUtils.getString(row, 0))) {
+            if (notEmpty(ImportExcelUtils.getString(row, 0))) {
                 DoctorMoveFarmInfo moveFarmInfo = DoctorMoveFarmInfo.builder()
                         .oldFarmName(ImportExcelUtils.getString(row, 1))
                         .orgName(ImportExcelUtils.getString(row, 2))
