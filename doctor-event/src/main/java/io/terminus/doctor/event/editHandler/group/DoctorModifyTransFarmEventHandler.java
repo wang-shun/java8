@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.editHandler.group;
 
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.*;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -32,6 +33,13 @@ public class DoctorModifyTransFarmEventHandler extends DoctorAbstractModifyGroup
 
     @Override
     public DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
-        return null;
+        DoctorGroupEvent newGroupEvent = new DoctorGroupEvent();
+        BeanMapper.copy(oldGroupEvent, newGroupEvent);
+        DoctorTransFarmGroupInput newInput = (DoctorTransFarmGroupInput) input;
+        newGroupEvent.setEventAt(DateTime.parse(newInput.getEventAt()).toDate());
+        newGroupEvent.setQuantity(newInput.getQuantity());
+        newGroupEvent.setWeight(newInput.getWeight());
+        newGroupEvent.setRemark(newInput.getRemark());
+        return newGroupEvent;
     }
 }
