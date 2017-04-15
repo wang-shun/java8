@@ -449,7 +449,7 @@ public class DoctorMoveDataController {
             log.warn("move pig end");
             return true;
         } catch (Exception e) {
-            doctorMoveDataService.deleteAllPigs(farmId);
+//            doctorMoveDataService.deleteAllPigs(farmId);
             log.error("move pig failed, moveId:{}, farmId:{}, cause:{}",
                     moveId, farmId, Throwables.getStackTraceAsString(e));
             return false;

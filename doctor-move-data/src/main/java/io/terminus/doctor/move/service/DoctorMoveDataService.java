@@ -723,7 +723,6 @@ public class DoctorMoveDataService {
             doctorPigTrackDao.creates(sowTracks);
         }
 
-        log.info("sowTracks==={}", sowTracks);
         sowTracks.forEach(sowTrack -> {
             DoctorPig sow = doctorPigDao.findById(sowTrack.getPigId());
             DoctorPigSnapshot pigSnapshot = DoctorPigSnapshot.builder()
