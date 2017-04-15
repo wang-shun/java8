@@ -1583,7 +1583,7 @@ public class DoctorMoveDataService {
 
         //查出公猪, 转换成map
         List<DoctorPig> boarList = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PigSex.BOAR.getKey());
-        log.info("boarList===:{}");
+        log.info("boarList===:{}", boarList);
         Map<String, DoctorPig> boarMap = boarList.stream()
                 .collect(Collectors.toMap(DoctorPig::getOutId, v -> v));
 
