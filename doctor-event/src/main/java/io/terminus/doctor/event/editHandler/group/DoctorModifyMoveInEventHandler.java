@@ -24,7 +24,7 @@ public class DoctorModifyMoveInEventHandler extends DoctorAbstractModifyGroupEve
         DoctorMoveInGroupInput oldMoveInGroupInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorSowMoveInGroupInput.class);
         DoctorMoveInGroupInput newMoveInGroupInput = (DoctorMoveInGroupInput) input;
         DoctorEventChangeDto changeDto = DoctorEventChangeDto.builder()
-                .groupQuantityChange(EventUtil.minusInt(newMoveInGroupInput.getQuantity(), oldMoveInGroupInput.getQuantity()))
+                .quantityChange(EventUtil.minusInt(newMoveInGroupInput.getQuantity(), oldMoveInGroupInput.getQuantity()))
                 .groupHealthyQtyChange(EventUtil.minusInt(newMoveInGroupInput.getHealthyQty(), oldMoveInGroupInput.getHealthyQty()))
                 .groupWeakQtyChange(EventUtil.minusInt(newMoveInGroupInput.getWeakQty(), oldMoveInGroupInput.getWeakQty()))
                 .build();
@@ -53,7 +53,7 @@ public class DoctorModifyMoveInEventHandler extends DoctorAbstractModifyGroupEve
 
     @Override
     public DoctorGroupTrack buildNewTrack(DoctorGroupTrack oldGroupTrack, DoctorEventChangeDto changeDto) {
-        oldGroupTrack.setQuantity(EventUtil.plusInt(oldGroupTrack.getQuantity(), changeDto.getGroupQuantityChange()));
+        oldGroupTrack.setQuantity(EventUtil.plusInt(oldGroupTrack.getQuantity(), changeDto.getQuantityChange()));
         oldGroupTrack.setBirthWeight(EventUtil.plusDouble(oldGroupTrack.getBirthWeight(), changeDto.getGroupBirthWeightChange()));
         oldGroupTrack.setLiveQty(EventUtil.plusInt(oldGroupTrack.getLiveQty(), changeDto.getGroupLiveQtyChange()));
         oldGroupTrack.setHealthyQty(EventUtil.plusInt(oldGroupTrack.getHealthyQty(), changeDto.getGroupHealthyQtyChange()));

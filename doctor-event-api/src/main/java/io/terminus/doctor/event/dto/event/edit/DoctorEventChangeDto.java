@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
@@ -122,24 +124,49 @@ public class DoctorEventChangeDto {
     private Integer pigletsCountChange;
 
     /**
-     * 新变动类型
+     * 旧变动类型
      */
-    private Long pigletsChangeType;
+    private Long oldChangeTypeId;
+
+    /**
+     * 旧变动原因
+     */
+    private Long oldChangeReasonId;
+
+    /**
+     * 新变动类型,猪群
+     */
+    private Long changeTypeId;
 
     /**
      * 新变动原因
      */
-    private Long pigletsChangeReason;
+    private Long changeReasonId;
+
+    /**
+     * 数量变化
+     */
+    private Integer quantityChange;
 
     /**
      * 变动重量变化量
      */
-    private Double pigletsWeightChange;
+    private Double weightChange;
+
+    /**
+     * 超出重量变化
+     */
+    private Double overWeightChange;
 
     /**
      * 变动价格变化量
      */
-    private Long pigletsPriceChange;
+    private Long priceChange;
+
+    /**
+     * 超出价格变化
+     */
+    private Long overPriceChange;
 
     /**
      * 断奶数变化量
@@ -147,26 +174,14 @@ public class DoctorEventChangeDto {
     private Integer weanCountChange;
 
     /**
-     * 猪重量变化量
-     */
-    private Double pigWeight;
-
-    /**
      * 新疾病id
      */
     private Long diseaseId;
-    private Long diseaseName;
 
     /**
      * 新防疫id;
      */
     private Long vaccinationId;
-    private Long vaccinationName;
-
-    /**
-     * 猪群数量变化量
-     */
-    private Integer groupQuantityChange;
 
     /**
      * 猪群公猪变化量
@@ -201,6 +216,66 @@ public class DoctorEventChangeDto {
     private Integer groupQuaQtyChange;
 
     private Integer groupUnqQtyChange;
+
+    /**
+     * 旧事件转种猪, 进场pigCode
+     */
+    private String oldPigCode;
+
+    /**
+     * 转种猪, 进场pigCode
+     */
+    private String pigCode;
+
+    /**
+     * 转种猪, 进场母亲耳缺号
+     */
+    private String motherEarCode;
+
+    /**
+     * 转种猪, 进场耳缺号
+     */
+    private String earCode;
+
+    /**
+     * 转种猪, 进场出生日期
+     */
+    private String birthDate;
+
+    /**
+     * 转入猪舍
+     */
+    @NotNull(message = "barnId.not.null")
+    private Long toBarnId;
+
+    @NotEmpty(message = "barnId.not.null")
+    private String toBarnName;
+
+    /**
+     * 均重变化
+     */
+    private double avgWeightChange;
+
+
+    /**
+     * 旧事件转场的猪场id
+     */
+    private Long oldToFarmId;
+
+    /**
+     * 旧事件转场的猪舍
+     */
+    private Long oldToGroupId;
+
+    /**
+     * 转场的猪场id
+     */
+    private Long toFarmId;
+
+    /**
+     * 转场的猪群id
+     */
+    private Long toGroupId;
 
     /**
      * 新备注
