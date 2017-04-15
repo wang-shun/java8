@@ -1675,13 +1675,11 @@ public class DoctorMoveDataService {
         boar.setGeneticName(card.getGenetic());
 
         //附加字段, 公猪类型
-        BoarEntryType boarType = BoarEntryType.from(card.getBoarType());
-        if (boarType != null) {
-            boar.setExtraMap(ImmutableMap.of(
-                    DoctorFarmEntryConstants.BOAR_TYPE_ID, boarType.getKey(),
-                    DoctorFarmEntryConstants.BOAR_TYPE_NAME, boarType.getDesc()
-            ));
-        }
+        BoarEntryType boarType = BoarEntryType.HGZ;
+        boar.setExtraMap(ImmutableMap.of(
+                DoctorFarmEntryConstants.BOAR_TYPE_ID, boarType.getKey(),
+                DoctorFarmEntryConstants.BOAR_TYPE_NAME, boarType.getDesc()
+        ));
         boar.setBoarType(boarType.getKey());
         return boar;
     }
