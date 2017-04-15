@@ -90,6 +90,11 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
     private Integer source;
 
     /**
+     * 触发猪群转群的母猪id
+     */
+    private Long sowId;
+
+    /**
      * 触发猪群转群的母猪号
      */
     private String sowCode;

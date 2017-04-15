@@ -53,9 +53,17 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
         //2.创建防疫事件
         DoctorGroupEvent<DoctorAntiepidemicGroupEvent> event = dozerGroupEvent(group, GroupEventType.ANTIEPIDEMIC, antiepidemic);
 
+        event.setBasicId(antiepidemic.getVaccinItemId());
+        event.setBasicName(antiepidemic.getVaccinItemName());
+        event.setVaccinationId(antiepidemic.getVaccinId());
+        event.setVaccinationName(antiepidemic.getVaccinName());
+        event.setVaccinResult(antiepidemic.getVaccinResult());
         event.setQuantity(antiepidemic.getQuantity());
         event.setExtraMap(antiEvent);
         event.setEventSource(SourceType.INPUT.getValue());
+        event.setOperatorId(antiepidemic.getVaccinStaffId());
+        event.setOperatorName(antiepidemic.getVaccinStaffName());
+
         return event;
     }
 

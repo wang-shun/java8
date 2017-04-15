@@ -824,3 +824,37 @@ CREATE TABLE `doctor_event_relations` (
   KEY `idx_relations_trigger_pig_event_id` (`trigger_pig_event_id`),
   KEY `idx_relations_trigger_group_event_id` (`trigger_group_event_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='事件关联表';
+
+-- 2017-04-07 猪事件拆分
+alter table doctor_pig_events add column source tinyint(4) default null comment '进场来源，1：本场，2：外购' after extra;
+alter table doctor_pig_events add column boar_type tinyint(4) default null comment '公猪类型,1：活公猪，2：冷冻精液，3：新鲜精液' after source;
+alter table doctor_pig_events add column breed_id bigint(20) default null comment '品种' after source;
+alter table doctor_pig_events add column breed_name varchar(32) default null comment '品种' after breed_id;
+alter table doctor_pig_events add column breed_type_id bigint(20) default null comment '品系' after breed_name;
+alter table doctor_pig_events add column breed_type_name varchar(32) default null comment '品系' after breed_type_id;
+alter table doctor_pig_events add column quantity int(11) default null comment '数量(拼窝数量,被拼窝数量,仔猪变动数量)' after amount;
+alter table doctor_pig_events add column weight DOUBLE default null comment '重量(变动重量)' after quantity;
+alter table doctor_pig_events add column basic_id bigint(20) default null comment '基础数据id(流产原因id,疾病id,防疫项目id)' after change_type_id;
+alter table doctor_pig_events add column basic_name varchar(32) default null comment '基础数据名(流产原因,疾病,防疫)' after basic_id;
+alter table doctor_pig_events add column customer_id bigint(20) default null comment '客户id' after basic_name;
+alter table doctor_pig_events add column customer_name varchar(32) default null comment '客户名' after customer_id;
+alter table doctor_pig_events add column vaccination_id bigint(20) default null comment '疫苗' after customer_name;
+alter table doctor_pig_events add column vaccination_name varchar(32) default null comment '疫苗名称' after vaccination_id;
+alter table doctor_pig_events add column mate_type tinyint(4) default null comment '配种类型(人工、自然)' after doctor_mate_type;
+alter table doctor_pig_events add column judge_preg_date date default null comment '预产期' after partwean_date;
+alter table doctor_pig_events add column barn_type tinyint(4) default null comment '猪舍类型' after barn_name;
+
+-- 2017-04-07 猪群拆分
+ALTER TABLE doctor_group_events ADD COLUMN sow_id bigint(20) DEFAULT NULL comment '有母猪触发的事件关联的猪id' after barn_name;
+ALTER TABLE doctor_group_events ADD COLUMN sow_code varchar(32) DEFAULT NULL comment '有母猪触发的事件关联的猪code' after sow_id;
+ALTER TABLE doctor_group_events ADD COLUMN customer_id bigint(20) DEFAULT NULL comment '销售时客户id' after over_price;
+ALTER TABLE doctor_group_events ADD COLUMN customer_name varchar(32) DEFAULT NULL comment '销售时客户名' after customer_id;
+ALTER TABLE doctor_group_events ADD COLUMN basic_id bigint(20) DEFAULT NULL comment '基础数据id(疾病id,防疫项目id)' after customer_name;
+ALTER TABLE doctor_group_events ADD COLUMN basic_name varchar(32) DEFAULT NULL comment '基础数据名(疾病,防疫)' after basic_id;
+ALTER TABLE doctor_group_events ADD COLUMN vaccin_result tinyint(4) DEFAULT NULL comment '防疫结果' after basic_name;
+alter table doctor_group_events add column vaccination_id bigint(20) default null comment '疫苗' after vaccin_result;
+alter table doctor_group_events add column vaccination_name varchar(32) default null comment '疫苗名称' after vaccination_id;
+ALTER TABLE doctor_group_events ADD COLUMN operator_id bigint(20) DEFAULT NULL comment '操作人id' after creator_name;
+ALTER TABLE doctor_group_events ADD COLUMN operator_name varchar(32) DEFAULT NULL comment '操作人姓名' after operator_id;
+
+

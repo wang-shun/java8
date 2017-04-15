@@ -99,9 +99,10 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorMatingDto matingDto = (DoctorMatingDto) inputDto;
+        doctorPigEvent.setJudgePregDate(matingDto.getJudgePregDate());
+        doctorPigEvent.setMateType(matingDto.getMatingType());
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
         doctorPigEvent.setBoarCode(matingDto.getMatingBoarPigCode());
-        doctorPigEvent.setMattingDate(generateEventAt(matingDto.getMatingDate()));
         //  校验断奶后, 第一次配种, 增加胎次
         Map<String, Object> trackExtraMap = doctorPigTrack.getExtraMap();
         if (!isNull(trackExtraMap) &&

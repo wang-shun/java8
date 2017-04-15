@@ -24,6 +24,7 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
+import io.terminus.doctor.event.dto.search.DoctorGroupCountDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -484,6 +485,32 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         }catch(Exception e){
             log.error("find linked group events failed, groupId: {}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
             return Response.fail("find.linked.group.events.failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorGroupCountDto> findGroupCount(@NotNull(message = "farmId.not.null") Long farmId) {
+        try {
+            DoctorGroupCountDto groupCountDto = doctorGroupJoinDao.findGroupCount(farmId);
+            groupCountDto.setGroupTotalCount(groupCountDto.getReserveCount()
+                    + groupCountDto.getDeliverPigCount()
+                    + groupCountDto.getFattenPigCount()
+                    + groupCountDto.getNurseryPigletCount());
+
+            return Response.ok(groupCountDto);
+        } catch (Exception e) {
+            log.error("get group count failed, farmId:{}, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("get.group.count.failed");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorGroup>> findGroupIds(Long farmId, Date startAt, Date endAt) {
+        try {
+            return Response.ok(doctorGroupDao.findGroupId(farmId, startAt, endAt));
+        }catch (Exception e) {
+            log.error("find.groupId.fail, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.grouPId.fail");
         }
     }
 }

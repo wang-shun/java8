@@ -68,6 +68,12 @@ public class DoctorPigInfoDto implements Serializable{
 
     private String barnName;
 
+    /**
+     * 猪舍类型
+     * @see io.terminus.doctor.common.enums.PigType
+     */
+    private Integer barnType;
+
     private String extraTrack;
 
     private Map<String,Object> extraTrackMap;
@@ -100,6 +106,7 @@ public class DoctorPigInfoDto implements Serializable{
                     .weight(doctorPigTrack.getWeight())
                     .barnId(doctorPigTrack.getCurrentBarnId())
                     .barnName(doctorPigTrack.getCurrentBarnName())
+                    .barnType(doctorPigTrack.getCurrentBarnType())
                     .extraTrack(doctorPigTrack.getExtra())
                     .extraTrackMap(doctorPigTrack.getExtraMap())
                     .extraTrackMessage(doctorPigTrack.getExtraMessage())

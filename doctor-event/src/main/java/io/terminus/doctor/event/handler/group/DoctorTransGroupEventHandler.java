@@ -7,7 +7,6 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -186,6 +185,8 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
         event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
 
+        event.setSowId(transGroup.getSowId());
+        event.setSowCode(transGroup.getSowCode());
         event.setAvgWeight(transGroup.getAvgWeight());  //均重
         event.setWeight(realWeight);                    //总重
         event.setTransGroupType(getTransType(null, group.getPigType(), toBarn).getValue());   //区别内转还是外转(null是因为不用判断转入类型)
@@ -269,6 +270,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     private Long autoTransGroupEventNew(List<DoctorEventInfo> eventInfoList, DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup, DoctorBarn toBarn) {
         DoctorNewGroupInput newGroupInput = new DoctorNewGroupInput();
         newGroupInput.setSowCode(transGroup.getSowCode());
+        newGroupInput.setSowId(transGroup.getSowId());
         newGroupInput.setFarmId(fromGroup.getFarmId());
         newGroupInput.setGroupCode(transGroup.getToGroupCode());    //录入猪群号
         newGroupInput.setEventAt(transGroup.getEventAt());          //事件发生日期

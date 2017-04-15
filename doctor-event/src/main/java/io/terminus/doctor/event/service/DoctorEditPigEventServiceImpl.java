@@ -115,6 +115,7 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
     }
 
     @Override
+    @Transactional
     public void elicitPigTrack(Long pigId) {
         log.info("elicitPigTrack starting, pigId:{}", pigId);
         DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigId);
@@ -122,10 +123,13 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
             elicitPigTrackImpl(pigId);
         } catch (InvalidException e) {
             createELicitPigTrackRecord(pigId, pigTrack, pigTrack, DoctorPigElicitRecord.Status.FAIL.getKey(), messageSourceHelper.getMessage(e.getError(), e.getParams()));
+            throw e;
         } catch (ServiceException e) {
             createELicitPigTrackRecord(pigId, pigTrack, pigTrack, DoctorPigElicitRecord.Status.FAIL.getKey(), e.getMessage());
+            throw e;
         } catch (Exception e) {
             createELicitPigTrackRecord(pigId, pigTrack, pigTrack, DoctorPigElicitRecord.Status.FAIL.getKey(), Throwables.getStackTraceAsString(e));
+            throw e;
         }
         log.info("elicitPigTrack ending");
     }
@@ -134,7 +138,6 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
      * 事物实现
      * @param pigId 猪id
      */
-    @Transactional
     private void elicitPigTrackImpl(Long pigId) {
         //校验源数据
         DoctorPigTrack oldTrack = doctorPigTrackDao.findByPigId(pigId);

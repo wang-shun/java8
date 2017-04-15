@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dao;
 
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.dto.search.DoctorGroupCountDto;
 import io.terminus.doctor.event.dto.search.SearchedGroup;
 import org.springframework.stereotype.Repository;
 
@@ -24,5 +25,14 @@ public class DoctorGroupJoinDao extends MyBatisDao<SearchedGroup> {
      */
     public Long getWeanCount(DoctorGroupSearchDto groupSearchDto) {
         return getSqlSession().selectOne(sqlId("getWeanCount"), groupSearchDto);
+    }
+
+    /**
+     * 获取猪场各个类型猪数量
+     * @param farmId 猪场id
+     * @return
+     */
+    public DoctorGroupCountDto findGroupCount(Long farmId) {
+        return getSqlSession().selectOne(sqlId("findGroupCount"), farmId);
     }
 }

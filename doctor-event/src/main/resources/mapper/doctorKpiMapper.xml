@@ -8,6 +8,7 @@
 
     <sql id="criteria">
         AND status = 1
+        AND event_source != 5
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
         <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
@@ -1800,5 +1801,39 @@
             ) AS delta
         ) c ON g.id = c.group_id
         WHERE g.quantity - ifnull(c.deltaQty, 0)  &gt; 0
+    </select>
+
+    <select id="getBarnChangeCount" parameterType="map" resultType="int">
+        select
+        ifnull(sum(
+        (case when type = 2 then quantity else 0 end) -
+        (case when type in (3,5,9) then quantity else 0 end)
+        ),0)
+        from doctor_group_events
+        where
+        barn_id = #{barnId}
+        AND event_at &gt;= date_sub(DATE(#{date}), INTERVAL #{index} WEEK)
+        AND event_at &lt; date_add(DATE(#{date}), INTERVAL 1 DAY)
+    </select>
+
+    <select id="getOutTrasGroup" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity),0)
+        from doctor_group_events
+        where
+        barn_id = #{barnId}
+        AND type = 4
+        AND trans_group_type = 1
+        AND event_at &gt;= date_sub(DATE(#{date}), INTERVAL #{index} WEEK)
+        AND event_at &lt; date_add(DATE(#{date}), INTERVAL 1 DAY)
+    </select>
+
+    <select id="getBarnLiveStock" parameterType="long" resultType="int" >
+        SELECT ifnull(sum(quantity), 0)
+        from doctor_groups a
+        left join doctor_group_tracks b
+        on a.id = b.group_id
+        where a.current_barn_id = #{barnId}
+        and a.status = 1;
     </select>
 </mapper>

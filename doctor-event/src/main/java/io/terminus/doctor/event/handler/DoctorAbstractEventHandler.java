@@ -75,34 +75,37 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+
         //上一个事件
         Long currentEventId = fromTrack.getCurrentEventId();
         //原事件id,编辑可用
         Long oldEventId = executeEvent.getId();
 
-        //1.创建事件
+        //1.事件前的特殊处理
+        specialHandleBefore(executeEvent, fromTrack);
+
+        //2.创建事件
         executeEvent.setPigStatusBefore(fromTrack.getStatus());
         executeEvent.setParity(fromTrack.getCurrentParity());
-
         doctorPigEventDao.create(executeEvent);
 
-        //如果是自动事件,或者编辑事件则创建关联关系
+        //3.如果是自动事件,或者编辑事件则创建关联关系
         if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.YES.getValue())
                 || Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
             createEventRelation(executeEvent, oldEventId);
         }
 
-        //事件是否需要更新track和生成镜像
+        //4。事件是否需要更新track和生成镜像
         DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
         if (!IGNORE_EVENT.contains(executeEvent.getType())) {
             //2.更新track
             doctorPigTrackDao.update(toTrack);
         }
 
-        //4.特殊处理
+        //5.特殊处理
         specialHandle(executeEvent, toTrack);
 
-        //5.记录发生的事件信息
+        //6.记录发生的事件信息
         DoctorBarn doctorBarn = doctorBarnDao.findById(toTrack.getCurrentBarnId());
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(executeEvent.getOrgId())
@@ -123,11 +126,12 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
 
-        //6.触发事件
+        //7.触发事件
         if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
             triggerEvent(doctorEventInfoList, executeEvent, toTrack);
         }
 
+        //8.创建镜像
         if (!IGNORE_EVENT.contains(executeEvent.getType())) {
             //创建镜像
             createPigSnapshot(toTrack, executeEvent, currentEventId);
@@ -152,7 +156,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
                 .pigId(inputDto.getPigId()).pigCode(inputDto.getPigCode())
                 .eventAt(generateEventAt(inputDto.eventAt())).type(inputDto.getEventType())
-                .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName())
+                .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName()).barnType(inputDto.getBarnType())
                 .kind(inputDto.getPigType()).relPigEventId(inputDto.getRelPigEventId()).relGroupEventId(inputDto.getRelGroupEventId())
                 .name(inputDto.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))
                 .operatorId(MoreObjects.firstNonNull(inputDto.getOperatorId(), basic.getStaffId()))
@@ -160,20 +164,14 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .isAuto(MoreObjects.firstNonNull(inputDto.getIsAuto(), IsOrNot.NO.getValue()))
                 .status(EventStatus.VALID.getValue()).eventSource(SourceType.INPUT.getValue()).isModify(IsOrNot.NO.getValue())
-                .npd(0)
-                .dpnpd(0)
-                .pfnpd(0)
-                .plnpd(0)
-                .psnpd(0)
-                .pynpd(0)
-                .ptnpd(0)
-                .jpnpd(0)
+                .npd(0).dpnpd(0).pfnpd(0).plnpd(0).psnpd(0).pynpd(0).ptnpd(0).jpnpd(0)
                 .build();
         doctorPigEvent.setRemark(inputDto.changeRemark());
         doctorPigEvent.setExtraMap(inputDto.toMap());
         return doctorPigEvent;
     }
 
+    protected void specialHandleBefore(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack){};
     /**
      * 当事件被动触发时创建事件关联
      * @param executeEvent 事件

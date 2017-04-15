@@ -51,4 +51,8 @@ public class DoctorGroupSnapshotDao extends MyBatisDao<DoctorGroupSnapshot> {
     public List<DoctorGroupSnapshot> findByGroupId(Long groupId) {
         return getSqlSession().selectList(sqlId("getSnapshotsByGroupId"), groupId);
     }
+
+    public void updates(List<DoctorGroupSnapshot> snapshots){
+        getSqlSession().update(sqlId("updates"), snapshots);
+    }
 }

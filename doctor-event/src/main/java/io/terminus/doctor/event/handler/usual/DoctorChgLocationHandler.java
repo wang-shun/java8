@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Maps;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -99,14 +98,6 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
         if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
             toTrack.setStatus(PigStatus.Farrow.getKey());
-        } else if (Objects.equals(toTrack.getStatus(), PigStatus.Wean.getKey()) && Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
-            // 设置断奶到配置舍标志
-            Map<String, Object> newExtraMap = Maps.newHashMap();
-            newExtraMap.put("hasWeanToMating", true);
-            //清空对应的Map 信息内容 （有一次生产过程）
-            toTrack.setExtraMap(newExtraMap);
-            //设置当前配种次数为零
-            toTrack.setCurrentMatingCount(0);
         }
         toTrack.setCurrentBarnId(toBarnId);
         toTrack.setCurrentBarnName(toBarn.getName());
@@ -138,6 +129,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         expectTrue(notNull(pigTrack.getGroupId()), "farrow.groupId.not.null", pigTrack.getPigId());
         //未断奶仔猪id
         DoctorTransGroupInput input = new DoctorTransGroupInput();
+        input.setSowId(chgLocationDto.getPigId());
         input.setSowCode(chgLocationDto.getPigCode());
         input.setToBarnId(doctorToBarn.getId());
         input.setToBarnName(doctorToBarn.getName());

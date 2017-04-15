@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Maps;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
@@ -120,6 +122,11 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         Double weanAvgWeight = ((MoreObjects.firstNonNull(toTrack.getWeanAvgWeight(), 0D) * weanCount) + toWeanAvgWeight * toWeanCount ) / (weanCount + toWeanCount);
         toTrack.setWeanAvgWeight(weanAvgWeight);
 
+        Map<String, Object> newExtraMap = Maps.newHashMap();
+        //更新extra字段
+        newExtraMap.put("hasWeanToMating", true);
+
+        fromTrack.setExtraMap(newExtraMap);
         //设置下此时的猪群id，下面肯能会把它刷掉
         //basic.setWeanGroupId(doctorPigTrack.getGroupId());
 

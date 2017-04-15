@@ -188,8 +188,8 @@ public class DoctorMoveDataController {
      * @return 是否成功
      */
     @RequestMapping(value = "/moveAllWithExcel", method = RequestMethod.GET)
-    public Boolean moveAllWithExcel(@RequestParam("mobile") String mobile,
-                                    @RequestParam("loginName") String loginName,
+    public Boolean moveAllWithExcel(@RequestParam(value = "mobile", required = false) String mobile,
+                                    @RequestParam(value = "loginName", required = false) String loginName,
                                     @RequestParam("moveId") Long moveId,
                                     @RequestParam("path") String path,
                                     @RequestParam(value = "index", required = false) Integer index,
@@ -1211,6 +1211,29 @@ public class DoctorMoveDataController {
         log.warn("{} flush group dateformat end", DateUtil.toDateTimeString(new Date()));
         return true;
     }
+
+    @RequestMapping(value = "/pig/snapshots")
+    public Boolean flushPigDateFormat(@RequestParam(required = false) Long farmId) {
+        log.warn("{} flush pig dateformat start", DateUtil.toDateTimeString(new Date()));
+        List<Long> farmIds = Lists.newArrayList();
+        try {
+            if (Arguments.isNull(farmId)) {
+                farmIds = getAllFarmIds();
+            } else {
+                farmIds.add(farmId);
+            }
+            farmIds.forEach(id -> {
+                log.warn("{} flush farm {} pig dateformat start", DateUtil.toDateTimeString(new Date()), id);
+                doctorMoveDataService.flushPigSnapshotsToInfoDateFormat(id);
+            });
+        } catch (Exception e) {
+            log.error("flush pig dateformat failed, cause: {}", Throwables.getStackTraceAsString(e));
+            return false;
+        }
+        log.warn("{} flush pig dateformat end", DateUtil.toDateTimeString(new Date()));
+        return true;
+    }
+
     /**
      * 更新用户名
      * @param userId 用户id
@@ -1253,6 +1276,17 @@ public class DoctorMoveDataController {
         log.info("fixTriggerPigWean starting");
         doctorMoveDataService.fixTriggerPigWean();
         log.info("fixTriggerPigWean ending");
+        return true;
+    }
+
+    /**
+     * 更新某个猪场猪舍权限
+     * @param farmId 猪场id
+     * @return
+     */
+    @RequestMapping(value = "/updatePermissionBarn", method = RequestMethod.GET)
+    public Boolean updatePermissionBarn(@RequestParam Long farmId){
+        userInitService.updatePermissionBarn(farmId);
         return true;
     }
 }

@@ -41,6 +41,17 @@
         <result column="event_source" property="eventSource"/>
         <result column="remark" property="remark"/>
         <result column="extra" property="extra"/>
+        <result column="sow_id" property="sowId"/>
+        <result column="sow_code" property="sowCode"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="customer_name" property="customerName"/>
+        <result column="basic_id" property="basicId"/>
+        <result column="basic_name" property="basicName"/>
+        <result column="vaccin_result" property="vaccinResult"/>
+        <result column="vaccination_id" property="vaccinationId"/>
+        <result column="vaccination_name" property="vaccinationName"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="operator_name" property="operatorName"/>
         <result column="created_at" property="createdAt"/>
         <result column="creator_id" property="creatorId"/>
         <result column="creator_name" property="creatorName"/>
@@ -92,6 +103,17 @@
         event_source,
         remark,
         extra,
+        sow_id,
+        sow_code,
+        customer_id,
+        customer_name,
+        basic_id,
+        basic_name,
+        vaccin_result,
+        vaccination_id,
+        vaccination_name,
+        operator_id,
+        operator_name,
         created_at,
         creator_id,
         creator_name,
@@ -135,6 +157,17 @@
         #{eventSource},
         #{remark},
         #{extra},
+        #{sowId},
+        #{sowCode},
+        #{customerId},
+        #{customerName},
+        #{basicId},
+        #{basicName},
+        #{vaccinResult},
+        #{vaccinationId},
+        #{vaccinationName},
+        #{operatorId},
+        #{operatorName},
         now(),
         #{creatorId},
         #{creatorName},
@@ -142,6 +175,67 @@
         #{updatorId},
         #{updatorName}
     </sql>
+
+    <insert id="creates" parameterType="list">
+        INSERT INTO <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        <foreach collection="list" separator="," item="item">
+            (
+            #{item.orgId},
+            #{item.orgName},
+            #{item.farmId},
+            #{item.farmName},
+            #{item.groupId},
+            #{item.groupCode},
+            #{item.eventAt},
+            #{item.type},
+            #{item.name},
+            #{item.desc},
+            #{item.barnId},
+            #{item.barnName},
+            #{item.pigType},
+            #{item.quantity},
+            #{item.weight},
+            #{item.avgWeight},
+            #{item.baseWeight},
+            #{item.avgDayAge},
+            #{item.isAuto},
+            #{item.changeTypeId},
+            #{item.price},
+            #{item.amount},
+            #{item.overPrice},
+            #{item.transGroupType},
+            #{item.inType},
+            #{item.otherBarnId},
+            #{item.otherBarnType},
+            #{item.relGroupEventId},
+            #{item.relPigEventId},
+            #{item.outId},
+            #{item.status},
+            #{item.eventSource},
+            #{item.remark},
+            #{item.extra},
+            #{item.sowId},
+            #{item.sowCode},
+            #{item.customerId},
+            #{item.customerCode},
+            #{item.basicId},
+            #{item.basicName},
+            #{item.vaccinResult},
+            #{item.vaccinationId},
+            #{item.vaccinationName},
+            #{item.operatorId},
+            #{item.operatorName},
+            now(),
+            #{item.creatorId},
+            #{item.creatorName},
+            now(),
+            #{item.updatorId},
+            #{item.updatorName}
+            )
+        </foreach>
+    </insert>
 
     <sql id="criteria">
         <if test="id != null">AND id = #{id}</if>
@@ -172,6 +266,7 @@
         <if test="overPrice != null">AND over_price = #{overPrice}</if>
         <if test="transGroupType != null">AND trans_group_type = #{transGroupType}</if>
         <if test="inType != null">AND in_type = #{inType}</if>
+        <if test="notInType != null">AND in_type != #{notInType}</if>
         <if test="otherBarnId != null">AND other_barn_id = #{otherBarnId}</if>
         <if test="otherBarnType != null">AND other_barn_type = #{otherBarnType},</if>
         <if test="relGroupEventId != null">AND rel_group_event_id = #{relGroupEventId}</if>
@@ -180,6 +275,17 @@
         <if test="remark != null">AND remark = #{remark}</if>
         <if test="eventSource != null">AND event_source = #{eventSource}</if>
         <if test="extra != null">AND extra = #{extra}</if>
+        <if test="sowId != null">AND sow_id = #{sowId}</if>
+        <if test="sowCode != null">AND sow_code = #{sowCode}</if>
+        <if test="customerId != null">AND customer_id = #{customerId}</if>
+        <if test="customerName != null">AND customer_name = #{customerName}</if>
+        <if test="basicId != null">AND basic_id = #{basicId}</if>
+        <if test="basicName != null">AND basic_name = #{basicName}</if>
+        <if test="vaccinResult != null">AND vaccin_result = #{vaccinResult}</if>
+        <if test="vaccinationId != null">AND vaccination_id = #{vaccinationId}</if>
+        <if test="vaccinationName != null">AND vaccination_name = #{vaccinationName}</if>
+        <if test="operatorId != null">AND operator_id = #{operatorId}</if>
+        <if test="operatorName != null">AND operator_name = #{operatorName}</if>
         <if test="creatorId != null">AND creator_id = #{creatorId}</if>
         <if test="creatorName != null">AND creator_name = #{creatorName}</if>
         <if test="updatorId != null">AND updator_id = #{updatorId}</if>
@@ -189,6 +295,20 @@
             AND `type` IN
             <foreach collection="types" item="i" open="(" close=")" separator=",">
                 #{i}
+            </foreach>
+        </if>
+
+        <if test="pigTypes != null &amp;&amp; pigTypes.size() > 0">
+            AND `pig_type` IN
+            <foreach collection="pigTypes" item="pigType" open="(" close=")" separator=",">
+                #{pigType}
+            </foreach>
+        </if>
+
+        <if test="changeTypeIds != null &amp;&amp; changeTypeIds.size() > 0">
+            AND `change_type_id` IN
+            <foreach collection="changeTypeIds" item="changeTypeId" open="(" close=")" separator=",">
+                #{changeTypeId}
             </foreach>
         </if>
     </sql>
@@ -247,6 +367,17 @@
             <if test="eventSource != null">event_source = #{eventSource},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="extra != null">extra = #{extra},</if>
+            <if test="sowId != null">sow_id = #{sowId},</if>
+            <if test="sowCode != null">sow_code = #{sowCode},</if>
+            <if test="customerId != null">customer_id = #{customerId},</if>
+            <if test="customerName != null">customer_name = #{customerName},</if>
+            <if test="basicId != null">basic_id = #{basicId},</if>
+            <if test="basicName != null">basic_name = #{basicName},</if>
+            <if test="vaccinResult != null">vaccin_result = #{vaccinResult},</if>
+            <if test="vaccinationId != null">vaccination_id = #{vaccinationId},</if>
+            <if test="vaccinationName != null">vaccination_name = #{vaccinationName},</if>
+            <if test="operatorId != null">operator_id = #{operatorId},</if>
+            <if test="operatorName != null">operator_name = #{operatorName},</if>
             <if test="creatorId != null">creator_id = #{creatorId},</if>
             <if test="creatorName != null">creator_name = #{creatorName},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
@@ -312,56 +443,6 @@
         </where>
     </select>
 
-    <insert id="creates" parameterType="list">
-        INSERT INTO <include refid="tb" />
-        (<include refid="cols_exclude_id" />)
-        VALUES
-        <foreach collection="list" separator="," item="item">
-            (
-            #{item.orgId},
-            #{item.orgName},
-            #{item.farmId},
-            #{item.farmName},
-            #{item.groupId},
-            #{item.groupCode},
-            #{item.eventAt},
-            #{item.type},
-            #{item.name},
-            #{item.desc},
-            #{item.barnId},
-            #{item.barnName},
-            #{item.pigType},
-            #{item.quantity},
-            #{item.weight},
-            #{item.avgWeight},
-            #{item.baseWeight},
-            #{item.avgDayAge},
-            #{item.isAuto},
-            #{item.changeTypeId},
-            #{item.price},
-            #{item.amount},
-            #{item.overPrice},
-            #{item.transGroupType},
-            #{item.inType},
-            #{item.otherBarnId},
-            #{item.otherBarnType},
-            #{item.relGroupEventId},
-            #{item.relPigEventId},
-            #{item.outId},
-            #{item.status},
-            #{item.remark},
-            #{item.status},
-            #{item.eventSource},
-            #{item.extra},
-            now(),
-            #{item.creatorId},
-            #{item.creatorName},
-            now(),
-            #{item.updatorId},
-            #{item.updatorName}
-            )
-        </foreach>
-    </insert>
 
     <select id="findByDateRange" parameterType="map" resultMap="DoctorGroupEventMap">
         select

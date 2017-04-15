@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -172,5 +173,11 @@ public class DoctorReports {
     public DoctorGroupBatchSummary getGroupBatchSummary(@RequestParam("groupId") Long groupId, @RequestParam("fcc") Double fcc) {
         DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
         return RespHelper.or500(doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(groupDetail, fcc));
+    }
+
+    @RequestMapping(value = "/getBarnLiveStocks", method = RequestMethod.GET)
+    public Map<String, Integer> getBarnLiveStocks(@RequestParam Long barnId,
+                                           @RequestParam Integer index){
+        return RespHelper.or500(doctorCommonReportReadService.findBarnLiveStock(barnId, new Date(), index));
     }
 }
