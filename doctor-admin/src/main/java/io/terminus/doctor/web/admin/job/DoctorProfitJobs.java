@@ -16,6 +16,7 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,12 +83,18 @@ public class DoctorProfitJobs {
 
             Date startDate = DateUtil.monthStart(new Date());
             Date endDate = DateUtil.getMonthEnd(new DateTime(startDate)).toDate();
+            DateTime date;
+            Date startDates;
+            Date endDates;
 
             doctorProfitMaterOrPigWriteServer.deleteDoctorProfitMaterialOrPig(startDate);
 
             Map<String, Object> map = Maps.newHashMap();
 
             List<DoctorProfitMaterialOrPig> doctorProfitMaterialOrPigList = Lists.newArrayList();
+            List<DoctorProfitExportDto> profitExportDto;
+            DoctorProfitMaterialOrPig doctorProfitMaterialOrPig;
+            List<DoctorProfitExportDto> profitYearExportDto;
 
             map.put("startDate", startDate);
             map.put("endDate", endDate);
@@ -97,8 +104,8 @@ public class DoctorProfitJobs {
                 map.put("farmId", farmId);
                 for (String pigs : pigType) {
                     map.put("pigTypeId", pigs);
-                    List<DoctorProfitExportDto> profitExportDto = RespHelper.or500(doctorPigEventReadService.sumProfitAmount(map));
-                    DoctorProfitMaterialOrPig doctorProfitMaterialOrPig = new DoctorProfitMaterialOrPig();
+                    profitExportDto = RespHelper.or500(doctorPigEventReadService.sumProfitAmount(map));
+                    doctorProfitMaterialOrPig = new DoctorProfitMaterialOrPig();
                     Double amountPig = 0.0;
                     feedAmount = 0.0;
                     materialAmount = 0.0;
@@ -110,12 +117,12 @@ public class DoctorProfitJobs {
                         amountPig += doctorProfitExportDto.getAmount();
                     }
 
-                    DateTime date = new DateTime(startDate);
-                    Date startDates = DateUtils.addDays(startDate,1-date.dayOfYear().get());
-                    Date endDates = DateUtils.addSeconds(DateUtils.addYears(startDate,1),-1);
+                    date = new DateTime(startDate);
+                    startDates = DateUtils.addDays(startDate,1-date.dayOfYear().get());
+                    endDates = DateUtils.addSeconds(DateUtils.addYears(startDate,1),-1);
                     map.put("startDate", startDates);
                     map.put("endDate", endDates);
-                    List<DoctorProfitExportDto> profitYearExportDto = RespHelper.or500(doctorPigEventReadService.sumProfitAmount(map));
+                    profitYearExportDto = RespHelper.or500(doctorPigEventReadService.sumProfitAmount(map));
 
                     Double amountPigYear = 0.0;
                     amount = 0.0;
@@ -123,7 +130,6 @@ public class DoctorProfitJobs {
                         doctorProfitMaterialOrPig = sumMaterialAmount(startDate, endDate, farmId, doctorProfitExportDto.getBarnId(), doctorProfitMaterialOrPig, false);
                         amountPigYear += doctorProfitExportDto.getAmount();
                     }
-
 
                     if (!profitExportDto.isEmpty() && !profitYearExportDto.isEmpty()) {
                         doctorProfitMaterialOrPig.setFarmId(farmId);
@@ -148,12 +154,13 @@ public class DoctorProfitJobs {
             log.error("daily profit job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
-    public DoctorProfitMaterialOrPig sumMaterialAmount(Date startDate, Date endDate, Long farmId, Long barnId, DoctorProfitMaterialOrPig doctorProfitMaterialOrPig, Boolean tag) {
+    private final DoctorProfitMaterialOrPig sumMaterialAmount(Date startDate, Date endDate, Long farmId, Long barnId, DoctorProfitMaterialOrPig doctorProfitMaterialOrPig, Boolean tag) {
 
+        List<DoctorMaterialConsumeProvider> doctorMaterialConsumeProviders = Lists.newArrayList();
         if (tag) {
             for (Long type : materialType) {
 
-                List<DoctorMaterialConsumeProvider> doctorMaterialConsumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialProfit(farmId,
+                doctorMaterialConsumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialProfit(farmId,
                         type,
                         barnId,
                         startDate,
@@ -187,7 +194,7 @@ public class DoctorProfitJobs {
                 }
             }
         } else {
-            List<DoctorMaterialConsumeProvider> doctorMaterialConsumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialProfit(farmId,
+            doctorMaterialConsumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialProfit(farmId,
                     null,
                     barnId,
                     startDate,
@@ -197,14 +204,15 @@ public class DoctorProfitJobs {
         return doctorProfitMaterialOrPig;
     }
     
-    private Double builderDoctorMaterialConumeProvider(List<DoctorMaterialConsumeProvider> doctorMaterialConsumeProviders) {
+    private final Double builderDoctorMaterialConumeProvider(List<DoctorMaterialConsumeProvider> doctorMaterialConsumeProviders) {
 
         Double acmunt = 0.0;
-
-        for (int i = 0; i < doctorMaterialConsumeProviders.size(); i++) {
+        List<Map<String, Object>> priceCompose;
+        double awp = System.currentTimeMillis();
+        for (int i = 0, lenght = doctorMaterialConsumeProviders.size(); i < lenght; i++) {
 
             if (doctorMaterialConsumeProviders.get(i).getExtra() != null && doctorMaterialConsumeProviders.get(i).getExtraMap().containsKey("consumePrice")) {
-                List<Map<String, Object>> priceCompose = (ArrayList) doctorMaterialConsumeProviders.get(i).getExtraMap().get("consumePrice");
+                priceCompose = (ArrayList) doctorMaterialConsumeProviders.get(i).getExtraMap().get("consumePrice");
                 for (Map<String, Object> eachPrice : priceCompose) {
 
                     Long unitPrice = Long.valueOf(eachPrice.get("unitPrice").toString());
