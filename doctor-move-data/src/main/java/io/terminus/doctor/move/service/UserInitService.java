@@ -1,6 +1,5 @@
 package io.terminus.doctor.move.service;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -390,9 +389,12 @@ public class UserInitService {
         DoctorFarm farm = doctorFarmDao.findById(farmId);
         String name = member.getLoginName() + "@" + farm.getFarmCode();
 
+        if (member.getMobilPhone().isEmpty()) {
+            member.setMobilPhone(null);
+        }
         Response<User> result = doctorUserReadService.findBy(member.getMobilPhone(), LoginType.MOBILE);
         Response<User> userResponse = doctorUserReadService.findBy(name, LoginType.NAME);
-        if(!Strings.isNullOrEmpty(member.getMobilPhone()) && result.isSuccess() && result.getResult() != null) {
+        if(result.isSuccess() && result.getResult() != null) {
             subUser = result.getResult();
         } else if(userResponse.isSuccess() && userResponse.getResult() != null) {
             subUser = userResponse.getResult();
