@@ -35,9 +35,14 @@ public class FactorManager {
      */
     @Transactional
     public Boolean updateFactors(List<DoctorDataFactor> datas) {
-        for(DoctorDataFactor factor: datas){
+        for(DoctorDataFactor factor: datas) {
             rangeVerify(factor);
-            doctorDataFactorDao.update(factor);
+            if (factor.getId() == null){
+                factor.setIsDelete(0);
+                doctorDataFactorDao.create(factor);
+            }else{
+                doctorDataFactorDao.update(factor);
+            }
         }
         return Boolean.TRUE;
     }
