@@ -323,6 +323,19 @@
         ORDER BY material_id ASC
     </select>
 
+    <select id="findMaterialProfits" parameterType="map" resultMap="DoctorMaterialConsumeProviderMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE
+        1 = 1
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="type != null">AND `type` = #{type}</if>
+        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="startDate != null" > <![CDATA[ AND `event_time` >= #{startDate} ]]> </if>
+        <if test="endDate != null" > <![CDATA[ AND `event_time` <= #{endDate} ]]> </if>
+        AND event_type = 1
+    </select>
+
     <select id="findMaterialByGroup" parameterType="map" resultMap="DoctorMaterialConsumeProviderMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>

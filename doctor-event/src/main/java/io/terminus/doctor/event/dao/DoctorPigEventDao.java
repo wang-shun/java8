@@ -8,6 +8,7 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dto.DoctorNpdExportDto;
 import io.terminus.doctor.event.dto.DoctorPigSalesExportDto;
+import io.terminus.doctor.event.dto.DoctorProfitExportDto;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -466,5 +467,15 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         }
         List<DoctorPigSalesExportDto> doctorPigSalesExportDtos = getSqlSession().selectList(sqlId("findSalesEvent"), maps);
         return new Paging<>(total, doctorPigSalesExportDtos);
+    }
+
+    /**
+     * 猪的不同种类进行金额的统计
+     * 利润情况
+     * @param maps
+     * @return
+     */
+    public List<DoctorProfitExportDto> sumProfitPigType(Map<String, Object> maps) {
+        return getSqlSession().selectList(sqlId("sumProFitPigType"), maps);
     }
 }
