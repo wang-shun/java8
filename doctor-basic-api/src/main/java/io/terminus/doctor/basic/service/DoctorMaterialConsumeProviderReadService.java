@@ -130,23 +130,36 @@ public interface DoctorMaterialConsumeProviderReadService {
                                                                               Long barnId, Long type, Date startDate, Date endDate ,Integer pageNo, Integer size);
 
     /**
-     * 根据事件时间段的不同查询物料的消耗情况
-     * @param farmId 猪场ID
-     * @param type 物料类型
-     * @param startDate 开始时间
-     * @param endDate 结束时间
+     * 根据猪场id查询数据
+     * @param farmId
+     * @param type
+     * @param barnId
+     * @param startDate
+     * @param endDate
      * @return
      */
     Response<List<DoctorMaterialConsumeProvider>> findMaterialProfit(Long farmId, Long type, Long barnId, Date startDate, Date endDate );
+
     /**
-     * 根据猪场id查询数据
+     *
      * @param farmId
-     * @param wareHouseId
-     * @param materialId
      * @param groupId
-     * @param materialName
-     * @param barnId
+     * @param materialId
      * @param type
+     * @param wareHouseId
+     * @param barnId
+     * @param materialType
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    Response<List<DoctorMaterialConsumeProvider>> findMaterialByGroupId(Long farmId, Long groupId, Long materialId, Long type, Long wareHouseId, Long barnId, Long materialType, Date startDate, Date endDate);
+
+    /**
+     * 根据groupID来获取批次数据统计的物料数据
+     * @param farmId
+     * @param type
+     * @param barnId
      * @param startDate
      * @param endDate
      * @return

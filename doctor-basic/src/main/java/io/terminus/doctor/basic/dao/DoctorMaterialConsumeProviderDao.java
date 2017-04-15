@@ -234,6 +234,27 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
         return sqlSession.selectList(sqlId("findMaterialProfits"), map);
     }
 
+    public List<DoctorMaterialConsumeProvider> findMaterialWithGroupId(Long farmId, Long groupId, Long materialId, Long type, Long wareHouseId, Long barnId, Long materialType, Date startDate, Date endDate) {
+        if (farmId == null) {
+            throw new ServiceException("farmId.not.null");
+        }
+
+        Map<String, Object> criteriaMap = MapBuilder.<String, Object>of()
+                .put("farmId", farmId)
+                .put("wareHouseId", wareHouseId)
+                .put("materialId", materialId)
+                .put("materialType", materialType)
+                .put("groupId", groupId)
+                .put("barnId", barnId)
+                .put("type", type)
+                .put("startDate", startDate)
+                .put("endDate", endDate)
+                .map();
+        return sqlSession.selectList(sqlId("findMaterialByGroupId"), criteriaMap);
+
+    }
+
+
     public List<DoctorMaterialConsumeProvider> findMaterialByGroup(Long farmId, Long wareHouseId, Long materialId, List<Long> groupId, String materialName, Long barnId, Long type, Date startDate, Date endDate) {
         if (farmId == null) {
             throw new ServiceException("farmId.not.null");
@@ -243,6 +264,8 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
                 .put("farmId", farmId)
                 .put("wareHouseId", wareHouseId)
                 .put("materialId", materialId)
+                .put("groupId", groupId)
+                .put("barnId", barnId)
                 .put("materialName", materialName)
                 .put("barnId", barnId)
                 .put("groupId", groupId)
