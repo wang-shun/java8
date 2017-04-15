@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 猪群卡片表Dao类
@@ -77,6 +79,18 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
      */
     public void updateFarmName(Long farmId, String farmName) {
         getSqlSession().update(sqlId("updateFarmName"), ImmutableMap.of("farmId", farmId, "farmName", farmName));
+    }
+    /**
+     * 根据猪群的建群时间和关群时间来筛选符合条件的猪群
+     */
+
+    public List<DoctorGroup> findGroupId(Long farmId, Date startAt, Date endAt) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("farmId", farmId);
+        map.put("startAt", startAt);
+        map.put("endAt", endAt);
+
+        return getSqlSession().selectList(sqlId("findGroupId"), map);
     }
 
 }

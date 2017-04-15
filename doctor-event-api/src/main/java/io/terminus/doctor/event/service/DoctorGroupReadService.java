@@ -263,4 +263,13 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<DoctorGroupCountDto> findGroupCount(@NotNull(message = "farmId.not.null") Long farmId);
+
+    /**
+     * 获取猪在关闭时间段里面的猪群ID
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    Response<List<DoctorGroup>> findGroupIds(Long farmId, Date startAt, Date endAt);
 }
