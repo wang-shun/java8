@@ -2,7 +2,6 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
@@ -257,9 +256,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     public Boolean updates(List<DoctorPigEvent> lists){
-        lists = Lists.newArrayList(lists.get(0), lists.get(1));
         return Boolean.valueOf(sqlSession.update(sqlId("updates"), lists) == 1);
-//        return true;
     }
 
     /**
