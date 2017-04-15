@@ -64,4 +64,12 @@ public class DoctorMaterialDatailsExportDto implements Serializable{
      * 饲养员
      */
     private String people;
+    /**
+     * 建群日期
+     */
+    private Date openAt;
+    /**
+     * 关闭日期
+     */
+    private Date closeAt;
 }

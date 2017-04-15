@@ -1,13 +1,16 @@
 package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.sun.org.apache.xpath.internal.Arg;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
@@ -293,6 +296,26 @@ public class DoctorSearches {
         Long groupCount = RespHelper.orServEx(doctorGroupReadService.getGroupCount(searchDto));
         Long sowCount = getSowCountWhenFarrow(searchDto);
         return new GroupPigPaging<>(paging, groupCount, sowCount);
+    }
+
+    @RequestMapping(value = "/barn-info", method = RequestMethod.GET)
+    public SearchedGroup getBarnInfo(@RequestParam Long barnId){
+        SearchedGroup searchDto = new SearchedGroup();
+        DoctorBarn doctorBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId));
+        searchDto.setFarmId(doctorBarn.getFarmId());
+        searchDto.setFarmName(doctorBarn.getFarmName());
+        searchDto.setPigType(doctorBarn.getPigType());
+        searchDto.setPigTypeName(PigType.from(doctorBarn.getPigType()).getDesc());
+        searchDto.setCurrentBarnId(doctorBarn.getId());
+        searchDto.setCurrentBarnName(doctorBarn.getName());
+        List<DoctorGroup> groups = RespHelper.orServEx(doctorGroupReadService.findGroupByCurrentBarnId(barnId));
+        groups.forEach(doctorGroup -> {
+            DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(doctorGroup.getId()));
+            if(!Arguments.isNull(groupDetail) && !Arguments.isNull(groupDetail.getGroupTrack())){
+                searchDto.setQuantity(MoreObjects.firstNonNull(searchDto.getQuantity(), 0) + MoreObjects.firstNonNull(groupDetail.getGroupTrack().getQuantity(), 0));
+            }
+        });
+        return searchDto;
     }
 
     //猪群分页

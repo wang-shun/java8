@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.Constants;
 import io.terminus.common.utils.MapBuilder;
@@ -192,7 +193,7 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
         return sqlSession.selectList(sqlId("findMaterialConsumeReport"), criteriaMap);
     }
     public Paging<DoctorMaterialConsumeProvider> pagingFindMaterialConsumeReports(Long farmId, Long wareHouseId, Long materialId, String materialName,
-                                                                          Long barnId, Long type, Date startDate, Date endDate, Integer offset, Integer limit) {
+                                                                          Long barnId, Long groupId, Long type, Date startDate, Date endDate, Integer offset, Integer limit) {
 
         if (farmId == null) {
             throw new ServiceException("farmId.not.null");
@@ -204,6 +205,7 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
                 .put("materialId", materialId)
                 .put("materialName", materialName)
                 .put("barnId", barnId)
+                .put("groupId", groupId)
                 .put("type", type)
                 .put("startDate", startDate)
                 .put("endDate", endDate)
@@ -218,6 +220,18 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
         }
         List<DoctorMaterialConsumeProvider> datas = sqlSession.selectList(sqlId("pagingFindMaterialConsumeReport"), criteriaMap);
         return new Paging<>(total, datas);
+    }
+
+    public List<DoctorMaterialConsumeProvider> findMaterialProfits(Long farmId, Long type, Long barnId, Date startDate, Date endDate){
+
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("farmId", farmId);
+        map.put("type", type);
+        map.put("barnId", barnId);
+        map.put("startDate", startDate);
+        map.put("endDate", endDate);
+
+        return sqlSession.selectList(sqlId("findMaterialProfits"), map);
     }
 
     public List<DoctorMaterialConsumeProvider> findMaterialWithGroupId(Long farmId, Long groupId, Long materialId, Long type, Long wareHouseId, Long barnId, Long materialType, Date startDate, Date endDate) {
@@ -237,6 +251,29 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
                 .put("endDate", endDate)
                 .map();
         return sqlSession.selectList(sqlId("findMaterialByGroupId"), criteriaMap);
+
+    }
+
+
+    public List<DoctorMaterialConsumeProvider> findMaterialByGroup(Long farmId, Long wareHouseId, Long materialId, List<Long> groupId, String materialName, Long barnId, Long type, Date startDate, Date endDate) {
+        if (farmId == null) {
+            throw new ServiceException("farmId.not.null");
+        }
+
+        Map<String, Object> criteriaMap = MapBuilder.<String, Object>of()
+                .put("farmId", farmId)
+                .put("wareHouseId", wareHouseId)
+                .put("materialId", materialId)
+                .put("groupId", groupId)
+                .put("barnId", barnId)
+                .put("materialName", materialName)
+                .put("barnId", barnId)
+                .put("groupId", groupId)
+                .put("type", type)
+                .put("startDate", startDate)
+                .put("endDate", endDate)
+                .map();
+        return sqlSession.selectList(sqlId("findMaterialByGroup"),criteriaMap);
     }
 
 }

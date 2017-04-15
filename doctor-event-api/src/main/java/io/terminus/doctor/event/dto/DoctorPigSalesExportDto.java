@@ -32,7 +32,7 @@ public class DoctorPigSalesExportDto implements Serializable{
     /**
      * 猪的类型
      */
-    private Integer pigType;
+    private String pigType;
     /**
      * 猪的类型名
      */

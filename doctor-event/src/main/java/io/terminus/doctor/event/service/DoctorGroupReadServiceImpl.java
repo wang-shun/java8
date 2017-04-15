@@ -503,4 +503,14 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             return Response.fail("get.group.count.failed");
         }
     }
+
+    @Override
+    public Response<List<DoctorGroup>> findGroupIds(Long farmId, Date startAt, Date endAt) {
+        try {
+            return Response.ok(doctorGroupDao.findGroupId(farmId, startAt, endAt));
+        }catch (Exception e) {
+            log.error("find.groupId.fail, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.grouPId.fail");
+        }
+    }
 }

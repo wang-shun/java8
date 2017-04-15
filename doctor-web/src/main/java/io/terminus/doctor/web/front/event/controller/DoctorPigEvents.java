@@ -516,7 +516,9 @@ public class DoctorPigEvents {
      */
     @RequestMapping(value = "/sales", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorPigSalesExportDto> pagingPigSales(@RequestParam Map<String, Object> pigEventCriteria, Integer pageNo, Integer pageSize, String date) {
+    public Paging<DoctorPigSalesExportDto> pagingPigSales(@RequestParam(required = false) Map<String, Object> pigEventCriteria,@RequestParam(required = false)Integer pageNo,@RequestParam(required = false) Integer pageSize,@RequestParam(required = false) String date) {
+
+        pigEventCriteria = Params.filterNullOrEmpty(pigEventCriteria);
         DateTime dateTime = DateTime.parse(date);
         String startDate = dateTime.toString(DateUtil.DATE);
         String endDate = DateUtil.getMonthEnd(dateTime).toString(DateUtil.DATE);

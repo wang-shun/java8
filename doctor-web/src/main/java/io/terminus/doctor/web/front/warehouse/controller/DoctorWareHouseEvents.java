@@ -2,6 +2,7 @@ package io.terminus.doctor.web.front.warehouse.controller;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
@@ -26,10 +27,14 @@ import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.core.export.Exporter;
+import io.terminus.doctor.web.front.event.dto.DoctorMatingDetail;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouse.dto.*;
 import io.terminus.pampas.common.UserUtil;
@@ -88,6 +93,8 @@ public class DoctorWareHouseEvents {
     private DoctorMaterialPriceInWareHouseReadService materialPriceInWareHouseReadService;
     @RpcConsumer
     private DoctorMaterialConsumeProviderReadService materialConsumeProviderReadService;
+    @RpcConsumer
+    private DoctorGroupReadService doctorGroupReadService;
 
     @Autowired
     public DoctorWareHouseEvents(DoctorMaterialInWareHouseWriteService doctorMaterialInWareHouseWriteService,
@@ -595,9 +602,7 @@ public class DoctorWareHouseEvents {
         DoctorWareHouseMaterialCriteria criteria = BeanMapper.map(criteriaMap, DoctorWareHouseMaterialCriteria.class);
         criteria.setStartDate(DateUtil.toDateTimeString(startDate));
         criteria.setEndDate(null);
-        List<DoctorWareHouseMaterialData> listDate = Lists.newArrayList();
-        List<DoctorMaterialConsumeProvider> listOverride = Lists.newArrayList();
-
+        List<DoctorWareHouseMaterialData> listDate = new ArrayList<>(500);
         double numbersOut = 0;
         double priceOut = 0;
         double numberIn = 0;
@@ -618,38 +623,9 @@ public class DoctorWareHouseEvents {
                 DateUtil.stringToDate(criteria.getEndDate()),
                 criteria.getPageNo(), criteria.getSize()));
         //处理不同事件时间出现的价格不一致问题，进行重建DoctorMaterialConsumeProvider数据加入不同事件时间的价格不同
-        for (int i = 0; i < list.size(); i++) {
-
-            if(list.get(i).getExtra() != null && list.get(i).getExtraMap().containsKey("consumePrice")) {
-
-                List<Map<String, Object>> priceCompose = (ArrayList) list.get(i).getExtraMap().get("consumePrice");
-                for(Map<String, Object> eachPrice : priceCompose) {
-                    DoctorMaterialConsumeProvider doctorMaterialConsumeProviderOverride = new DoctorMaterialConsumeProvider();
-                    Long providerIdfd = Long.valueOf(eachPrice.get("providerId").toString());
-                    if (isNull(providerIdfd)) {
-                        providerIdfd = -1L;
-                    }
-                    Long unitPrice = Long.valueOf(eachPrice.get("unitPrice").toString());
-                    Double count = Double.valueOf(eachPrice.get("count").toString());
-                    doctorMaterialConsumeProviderOverride.setMaterialName(list.get(i).getMaterialName());
-                    doctorMaterialConsumeProviderOverride.setUnitPrice(unitPrice);
-                    doctorMaterialConsumeProviderOverride.setMaterialId(list.get(i).getMaterialId());
-                    doctorMaterialConsumeProviderOverride.setWareHouseId(list.get(i).getWareHouseId());
-                    doctorMaterialConsumeProviderOverride.setEventCount(count);
-                    doctorMaterialConsumeProviderOverride.setProvider(providerIdfd);
-                    doctorMaterialConsumeProviderOverride.setEventType(list.get(i).getEventType());
-                    listOverride.add(doctorMaterialConsumeProviderOverride);
-
-                }
-            }else {
-                if (isNull(list.get(i).getProviderFactoryId())) {
-                    list.get(i).setProvider(-1L);
-                }
-                listOverride.add(list.get(i));
-            }
-        }
+        List<DoctorMaterialConsumeProvider> listOverride = buildDoctorMaterialConsumeProvider(list);
         //处理dto中数据统计相同物料的出入库
-        for (int i = 0; i < listOverride.size(); i++) {
+        for (int i = 0, length = listOverride.size(); i < length; i++) {
             if (i != (listOverride.size()-1) && listOverride.get(i).getMaterialId().equals(listOverride.get(i+1).getMaterialId())) {
                 if (DoctorMaterialConsumeProvider.EVENT_TYPE.from(listOverride.get(i).getEventType()).isOut()) {
                     numbersOut += listOverride.get(i).getEventCount();
@@ -830,8 +806,6 @@ public class DoctorWareHouseEvents {
         DoctorWareHouseMaterialCriteria criteria = BeanMapper.map(params, DoctorWareHouseMaterialCriteria.class);
         criteria.setStartDate(DateUtil.toDateTimeString(startDate));
         criteria.setEndDate(DateUtil.toDateTimeString(endDate));
-        List<DoctorMaterialConsumeProvider> listOverride = Lists.newArrayList();
-
         List<DoctorMaterialConsumeProvider> list = RespHelper.or500(materialConsumeProviderReadService.findMaterialConsume(
 
                 criteria.getFarmId(),
@@ -846,42 +820,7 @@ public class DoctorWareHouseEvents {
                 DateUtil.stringToDate(criteria.getEndDate()),
                 criteria.getPageNo(), criteria.getSize()));
         //处理不同事件时间出现的价格不一致问题，进行重建DoctorMaterialConsumeProvider数据加入不同事件时间的价格不同
-        for (int i = 0; i < list.size(); i++) {
-
-            if(list.get(i).getExtra() != null && list.get(i).getExtraMap().containsKey("consumePrice")) {
-
-                List<Map<String, Object>> priceCompose = (ArrayList) list.get(i).getExtraMap().get("consumePrice");
-                for(Map<String, Object> eachPrice : priceCompose) {
-                    DoctorMaterialConsumeProvider doctorMaterialConsumeProviderOverride = new DoctorMaterialConsumeProvider();
-                    Long providerIdfd = Long.valueOf(eachPrice.get("providerId").toString());
-                    if (isNull(providerIdfd)) {
-                        providerIdfd = -1L;
-                    }
-                    Long unitPrice = Long.valueOf(eachPrice.get("unitPrice").toString());
-                    Double count = Double.valueOf(eachPrice.get("count").toString());
-                    doctorMaterialConsumeProviderOverride.setMaterialName(list.get(i).getMaterialName());
-                    doctorMaterialConsumeProviderOverride.setUnitPrice(unitPrice);
-                    doctorMaterialConsumeProviderOverride.setMaterialId(list.get(i).getMaterialId());
-                    doctorMaterialConsumeProviderOverride.setWareHouseId(list.get(i).getWareHouseId());
-                    doctorMaterialConsumeProviderOverride.setBarnName(list.get(i).getBarnName());
-                    doctorMaterialConsumeProviderOverride.setEventTime(list.get(i).getEventTime());
-                    doctorMaterialConsumeProviderOverride.setGroupCode(list.get(i).getGroupCode());
-                    doctorMaterialConsumeProviderOverride.setWareHouseName(list.get(i).getWareHouseName());
-                    doctorMaterialConsumeProviderOverride.setEventCount(count);
-                    doctorMaterialConsumeProviderOverride.setType(list.get(i).getType());
-                    doctorMaterialConsumeProviderOverride.setProvider(providerIdfd);
-                    doctorMaterialConsumeProviderOverride.setEventType(list.get(i).getEventType());
-                    listOverride.add(doctorMaterialConsumeProviderOverride);
-
-                }
-            }else {
-                if (isNull(list.get(i).getProviderFactoryId())) {
-                    list.get(i).setProvider(-1L);
-                }
-                listOverride.add(list.get(i));
-            }
-        }
-
+        List<DoctorMaterialConsumeProvider> listOverride = buildDoctorMaterialConsumeProvider(list);
         List<DoctorMaterialDatailsExportDto> doctorMaterialDatails = Lists.newArrayList();
 
         for (DoctorMaterialConsumeProvider lists : listOverride) {
@@ -915,5 +854,136 @@ public class DoctorWareHouseEvents {
         doctorMaterialDatails.stream().collect(Collectors.toList());
 
         return new Paging<>((long) doctorMaterialDatails.size(), doctorMaterialDatails);
+    }
+
+    /**
+     * 猪群的领用报表输出
+     * @param map
+     * @param farmId
+     * @param response
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/group/material")
+    @ResponseBody
+    public List<DoctorMaterialDatailsExportDto> pagingGroupMaterial(@RequestParam Map<String, Object> map, @RequestParam Long farmId, HttpServletResponse response, HttpServletRequest request) {
+        map.put("farmId", farmId);
+        return getPagingGroupMaterial(map);
+    }
+
+    public List<DoctorMaterialDatailsExportDto> getPagingGroupMaterial(Map<String, Object> map) {
+
+        Date startAt = null;
+        Date endAt = null;
+        Long farmId = null;
+        List<Long> groupIds = Lists.newArrayList();
+
+        if (map.containsKey("farmId")) {
+            farmId =(long) map.get("farmId");
+        }
+        if (map.containsKey("startAt")) {
+            startAt = DateUtil.toDate(map.get("startAt").toString());
+        }
+        if (map.containsKey("endAt")) {
+            endAt = DateUtil.toDate(map.get("endAt").toString());
+        }
+        if (map.containsKey("groupId")) {
+            groupIds.add((long)map.get("groupId"));
+        } else {
+
+            List<DoctorGroup> doctorGroup = RespHelper.or500(doctorGroupReadService.findGroupIds(farmId, startAt, endAt));
+            groupIds = doctorGroup.stream()
+                    .map(s -> s.getId()).collect(Collectors.toList());
+        }
+        map.put("groupId", groupIds);
+        DoctorWareHouseMaterialCriteria criteria = BeanMapper.map(map, DoctorWareHouseMaterialCriteria.class);
+
+        List<DoctorMaterialConsumeProvider> list = RespHelper.or500(materialConsumeProviderReadService.findMaterialByGroup(
+                criteria.getFarmId(),
+                criteria.getWareHouseId(),
+                criteria.getMaterialId(),
+                criteria.getGroupId(),
+                criteria.getMaterialName(),
+                criteria.getBarnId(),
+                criteria.getType(),
+                DateUtil.toDate(criteria.getStartDate()),
+                DateUtil.toDate(criteria.getEndDate())
+        ));
+        List<DoctorMaterialDatailsExportDto> doctorMaterialDatails = Lists.newArrayList();
+        List<DoctorMaterialConsumeProvider> listOverride = buildDoctorMaterialConsumeProvider(list);
+        for (DoctorMaterialConsumeProvider lists : listOverride) {
+            DoctorMaterialDatailsExportDto doctorMaterialDatail = new DoctorMaterialDatailsExportDto();
+            doctorMaterialDatail.setBarnName(lists.getBarnName());
+            doctorMaterialDatail.setMaterialName(lists.getMaterialName());
+            doctorMaterialDatail.setTypeName(DoctorMaterialConsumeProvider.EVENT_TYPE.from(lists.getEventType()).getDesc());
+            DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.findMaterialUnits(
+                    criteria.getFarmId(),
+                    lists.getMaterialId(),
+                    lists.getWareHouseId()));
+            if (doctorMaterialInWareHouse != null) {
+                doctorMaterialDatail.setUnitName(doctorMaterialInWareHouse.getUnitName());
+            }
+            DoctorBarn doctorBarn = RespHelper.or500(doctorBarnReadService.findBarnById(lists.getBarnId()));
+            if (doctorBarn != null) {
+                doctorMaterialDatail.setPeople(doctorBarn.getStaffName());
+            }
+            DoctorGroup doctorGroups =RespHelper.or500(doctorGroupReadService.findGroupById(lists.getGroupId()));
+            if (doctorGroups != null) {
+                doctorMaterialDatail.setOpenAt(doctorGroups.getOpenAt());
+                doctorMaterialDatail.setCloseAt(doctorGroups.getCloseAt());
+            }
+            doctorMaterialDatail.setMaterialType(WareHouseType.from(lists.getType()).getDesc());
+            doctorMaterialDatail.setUpdatedAt(lists.getEventTime());
+            doctorMaterialDatail.setGroupName(lists.getGroupCode());
+            doctorMaterialDatail.setPrice(lists.getUnitPrice());
+            doctorMaterialDatail.setNumber(lists.getEventCount());
+            doctorMaterialDatail.setPriceSum(lists.getUnitPrice() * lists.getEventCount());
+            doctorMaterialDatail.setWareHouseName(lists.getWareHouseName());
+            doctorMaterialDatails.add(doctorMaterialDatail);
+        }
+        return doctorMaterialDatails;
+    }
+
+    private final List<DoctorMaterialConsumeProvider> buildDoctorMaterialConsumeProvider(List<DoctorMaterialConsumeProvider> list) {
+
+        List<DoctorMaterialConsumeProvider> listOverride = new ArrayList<>(500);
+        DoctorMaterialConsumeProvider doctorMaterialConsumeProviderOverride;
+
+        for (int i = 0 , length = list.size(); i < length ; i++) {
+
+            if(list.get(i).getExtra() != null && list.get(i).getExtraMap().containsKey("consumePrice")) {
+
+                List<Map<String, Object>> priceCompose = (ArrayList) list.get(i).getExtraMap().get("consumePrice");
+                for(Map<String, Object> eachPrice : priceCompose) {
+                    doctorMaterialConsumeProviderOverride = new DoctorMaterialConsumeProvider();
+                    Long providerIdfd = Long.valueOf(eachPrice.get("providerId").toString());
+                    if (isNull(providerIdfd)) {
+                        providerIdfd = -1L;
+                    }
+                    Long unitPrice = Long.valueOf(eachPrice.get("unitPrice").toString());
+                    Double count = Double.valueOf(eachPrice.get("count").toString());
+                    doctorMaterialConsumeProviderOverride.setMaterialName(list.get(i).getMaterialName());
+                    doctorMaterialConsumeProviderOverride.setUnitPrice(unitPrice);
+                    doctorMaterialConsumeProviderOverride.setMaterialId(list.get(i).getMaterialId());
+                    doctorMaterialConsumeProviderOverride.setWareHouseId(list.get(i).getWareHouseId());
+                    doctorMaterialConsumeProviderOverride.setBarnName(list.get(i).getBarnName());
+                    doctorMaterialConsumeProviderOverride.setEventTime(list.get(i).getEventTime());
+                    doctorMaterialConsumeProviderOverride.setGroupCode(list.get(i).getGroupCode());
+                    doctorMaterialConsumeProviderOverride.setWareHouseName(list.get(i).getWareHouseName());
+                    doctorMaterialConsumeProviderOverride.setEventCount(count);
+                    doctorMaterialConsumeProviderOverride.setType(list.get(i).getType());
+                    doctorMaterialConsumeProviderOverride.setProvider(providerIdfd);
+                    doctorMaterialConsumeProviderOverride.setEventType(list.get(i).getEventType());
+                    listOverride.add(doctorMaterialConsumeProviderOverride);
+
+                }
+            }else {
+                if (isNull(list.get(i).getProviderFactoryId())) {
+                    list.get(i).setProvider(-1L);
+                }
+                listOverride.add(list.get(i));
+            }
+        }
+        return listOverride;
     }
 }
