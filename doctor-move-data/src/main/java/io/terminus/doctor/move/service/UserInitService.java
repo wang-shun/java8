@@ -39,6 +39,7 @@ import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
+import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
@@ -82,6 +83,8 @@ public class UserInitService {
     private DoctorServiceReviewReadService doctorServiceReviewReadService;
     @Autowired
     private DoctorServiceStatusWriteService doctorServiceStatusWriteService;
+    @Autowired
+    private DoctorServiceStatusReadService doctorServiceStatusReadService;
     @Autowired
     private DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     @Autowired
@@ -168,11 +171,26 @@ public class UserInitService {
                 userWriteService.update(primaryUser);
             } else {
                 primaryUser = this.registerByMobile(farmInfo.getMobile(), "123456", farmInfo.getLoginName(), farmInfo.getRealName());
+            }
+            DoctorServiceStatus serviceStatus = RespHelper.orServEx(doctorServiceStatusReadService.findByUserId(primaryUser.getId()));
+            if(serviceStatus == null){
                 //初始化服务状态
                 this.initDefaultServiceStatus(primaryUser.getId());
+            }else{
+                serviceStatus.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
+                serviceStatus.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
+                doctorServiceStatusWriteService.updateServiceStatus(serviceStatus);
+            }
+
+            DoctorServiceReview review = RespHelper.orServEx(doctorServiceReviewReadService.findServiceReviewByUserIdAndType(primaryUser.getId(), DoctorServiceReview.Type.PIG_DOCTOR));
+            if(review == null){
                 //初始化服务的申请审批状态
                 this.initServiceReview(primaryUser.getId(), primaryUser.getMobile(), primaryUser.getName());
+            }else{
+                review.setStatus(DoctorServiceReview.Status.OK.getValue());
+                doctorServiceReviewWriteService.updateReview(review);
             }
+
             Long userId = primaryUser.getId();
             DoctorFarm farm = nameFarmMap.get(farmInfo.getNewFarmName());
             log.info("===farm:{}", farm);
