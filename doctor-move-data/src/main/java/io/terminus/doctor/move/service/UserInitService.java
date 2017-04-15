@@ -236,7 +236,7 @@ public class UserInitService {
     private List<DoctorMoveFarmInfo> analyzeExcelForFarmInfo(Sheet sheet) {
         List<DoctorMoveFarmInfo> infoList = Lists.newArrayList();
         for (Row row : sheet) {
-            if (notEmpty(ImportExcelUtils.getString(row, 0))) {
+            if (row.getRowNum() > 0 && notEmpty(ImportExcelUtils.getString(row, 0))) {
                 DoctorMoveFarmInfo moveFarmInfo = DoctorMoveFarmInfo.builder()
                         .oldFarmName(ImportExcelUtils.getString(row, 1))
                         .orgName(ImportExcelUtils.getString(row, 2))
