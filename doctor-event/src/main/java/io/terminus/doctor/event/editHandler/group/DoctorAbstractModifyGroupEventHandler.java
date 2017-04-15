@@ -38,7 +38,6 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     protected final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
 
     @Override
-    @Transactional
     public void modifyHandle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         log.info("modify pig event handler starting, oldGroupEvent:{}, input:{}", oldGroupEvent, input);
 
