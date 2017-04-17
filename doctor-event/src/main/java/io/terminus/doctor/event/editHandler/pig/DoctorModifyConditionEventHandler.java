@@ -10,6 +10,7 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.springframework.stereotype.Component;
 
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
 
@@ -17,7 +18,8 @@ import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEvent
  * 状态新事件的构建
  * Created by terminus on 2017/4/17.
  */
-public class DoctorMoodifyConditionEventHandler extends DoctorAbstractModifyPigEventHandler{
+@Component
+public class DoctorModifyConditionEventHandler extends DoctorAbstractModifyPigEventHandler{
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {

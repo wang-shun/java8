@@ -5,12 +5,14 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import org.springframework.stereotype.Component;
 
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
 
 /**
  * Created by terminus on 2017/4/17.
  */
+@Component
 public class DoctorModifyMatingEventHandler extends DoctorAbstractModifyPigEventHandler{
 
     @Override

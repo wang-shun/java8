@@ -4,6 +4,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import org.springframework.stereotype.Component;
 
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
 
@@ -11,6 +12,7 @@ import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEvent
  * 防疫新事件的构建
  * Created by terminus on 2017/4/17.
  */
+@Component
 public class DoctorModifyVaccinEventHandler extends DoctorAbstractModifyPigEventHandler{
 
     @Override
