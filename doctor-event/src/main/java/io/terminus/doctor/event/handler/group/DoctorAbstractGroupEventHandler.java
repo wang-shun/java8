@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
@@ -40,7 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -170,6 +170,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setRelGroupEventId(baseInput.getRelGroupEventId());
         event.setRelPigEventId(baseInput.getRelPigEventId());
         event.setStatus(EventStatus.VALID.getValue());
+        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 
