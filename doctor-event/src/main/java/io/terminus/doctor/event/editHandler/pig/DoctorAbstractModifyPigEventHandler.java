@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.editHandler.pig;
 
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
@@ -19,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
+
 
 /**
  * Created by xjn on 17/4/13.
@@ -91,6 +94,17 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         return null;
+    }
+
+    @Override
+    public DoctorPigEvent buildNewEvent(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        DoctorPigEvent newEvent = new DoctorPigEvent();
+        BeanMapper.copy(oldPigEvent, newEvent);
+        newEvent.setExtra(TO_JSON_MAPPER.toJson(inputDto));
+        newEvent.setDesc(generateEventDescFromExtra(inputDto));
+        newEvent.setRemark(inputDto.changeRemark());
+        newEvent.setEventAt(inputDto.eventAt());
+        return newEvent;
     }
 
     @Override

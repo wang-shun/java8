@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class DoctorModifyMoveInEventHandler extends DoctorAbstractModifyGroupEventHandler {
+public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGroupEventHandler {
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {

@@ -13,7 +13,7 @@ import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEvent
  * Created by terminus on 2017/4/17.
  */
 @Component
-public class DoctorModifyMatingEventHandler extends DoctorAbstractModifyPigEventHandler{
+public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEventHandler{
 
     @Override
     public DoctorPigEvent buildNewEvent(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {

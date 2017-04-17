@@ -8,8 +8,8 @@ import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyMoveInEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyFarrowEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigFarrowEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -262,7 +262,7 @@ public class  DoctorEventConfiguration {
     }
 
     @Bean
-    public DoctorModifyPigEventHandlers doctorModifyPigEventHandlers(DoctorModifyFarrowEventHandler modifyFarrowEventHandler) {
+    public DoctorModifyPigEventHandlers doctorModifyPigEventHandlers(DoctorModifyPigFarrowEventHandler modifyFarrowEventHandler) {
         Map<Integer, DoctorModifyPigEventHandler> modifyPigEventHandlerMap = Maps.newHashMap();
         modifyPigEventHandlerMap.put(PigEvent.FARROWING.getKey(), modifyFarrowEventHandler);
         DoctorModifyPigEventHandlers modifyPigEventHandlers = new DoctorModifyPigEventHandlers();
@@ -271,7 +271,7 @@ public class  DoctorEventConfiguration {
     }
 
     @Bean
-    public DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers(DoctorModifyMoveInEventHandler modifyMoveInEventHandler) {
+    public DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers(DoctorModifyGroupMoveInEventHandler modifyMoveInEventHandler) {
         Map<Integer, DoctorModifyGroupEventHandler> modifyGroupEventHandlerMap = Maps.newHashMap();
         modifyGroupEventHandlerMap.put(GroupEventType.MOVE_IN.getValue(), modifyMoveInEventHandler);
         DoctorModifyGroupEventHandlers modifyGroupEventHandlers = new DoctorModifyGroupEventHandlers();

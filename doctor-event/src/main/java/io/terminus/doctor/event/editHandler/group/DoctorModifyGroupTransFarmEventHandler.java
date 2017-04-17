@@ -12,7 +12,7 @@ import org.joda.time.DateTime;
  * Date: 16:10 2017/4/15
  */
 
-public class DoctorModifyTransFarmEventHandler extends DoctorAbstractModifyGroupEventHandler{
+public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModifyGroupEventHandler{
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {

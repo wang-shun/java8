@@ -198,7 +198,7 @@ public class DoctorEventChangeDto {
     /**
      * 猪断奶均重变化量
      */
-    private Integer weanAvgWeightChange;
+    private Double weanAvgWeightChange;
 
     /**
      * 猪群初生重变化量
