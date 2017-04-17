@@ -58,7 +58,6 @@ public class DoctorModifyFarrowEventHandler extends DoctorAbstractModifyPigEvent
         newEvent.setBlackCount(newFarrowingDto.getBlackCount());
         newEvent.setDeadCount(newFarrowingDto.getDeadCount());
         newEvent.setRemark(newFarrowingDto.getFarrowRemark());
-        createModifyLog(oldPigEvent, newEvent);
         return newEvent;
     }
 

@@ -64,8 +64,12 @@ public class DoctorEventChangeDto {
      * 新配种公猪id
      */
     private Long matingBoarId;
-    private Long matingBoarCode;
-
+    private String matingBoarCode;
+    /**
+     * 新的操作人
+     */
+    private Long newOperatorId;
+    private String newOperatorName;
     /**
      * 新配种类型
      * @see io.terminus.doctor.event.enums.MatingType
