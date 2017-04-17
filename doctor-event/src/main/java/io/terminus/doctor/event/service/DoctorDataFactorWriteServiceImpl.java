@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorDataFactorDao;
 import io.terminus.doctor.event.manager.FactorManager;
@@ -57,6 +58,8 @@ public class DoctorDataFactorWriteServiceImpl implements DoctorDataFactorWriteSe
     public Response<Boolean> batchUpdate(List<DoctorDataFactor> factors) {
         try{
             return Response.ok(factorManager.updateFactors(factors));
+        }catch (JsonResponseException je){
+            return Response.fail(je.getMessage());
         }catch (Exception e){
             log.error("failed to batch update doctor data factor, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.data.factor.update.fail");
