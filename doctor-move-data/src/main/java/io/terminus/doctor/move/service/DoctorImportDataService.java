@@ -337,7 +337,7 @@ public class DoctorImportDataService {
                 if (notNull(subUser)) {
                     DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(subUser.getId());
                     if (notNull(permission)) {
-                        throw new JsonResponseException("user.has.related.farm");
+                        throw new JsonResponseException("用户已关联猪场, 用户手机号:" + subUser.getMobile());
                     }
 
                     subUser.setName(loginName + "@" + farm.getFarmCode());
