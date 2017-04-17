@@ -857,4 +857,32 @@ alter table doctor_group_events add column vaccination_name varchar(32) default 
 ALTER TABLE doctor_group_events ADD COLUMN operator_id bigint(20) DEFAULT NULL comment '操作人id' after creator_name;
 ALTER TABLE doctor_group_events ADD COLUMN operator_name varchar(32) DEFAULT NULL comment '操作人姓名' after operator_id;
 
-
+-- 2017-04-15 利润表
+drop table if exists `doctor_export_porfit`;
+CREATE TABLE `doctor_export_porfit` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场ID',
+  `feed_type_name` varchar(20) DEFAULT NULL COMMENT '饲料名',
+  `feed_type_id` tinyint(11) DEFAULT NULL COMMENT '饲料ID',
+  `feed_amount` double DEFAULT NULL COMMENT '饲料金额',
+  `vaccine_type_name` varchar(20) DEFAULT NULL COMMENT '疫苗名称',
+  `vaccine_type_id` tinyint(11) DEFAULT NULL COMMENT '疫苗ID',
+  `vaccine_amount` double DEFAULT NULL COMMENT '疫苗金额',
+  `medicine_type_name` varchar(20) DEFAULT NULL COMMENT '药品名称',
+  `medicine_type_id` tinyint(11) DEFAULT NULL COMMENT '药品ID',
+  `medicine_amount` double DEFAULT NULL COMMENT '药品金额',
+  `consumables_type_name` varchar(20) DEFAULT NULL COMMENT '消耗品名称',
+  `consumables_type_id` tinyint(11) DEFAULT NULL COMMENT '消耗品ID',
+  `consumables_amount` double DEFAULT NULL COMMENT '消耗品金额',
+  `material_type_name` varchar(20) DEFAULT NULL COMMENT '原料名称',
+  `material_type_id` tinyint(11) DEFAULT NULL COMMENT '原料ID',
+  `material_amount` double DEFAULT NULL COMMENT '原料金额',
+  `pig_type_name` varchar(20) DEFAULT NULL COMMENT '猪类型名称',
+  `pig_type_name_id` varchar(20) DEFAULT NULL COMMENT '猪类型ID',
+  `amount_pig` double DEFAULT NULL COMMENT '猪金额',
+  `amount_year_pig` double DEFAULT NULL COMMENT '猪的年利润',
+  `amount_year_material` double DEFAULT NULL COMMENT '物料的年消耗',
+  `sum_time` datetime DEFAULT NULL COMMENT '统计时间',
+  `refresh_time` datetime DEFAULT NULL COMMENT '刷新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9727 DEFAULT CHARSET=utf8;

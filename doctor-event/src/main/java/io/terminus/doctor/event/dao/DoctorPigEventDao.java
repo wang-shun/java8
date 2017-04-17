@@ -476,6 +476,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @return
      */
     public List<DoctorProfitExportDto> sumProfitPigType(Map<String, Object> maps) {
+        maps = Params.filterNullOrEmpty(maps);
         return getSqlSession().selectList(sqlId("sumProFitPigType"), maps);
     }
 }

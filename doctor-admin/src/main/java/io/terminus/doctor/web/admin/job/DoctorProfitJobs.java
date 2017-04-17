@@ -16,7 +16,6 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,7 +126,7 @@ public class DoctorProfitJobs {
                     Double amountPigYear = 0.0;
                     amount = 0.0;
                     for (DoctorProfitExportDto doctorProfitExportDto : profitYearExportDto) {
-                        doctorProfitMaterialOrPig = sumMaterialAmount(startDate, endDate, farmId, doctorProfitExportDto.getBarnId(), doctorProfitMaterialOrPig, false);
+                        doctorProfitMaterialOrPig = sumMaterialAmount(startDates, endDates, farmId, doctorProfitExportDto.getBarnId(), doctorProfitMaterialOrPig, false);
                         amountPigYear += doctorProfitExportDto.getAmount();
                     }
 
@@ -208,8 +207,7 @@ public class DoctorProfitJobs {
 
         Double acmunt = 0.0;
         List<Map<String, Object>> priceCompose;
-        double awp = System.currentTimeMillis();
-        for (int i = 0, lenght = doctorMaterialConsumeProviders.size(); i < lenght; i++) {
+        for (int i = 0, length = doctorMaterialConsumeProviders.size(); i < length; i++) {
 
             if (doctorMaterialConsumeProviders.get(i).getExtra() != null && doctorMaterialConsumeProviders.get(i).getExtraMap().containsKey("consumePrice")) {
                 priceCompose = (ArrayList) doctorMaterialConsumeProviders.get(i).getExtraMap().get("consumePrice");
