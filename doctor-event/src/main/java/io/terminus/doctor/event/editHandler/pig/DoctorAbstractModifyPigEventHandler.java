@@ -18,6 +18,8 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 /**
  * Created by xjn on 17/4/13.
  * 猪事件编辑抽象实现
@@ -105,8 +107,13 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @return
      */
     private boolean isUpdatePig(DoctorEventChangeDto changeDto){
-        //// TODO: 17/4/13 是否需要更新
-        return true;
+        return notNull(changeDto.getSource())
+                || notNull(changeDto.getBirthDate())
+                || notNullAndNotZero(changeDto.getBirthWeightChange())
+                || notNull(changeDto.getNewEventAt())
+                || notNull(changeDto.getPigBreedId())
+                || notNull(changeDto.getPigBreedTypeId())
+                || notNull(changeDto.getBoarType());
     }
 
     /**
@@ -114,9 +121,11 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @param changeDto 变化记录
      * @return
      */
-    private boolean isUpdateTrack(DoctorEventChangeDto changeDto){
+    private boolean isUpdateTrack(DoctorEventChangeDto changeDto) {
+        return notNullAndNotZero(changeDto.getWeightChange())
+                || notNullAndNotZero(changeDto.getLiveCountChange())
+                || notNullAndNotZero(changeDto.getWeanCountChange());
         // TODO: 17/4/13 是否需要跟新
-        return true;
     }
 
 
@@ -135,5 +144,23 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
+    }
+
+    /**
+     * 不等于空且不等于零
+     * @param d
+     * @return
+     */
+    private boolean notNullAndNotZero(Double d) {
+        return notNull(d) && d != 0D;
+    }
+
+    /**
+     * 不等于空且不等于零
+     * @param d
+     * @return
+     */
+    private boolean notNullAndNotZero(Integer d) {
+        return notNull(d) && d != 0;
     }
 }
