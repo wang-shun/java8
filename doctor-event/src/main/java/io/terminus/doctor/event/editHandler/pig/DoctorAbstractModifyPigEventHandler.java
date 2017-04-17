@@ -57,6 +57,8 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         //3.更新事件
         DoctorPigEvent newEvent = buildNewEvent(oldPigEvent, inputDto);
         doctorPigEventDao.update(newEvent);
+        //4.创建事件完成后创建编辑记录
+        createModifyLog(oldPigEvent, newEvent);
 
         //4.更新猪信息
         if (isUpdatePig(changeDto)) {
@@ -83,6 +85,11 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Override
     public void rollbackHandle(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
 
+    }
+
+    @Override
+    public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        return null;
     }
 
     @Override
