@@ -3,19 +3,13 @@ package io.terminus.doctor.move.service;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.utils.Dates;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
-import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
-import io.terminus.doctor.event.service.DoctorDailyReportReadService;
-import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
-import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
-import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
+import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.model.ReportBoarLiveStock;
 import io.terminus.doctor.move.model.ReportGroupLiveStock;
@@ -56,6 +50,7 @@ public class DoctorMoveReportService {
     private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
     private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
     private final DoctorDailyReportWriteService doctorDailyReportWriteService;
+    private final DoctorDailyPigWriteService doctorDailyPigWriteService;
 
     @Autowired
     public DoctorMoveReportService(DoctorDailyReportDao doctorDailyReportDao,
@@ -65,7 +60,7 @@ public class DoctorMoveReportService {
                                    DoctorCommonReportWriteService doctorCommonReportWriteService,
                                    DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
                                    DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService,
-                                   DoctorDailyReportWriteService doctorDailyReportWriteService) {
+                                   DoctorDailyReportWriteService doctorDailyReportWriteService, DoctorDailyPigWriteService doctorDailyPigWriteService) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorFarmDao = doctorFarmDao;
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
@@ -74,6 +69,7 @@ public class DoctorMoveReportService {
         this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
         this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
         this.doctorDailyReportWriteService = doctorDailyReportWriteService;
+        this.doctorDailyPigWriteService = doctorDailyPigWriteService;
     }
 
     /**
@@ -196,5 +192,14 @@ public class DoctorMoveReportService {
     public void moveBoarMonthlyReport(Long farmId, Integer index) {
         DateUtil.getBeforeMonthEnds(new Date(), MoreObjects.firstNonNull(index, MONTH_INDEX))
                 .forEach(date -> doctorBoarMonthlyReportWriteService.createMonthlyReport(farmId, date));
+    }
+
+    public void flushPigDaily(Long farmId, Date date){
+        doctorDailyPigWriteService.createDailyPigs(farmId, date);
+    }
+
+    public void flushPigDaily(Long farmId, Integer index) {
+        DateUtil.getBeforeDays(new Date(), MoreObjects.firstNonNull(index, INDEX))
+                .forEach(date -> doctorDailyPigWriteService.createDailyPigs(farmId, date));
     }
 }

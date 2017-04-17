@@ -8,11 +8,7 @@ import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorDailyReport;
-import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
-import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
-import io.terminus.doctor.event.service.DoctorDailyReportReadService;
-import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
-import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
+import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.leader.HostLeader;
@@ -55,6 +51,8 @@ public class DoctorReportJobs {
 
     @RpcConsumer
     private DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
+    @RpcConsumer(timeout = "60000")
+    private DoctorDailyPigWriteService doctorDailyPigWriteService;
 
     private final HostLeader hostLeader;
 
@@ -213,6 +211,23 @@ public class DoctorReportJobs {
             log.info("parity monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("parity monthly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
+    @Scheduled(cron = "0 0 1 * * ?")
+    @RequestMapping(value = "/pig/daily", method = RequestMethod.GET)
+    public void pigDaily() {
+        try {
+            if(!hostLeader.isLeader()){
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("statistics daily pig job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
+            RespHelper.or500(doctorDailyPigWriteService.createDailyPigs(getAllFarmIds(),yesterday));
+            log.info("statistics daily pig job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        }catch (Exception e){
+            log.error("statistics daily pig job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
 

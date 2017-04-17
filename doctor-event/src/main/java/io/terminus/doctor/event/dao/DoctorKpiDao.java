@@ -70,6 +70,13 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 分娩初生重总重
+     */
+    public double getFarrowWeight(Long farmId, Date startAt, Date endAt) {
+        return EventUtil.get2(this.sqlSession.selectOne(sqlId("farrowWeight"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
+    }
+
+    /**
      * 产活仔数
      */
     public int getDeliveryLive(Long farmId, Date startAt, Date endAt) {
@@ -293,6 +300,34 @@ public class DoctorKpiDao {
      */
     public int getSaleHoubei(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne(sqlId("getSaleHoubei"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 进场情况: 母猪
+     */
+    public int getInSow(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getInSow"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 其他数量减少情况: 母猪
+     */
+    public int getOtherOutSow(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getOtherOutSow"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 进场情况: 公猪
+     */
+    public int getInBoar(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getInBoar"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 其他数量减少情况: 公猪
+     */
+    public int getOtherOutBoar(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getOtherOutBoar"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
@@ -604,6 +639,16 @@ public class DoctorKpiDao {
      */
     public int realTimeLiveStockFarrowSow(Long farmId, Date date) {
         return sqlSession.selectOne(sqlId("realTimeLiveStockFarrowSow"), ImmutableMap.of("farmId", farmId, "date", date));
+    }
+
+    /**
+     *
+     * @param farmId
+     * @param date
+     * @return
+     */
+    public int realTimeLiveStockPHSow(Long farmId, Date date) {
+        return sqlSession.selectOne(sqlId("realTimeLiveStockPHSow"), ImmutableMap.of("farmId", farmId, "date", date));
     }
 
     /**
