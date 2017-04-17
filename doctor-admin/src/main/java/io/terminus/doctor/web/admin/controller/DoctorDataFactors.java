@@ -111,6 +111,9 @@ public class DoctorDataFactors {
             throw new JsonResponseException(500,"doctor.data.factor.invalid");
         }
         rangeVerify(factor);
+        if(factor.getRangeFrom()>factor.getRangeTo()){
+            throw new JsonResponseException(500,"range.from.gt.to");
+        }
         factor.setIsDelete(0);
         Response<Long> response = doctorDataFactorWriteService.create(factor);
         if (!response.isSuccess()) {

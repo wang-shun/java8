@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorDataFactorDao;
 import io.terminus.doctor.event.model.DoctorDataFactor;
@@ -37,6 +38,9 @@ public class FactorManager {
     public Boolean updateFactors(List<DoctorDataFactor> datas) {
         for(DoctorDataFactor factor: datas) {
             rangeVerify(factor);
+            if(factor.getRangeFrom()>factor.getRangeTo()){
+                throw new JsonResponseException(500,"range.from.gt.to");
+            }
             if (factor.getId() == null){
                 factor.setIsDelete(0);
                 doctorDataFactorDao.create(factor);
