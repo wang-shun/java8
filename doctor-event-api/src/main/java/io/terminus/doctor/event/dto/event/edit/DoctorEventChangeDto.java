@@ -4,9 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
-import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
@@ -33,9 +31,19 @@ public class DoctorEventChangeDto {
     private Date oldEventAt;
 
     /**
+     * 新进场来源
+     */
+    private Integer source;
+
+    /**
      * 新胎次
      */
     private Integer pigParity;
+
+    /**
+     * 猪初生重变化量
+     */
+    private Double birthWeightChange;
 
     /**
      * 新品种id
@@ -169,11 +177,6 @@ public class DoctorEventChangeDto {
     private Long overPriceChange;
 
     /**
-     * 断奶数变化量
-     */
-    private Integer weanCountChange;
-
-    /**
      * 新疾病id
      */
     private Long diseaseId;
@@ -184,6 +187,21 @@ public class DoctorEventChangeDto {
     private Long vaccinationId;
 
     /**
+     * 猪断奶数变化量
+     */
+    private Integer weanCountChange;
+
+    /**
+     * 猪断奶均重变化量
+     */
+    private Integer weanAvgWeightChange;
+
+    /**
+     * 猪群初生重变化量
+     */
+    private Double groupBirthWeightChange;
+
+    /**
      * 猪群公猪变化量
      */
     private Integer groupBoarQtyChange;
@@ -192,16 +210,6 @@ public class DoctorEventChangeDto {
      * 猪群母猪变化量
      */
     private Integer groupSowQtyChange;
-
-    /**
-     * 猪群断奶重变化量
-     */
-    private Integer groupWeanWeightChange;
-
-    /**
-     * 猪群初生重变化量
-     */
-    private Double groupBirthWeightChange;
 
     private Integer groupLiveQtyChange;
 
@@ -245,10 +253,7 @@ public class DoctorEventChangeDto {
     /**
      * 转入猪舍
      */
-    @NotNull(message = "barnId.not.null")
     private Long toBarnId;
-
-    @NotEmpty(message = "barnId.not.null")
     private String toBarnName;
 
     /**
