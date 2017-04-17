@@ -53,15 +53,15 @@ public class DoctorMoodifyConditionEventHandler extends DoctorAbstractModifyPigE
             BeanMapper.copy(oldPigEvent, doctorPigEvent);
             doctorPigEvent.setRemark(doctorConditionDto.getConditionRemark());
             doctorPigEvent.setEventAt(doctorConditionDto.getConditionDate());
-            doctorPigEvent.setExtra(generateEventDescFromExtra(doctorConditionDto));
-            doctorPigEvent.setDesc(TO_JSON_MAPPER.toJson(doctorConditionDto));
+            doctorPigEvent.setDesc(generateEventDescFromExtra(doctorConditionDto));
+            doctorPigEvent.setExtra(TO_JSON_MAPPER.toJson(doctorConditionDto));
         } else {
             DoctorBoarConditionDto doctorBoarConditionDto = (DoctorBoarConditionDto) inputDto;
             BeanMapper.copy(oldPigEvent, doctorPigEvent);
             doctorPigEvent.setRemark(doctorBoarConditionDto.getRemark());
             doctorPigEvent.setEventAt(doctorBoarConditionDto.eventAt());
-            doctorPigEvent.setExtra(generateEventDescFromExtra(doctorBoarConditionDto));
-            doctorPigEvent.setDesc(TO_JSON_MAPPER.toJson(doctorBoarConditionDto));
+            doctorPigEvent.setDesc(generateEventDescFromExtra(doctorBoarConditionDto));
+            doctorPigEvent.setExtra(TO_JSON_MAPPER.toJson(doctorBoarConditionDto));
         }
         return doctorPigEvent;
     }

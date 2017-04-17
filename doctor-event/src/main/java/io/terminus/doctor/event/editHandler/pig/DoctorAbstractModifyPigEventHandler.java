@@ -57,26 +57,27 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         //3.更新事件
         DoctorPigEvent newEvent = buildNewEvent(oldPigEvent, inputDto);
         doctorPigEventDao.update(newEvent);
+
         //4.创建事件完成后创建编辑记录
         createModifyLog(oldPigEvent, newEvent);
 
-        //4.更新猪信息
+        //5.更新猪信息
         if (isUpdatePig(changeDto)) {
             DoctorPig oldPig = doctorPigDao.findById(oldPigEvent.getId());
             DoctorPig newPig = buildNewPig(oldPig, changeDto);
             doctorPigDao.update(newPig);
         }
 
-        //5.更新track
+        //6.更新track
         if (isUpdateTrack(changeDto)) {
             DoctorPigTrack oldPigTrack = doctorPigTrackDao.findByPigId(oldPigEvent.getPigId());
             DoctorPigTrack newTrack = buildNewTrack(oldPigTrack, changeDto);
             doctorPigTrackDao.update(newTrack);
         }
 
-        //6.更新每日数据记录
+        //7.更新每日数据记录
 
-        //7.调用触发事件的编辑
+        //8.调用触发事件的编辑
         triggerEventModifyHandle(newEvent);
 
         log.info("modify pig event handler ending");

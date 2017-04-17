@@ -16,7 +16,6 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created by xjn on 17/4/13.
@@ -51,23 +50,26 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         DoctorGroupEvent newEvent = buildNewEvent(oldGroupEvent, input);
         doctorGroupEventDao.update(newEvent);
 
-        //4.更新猪群
+        //4.创建事件完成后创建编辑记录
+        createModifyLog(oldGroupEvent, newEvent);
+
+        //5.更新猪群
         if (isUpdateGroup(changeDto)) {
             DoctorGroup oldGroup = doctorGroupDao.findById(oldGroupEvent.getGroupId());
             DoctorGroup newGroup = buildNewGroup(oldGroup, changeDto);
             doctorGroupDao.update(newGroup);
         }
 
-        //5.更新track
+        //6.更新track
         if (isUpdateTrack(changeDto)) {
             DoctorGroupTrack oldTrack = doctorGroupTrackDao.findByGroupId(oldGroupEvent.getGroupId());
             DoctorGroupTrack newTrack = buildNewTrack(oldTrack, changeDto);
             doctorGroupTrackDao.update(newTrack);
         }
 
-        //6.更新每日数据记录
+        //7.更新每日数据记录
 
-        //7.调用触发事件的编辑
+        //8.调用触发事件的编辑
         log.info("modify pig event handler ending");
     }
 

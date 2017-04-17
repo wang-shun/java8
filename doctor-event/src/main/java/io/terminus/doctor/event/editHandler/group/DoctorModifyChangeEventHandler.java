@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.editHandler.group;
 
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
@@ -20,8 +21,9 @@ public class DoctorModifyChangeEventHandler extends DoctorAbstractModifyGroupEve
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         DoctorChangeGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorChangeGroupInput.class);
         DoctorChangeGroupInput newInput = (DoctorChangeGroupInput) input;
-        DoctorEventChangeDto changeDto = DoctorEventChangeDto.builder()
-                .oldEventAt(DateTime.parse(newInput.getEventAt()).toDate())
+        return DoctorEventChangeDto.builder()
+                .newEventAt(DateUtil.toDate(newInput.getEventAt()))
+                .oldEventAt(DateUtil.toDate(oldInput.getEventAt()))
                 .oldChangeTypeId(oldInput.getChangeTypeId())
                 .oldChangeReasonId(oldInput.getChangeReasonId())
                 .changeTypeId(newInput.getChangeTypeId())
@@ -31,7 +33,6 @@ public class DoctorModifyChangeEventHandler extends DoctorAbstractModifyGroupEve
                 .priceChange(EventUtil.minusLong(newInput.getPrice(), oldInput.getPrice()))
                 .overPriceChange(EventUtil.minusLong(newInput.getOverPrice(), oldInput.getOverPrice()))
                 .build();
-        return changeDto;
     }
 
     @Override
@@ -47,6 +48,7 @@ public class DoctorModifyChangeEventHandler extends DoctorAbstractModifyGroupEve
         newGroupEvent.setOverPrice(newInput.getOverPrice());
         newGroupEvent.setExtra(TO_JSON_MAPPER.toJson(newInput));
         newGroupEvent.setRemark(newInput.getRemark());
+        newGroupEvent.setDesc(newInput.generateEventDesc());
         return newGroupEvent;
     }
 }

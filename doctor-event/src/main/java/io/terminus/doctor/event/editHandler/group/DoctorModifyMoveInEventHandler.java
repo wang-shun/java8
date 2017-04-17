@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.editHandler.group;
 
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
@@ -24,6 +25,8 @@ public class DoctorModifyMoveInEventHandler extends DoctorAbstractModifyGroupEve
         DoctorMoveInGroupInput oldMoveInGroupInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorSowMoveInGroupInput.class);
         DoctorMoveInGroupInput newMoveInGroupInput = (DoctorMoveInGroupInput) input;
         DoctorEventChangeDto changeDto = DoctorEventChangeDto.builder()
+                .newEventAt(DateUtil.toDate(newMoveInGroupInput.getEventAt()))
+                .oldEventAt(DateUtil.toDate(oldMoveInGroupInput.getEventAt()))
                 .quantityChange(EventUtil.minusInt(newMoveInGroupInput.getQuantity(), oldMoveInGroupInput.getQuantity()))
                 .groupHealthyQtyChange(EventUtil.minusInt(newMoveInGroupInput.getHealthyQty(), oldMoveInGroupInput.getHealthyQty()))
                 .groupWeakQtyChange(EventUtil.minusInt(newMoveInGroupInput.getWeakQty(), oldMoveInGroupInput.getWeakQty()))
@@ -40,7 +43,6 @@ public class DoctorModifyMoveInEventHandler extends DoctorAbstractModifyGroupEve
     public DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         DoctorGroupEvent newGroupEvent = new DoctorGroupEvent();
         BeanMapper.copy(oldGroupEvent, newGroupEvent);
-        createModifyLog(oldGroupEvent, newGroupEvent);
         DoctorMoveInGroupInput newMoveInGroupInput = (DoctorMoveInGroupInput) input;
         newGroupEvent.setExtra(TO_JSON_MAPPER.toJson(newMoveInGroupInput));
         newGroupEvent.setQuantity(newMoveInGroupInput.getQuantity());
@@ -48,6 +50,7 @@ public class DoctorModifyMoveInEventHandler extends DoctorAbstractModifyGroupEve
         newGroupEvent.setWeight(EventUtil.getWeight(newGroupEvent.getAvgWeight(), newGroupEvent.getQuantity()));
         newGroupEvent.setAvgDayAge(newMoveInGroupInput.getAvgDayAge());
         newGroupEvent.setRemark(newMoveInGroupInput.getRemark());
+        newGroupEvent.setDesc(newMoveInGroupInput.generateEventDesc());
         return newGroupEvent;
     }
 

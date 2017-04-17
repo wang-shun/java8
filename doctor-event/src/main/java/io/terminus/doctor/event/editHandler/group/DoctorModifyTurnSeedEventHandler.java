@@ -37,6 +37,7 @@ public class DoctorModifyTurnSeedEventHandler extends DoctorAbstractModifyGroupE
         newGroupEvent.setExtra(TO_JSON_MAPPER.toJson(newInput));
         newGroupEvent.setEventAt(DateTime.parse(newInput.getEventAt()).toDate());
         newGroupEvent.setRemark(newInput.getRemark());
+        newGroupEvent.setDesc(newInput.generateEventDesc());
         return newGroupEvent;
     }
 }

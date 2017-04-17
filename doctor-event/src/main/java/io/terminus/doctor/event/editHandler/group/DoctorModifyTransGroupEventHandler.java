@@ -39,6 +39,7 @@ public class DoctorModifyTransGroupEventHandler extends DoctorAbstractModifyGrou
         newGroupEvent.setQuantity(newInput.getQuantity());
         newGroupEvent.setAvgWeight(newInput.getAvgWeight());
         newGroupEvent.setRemark(newInput.getRemark());
+        newGroupEvent.setDesc(newInput.generateEventDesc());
         return newGroupEvent;
     }
 }

@@ -14,6 +14,8 @@ import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
+
 /**
  * Created by xjn on 17/4/14.
  * 分娩编辑和回滚
@@ -33,6 +35,8 @@ public class DoctorModifyFarrowEventHandler extends DoctorAbstractModifyPigEvent
         DoctorFarrowingDto newFarrowingDto = (DoctorFarrowingDto) inputDto;
         DoctorFarrowingDto oldFarrowingDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorFarrowingDto.class);
         return DoctorEventChangeDto.builder()
+                .newEventAt(newFarrowingDto.eventAt())
+                .oldEventAt(oldFarrowingDto.eventAt())
                 .farrowWeightChange(EventUtil.minusDouble(newFarrowingDto.getBirthNestAvg(), oldFarrowingDto.getBirthNestAvg()))
                 .liveCountChange(EventUtil.minusInt(newFarrowingDto.getFarrowingLiveCount(), oldFarrowingDto.getFarrowingLiveCount()))
                 .healthCountChange(EventUtil.minusInt(newFarrowingDto.getHealthCount(), oldFarrowingDto.getHealthCount()))
@@ -58,6 +62,7 @@ public class DoctorModifyFarrowEventHandler extends DoctorAbstractModifyPigEvent
         newEvent.setBlackCount(newFarrowingDto.getBlackCount());
         newEvent.setDeadCount(newFarrowingDto.getDeadCount());
         newEvent.setRemark(newFarrowingDto.getFarrowRemark());
+        newEvent.setDesc(generateEventDescFromExtra(newFarrowingDto));
         return newEvent;
     }
 
