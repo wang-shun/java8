@@ -523,4 +523,19 @@
         WHERE group_id = #{groupId}
         AND type = 1
     </select>
+
+    <select id="getEventCount" parameterType="long" resultType="int" >
+        SELECT
+        ifnull(
+        sum(
+        CASE WHEN TYPE = 2 THEN quantity ELSE 0 END -
+        CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END -
+        CASE WHEN TYPE = 5 THEN 1 ELSE 0 END
+        )
+        ,0) as event_count
+        from <include refid="tb"/>
+        where type in(2,3,4,5,9)
+        and status = 1
+        AND group_id = #{groupId}
+    </select>
 </mapper>
