@@ -72,8 +72,12 @@ public class DoctorEventChangeDto {
      * 新配种公猪id
      */
     private Long matingBoarId;
-    private Long matingBoarCode;
-
+    private String matingBoarCode;
+    /**
+     * 新的操作人
+     */
+    private Long newOperatorId;
+    private String newOperatorName;
     /**
      * 新配种类型
      * @see io.terminus.doctor.event.enums.MatingType
@@ -137,19 +141,9 @@ public class DoctorEventChangeDto {
     private Long oldChangeTypeId;
 
     /**
-     * 旧变动原因
-     */
-    private Long oldChangeReasonId;
-
-    /**
      * 新变动类型,猪群
      */
     private Long changeTypeId;
-
-    /**
-     * 新变动原因
-     */
-    private Long changeReasonId;
 
     /**
      * 数量变化
@@ -194,7 +188,7 @@ public class DoctorEventChangeDto {
     /**
      * 猪断奶均重变化量
      */
-    private Integer weanAvgWeightChange;
+    private Double weanAvgWeightChange;
 
     /**
      * 猪群初生重变化量
@@ -218,8 +212,6 @@ public class DoctorEventChangeDto {
     private Integer groupWeakQtyChange;
 
     private Integer groupUnweanQtyChange;
-
-    private Integer groupWeanQtyChange;
 
     private Integer groupQuaQtyChange;
 

@@ -15,7 +15,7 @@ import org.joda.time.DateTime;
  * Date: 11:31 2017/4/15
  */
 
-public class DoctorModifyTransGroupEventHandler extends DoctorAbstractModifyGroupEventHandler{
+public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModifyGroupEventHandler{
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
@@ -39,6 +39,7 @@ public class DoctorModifyTransGroupEventHandler extends DoctorAbstractModifyGrou
         newGroupEvent.setQuantity(newInput.getQuantity());
         newGroupEvent.setAvgWeight(newInput.getAvgWeight());
         newGroupEvent.setRemark(newInput.getRemark());
+        newGroupEvent.setDesc(newInput.generateEventDesc());
         return newGroupEvent;
     }
 }

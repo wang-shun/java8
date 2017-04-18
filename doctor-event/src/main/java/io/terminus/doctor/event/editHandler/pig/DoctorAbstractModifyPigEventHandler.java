@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.editHandler.pig;
 
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
@@ -19,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
+
 
 /**
  * Created by xjn on 17/4/13.
@@ -58,23 +61,26 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         DoctorPigEvent newEvent = buildNewEvent(oldPigEvent, inputDto);
         doctorPigEventDao.update(newEvent);
 
-        //4.更新猪信息
+        //4.创建事件完成后创建编辑记录
+        createModifyLog(oldPigEvent, newEvent);
+
+        //5.更新猪信息
         if (isUpdatePig(changeDto)) {
             DoctorPig oldPig = doctorPigDao.findById(oldPigEvent.getId());
             DoctorPig newPig = buildNewPig(oldPig, changeDto);
             doctorPigDao.update(newPig);
         }
 
-        //5.更新track
+        //6.更新track
         if (isUpdateTrack(changeDto)) {
             DoctorPigTrack oldPigTrack = doctorPigTrackDao.findByPigId(oldPigEvent.getPigId());
             DoctorPigTrack newTrack = buildNewTrack(oldPigTrack, changeDto);
             doctorPigTrackDao.update(newTrack);
         }
 
-        //6.更新每日数据记录
+        //7.更新每日数据记录
 
-        //7.调用触发事件的编辑
+        //8.调用触发事件的编辑
         triggerEventModifyHandle(newEvent);
 
         log.info("modify pig event handler ending");
@@ -83,6 +89,22 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Override
     public void rollbackHandle(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
 
+    }
+
+    @Override
+    public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        return null;
+    }
+
+    @Override
+    public DoctorPigEvent buildNewEvent(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        DoctorPigEvent newEvent = new DoctorPigEvent();
+        BeanMapper.copy(oldPigEvent, newEvent);
+        newEvent.setExtra(TO_JSON_MAPPER.toJson(inputDto));
+        newEvent.setDesc(generateEventDescFromExtra(inputDto));
+        newEvent.setRemark(inputDto.changeRemark());
+        newEvent.setEventAt(inputDto.eventAt());
+        return newEvent;
     }
 
     @Override

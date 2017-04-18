@@ -1,5 +1,7 @@
 package io.terminus.doctor.event.editHandler.group;
 
+import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
@@ -16,7 +18,6 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created by xjn on 17/4/13.
@@ -51,23 +52,26 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         DoctorGroupEvent newEvent = buildNewEvent(oldGroupEvent, input);
         doctorGroupEventDao.update(newEvent);
 
-        //4.更新猪群
+        //4.创建事件完成后创建编辑记录
+        createModifyLog(oldGroupEvent, newEvent);
+
+        //5.更新猪群
         if (isUpdateGroup(changeDto)) {
             DoctorGroup oldGroup = doctorGroupDao.findById(oldGroupEvent.getGroupId());
             DoctorGroup newGroup = buildNewGroup(oldGroup, changeDto);
             doctorGroupDao.update(newGroup);
         }
 
-        //5.更新track
+        //6.更新track
         if (isUpdateTrack(changeDto)) {
             DoctorGroupTrack oldTrack = doctorGroupTrackDao.findByGroupId(oldGroupEvent.getGroupId());
             DoctorGroupTrack newTrack = buildNewTrack(oldTrack, changeDto);
             doctorGroupTrackDao.update(newTrack);
         }
 
-        //6.更新每日数据记录
+        //7.更新每日数据记录
 
-        //7.调用触发事件的编辑
+        //8.调用触发事件的编辑
         log.info("modify pig event handler ending");
     }
 
@@ -79,6 +83,22 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     @Override
     public void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, DoctorEventChangeDto changeDto) {
 
+    }
+
+    @Override
+    public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        return null;
+    }
+
+    @Override
+    public DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        DoctorGroupEvent newEvent = new DoctorGroupEvent();
+        BeanMapper.copy(oldGroupEvent, newEvent);
+        newEvent.setDesc(input.generateEventDesc());
+        newEvent.setExtra(TO_JSON_MAPPER.toJson(input));
+        newEvent.setEventAt(DateUtil.toDate(input.getEventAt()));
+        newEvent.setRemark(input.getRemark());
+        return newEvent;
     }
 
     @Override
