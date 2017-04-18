@@ -1230,7 +1230,7 @@ public class DoctorImportDataService {
         else if (first.getMateDate() != null) {
             sow.setInFarmDate(new DateTime(first.getMateDate()).plusDays(-1).toDate()); //进场时间取第一次配种时间减一天
         } else {
-            sow.setInFarmDate(DateTime.now().plusDays(-7).toDate()); //进场时间取当前日期减7天
+            throw new JsonResponseException("母猪:" + sow.getPigCode() + "进场日期为空");
         }
         
         sow.setInitBarnName(last.getBarnName());
