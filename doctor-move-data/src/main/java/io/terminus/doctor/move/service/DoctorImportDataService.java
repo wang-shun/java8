@@ -1753,7 +1753,7 @@ public class DoctorImportDataService {
 
     //第一行是表头，跳过  第一列不能为空
     private static boolean canImport(Row row) {
-        return row.getRowNum() > 0 && notEmpty(ImportExcelUtils.getString(row, 0));
+        return row.getRowNum() > 0 && StringUtils.isNotBlank(ImportExcelUtils.getString(row, 0));
     }
 
     /**
