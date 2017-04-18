@@ -886,3 +886,30 @@ CREATE TABLE `doctor_export_porfit` (
   `refresh_time` datetime DEFAULT NULL COMMENT '刷新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9727 DEFAULT CHARSET=utf8;
+
+-- 2017-04-18 领用统计
+drop table if exists `doctor_masterial_datails_groups`;
+CREATE TABLE `doctor_masterial_datails_groups` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '唯一ID',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '公司ID',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '物料ID',
+  `material_name` varchar(20) DEFAULT NULL COMMENT '物料名',
+  `material_type` int(11) DEFAULT NULL COMMENT '物料类型',
+  `types` int(11) DEFAULT NULL COMMENT '类型',
+  `type_name` varchar(20) DEFAULT NULL COMMENT '类型名',
+  `barn_id` bigint(20) DEFAULT NULL COMMENT '猪舍ID',
+  `barn_name` varchar(20) DEFAULT NULL COMMENT '猪舍名',
+  `numbers` double DEFAULT NULL COMMENT '数量',
+  `price` bigint(20) DEFAULT NULL COMMENT '单价',
+  `price_sum` double DEFAULT NULL COMMENT '金额',
+  `unit_name` varchar(20) DEFAULT NULL COMMENT '物料单位',
+  `group_id` bigint(20) DEFAULT NULL COMMENT '猪群ID',
+  `group_name` varchar(512) DEFAULT NULL COMMENT '猪群名',
+  `ware_house_id` bigint(20) DEFAULT NULL COMMENT '仓库ID',
+  `ware_house_name` varchar(20) DEFAULT NULL COMMENT '仓库名',
+  `people` varchar(20) DEFAULT NULL COMMENT '饲养员',
+  `open_at` datetime DEFAULT NULL COMMENT '建群时间',
+  `close_at` datetime DEFAULT NULL COMMENT '关群时间',
+  `flush_date` datetime DEFAULT NULL COMMENT '刷新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=201743 DEFAULT CHARSET=utf8;

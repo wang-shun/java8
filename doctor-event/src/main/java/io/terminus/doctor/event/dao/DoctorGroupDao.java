@@ -93,4 +93,11 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
         return getSqlSession().selectList(sqlId("findGroupId"), map);
     }
 
+    public List<DoctorGroup> findGroupIdByBranId(Long farmId, Long barnId) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("farmId", farmId);
+        map.put("currentBarnId", barnId);
+        return getSqlSession().selectList("findGroupByBarnId", map);
+    }
+
 }

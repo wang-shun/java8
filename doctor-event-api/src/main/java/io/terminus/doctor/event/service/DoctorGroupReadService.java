@@ -272,4 +272,12 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<List<DoctorGroup>> findGroupIds(Long farmId, Date startAt, Date endAt);
+
+    /**
+     * 根据当前猪舍Id获取猪群
+     * @param farmId
+     * @param barnId
+     * @return
+     */
+    Response<List<DoctorGroup>> findGroupId(Long farmId, Long barnId);
 }
