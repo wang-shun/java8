@@ -510,7 +510,17 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             return Response.ok(doctorGroupDao.findGroupId(farmId, startAt, endAt));
         }catch (Exception e) {
             log.error("find.groupId.fail, cause{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("find.grouPId.fail");
+            return Response.fail("find.groupId.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorGroup>> findGroupId(Long farmId, Long barnId) {
+        try {
+            return Response.ok(doctorGroupDao.findGroupIdByBranId(farmId, barnId));
+        }catch (Exception e) {
+            log.error("find.groupId.fail, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.groupIdByBarnId.fail");
         }
     }
 }

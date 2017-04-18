@@ -267,4 +267,11 @@
         <if test="startAt != null" > <![CDATA[ AND `open_at` >= #{startAt} ]]> </if>
         <if test="endAt != null" > <![CDATA[ AND `close_at` <= #{endAt} ]]> </if>
     </select>
+
+    <select id="findGroupByBarnId" parameterType="map" resultMap="DoctorGroupMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE 1 = 1
+        <include refid="criteria"/>
+    </select>
 </mapper>

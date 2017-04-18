@@ -376,7 +376,6 @@
         </if>
         <if test="startDate != null" > <![CDATA[ AND `event_time` >= #{startDate} ]]> </if>
         <if test="endDate != null" > <![CDATA[ AND `event_time` < #{endDate} ]]> </if>
-        order by material_id ASC
     </select>
 
 </mapper>
