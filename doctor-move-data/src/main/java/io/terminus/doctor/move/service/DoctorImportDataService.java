@@ -1224,7 +1224,10 @@ public class DoctorImportDataService {
         sow.setBirthWeight(0D);
 
         //设置进场日期
-        if (first.getMateDate() != null) {
+        if (notNull(first.getInFarmDate())) {
+            sow.setInFarmDate(first.getInFarmDate());
+        }
+        else if (first.getMateDate() != null) {
             sow.setInFarmDate(new DateTime(first.getMateDate()).plusDays(-1).toDate()); //进场时间取第一次配种时间减一天
         } else {
             sow.setInFarmDate(DateTime.now().plusDays(-7).toDate()); //进场时间取当前日期减7天
@@ -1618,6 +1621,7 @@ public class DoctorImportDataService {
                 sow.setWeanCount(ImportExcelUtils.getIntOrDefault(row, 26, 0));                         //断奶数
                 sow.setFatherCode(ImportExcelUtils.getString(row, 27));                                 //父号
                 sow.setMotherCode(ImportExcelUtils.getString(row, 28));                                 //母号
+                sow.setInFarmDate(ImportExcelUtils.getDate(row, 29));
                 sows.add(sow);
             }
         }
