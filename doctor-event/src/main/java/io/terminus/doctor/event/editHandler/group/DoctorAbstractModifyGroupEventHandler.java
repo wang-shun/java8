@@ -1,5 +1,7 @@
 package io.terminus.doctor.event.editHandler.group;
 
+import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
@@ -81,6 +83,22 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     @Override
     public void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, DoctorEventChangeDto changeDto) {
 
+    }
+
+    @Override
+    public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        return null;
+    }
+
+    @Override
+    public DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        DoctorGroupEvent newEvent = new DoctorGroupEvent();
+        BeanMapper.copy(oldGroupEvent, newEvent);
+        newEvent.setDesc(input.generateEventDesc());
+        newEvent.setExtra(TO_JSON_MAPPER.toJson(input));
+        newEvent.setEventAt(DateUtil.toDate(input.getEventAt()));
+        newEvent.setRemark(input.getRemark());
+        return newEvent;
     }
 
     @Override

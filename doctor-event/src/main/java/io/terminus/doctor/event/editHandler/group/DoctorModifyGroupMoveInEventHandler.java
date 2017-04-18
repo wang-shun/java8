@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.editHandler.group;
 
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
@@ -41,16 +40,12 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
 
     @Override
     public DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
-        DoctorGroupEvent newGroupEvent = new DoctorGroupEvent();
-        BeanMapper.copy(oldGroupEvent, newGroupEvent);
+        DoctorGroupEvent newGroupEvent = super.buildNewEvent(oldGroupEvent, input);
         DoctorMoveInGroupInput newMoveInGroupInput = (DoctorMoveInGroupInput) input;
-        newGroupEvent.setExtra(TO_JSON_MAPPER.toJson(newMoveInGroupInput));
         newGroupEvent.setQuantity(newMoveInGroupInput.getQuantity());
         newGroupEvent.setAvgWeight(newMoveInGroupInput.getAvgWeight());
         newGroupEvent.setWeight(EventUtil.getWeight(newGroupEvent.getAvgWeight(), newGroupEvent.getQuantity()));
         newGroupEvent.setAvgDayAge(newMoveInGroupInput.getAvgDayAge());
-        newGroupEvent.setRemark(newMoveInGroupInput.getRemark());
-        newGroupEvent.setDesc(newMoveInGroupInput.generateEventDesc());
         return newGroupEvent;
     }
 

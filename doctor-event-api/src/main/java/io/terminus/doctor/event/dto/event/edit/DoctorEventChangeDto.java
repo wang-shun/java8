@@ -141,19 +141,9 @@ public class DoctorEventChangeDto {
     private Long oldChangeTypeId;
 
     /**
-     * 旧变动原因
-     */
-    private Long oldChangeReasonId;
-
-    /**
      * 新变动类型,猪群
      */
     private Long changeTypeId;
-
-    /**
-     * 新变动原因
-     */
-    private Long changeReasonId;
 
     /**
      * 数量变化
@@ -222,8 +212,6 @@ public class DoctorEventChangeDto {
     private Integer groupWeakQtyChange;
 
     private Integer groupUnweanQtyChange;
-
-    private Integer groupWeanQtyChange;
 
     private Integer groupQuaQtyChange;
 
