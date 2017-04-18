@@ -257,4 +257,11 @@
         WHERE
         farm_id = #{farmId}
     </update>
+
+    <select id="findByFarmIdAndDate" parameterType="map" resultMap="DoctorGroupMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+        AND open_at &lt;= #{date}
+        AND (status = 1 OR close_at &gt;= #{date})
+    </select>
 </mapper>

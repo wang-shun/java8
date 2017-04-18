@@ -53,6 +53,8 @@ public class DoctorReportJobs {
     private DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
     @RpcConsumer(timeout = "60000")
     private DoctorDailyPigWriteService doctorDailyPigWriteService;
+    @RpcConsumer(timeout = "60000")
+    private DoctorDailyGroupWriteService doctorDailyGroupWriteService;
 
     private final HostLeader hostLeader;
 
@@ -228,6 +230,23 @@ public class DoctorReportJobs {
             log.info("statistics daily pig job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         }catch (Exception e){
             log.error("statistics daily pig job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
+    @Scheduled(cron = "0 0 1 * * ?")
+    @RequestMapping(value = "/group/daily", method = RequestMethod.GET)
+    public void groupDaily() {
+        try {
+            if(!hostLeader.isLeader()){
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("statistics daily group job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
+            RespHelper.or500(doctorDailyGroupWriteService.createDailyGroups(getAllFarmIds(),yesterday));
+            log.info("statistics daily group job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        }catch (Exception e){
+            log.error("statistics daily group job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
 

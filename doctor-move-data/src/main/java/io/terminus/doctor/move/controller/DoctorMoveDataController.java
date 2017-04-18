@@ -1323,4 +1323,36 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    @RequestMapping(value = "/group/daily", method = RequestMethod.GET)
+    public Boolean flushGroupDailyHistorty(@RequestParam(required = false) Long farmId,
+                                         @RequestParam("since") String since,
+                                         @RequestParam(value = "only", defaultValue = "false") boolean only){
+        try {
+            log.warn("flush  gropu daily since start, farmId:{}, since:{}, only:{}", farmId, since, only);
+
+            Date startAt = DateUtil.toDate(since);
+            if (startAt == null || startAt.after(new Date())) {
+                return false;
+            }
+            if(only && !Objects.isNull(since) && !Objects.isNull(farmId)) {
+                doctorMoveReportService.flushGroupDaily(farmId, startAt);
+                return Boolean.TRUE;
+            }
+            int index = DateUtil.getDeltaDaysAbs(startAt, new Date()) + 1;
+            if (farmId == null) {
+                List<Long> farmIds = getAllFarmIds();
+                farmIds.forEach(fid -> {
+                    doctorMoveReportService.flushGroupDaily(fid, index);
+                });
+            } else {
+                doctorMoveReportService.flushGroupDaily(farmId, index);
+            }
+            log.warn("flush gropu daily since end, farmId:{}, since:{}, only:{}", farmId, since, only);
+            return true;
+        } catch (Exception e) {
+            log.error("flush gropu daily  since failed, farmId:{}, since:{}, only:{}", farmId, since, only, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }

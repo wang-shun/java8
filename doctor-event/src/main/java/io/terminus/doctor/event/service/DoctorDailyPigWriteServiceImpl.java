@@ -71,7 +71,7 @@ public class DoctorDailyPigWriteServiceImpl implements DoctorDailyPigWriteServic
         try{
             farmIds.forEach(farmId -> {
                 log.info("create daily pigs start, farmId: {}, now is: {}", farmId, DateUtil.toDateTimeString(date));
-                DoctorDailyPig doctorDailyPig = getDoctorDailyPig(farmId, date, new DateTime(date).plusSeconds(86399).toDate());
+                DoctorDailyPig doctorDailyPig = getDoctorDailyPig(farmId, date, DateUtil.getDateEnd(new DateTime(date)).toDate());
                 doctorDailyPigDao.create(doctorDailyPig);
             });
         }catch (Exception e){
@@ -85,7 +85,7 @@ public class DoctorDailyPigWriteServiceImpl implements DoctorDailyPigWriteServic
     public Response<Boolean> createDailyPigs(Long farmId, Date date) {
         log.info("create daily pigs start, farmId: {}, now is: {}", farmId, DateUtil.toDateTimeString(date));
         try{
-            DoctorDailyPig doctorDailyPig = getDoctorDailyPig(farmId, date, new DateTime(date).plusSeconds(86399).toDate());
+            DoctorDailyPig doctorDailyPig = getDoctorDailyPig(farmId, date, DateUtil.getDateEnd(new DateTime(date)).toDate());
             doctorDailyPigDao.create(doctorDailyPig);
         }catch (Exception e){
             log.error("crate daily pigs failed, cause: {}", Throwables.getStackTraceAsString(e));
@@ -109,7 +109,7 @@ public class DoctorDailyPigWriteServiceImpl implements DoctorDailyPigWriteServic
         doctorDailyPig.setSowPh(doctorKpiDao.realTimeLiveStockPHSow(farmId, startAt));
         doctorDailyPig.setSowCf(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));
         //母猪存栏变化
-        doctorDailyPig.setSowStart(doctorKpiDao.realTimeLiveStockSow(farmId, new DateTime(startAt).minusDays(1).toDate()));
+        doctorDailyPig.setSowStart(doctorKpiDao.realTimeLiveStockSow(farmId, DateUtil.getDateEnd(new DateTime(startAt).minusDays(1)).toDate()));
         doctorDailyPig.setSowIn(doctorKpiDao.getInSow(farmId, startAt, endAt));
         doctorDailyPig.setSowDead(doctorKpiDao.getDeadSow(farmId, startAt, endAt));
         doctorDailyPig.setSowWeedOut(doctorKpiDao.getWeedOutSow(farmId, startAt, endAt));
@@ -117,7 +117,7 @@ public class DoctorDailyPigWriteServiceImpl implements DoctorDailyPigWriteServic
         doctorDailyPig.setSowOtherOut(doctorKpiDao.getOtherOutSow(farmId, startAt, endAt));
         doctorDailyPig.setSowEnd(doctorKpiDao.realTimeLiveStockSow(farmId, startAt));
         //公猪存栏变化
-        doctorDailyPig.setBoarStart(doctorKpiDao.realTimeLiveStockBoar(farmId, new DateTime(startAt).minusDays(1).toDate()));
+        doctorDailyPig.setBoarStart(doctorKpiDao.realTimeLiveStockBoar(farmId, DateUtil.getDateEnd(new DateTime(startAt).minusDays(1)).toDate()));
         doctorDailyPig.setBoarIn(doctorKpiDao.getInBoar(farmId, startAt, endAt));
         doctorDailyPig.setBoarDead(doctorKpiDao.getDeadBoar(farmId, startAt, endAt));
         doctorDailyPig.setBoarWeedOut(doctorKpiDao.getWeedOutBoar(farmId, startAt, endAt));

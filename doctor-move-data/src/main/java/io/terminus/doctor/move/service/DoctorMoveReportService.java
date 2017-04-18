@@ -51,6 +51,7 @@ public class DoctorMoveReportService {
     private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
     private final DoctorDailyReportWriteService doctorDailyReportWriteService;
     private final DoctorDailyPigWriteService doctorDailyPigWriteService;
+    private final DoctorDailyGroupWriteService doctorDailyGroupWriteService;
 
     @Autowired
     public DoctorMoveReportService(DoctorDailyReportDao doctorDailyReportDao,
@@ -60,7 +61,8 @@ public class DoctorMoveReportService {
                                    DoctorCommonReportWriteService doctorCommonReportWriteService,
                                    DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
                                    DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService,
-                                   DoctorDailyReportWriteService doctorDailyReportWriteService, DoctorDailyPigWriteService doctorDailyPigWriteService) {
+                                   DoctorDailyReportWriteService doctorDailyReportWriteService, DoctorDailyPigWriteService doctorDailyPigWriteService,
+                                   DoctorDailyGroupWriteService doctorDailyGroupWriteService) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorFarmDao = doctorFarmDao;
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
@@ -70,6 +72,7 @@ public class DoctorMoveReportService {
         this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
         this.doctorDailyReportWriteService = doctorDailyReportWriteService;
         this.doctorDailyPigWriteService = doctorDailyPigWriteService;
+        this.doctorDailyGroupWriteService = doctorDailyGroupWriteService;
     }
 
     /**
@@ -201,5 +204,14 @@ public class DoctorMoveReportService {
     public void flushPigDaily(Long farmId, Integer index) {
         DateUtil.getBeforeDays(new Date(), MoreObjects.firstNonNull(index, INDEX))
                 .forEach(date -> doctorDailyPigWriteService.createDailyPigs(farmId, date));
+    }
+
+    public void flushGroupDaily(Long farmId, Date date){
+        doctorDailyGroupWriteService.createDailyGroups(farmId, date);
+    }
+
+    public void flushGroupDaily(Long farmId, int index) {
+        DateUtil.getBeforeDays(new Date(), MoreObjects.firstNonNull(index, INDEX))
+                .forEach(date -> doctorDailyGroupWriteService.createDailyGroups(farmId, date));
     }
 }

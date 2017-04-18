@@ -14,6 +14,14 @@
         <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
     </sql>
 
+    <sql id="groupCriteria">
+        AND status = 1
+        AND event_source != 5
+        <if test="groupId != null">AND group_id = #{groupId}</if>
+        <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
+    </sql>
+
     <!-- 某一猪群死淘率 -->
     <select id="getDeadRateByGroupId" parameterType="map" resultType="double">
         SELECT
@@ -1844,4 +1852,150 @@
         ) c ON g.id = c.group_id
         WHERE g.quantity - ifnull(c.deltaQty, 0)  &gt; 0
     </select>
+
+
+
+    <select id="realTimeLivetockGroup" parameterType="map" resultType="int">
+        select
+        ifnull(
+        sum(
+        CASE WHEN TYPE = 2 THEN quantity ELSE 0 END -
+        CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END -
+        CASE WHEN TYPE = 5 THEN 1 ELSE 0 END
+        )
+        ,0)
+        from doctor_group_events
+        where group_id = #{groupId}
+        and event_at &lt;=  date_add(date(#{date}), INTERVAL 86399 SECOND)  -- 当前23:59:59
+        and type in(2,3,4,5,9)
+    </select>
+
+    <select id="getGroupInnerIn" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 2
+        and trans_group_type = 1
+        <include refid="groupCriteria"/>
+    </select>
+
+    <select id="getGroupOuterIn" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 2
+        and trans_group_type = 0
+        <include refid="groupCriteria"/>
+    </select>
+
+    <select id="getGroupSale" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 3
+        and change_type_id = 109
+        <include refid="groupCriteria"/>
+    </select>
+
+    <select id="getGroupDead" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 3
+        and change_type_id = 110
+        <include refid="groupCriteria"/>
+    </select>
+
+    <select id="getGroupWeedOut" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 3
+        and change_type_id = 111
+        <include refid="groupCriteria"/>
+    </select>
+
+
+    <select id="getGroupOtherChange" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 3
+        and change_type_id not in (109, 110, 111)
+        <include refid="groupCriteria"/>
+    </select>
+
+    <select id="getGroupChgFarm" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 9
+        <include refid="groupCriteria"/>
+    </select>
+
+
+    <select id="getGroupInnerOut" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 4
+        and trans_group_type = 1
+        <include refid="groupCriteria"/>
+    </select>
+
+    <select id="getGroupOuterOut" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 4
+        and trans_group_type = 0
+        <include refid="groupCriteria"/>
+    </select>
+
+    <select id="getGroupTurnSeed" parameterType="map" resultType="int">
+        select
+        ifnull(count(1), 0)
+        from doctor_group_events
+        where
+        type = 5
+        <include refid="groupCriteria"/>
+    </select>
+
+    <select id="getGroupUnWean" parameterType="map" resultType="int">
+        select
+        ifnull(
+        sum(case when type = 2 and sow_id is not null then quantity else 0 end) -
+        sum(case when type = 11 then quantity else 0 end) -
+        sum(case when type in ( 3, 4) and sow_id is not null then quantity else 0 end)
+        , 0) as unWeanCount
+        from doctor_group_events
+        where
+        group_id = #{groupId}
+        and status = 1
+        and event_at &lt;= #{date}
+    </select>
+
+    <select id="getGroupWean" parameterType="map" resultType="int">
+        select
+        ifnull(
+        sum(case when type = 2 and sow_id is null then quantity else 0 end) +
+        sum(case when type = 11 then quantity else 0 end) -
+        sum(case when type in ( 3, 4, 9) and sow_id is null then quantity else 0 end)
+        , 0) as weanCount
+        from doctor_group_events
+        where
+        group_id = #{groupId}
+        and status = 1
+        and event_at &lt;= #{date}
+    </select>
+
 </mapper>

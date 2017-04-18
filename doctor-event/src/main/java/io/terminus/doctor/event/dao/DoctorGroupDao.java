@@ -79,4 +79,7 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
         getSqlSession().update(sqlId("updateFarmName"), ImmutableMap.of("farmId", farmId, "farmName", farmName));
     }
 
+    public List<DoctorGroup> findByFarmIdAndDate(Long farmId, Date date) {
+        return getSqlSession().selectList(sqlId("findByFarmIdAndDate"), ImmutableMap.of("farmId", farmId, "date", date));
+    }
 }

@@ -864,4 +864,145 @@ public class DoctorKpiDao {
     public List<Map<String, Object>> getEveryGroupInfo(String date) {
         return sqlSession.selectList(sqlId("getEveryGroupInfo"), ImmutableMap.of("date", date));
     }
+
+
+    /**
+     * 猪群实时存栏
+     * @param groupId
+     * @param date
+     * @return
+     */
+    public int realTimeLivetockGroup(Long groupId, Date date){
+        return sqlSession.selectOne(sqlId("realTimeLivetockGroup"), ImmutableMap.of("groupId", groupId, "date", date));
+    }
+
+    /**
+     * 具体某个猪群内部转入
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupInnerIn(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupInnerIn"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群外部转入
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupOuterIn(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupOuterIn"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群销售
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupSale(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupSale"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群死淘
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupDead(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupDead"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群死淘
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupWeedOut(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupWeedOut"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群其他变动
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupOtherChange(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupOtherChange"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群转场
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupChgFarm(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupChgFarm"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群内转
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupInnerOut(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupInnerOut"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群外传
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupOuterOut(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupOuterOut"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群外传
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupTrunSeed(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupTurnSeed"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群断奶数量
+     * @param groupId
+     * @param date
+     * @return
+     */
+    public int getGroupWean(Long groupId, Date date){
+        return sqlSession.selectOne(sqlId("getGroupWean"), ImmutableMap.of("groupId", groupId, "date", date));
+    }
+
+    /**
+     * 具体某个猪群未断奶数量
+     * @param groupId
+     * @param date
+     * @return
+     */
+    public int getGroupUnWean(Long groupId, Date date){
+        return sqlSession.selectOne(sqlId("getGroupUnWean"), ImmutableMap.of("groupId", groupId, "date", date));
+    }
 }
