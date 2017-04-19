@@ -5,6 +5,7 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.sow.DoctorSowFarrowingHandler;
 import io.terminus.doctor.event.model.DoctorDailyPig;
@@ -34,34 +35,34 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
-        DoctorFarrowingDto newFarrowingDto = (DoctorFarrowingDto) inputDto;
-        DoctorFarrowingDto oldFarrowingDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorFarrowingDto.class);
+        DoctorFarrowingDto newDto = (DoctorFarrowingDto) inputDto;
+        DoctorFarrowingDto oldDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorFarrowingDto.class);
         return DoctorEventChangeDto.builder()
                 .farmId(oldPigEvent.getFarmId())
                 .businessId(oldPigEvent.getPigId())
-                .newEventAt(newFarrowingDto.eventAt())
-                .oldEventAt(oldFarrowingDto.eventAt())
-                .farrowWeightChange(EventUtil.minusDouble(newFarrowingDto.getBirthNestAvg(), oldFarrowingDto.getBirthNestAvg()))
-                .liveCountChange(EventUtil.minusInt(newFarrowingDto.getFarrowingLiveCount(), oldFarrowingDto.getFarrowingLiveCount()))
-                .healthCountChange(EventUtil.minusInt(newFarrowingDto.getHealthCount(), oldFarrowingDto.getHealthCount()))
-                .weakCountChange(EventUtil.minusInt(newFarrowingDto.getWeakCount(), oldFarrowingDto.getWeakCount()))
-                .mnyCountChange(EventUtil.minusInt(newFarrowingDto.getMnyCount(), oldFarrowingDto.getMnyCount()))
-                .blackCountChange(EventUtil.minusInt(newFarrowingDto.getBlackCount(), oldFarrowingDto.getBlackCount()))
-                .deadCountChange(EventUtil.minusInt(newFarrowingDto.getDeadCount(), oldFarrowingDto.getDeadCount()))
+                .newEventAt(newDto.eventAt())
+                .oldEventAt(oldDto.eventAt())
+                .farrowWeightChange(EventUtil.minusDouble(newDto.getBirthNestAvg(), oldDto.getBirthNestAvg()))
+                .liveCountChange(EventUtil.minusInt(newDto.getFarrowingLiveCount(), oldDto.getFarrowingLiveCount()))
+                .healthCountChange(EventUtil.minusInt(newDto.getHealthCount(), oldDto.getHealthCount()))
+                .weakCountChange(EventUtil.minusInt(newDto.getWeakCount(), oldDto.getWeakCount()))
+                .mnyCountChange(EventUtil.minusInt(newDto.getMnyCount(), oldDto.getMnyCount()))
+                .blackCountChange(EventUtil.minusInt(newDto.getBlackCount(), oldDto.getBlackCount()))
+                .deadCountChange(EventUtil.minusInt(newDto.getDeadCount(), oldDto.getDeadCount()))
                 .build();
     }
 
     @Override
     public DoctorPigEvent buildNewEvent(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         DoctorPigEvent newEvent = super.buildNewEvent(oldPigEvent, inputDto);
-        DoctorFarrowingDto newFarrowingDto = (DoctorFarrowingDto) inputDto;
-        newEvent.setFarrowWeight(newFarrowingDto.getBirthNestAvg());
-        newEvent.setLiveCount(newFarrowingDto.getFarrowingLiveCount());
-        newEvent.setHealthCount(newFarrowingDto.getHealthCount());
-        newEvent.setWeakCount(newFarrowingDto.getWeakCount());
-        newEvent.setMnyCount(newFarrowingDto.getMnyCount());
-        newEvent.setBlackCount(newFarrowingDto.getBlackCount());
-        newEvent.setDeadCount(newFarrowingDto.getDeadCount());
+        DoctorFarrowingDto newDto = (DoctorFarrowingDto) inputDto;
+        newEvent.setFarrowWeight(newDto.getBirthNestAvg());
+        newEvent.setLiveCount(newDto.getFarrowingLiveCount());
+        newEvent.setHealthCount(newDto.getHealthCount());
+        newEvent.setWeakCount(newDto.getWeakCount());
+        newEvent.setMnyCount(newDto.getMnyCount());
+        newEvent.setBlackCount(newDto.getBlackCount());
+        newEvent.setDeadCount(newDto.getDeadCount());
         return newEvent;
     }
 
@@ -78,7 +79,7 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
     }
 
     @Override
-    protected void updateDaily(DoctorPigEvent oldEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
+    protected void updateDailyForModify(DoctorPigEvent oldEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
         if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
             DoctorDailyPig oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
             doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
@@ -117,7 +118,9 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent) {
-        DoctorGroupEvent oldGroupEvent = doctorGroupEventDao.findByRelPigEventId(newPigEvent.getId());
+        // TODO: 17/4/19 新建编辑
+        //转入编辑
+        DoctorGroupEvent oldGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(newPigEvent.getId(), GroupEventType.MOVE_IN.getValue());
         doctorModifyMoveInEventHandler.modifyHandle(oldGroupEvent, doctorSowFarrowingHandler.buildTriggerGroupEventInput(newPigEvent));
     }
 
@@ -133,5 +136,39 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         oldDailyPig.setFarrowWeight(EventUtil.plusDouble(oldDailyPig.getFarrowWeight(), changeDto.getFarrowWeightChange()));
         oldDailyPig.setFarrowAvgWeight(EventUtil.getAvgWeight(oldDailyPig.getFarrowWeight(), oldDailyPig.getFarrowLive()));
         return oldDailyPig;
+    }
+
+    @Override
+    protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
+        // TODO: 17/4/19 新建回滚
+        //转入回滚
+        DoctorGroupEvent deleteGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.MOVE_IN.getValue());
+        doctorModifyMoveInEventHandler.rollbackHandle(deleteGroupEvent, operatorId, operatorName);
+    }
+
+    @Override
+    protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack) {
+        oldPigTrack.setStatus(PigStatus.Farrow.getKey());
+        oldPigTrack.setFarrowAvgWeight(0D);
+        oldPigTrack.setFarrowQty(0);
+        oldPigTrack.setUnweanQty(0);
+        oldPigTrack.setGroupId(-1L);
+        return oldPigTrack;
+    }
+
+    @Override
+    protected void updateDailyForDelete(DoctorPigEvent deletePigEvent) {
+        DoctorDailyPig oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(deletePigEvent.getFarmId(), deletePigEvent.getEventAt());
+        oldDailyPig.setFarrowNest(EventUtil.minusInt(oldDailyPig.getFarrowNest(), 1));
+        oldDailyPig.setFarrowLive(EventUtil.minusInt(oldDailyPig.getFarrowLive(), deletePigEvent.getLiveCount()));
+        oldDailyPig.setFarrowHealth(EventUtil.minusInt(oldDailyPig.getFarrowHealth(), deletePigEvent.getHealthCount()));
+        oldDailyPig.setFarrowWeak(EventUtil.minusInt(oldDailyPig.getFarrowWeak(), deletePigEvent.getWeakCount()));
+        oldDailyPig.setFarrowBlack(EventUtil.minusInt(oldDailyPig.getFarrowBlack(), deletePigEvent.getBlackCount()));
+        oldDailyPig.setFarrowDead(EventUtil.minusInt(oldDailyPig.getFarrowDead(), deletePigEvent.getDeadCount()));
+        oldDailyPig.setFarrowJx(EventUtil.minusInt(oldDailyPig.getFarrowJx(), deletePigEvent.getJxCount()));
+        oldDailyPig.setFarrowMny(EventUtil.minusInt(oldDailyPig.getFarrowMny(), deletePigEvent.getMnyCount()));
+        oldDailyPig.setFarrowWeight(EventUtil.minusDouble(oldDailyPig.getFarrowWeight(), deletePigEvent.getFarrowWeight()));
+        oldDailyPig.setFarrowAvgWeight(EventUtil.getAvgWeight(oldDailyPig.getFarrowWeight(), oldDailyPig.getFarrowLive()));
+        doctorDailyPigDao.update(oldDailyPig);
     }
 }

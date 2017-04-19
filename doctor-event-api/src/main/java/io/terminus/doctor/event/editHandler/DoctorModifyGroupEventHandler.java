@@ -47,11 +47,10 @@ public interface DoctorModifyGroupEventHandler {
     //// TODO: 17/4/13 构建记录表
 
     /**
-     * 编辑校验
+     * 能否编辑
      * @param oldGroupEvent 原事件
-     * @param changeDto 变化
      */
-    void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, DoctorEventChangeDto changeDto);
+    Boolean canModify(DoctorGroupEvent oldGroupEvent);
 
     /**
      * 编辑处理
@@ -60,6 +59,11 @@ public interface DoctorModifyGroupEventHandler {
      */
     void modifyHandle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input);
 
+    /**
+     * 能否回滚
+     * @param deleteGroupEvent 删除事件
+     */
+    Boolean canRollback(DoctorGroupEvent deleteGroupEvent);
     /**
      * 事件回滚处理
      * @param groupEvent 回滚事件

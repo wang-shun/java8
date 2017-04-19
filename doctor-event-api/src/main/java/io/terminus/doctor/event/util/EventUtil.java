@@ -21,6 +21,10 @@ public class EventUtil {
         return avgWeight * quantity;
     }
 
+    public static double getWeight(Double avgWeight, Integer quantity) {
+        return MoreObjects.firstNonNull(avgWeight, 0D) * MoreObjects.firstNonNull(quantity, 0);
+    }
+
     public static double getAvgWeight(Double weight, Integer quantity) {
         if (quantity == null || quantity == 0) {
             return 0D;

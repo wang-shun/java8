@@ -98,6 +98,7 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     /**
      * 根据关联猪群事件id查询（只有自动生成的事件才有关联id！）
      * @param relGroupEventId 关联事件id
+     * @param type 事件类型
      * @return 关联的事件
      */
     public DoctorGroupEvent findByRelGroupEventIdAndType(Long relGroupEventId, Integer type) {
@@ -111,6 +112,16 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      */
     public DoctorGroupEvent findByRelPigEventId(Long relPigEventId) {
         return getSqlSession().selectOne(sqlId("findByRelPigEventId"), relPigEventId);
+    }
+
+    /**
+     * 根据关联猪事件id查询（只有自动生成的事件才有关联id！）
+     * @param relPigEventId 关联事件id
+     * @param type 事件类型
+     * @return 关联的事件
+     */
+    public DoctorGroupEvent findByRelPigEventIdAndType(Long relPigEventId, Integer type) {
+        return getSqlSession().selectOne(sqlId("findByRelPigEventIdAndType"), ImmutableMap.of("relPigEventId", relPigEventId, "type", type));
     }
 
     /**

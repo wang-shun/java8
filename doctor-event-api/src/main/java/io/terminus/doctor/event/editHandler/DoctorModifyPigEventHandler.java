@@ -47,11 +47,10 @@ public interface DoctorModifyPigEventHandler {
     //// TODO: 17/4/13 构建记录表
 
     /**
-     * 编辑校验
+     * 能否编辑
      * @param oldPigEvent 原事件
-     * @param changeDto 变化
      */
-    void modifyHandleCheck(DoctorPigEvent oldPigEvent, DoctorEventChangeDto changeDto);
+    Boolean canModify(DoctorPigEvent oldPigEvent);
 
     /**
      * 编辑处理
@@ -61,10 +60,16 @@ public interface DoctorModifyPigEventHandler {
     void modifyHandle(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto);
 
     /**
+     * 能否回滚
+     * @param deletePigEvent 原事件
+     */
+    Boolean canRollback(DoctorPigEvent deletePigEvent);
+
+    /**
      * 事件回滚处理
-     * @param pigEvent 回滚事件
+     * @param deletePigEvent 回滚事件
      * @param operatorId 操作人id
      * @param operatorName 操作人姓名
      */
-    void rollbackHandle(DoctorPigEvent pigEvent, Long operatorId, String operatorName);
+    void rollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName);
 }

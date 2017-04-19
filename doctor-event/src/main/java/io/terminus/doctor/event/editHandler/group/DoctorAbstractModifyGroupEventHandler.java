@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.editHandler.group;
 
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
@@ -12,6 +13,8 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
+import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -19,6 +22,8 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Objects;
 
 /**
  * Created by xjn on 17/4/13.
@@ -40,6 +45,12 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     protected final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
+
+    @Override
+    public final Boolean canModify(DoctorGroupEvent oldGroupEvent) {
+        return Objects.equals(oldGroupEvent.getIsAuto(), IsOrNot.NO.getValue())
+                && Objects.equals(oldGroupEvent.getEventSource(), SourceType.INPUT.getValue());
+    }
 
     @Override
     public void modifyHandle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
@@ -73,19 +84,67 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         }
 
         //7.更新每日数据记录
-        updateDaily(oldGroupEvent, input, changeDto);
+        updateDailyForModify(oldGroupEvent, input, changeDto);
 
         //8.调用触发事件的编辑
         log.info("modify pig event handler ending");
     }
-
+    
     @Override
-    public void rollbackHandle(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+    public Boolean canRollback(DoctorGroupEvent deleteGroupEvent) {
+        return Objects.equals(deleteGroupEvent.getIsAuto(), IsOrNot.NO.getValue())
+                && Objects.equals(deleteGroupEvent.getEventSource(), SourceType.INPUT.getValue());
+    }
+    
+    @Override
+    public void rollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
+        log.info("rollback handle starting, deleteGroupEvent:{}", deleteGroupEvent);
 
+        //1.删除校验
+        rollbackHandleCheck(deleteGroupEvent);
+
+        //2.删除触发事件
+        triggerEventRollbackHandle(deleteGroupEvent, operatorId, operatorName);
+
+        //3.删除事件
+        doctorGroupEventDao.delete(deleteGroupEvent.getId());
+
+        //4.删除记录
+
+        //5.更新猪
+        if (isUpdateGroup(deleteGroupEvent.getType())) {
+            DoctorGroup oldGroup = doctorGroupDao.findById(deleteGroupEvent.getGroupId());
+            if (Objects.equals(deleteGroupEvent.getType(), GroupEventType.NEW.getValue())) {
+                doctorGroupDao.delete(oldGroup.getId());
+            } else {
+                DoctorGroup newGroup = buildNewGroupForRollback(deleteGroupEvent, oldGroup);
+                doctorGroupDao.update(newGroup);
+            }
+        }
+
+        //6.更新track
+        if (isUpdateTrack(deleteGroupEvent.getType())) {
+            DoctorGroupTrack oldTrack = doctorGroupTrackDao.findByGroupId(deleteGroupEvent.getGroupId());
+            if (Objects.equals(deleteGroupEvent.getType(), GroupEventType.NEW.getValue())) {
+                doctorGroupTrackDao.delete(oldTrack.getId());
+            } else {
+                DoctorGroupTrack newTrack = buildNewTrackForRollback(deleteGroupEvent, oldTrack);
+                doctorGroupTrackDao.update(newTrack);
+            }
+        }
+
+        //7.更新报表
+        updateDailyForDelete(deleteGroupEvent);
+
+        log.info("rollback handle ending");
     }
 
-    @Override
-    public void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, DoctorEventChangeDto changeDto) {
+    /**
+     * 编辑校验的具体事件
+     * @param oldGroupEvent 原事件
+     * @param changeDto 变化
+     */
+    protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, DoctorEventChangeDto changeDto) {
 
     }
 
@@ -121,10 +180,43 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param input 新输入
      * @param changeDto 变化
      */
-    protected void updateDaily(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto){};
+    protected void updateDailyForModify(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto){};
 
     /**
-     * 是否需要更新猪群
+     * 删除事件校验的具体实现(删除)
+     * @param deleteGroupEvent 删除事件
+     */
+    protected void rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {}
+
+    /**
+     * 触发事件的删除处理(删除)
+     * @param deleteGroupEvent 删除事件
+     */
+    protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {}
+
+    /**
+     * 构建猪群信息(删除)
+     * @param deleteGroupEvent 删除事件
+     * @param oldGroup 原猪群信息
+     * @return 新猪群信息
+     */
+    protected DoctorGroup buildNewGroupForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroup oldGroup){return null;}
+
+    /**
+     * 构建track(删除)
+     * @param deleteGroupEvent 删除事件
+     * @param oldTrack 原track
+     * @return 新 track
+     */
+    protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldTrack) {return null;}
+    /**
+     * 更新日记录(删除)
+     * @param deleteGroupEvent 删除事件
+     */
+    protected void updateDailyForDelete(DoctorGroupEvent deleteGroupEvent) {}
+    
+    /**
+     * 是否需要更新猪群(编辑)
      * @param changeDto 变化记录
      * @return
      */
@@ -134,11 +226,31 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     }
 
     /**
+     * 是否需要更新猪群(删除)
+     * @param eventType 事件类型
+     * @return
+     */
+    private boolean isUpdateGroup(Integer eventType){
+        //// TODO: 17/4/13 是否需要更新
+        return true;
+    }
+    
+    /**
      * 是否需要更新track
      * @param changeDto 变化记录
      * @return
      */
     private boolean isUpdateTrack(DoctorEventChangeDto changeDto){
+        // TODO: 17/4/13 是否需要跟新
+        return true;
+    }
+
+    /**
+     * 是否需要更新track(删除)
+     * @param eventType 事件类型
+     * @return
+     */
+    private boolean isUpdateTrack(Integer eventType){
         // TODO: 17/4/13 是否需要跟新
         return true;
     }
