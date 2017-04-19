@@ -44,7 +44,7 @@ public class DoctorMasterialDatailsGroup implements Serializable{
     /**
      * 时间
      */
-    private Date updatedAt;
+    private Date eventAt;
     /**
      * 数量
      */
@@ -94,5 +94,9 @@ public class DoctorMasterialDatailsGroup implements Serializable{
      * 刷新日期
      */
     private Date flushDate;
+    /**
+     * 标志位判断是仓库OR猪群
+     */
+    private Integer flag;
 
 }
