@@ -159,6 +159,10 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         return null;
     }
 
+    protected DoctorEventChangeDto buildEventChange(BasePigEventInputDto oldInputDto, BasePigEventInputDto newInputDto) {
+        return null;
+    }
+
     /**
      * 子类的具体实现
      * @param oldPigEvent 原事件
@@ -234,6 +238,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     protected DoctorPig buildNewPigForRollback(DoctorPigEvent deletePigEvent, DoctorPig oldPig) {
         return null;
     }
+
     /**
      * 构建删除后新track(删除)
      * @param deletePigEvent 删除事件
@@ -243,6 +248,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack){
         return null;
     }
+
     /**
      * 更新日记录(删除)
      * @param deletePigEvent 删除时间
