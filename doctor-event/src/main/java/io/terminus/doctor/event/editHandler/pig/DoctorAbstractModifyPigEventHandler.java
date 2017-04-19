@@ -3,6 +3,7 @@ package io.terminus.doctor.event.editHandler.pig;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
+import io.terminus.doctor.event.dao.DoctorDailyPigDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -10,9 +11,9 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
+import io.terminus.doctor.event.model.DoctorDailyPig;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -30,11 +31,13 @@ import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEvent
 @Slf4j
 public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModifyPigEventHandler{
     @Autowired
-    private DoctorPigEventDao doctorPigEventDao;
+    protected DoctorPigEventDao doctorPigEventDao;
     @Autowired
-    private DoctorPigTrackDao doctorPigTrackDao;
+    protected DoctorPigTrackDao doctorPigTrackDao;
     @Autowired
-    private DoctorPigDao doctorPigDao;
+    protected DoctorPigDao doctorPigDao;
+    @Autowired
+    protected DoctorDailyPigDao doctorDailyPigDao;
     @Autowired
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
 
@@ -67,7 +70,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         //5.更新猪信息
         if (isUpdatePig(changeDto)) {
             DoctorPig oldPig = doctorPigDao.findById(oldPigEvent.getId());
-            DoctorPig newPig = buildNewPig(oldPig, changeDto);
+            DoctorPig newPig = buildNewPig(oldPig, inputDto);
             doctorPigDao.update(newPig);
         }
 
@@ -79,6 +82,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         }
 
         //7.更新每日数据记录
+        updateDaily(oldPigEvent, inputDto, changeDto);
 
         //8.调用触发事件的编辑
         triggerEventModifyHandle(newEvent);
@@ -87,7 +91,13 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     }
 
     @Override
-    public void rollbackHandle(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+    public void rollbackHandle(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+        //1.删除触发事件
+        //2.删除事件
+        doctorPigEventDao.delete(pigEvent.getId());
+        //3.更新猪
+        //3.更新track
+        //4.更新报表
 
     }
 
@@ -108,7 +118,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     }
 
     @Override
-    public DoctorPig buildNewPig(DoctorPig oldPig, DoctorEventChangeDto changeDto) {
+    public DoctorPig buildNewPig(DoctorPig oldPig, BasePigEventInputDto inputDto) {
         return null;
     }
 
@@ -116,6 +126,22 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     public DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto) {
         return null;
     }
+
+    /**
+     * 更新日记录表
+     * @param oldPigEvent 原事件
+     * @param inputDto 新输入
+     * @param changeDto 变化
+     */
+    protected void updateDaily(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto){};
+
+    /**
+     * 构建日记录
+     * @param oldDailyPig 原记录
+     * @param changeDto 变化量
+     * @return 新记录
+     */
+    protected DoctorDailyPig buildDailyPig(DoctorDailyPig oldDailyPig, DoctorEventChangeDto changeDto){return oldDailyPig;}
 
     /**
      * 触发事件的处理
@@ -129,13 +155,14 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @return
      */
     private boolean isUpdatePig(DoctorEventChangeDto changeDto){
-        return notNull(changeDto.getSource())
+        return notNull(changeDto)
+                && (notNull(changeDto.getSource())
                 || notNull(changeDto.getBirthDate())
                 || notNullAndNotZero(changeDto.getBirthWeightChange())
                 || notNull(changeDto.getNewEventAt())
                 || notNull(changeDto.getPigBreedId())
                 || notNull(changeDto.getPigBreedTypeId())
-                || notNull(changeDto.getBoarType());
+                || notNull(changeDto.getBoarType()));
     }
 
     /**
@@ -144,9 +171,10 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @return
      */
     private boolean isUpdateTrack(DoctorEventChangeDto changeDto) {
-        return notNullAndNotZero(changeDto.getWeightChange())
+        return notNull(changeDto)
+                && (notNullAndNotZero(changeDto.getWeightChange())
                 || notNullAndNotZero(changeDto.getLiveCountChange())
-                || notNullAndNotZero(changeDto.getWeanCountChange());
+                || notNullAndNotZero(changeDto.getWeanCountChange()));
         // TODO: 17/4/13 是否需要跟新
     }
 
@@ -156,7 +184,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @param oldEvent 原事件
      * @param newEvent 新事件
      */
-    protected void createModifyLog(DoctorPigEvent oldEvent, DoctorPigEvent newEvent) {
+    private void createModifyLog(DoctorPigEvent oldEvent, DoctorPigEvent newEvent) {
         DoctorEventModifyLog modifyLog = DoctorEventModifyLog.builder()
                 .businessId(newEvent.getPigId())
                 .businessCode(newEvent.getPigCode())

@@ -31,4 +31,14 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
     public void deleteByFarmIdAndSumAt(Date date) {
         getSqlSession().delete(sqlId("deleteBySumAt"), ImmutableMap.of("sumAt", date));
     }
+
+    /**
+     * 获取猪群某一天统计记录
+     * @param groupId 猪群id
+     * @param sumAt 统计时间
+     * @return 记录
+     */
+    public DoctorDailyGroup findByGroupIdAndSumAt(Long groupId, Date sumAt) {
+        return getSqlSession().selectOne(sqlId("findByGroupIdAndSumAt"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt));
+    }
 }

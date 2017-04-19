@@ -7,18 +7,22 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 /**
  * Created by xjn on 17/4/17.
  */
+@Component
 public class DoctorModifyPigPigletsChgHandler extends DoctorAbstractModifyPigEventHandler{
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         DoctorPigletsChgDto oldDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorPigletsChgDto.class);
         DoctorPigletsChgDto newDto = (DoctorPigletsChgDto) inputDto;
         return DoctorEventChangeDto.builder()
+                .farmId(oldPigEvent.getFarmId())
+                .businessId(oldPigEvent.getPigId())
                 .newEventAt(newDto.eventAt())
                 .oldEventAt(oldDto.eventAt())
                 .changeTypeId(newDto.getPigletsChangeType())

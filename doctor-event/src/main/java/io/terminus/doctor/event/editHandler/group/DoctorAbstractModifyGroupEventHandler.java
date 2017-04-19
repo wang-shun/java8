@@ -4,6 +4,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
+import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -26,11 +27,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Slf4j
 public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorModifyGroupEventHandler{
     @Autowired
-    private DoctorGroupDao doctorGroupDao;
+    protected DoctorGroupDao doctorGroupDao;
     @Autowired
-    private DoctorGroupEventDao doctorGroupEventDao;
+    protected DoctorGroupEventDao doctorGroupEventDao;
     @Autowired
-    private DoctorGroupTrackDao doctorGroupTrackDao;
+    protected DoctorGroupTrackDao doctorGroupTrackDao;
+    @Autowired
+    protected DoctorDailyGroupDao doctorDailyGroupDao;
     @Autowired
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
 
@@ -70,6 +73,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         }
 
         //7.更新每日数据记录
+        updateDaily(oldGroupEvent, input, changeDto);
 
         //8.调用触发事件的编辑
         log.info("modify pig event handler ending");
@@ -110,6 +114,14 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     public DoctorGroupTrack buildNewTrack(DoctorGroupTrack oldGroupTrack, DoctorEventChangeDto changeDto) {
         return null;
     }
+
+    /**
+     * 更新日记录表
+     * @param oldGroupEvent 原事件
+     * @param input 新输入
+     * @param changeDto 变化
+     */
+    protected void updateDaily(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto){};
 
     /**
      * 是否需要更新猪群

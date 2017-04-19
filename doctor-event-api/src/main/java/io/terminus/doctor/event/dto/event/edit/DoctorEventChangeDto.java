@@ -16,8 +16,14 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DoctorEventChangeDto {
+    /**
+     * 当前猪场id
+     */
     private Long farmId;
 
+    /**
+     * 目标id
+     */
     private Long businessId;
 
     /**

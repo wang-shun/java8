@@ -31,6 +31,8 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         DoctorWeanDto oldDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorWeanDto.class);
         DoctorWeanDto newDto = (DoctorWeanDto) inputDto;
         return DoctorEventChangeDto.builder()
+                .farmId(oldPigEvent.getFarmId())
+                .businessId(oldPigEvent.getPigId())
                 .newEventAt(newDto.eventAt())
                 .oldEventAt(oldDto.eventAt())
                 .weanCountChange(EventUtil.minusInt(newDto.getWeanPigletsCount(), oldDto.getPartWeanPigletsCount()))

@@ -19,4 +19,14 @@ public class DoctorDailyPigDao extends MyBatisDao<DoctorDailyPig> {
         return getSqlSession().delete(sqlId("deleteBySumAt"), ImmutableMap.of("sumAt", date)) == 1;
     }
 
+    /**
+     * 根据猪场和统计时间获取猪日记录
+     * @param farmId 猪场id
+     * @param sumAt 统计日期
+     * @return 日记录
+     */
+    public DoctorDailyPig findByFarmIdAndSumAt(Long farmId, Date sumAt) {
+        return getSqlSession().selectOne(sqlId("findByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+    }
+
 }

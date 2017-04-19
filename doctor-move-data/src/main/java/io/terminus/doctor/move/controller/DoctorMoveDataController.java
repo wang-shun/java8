@@ -24,7 +24,6 @@ import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
-import io.terminus.doctor.move.model.B_ChangeReason;
 import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
@@ -50,6 +49,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -1293,7 +1293,7 @@ public class DoctorMoveDataController {
     }
 
     @RequestMapping(value = "/pig/daily", method = RequestMethod.GET)
-    public Boolean flushPigDailyHistorty(@RequestParam(required = false) Long farmId,
+    public Boolean flushPigDailyHistory(@RequestParam(required = false) Long farmId,
                                          @RequestParam("since") String since,
                                          @RequestParam(value = "only", defaultValue = "false") boolean only){
         try {
@@ -1325,7 +1325,7 @@ public class DoctorMoveDataController {
     }
 
     @RequestMapping(value = "/group/daily", method = RequestMethod.GET)
-    public Boolean flushGroupDailyHistorty(@RequestParam(required = false) Long farmId,
+    public Boolean flushGroupDailyHistory(@RequestParam(required = false) Long farmId,
                                          @RequestParam("since") String since,
                                          @RequestParam(value = "only", defaultValue = "false") boolean only){
         try {

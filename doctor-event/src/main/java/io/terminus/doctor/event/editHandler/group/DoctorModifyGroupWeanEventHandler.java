@@ -7,10 +7,12 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorWeanGroupInput;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by xjn on 17/4/17.
  */
+@Component
 public class DoctorModifyGroupWeanEventHandler extends DoctorAbstractModifyGroupEventHandler
 {
     @Override

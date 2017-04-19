@@ -262,7 +262,7 @@
             <if test="weanAvgWeight != null">wean_avg_weight = #{weanAvgWeight},</if>
             <if test="weanDayAge != null">wean_day_age = #{weanDayAge},</if>
 
-            updated_at=now()
+
         </set>
         WHERE id = #{id}
     </update>
@@ -298,5 +298,12 @@
         DELETE FROM <include refid="tb"/>
         WHERE sum_at = #{sumAt}
     </delete>
+
+    <select id="findByFarmIdAndSumAt" parameterType="map" resultMap="DoctorDailyPigMap" >
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+        AND sum_at = date_format(#{sumAt}, '%Y-%m-%d')
+    </select>
 
 </mapper>

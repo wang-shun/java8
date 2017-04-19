@@ -12,7 +12,7 @@ import java.util.Date;
  */
 @Data
 public class DoctorDailyGroup implements Serializable {
-    //TODO: Do not forget add "serialVersionUID" field AND change package path!
+    private static final long serialVersionUID = 7619929987707327637L;
 
     private Long id;
     

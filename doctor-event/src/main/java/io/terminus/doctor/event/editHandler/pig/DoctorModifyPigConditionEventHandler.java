@@ -28,6 +28,8 @@ public class DoctorModifyPigConditionEventHandler extends DoctorAbstractModifyPi
             DoctorConditionDto newConditionDto = (DoctorConditionDto) inputDto;
             DoctorConditionDto oldConditionDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorConditionDto.class);
             return DoctorEventChangeDto.builder()
+                    .farmId(oldPigEvent.getFarmId())
+                    .businessId(oldPigEvent.getPigId())
                     .newEventAt(newConditionDto.eventAt())
                     .remark(newConditionDto.getConditionRemark())
                     .oldEventAt(oldPigEvent.getEventAt())
@@ -37,6 +39,8 @@ public class DoctorModifyPigConditionEventHandler extends DoctorAbstractModifyPi
             DoctorBoarConditionDto newConditionDto = (DoctorBoarConditionDto) inputDto;
             DoctorBoarConditionDto oldConditionDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorBoarConditionDto.class);
             return DoctorEventChangeDto.builder()
+                    .farmId(oldPigEvent.getFarmId())
+                    .businessId(oldPigEvent.getPigId())
                     .newEventAt(newConditionDto.eventAt())
                     .remark(newConditionDto.getRemark())
                     .oldEventAt(oldPigEvent.getEventAt())

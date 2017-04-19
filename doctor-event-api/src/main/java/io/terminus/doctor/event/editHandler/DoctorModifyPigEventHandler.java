@@ -2,7 +2,6 @@ package io.terminus.doctor.event.editHandler;
 
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -24,10 +23,10 @@ public interface DoctorModifyPigEventHandler {
     /**
      * 构建新猪信息
      * @param oldPig 原猪信息
-     * @param changeDto 变化
+     * @param inputDto 编辑输入
      * @return 新猪信息
      */
-    DoctorPig buildNewPig(DoctorPig oldPig, DoctorEventChangeDto changeDto);
+    DoctorPig buildNewPig(DoctorPig oldPig, BasePigEventInputDto inputDto);
 
     /**
      * 根据原事件和变化构建新事件
@@ -63,9 +62,9 @@ public interface DoctorModifyPigEventHandler {
 
     /**
      * 事件回滚处理
-     * @param groupEvent 回滚事件
+     * @param pigEvent 回滚事件
      * @param operatorId 操作人id
      * @param operatorName 操作人姓名
      */
-    void rollbackHandle(DoctorGroupEvent groupEvent, Long operatorId, String operatorName);
+    void rollbackHandle(DoctorPigEvent pigEvent, Long operatorId, String operatorName);
 }
