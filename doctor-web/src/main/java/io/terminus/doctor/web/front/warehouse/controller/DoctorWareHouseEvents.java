@@ -115,7 +115,9 @@ public class DoctorWareHouseEvents {
         this.doctorGroupWebService = doctorGroupWebService;
         this.doctorBarnReadService = doctorBarnReadService;
     }
-
+    private final static Integer DETAILS = 2;
+    private final static Integer WHARE = 1;
+    private final static Integer GROUP = 0;
     /**
      * 获取对应的仓库的 物料信息
      * @param farmId
@@ -750,110 +752,43 @@ public class DoctorWareHouseEvents {
 
     @RequestMapping(value = "/ware/details", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorMaterialDatailsExportDto> pagingWareHouseMaterialDetails(@RequestParam Map<String, String> params) {
-
-        return wareHouseMaterExport(params);
+    public Paging<DoctorMasterialDatailsGroup> pagingWareHouseMaterialDetails(@RequestParam Map<String, Object> params,
+                                                                              @RequestParam Long farmId,
+                                                                              @RequestParam Integer pageNo,
+                                                                              @RequestParam Integer pageSize,
+                                                                              @RequestParam String date) {
+        Date startDate = DateUtil.toYYYYMM(date);
+        Date endDate = DateUtil.toYYYYMM(date);
+        startDate = DateUtil.monthStart(startDate);
+        endDate = DateUtil.monthEnd(endDate);
+        params.put("farmId", farmId);
+        params.put("flag", DETAILS);
+        params.put("startDate", startDate);
+        params.put("endDate", endDate);
+        return RespHelper.or500(doctorGroupMaterialReadServer.findMasterialDatailsGroup(params, pageNo, pageSize));
     }
-
     /**
-     * 物料的详细情况导出
-     * @param params
-     * @param request
-     * @param response
-     */
-
-    @RequestMapping(value = "/ware/details/export", method = RequestMethod.GET)
-    @ResponseBody
-    public void pagingWareHouseMaterialDetailsExport(@RequestParam Map<String, String> params,
-                                               HttpServletRequest request,
-                                               HttpServletResponse response) {
-        exporter.export("web-wareHouse-details", params, 1, 500, this::wareHouseMaterExport, request, response);
-
-    }
-
-    /**
-     *
-     * @param params
+     * 猪舍物料领用报表输出
+     * @param maps
      * @return
      */
     @RequestMapping(value = "/ware/use", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorMaterialDatailsExportDto> pagingWareHouseMaterialUse(@RequestParam Map<String, String> params) {
-         return wareHouseMaterExport(params);
-    }
+    public Paging<DoctorMasterialDatailsGroup> pagingWareHouseMaterialUse(@RequestParam Map<String, Object> maps,
+                                                                          @RequestParam Long farmId,
+                                                                          @RequestParam Integer pageNo,
+                                                                          @RequestParam Integer pageSize,
+                                                                          @RequestParam String date) {
 
-    /**
-     *
-     * @param params
-     * @param request
-     * @param response
-     * @return
-     */
-    @RequestMapping(value = "/ware/use/export", method = RequestMethod.GET)
-    @ResponseBody
-    public void pagingWareHouseMaterialUseExport(@RequestParam Map<String, String> params,
-                                           HttpServletRequest request,
-                                           HttpServletResponse response) {
-
-        exporter.export("web-wareHouse-use", params, 1, 500, this::wareHouseMaterExport, request, response);
-
-    }
-
-    public Paging<DoctorMaterialDatailsExportDto> wareHouseMaterExport(Map<String, String> params) {
-
-        Date startDate = DateUtil.toDate(params.get("startDate"));
-        Date endDate = DateUtil.toDate(params.get("endDate"));
-        DoctorWareHouseMaterialCriteria criteria = BeanMapper.map(params, DoctorWareHouseMaterialCriteria.class);
-        criteria.setStartDate(DateUtil.toDateTimeString(startDate));
-        criteria.setEndDate(DateUtil.toDateTimeString(endDate));
-        List<DoctorMaterialConsumeProvider> list = RespHelper.or500(materialConsumeProviderReadService.findMaterialConsume(
-
-                criteria.getFarmId(),
-                criteria.getWareHouseId(),
-                criteria.getMaterialId(),
-                criteria.getMaterialName(),
-                criteria.getBarnId(),
-                criteria.getMaterialType(),
-                criteria.getBarnName(),
-                criteria.getType(),
-                DateUtil.stringToDate(criteria.getStartDate()),
-                DateUtil.stringToDate(criteria.getEndDate()),
-                criteria.getPageNo(), criteria.getSize()));
-        //处理不同事件时间出现的价格不一致问题，进行重建DoctorMaterialConsumeProvider数据加入不同事件时间的价格不同
-        List<DoctorMaterialConsumeProvider> listOverride = buildDoctorMaterialConsumeProvider(list);
-        List<DoctorMaterialDatailsExportDto> doctorMaterialDatails = Lists.newArrayList();
-
-        for (DoctorMaterialConsumeProvider lists : listOverride) {
-            DoctorMaterialDatailsExportDto doctorMaterialDatail = new DoctorMaterialDatailsExportDto();
-
-            doctorMaterialDatail.setBarnName(lists.getBarnName());
-            doctorMaterialDatail.setMaterialName(lists.getMaterialName());
-            doctorMaterialDatail.setTypeName(DoctorMaterialConsumeProvider.EVENT_TYPE.from(lists.getEventType()).getDesc());
-            DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.findMaterialUnits(
-                    criteria.getFarmId(),
-                    lists.getMaterialId(),
-                    lists.getWareHouseId()));
-            if (doctorMaterialInWareHouse != null) {
-                doctorMaterialDatail.setUnitName(doctorMaterialInWareHouse.getUnitName());
-            }
-
-            DoctorBarn doctorBarn = RespHelper.or500(doctorBarnReadService.findBarnById(lists.getBarnId()));
-            if (doctorBarn != null) {
-                doctorMaterialDatail.setPeople(doctorBarn.getStaffName());
-            }
-            doctorMaterialDatail.setMaterialType(WareHouseType.from(lists.getType()).getDesc());
-            doctorMaterialDatail.setUpdatedAt(lists.getEventTime());
-            doctorMaterialDatail.setGroupName(lists.getGroupCode());
-            doctorMaterialDatail.setPrice(lists.getUnitPrice());
-            doctorMaterialDatail.setNumber(lists.getEventCount());
-            doctorMaterialDatail.setPriceSum(lists.getUnitPrice() * lists.getEventCount());
-            doctorMaterialDatail.setWareHouseName(lists.getWareHouseName());
-            doctorMaterialDatails.add(doctorMaterialDatail);
-        }
-
-        doctorMaterialDatails.stream().collect(Collectors.toList());
-
-        return new Paging<>((long) doctorMaterialDatails.size(), doctorMaterialDatails);
+        Date startDate = DateUtil.toYYYYMM(date);
+        Date endDate = DateUtil.toYYYYMM(date);
+        startDate = DateUtil.monthStart(startDate);
+        endDate = DateUtil.monthEnd(endDate);
+        maps.put("farmId", farmId);
+        maps.put("flag", WHARE);
+        maps.put("startDate", startDate);
+        maps.put("endDate", endDate);
+        return RespHelper.or500(doctorGroupMaterialReadServer.findMasterialDatailsGroup(maps, pageNo, pageSize));
     }
 
     /**
@@ -864,8 +799,12 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/group/material")
     @ResponseBody
-    public Paging<DoctorMasterialDatailsGroup> pagingGroupMaterial(@RequestParam Map<String, Object> map, @RequestParam Long farmId, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
+    public Paging<DoctorMasterialDatailsGroup> pagingGroupMaterial(@RequestParam Map<String, Object> map,
+                                                                   @RequestParam Long farmId,
+                                                                   @RequestParam Integer pageNo,
+                                                                   @RequestParam Integer pageSize) {
         map.put("farmId", farmId);
+        map.put("flag", GROUP);
         return RespHelper.or500(doctorGroupMaterialReadServer.findMasterialDatailsGroup(map, pageNo, pageSize));
     }
 
@@ -874,12 +813,12 @@ public class DoctorWareHouseEvents {
         List<DoctorMaterialConsumeProvider> listOverride = new ArrayList<>(500);
         DoctorMaterialConsumeProvider doctorMaterialConsumeProviderOverride;
 
-        for (int i = 0 , length = list.size(); i < length ; i++) {
+        for (int i = 0, length = list.size(); i < length; i++) {
 
-            if(list.get(i).getExtra() != null && list.get(i).getExtraMap().containsKey("consumePrice")) {
+            if (list.get(i).getExtra() != null && list.get(i).getExtraMap().containsKey("consumePrice")) {
 
                 List<Map<String, Object>> priceCompose = (ArrayList) list.get(i).getExtraMap().get("consumePrice");
-                for(Map<String, Object> eachPrice : priceCompose) {
+                for (Map<String, Object> eachPrice : priceCompose) {
                     doctorMaterialConsumeProviderOverride = new DoctorMaterialConsumeProvider();
                     Long providerIdfd = Long.valueOf(eachPrice.get("providerId").toString());
                     if (isNull(providerIdfd)) {
@@ -902,7 +841,7 @@ public class DoctorWareHouseEvents {
                     listOverride.add(doctorMaterialConsumeProviderOverride);
 
                 }
-            }else {
+            } else {
                 if (isNull(list.get(i).getProviderFactoryId())) {
                     list.get(i).setProvider(-1L);
                 }
@@ -911,4 +850,5 @@ public class DoctorWareHouseEvents {
         }
         return listOverride;
     }
+
 }

@@ -912,7 +912,7 @@ CREATE TABLE `doctor_masterial_datails_groups` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '唯一ID',
   `farm_id` bigint(20) DEFAULT NULL COMMENT '公司ID',
   `material_id` bigint(20) DEFAULT NULL COMMENT '物料ID',
-  `material_name` varchar(20) DEFAULT NULL COMMENT '物料名',
+  `material_name` varchar(512) DEFAULT NULL COMMENT '物料名',
   `material_type` int(11) DEFAULT NULL COMMENT '物料类型',
   `types` int(11) DEFAULT NULL COMMENT '类型',
   `type_name` varchar(20) DEFAULT NULL COMMENT '类型名',
@@ -926,9 +926,11 @@ CREATE TABLE `doctor_masterial_datails_groups` (
   `group_name` varchar(512) DEFAULT NULL COMMENT '猪群名',
   `ware_house_id` bigint(20) DEFAULT NULL COMMENT '仓库ID',
   `ware_house_name` varchar(20) DEFAULT NULL COMMENT '仓库名',
+  `event_at` datetime DEFAULT NULL,
   `people` varchar(20) DEFAULT NULL COMMENT '饲养员',
+  `flag` smallint(2) DEFAULT NULL COMMENT '标志位',
   `open_at` datetime DEFAULT NULL COMMENT '建群时间',
   `close_at` datetime DEFAULT NULL COMMENT '关群时间',
   `flush_date` datetime DEFAULT NULL COMMENT '刷新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=201743 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=471866 DEFAULT CHARSET=utf8;

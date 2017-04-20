@@ -34,9 +34,9 @@ public class DoctorGroupMaterialWriteServerImpl implements DoctorGroupMaterialWr
     }
 
     @Override
-    public Response<Boolean> deleteDoctorGroupMaterial() {
+    public Response<Boolean> deleteDoctorGroupMaterial(Integer flag) {
         try {
-            doctorGroupMaterialDao.deleteDoctorGroupMaterials();
+            doctorGroupMaterialDao.deleteDoctorGroupMaterials(flag);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("delete DoctorGroupMaterials fail, caues:{}", Throwables.getStackTraceAsString(e));

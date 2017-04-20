@@ -23,7 +23,9 @@
         <result column="group_name" property="groupName"/>
         <result column="ware_house_id" property="wareHouseId"/>
         <result column="ware_house_name" property="wareHouseName"/>
+        <result column="event_at" property="eventAt"/>
         <result column="people" property="people"/>
+        <result column="flag" property="flag"/>
         <result column="open_at" property="openAt"/>
         <result column="close_at" property="closeAt"/>
         <result column="flush_date" property="flushDate"/>
@@ -54,7 +56,9 @@
       group_name,
       ware_house_id,
       ware_house_name,
+      event_at,
       people,
+      flag,
       open_at,
       close_at,
       flush_date
@@ -77,7 +81,9 @@
       #{groupName},
       #{wareHouseId},
       #{wareHouseName},
+      #{eventAt},
       #{people},
+      #{flag},
       #{openAt},
       #{closeAt},
       #{flushDate}
@@ -113,7 +119,9 @@
             #{item.groupName},
             #{item.wareHouseId},
             #{item.wareHouseName},
+            #{item.eventAt},
             #{item.people},
+            #{item.flag},
             #{item.openAt},
             #{item.closeAt},
             #{item.flushDate}
@@ -143,8 +151,9 @@
         <!--WHERE id = #{id}-->
     <!--</update>-->
 
-    <delete id="delete">
+    <delete id="delete" parameterType="int">
         DELETE FROM <include refid="tb"/>
+        WHERE flag = #{flag}
     </delete>
 
     <select id="find" parameterType="map" resultMap="DoctorMasterialDatailsGroupMap">
@@ -152,6 +161,7 @@
         FROM <include refid="tb"/>
         WHERE
         1 = 1
+        AND flag = #{flag}
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="materialId != null">AND material_id = #{materialId}</if>
         <if test="groupId != null">AND group_id = #{groupId}</if>
@@ -159,6 +169,8 @@
         <if test="materialName != null" > AND `material_name` LIKE concat('%',#{materialName},'%')</if>
         <if test="materialType != null">AND material_type = #{materialType}</if>
         <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="startDate != null"><![CDATA[ AND date_format(`event_at`, '%Y-%m-%d') >= #{startDate} ]]></if>
+        <if test="endDate != null"><![CDATA[ AND date_format(`event_at`, '%Y-%m-%d') <= #{endDate} ]]></if>
         <if test="openStartAt != null"><![CDATA[ AND date_format(`open_at`, '%Y-%m-%d') >= #{openStartAt} ]]></if>
         <if test="openEndAt != null"><![CDATA[ AND date_format(`open_at`, '%Y-%m-%d') <= #{openEndAt} ]]></if>
         <if test="closeStartAt != null"><![CDATA[ AND date_format(`close_at`, '%Y-%m-%d') >= #{closeStartAt} ]]></if>
@@ -171,6 +183,7 @@
         FROM <include refid="tb"/>
         WHERE
         1 = 1
+        AND flag = #{flag}
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="materialId != null">AND material_id = #{materialId}</if>
         <if test="groupId != null">AND group_id = #{groupId}</if>
@@ -178,6 +191,8 @@
         <if test="materialType != null">AND material_type = #{materialType}</if>
         <if test="barnId != null">AND barn_id = #{barnId}</if>
         <if test="materialName != null" > AND `material_name` LIKE concat('%',#{materialName},'%')</if>
+        <if test="startDate != null"><![CDATA[ AND date_format(`event_at`, '%Y-%m-%d') >= #{startDate} ]]></if>
+        <if test="endDate != null"><![CDATA[ AND date_format(`event_at`, '%Y-%m-%d') <= #{endDate} ]]></if>
         <if test="openStartAt != null"><![CDATA[ AND date_format(`open_at`, '%Y-%m-%d') >= #{openStartAt} ]]></if>
         <if test="openEndAt != null"><![CDATA[ AND date_format(`open_at`, '%Y-%m-%d') <= #{openEndAt} ]]></if>
         <if test="closeStartAt != null"><![CDATA[ AND date_format(`close_at`, '%Y-%m-%d') >= #{closeStartAt} ]]></if>

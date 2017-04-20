@@ -24,8 +24,8 @@ public class DoctorGroupMaterialDao extends MyBatisDao<DoctorMasterialDatailsGro
     /**
      * 删除数据
      */
-    public void deleteDoctorGroupMaterials() {
-        getSqlSession().delete(sqlId("delete"));
+    public void deleteDoctorGroupMaterials(Integer flag) {
+        getSqlSession().delete(sqlId("delete"), flag);
     }
     /**
      * 插查询DoctorMasterialDatailsGroup数据

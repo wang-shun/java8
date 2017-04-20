@@ -18,5 +18,5 @@ public interface DoctorGroupMaterialWriteServer {
     /**
      * 删除
      */
-    public Response<Boolean> deleteDoctorGroupMaterial();
+    public Response<Boolean> deleteDoctorGroupMaterial(Integer flag);
 }
