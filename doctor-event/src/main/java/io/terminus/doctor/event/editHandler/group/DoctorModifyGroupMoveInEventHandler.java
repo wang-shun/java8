@@ -82,10 +82,10 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
     @Override
     protected void updateDailyForModify(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto) {
 
-        DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(changeDto.getBusinessId(), changeDto.getOldEventAt());
         if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
-            buildDailyGroup(oldDailyGroup1, changeDto, oldGroupEvent.getTransGroupType());
-            doctorDailyGroupDao.update(oldDailyGroup1);
+            DoctorDailyGroup oldDailyGroup = doctorDailyGroupDao.findByGroupIdAndSumAt(changeDto.getBusinessId(), changeDto.getOldEventAt());
+            buildDailyGroup(oldDailyGroup, changeDto, oldGroupEvent.getTransGroupType());
+            doctorDailyGroupDao.update(oldDailyGroup);
             updateDailyGroupLiveStock(changeDto.getBusinessId(), new DateTime(changeDto.getNewEventAt()).plusDays(1).toDate(), changeDto.getQuantityChange());
         } else {
             DoctorMoveInGroupInput input1 = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorMoveInGroupInput.class);
@@ -94,52 +94,63 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
                     .isSowTrigger(changeDto.getIsSowTrigger())
                     .build();
 
-            DoctorDailyGroup oldDailyGroup2 = doctorDailyGroupDao.findByGroupIdAndSumAt(changeDto.getBusinessId(), changeDto.getNewEventAt());
             DoctorMoveInGroupInput input2 = (DoctorMoveInGroupInput) input;
             DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                     .quantityChange(input2.getQuantity())
                     .isSowTrigger(changeDto.getIsSowTrigger())
                     .build();
-
-            if (changeDto.getOldEventAt().before(changeDto.getNewEventAt())) {
-                doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1, oldGroupEvent.getTransGroupType()));
-                updateDailyGroupLiveStock(changeDto.getBusinessId(), new DateTime(changeDto.getNewEventAt()).plusDays(1).toDate(), changeDto1.getQuantityChange());
-
-                doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup2, changeDto2, oldGroupEvent.getTransGroupType()));
-                updateDailyGroupLiveStock(changeDto.getBusinessId(), new DateTime(changeDto.getOldEventAt()).plusDays(1).toDate(), changeDto2.getQuantityChange());
-            } else {
-                doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup2, changeDto2, oldGroupEvent.getTransGroupType()));
-                updateDailyGroupLiveStock(changeDto.getBusinessId(), new DateTime(changeDto.getOldEventAt()).plusDays(1).toDate(), changeDto2.getQuantityChange());
-
-                doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1, oldGroupEvent.getTransGroupType()));
-                updateDailyGroupLiveStock(changeDto.getBusinessId(), new DateTime(changeDto.getNewEventAt()).plusDays(1).toDate(), changeDto1.getQuantityChange());
-            }
+            updateDailyWhenEventDiff(changeDto, changeDto1, changeDto2, oldGroupEvent.getTransGroupType());
         }
     }
 
     @Override
     protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {
+        if (notNull(deleteGroupEvent.getSowId())) {
+            oldGroupTrack.setNest(EventUtil.minusInt(oldGroupTrack.getNest(), 1));
+        }
         return buildNewTrack(oldGroupTrack, buildEventChange(deleteGroupEvent, new DoctorMoveInGroupInput()));
     }
 
     @Override
     protected void updateDailyForDelete(DoctorGroupEvent deleteGroupEvent) {
         DoctorDailyGroup oldDailyGroup = doctorDailyGroupDao.findByGroupIdAndSumAt(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt());
-        DoctorEventChangeDto changeDto = DoctorEventChangeDto.builder().quantityChange(EventUtil.minusInt(0, deleteGroupEvent.getQuantity())).build();
+        DoctorEventChangeDto changeDto = DoctorEventChangeDto.builder()
+                .quantityChange(EventUtil.minusInt(0, deleteGroupEvent.getQuantity()))
+                .isSowTrigger(notNull(deleteGroupEvent.getSowId()))
+                .build();
         doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup, changeDto, deleteGroupEvent.getTransGroupType()));
         updateDailyGroupLiveStock(deleteGroupEvent.getGroupId(), new DateTime(deleteGroupEvent.getEventAt()).plusDays(1).toDate(), changeDto.getQuantityChange());
     }
 
-    /**
-     * 构建日记录
-     * @param oldDailyGroup 原记录
-     * @param changeDto 变化量
-     * @param tranType 转入类型
-     * @return 新记录
-     */
+    private void updateDailyWhenEventDiff(DoctorEventChangeDto changeDto, DoctorEventChangeDto changeDto1, DoctorEventChangeDto changeDto2, Integer transGroupType) {
+        if (changeDto.getOldEventAt().before(changeDto.getNewEventAt())) {
+            DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(changeDto.getBusinessId(), changeDto.getOldEventAt());
+            doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1, transGroupType));
+            updateDailyGroupLiveStock(changeDto.getBusinessId(), getAfterDay(changeDto.getOldEventAt()), changeDto1.getQuantityChange());
+
+            DoctorDailyGroup oldDailyGroup2 = doctorDailyGroupDao.findByGroupIdAndSumAt(changeDto.getBusinessId(), changeDto.getNewEventAt());
+            doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup2, changeDto2, transGroupType));
+            updateDailyGroupLiveStock(changeDto.getBusinessId(), getAfterDay(changeDto.getNewEventAt()), changeDto2.getQuantityChange());
+        } else {
+            DoctorDailyGroup oldDailyGroup2 = doctorDailyGroupDao.findByGroupIdAndSumAt(changeDto.getBusinessId(), changeDto.getNewEventAt());
+            doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup2, changeDto2, transGroupType));
+            updateDailyGroupLiveStock(changeDto.getBusinessId(), getAfterDay(changeDto.getNewEventAt()), changeDto2.getQuantityChange());
+
+            DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(changeDto.getBusinessId(), changeDto.getOldEventAt());
+            doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1, transGroupType));
+            updateDailyGroupLiveStock(changeDto.getBusinessId(), getAfterDay(changeDto.getOldEventAt()), changeDto1.getQuantityChange());
+        }
+    }
+        /**
+         * 构建日记录
+         * @param oldDailyGroup 原记录
+         * @param changeDto 变化量
+         * @param tranType 转入类型
+         * @return 新记录
+         */
     private DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto, Integer tranType) {
         if (Objects.equals(tranType, DoctorGroupEvent.TransGroupType.OUT.getValue())) {
-            oldDailyGroup.setOuterIn(EventUtil.plusInt(oldDailyGroup.getInnerIn(), changeDto.getQuantityChange()));
+            oldDailyGroup.setOuterIn(EventUtil.plusInt(oldDailyGroup.getOuterIn(), changeDto.getQuantityChange()));
         } else {
             oldDailyGroup.setInnerIn(EventUtil.plusInt(oldDailyGroup.getInnerIn(), changeDto.getQuantityChange()));
         }

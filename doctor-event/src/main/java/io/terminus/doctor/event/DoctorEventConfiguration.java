@@ -83,6 +83,8 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 
 import java.util.Map;
 
+import static javafx.scene.input.KeyCode.R;
+
 /**
  * Created by yaoqijun.
  * Date:2016-04-22

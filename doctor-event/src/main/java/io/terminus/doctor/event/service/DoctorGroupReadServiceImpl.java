@@ -25,8 +25,8 @@ import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.dto.search.DoctorGroupCountDto;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -67,7 +67,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     private final DoctorGroupJoinDao doctorGroupJoinDao;
 
     @Autowired
-    private DoctorRollbackHandlerChain doctorRollbackHandlerChain;
+    private DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers;
 
     @Autowired
     public DoctorGroupReadServiceImpl(DoctorGroupDao doctorGroupDao,
@@ -392,7 +392,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             if (groupEvent == null) {
                 return RespWithEx.ok(null);
             }
-            if (doctorRollbackHandlerChain.getRollbackGroupEventHandlers().get(groupEvent.getType()).canRollback(groupEvent)) {
+            if (doctorModifyGroupEventHandlers.getModifyGroupEventHandlerMap().get(groupEvent.getType()).canRollback(groupEvent)) {
                 return RespWithEx.ok(groupEvent);
             }
             return RespWithEx.ok(null);
@@ -408,7 +408,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     public RespWithEx<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId) {
         try {
             DoctorGroupEvent groupEvent = doctorGroupEventDao.findById(eventId);
-            if (doctorRollbackHandlerChain.getRollbackGroupEventHandlers().get(groupEvent.getType()).canRollback(groupEvent)) {
+            if (doctorModifyGroupEventHandlers.getModifyGroupEventHandlerMap().get(groupEvent.getType()).canRollback(groupEvent)) {
                 return RespWithEx.ok(Boolean.TRUE);
             }
             return RespWithEx.ok(Boolean.FALSE);

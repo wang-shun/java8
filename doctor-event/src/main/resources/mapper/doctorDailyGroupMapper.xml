@@ -211,11 +211,11 @@
 
     <update id="updateDailyGroupLiveStock" parameterType="map" >
         UPDATE <include refid="tb"/>
-        SET start = start + #{changeCount}
+        SET start = start + #{changeCount},
         `end` = `end` + #{changeCount}
         WHERE
         group_id = #{groupId}
-        AND sum_at &lt;= date_format(#{sumAt}, '%Y-%m-%d')
+        AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
     </update>
 
 </mapper>

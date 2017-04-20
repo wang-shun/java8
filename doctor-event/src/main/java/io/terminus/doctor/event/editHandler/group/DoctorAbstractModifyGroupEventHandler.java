@@ -229,7 +229,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param deleteGroupEvent 删除事件
      */
     protected void updateDailyForDelete(DoctorGroupEvent deleteGroupEvent) {}
-    
+
     /**
      * 是否需要更新猪群(编辑)
      * @param changeDto 变化记录
@@ -303,7 +303,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param date 日期
      * @return 下一天
      */
-    protected Date getAfterDay(Date date) {
+    public static Date getAfterDay(Date date) {
         return new DateTime(date).plusDays(1).toDate();
     }
 }

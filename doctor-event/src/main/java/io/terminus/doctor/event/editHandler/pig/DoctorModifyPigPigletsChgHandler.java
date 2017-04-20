@@ -13,6 +13,7 @@ import java.util.Objects;
 
 /**
  * Created by xjn on 17/4/17.
+ * 仔猪变动
  */
 @Component
 public class DoctorModifyPigPigletsChgHandler extends DoctorAbstractModifyPigEventHandler{
@@ -54,4 +55,5 @@ public class DoctorModifyPigPigletsChgHandler extends DoctorAbstractModifyPigEve
         oldPigTrack.setUnweanQty(EventUtil.plusInt(oldPigTrack.getUnweanQty(), changeDto.getQuantityChange()));
         return oldPigTrack;
     }
+
 }

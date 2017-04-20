@@ -78,8 +78,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             if (groupEvent == null) {
                 throw  new InvalidException("group.event.not.found", eventId);
             }
-            List<DoctorRollbackDto> dtos = doctorRollbackManager.rollbackGroup(groupEvent, operatorId, operatorName);
-            doctorRollbackManager.checkAndPublishRollback(dtos);
+            doctorRollbackManager.rollbackGroup(groupEvent, operatorId, operatorName);
             return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return RespWithEx.fail(e.getMessage());
@@ -98,8 +97,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             if (pigEvent == null) {
                 throw new InvalidException("pig.event.not.found", eventId);
             }
-            List<DoctorRollbackDto> dtos = doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
-            doctorRollbackManager.checkAndPublishRollback(dtos);
+            doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
             return RespWithEx.exception(e);

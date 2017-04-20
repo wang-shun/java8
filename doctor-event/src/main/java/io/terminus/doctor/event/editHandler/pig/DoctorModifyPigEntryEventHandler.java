@@ -1,10 +1,15 @@
 package io.terminus.doctor.event.editHandler.pig;
 
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.model.DoctorDailyPig;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /**
  * Created by xjn on 17/4/18.
@@ -37,5 +42,21 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
         oldPig.setPigFatherCode(newDto.getFatherCode());
         oldPig.setPigMotherCode(newDto.getMotherCode());
         return oldPig;
+    }
+
+    @Override
+    protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
+        if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
+            return;
+        }
+        DoctorDailyPig oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
+
+        DoctorDailyPig oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
+    }
+
+    private DoctorDailyPig buildDailyPig(DoctorDailyPig oldDailyPig, Integer quantityChange) {
+        oldDailyPig.setSowIn(EventUtil.plusInt(oldDailyPig.getSowIn(), quantityChange));
+        oldDailyPig.setSowEnd(EventUtil.plusInt(oldDailyPig.getSowEnd(), quantityChange));
+        return oldDailyPig;
     }
 }

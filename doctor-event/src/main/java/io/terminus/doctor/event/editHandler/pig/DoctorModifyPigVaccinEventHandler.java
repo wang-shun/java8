@@ -18,16 +18,11 @@ public class DoctorModifyPigVaccinEventHandler extends DoctorAbstractModifyPigEv
     @Override
     public DoctorPigEvent buildNewEvent(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         DoctorVaccinationDto doctorVaccinationDto = (DoctorVaccinationDto) inputDto;
-        DoctorPigEvent doctorPigEvent = new DoctorPigEvent();
-        BeanMapper.copy(oldPigEvent, doctorPigEvent);
-        doctorPigEvent.setRemark(doctorVaccinationDto.getVaccinationRemark());
-        doctorPigEvent.setEventAt(doctorVaccinationDto.getVaccinationDate());
+        DoctorPigEvent doctorPigEvent = super.buildNewEvent(oldPigEvent, inputDto);
         doctorPigEvent.setVaccinationId(doctorVaccinationDto.getVaccinationId());
         doctorPigEvent.setVaccinationName(doctorVaccinationDto.getVaccinationName());
         doctorPigEvent.setBasicId(doctorVaccinationDto.getVaccinationItemId());
         doctorPigEvent.setBarnName(doctorVaccinationDto.getVaccinationItemName());
-        doctorPigEvent.setDesc(generateEventDescFromExtra(doctorVaccinationDto));
-        doctorPigEvent.setExtra(TO_JSON_MAPPER.toJson(doctorPigEvent));
         return doctorPigEvent;
     }
 }
