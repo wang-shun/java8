@@ -35,5 +35,21 @@ public interface DoctorRangeReportWriteService {
      */
     Response<Boolean> deleteDoctorRangeReportById(Long doctorRangeReportId);
 
+    /**
+     * 生产周报、月报
+     * @param farmIds
+     * @param today
+     * @return
+     */
     Response<Boolean> generateDoctorRangeReports(List<Long> farmIds, Date today);
+
+    Response<Boolean> generateDoctorRangeReports(Long farmId, Date date);
+
+    /**
+     * 刷历史数据报表,刷当前月,当前5周的报表
+     * @param farmId
+     * @param date
+     * @return
+     */
+    Response<Boolean> flushDoctorRangeReports(Long farmId, Date date);
 }

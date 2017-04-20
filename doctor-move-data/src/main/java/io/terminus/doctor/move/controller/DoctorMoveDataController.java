@@ -316,15 +316,9 @@ public class DoctorMoveDataController {
         doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
         log.warn("move daily end");
 
-        //7.迁移猪场周报
-        log.warn("move weekly start, moveId:{}", moveId);
-        doctorMoveReportService.moveWeeklyReport(farm.getId(), monthIndex == null ? null : monthIndex * 4);
-        log.warn("move weekly end");
-
-
         //7.迁移猪场月报
         log.warn("move monthly start, moveId:{}", moveId);
-        doctorMoveReportService.moveMonthlyReport(farm.getId(), monthIndex);
+        doctorMoveReportService.moveDoctorRangeReport(farm.getId(), monthIndex);
         log.warn("move monthly end");
 
         //8.迁移猪场胎次分析月报
@@ -625,42 +619,32 @@ public class DoctorMoveDataController {
      * 月报/周报
      */
     @RequestMapping(value = "/monthly/since", method = RequestMethod.GET)
-    public Boolean moveMonthlyReport(@RequestParam(value = "farmId", required = false) Long farmId,
-                                     @RequestParam("since") String since,
-                                     @RequestParam(value = "only", defaultValue = "false") boolean only) {
+    public Boolean moveDoctorRangeReport(@RequestParam(value = "farmId", required = false) Long farmId,
+                                     @RequestParam("since") String since) {
         try {
-            log.warn("move monthly report since start, farmId:{}, since:{}, only:{}", farmId, since, only);
+            log.warn("move monthly report since start, farmId:{}, since:{}", farmId, since);
 
             Date startAt = DateUtil.toDate(since);
             if (startAt == null || startAt.after(new Date())) {
                 return false;
             }
-            int index;
-            if (only) {
-                index = 1;
-            } else {
-                index = DateUtil.getDeltaMonthsAbs(startAt, new Date()) + 1;
-            }
-
+            Integer index = DateUtil.getDeltaMonthsAbs(startAt, new Date()) + 1;
             if (farmId == null) {
                 List<Long> farmIds = getAllFarmIds();
                 farmIds.forEach(fid -> {
-                    doctorMoveReportService.moveMonthlyReport(fid, index);
-                    doctorMoveReportService.moveWeeklyReport(fid, index);
-                    // 周数用月数*5
-                    doctorMoveReportService.moveParityMonthlyReport(fid, index * 5);
+                    doctorMoveReportService.moveDoctorRangeReport(fid, index);
+                    doctorMoveReportService.moveParityMonthlyReport(fid, index);
                     doctorMoveReportService.moveBoarMonthlyReport(fid, index);
                 });
             } else {
-                doctorMoveReportService.moveMonthlyReport(farmId, index);
-                doctorMoveReportService.moveWeeklyReport(farmId, index * 5);
+                doctorMoveReportService.moveDoctorRangeReport(farmId, index);
                 doctorMoveReportService.moveParityMonthlyReport(farmId, index);
                 doctorMoveReportService.moveBoarMonthlyReport(farmId, index);
             }
             log.warn("move monthly report since end");
             return true;
         } catch (Exception e) {
-            log.error("move monthly report since failed, farmId:{}, since:{}, only:{}", farmId, since, only, Throwables.getStackTraceAsString(e));
+            log.error("move monthly report since failed, farmId:{}, since:{}, only:{}", farmId, since, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
@@ -669,11 +653,11 @@ public class DoctorMoveDataController {
      * 月报
      */
     @RequestMapping(value = "/monthly/date", method = RequestMethod.GET)
-    public Boolean moveMonthlyReport(@RequestParam("farmId") Long farmId,
+    public Boolean moveDoctorRangeReportOnlyOne(@RequestParam("farmId") Long farmId,
                                      @RequestParam("date") String date) {
         try {
             log.warn("move monthly report date start, farmId:{}, date:{}", farmId, date);
-            doctorCommonReportWriteService.createMonthlyReport(farmId, DateUtil.toDate(date));
+            doctorMoveReportService.moveDoctorRangeReport(farmId, DateUtil.toDate(date));
             log.warn("move monthly report date end");
             
             return true;

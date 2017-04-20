@@ -1,9 +1,9 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
-import io.terminus.doctor.event.model.DoctorMonthlyReport;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
@@ -49,7 +49,7 @@ public interface DoctorCommonReportReadService {
      * @param sumAt 统计时间
      * @return
      */
-    Response<List<DoctorMonthlyReport>> findMonthlyReports(@NotNull(message = "date.not.null") String sumAt);
+    Response<List<DoctorCommonReportDto>> findMonthlyReports(@NotNull(message = "date.not.null") String sumAt);
 
     /**
      * 根据日期获取当时猪群的情况

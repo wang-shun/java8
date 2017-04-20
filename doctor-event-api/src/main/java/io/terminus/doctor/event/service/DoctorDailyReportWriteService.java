@@ -53,7 +53,14 @@ public interface DoctorDailyReportWriteService {
     /**
      * 生成所有猪场的日报
      * @param farmIds
-     * @param startAt
+     * @param date
      */
-    Response<Boolean> createDailyReports(List<Long> farmIds, Date startAt);
+    Response<Boolean> createDailyReports(List<Long> farmIds, Date date);
+
+    /**
+     * 生成所有猪场的日报
+     * @param farmId
+     * @param date
+     */
+    Response<Boolean> createDailyReports(Long farmId, Date date);
 }

@@ -12,7 +12,7 @@ import java.util.List;
  * Date: 17:01 2017/4/20
  */
 @Data
-public class DoctorStockDistributeDto implements Serializable{
+public class DoctorStockStructureDto implements Serializable{
     private static final long serialVersionUID = -6069218646856432236L;
 
     /**

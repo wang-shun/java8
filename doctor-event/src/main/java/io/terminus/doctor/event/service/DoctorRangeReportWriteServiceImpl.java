@@ -3,11 +3,12 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorRangeReportDao;
-import io.terminus.doctor.event.dto.DoctorStockDistributeDto;
+import io.terminus.doctor.event.dto.DoctorStockStructureDto;
 import io.terminus.doctor.event.enums.ReportRangeType;
 import io.terminus.doctor.event.model.DoctorRangeReport;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
     private final DoctorKpiDao doctorKpiDao;
 
     private static final Integer TIME_RANGE = 5;   //计算5个月之前的实际受胎率,分娩率
+    private static final Integer WEEK_FLUSH = 5;   //重新生成5周的报表
 
     @Autowired
     public DoctorRangeReportWriteServiceImpl(DoctorRangeReportDao doctorRangeReportDao,
@@ -87,8 +89,60 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
         return Response.ok(Boolean.TRUE);
     }
 
-    private void updateActualIndicator(Long farmId, Date date) {
+    @Override
+    public Response<Boolean> generateDoctorRangeReports(Long farmId, Date date) {
+        try{
+            generateDoctorWeeklyReports(farmId, date);
+            generateDoctorMonthlyReports(farmId, date);
+            updateActualIndicator(farmId, new DateTime(date).minusMonths(TIME_RANGE).toDate());
+        }catch(Exception e){
+            log.info("generate DoctorRangeReports failed, cause: {}", Throwables.getStackTraceAsString(e));
+            return Response.ok(Boolean.FALSE);
+        }
+        return Response.ok(Boolean.TRUE);
+    }
 
+    @Override
+    public Response<Boolean> flushDoctorRangeReports(Long farmId, Date date) {
+        try{
+            DateUtil.getBeforeWeekEnds(date, WEEK_FLUSH).forEach(week ->{
+                generateDoctorWeeklyReports(farmId, week);
+            });
+            generateDoctorMonthlyReports(farmId, date);
+            updateActualIndicator(farmId, new DateTime(date).minusMonths(TIME_RANGE).toDate());
+        }catch(Exception e){
+            log.info("flush DoctorRangeReports failed, cause: {}", Throwables.getStackTraceAsString(e));
+            return Response.ok(Boolean.FALSE);
+        }
+        return Response.ok(Boolean.TRUE);
+    }
+
+    private void updateActualIndicator(Long farmId, Date date) {
+        DateUtil.getBeforeWeekEnds(date, WEEK_FLUSH * TIME_RANGE).forEach(week ->{
+            updateWeeklyActualIndicator(farmId, week);
+        });
+        DateUtil.getBeforeMonthEnds(date, TIME_RANGE).forEach(month ->{
+            updateMonthActuralIndicator(farmId, month);
+        });
+    }
+
+    private void updateMonthActuralIndicator(Long farmId, Date date) {
+        String month = DateUtil.getYearMonth(date);
+        DoctorRangeReport report = doctorRangeReportDao.findByRangeReport(farmId, ReportRangeType.MONTH.getValue(), month);
+        if(!Arguments.isNull(report)){
+            getActualIndicator(report, farmId, report.getSumFrom(), report.getSumTo());
+            doctorRangeReportDao.update(report);
+        }
+
+    }
+
+    private void updateWeeklyActualIndicator(Long farmId, Date date) {
+        String week = DateUtil.getYearWeek(date);
+        DoctorRangeReport report = doctorRangeReportDao.findByRangeReport(farmId, ReportRangeType.WEEK.getValue(), week);
+        if(!Arguments.isNull(report)) {
+            getActualIndicator(report, farmId, report.getSumFrom(), report.getSumTo());
+            doctorRangeReportDao.update(report);
+        }
     }
 
 
@@ -115,7 +169,7 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
             log.info("generate DoctorWeeklyReports start, farmId: {}, start: {}, end: {}, now: {}", farmId, startAt, endAt, DateUtil.toDateTimeString(new Date()));
             createDoctorRangeReport(farmId, ReportRangeType.WEEK.getValue(), week, startAt, endAt);
         }catch(Exception e){
-            log.info("generate DoctorWeeklyReports failed,farmId: {}, date: {}, cause: {}", farmId, DateUtil.toDateString(date), Throwables.getStackTraceAsString(e));
+            log.info("generate DoctorWeeklyReports failed,farmId: {}, start: {}, end: {}, cause: {}", farmId, startAt, endAt, Throwables.getStackTraceAsString(e));
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
@@ -157,7 +211,7 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
         doctorRangeReport.setDeadFarrowRate(doctorKpiDao.getDeadFarrowRate(farmId, startAt, endAt));    //产房死淘率
         doctorRangeReport.setDeadNurseryRate(doctorKpiDao.getDeadNurseryRate(farmId, startAt, endAt));  //保育死淘率
         doctorRangeReport.setDeadFattenRate(doctorKpiDao.getDeadFattenRate(farmId, startAt, endAt));    //育肥死淘率
-        DoctorStockDistributeDto stockDistributeDto = new DoctorStockDistributeDto();
+        DoctorStockStructureDto stockDistributeDto = new DoctorStockStructureDto();
         stockDistributeDto.setParityStockList(doctorKpiDao.getMonthlyParityStock(farmId, startAt, endAt));
         stockDistributeDto.setBreedStockList(doctorKpiDao.getMonthlyBreedStock(farmId, startAt, endAt));
         doctorRangeReport.setExtra(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(stockDistributeDto));

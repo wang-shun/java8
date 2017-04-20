@@ -5,9 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
-import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
@@ -45,33 +43,32 @@ public class DoctorMoveReportService {
     private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorFarmDao doctorFarmDao;
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
-    private final DoctorDailyReportReadService doctorDailyReportReadService;
-    private final DoctorCommonReportWriteService doctorCommonReportWriteService;
-    private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
-    private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
+
     private final DoctorDailyReportWriteService doctorDailyReportWriteService;
     private final DoctorDailyGroupWriteService doctorDailyGroupWriteService;
+    private final DoctorRangeReportWriteService doctorRangeReportWriteService;
+    private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
+    private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
 
     @Autowired
     public DoctorMoveReportService(DoctorDailyReportDao doctorDailyReportDao,
                                    DoctorFarmDao doctorFarmDao,
                                    DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
-                                   DoctorDailyReportReadService doctorDailyReportReadService,
-                                   DoctorCommonReportWriteService doctorCommonReportWriteService,
-                                   DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
-                                   DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService,
                                    DoctorDailyReportWriteService doctorDailyReportWriteService,
-                                   DoctorDailyGroupWriteService doctorDailyGroupWriteService) {
+                                   DoctorDailyGroupWriteService doctorDailyGroupWriteService,
+                                   DoctorRangeReportWriteService doctorRangeReportWriteService,
+                                   DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
+                                   DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorFarmDao = doctorFarmDao;
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
-        this.doctorDailyReportReadService = doctorDailyReportReadService;
-        this.doctorCommonReportWriteService = doctorCommonReportWriteService;
-        this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
-        this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
         this.doctorDailyReportWriteService = doctorDailyReportWriteService;
         this.doctorDailyGroupWriteService = doctorDailyGroupWriteService;
+        this.doctorRangeReportWriteService = doctorRangeReportWriteService;
+        this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
+        this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
     }
+
 
     /**
      * 迁移猪场日报(放在所有事件迁移之后进行)
@@ -140,29 +137,25 @@ public class DoctorMoveReportService {
         return report;
     }
 
+    @Transactional
+    public void moveDailyReport(Long farmId, Integer index){
+        DateUtil.getBeforeDays(DateTime.now().toDate(),MoreObjects.firstNonNull(index, INDEX)).forEach(date ->{
+            doctorDailyReportWriteService.createDailyReports(farmId, date);
+        });
+    }
     /**
      * 迁移猪场月报(放在日报迁移之后进行)
      * @param farmId 猪场id
      */
     @Transactional
-    public void moveMonthlyReport(Long farmId, Integer index) {
+    public void moveDoctorRangeReport(Long farmId, Integer index) {
         DateUtil.getBeforeMonthEnds(DateTime.now().toDate(), MoreObjects.firstNonNull(index, MONTH_INDEX))
-                .forEach(date -> doctorCommonReportWriteService.createMonthlyReport(farmId, date));
+                .forEach(date -> doctorRangeReportWriteService.flushDoctorRangeReports(farmId, date));
     }
 
-    /**
-     * 迁移猪场周报(放在日报迁移之后进行)
-     * @param farmId 猪场id
-     */
     @Transactional
-    public void moveWeeklyReport(Long farmId, Integer index) {
-        Date now = DateTime.now().withTimeAtStartOfDay().toDate();
-        doctorCommonReportWriteService.createWeeklyReport(farmId, now);
-
-        //默认12周
-        for (int i = 1; i < MoreObjects.firstNonNull(index, MONTH_INDEX); i++) {
-            doctorCommonReportWriteService.createWeeklyReport(farmId, new DateTime(now).plusWeeks(-i).toDate());
-        }
+    public void moveDoctorRangeReport(Long farmId, Date date) {
+        doctorRangeReportWriteService.flushDoctorRangeReports(farmId, date);
     }
 
     @Transactional

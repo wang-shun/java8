@@ -322,4 +322,25 @@ public class DateUtil {
         stringBuffer.append(week);
         return stringBuffer.toString();
     }
+
+    /**
+     * 获取指定年份和周的日期, 如果是未来时间，返回今天
+     * @param year 年
+     * @param week 周
+     * @return 日期
+     */
+    private static DateTime withWeekOfYear(Integer year, Integer week) {
+        if (year == null || week == null) {
+            return DateUtil.getDateEnd(DateTime.now());
+        }
+        DateTime yearDate = new DateTime(year, 1, 1, 0, 0);
+
+        while (true) {
+            if (yearDate.getDayOfWeek() == 7) {
+                break;
+            }
+            yearDate = yearDate.plusDays(1);
+        }
+        return new DateTime(DateUtil.weekEnd(yearDate.plusWeeks(week).toDate()));
+    }
 }

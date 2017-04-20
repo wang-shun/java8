@@ -45,8 +45,6 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     private static final int MONTH_INDEX = 12;
     private static final int WEEK_INDEX = 20;
 
-    private final DoctorMonthlyReportDao doctorMonthlyReportDao;
-    private final DoctorWeeklyReportDao doctorWeeklyReportDao;
     private final DoctorParityMonthlyReportDao doctorParityMonthlyReportDao;
     private final DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao;
     private final DoctorKpiDao doctorKpiDao;
@@ -55,16 +53,13 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     private final DoctorDailyGroupDao doctorDailyGroupDao;
 
     @Autowired
-    public DoctorCommonReportReadServiceImpl(DoctorMonthlyReportDao doctorMonthlyReportDao,
-                                             DoctorWeeklyReportDao doctorWeeklyReportDao,
+    public DoctorCommonReportReadServiceImpl(
                                              DoctorParityMonthlyReportDao doctorParityMonthlyReportDao,
                                              DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao,
                                              DoctorKpiDao doctorKpiDao,
                                              DoctorRangeReportDao doctorRangeReportDao,
                                              DoctorDailyReportDao doctorDailyReportDao,
                                              DoctorDailyGroupDao doctorDailyGroupDao) {
-        this.doctorMonthlyReportDao = doctorMonthlyReportDao;
-        this.doctorWeeklyReportDao = doctorWeeklyReportDao;
         this.doctorParityMonthlyReportDao = doctorParityMonthlyReportDao;
         this.doctorBoarMonthlyReportDao = doctorBoarMonthlyReportDao;
         this.doctorKpiDao = doctorKpiDao;
@@ -138,13 +133,18 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     }
 
     @Override
-    public Response<List<DoctorMonthlyReport>> findMonthlyReports(@NotNull(message = "date.not.null") String sumAt) {
+    public Response<List<DoctorCommonReportDto>> findMonthlyReports(@NotNull(message = "date.not.null") String sumAt) {
         try {
             //如果查询未来的数据, 返回失败查询
             if (new DateTime(DateUtil.toDate(sumAt)).isAfter(DateUtil.getDateEnd(DateTime.now()))) {
                 return Response.fail("find.monthly.report.data.failed");
             }
-            return Response.ok(doctorMonthlyReportDao.findBySumAt(sumAt));
+            List<DoctorCommonReportDto> commonReportDtos = Lists.newArrayList();
+            List<DoctorRangeReport> reports = doctorRangeReportDao.findBySumAt(ReportRangeType.MONTH.getValue(), sumAt);
+            reports.forEach(report -> {
+                commonReportDtos.add(getDoctorCommonReportDto(report));
+            });
+            return Response.ok(commonReportDtos);
         } catch (Exception e) {
             log.error("find.monthly.report.data.failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.monthly.report.data.failed");
@@ -191,8 +191,6 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         doctorCommonReportDto.setGroupChangeReport(groupChangeSum);
         doctorCommonReportDto.setIndicatorReport(report);
 
-        doctorCommonReportDto.setParityStockList(report.getStockDistributeDto().getParityStockList());
-        doctorCommonReportDto.setBreedStockList(report.getStockDistributeDto().getBreedStockList());
         return doctorCommonReportDto;
     }
 
@@ -269,24 +267,4 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         return "第" + date.getWeekOfWeekyear() + "周(" + date.toString(DateUtil.DATE) + ")";
     }
 
-    /**
-     * 获取指定年份和周的日期, 如果是未来时间，返回今天
-     * @param year 年
-     * @param week 周
-     * @return 日期
-     */
-    private static DateTime withWeekOfYear(Integer year, Integer week) {
-        if (year == null || week == null) {
-            return DateUtil.getDateEnd(DateTime.now());
-        }
-        DateTime yearDate = new DateTime(year, 1, 1, 0, 0);
-
-        while (true) {
-            if (yearDate.getDayOfWeek() == 7) {
-                break;
-            }
-            yearDate = yearDate.plusDays(1);
-        }
-        return new DateTime(DateUtil.weekEnd(yearDate.plusWeeks(week).toDate()));
-    }
 }

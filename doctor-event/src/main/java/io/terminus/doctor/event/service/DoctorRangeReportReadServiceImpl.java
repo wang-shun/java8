@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorRangeReportDao;
+import io.terminus.doctor.event.enums.ReportRangeType;
 import io.terminus.doctor.event.model.DoctorRangeReport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,16 @@ public class DoctorRangeReportReadServiceImpl implements DoctorRangeReportReadSe
             return Response.ok(doctorRangeReportDao.findById(doctorRangeReportId));
         } catch (Exception e) {
             log.error("find doctorRangeReport by id failed, doctorRangeReportId:{}, cause:{}", doctorRangeReportId, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctorRangeReport.find.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorRangeReport> findMonthlyByFarmIdAndSumAt(Long farmId, String date) {
+        try {
+            return Response.ok(doctorRangeReportDao.findByRangeReport(farmId, ReportRangeType.MONTH.getValue(), date));
+        } catch (Exception e) {
+            log.error("find doctorRangeReport by id failed, farmId:{}, date:{}, cause:{}", farmId, date, Throwables.getStackTraceAsString(e));
             return Response.fail("doctorRangeReport.find.fail");
         }
     }

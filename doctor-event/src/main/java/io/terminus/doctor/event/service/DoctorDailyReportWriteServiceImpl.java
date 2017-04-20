@@ -107,6 +107,18 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
         return Response.ok(Boolean.TRUE);
     }
 
+    @Override
+    public Response<Boolean> createDailyReports(Long farmId, Date date) {
+        try{
+            log.info("create daily report start, farmId: {}, date: {}, now: {}", farmId, DateUtil.toDateString(date), DateUtil.toDateTimeString(new Date()));
+            createOrUpdateReport(farmId, date);
+        }catch(Exception e) {
+            log.error("create daily report failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("update.history.daily.report.fail");
+        }
+        return Response.ok(Boolean.TRUE);
+    }
+
     private Boolean createOrUpdateReport(Long farmId, Date date) {
         DoctorDailyReport newReport = null;
         try{

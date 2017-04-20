@@ -19,8 +19,8 @@ import java.util.Date;
 public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
 
     public DoctorDailyReport findByFarmIdAndSumAt(Long farmId, Date date) {
-        date = Dates.startOfDay(date);
-        return getSqlSession().selectOne(sqlId("findByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", date));
+        String sumAt = DateUtil.toDateString(date);
+        return findByFarmIdAndSumAt(farmId, sumAt);
     }
 
     public DoctorDailyReport findByFarmIdAndSumAt(Long farmId, String date) {

@@ -19,4 +19,6 @@ public interface DoctorRangeReportReadService {
      * @return 指标月报
      */
     Response<DoctorRangeReport> findDoctorRangeReportById(Long doctorRangeReportId);
+
+    Response<DoctorRangeReport> findMonthlyByFarmIdAndSumAt(Long farmId, String date);
 }

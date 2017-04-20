@@ -4,7 +4,6 @@ import io.terminus.doctor.event.model.*;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Desc: 猪场报表json字段(月报，周报公用)
@@ -31,13 +30,4 @@ public class DoctorCommonReportDto implements Serializable {
 
     private DoctorRangeReport indicatorReport;  //指标
 
-    /**
-     * 胎次分布
-     */
-    private List<DoctorStockStructureCommonReport> parityStockList;
-
-    /**
-     * 品类分布
-     */
-    private List<DoctorStockStructureCommonReport> breedStockList;
 }
