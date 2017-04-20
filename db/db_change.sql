@@ -857,6 +857,25 @@ alter table doctor_group_events add column vaccination_name varchar(32) default 
 ALTER TABLE doctor_group_events ADD COLUMN operator_id bigint(20) DEFAULT NULL comment '操作人id' after creator_name;
 ALTER TABLE doctor_group_events ADD COLUMN operator_name varchar(32) DEFAULT NULL comment '操作人姓名' after operator_id;
 
+-- 2017-04-12
+-- 如果因子没有范围，from和to的值一直，from没有值时默认double最小值， to没有值时默认double最大值
+drop table if exists `doctor_data_factors`;
+CREATE TABLE `doctor_data_factors` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `type` tinyint(4) DEFAULT NULL COMMENT '类型',
+  `type_name` varchar(64) DEFAULT NULL,
+  `sub_type` tinyint(4) DEFAULT NULL COMMENT '小类：猪类等',
+  `sub_type_name` varchar(64) DEFAULT NULL,
+  `factor` double DEFAULT NULL COMMENT '系数',
+  `range_from` double DEFAULT NULL COMMENT '范围,默认double最小值',
+  `range_to` double DEFAULT NULL COMMENT '范围，默认double最大值',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) DEFAULT CHARSET=utf8 COMMENT='大数据信用价值计算因子';
+alter table doctor_data_factors ADD `is_delete` smallint(6) DEFAULT 0  AFTER `range_to`;
+
+
 -- 2017-04-15 利润表
 drop table if exists `doctor_export_porfit`;
 CREATE TABLE `doctor_export_porfit` (
