@@ -24,7 +24,6 @@ import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
-import io.terminus.doctor.move.model.B_ChangeReason;
 import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
@@ -604,13 +603,13 @@ public class DoctorMoveDataController {
                 if (only) {
                     doctorDailyReportWriteService.createDailyReports(getAllFarmIds(), startAt);
                 } else {
-                    getAllFarmIds().forEach(fid -> doctorDailyReportWriteService.createDailyReports(startAt, new Date(), fid));
+                    getAllFarmIds().forEach(fid -> doctorDailyReportWriteService.createDailyReports(fid, startAt, new Date() ));
                 }
             } else {
                 if (only) {
                     doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), startAt);
                 } else {
-                    doctorDailyReportWriteService.createDailyReports(startAt, new Date(), farmId);
+                    doctorDailyReportWriteService.createDailyReports(farmId, startAt, new Date());
                 }
             }
             log.warn("move daily report since end");
@@ -1290,38 +1289,6 @@ public class DoctorMoveDataController {
     public Boolean updatePermissionBarn(@RequestParam Long farmId){
         userInitService.updatePermissionBarn(farmId);
         return true;
-    }
-
-    @RequestMapping(value = "/pig/daily", method = RequestMethod.GET)
-    public Boolean flushPigDailyHistorty(@RequestParam(required = false) Long farmId,
-                                         @RequestParam("since") String since,
-                                         @RequestParam(value = "only", defaultValue = "false") boolean only){
-        try {
-            log.warn("flush  pig daily since start, farmId:{}, since:{}, only:{}", farmId, since, only);
-
-            Date startAt = DateUtil.toDate(since);
-            if (startAt == null || startAt.after(new Date())) {
-                return false;
-            }
-            if(only && !Objects.isNull(since) && !Objects.isNull(farmId)) {
-                doctorMoveReportService.flushPigDaily(farmId, startAt);
-                return Boolean.TRUE;
-            }
-            int index = DateUtil.getDeltaDaysAbs(startAt, new Date()) + 1;
-            if (farmId == null) {
-                List<Long> farmIds = getAllFarmIds();
-                farmIds.forEach(fid -> {
-                    doctorMoveReportService.flushPigDaily(fid, index);
-                });
-            } else {
-                doctorMoveReportService.flushPigDaily(farmId, index);
-            }
-            log.warn("flush pig daily since end, farmId:{}, since:{}, only:{}", farmId, since, only);
-            return true;
-        } catch (Exception e) {
-            log.error("flush pig daily  since failed, farmId:{}, since:{}, only:{}", farmId, since, only, Throwables.getStackTraceAsString(e));
-            return false;
-        }
     }
 
     @RequestMapping(value = "/group/daily", method = RequestMethod.GET)

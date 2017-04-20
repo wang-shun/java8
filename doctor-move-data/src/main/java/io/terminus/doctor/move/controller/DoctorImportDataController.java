@@ -187,7 +187,7 @@ public class DoctorImportDataController {
         DateTime end = DateTime.now().withTimeAtStartOfDay(); //昨天开始时间
         DateTime begin = end.minusYears(1);
         new Thread(() -> {
-            doctorDailyReportWriteService.createDailyReports(begin.toDate(), end.toDate(), farmId);
+            doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
             doctorMoveReportService.moveMonthlyReport(farmId, 12);
             doctorMoveReportService.moveWeeklyReport(farmId, 50);
             doctorMoveReportService.moveParityMonthlyReport(farmId, 12);

@@ -154,76 +154,76 @@ public class DoctorGroupEventListener implements EventListener {
 
     //根据每个类型更新相应的存栏
     private void getLiveStock(PigType pigType, Long farmId, Date startAt) {
-        switch (pigType) {
-            case NURSERY_PIGLET:
-                int nursery = doctorKpiDao.realTimeLiveStockNursery(farmId, startAt);
-                DoctorDailyReportDto reportDtoNursery = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoNursery.getLiveStock().setNursery(nursery);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoNursery);
-                break;
-            case FATTEN_PIG:
-                int fatten = doctorKpiDao.realTimeLiveStockFatten(farmId, startAt);
-                DoctorDailyReportDto reportDtoFatten = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoFatten.getLiveStock().setFatten(fatten);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFatten);
-                break;
-            case RESERVE:
-                int houbeiSow = doctorKpiDao.realTimeLiveStockHoubeiSow(farmId, startAt);
-                int houbeiBoar = doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId, startAt);
-                DoctorDailyReportDto reportDtoHoubei = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoHoubei.getLiveStock().setHoubeiSow(houbeiSow);
-                reportDtoHoubei.getLiveStock().setHoubeiBoar(houbeiBoar);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoHoubei);
-                break;
-            case DELIVER_SOW:
-                int farrow = doctorKpiDao.realTimeLiveStockFarrow(farmId, startAt);
-                DoctorDailyReportDto reportDtoFarrow = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoFarrow.getLiveStock().setFarrow(farrow);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFarrow);
-                break;
-            default:
-                break;
-        }
+//        switch (pigType) {
+//            case NURSERY_PIGLET:
+//                int nursery = doctorKpiDao.realTimeLiveStockNursery(farmId, startAt);
+//                DoctorDailyReportDto reportDtoNursery = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoNursery.getLiveStock().setNursery(nursery);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoNursery);
+//                break;
+//            case FATTEN_PIG:
+//                int fatten = doctorKpiDao.realTimeLiveStockFatten(farmId, startAt);
+//                DoctorDailyReportDto reportDtoFatten = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoFatten.getLiveStock().setFatten(fatten);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFatten);
+//                break;
+//            case RESERVE:
+//                int houbeiSow = doctorKpiDao.realTimeLiveStockHoubeiSow(farmId, startAt);
+//                int houbeiBoar = doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId, startAt);
+//                DoctorDailyReportDto reportDtoHoubei = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoHoubei.getLiveStock().setHoubeiSow(houbeiSow);
+//                reportDtoHoubei.getLiveStock().setHoubeiBoar(houbeiBoar);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoHoubei);
+//                break;
+//            case DELIVER_SOW:
+//                int farrow = doctorKpiDao.realTimeLiveStockFarrow(farmId, startAt);
+//                DoctorDailyReportDto reportDtoFarrow = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoFarrow.getLiveStock().setFarrow(farrow);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFarrow);
+//                break;
+//            default:
+//                break;
+//        }
     }
 
     //处理死淘
     private void getDead(PigType pigType, Long farmId, Date startAt, Date endAt) {
-        switch (pigType) {
-            case NURSERY_PIGLET:
-                int nursery = doctorKpiDao.getDeadNursery(farmId, startAt, endAt);
-                int weedOutNursery = doctorKpiDao.getWeedOutNursery(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoNursery = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoNursery.getDead().setNursery(nursery);
-                reportDtoNursery.getDead().setWeedOutNursery(weedOutNursery);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoNursery);
-                break;
-            case FATTEN_PIG:
-                int fatten = doctorKpiDao.getDeadFatten(farmId, startAt, endAt);
-                int weedOutFatten = doctorKpiDao.getWeedOutFatten(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoFatten = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoFatten.getDead().setFatten(fatten);
-                reportDtoFatten.getDead().setWeedOutFatten(weedOutFatten);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFatten);
-                break;
-            case RESERVE:
-                int houbei = doctorKpiDao.getDeadHoubei(farmId, startAt, endAt);
-                int weedOutHoubei = doctorKpiDao.getWeedOutHoubei(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoHoubei = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoHoubei.getDead().setHoubei(houbei);
-                reportDtoHoubei.getDead().setWeedOutHoubei(weedOutHoubei);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoHoubei);
-                break;
-            case DELIVER_SOW:
-                int farrow = doctorKpiDao.getDeadFarrow(farmId, startAt, endAt);
-                int weedOutFarrow = doctorKpiDao.getWeedOutFarrow(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoFarrow = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoFarrow.getDead().setFarrow(farrow);
-                reportDtoFarrow.getDead().setWeedOutFarrow(weedOutFarrow);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFarrow);
-                break;
-            default:
-                break;
-        }
+//        switch (pigType) {
+//            case NURSERY_PIGLET:
+//                int nursery = doctorKpiDao.getDeadNursery(farmId, startAt, endAt);
+//                int weedOutNursery = doctorKpiDao.getWeedOutNursery(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoNursery = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoNursery.getDead().setNursery(nursery);
+//                reportDtoNursery.getDead().setWeedOutNursery(weedOutNursery);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoNursery);
+//                break;
+//            case FATTEN_PIG:
+//                int fatten = doctorKpiDao.getDeadFatten(farmId, startAt, endAt);
+//                int weedOutFatten = doctorKpiDao.getWeedOutFatten(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoFatten = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoFatten.getDead().setFatten(fatten);
+//                reportDtoFatten.getDead().setWeedOutFatten(weedOutFatten);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFatten);
+//                break;
+//            case RESERVE:
+//                int houbei = doctorKpiDao.getDeadHoubei(farmId, startAt, endAt);
+//                int weedOutHoubei = doctorKpiDao.getWeedOutHoubei(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoHoubei = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoHoubei.getDead().setHoubei(houbei);
+//                reportDtoHoubei.getDead().setWeedOutHoubei(weedOutHoubei);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoHoubei);
+//                break;
+//            case DELIVER_SOW:
+//                int farrow = doctorKpiDao.getDeadFarrow(farmId, startAt, endAt);
+//                int weedOutFarrow = doctorKpiDao.getWeedOutFarrow(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoFarrow = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoFarrow.getDead().setFarrow(farrow);
+//                reportDtoFarrow.getDead().setWeedOutFarrow(weedOutFarrow);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFarrow);
+//                break;
+//            default:
+//                break;
+//        }
     }
 
     //处理销售
@@ -233,15 +233,15 @@ public class DoctorGroupEventListener implements EventListener {
             int fatten = doctorKpiDao.getSaleFatten(farmId, startAt, endAt);
             long fattenPrice = doctorKpiDao.getGroupSaleFattenPrice(farmId, startAt, endAt);
             DoctorDailyReportDto reportDtoFatten = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-            reportDtoFatten.getSale().setFatten(fatten);
-            reportDtoFatten.getSale().setFattenPrice(fattenPrice);
+//            reportDtoFatten.getSale().setFatten(fatten);
+//            reportDtoFatten.getSale().setFattenPrice(fattenPrice);
             doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFatten);
             return;
         }
         if (Objects.equals(pigType, PigType.RESERVE)) {
             int houbei = doctorKpiDao.getSaleHoubei(farmId, startAt, endAt);
             DoctorDailyReportDto reportDtoHoubei = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-            reportDtoHoubei.getSale().setHoubei(houbei);
+//            reportDtoHoubei.getSale().setHoubei(houbei);
             doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoHoubei);
             return;
         }
@@ -250,9 +250,9 @@ public class DoctorGroupEventListener implements EventListener {
         long base15 = doctorKpiDao.getGroupSaleBasePrice15(farmId, startAt, endAt);
 
         DoctorDailyReportDto reportDtoNursery = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-        reportDtoNursery.getSale().setNursery(nursery);
-        reportDtoNursery.getSale().setBasePrice10(base10);
-        reportDtoNursery.getSale().setBasePrice15(base15);
+//        reportDtoNursery.getSale().setNursery(nursery);
+//        reportDtoNursery.getSale().setBasePrice10(base10);
+//        reportDtoNursery.getSale().setBasePrice15(base15);
         doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoNursery);
     }
 }

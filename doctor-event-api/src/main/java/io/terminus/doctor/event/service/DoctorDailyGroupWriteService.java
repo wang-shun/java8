@@ -36,12 +36,20 @@ public interface DoctorDailyGroupWriteService {
     Response<Boolean> deleteDoctorDailyGroupById(Long doctorDailyGroupId);
 
     /**
-     * 生成每天的group daily
+     * 生成昨天和今天的
      * @param allFarmIds
-     * @param yesterday
+     * @param date
      * @return
      */
-    Response<Boolean> createDailyGroups(List<Long> allFarmIds, Date yesterday);
+    Response<Boolean> generateYesterdayAndToday(List<Long> allFarmIds, Date date);
 
-    Response<Boolean> createDailyGroups(Long farmIds, Date yesterday);
+    /**
+     * 生成每天的group daily
+     * @param allFarmIds
+     * @param date
+     * @return
+     */
+    Response<Boolean> createDailyGroups(List<Long> allFarmIds, Date date);
+
+    Response<Boolean> createDailyGroups(Long farmIds, Date date);
 }

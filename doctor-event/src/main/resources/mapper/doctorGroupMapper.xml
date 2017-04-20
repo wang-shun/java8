@@ -264,4 +264,28 @@
         AND open_at &lt;= #{date}
         AND (status = 1 OR close_at &gt;= #{date})
     </select>
+
+    <select id="findGroupSumByFarmIdAndDate" parameterType="map" resultMap="DoctorGroupMap">
+        select
+            null as id,
+            farm_id,
+            null as group_id,
+            `type`,
+            sum_at,
+            ifnull(sum(`start`),0) as `start`,
+            ifnull(sum(wean_count),0) as wean_count,
+            ifnull(sum(unwean_count),0) as unwean_count,
+            ifnull(sum(inner_in),0) as inner_in,
+            ifnull(sum(outer_in),0) as outer_in,
+            ifnull(sum(sale),0) as sale,
+            ifnull(sum(dead),0) as dead,
+            ifnull(sum(weed_out),0) as weed_out,
+            ifnull(sum(other_change),0) as other_change,
+            ifnull(sum(chg_farm),0) as chg_farm,
+            ifnull(sum(inner_out),0) as inner_out,
+            ifnull(sum(outer_out),0) as outer_out,
+            ifnull(sum(`end`),0) as `end`
+        from doctor_daily_groups
+        group by farm_id, `type`, sum_at
+    </select>
 </mapper>

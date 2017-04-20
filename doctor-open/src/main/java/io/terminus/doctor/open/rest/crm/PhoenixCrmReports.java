@@ -88,7 +88,7 @@ public class PhoenixCrmReports {
         Map<Long, String> farmMap = farmsResponse.getResult().stream().collect(Collectors.toMap(k -> k.getId(), v -> v.getName()));
         List<DoctorDailyReportOpen> doctorDailyReportDtos = dailyReportsResponse.getResult().stream().map(doctorDailyReport -> {
             DoctorDailyReportOpen doctorDailyReportOpen = new DoctorDailyReportOpen();
-            BeanMapper.copy(doctorDailyReport.getReportData(), doctorDailyReportOpen);
+//            BeanMapper.copy(doctorDailyReport.getReportData(), doctorDailyReportOpen);
             doctorDailyReportOpen.setFarmName(farmMap.get(doctorDailyReport.getFarmId()));
             doctorDailyReportOpen.getLiveStock().setFattenOut(fattenOutMap.containsKey(doctorDailyReport.getFarmId()) ? fattenOutMap.get(doctorDailyReport.getFarmId()) : 0);
             return doctorDailyReportOpen;

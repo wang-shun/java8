@@ -202,4 +202,17 @@
         AND sum_at = #{sumAt}
     </delete>
 
+    <select id="getGroupStock" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorGroupStock">
+        select
+            farm_id,
+            sum(case `type` when 7 then `end` else 0 end) as farrowEnd,
+            sum(case `type` when 2 then `end` else 0 end) as nurseryEnd,
+            sum(case `type` when 3 then `end` else 0 end) as fattenEnd,
+            sum(case `type` when 4 then `end` else 0 end) as houbeiEnd
+        from doctor_daily_groups
+        where farm_id = #{farmId}
+        and sum_at = #{sumAt}
+        group by farm_id
+    </select>
+
 </mapper>

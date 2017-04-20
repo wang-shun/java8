@@ -74,6 +74,20 @@ public class DoctorDailyGroupWriteServiceImpl implements DoctorDailyGroupWriteSe
     }
 
     @Override
+    public Response<Boolean> generateYesterdayAndToday(List<Long> farmIds, Date date) {
+        try{
+            Date today = new DateTime(date).plus(1).toDate();
+            createDailyGroups(farmIds, date);
+            createDailyGroups(farmIds, today);
+        }catch(Exception e){
+            log.info("generate yesterday and today failed, cause: {}", Throwables.getStackTraceAsString(e));
+            return Response.ok(Boolean.FALSE);
+        }
+
+        return Response.ok(Boolean.TRUE);
+    }
+
+    @Override
     public Response<Boolean> createDailyGroups(List<Long> farmIds, Date date) {
         try{
             doctorDailyGroupDao.deleteByFarmIdAndSumAt(date);

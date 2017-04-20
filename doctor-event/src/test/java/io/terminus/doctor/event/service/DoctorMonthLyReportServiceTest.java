@@ -38,6 +38,6 @@ public class DoctorMonthLyReportServiceTest extends BaseServiceTest{
 
     @Test
     public void test_dailyReport(){
-        System.out.println(RespHelper.orServEx(doctorDailyReportReadService.findDailyReportBySumAt(DateUtil.toDate("2016-11-08"))));
+//        System.out.println(RespHelper.orServEx(doctorDailyReportReadService.findDailyReportBySumAt(DateUtil.toDate("2016-11-08"))));
     }
 }

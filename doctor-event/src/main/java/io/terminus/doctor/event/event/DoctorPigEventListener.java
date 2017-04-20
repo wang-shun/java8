@@ -232,38 +232,38 @@ public class DoctorPigEventListener implements EventListener {
             log.error("handle pig mate event, but matetype unsupport! farmId:{}", farmId);
             return;
         }
-        switch (matingType) {
-            case HP:
-                int hp = doctorKpiDao.firstMatingCounts(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoHP = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoHP.getMating().setHoubei(hp);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoHP);
-                break;
-            case DP:
-                int dp = doctorKpiDao.weanMatingCounts(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoDP = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoDP.getMating().setDuannai(dp);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoDP);
-                break;
-            case YP:
-                int yp = doctorKpiDao.yinMatingCounts(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoYP = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoYP.getMating().setPregCheckResultYing(yp);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoYP);
-                break;
-            case FP:
-                int fp = doctorKpiDao.fanQMatingCounts(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoFP = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoFP.getMating().setFanqing(fp);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFP);
-                break;
-            default:
-                int lp = doctorKpiDao.abortionMatingCounts(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoLP = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoLP.getMating().setLiuchan(lp);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoLP);
-                break;
-        }
+//        switch (matingType) {
+//            case HP:
+//                int hp = doctorKpiDao.firstMatingCounts(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoHP = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoHP.getMating().setHoubei(hp);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoHP);
+//                break;
+//            case DP:
+//                int dp = doctorKpiDao.weanMatingCounts(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoDP = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoDP.getMating().setDuannai(dp);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoDP);
+//                break;
+//            case YP:
+//                int yp = doctorKpiDao.yinMatingCounts(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoYP = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoYP.getMating().setPregCheckResultYing(yp);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoYP);
+//                break;
+//            case FP:
+//                int fp = doctorKpiDao.fanQMatingCounts(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoFP = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoFP.getMating().setFanqing(fp);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFP);
+//                break;
+//            default:
+//                int lp = doctorKpiDao.abortionMatingCounts(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoLP = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoLP.getMating().setLiuchan(lp);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoLP);
+//                break;
+//        }
     }
 
     //处理妊检
@@ -282,34 +282,34 @@ public class DoctorPigEventListener implements EventListener {
             log.error("handle pig pregcheck event, but checkResult unsupport! farmId:{}", farmId);
             return;
         }
-        switch (result) {
-            case YANG:
-                int yang = doctorKpiDao.checkYangCounts(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoYANG = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoYANG.getCheckPreg().setPositive(yang);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoYANG);
-                break;
-            case YING:
-                int ying = doctorKpiDao.checkYingCounts(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoYING = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoYING.getCheckPreg().setNegative(ying);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoYING);
-                break;
-            case LIUCHAN:
-                int lc = doctorKpiDao.checkAbortionCounts(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoLIUCHAN = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoLIUCHAN.getCheckPreg().setLiuchan(lc);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoLIUCHAN);
-                break;
-            case FANQING:
-                int fq = doctorKpiDao.checkFanQCounts(farmId, startAt, endAt);
-                DoctorDailyReportDto reportDtoFANQING = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-                reportDtoFANQING.getCheckPreg().setFanqing(fq);
-                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFANQING);
-                break;
-            default:
-                break;
-        }
+//        switch (result) {
+//            case YANG:
+//                int yang = doctorKpiDao.checkYangCounts(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoYANG = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoYANG.getCheckPreg().setPositive(yang);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoYANG);
+//                break;
+//            case YING:
+//                int ying = doctorKpiDao.checkYingCounts(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoYING = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoYING.getCheckPreg().setNegative(ying);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoYING);
+//                break;
+//            case LIUCHAN:
+//                int lc = doctorKpiDao.checkAbortionCounts(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoLIUCHAN = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoLIUCHAN.getCheckPreg().setLiuchan(lc);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoLIUCHAN);
+//                break;
+//            case FANQING:
+//                int fq = doctorKpiDao.checkFanQCounts(farmId, startAt, endAt);
+//                DoctorDailyReportDto reportDtoFANQING = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
+//                reportDtoFANQING.getCheckPreg().setFanqing(fq);
+//                doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoFANQING);
+//                break;
+//            default:
+//                break;
+//        }
     }
 
     //处理分娩
@@ -331,19 +331,19 @@ public class DoctorPigEventListener implements EventListener {
         }
         DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
         int live = CountUtil.intStream(events, DoctorPigEvent::getLiveCount).sum();
-        reportDto.getDeliver().setNest(events.size());
-        reportDto.getDeliver().setLive(live);
-        reportDto.getDeliver().setHealth(CountUtil.intStream(events, DoctorPigEvent::getHealthCount).sum());
-        reportDto.getDeliver().setWeak(CountUtil.intStream(events, DoctorPigEvent::getWeakCount).sum());
-        reportDto.getDeliver().setBlack(CountUtil.intStream(events, e -> MoreObjects.firstNonNull(e.getBlackCount(), 0)
-                        + MoreObjects.firstNonNull(e.getDeadCount(), 0)
-                        + MoreObjects.firstNonNull(e.getMnyCount(), 0)
-                        + MoreObjects.firstNonNull(e.getJxCount(), 0))
-                .sum());
-
-        //均重
-        double farrowWeiht = CountUtil.doubleStream(events, DoctorPigEvent::getFarrowWeight).sum();
-        reportDto.getDeliver().setAvgWeight(live == 0 ? 0 : farrowWeiht/live);
+//        reportDto.getDeliver().setNest(events.size());
+//        reportDto.getDeliver().setLive(live);
+//        reportDto.getDeliver().setHealth(CountUtil.intStream(events, DoctorPigEvent::getHealthCount).sum());
+//        reportDto.getDeliver().setWeak(CountUtil.intStream(events, DoctorPigEvent::getWeakCount).sum());
+//        reportDto.getDeliver().setBlack(CountUtil.intStream(events, e -> MoreObjects.firstNonNull(e.getBlackCount(), 0)
+//                        + MoreObjects.firstNonNull(e.getDeadCount(), 0)
+//                        + MoreObjects.firstNonNull(e.getMnyCount(), 0)
+//                        + MoreObjects.firstNonNull(e.getJxCount(), 0))
+//                .sum());
+//
+//        //均重
+//        double farrowWeiht = CountUtil.doubleStream(events, DoctorPigEvent::getFarrowWeight).sum();
+//        reportDto.getDeliver().setAvgWeight(live == 0 ? 0 : farrowWeiht/live);
 
         doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
     }
@@ -367,13 +367,13 @@ public class DoctorPigEventListener implements EventListener {
         int farrowSale = doctorKpiDao.getFarrowSaleCount(farmId, startAt, endAt);
 
         DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-        reportDto.getWean().setCount(count);
-        reportDto.getWean().setWeight(weight);
-        reportDto.getWean().setNest(nest);
-        reportDto.getWean().setAvgDayAge(age);
-        reportDto.getWean().setFarrowChgFarm(farrowChgFarm);
-        reportDto.getWean().setFarrowToNursery(farrowToNursery);
-        reportDto.getWean().setFarrowSale(farrowSale);
+//        reportDto.getWean().setCount(count);
+//        reportDto.getWean().setWeight(weight);
+//        reportDto.getWean().setNest(nest);
+//        reportDto.getWean().setAvgDayAge(age);
+//        reportDto.getWean().setFarrowChgFarm(farrowChgFarm);
+//        reportDto.getWean().setFarrowToNursery(farrowToNursery);
+//        reportDto.getWean().setFarrowSale(farrowSale);
         doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
     }
 
@@ -401,7 +401,7 @@ public class DoctorPigEventListener implements EventListener {
             int boar = doctorKpiDao.realTimeLiveStockBoar(farmId, startAt);
 
             DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-            reportDto.getLiveStock().setBoar(boar);
+//            reportDto.getLiveStock().setBoar(boar);
             doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
 
         } else {
@@ -409,9 +409,9 @@ public class DoctorPigEventListener implements EventListener {
             int allSow = doctorKpiDao.realTimeLiveStockSow(farmId, startAt);
 
             DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-            reportDto.getLiveStock().setBuruSow(buruSow);
-            reportDto.getLiveStock().setPeihuaiSow(allSow - buruSow);
-            reportDto.getLiveStock().setKonghuaiSow(0);
+//            reportDto.getLiveStock().setBuruSow(buruSow);
+//            reportDto.getLiveStock().setPeihuaiSow(allSow - buruSow);
+//            reportDto.getLiveStock().setKonghuaiSow(0);
             doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
         }
     }
@@ -431,12 +431,12 @@ public class DoctorPigEventListener implements EventListener {
         int saleBoar = doctorKpiDao.getSaleBoar(farmId, startAt, endAt);
 
         DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-        reportDto.getDead().setSow(deadSow);
-        reportDto.getDead().setWeedOutSow(weedOutSow);
-        reportDto.getDead().setBoar(deadBoar);
-        reportDto.getDead().setWeedOutBoar(weedOutBoar);
-        reportDto.getSale().setSow(saleSow);
-        reportDto.getSale().setBoar(saleBoar);
+//        reportDto.getDead().setSow(deadSow);
+//        reportDto.getDead().setWeedOutSow(weedOutSow);
+//        reportDto.getDead().setBoar(deadBoar);
+//        reportDto.getDead().setWeedOutBoar(weedOutBoar);
+//        reportDto.getSale().setSow(saleSow);
+//        reportDto.getSale().setBoar(saleBoar);
         doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
     }
 }

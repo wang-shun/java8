@@ -50,7 +50,6 @@ public class DoctorMoveReportService {
     private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
     private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
     private final DoctorDailyReportWriteService doctorDailyReportWriteService;
-    private final DoctorDailyPigWriteService doctorDailyPigWriteService;
     private final DoctorDailyGroupWriteService doctorDailyGroupWriteService;
 
     @Autowired
@@ -61,7 +60,7 @@ public class DoctorMoveReportService {
                                    DoctorCommonReportWriteService doctorCommonReportWriteService,
                                    DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
                                    DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService,
-                                   DoctorDailyReportWriteService doctorDailyReportWriteService, DoctorDailyPigWriteService doctorDailyPigWriteService,
+                                   DoctorDailyReportWriteService doctorDailyReportWriteService,
                                    DoctorDailyGroupWriteService doctorDailyGroupWriteService) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorFarmDao = doctorFarmDao;
@@ -71,7 +70,6 @@ public class DoctorMoveReportService {
         this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
         this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
         this.doctorDailyReportWriteService = doctorDailyReportWriteService;
-        this.doctorDailyPigWriteService = doctorDailyPigWriteService;
         this.doctorDailyGroupWriteService = doctorDailyGroupWriteService;
     }
 
@@ -131,33 +129,15 @@ public class DoctorMoveReportService {
         DoctorDailyReport report = new DoctorDailyReport();
         report.setFarmId(farmId);
         report.setSumAt(group.getSumat());
-        report.setFarrowCount(group.getFarrowCount());      // 当天产房仔猪存栏
-        report.setNurseryCount(group.getNurseryCount());    // 当天保育猪存栏
-        report.setFattenCount(group.getFattenCount());      // 当天育肥猪存栏
-        report.setHoubeiCount(group.getHoubeiCount());      // 当天后备猪的存栏
-        report.setSowCount(sow.getBuruSow() + sow.getKonghuaiSow() + sow.getPeihuaiSow());     // 当天母猪存栏
-        report.setData(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(getDailyReportDto(farmId, group, sow, boar)));
+//        report.set;
+//        report.setFarrowCount(group.getFarrowCount());      // 当天产房仔猪存栏
+//        report.setNurseryCount(group.getNurseryCount());    // 当天保育猪存栏
+//        report.setFattenCount(group.getFattenCount());      // 当天育肥猪存栏
+//        report.setHoubeiCount(group.getHoubeiCount());      // 当天后备猪的存栏
+//        report.setSowCount(sow.getBuruSow() + sow.getKonghuaiSow() + sow.getPeihuaiSow());     // 当天母猪存栏
+//        report.setData(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(getDailyReportDto(farmId, group, sow, boar)));
+
         return report;
-    }
-
-    //日报统计json字段
-    private DoctorDailyReportDto getDailyReportDto(Long farmId, ReportGroupLiveStock group, ReportSowLiveStock sow, ReportBoarLiveStock boar) {
-        DoctorDailyReportDto dto = RespHelper.orServEx(doctorDailyReportReadService
-                .initDailyReportByFarmIdAndDate(farmId, group.getSumat()));
-
-        //刷新下dto里的统计
-        dto.getLiveStock().setFarrow(group.getFarrowCount());
-        dto.getLiveStock().setNursery(group.getNurseryCount());
-        dto.getLiveStock().setFatten(group.getFattenCount());
-        dto.getLiveStock().setHoubeiBoar(group.getHoubeiCount());
-
-        //注意下面的存栏都是当天的存栏
-        dto.getLiveStock().setBoar(boar.getQuantity());
-        dto.getLiveStock().setBuruSow(sow.getBuruSow());
-        dto.getLiveStock().setHoubeiSow(group.getHoubeiCount());
-        dto.getLiveStock().setKonghuaiSow(sow.getKonghuaiSow());
-        dto.getLiveStock().setPeihuaiSow(sow.getPeihuaiSow());
-        return dto;
     }
 
     /**
@@ -195,15 +175,6 @@ public class DoctorMoveReportService {
     public void moveBoarMonthlyReport(Long farmId, Integer index) {
         DateUtil.getBeforeMonthEnds(new Date(), MoreObjects.firstNonNull(index, MONTH_INDEX))
                 .forEach(date -> doctorBoarMonthlyReportWriteService.createMonthlyReport(farmId, date));
-    }
-
-    public void flushPigDaily(Long farmId, Date date){
-        doctorDailyPigWriteService.createDailyPigs(farmId, date);
-    }
-
-    public void flushPigDaily(Long farmId, Integer index) {
-        DateUtil.getBeforeDays(new Date(), MoreObjects.firstNonNull(index, INDEX))
-                .forEach(date -> doctorDailyPigWriteService.createDailyPigs(farmId, date));
     }
 
     public void flushGroupDaily(Long farmId, Date date){

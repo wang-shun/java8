@@ -292,4 +292,28 @@ public class DateUtil {
         }
         return DateUtil.getMonthEnd(new DateTime(date)).toDate();
     }
+
+    public static String getYearWeek(Date date){
+        DateTime dateTime = new DateTime(date);
+        StringBuffer stringBuffer = new StringBuffer();
+        int week = dateTime.getWeekOfWeekyear();
+        stringBuffer.append(dateTime.getWeekyear());
+        if(week < 10){
+            stringBuffer.append(0);
+        }
+        stringBuffer.append(dateTime.getWeekOfWeekyear());
+        return stringBuffer.toString();
+    }
+
+    public static String getYearMonth(Date date){
+        DateTime dateTime = new DateTime(date);
+        StringBuffer stringBuffer = new StringBuffer();
+        int month = dateTime.getMonthOfYear();
+        stringBuffer.append(dateTime.getYear());
+        if(month < 10){
+            stringBuffer.append(0);
+        }
+        stringBuffer.append(dateTime.getMonthOfYear());
+        return stringBuffer.toString();
+    }
 }

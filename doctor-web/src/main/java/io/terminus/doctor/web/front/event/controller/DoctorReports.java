@@ -12,25 +12,22 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
-import io.terminus.doctor.event.service.DoctorCommonReportReadService;
-import io.terminus.doctor.event.service.DoctorDailyReportReadService;
-import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
-import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.time.DateUtils;
+import org.joda.time.DateTime;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -71,7 +68,12 @@ public class DoctorReports {
     @RequestMapping(value = "/daily", method = RequestMethod.GET)
     public DoctorDailyReportDto findDailyReportByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
                                                                 @RequestParam("date") String date) {
-        return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndSumAt(farmId, date));
+        DoctorDailyReportDto doctorDailyReportDto = new DoctorDailyReportDto();
+        if(DateUtil.toDate(date).after(new Date())){
+            doctorDailyReportDto.setFail(true);
+            return doctorDailyReportDto;
+        }
+        return RespHelper.or500(doctorDailyReportReadService.findDailyReportDtoByFarmIdAndSumAt(farmId, date));
     }
 
     /**
@@ -85,7 +87,7 @@ public class DoctorReports {
     public List<DoctorDailyReportDto> findDailyReportByFarmIdAndRange(@RequestParam("farmId") Long farmId,
                                                                       @RequestParam(value = "startAt", required = false) String startAt,
                                                                       @RequestParam(value = "endAt", required = false) String endAt) {
-        return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndRange(farmId, startAt, endAt));
+        return RespHelper.or500(doctorDailyReportReadService.findDailyReportDtoByFarmIdAndRange(farmId, startAt, endAt));
     }
 
     /**
