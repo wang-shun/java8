@@ -10,6 +10,7 @@ import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.model.DoctorGroupChangeSum;
 import io.terminus.doctor.event.model.DoctorGroupStock;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -75,9 +76,9 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     private DoctorDailyReportDto getDoctorDailyReportDto(Long farmId, String date) {
         DoctorDailyReportDto doctorDailyReportDto = new DoctorDailyReportDto();
         DoctorDailyReport dailyReport = doctorDailyReportDao.findByFarmIdAndSumAt(farmId, date);
-        DoctorGroupStock groupStock = doctorDailyGroupDao.getGroupStock(farmId, date);
+        DoctorGroupChangeSum groupChangeSum = doctorDailyGroupDao.getGroupChangeSum(farmId, date);
         doctorDailyReportDto.setDailyReport(dailyReport);
-        doctorDailyReportDto.setGroupStock(groupStock);
+        doctorDailyReportDto.setGroupChangeSum(groupChangeSum);
         return doctorDailyReportDto;
     }
 
@@ -119,8 +120,8 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     private DoctorDailyReportDto getDoctorDailyReportDto(DoctorDailyReport report) {
         DoctorDailyReportDto dto = new DoctorDailyReportDto();
         dto.setDailyReport(report);
-        DoctorGroupStock groupStock = doctorDailyGroupDao.getGroupStock(report.getFarmId(), report.getSumAt());
-        dto.setGroupStock(groupStock);
+        DoctorGroupChangeSum groupChangeSum = doctorDailyGroupDao.getGroupChangeSum(report.getFarmId(), report.getSumAt());
+        dto.setGroupChangeSum(groupChangeSum);
         return dto;
     }
 }

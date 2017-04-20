@@ -10,6 +10,8 @@
         <result column="farm_id" property="farmId"/>
         <result column="type" property="type"/>
         <result column="sum_at" property="sumAt"/>
+        <result column="sum_from" property="sumFrom"/>
+        <result column="sum_to" property="sumTo"/>
         <result column="mate_estimate_preg_rate" property="mateEstimatePregRate"/>
         <result column="mate_real_preg_rate" property="mateRealPregRate"/>
         <result column="mate_estimate_farrowing_rate" property="mateEstimateFarrowingRate"/>
@@ -22,6 +24,7 @@
         <result column="npd" property="npd"/>
         <result column="psy" property="psy"/>
         <result column="mate_in_seven" property="mateInSeven"/>
+        <result column="extra" property="extra"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
         
@@ -38,7 +41,9 @@
     <sql id="cols_exclude_id">
         farm_id, 
         type, 
-        sum_at, 
+        sum_at,
+        sum_from,
+        sum_to,
         mate_estimate_preg_rate, 
         mate_real_preg_rate, 
         mate_estimate_farrowing_rate, 
@@ -50,7 +55,8 @@
         dead_fatten_rate, 
         npd, 
         psy, 
-        mate_in_seven, 
+        mate_in_seven,
+        extra,
         created_at, 
         updated_at
         
@@ -59,7 +65,9 @@
     <sql id="vals">
         #{farmId}, 
         #{type}, 
-        #{sumAt}, 
+        #{sumAt},
+        #{sumFrom},
+        #{sumTo},
         #{mateEstimatePregRate}, 
         #{mateRealPregRate}, 
         #{mateEstimateFarrowingRate}, 
@@ -72,7 +80,8 @@
         #{npd}, 
         #{psy}, 
         #{mateInSeven}, 
-        now(), 
+        #{extra},
+        now(),
         now()
         
     </sql>
@@ -117,6 +126,8 @@
             <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="type != null">type = #{type},</if>
             <if test="sumAt != null">sum_at = #{sumAt},</if>
+            <if test="sumFrom != null">sum_from = #{sumFrom},</if>
+            <if test="sumTo != null">sum_to = #{sumFrom},</if>
             <if test="mateEstimatePregRate != null">mate_estimate_preg_rate = #{mateEstimatePregRate},</if>
             <if test="mateRealPregRate != null">mate_real_preg_rate = #{mateRealPregRate},</if>
             <if test="mateEstimateFarrowingRate != null">mate_estimate_farrowing_rate = #{mateEstimateFarrowingRate},</if>
@@ -128,6 +139,7 @@
             <if test="deadFattenRate != null">dead_fatten_rate = #{deadFattenRate},</if>
             <if test="npd != null">npd = #{npd},</if>
             <if test="psy != null">psy = #{psy},</if>
+            <if test="extra != null">extra = #{extra},</if>
             <if test="mateInSeven != null">mate_in_seven = #{mateInSeven},</if>
             
             

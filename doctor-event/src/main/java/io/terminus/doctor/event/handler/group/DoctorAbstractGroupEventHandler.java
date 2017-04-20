@@ -235,11 +235,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //发布猪群猪舍事件(不发统计事件了，事务里套事务，事件区分不开，改成同步统计)
     protected void publistGroupAndBarn(DoctorGroupEvent event) {
-        doctorGroupEventListener.handleGroupEvent(ListenedGroupEvent.builder()
-                .orgId(event.getOrgId())
-                .farmId(event.getFarmId())
-                .groups(Lists.newArrayList(getPublishGroup(event)))
-                .build());
+//        doctorGroupEventListener.handleGroupEvent(ListenedGroupEvent.builder()
+//                .orgId(event.getOrgId())
+//                .farmId(event.getFarmId())
+//                .groups(Lists.newArrayList(getPublishGroup(event)))
+//                .build());
     }
 
     private static DoctorGroupPublishDto getPublishGroup(DoctorGroupEvent event) {

@@ -8,6 +8,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Dates;
+import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
@@ -298,6 +299,7 @@ public class DateUtil {
         StringBuffer stringBuffer = new StringBuffer();
         int week = dateTime.getWeekOfWeekyear();
         stringBuffer.append(dateTime.getWeekyear());
+        stringBuffer.append("-");
         if(week < 10){
             stringBuffer.append(0);
         }
@@ -307,13 +309,17 @@ public class DateUtil {
 
     public static String getYearMonth(Date date){
         DateTime dateTime = new DateTime(date);
+        return dateTime.toString(YYYYMM);
+    }
+
+    public static String getYearWeek(Integer year, Integer week){
         StringBuffer stringBuffer = new StringBuffer();
-        int month = dateTime.getMonthOfYear();
-        stringBuffer.append(dateTime.getYear());
-        if(month < 10){
+        stringBuffer.append(year);
+        stringBuffer.append("-");
+        if(week < 10){
             stringBuffer.append(0);
         }
-        stringBuffer.append(dateTime.getMonthOfYear());
+        stringBuffer.append(week);
         return stringBuffer.toString();
     }
 }

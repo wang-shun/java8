@@ -128,7 +128,7 @@ public class DoctorMoveReportService {
     private DoctorDailyReport getDailyReport(Long farmId, ReportGroupLiveStock group, ReportSowLiveStock sow, ReportBoarLiveStock boar) {
         DoctorDailyReport report = new DoctorDailyReport();
         report.setFarmId(farmId);
-        report.setSumAt(group.getSumat());
+//        report.setSumAt(group.getSumat());
 //        report.set;
 //        report.setFarrowCount(group.getFarrowCount());      // 当天产房仔猪存栏
 //        report.setNurseryCount(group.getNurseryCount());    // 当天保育猪存栏

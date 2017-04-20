@@ -433,4 +433,80 @@
         WHERE sum_at = #{sumAt}
     </select>
 
+    <select id="findPigChangeSum" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorBaseReport">
+        select
+            sum(case when sum_at = #{startAt} then sow_start else 0 end) as sowStart,
+            sum(sow_in) as sowIn,
+            sum(sow_dead) as sowDead,
+            sum(sow_weed_out) as sowWeedOut,
+            sum(sow_sale) as sowSale,
+            sum(sow_other_out) as sowOtherOut,
+            sum(case when sum_at = #{endAt} then sow_end else 0 end) as sowEnd,
+
+            sum(case when sum_at = #{startAt} then boar_start else 0 end) as boarStart,
+            sum(boar_in) as boarIn,
+            sum(boar_dead) as boarDead,
+            sum(boar_weed_out) as boarWeedOut,
+            sum(boar_sale) as boarSale,
+            sum(boar_other_out) as boarOtherOut,
+            sum(case when sum_at = #{endAt} then boar_end else 0 end) as boarEnd,
+            sum(mate_hb) as mateHb,
+            sum(mate_dn) as mateDn,
+            sum(mate_fq) as mateFq,
+            sum(mate_lc) as mateLc,
+            sum(mate_yx) as mateYx,
+
+            sum(preg_positive) as pregPositive,
+            sum(preg_negative) as pregNegative,
+            sum(preg_fanqing) as pregFanqing,
+            sum(preg_liuchan) as pregLiuchan,
+
+            sum(farrow_nest) as farrowNest,
+            sum(farrow_all) as farrowAll,
+            sum(farrow_live) as farrowLive,
+            sum(farrow_health) as farrowHealth,
+            sum(farrow_weak) as farrowWeak,
+            sum(farrow_dead) as farrowDead,
+            sum(farrow_jx) as farrowJx,
+            sum(farrow_mny) as farrowMny,
+            sum(farrow_black) as farrowBlack,
+            sum(farrow_sjmh) as farrowSjmh,
+            sum(farrow_weight) as farrowWeight,
+            sum(farrow_weight)/sum(farrow_live) as farrowAvgWeight,
+            sum(wean_nest) as weanNest,
+            sum(wean_count) as weanCount,
+            sum(wean_count*wean_avg_weight)/sum(wean_count) as weanAvgWeight,
+            sum(wean_count*wean_day_age)/sum(wean_count) as weanDage,
+
+            sum(farrow_feed) as farrowFeed,
+            sum(farrow_feed_amount) as farrowFeedAmount,
+            sum(farrow_medicine_amount) as farrowMedicineAmount,
+            sum(farrow_vaccination_amount) as farrowVaccinationAmount,
+            sum(farrow_consumable_amount) as farrowConsumableAmount,
+
+            sum(nursery_feed) as farrowFeed,
+            sum(nursery_feed_amount) as farrowFeedAmount,
+            sum(nursery_medicine_amount) as farrowMedicineAmount,
+            sum(nursery_vaccination_amount) as farrowVaccinationAmount,
+            sum(nursery_consumable_amount) as farrowConsumableAmount,
+
+            sum(fatten_feed) as farrowFeed,
+            sum(fatten_feed_amount) as farrowFeedAmount,
+            sum(fatten_medicine_amount) as farrowMedicineAmount,
+            sum(fatten_vaccination_amount) as farrowVaccinationAmount,
+            sum(fatten_consumable_amount) as farrowConsumableAmount,
+
+            sum(houbei_feed) as farrowFeed,
+            sum(houbei_feed_amount) as farrowFeedAmount,
+            sum(houbei_medicine_amount) as farrowMedicineAmount,
+            sum(houbei_vaccination_amount) as farrowVaccinationAmount,
+            sum(houbei_consumable_amount) as farrowConsumableAmount
+
+        from doctor_daily_reports
+        where farm_id = #{farmId}
+          and sum_at &gt;= #{startAt}
+          and sum_at &lt;= #{endAt};
+
+    </select>
+
 </mapper>

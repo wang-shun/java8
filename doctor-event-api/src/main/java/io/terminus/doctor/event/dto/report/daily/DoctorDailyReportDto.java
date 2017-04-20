@@ -1,14 +1,10 @@
 package io.terminus.doctor.event.dto.report.daily;
 
-import com.google.common.collect.Maps;
+import io.terminus.doctor.event.model.DoctorGroupChangeSum;
 import io.terminus.doctor.event.model.DoctorDailyReport;
-import io.terminus.doctor.event.model.DoctorGroupStock;
 import lombok.Data;
 
-import javax.print.Doc;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
 
 /**
  * Desc: 日报统计dto
@@ -22,7 +18,8 @@ public class DoctorDailyReportDto implements Serializable {
 
     DoctorDailyReport dailyReport;  //猪日报
 
-    DoctorGroupStock groupStock;    //猪群存栏
+    DoctorGroupChangeSum groupChangeSum; //猪群日存栏变化
+
     /**
      * 是否失败, true 失败
      */

@@ -2,8 +2,10 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.model.DoctorGroupChangeSum;
 import io.terminus.doctor.event.model.DoctorGroupStock;
 import org.springframework.stereotype.Repository;
 
@@ -66,4 +68,40 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
     public List<DoctorDailyReport> findBySumAt(Date sumAt) {
         return getSqlSession().selectList(sqlId("findBySumAt"), ImmutableMap.of("sumAt", sumAt));
     }
+
+    /**
+     * 获取某一段时间的猪群存栏变化
+     * @param farmId
+     * @param sumAt
+     * @return
+     */
+    public DoctorGroupChangeSum getGroupChangeSum(Long farmId, String sumAt) {
+        return getGroupChangeSum(farmId, sumAt, sumAt);
+    }
+
+    /**
+     * 获取某一段时间的猪群存栏变化
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public DoctorGroupChangeSum getGroupChangeSum(Long farmId, Date startAt, Date endAt) {
+        return getGroupChangeSum(farmId, DateUtil.toDateString(startAt), DateUtil.toDateString(endAt));
+    }
+
+    /**
+     * 获取某一段时间的猪群存栏变化
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public DoctorGroupChangeSum getGroupChangeSum(Long farmId, String startAt, String endAt) {
+        return getSqlSession().selectOne(sqlId("getGroupChangeSum"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+
+
+
 }

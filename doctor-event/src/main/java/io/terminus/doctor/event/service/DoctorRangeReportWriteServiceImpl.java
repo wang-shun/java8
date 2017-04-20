@@ -4,8 +4,10 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorRangeReportDao;
+import io.terminus.doctor.event.dto.DoctorStockDistributeDto;
 import io.terminus.doctor.event.enums.ReportRangeType;
 import io.terminus.doctor.event.model.DoctorRangeReport;
 import lombok.extern.slf4j.Slf4j;
@@ -124,6 +126,8 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
         doctorRangeReport.setFarmId(farmId);
         doctorRangeReport.setType(type);
         doctorRangeReport.setSumAt(sumAt);
+        doctorRangeReport.setSumFrom(startAt);
+        doctorRangeReport.setSumTo(endAt);
         doctorRangeReportDao.deleteByFarmIdAndTypeAndSumAt(farmId, type, sumAt);
         doctorRangeReportDao.create(doctorRangeReport);
     }
@@ -153,6 +157,10 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
         doctorRangeReport.setDeadFarrowRate(doctorKpiDao.getDeadFarrowRate(farmId, startAt, endAt));    //产房死淘率
         doctorRangeReport.setDeadNurseryRate(doctorKpiDao.getDeadNurseryRate(farmId, startAt, endAt));  //保育死淘率
         doctorRangeReport.setDeadFattenRate(doctorKpiDao.getDeadFattenRate(farmId, startAt, endAt));    //育肥死淘率
+        DoctorStockDistributeDto stockDistributeDto = new DoctorStockDistributeDto();
+        stockDistributeDto.setParityStockList(doctorKpiDao.getMonthlyParityStock(farmId, startAt, endAt));
+        stockDistributeDto.setBreedStockList(doctorKpiDao.getMonthlyBreedStock(farmId, startAt, endAt));
+        doctorRangeReport.setExtra(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(stockDistributeDto));
         return doctorRangeReport;
     }
 

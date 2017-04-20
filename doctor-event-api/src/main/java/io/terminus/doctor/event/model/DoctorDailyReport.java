@@ -15,6 +15,16 @@ public class DoctorDailyReport extends DoctorBaseReport implements Serializable 
     private static final long serialVersionUID = -1834863070047257695L;
 
     private Long id;
+
+    /**
+     * 猪场id
+     */
+    private Long farmId;
+
+    /**
+     * 日期
+     */
+    private String sumAt;
     
     /**
      * 配怀母猪头数
@@ -26,6 +36,20 @@ public class DoctorDailyReport extends DoctorBaseReport implements Serializable 
      */
     private Integer sowCf;
 
+    /**
+     * 10kg基础价格
+     */
+    private Long basePrice10;
+
+    /**
+     * 15kg基础价格
+     */
+    private Long basePrice15;
+
+    /**
+     * 育肥猪价格
+     */
+    private Long fattenPrice;
     /**
      * 创建时间
      */

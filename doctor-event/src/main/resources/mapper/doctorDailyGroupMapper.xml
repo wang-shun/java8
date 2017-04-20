@@ -215,4 +215,55 @@
         group by farm_id
     </select>
 
+    <select id="getGroupChangeSum" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorGroupChangeSum">
+        select
+        sum(case when type = 7 and sum_at = #{startAt} then `start` else 0 END) as farrowStart,
+        sum(case when type = 7  then `inner_in` else 0 END) as farrowInnerIn,
+        sum(case when type = 7  then `outer_in` else 0 END) as farrowOuterIn,
+        sum(case when type = 7  then `sale` else 0 END) as farrowSale,
+        sum(case when type = 7  then `dead` else 0 END) as farrowDead,
+        sum(case when type = 7  then `weed_out` else 0 END) as farrowWeedOut,
+        sum(case when type = 7  then `other_change` else 0 END) as farrowOtherChange,
+        sum(case when type = 7  then `inner_out` else 0 END) as farrowInnerOut,
+        sum(case when type = 7  then `outer_out` else 0 END) as farrowOuterOut,
+        sum(case when type = 7 and sum_at = #{endAt} then `end` else 0 END) as farrowEnd,
+
+        sum(case when type = 2 and sum_at = #{startAt} then `start` else 0 END) as nurseryStart,
+        sum(case when type = 2  then `inner_in` else 0 END) as nurseryInnerIn,
+        sum(case when type = 2  then `outer_in` else 0 END) as nurseryOuterIn,
+        sum(case when type = 2  then `sale` else 0 END) as nurserySale,
+        sum(case when type = 2  then `dead` else 0 END) as nurseryDead,
+        sum(case when type = 2  then `weed_out` else 0 END) as nurseryWeedOut,
+        sum(case when type = 2  then `other_change` else 0 END) as nurseryOtherChange,
+        sum(case when type = 2  then `inner_out` else 0 END) as nurseryInnerOut,
+        sum(case when type = 2  then `outer_out` else 0 END) as nurseryOuterOut,
+        sum(case when type = 2 and sum_at = #{endAt} then `end` else 0 END) as nurseryEnd,
+
+        sum(case when type = 3 and sum_at = #{startAt} then `start` else 0 END) as fattenStart,
+        sum(case when type = 3  then `inner_in` else 0 END) as fattenInnerIn,
+        sum(case when type = 3  then `outer_in` else 0 END) as fattenOuterIn,
+        sum(case when type = 3  then `sale` else 0 END) as fattenSale,
+        sum(case when type = 3  then `dead` else 0 END) as fattenDead,
+        sum(case when type = 3  then `weed_out` else 0 END) as fattenWeedOut,
+        sum(case when type = 3  then `other_change` else 0 END) as fattenOtherChange,
+        sum(case when type = 3  then `inner_out` else 0 END) as fattenInnerOut,
+        sum(case when type = 3  then `outer_out` else 0 END) as fattenOuterOut,
+        sum(case when type = 3 and sum_at = #{endAt} then `end` else 0 END) as fattenEnd,
+
+        sum(case when type = 4 and sum_at = #{startAt} then `start` else 0 END) as houbeiStart,
+        sum(case when type = 4  then `inner_in` else 0 END) as houbeiInnerIn,
+        sum(case when type = 4  then `outer_in` else 0 END) as houbeiOuterIn,
+        sum(case when type = 4  then `sale` else 0 END) as houbeiSale,
+        sum(case when type = 4  then `dead` else 0 END) as houbeiDead,
+        sum(case when type = 4  then `weed_out` else 0 END) as houbeiWeedOut,
+        sum(case when type = 4  then `other_change` else 0 END) as houbeiOtherChange,
+        sum(case when type = 4  then `inner_out` else 0 END) as houbeiInnerOut,
+        sum(case when type = 4  then `outer_out` else 0 END) as houbeiOuterOut,
+        sum(case when type = 4 and sum_at = #{endAt} then `end` else 0 END) as houbeiEnd
+        from doctor_daily_groups
+        where farm_id = 1
+        and sum_at &gt;= #{startAt}
+        and sum_at &lt;= #{endAt}
+    </select>
+
 </mapper>

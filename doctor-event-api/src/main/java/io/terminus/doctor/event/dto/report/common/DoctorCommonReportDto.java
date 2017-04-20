@@ -1,8 +1,6 @@
 package io.terminus.doctor.event.dto.report.common;
 
-import io.terminus.doctor.event.model.DoctorBaseReport;
-import io.terminus.doctor.event.model.DoctorIndicatorReport;
-import io.terminus.doctor.event.model.DoctorRangeReport;
+import io.terminus.doctor.event.model.*;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -23,9 +21,13 @@ public class DoctorCommonReportDto implements Serializable {
      */
     private boolean fail;
 
+    private Long farmId;
+
     private String date;                      //统计月份 2016年08月, 供前台显示 或 第几周
 
-    private DoctorBaseReport changeReport;    //数量变化报表
+    private DoctorBaseReport changeReport;    //猪数量变化报表
+
+    private DoctorGroupChangeSum groupChangeReport; //猪群数量变化报表
 
     private DoctorRangeReport indicatorReport;  //指标
 

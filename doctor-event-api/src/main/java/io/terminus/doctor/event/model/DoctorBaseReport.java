@@ -13,15 +13,6 @@ import java.io.Serializable;
 public class DoctorBaseReport implements Serializable{
 
     private static final long serialVersionUID = 8428231403969882763L;
-    /**
-     * 猪场id
-     */
-    private Long farmId;
-
-    /**
-     * 日期
-     */
-    private String sumAt;
 
     /**
      * 母猪期初头数
@@ -217,21 +208,6 @@ public class DoctorBaseReport implements Serializable{
      * 断奶日龄
      */
     private Double weanDayAge;
-
-    /**
-     * 10kg基础价格
-     */
-    private Long basePrice10;
-
-    /**
-     * 15kg基础价格
-     */
-    private Long basePrice15;
-
-    /**
-     * 育肥猪价格
-     */
-    private Long fattenPrice;
 
     /**
      * 产房仔猪饲料消耗数量
