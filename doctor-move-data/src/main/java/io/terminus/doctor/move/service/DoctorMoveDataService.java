@@ -2741,6 +2741,10 @@ public class DoctorMoveDataService {
     }
 
 
+    /**
+     * 刷新groupSnapshot的时间格式
+     * @param farmId
+     */
     public void flushGroupSnapshotsToInfoDateFormat(Long farmId) {
         List<DoctorGroup> groupList = doctorGroupDao.findByFarmId(farmId);
         groupList.forEach(group -> {
@@ -2750,8 +2754,30 @@ public class DoctorMoveDataService {
                 String jsonInfo = ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info);
                 doctorGroupSnapshot.setToInfo(jsonInfo);
             });
-//            doctorGroupSnapshotDao.deleteByGroupId(group.getId());
-            doctorGroupSnapshotDao.creates(snapshots);
+            if(!Arguments.isNullOrEmpty(snapshots)){
+                doctorGroupSnapshotDao.updates(snapshots);
+            }
+        });
+    }
+
+
+    /**
+     * 刷新pigSnapshots时间格式
+     * @param farmId
+     */
+    public void flushPigSnapshotsToInfoDateFormat(Long farmId) {
+        List<DoctorPig> pigList = doctorPigDao.findPigsByFarmId(farmId);
+        pigList.forEach(pig -> {
+            List<DoctorPigSnapshot> snapshots = doctorPigSnapshotDao.findByPigId(pig.getId());
+            snapshots.forEach(doctorPigSnapshot -> {
+                DoctorPigSnapShotInfo info = JsonFormatUtils.JSON_NON_EMPTY_MAPPER.fromJson(doctorPigSnapshot.getToPigInfo(), DoctorPigSnapShotInfo.class);
+                String jsonInfo = ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info);
+                doctorPigSnapshot.setToPigInfo(jsonInfo);
+                doctorPigSnapshotDao.update(doctorPigSnapshot);
+            });
+            if(!Arguments.isNullOrEmpty(snapshots)){
+                doctorPigSnapshotDao.updates(snapshots);
+            }
         });
     }
 

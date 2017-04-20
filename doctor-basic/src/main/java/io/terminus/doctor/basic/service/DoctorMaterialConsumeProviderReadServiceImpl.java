@@ -217,13 +217,43 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
     }
 
     @Override
-    public Response<Paging<DoctorMaterialConsumeProvider>> pagingfindMaterialConsume(Long farmId, Long wareHouseId, Long materialId, String materialName, Long barnId, Long type, Date startDate, Date endDate, Integer pageNo, Integer size) {
+    public Response<Paging<DoctorMaterialConsumeProvider>> pagingfindMaterialConsume(Long farmId, Long wareHouseId, Long materialId, Long groupId, String materialName, Long barnId, Long type, Date startDate, Date endDate, Integer pageNo, Integer size) {
         try {
             PageInfo pageInfo = new PageInfo(pageNo, size);
-            return Response.ok(doctorMaterialConsumeProviderDao.pagingFindMaterialConsumeReports(farmId, wareHouseId, materialId, materialName, barnId, type, startDate, endDate, pageInfo.getOffset(), pageInfo.getLimit()));
+            return Response.ok(doctorMaterialConsumeProviderDao.pagingFindMaterialConsumeReports(farmId, wareHouseId, materialId, materialName, barnId, groupId, type, startDate, endDate, pageInfo.getOffset(), pageInfo.getLimit()));
         }catch (Exception e){
             log.error("findMaterialConsume failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("findMaterialConsume.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorMaterialConsumeProvider>> findMaterialByGroupId(Long farmId, Long groupId, Long materialId, Long type, Long wareHouseId, Long barnId, Long materialType, Date startDate, Date endDate) {
+        try {
+            return Response.ok(doctorMaterialConsumeProviderDao.findMaterialWithGroupId(farmId, groupId, materialId, type, wareHouseId, barnId, materialType, startDate, endDate));
+        } catch (Exception e) {
+            log.error("find.by.groupId.fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find by groupId fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorMaterialConsumeProvider>> findMaterialProfit(Long farmId, Long type, Long barnId, Date startDate, Date endDate) {
+        try {
+            return Response.ok(doctorMaterialConsumeProviderDao.findMaterialProfits(farmId, type, barnId, startDate, endDate));
+        } catch (Exception e) {
+            log.error("findMaterialConsume failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("findMaterialConsume.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorMaterialConsumeProvider>> findMaterialByGroup(Long farmId, Long wareHouseId, Long materialId, List<Long> groupId, String materialName, Long barnId, Long type, Date startDate, Date endDate) {
+        try {
+            return Response.ok(doctorMaterialConsumeProviderDao.findMaterialByGroup(farmId, wareHouseId, materialId, groupId, materialName, barnId, type, startDate, endDate));
+        }catch (Exception e){
+            log.error("findMaterialConsume by groupId failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("findMaterialConsume by groupId failed");
         }
     }
 

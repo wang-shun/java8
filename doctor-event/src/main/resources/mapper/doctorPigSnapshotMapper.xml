@@ -50,9 +50,21 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.pigId},#{fromEventId},#{i.toEventId},#{i.toPigInfo},now(),now())
+        (#{i.pigId},#{i.fromEventId},#{i.toEventId},#{i.toPigInfo},now(),now())
         </foreach>
     </insert>
+
+    <update id="updates" parameterType="list">
+        <foreach collection="list" item="i" separator=";">
+          UPDATE <include refid="tb"/> SET
+            `updated_at` = now(),
+            `pig_id` = #{i.pigId},
+            `from_event_id` = #{i.fromEventId},
+            `to_event_id` = #{i.toEventId},
+            `to_pig_info` = #{i.toPigInfo}
+          WHERE id = #{i.id}
+        </foreach>
+    </update>
 
     <delete id="delete" parameterType="Long">
         DELETE FROM <include refid="tb"/> WHERE

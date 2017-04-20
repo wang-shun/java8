@@ -455,4 +455,15 @@ public class DoctorGroupEvents {
             return Boolean.FALSE;
         }
     }
+
+    /**
+     * 根据猪舍id查询猪场
+     * @param farmId
+     * @param barnId
+     * @return
+     */
+    @RequestMapping(value = "/barnId/group", method = RequestMethod.GET)
+    public List<DoctorGroup> doctorGroupDetails(@RequestParam Long farmId,@RequestParam Long barnId) {
+        return RespHelper.or500(doctorGroupReadService.findGroupId(farmId, barnId));
+    }
 }

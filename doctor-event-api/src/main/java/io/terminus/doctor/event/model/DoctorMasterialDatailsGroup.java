@@ -1,17 +1,22 @@
-package io.terminus.doctor.web.front.warehouse.dto;
+package io.terminus.doctor.event.model;
 
 import lombok.Data;
-
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Created by terminus on 2017/4/6.
+ * 猪群领用Dto
+ * Created by terminus on 2017/4/17.
  */
 @Data
-public class DoctorMaterialDatailsExportDto implements Serializable{
+public class DoctorMasterialDatailsGroup implements Serializable{
 
-    private static final long serialVersionUID = 3423060897030227862L;
+    private static final long serialVersionUID = -7816407708068074095L;
+    private Long farmId;
+    /**
+     * 物料Id
+     */
+    private Long materialId;
     /**
      * 物料名
      */
@@ -19,11 +24,11 @@ public class DoctorMaterialDatailsExportDto implements Serializable{
     /**
      * 类型
      */
-    private Long type;
+    private Integer type;
     /**
      * 物料类型
      */
-    private String materialType;
+    private Integer materialType;
     /**
      * 类型名
      */
@@ -32,6 +37,10 @@ public class DoctorMaterialDatailsExportDto implements Serializable{
      * 猪舍
      */
     private String barnName;
+    /**
+     * 猪舍Id
+     */
+    private Long barnId;
     /**
      * 时间
      */
@@ -57,9 +66,17 @@ public class DoctorMaterialDatailsExportDto implements Serializable{
      */
     private String groupName;
     /**
+     * 猪群ID
+     */
+    private Long groupId;
+    /**
      * 仓库名
      */
     private String wareHouseName;
+    /**
+     * 仓库Id
+     */
+    private Long wareHouseId;
     /**
      * 饲养员
      */
@@ -72,4 +89,10 @@ public class DoctorMaterialDatailsExportDto implements Serializable{
      * 关闭日期
      */
     private Date closeAt;
+
+    /**
+     * 刷新日期
+     */
+    private Date flushDate;
+
 }

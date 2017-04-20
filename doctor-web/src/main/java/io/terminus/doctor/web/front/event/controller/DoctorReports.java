@@ -1,9 +1,11 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
@@ -26,10 +28,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -143,7 +147,6 @@ public class DoctorReports {
             dto.setPigTypes(Splitters.splitToInteger(dto.getPigTypeCommas(), Splitters.COMMA));
         }
         Paging<DoctorGroupBatchSummary> paging = RespHelper.or500(doctorGroupBatchSummaryReadService.pagingGroupBatchSummary(dto, pageNo, pageSize));
-
         //如果猪群没有关闭，刷新下料肉比
         List<DoctorGroupBatchSummary> summaries = paging.getData().stream()
                 .map(s -> {
@@ -154,7 +157,27 @@ public class DoctorReports {
                     return s;
                 })
                 .collect(Collectors.toList());
-        return new Paging<>(paging.getTotal(), summaries);
+
+        //对批次表进行金额的注入
+        List<DoctorGroupBatchSummary> batchSummaries = summaries.stream()
+                .map(s -> {
+                    List<DoctorMaterialConsumeProvider> consumeProviders = Lists.newArrayList();
+                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,1L,null,null));
+                    s.setFeedAmount(getMaterialAmount(consumeProviders));
+                    s.setFendNumber(getMaterialNumber(consumeProviders));
+                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,2L,null,null));
+                    s.setMedicineAmount(getMaterialAmount(consumeProviders));
+                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,3L,null,null));
+                    s.setVaccineAmount(getMaterialAmount(consumeProviders));
+                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,4L,null,null));
+                    s.setMedicineAmount(getMaterialAmount(consumeProviders));
+                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,5L,null,null));
+                    s.setConsumablesAmount(getMaterialAmount(consumeProviders));
+                    return s;
+                })
+                .collect(Collectors.toList());
+
+        return new Paging<>(paging.getTotal(), batchSummaries);
     }
 
     private static String getDate(Object o) {
@@ -162,6 +185,42 @@ public class DoctorReports {
             return null;
         }
         return String.valueOf(o);
+    }
+
+    private static Double getMaterialNumber(List<DoctorMaterialConsumeProvider> doctorMaterialConsumeProviders) {
+        Double number = 0.0;
+        for (int i = 0; i < doctorMaterialConsumeProviders.size(); i++) {
+            if (doctorMaterialConsumeProviders.get(i).getExtra() != null && doctorMaterialConsumeProviders.get(i).getExtraMap().containsKey("consumePrice")) {
+                List<Map<String, Object>> priceCompose = (ArrayList) doctorMaterialConsumeProviders.get(i).getExtraMap().get("consumePrice");
+                for (Map<String, Object> eachPrice : priceCompose) {
+                    Double count = Double.valueOf(eachPrice.get("count").toString());
+                    number += count;
+                }
+            } else {
+                Double count = doctorMaterialConsumeProviders.get(i).getEventCount();
+                number += count;
+            }
+        }
+        return number;
+    }
+
+    private static Double getMaterialAmount(List<DoctorMaterialConsumeProvider> doctorMaterialConsumeProviders) {
+        Double amount = 0.0;
+        for (int i = 0; i < doctorMaterialConsumeProviders.size(); i++) {
+            if (doctorMaterialConsumeProviders.get(i).getExtra() != null && doctorMaterialConsumeProviders.get(i).getExtraMap().containsKey("consumePrice")) {
+                List<Map<String, Object>> priceCompose = (ArrayList) doctorMaterialConsumeProviders.get(i).getExtraMap().get("consumePrice");
+                for (Map<String, Object> eachPrice : priceCompose) {
+                    Long unitPrice = Long.valueOf(eachPrice.get("unitPrice").toString());
+                    Double count = Double.valueOf(eachPrice.get("count").toString());
+                    amount += unitPrice * count;
+                }
+            } else {
+                Long unitPrice = doctorMaterialConsumeProviders.get(i).getUnitPrice();
+                Double count = doctorMaterialConsumeProviders.get(i).getEventCount();
+                amount += unitPrice * count;
+            }
+        }
+        return amount;
     }
 
     /**
@@ -172,5 +231,11 @@ public class DoctorReports {
     public DoctorGroupBatchSummary getGroupBatchSummary(@RequestParam("groupId") Long groupId, @RequestParam("fcc") Double fcc) {
         DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
         return RespHelper.or500(doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(groupDetail, fcc));
+    }
+
+    @RequestMapping(value = "/getBarnLiveStocks", method = RequestMethod.GET)
+    public Map<String, Integer> getBarnLiveStocks(@RequestParam Long barnId,
+                                           @RequestParam Integer index){
+        return RespHelper.or500(doctorCommonReportReadService.findBarnLiveStock(barnId, new Date(), index));
     }
 }
