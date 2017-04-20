@@ -263,4 +263,11 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<DoctorGroupCountDto> findGroupCount(@NotNull(message = "farmId.not.null") Long farmId);
+
+    /**
+     * 查询新建猪群事件
+     * @param groupId 猪群id
+     * @return 新建猪群事件
+     */
+    Response<DoctorGroupEvent> findNewGroupEvent(@NotNull(message = "groupId.not.null") Long groupId);
 }

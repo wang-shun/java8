@@ -57,7 +57,6 @@ import io.terminus.doctor.web.front.event.dto.DoctorBatchGroupEventDto;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchNewGroupEventDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -655,10 +654,10 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
      * @param eventAt
      * @return
      */
-    private void checkEventAt(Long groupId, Date eventAt){
-        DoctorGroupEvent lastEvent = RespHelper.orServEx(doctorGroupReadService.findLastEventByGroupId(groupId));
-        if (notNull(lastEvent) && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt())) || Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date()))) {
-                throw new InvalidException("event.at.range.error", DateUtil.toDateString(lastEvent.getEventAt()), DateUtil.toDateString(new Date()), DateUtil.toDateString(eventAt));
-            }
+    private void checkEventAt(Long groupId, Date eventAt) {
+        DoctorGroupEvent newEvent = RespHelper.orServEx(doctorGroupReadService.findNewGroupEvent(groupId));
+        if (notNull(newEvent) && Dates.startOfDay(eventAt).before(Dates.startOfDay(newEvent.getEventAt()))) {
+            throw new InvalidException("move.in.event.at.before.new.event.at", DateUtil.toDateString(eventAt), DateUtil.toDateString(newEvent.getEventAt()));
         }
+    }
 }
