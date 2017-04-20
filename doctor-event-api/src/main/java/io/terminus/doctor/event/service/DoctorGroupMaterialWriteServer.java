@@ -11,12 +11,27 @@ import java.util.List;
 public interface DoctorGroupMaterialWriteServer {
     /**
      * 批量插入DoctorMasterialDatailsGroup数据
-     * @param doctorMasterialDatailsGroups
      * @return
      */
-    public Response<Boolean> insterDoctorGroupMaterial(List<DoctorMasterialDatailsGroup> doctorMasterialDatailsGroups);
+    public void insterDoctorGroupMaterialWareHouse( List<Long> farmIds, Integer flag);
     /**
      * 删除
      */
     public Response<Boolean> deleteDoctorGroupMaterial(Integer flag);
+
+    /**
+     *
+     * @param farmIds
+     * @param flag
+     * @return
+     */
+    public void insterDoctorGroupMaterialWareDetails( List<Long> farmIds, Integer flag);
+
+    /**
+     *
+     * @param farmIds
+     * @param flag
+     * @return
+     */
+    public void insterDoctorGroupMaterialWare( List<Long> farmIds, Integer flag);
 }
