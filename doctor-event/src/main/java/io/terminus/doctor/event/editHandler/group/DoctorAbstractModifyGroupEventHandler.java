@@ -21,8 +21,10 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -87,6 +89,8 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         updateDailyForModify(oldGroupEvent, input, changeDto);
 
         //8.调用触发事件的编辑
+        triggerEventModifyHandle(newEvent);
+
         log.info("modify pig event handler ending");
     }
     
@@ -153,6 +157,11 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         return null;
     }
 
+
+    protected DoctorEventChangeDto buildEventChange(BaseGroupInput oldInputDto, BaseGroupInput newInputDto) {
+        return null;
+    }
+
     @Override
     public DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         DoctorGroupEvent newEvent = new DoctorGroupEvent();
@@ -183,6 +192,12 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     protected void updateDailyForModify(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto){};
 
     /**
+     * 触发事件的编辑处理(编辑)
+     * @param newEvent 修改后事件
+     */
+    protected void triggerEventModifyHandle(DoctorGroupEvent newEvent) {}
+
+    /**
      * 删除事件校验的具体实现(删除)
      * @param deleteGroupEvent 删除事件
      */
@@ -205,10 +220,10 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     /**
      * 构建track(删除)
      * @param deleteGroupEvent 删除事件
-     * @param oldTrack 原track
+     * @param oldGroupTrack 原track
      * @return 新 track
      */
-    protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldTrack) {return null;}
+    protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {return null;}
     /**
      * 更新日记录(删除)
      * @param deleteGroupEvent 删除事件
@@ -261,7 +276,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param oldEvent 原事件
      * @param newEvent 新事件
      */
-    protected void createModifyLog(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {
+    private void createModifyLog(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {
         DoctorEventModifyLog modifyLog = DoctorEventModifyLog.builder()
                 .businessId(newEvent.getGroupId())
                 .businessCode(newEvent.getGroupCode())
@@ -271,5 +286,24 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
+    }
+
+    /**
+     * 更新猪群某天及某天之后的存栏数量
+     * @param groupId 猪群id
+     * @param sumAt 统计时间
+     * @param changeCount 存栏变化量
+     */
+    protected void updateDailyGroupLiveStock(Long groupId, Date sumAt, Integer changeCount) {
+        doctorDailyGroupDao.updateDailyGroupLiveStock(groupId, sumAt, changeCount);
+    }
+
+    /**
+     * 获取日期下一天
+     * @param date 日期
+     * @return 下一天
+     */
+    protected Date getAfterDay(Date date) {
+        return new DateTime(date).plusDays(1).toDate();
     }
 }

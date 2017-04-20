@@ -211,13 +211,13 @@ public class DoctorEventChangeDto {
      */
     private Integer groupSowQtyChange;
 
-    private Integer groupLiveQtyChange;
+//    private Integer groupLiveQtyChange;
 
     private Integer groupHealthyQtyChange;
 
     private Integer groupWeakQtyChange;
 
-    private Integer groupUnweanQtyChange;
+//    private Integer groupUnweanQtyChange;
 
     private Integer groupQuaQtyChange;
 
@@ -284,5 +284,10 @@ public class DoctorEventChangeDto {
      * 新备注
      */
     private String remark;
+
+    /**
+     * 猪群事件是否由母猪触发
+     */
+    private Boolean isSowTrigger;
 
 }

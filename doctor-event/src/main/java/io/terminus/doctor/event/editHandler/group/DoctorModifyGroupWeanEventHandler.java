@@ -9,6 +9,8 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.stereotype.Component;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 /**
  * Created by xjn on 17/4/17.
  */
@@ -20,12 +22,14 @@ public class DoctorModifyGroupWeanEventHandler extends DoctorAbstractModifyGroup
         DoctorWeanGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorWeanGroupInput.class);
         DoctorWeanGroupInput newInput = (DoctorWeanGroupInput) input;
         return DoctorEventChangeDto.builder()
+                .farmId(oldGroupEvent.getFarmId())
+                .businessId(oldGroupEvent.getGroupId())
                 .newEventAt(DateUtil.toDate(newInput.getEventAt()))
                 .oldEventAt(DateUtil.toDate(oldInput.getEventAt()))
                 .quantityChange(EventUtil.minusInt(newInput.getPartWeanPigletsCount(), oldInput.getPartWeanPigletsCount()))
-                .groupUnqQtyChange(EventUtil.minusInt(oldInput.getPartWeanPigletsCount(), newInput.getPartWeanPigletsCount()))
                 .weightChange(EventUtil.minusDouble(EventUtil.getWeight(newInput.getPartWeanAvgWeight(), newInput.getPartWeanPigletsCount())
                         , EventUtil.getWeight(oldInput.getPartWeanAvgWeight(), oldInput.getPartWeanPigletsCount())))
+                .isSowTrigger(notNull(oldGroupEvent.getSowId()))
                 .build();
     }
 
@@ -41,9 +45,17 @@ public class DoctorModifyGroupWeanEventHandler extends DoctorAbstractModifyGroup
 
     @Override
     public DoctorGroupTrack buildNewTrack(DoctorGroupTrack oldGroupTrack, DoctorEventChangeDto changeDto) {
+        oldGroupTrack.setUnweanQty(EventUtil.minusInt(oldGroupTrack.getUnweanQty(), changeDto.getQuantityChange()));
         oldGroupTrack.setWeanQty(EventUtil.plusInt(oldGroupTrack.getWeanQty(), changeDto.getQuantityChange()));
-        oldGroupTrack.setUnweanQty(EventUtil.plusInt(oldGroupTrack.getUnweanQty(), changeDto.getGroupUnweanQtyChange()));
         oldGroupTrack.setWeanWeight(EventUtil.plusDouble(oldGroupTrack.getWeanWeight(), changeDto.getWeightChange()));
+        return oldGroupTrack;
+    }
+
+    @Override
+    protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {
+        oldGroupTrack.setUnweanQty(EventUtil.plusInt(oldGroupTrack.getUnweanQty(), deleteGroupEvent.getQuantity()));
+        oldGroupTrack.setWeanQty(EventUtil.minusInt(oldGroupTrack.getWeanQty(), deleteGroupEvent.getQuantity()));
+        oldGroupTrack.setWeanWeight(EventUtil.minusDouble(oldGroupTrack.getWeanWeight(), deleteGroupEvent.getWeight()));
         return oldGroupTrack;
     }
 }

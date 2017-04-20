@@ -108,15 +108,13 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Override
     public Boolean canRollback(DoctorPigEvent deletePigEvent) {
         return Objects.equals(deletePigEvent.getIsAuto(), IsOrNot.NO.getValue())
-                && Objects.equals(deletePigEvent.getEventSource(), SourceType.INPUT.getValue());
+                && Objects.equals(deletePigEvent.getEventSource(), SourceType.INPUT.getValue())
+                && rollbackHandleCheck(deletePigEvent);
     }
 
     @Override
     public void rollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
        log.info("rollback handle starting, deletePigEvent:{}", deletePigEvent);
-
-        //1.删除校验
-        rollbackHandleCheck(deletePigEvent);
 
         //2.删除触发事件
         triggerEventRollbackHandle(deletePigEvent, operatorId, operatorName);
@@ -219,8 +217,8 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * 子类的具体实现(删除)
      * @param deletePigEvent 删除事件
      */
-    protected void rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
-
+    protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
+        return true;
     }
 
     /**
