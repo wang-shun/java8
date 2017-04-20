@@ -11,7 +11,7 @@ import java.util.Date;
  * Date: 2017-04-19
  */
 @Data
-public class DoctorRangeReport implements Serializable {
+public class DoctorRangeReport extends DoctorIndicatorReport implements Serializable {
     private static final long serialVersionUID = 5062599644349888732L;
 
     private Long id;
@@ -31,66 +31,6 @@ public class DoctorRangeReport implements Serializable {
      * 统计时间
      */
     private String sumAt;
-    
-    /**
-     * 估算受胎率
-     */
-    private Double mateEstimatePregRate;
-    
-    /**
-     * 实际受胎率
-     */
-    private Double mateRealPregRate;
-    
-    /**
-     * 估算配种分娩率
-     */
-    private Double mateEstimateFarrowingRate;
-    
-    /**
-     * 实际配种分娩率
-     */
-    private Double mateRealFarrowingRate;
-    
-    /**
-     * 窝均断奶数
-     */
-    private Double weanAvgCount;
-    
-    /**
-     * 窝均断奶日龄
-     */
-    private Double weanAvgDayAge;
-    
-    /**
-     * 产房死淘率
-     */
-    private Double deadFarrowRate;
-    
-    /**
-     * 保育死淘率
-     */
-    private Double deadNurseryRate;
-    
-    /**
-     * 育肥死淘率
-     */
-    private Double deadFattenRate;
-    
-    /**
-     * 非生产天数
-     */
-    private Double npd;
-    
-    /**
-     * psy
-     */
-    private Double psy;
-    
-    /**
-     * 断奶七天配种率
-     */
-    private Double mateInSeven;
     
     /**
      * 创建时间

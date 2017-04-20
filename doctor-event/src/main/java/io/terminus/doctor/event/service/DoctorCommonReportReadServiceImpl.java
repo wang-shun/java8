@@ -7,22 +7,15 @@ import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
-import io.terminus.doctor.event.dao.DoctorBoarMonthlyReportDao;
-import io.terminus.doctor.event.dao.DoctorKpiDao;
-import io.terminus.doctor.event.dao.DoctorMonthlyReportDao;
-import io.terminus.doctor.event.dao.DoctorParityMonthlyReportDao;
-import io.terminus.doctor.event.dao.DoctorWeeklyReportDao;
+import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
-import io.terminus.doctor.event.model.DoctorBoarMonthlyReport;
-import io.terminus.doctor.event.model.DoctorMonthlyReport;
-import io.terminus.doctor.event.model.DoctorParityMonthlyReport;
-import io.terminus.doctor.event.model.DoctorWeeklyReport;
+import io.terminus.doctor.event.enums.ReportRangeType;
+import io.terminus.doctor.event.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,18 +49,21 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     private final DoctorParityMonthlyReportDao doctorParityMonthlyReportDao;
     private final DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao;
     private final DoctorKpiDao doctorKpiDao;
+    private final DoctorRangeReportDao doctorRangeReportDao;
 
     @Autowired
     public DoctorCommonReportReadServiceImpl(DoctorMonthlyReportDao doctorMonthlyReportDao,
                                              DoctorWeeklyReportDao doctorWeeklyReportDao,
                                              DoctorParityMonthlyReportDao doctorParityMonthlyReportDao,
                                              DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao,
-                                             DoctorKpiDao doctorKpiDao) {
+                                             DoctorKpiDao doctorKpiDao,
+                                             DoctorRangeReportDao doctorRangeReportDao) {
         this.doctorMonthlyReportDao = doctorMonthlyReportDao;
         this.doctorWeeklyReportDao = doctorWeeklyReportDao;
         this.doctorParityMonthlyReportDao = doctorParityMonthlyReportDao;
         this.doctorBoarMonthlyReportDao = doctorBoarMonthlyReportDao;
         this.doctorKpiDao = doctorKpiDao;
+        this.doctorRangeReportDao = doctorRangeReportDao;
     }
 
     @Override
@@ -82,7 +78,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 date = getLastDay(DateUtil.toYYYYMM(sumAt));
             }
 
-            String monthStr = DateUtil.getDateStr(date);
+            String monthStr = DateUtil.getYearMonth(date);
 
             //如果查询未来的数据, 返回失败查询
             if (new DateTime(date).isAfter(DateUtil.getDateEnd(DateTime.now()))) {
@@ -90,7 +86,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             }
 
             //查询月报结果, 如果没查到, 返回失败的结果
-            DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, date);
+            DoctorRangeReport report = doctorRangeReportDao.findByRangeReport(farmId, ReportRangeType.MONTH.getValue(), date);
             if (report == null) {
                 return Response.ok(failReportTrend(monthStr));
             }

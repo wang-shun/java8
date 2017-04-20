@@ -69,7 +69,7 @@ public class DoctorReports {
     public DoctorDailyReportDto findDailyReportByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
                                                                 @RequestParam("date") String date) {
         DoctorDailyReportDto doctorDailyReportDto = new DoctorDailyReportDto();
-        if(DateUtil.toDate(date).after(new Date())){
+        if(DateUtil.toDate(date).after(DateUtil.getDateEnd(DateTime.now()).toDate())){
             doctorDailyReportDto.setFail(true);
             return doctorDailyReportDto;
         }

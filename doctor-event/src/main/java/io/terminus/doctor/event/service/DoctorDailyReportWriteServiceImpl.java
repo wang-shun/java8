@@ -131,7 +131,7 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
     private DoctorDailyReport getdoctorDailyReport(Long farmId, Date startAt, Date endAt) {
         DoctorDailyReport doctorDailyReport = new DoctorDailyReport();
         doctorDailyReport.setFarmId(farmId);
-        doctorDailyReport.setSumAt(startAt);
+        doctorDailyReport.setSumAt(DateUtil.toDateString(startAt));
         doctorDailyReport.setSowPh(doctorKpiDao.realTimeLiveStockPHSow(farmId, startAt));
         doctorDailyReport.setSowCf(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));
         //母猪存栏变化
@@ -184,7 +184,7 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
 
     private DoctorDailyReport caculateIndicator(DoctorDailyReport doctorDailyReport){
         Long farmId = doctorDailyReport.getFarmId();
-        Date startAt = doctorDailyReport.getSumAt();
+        Date startAt = DateUtil.toDate(doctorDailyReport.getSumAt());
         Date endAt = DateUtil.getDateEnd(new DateTime(startAt)).toDate();
 
         DoctorLiveStockChangeCommonReport changeCommonReport = doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId, startAt, endAt);

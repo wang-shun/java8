@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dao;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorGroupStock;
 import org.springframework.stereotype.Repository;
 
@@ -43,12 +44,26 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
     }
 
     /**
-     * 获取后一天的存栏
+     * 获取某一天的存栏
      * @param farmId
      * @param sumAt
      * @return
      */
     public DoctorGroupStock getGroupStock(Long farmId, String sumAt) {
         return getSqlSession().selectOne(sqlId("getGroupStock"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+    }
+
+    /**
+     * 获取某一天的存栏
+     * @param farmId
+     * @param sumAt
+     * @return
+     */
+    public DoctorGroupStock getGroupStock(Long farmId, Date sumAt) {
+        return getSqlSession().selectOne(sqlId("getGroupStock"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+    }
+
+    public List<DoctorDailyReport> findBySumAt(Date sumAt) {
+        return getSqlSession().selectList(sqlId("findBySumAt"), ImmutableMap.of("sumAt", sumAt));
     }
 }

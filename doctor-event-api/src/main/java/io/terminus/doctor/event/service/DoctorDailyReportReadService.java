@@ -61,5 +61,5 @@ public interface DoctorDailyReportReadService {
      * @param date
      * @return
      */
-    Response<List<DoctorDailyReport>> findDailyReportBySumAt(Date date);
+    Response<List<DoctorDailyReportDto>> findDailyReportBySumAt(Date date);
 }
