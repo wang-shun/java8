@@ -92,15 +92,17 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
             DoctorDailyPig oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
             doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
         } else {
-            //更新新时间的日记录
-            DoctorDailyPig oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
             DoctorFarrowingDto farrowingDto1 = (DoctorFarrowingDto) inputDto;
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, buildEventChange(new DoctorFarrowingDto(), farrowingDto1)));
+            DoctorEventChangeDto changeDto1 = buildEventChange(new DoctorFarrowingDto(), farrowingDto1);
+            DoctorFarrowingDto farrowingDto2 = JSON_MAPPER.fromJson(oldEvent.getExtra(), DoctorFarrowingDto.class);
+            DoctorEventChangeDto changeDto2 = buildEventChange(farrowingDto2, new DoctorFarrowingDto());
+
+            DoctorDailyPig oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
+            doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
 
             //更新原时间的日记录
             DoctorDailyPig oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
-            DoctorFarrowingDto farrowingDto2 = JSON_MAPPER.fromJson(oldEvent.getExtra(), DoctorFarrowingDto.class);
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, buildEventChange(farrowingDto2, new DoctorFarrowingDto())));
+            doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
         }
     }
 

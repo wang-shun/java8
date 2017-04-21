@@ -21,6 +21,7 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
@@ -29,7 +30,7 @@ import java.util.Objects;
  * Author: luoys
  * Date: 10:45 2017/4/15
  */
-
+@Component
 public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyGroupEventHandler{
     @Autowired
     private DoctorModifyPigEntryEventHandler doctorModifyPigEntryEventHandler;

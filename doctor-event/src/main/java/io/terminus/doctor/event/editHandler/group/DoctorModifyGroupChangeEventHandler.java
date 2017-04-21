@@ -9,6 +9,7 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import org.joda.time.DateTime;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
@@ -19,7 +20,7 @@ import static io.terminus.common.utils.Arguments.notNull;
  * Author: luoys
  * Date: 14:01 2017/4/15
  */
-
+@Component
 public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGroupEventHandler {
 
     @Override
@@ -95,7 +96,11 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
 
     @Override
     protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {
-        return super.buildNewTrackForRollback(deleteGroupEvent, oldGroupTrack);
+        oldGroupTrack.setQuantity(EventUtil.plusInt(oldGroupTrack.getQuantity(), deleteGroupEvent.getQuantity()));
+        if (notNull(deleteGroupEvent.getSowId())) {
+            oldGroupTrack.setUnweanQty(EventUtil.plusInt(oldGroupTrack.getUnweanQty(), deleteGroupEvent.getQuantity()));
+        }
+        return oldGroupTrack;
     }
 
     @Override

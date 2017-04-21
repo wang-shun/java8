@@ -7,5 +7,5 @@ import org.springframework.stereotype.Component;
  * 转舍
  */
 @Component
-public class DoctorModifyPigChgLocationEventHandlers extends DoctorAbstractModifyPigEventHandler {
+public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModifyPigEventHandler {
 }

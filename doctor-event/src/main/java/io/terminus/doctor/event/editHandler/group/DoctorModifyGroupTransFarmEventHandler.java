@@ -6,13 +6,14 @@ import io.terminus.doctor.event.dto.event.group.input.*;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.util.EventUtil;
 import org.joda.time.DateTime;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by IntelliJ IDEA.
  * Author: luoys
  * Date: 16:10 2017/4/15
  */
-
+@Component
 public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModifyGroupEventHandler{
 
     @Override

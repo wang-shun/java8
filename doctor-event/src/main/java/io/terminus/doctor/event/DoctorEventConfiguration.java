@@ -7,10 +7,28 @@ import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupChangeEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigFarrowEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransFarmEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransGroupEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTurnSeedEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupWeanEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgLocationEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigConditionEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigDiseaseEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEntryEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigFarrowEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigFosterByEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigFosterEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigMatingEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPigletsChgHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPregCheckEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigSemenEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigVaccinEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigWeanEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
@@ -19,7 +37,18 @@ import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
-import io.terminus.doctor.event.handler.group.*;
+import io.terminus.doctor.event.handler.group.DoctorAntiepidemicGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorCloseGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorDiseaseGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorGroupEventHandlers;
+import io.terminus.doctor.event.handler.group.DoctorLiveStockGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorMoveInGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorNewGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorWeanGroupEventHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgFarmEventHandler;
 import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgLocationEventHandler;
@@ -82,8 +111,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 import java.util.Map;
-
-import static javafx.scene.input.KeyCode.R;
 
 /**
  * Created by yaoqijun.
@@ -264,18 +291,56 @@ public class  DoctorEventConfiguration {
     }
 
     @Bean
-    public DoctorModifyPigEventHandlers doctorModifyPigEventHandlers(DoctorModifyPigFarrowEventHandler modifyFarrowEventHandler) {
+    public DoctorModifyPigEventHandlers doctorModifyPigEventHandlers(
+            DoctorModifyPigChgFarmEventHandler modifyPigChgFarmEventHandler,
+            DoctorModifyPigChgLocationEventHandler modifyPigChgLocationEventHandler,
+            DoctorModifyPigConditionEventHandler modifyPigConditionEventHandler,
+            DoctorModifyPigDiseaseEventHandler modifyPigDiseaseEventHandler,
+            DoctorModifyPigEntryEventHandler modifyPigEntryEventHandler,
+            DoctorModifyPigFarrowEventHandler modifyFarrowEventHandler,
+            DoctorModifyPigFosterByEventHandler modifyPigFosterByEventHandler,
+            DoctorModifyPigFosterEventHandler modifyPigFosterEventHandler,
+            DoctorModifyPigMatingEventHandler modifyPigMatingEventHandler,
+            DoctorModifyPigPigletsChgHandler modifyPigPigletsChgHandler,
+            DoctorModifyPigPregCheckEventHandler modifyPigPregCheckEventHandler,
+            DoctorModifyPigSemenEventHandler modifyPigSemenEventHandler,
+            DoctorModifyPigVaccinEventHandler modifyPigVaccinEventHandler,
+            DoctorModifyPigWeanEventHandler modifyPigWeanEventHandler) {
         Map<Integer, DoctorModifyPigEventHandler> modifyPigEventHandlerMap = Maps.newHashMap();
+        modifyPigEventHandlerMap.put(PigEvent.CHG_FARM.getKey(), modifyPigChgFarmEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.CHG_LOCATION.getKey(), modifyPigChgLocationEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.CONDITION.getKey(), modifyPigConditionEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.DISEASE.getKey(), modifyPigDiseaseEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.ENTRY.getKey(), modifyPigEntryEventHandler);
         modifyPigEventHandlerMap.put(PigEvent.FARROWING.getKey(), modifyFarrowEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.FOSTERS_BY.getKey(), modifyPigFosterByEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.FOSTERS.getKey(), modifyPigFosterEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.MATING.getKey(), modifyPigMatingEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.PIGLETS_CHG.getKey(), modifyPigPigletsChgHandler);
+        modifyPigEventHandlerMap.put(PigEvent.PREG_CHECK.getKey(), modifyPigPregCheckEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.SEMEN.getKey(), modifyPigSemenEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.VACCINATION.getKey(), modifyPigVaccinEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.WEAN.getKey(), modifyPigWeanEventHandler);
         DoctorModifyPigEventHandlers modifyPigEventHandlers = new DoctorModifyPigEventHandlers();
         modifyPigEventHandlers.setModifyPigEventHandlerMap(modifyPigEventHandlerMap);
         return modifyPigEventHandlers;
     }
 
     @Bean
-    public DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers(DoctorModifyGroupMoveInEventHandler modifyMoveInEventHandler) {
+    public DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers(
+            DoctorModifyGroupChangeEventHandler modifyGroupChangeEventHandler,
+            DoctorModifyGroupMoveInEventHandler modifyMoveInEventHandler,
+            DoctorModifyGroupTransFarmEventHandler modifyGroupTransFarmEventHandler,
+            DoctorModifyGroupTransGroupEventHandler modifyGroupTransGroupEventHandler,
+            DoctorModifyGroupTurnSeedEventHandler modifyGroupTurnSeedEventHandler,
+            DoctorModifyGroupWeanEventHandler modifyGroupWeanEventHandler) {
         Map<Integer, DoctorModifyGroupEventHandler> modifyGroupEventHandlerMap = Maps.newHashMap();
+        modifyGroupEventHandlerMap.put(GroupEventType.CHANGE.getValue(), modifyGroupChangeEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.MOVE_IN.getValue(), modifyMoveInEventHandler);
+        modifyGroupEventHandlerMap.put(GroupEventType.TRANS_FARM.getValue(), modifyGroupTransFarmEventHandler);
+        modifyGroupEventHandlerMap.put(GroupEventType.TRANS_GROUP.getValue(), modifyGroupTransGroupEventHandler);
+        modifyGroupEventHandlerMap.put(GroupEventType.TURN_SEED.getValue(), modifyGroupTurnSeedEventHandler);
+        modifyGroupEventHandlerMap.put(GroupEventType.WEAN.getValue(), modifyGroupWeanEventHandler);
         DoctorModifyGroupEventHandlers modifyGroupEventHandlers = new DoctorModifyGroupEventHandlers();
         modifyGroupEventHandlers.setModifyGroupEventHandlerMap(modifyGroupEventHandlerMap);
         return modifyGroupEventHandlers;

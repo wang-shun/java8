@@ -255,10 +255,11 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 是否需要更新猪(编辑)
+     *
      * @param changeDto 变化记录
      * @return
      */
-    private boolean isUpdatePig(DoctorEventChangeDto changeDto){
+    private boolean isUpdatePig(DoctorEventChangeDto changeDto) {
         return notNull(changeDto)
                 && (notNull(changeDto.getSource())
                 || notNull(changeDto.getBirthDate())
