@@ -122,6 +122,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         dto.setDailyReport(report);
         DoctorGroupChangeSum groupChangeSum = doctorDailyGroupDao.getGroupChangeSum(report.getFarmId(), report.getSumAt());
         dto.setGroupChangeSum(groupChangeSum);
+        dto.setFattenWillOut(doctorDailyGroupDao.findFattenWillOut(report.getFarmId(), report.getSumAt()));
         return dto;
     }
 }

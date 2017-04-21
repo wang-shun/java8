@@ -184,10 +184,10 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         Date endAt = report.getSumTo();
         doctorCommonReportDto.setFarmId(report.getFarmId());
         doctorCommonReportDto.setDate(report.getSumAt());
-        DoctorBaseReport pigChangeReport = doctorDailyReportDao.findPigChangeSum(farmId, startAt, endAt);
+        DoctorDailyReportSum dailyReportSum = doctorDailyReportDao.findDailyReportSum(farmId, startAt, endAt);
         DoctorGroupChangeSum groupChangeSum = doctorDailyGroupDao.getGroupChangeSum(farmId, startAt, endAt);
 
-        doctorCommonReportDto.setChangeReport(pigChangeReport);
+        doctorCommonReportDto.setChangeReport(dailyReportSum);
         doctorCommonReportDto.setGroupChangeReport(groupChangeSum);
         doctorCommonReportDto.setIndicatorReport(report);
 

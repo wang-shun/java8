@@ -6,6 +6,7 @@ import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.model.DoctorBaseReport;
 import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.model.DoctorDailyReportSum;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -35,7 +36,7 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
         getSqlSession().delete(sqlId("deleteByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
     }
 
-    public DoctorBaseReport findPigChangeSum(Long farmId, Date startAt, Date endAt) {
-        return getSqlSession().selectOne(sqlId("findPigChangeSum"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    public DoctorDailyReportSum findDailyReportSum(Long farmId, Date startAt, Date endAt) {
+        return getSqlSession().selectOne(sqlId("findDailyReportSum"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 }

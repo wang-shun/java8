@@ -433,8 +433,13 @@
         WHERE sum_at = #{sumAt}
     </select>
 
-    <select id="findPigChangeSum" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorBaseReport">
+    <select id="findDailyReportSum" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorDailyReportSum">
         select
+            sum(mate_hb+mate_dn+mate_fq+mate_lc+mate_yx) as preFarrowCount,
+            sum(farrow_live)/sum(farrow_nest) as farrowAvgLive,
+            sum(farrow_health)/sum(farrow_nest) as farrowAvgHealth,
+            sum(farrow_weak)/sum(farrow_nest) as farrowAvgWeak,
+            sum(wean_count)/sum(wean_nest) as avgWeanCount,
             sum(case when sum_at = #{startAt} then sow_start else 0 end) as sowStart,
             sum(sow_in) as sowIn,
             sum(sow_dead) as sowDead,

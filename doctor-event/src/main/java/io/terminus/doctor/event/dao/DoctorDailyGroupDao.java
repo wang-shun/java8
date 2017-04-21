@@ -120,4 +120,7 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
         getSqlSession().update(sqlId("updateDailyGroupLiveStock"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt, "changeCount", changeCount));
     }
 
+    public Integer findFattenWillOut(Long farmId, String sumAt) {
+        return getSqlSession().selectOne(sqlId("findFattenWillOut"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+    }
 }

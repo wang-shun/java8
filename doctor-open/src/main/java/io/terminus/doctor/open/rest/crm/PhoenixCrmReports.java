@@ -8,9 +8,15 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.model.DoctorBaseReport;
+import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.model.DoctorGroupChangeSum;
 import io.terminus.doctor.event.service.DoctorCommonReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.util.EventUtil;
+import io.terminus.doctor.open.dto.DoctorDailyReportOpen;
 import io.terminus.doctor.open.dto.DoctorGroupLiveStockDetailOpen;
 import io.terminus.doctor.open.dto.DoctorMonthlyReportOpen;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -19,6 +25,7 @@ import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,26 +78,68 @@ public class PhoenixCrmReports {
      */
     @OpenMethod(key = "get.daily.report", paramNames = "date")
     public String getDailyReport(@NotEmpty(message = "date.not.empty") String date) {
-//        Response<List<DoctorDailyReport>> dailyReportsResponse = doctorDailyReportReadService.findDailyReportBySumAt(DTF.parseDateTime(date).toDate());
-//        if (!dailyReportsResponse.isSuccess() || Arguments.isNullOrEmpty(dailyReportsResponse.getResult())) {
-//            return "";
-//        }
-//        Response<List<DoctorFarm>> farmsResponse = doctorFarmReadService.findAllFarms();
-//        if (!farmsResponse.isSuccess()) {
-//            return "";
-//        }
-//        Response<Map<Long, Integer>> mapResponse = doctorGroupReadService.queryFattenOutBySumAt(date);
+        Response<List<DoctorDailyReportDto>> dailyReportsResponse = doctorDailyReportReadService.findDailyReportBySumAt(DTF.parseDateTime(date).toDate());
+        if (!dailyReportsResponse.isSuccess() || Arguments.isNullOrEmpty(dailyReportsResponse.getResult())) {
+            return "";
+        }
+        Response<List<DoctorFarm>> farmsResponse = doctorFarmReadService.findAllFarms();
+        if (!farmsResponse.isSuccess()) {
+            return "";
+        }
+        Response<Map<Long, Integer>> mapResponse = doctorGroupReadService.queryFattenOutBySumAt(date);
 //        Map<Long, Integer> fattenOutMap = mapResponse.getResult();
-//        Map<Long, String> farmMap = farmsResponse.getResult().stream().collect(Collectors.toMap(k -> k.getId(), v -> v.getName()));
-//        List<DoctorDailyReportOpen> doctorDailyReportDtos = dailyReportsResponse.getResult().stream().map(doctorDailyReport -> {
-//            DoctorDailyReportOpen doctorDailyReportOpen = new DoctorDailyReportOpen();
-////            BeanMapper.copy(doctorDailyReport.getReportData(), doctorDailyReportOpen);
-//            doctorDailyReportOpen.setFarmName(farmMap.get(doctorDailyReport.getFarmId()));
-//            doctorDailyReportOpen.getLiveStock().setFattenOut(fattenOutMap.containsKey(doctorDailyReport.getFarmId()) ? fattenOutMap.get(doctorDailyReport.getFarmId()) : 0);
-//            return doctorDailyReportOpen;
-//        }).collect(Collectors.toList());
-//        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(doctorDailyReportDtos);
-        return null;
+        Map<Long, String> farmMap = farmsResponse.getResult().stream().collect(Collectors.toMap(k -> k.getId(), v -> v.getName()));
+        List<DoctorDailyReportOpen> doctorDailyReportDtos = dailyReportsResponse.getResult().stream().map(doctorDailyReportDto -> {
+            DoctorDailyReportOpen doctorDailyReportOpen = new DoctorDailyReportOpen();
+//            BeanMapper.copy(doctorDailyReport.getReportData(), doctorDailyReportOpen);
+            DoctorDailyReport pigDailyReport = doctorDailyReportDto.getDailyReport();
+            DoctorGroupChangeSum groupDailyReport = doctorDailyReportDto.getGroupChangeSum();
+
+            doctorDailyReportOpen.setFarmName(farmMap.get(pigDailyReport.getFarmId()));
+            doctorDailyReportOpen.setSumAt(DateTime.parse(pigDailyReport.getSumAt()).toDate());
+
+            doctorDailyReportOpen.getMating().setHoubei(pigDailyReport.getMateHb());
+            doctorDailyReportOpen.getMating().setDuannai(pigDailyReport.getMateDn());
+            doctorDailyReportOpen.getMating().setFanqing(pigDailyReport.getMateFq());
+            doctorDailyReportOpen.getMating().setLiuchan(pigDailyReport.getMateLc());
+
+            doctorDailyReportOpen.getCheckPreg().setPositive(pigDailyReport.getPregPositive());
+            doctorDailyReportOpen.getCheckPreg().setNegative(pigDailyReport.getPregNegative());
+            doctorDailyReportOpen.getCheckPreg().setFanqing(pigDailyReport.getPregFanqing());
+            doctorDailyReportOpen.getCheckPreg().setLiuchan(pigDailyReport.getPregLiuchan());
+
+            doctorDailyReportOpen.getDeliver().setNest(pigDailyReport.getFarrowNest());
+            doctorDailyReportOpen.getDeliver().setLive(pigDailyReport.getFarrowLive());
+            doctorDailyReportOpen.getDeliver().setHealth(pigDailyReport.getFarrowHealth());
+            doctorDailyReportOpen.getDeliver().setWeak(pigDailyReport.getFarrowWeak());
+            doctorDailyReportOpen.getDeliver().setBlack(pigDailyReport.getFarrowSjmh());
+
+            doctorDailyReportOpen.getWean().setCount(pigDailyReport.getWeanCount());
+            doctorDailyReportOpen.getWean().setWeight(pigDailyReport.getWeanAvgWeight());
+
+            doctorDailyReportOpen.getLiveStock().setPeihuaiSow(pigDailyReport.getSowPh());
+            doctorDailyReportOpen.getLiveStock().setBuruSow(pigDailyReport.getSowCf());
+            doctorDailyReportOpen.getLiveStock().setHoubeiSow(groupDailyReport.getHoubeiEnd());
+            doctorDailyReportOpen.getLiveStock().setBoar(pigDailyReport.getBoarEnd());
+            doctorDailyReportOpen.getLiveStock().setFarrow(groupDailyReport.getFarrowEnd());
+            doctorDailyReportOpen.getLiveStock().setNursery(groupDailyReport.getNurseryEnd());
+            doctorDailyReportOpen.getLiveStock().setFatten(groupDailyReport.getFattenEnd());
+            doctorDailyReportOpen.getLiveStock().setFattenOut(doctorDailyReportDto.getFattenWillOut());
+
+            doctorDailyReportOpen.getDead().setSow(pigDailyReport.getSowDead());
+            doctorDailyReportOpen.getDead().setBoar(pigDailyReport.getBoarDead());
+            doctorDailyReportOpen.getDead().setFarrow(groupDailyReport.getFarrowDead());
+            doctorDailyReportOpen.getDead().setNursery(groupDailyReport.getNurseryDead());
+            doctorDailyReportOpen.getDead().setFatten(groupDailyReport.getFattenDead());
+
+            doctorDailyReportOpen.getSale().setSow(pigDailyReport.getSowSale());
+            doctorDailyReportOpen.getSale().setBoar(pigDailyReport.getBoarSale());
+            doctorDailyReportOpen.getSale().setNursery(EventUtil.plusInt(groupDailyReport.getFarrowSale(), groupDailyReport.getNurserySale()));
+            doctorDailyReportOpen.getSale().setFatten(groupDailyReport.getFattenSale());
+
+            return doctorDailyReportOpen;
+        }).collect(Collectors.toList());
+        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(doctorDailyReportDtos);
     }
 
     /**

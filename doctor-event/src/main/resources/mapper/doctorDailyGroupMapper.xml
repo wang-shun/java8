@@ -281,5 +281,16 @@
         group_id = #{groupId}
         AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
     </update>
+    
+    <select id="findFattenWillOut" parameterType="map" resultType="int">
+        select
+        sum(`end`)
+        from doctor_daily_groups a
+        left join doctor_group_tracks b on a.group_id = b.group_id
+        where a.`type` = 3
+          and a.farm_id = 1
+          and a.sum_at = #{sumAt}
+          and b.birth_date &lt;= date_add(date(#{sumAt}), interval -180 day)    -- 日龄180的育肥猪
+    </select>
 
 </mapper>
