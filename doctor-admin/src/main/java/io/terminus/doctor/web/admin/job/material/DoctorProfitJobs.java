@@ -56,8 +56,8 @@ public class DoctorProfitJobs {
      * 猪场利润的计算
      * 每天凌晨1点统计昨天的数据
      */
-//    @Scheduled(cron = "0 0 1 * * ?")
-    @Scheduled(cron = "0 */1 * * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
+//    @Scheduled(cron = "0 */1 * * * ?")
     @RequestMapping(value = "/profit", method = RequestMethod.GET)
     public void profitReport() {
 

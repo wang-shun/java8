@@ -41,7 +41,7 @@ public class DoctorGroupMaterialWriteServerImpl implements DoctorGroupMaterialWr
                 public void run() {
                     doctorGroupMaterialDao.insterDoctorGroupMaterials(doctorMasterialDatailsGroups);
                 }
-            }).start();
+            }, "insterDoctorGroupMaterialWareDetails").start();
             return Response.ok(Boolean.TRUE);
             } catch (Exception e) {
             log.error("inster insterDoctorGroupMaterialWareDetails fail, caues:{}", Throwables.getStackTraceAsString(e));

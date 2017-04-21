@@ -42,8 +42,8 @@ public class DoctorGroupMaterialJobs {
     }
 
     private final static Integer GROUP = 0;
-//    @Scheduled(cron = "0 0 1 * * ?")
-    @Scheduled(cron = "0 */1 * * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
+//    @Scheduled(cron = "0 */1 * * * ?")
     @RequestMapping(value = "/group", method = RequestMethod.GET)
     public void groupMaterialReport() {
         try {
