@@ -136,7 +136,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     public Response<List<DoctorCommonReportDto>> findMonthlyReports(@NotNull(message = "date.not.null") String sumAt) {
         try {
             //如果查询未来的数据, 返回失败查询
-            if (new DateTime(DateUtil.toDate(sumAt)).isAfter(DateUtil.getDateEnd(DateTime.now()))) {
+            if (sumAt.substring(0,6).compareTo(DateUtil.getYearMonth(new Date())) == 1) {
                 return Response.fail("find.monthly.report.data.failed");
             }
             List<DoctorCommonReportDto> commonReportDtos = Lists.newArrayList();

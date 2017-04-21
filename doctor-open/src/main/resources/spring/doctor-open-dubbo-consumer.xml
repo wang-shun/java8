@@ -69,6 +69,8 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorDailyReportReadService" id="doctorDailyReportReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorCommonReportReadService" id="doctorCommonReportReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupReadService" id="doctorGroupReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorDailyGroupReadService" id="doctorDailyGroupReadService" check="false"/>
+
 
     <!-- Doctor Message Service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorMessageReadService" id="doctorMessageReadService" check="false"/>

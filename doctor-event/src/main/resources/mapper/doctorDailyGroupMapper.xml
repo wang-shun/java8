@@ -261,7 +261,7 @@
         sum(case when type = 4  then `outer_out` else 0 END) as houbeiOuterOut,
         sum(case when type = 4 and sum_at = #{endAt} then `end` else 0 END) as houbeiEnd
         from doctor_daily_groups
-        where farm_id = 1
+        where farm_id = #{farmId}
         and sum_at &gt;= #{startAt}
         and sum_at &lt;= #{endAt}
     </select>
@@ -291,6 +291,11 @@
           and a.farm_id = 1
           and a.sum_at = #{sumAt}
           and b.birth_date &lt;= date_add(date(#{sumAt}), interval -180 day)    -- 日龄180的育肥猪
+    </select>
+
+    <select id="findGroupInfoBySumAt" parameterType="map" resultMap="DoctorDailyGroupMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE sum_at = #{sumAt}
     </select>
 
 </mapper>

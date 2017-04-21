@@ -54,7 +54,7 @@ public interface DoctorDailyReportReadService {
      * @param endAt
      * @return
      */
-    Response<List<DoctorDailyReportDto>> findDailyReportDtoByFarmIdAndRange(Long farmId, String startAt, String endAt);
+    Response<List<DoctorDailyReport>> findDailyReportDtoByFarmIdAndRange(Long farmId, String startAt, String endAt);
 
     /**
      * 根据日期查询日报

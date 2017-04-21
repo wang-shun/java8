@@ -37,4 +37,14 @@ public class DoctorDailyGroupReadServiceImpl implements DoctorDailyGroupReadServ
             return Response.fail("doctorDailyGroup.find.fail");
         }
     }
+
+    @Override
+    public Response<List<DoctorDailyGroup>> findGroupInfoBySumAt(String sumAt) {
+        try {
+            return Response.ok(doctorDailyGroupDao.findGroupInfoBySumAt(sumAt));
+        } catch (Exception e) {
+            log.error("find doctorDailyGroups by sumAt failed, sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctorDailyGroup.find.fail");
+        }
+    }
 }

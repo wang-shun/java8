@@ -343,4 +343,11 @@ public class DateUtil {
         }
         return new DateTime(DateUtil.weekEnd(yearDate.plusWeeks(week).toDate()));
     }
+
+    public static Date getMonthEndOrToday(DateTime datetime) {
+        if(datetime.isBeforeNow()){
+            return DateUtil.getMonthEnd(datetime).toDate();
+        }
+        return new Date();
+    }
 }

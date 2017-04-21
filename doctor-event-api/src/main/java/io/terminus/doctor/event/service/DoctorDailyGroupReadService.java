@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,4 +20,6 @@ public interface DoctorDailyGroupReadService {
      * @return 猪群数量每天记录表
      */
     Response<DoctorDailyGroup> findDoctorDailyGroupById(Long doctorDailyGroupId);
+
+    Response<List<DoctorDailyGroup>> findGroupInfoBySumAt(String sumAt);
 }

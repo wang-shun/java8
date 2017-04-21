@@ -1,20 +1,22 @@
 package io.terminus.doctor.open.rest.crm;
 
 import com.github.kevinsawicki.http.HttpRequest;
+import com.google.api.client.util.Lists;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
-import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
+import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
-import io.terminus.doctor.event.model.DoctorBaseReport;
-import io.terminus.doctor.event.model.DoctorDailyReport;
-import io.terminus.doctor.event.model.DoctorGroupChangeSum;
-import io.terminus.doctor.event.service.DoctorCommonReportReadService;
-import io.terminus.doctor.event.service.DoctorDailyReportReadService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.doctor.open.dto.DoctorDailyReportOpen;
 import io.terminus.doctor.open.dto.DoctorGroupLiveStockDetailOpen;
@@ -50,6 +52,7 @@ public class PhoenixCrmReports {
     private final DoctorDailyReportReadService doctorDailyReportReadService;
     private final DoctorCommonReportReadService doctorCommonReportReadService;
     private final DoctorFarmReadService doctorFarmReadService;
+    private final DoctorDailyGroupReadService doctorDailyGroupReadService;
     private final DoctorGroupReadService doctorGroupReadService;
 
     private final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
@@ -61,10 +64,12 @@ public class PhoenixCrmReports {
     public PhoenixCrmReports(DoctorDailyReportReadService doctorDailyReportReadService,
                              DoctorCommonReportReadService doctorCommonReportReadService,
                              DoctorFarmReadService doctorFarmReadService,
+                             DoctorDailyGroupReadService doctorDailyGroupReadService,
                              DoctorGroupReadService doctorGroupReadService) {
         this.doctorDailyReportReadService = doctorDailyReportReadService;
         this.doctorCommonReportReadService = doctorCommonReportReadService;
         this.doctorFarmReadService = doctorFarmReadService;
+        this.doctorDailyGroupReadService = doctorDailyGroupReadService;
         this.doctorGroupReadService = doctorGroupReadService;
     }
 
@@ -86,14 +91,11 @@ public class PhoenixCrmReports {
         if (!farmsResponse.isSuccess()) {
             return "";
         }
-        Response<Map<Long, Integer>> mapResponse = doctorGroupReadService.queryFattenOutBySumAt(date);
-//        Map<Long, Integer> fattenOutMap = mapResponse.getResult();
         Map<Long, String> farmMap = farmsResponse.getResult().stream().collect(Collectors.toMap(k -> k.getId(), v -> v.getName()));
         List<DoctorDailyReportOpen> doctorDailyReportDtos = dailyReportsResponse.getResult().stream().map(doctorDailyReportDto -> {
             DoctorDailyReportOpen doctorDailyReportOpen = new DoctorDailyReportOpen();
-//            BeanMapper.copy(doctorDailyReport.getReportData(), doctorDailyReportOpen);
-            DoctorDailyReport pigDailyReport = doctorDailyReportDto.getDailyReport();
-            DoctorGroupChangeSum groupDailyReport = doctorDailyReportDto.getGroupChangeSum();
+            DoctorDailyReport pigDailyReport = MoreObjects.firstNonNull(doctorDailyReportDto.getDailyReport(), new DoctorDailyReport());
+            DoctorGroupChangeSum groupDailyReport = MoreObjects.firstNonNull(doctorDailyReportDto.getGroupChangeSum(), new DoctorGroupChangeSum());
 
             doctorDailyReportOpen.setFarmName(farmMap.get(pigDailyReport.getFarmId()));
             doctorDailyReportOpen.setSumAt(DateTime.parse(pigDailyReport.getSumAt()).toDate());
@@ -149,24 +151,58 @@ public class PhoenixCrmReports {
      */
     @OpenMethod(key = "get.monthly.report", paramNames = "date")
     public String getMonthlyReport(@NotEmpty(message = "date.not.empty") String date) {
-//        Response<List<DoctorMonthlyReport>> monthlyReportsResponse = doctorCommonReportReadService.findMonthlyReports(date);
-//        if (!monthlyReportsResponse.isSuccess() || Arguments.isNullOrEmpty(monthlyReportsResponse.getResult())) {
-//            return "";
-//        }
-//        Response<List<DoctorFarm>> farmsResponse = doctorFarmReadService.findAllFarms();
-//        if (!farmsResponse.isSuccess()) {
-//            return "";
-//        }
-//        Map<Long, String> farmMap = farmsResponse.getResult().stream().collect(Collectors.toMap(k -> k.getId(), v -> v.getName()));
-//
-//        List<DoctorMonthlyReportOpen> doctorCommonReportDtos = monthlyReportsResponse.getResult().stream().map(doctorMonthlyReport -> {
-//            DoctorMonthlyReportOpen doctorMonthlyReportOpen = MAPPER.fromJson(doctorMonthlyReport.getData(), DoctorMonthlyReportOpen.class);
-//            doctorMonthlyReportOpen.setDate(doctorMonthlyReport.getSumAt());
-//            doctorMonthlyReportOpen.setFarmName(farmMap.get(doctorMonthlyReport.getFarmId()));
-//            return doctorMonthlyReportOpen;
-//        }).collect(Collectors.toList());
-//        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(doctorCommonReportDtos);
-        return null;
+        Response<List<DoctorCommonReportDto>> monthlyReportsResponse = doctorCommonReportReadService.findMonthlyReports(date);
+        if (!monthlyReportsResponse.isSuccess() || Arguments.isNullOrEmpty(monthlyReportsResponse.getResult())) {
+            return "";
+        }
+        Response<List<DoctorFarm>> farmsResponse = doctorFarmReadService.findAllFarms();
+        if (!farmsResponse.isSuccess()) {
+            return "";
+        }
+        Map<Long, String> farmMap = farmsResponse.getResult().stream().collect(Collectors.toMap(k -> k.getId(), v -> v.getName()));
+
+        List<DoctorMonthlyReportOpen> doctorCommonReportDtos = monthlyReportsResponse.getResult().stream().map(doctorCommonReportDto -> {
+            DoctorMonthlyReportOpen doctorMonthlyReportOpen = new DoctorMonthlyReportOpen();
+            DoctorDailyReportSum dailyReportSum = MoreObjects.firstNonNull(doctorCommonReportDto.getChangeReport(), new DoctorDailyReportSum());
+            DoctorGroupChangeSum groupChangeSum = MoreObjects.firstNonNull(doctorCommonReportDto.getGroupChangeReport(), new DoctorGroupChangeSum());
+            DoctorRangeReport indicatorReport = MoreObjects.firstNonNull(doctorCommonReportDto.getIndicatorReport(), new DoctorRangeReport());
+            doctorMonthlyReportOpen.setMateHoubei(dailyReportSum.getMateHb());
+            doctorMonthlyReportOpen.setMateFanqing(dailyReportSum.getMateFq());
+            doctorMonthlyReportOpen.setMateAbort(dailyReportSum.getMateLc());
+            doctorMonthlyReportOpen.setMateWean(dailyReportSum.getMateDn());
+            doctorMonthlyReportOpen.setMateNegtive(dailyReportSum.getMateYx());
+            doctorMonthlyReportOpen.setMateEstimatePregRate(indicatorReport.getMateEstimatePregRate());
+            doctorMonthlyReportOpen.setMateRealPregRate(indicatorReport.getMateRealPregRate());
+            doctorMonthlyReportOpen.setMateEstimateFarrowingRate(indicatorReport.getMateEstimateFarrowingRate());
+            doctorMonthlyReportOpen.setMateRealFarrowingRate(indicatorReport.getMateRealFarrowingRate());
+
+            doctorMonthlyReportOpen.setFarrowNest(dailyReportSum.getFarrowNest());
+            doctorMonthlyReportOpen.setFarrowEstimateParity(dailyReportSum.getPreFarrowCount());
+            doctorMonthlyReportOpen.setFarrowAll(dailyReportSum.getFarrowAll());
+            doctorMonthlyReportOpen.setFarrowAlive(dailyReportSum.getFarrowLive());
+            doctorMonthlyReportOpen.setFarrowHealth(dailyReportSum.getFarrowHealth());
+            doctorMonthlyReportOpen.setFarrowWeak(dailyReportSum.getFarrowWeak());
+            doctorMonthlyReportOpen.setFarrowDead(dailyReportSum.getFarrowDead());
+            doctorMonthlyReportOpen.setFarrowMny(dailyReportSum.getFarrowMny());
+            doctorMonthlyReportOpen.setFarrowAvgAll((Arguments.isNull(dailyReportSum.getFarrowNest()) || dailyReportSum.getFarrowNest() == 0) ? 0 : dailyReportSum.getFarrowAll()/dailyReportSum.getFarrowNest());
+            doctorMonthlyReportOpen.setFarrowAvgAlive(dailyReportSum.getFarrowAvgLive());
+            doctorMonthlyReportOpen.setFarrowAvgHealth(dailyReportSum.getFarrowAvgHealth());
+
+            doctorMonthlyReportOpen.setNpd(indicatorReport.getNpd());
+            doctorMonthlyReportOpen.setPsy(indicatorReport.getPsy());
+            doctorMonthlyReportOpen.setMateInSeven(indicatorReport.getMateInSeven());
+
+            doctorMonthlyReportOpen.setSaleSow(dailyReportSum.getSowSale());
+            doctorMonthlyReportOpen.setSaleBoar(dailyReportSum.getBoarSale());
+            doctorMonthlyReportOpen.setSaleFarrow(groupChangeSum.getFarrowSale());
+            doctorMonthlyReportOpen.setSaleNursery(groupChangeSum.getNurserySale());
+            doctorMonthlyReportOpen.setSaleFatten(groupChangeSum.getFattenSale());
+
+            doctorMonthlyReportOpen.setDate(DateUtil.getMonthEndOrToday(DateTime.parse(doctorCommonReportDto.getDate(), DateUtil.YYYYMM)));
+            doctorMonthlyReportOpen.setFarmName(farmMap.get(doctorCommonReportDto.getFarmId()));
+            return doctorMonthlyReportOpen;
+        }).collect(Collectors.toList());
+        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(doctorCommonReportDtos);
     }
 
     /**
@@ -176,15 +212,22 @@ public class PhoenixCrmReports {
      */
     @OpenMethod(key = "get.group.live.stock.detail", paramNames = "date")
     public String getGroupLiveStockDetail(@NotEmpty(message = "date.not.empty") String date) {
-        Response<List<DoctorGroupLiveStockDetailDto>> detailDtoResponse = doctorCommonReportReadService.findEveryGroupInfo(date);
-        if (!detailDtoResponse.isSuccess() || detailDtoResponse.getResult() == null) {
+        Response<List<DoctorDailyGroup>> dailyGroups = doctorDailyGroupReadService.findGroupInfoBySumAt(date);
+        if (!dailyGroups.isSuccess() || dailyGroups.getResult() == null) {
             return "";
         }
-        List<DoctorGroupLiveStockDetailOpen> liveStockDetailOpenList = detailDtoResponse.getResult()
-                .stream().map(dto -> MAPPER.getMapper().convertValue(dto, DoctorGroupLiveStockDetailOpen.class))
-                .collect(Collectors.toList());
-        DoctorGroupLiveStockDetailOpen doctorGroupLiveStockDetailOpen = new DoctorGroupLiveStockDetailOpen();
-        BeanMapper.copy(detailDtoResponse.getResult(), doctorGroupLiveStockDetailOpen);
+        List<DoctorGroupLiveStockDetailOpen> liveStockDetailOpenList = Lists.newArrayList();
+        dailyGroups.getResult().forEach(doctorDailyGroup -> {
+            DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(doctorDailyGroup.getGroupId()));
+            DoctorGroupLiveStockDetailOpen doctorGroupLiveStockDetailOpen = new DoctorGroupLiveStockDetailOpen();
+            doctorGroupLiveStockDetailOpen.setFarmName(groupDetail.getGroup().getFarmName());
+            doctorGroupLiveStockDetailOpen.setGroupCode(groupDetail.getGroup().getGroupCode());
+            doctorGroupLiveStockDetailOpen.setLiveStocks(doctorDailyGroup.getEnd());
+            doctorGroupLiveStockDetailOpen.setType(PigType.from(doctorDailyGroup.getType()).getName());
+            doctorGroupLiveStockDetailOpen.setSumAt(doctorDailyGroup.getSumAt());
+            doctorGroupLiveStockDetailOpen.setDayAge(DateUtil.getDeltaDaysAbs(groupDetail.getGroupTrack().getBirthDate(), doctorDailyGroup.getSumAt()));
+            liveStockDetailOpenList.add(doctorGroupLiveStockDetailOpen);
+        });
         return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(liveStockDetailOpenList);
     }
 
