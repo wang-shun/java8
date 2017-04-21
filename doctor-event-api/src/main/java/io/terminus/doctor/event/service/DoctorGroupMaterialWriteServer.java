@@ -13,25 +13,11 @@ public interface DoctorGroupMaterialWriteServer {
      * 批量插入DoctorMasterialDatailsGroup数据
      * @return
      */
-    public void insterDoctorGroupMaterialWareHouse( List<Long> farmIds, Integer flag);
+    public Response<Boolean> insterDoctorGroupMaterialWareDetails(List<DoctorMasterialDatailsGroup> doctorMasterialDatailsGroups);
     /**
+     * 根据flag标志来进行删除
      * 删除
+     * @param flag
      */
     public Response<Boolean> deleteDoctorGroupMaterial(Integer flag);
-
-    /**
-     *
-     * @param farmIds
-     * @param flag
-     * @return
-     */
-    public void insterDoctorGroupMaterialWareDetails( List<Long> farmIds, Integer flag);
-
-    /**
-     *
-     * @param farmIds
-     * @param flag
-     * @return
-     */
-    public void insterDoctorGroupMaterialWare( List<Long> farmIds, Integer flag);
 }

@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.admin.job;
+package io.terminus.doctor.web.admin.job.material;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
@@ -41,10 +41,11 @@ public class DoctorProfitJobs {
 
 
     private final HostLeader hostLeader;
-    @RpcConsumer(timeout = "6000000")
-    private DoctorProfitMaterOrPigWriteServer doctorProfitMaterOrPigWriteServer;
+
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
+    @RpcConsumer
+    private DoctorGroupProfitManage doctorGroupProfitManage;
 
     @Autowired
     public DoctorProfitJobs(HostLeader hostLeader) {
@@ -55,10 +56,11 @@ public class DoctorProfitJobs {
      * 猪场利润的计算
      * 每天凌晨1点统计昨天的数据
      */
-    @Scheduled(cron = "0 0 1 * * ?")
-//    @Scheduled(cron = "0 */1 * * * ?")
+//    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 */1 * * * ?")
     @RequestMapping(value = "/profit", method = RequestMethod.GET)
     public void profitReport() {
+
         try {
             if(!hostLeader.isLeader()) {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
@@ -66,7 +68,7 @@ public class DoctorProfitJobs {
             }
             log.info("daily profit job start, now is:{}", DateUtil.toDateTimeString(new Date()));
             List<Long> farmIds = getAllFarmIds();
-            doctorProfitMaterOrPigWriteServer.insterDoctorProfitMaterialOrPig(farmIds);
+            doctorGroupProfitManage.sumDoctorProfitMaterialOrPig(farmIds);
             log.info("daily profit job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("daily profit job failed, cause:{}", Throwables.getStackTraceAsString(e));
