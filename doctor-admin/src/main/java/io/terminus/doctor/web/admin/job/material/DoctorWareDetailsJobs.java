@@ -1,15 +1,10 @@
-package io.terminus.doctor.web.admin.job;
+package io.terminus.doctor.web.admin.job.material;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
-import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
-import io.terminus.doctor.basic.service.DoctorMaterialInWareHouseReadService;
-import io.terminus.doctor.basic.service.DoctorMaterialPriceInWareHouseReadService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupMaterialWriteServer;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.leader.HostLeader;
@@ -25,37 +20,39 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Created by terminus on 2017/4/18.
+ * Created by terminus on 2017/4/19.
  */
 @RestController
-@RequestMapping("/api/ware/house")
+@RequestMapping("/api/ware")
 @Slf4j
-public class DoctorWareHouseJobs {
+public class DoctorWareDetailsJobs {
 
     @RpcConsumer
     private DoctorGroupMaterialWriteServer doctorGroupMaterialWriteServer;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
+    @RpcConsumer
+    private DoctorMaterialManage doctorMaterialManage;
 
     private final HostLeader hostLeader;
     @Autowired
-    public DoctorWareHouseJobs(HostLeader hostLeader) {
+    public DoctorWareDetailsJobs(HostLeader hostLeader) {
         this.hostLeader = hostLeader;
     }
-    private final static Integer WHARE = 1;
-//    @Scheduled(cron = "0 0 1 * * ?")
-    @Scheduled(cron = "0 */1 * * * ?")
-    @RequestMapping(value = "/house", method = RequestMethod.GET)
+    private final static Integer DETAILS = 2;
+    @Scheduled(cron = "0 0 1 * * ?")
+//    @Scheduled(cron = "0 */1 * * * ?")
+    @RequestMapping(value = "/details", method = RequestMethod.GET)
     public void groupMaterialReport() {
         try {
             if(!hostLeader.isLeader()) {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
                 return;
             }
-            doctorGroupMaterialWriteServer.deleteDoctorGroupMaterial(WHARE);
-            log.info("daily ware house job start, now is:{}", DateUtil.toDateTimeString(new Date()));
-            doctorGroupMaterialWriteServer.insterDoctorGroupMaterialWareHouse(getAllFarmIds(), WHARE);
-            log.info("daily ware house job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+            doctorGroupMaterialWriteServer.deleteDoctorGroupMaterial(DETAILS);
+            log.info("daily ware details job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+            doctorMaterialManage.runDoctorGroupMaterialWareDetails(getAllFarmIds(), DETAILS);
+            log.info("daily ware details job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("daily report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }

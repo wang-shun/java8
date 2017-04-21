@@ -19,9 +19,9 @@ public interface DoctorProfitMaterOrPigWriteServer {
     public Response<Boolean> updateDoctorProfitMaterialOrPig(List<DoctorProfitMaterialOrPig> doctorProfitMaterialOrPig);
     /**
      * 插入数据物料和猪类型的报表数据
-     * @param farmId
+     * @param doctorProfitMaterialOrPig
      */
-    public void insterDoctorProfitMaterialOrPig(List<Long> farmId);
+    public Response<Boolean> insterDoctorProfitMaterialOrPig(List<DoctorProfitMaterialOrPig> doctorProfitMaterialOrPig);
 
     /**
      * 删除数据，当已存在报表数据时
