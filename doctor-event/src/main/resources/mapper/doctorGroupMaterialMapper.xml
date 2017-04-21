@@ -165,6 +165,7 @@
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="materialId != null">AND material_id = #{materialId}</if>
         <if test="groupId != null">AND group_id = #{groupId}</if>
+        <if test="type != null">AND types = #{type}</if>
         <if test="wareHouseId != null">AND ware_house_id = #{wareHouseId}</if>
         <if test="materialName != null" > AND `material_name` LIKE concat('%',#{materialName},'%')</if>
         <if test="materialType != null">AND material_type = #{materialType}</if>
@@ -187,6 +188,7 @@
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="materialId != null">AND material_id = #{materialId}</if>
         <if test="groupId != null">AND group_id = #{groupId}</if>
+        <if test="type != null">AND types = #{type}</if>
         <if test="wareHouseId != null">AND ware_house_id = #{wareHouseId}</if>
         <if test="materialType != null">AND material_type = #{materialType}</if>
         <if test="barnId != null">AND barn_id = #{barnId}</if>

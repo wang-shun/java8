@@ -28,7 +28,7 @@ public class DoctorGroupMaterialWriteServerImpl implements DoctorGroupMaterialWr
             doctorGroupMaterialDao.deleteDoctorGroupMaterials(flag);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
-            log.error("delete DoctorGroupMaterials fail, caues:{}", Throwables.getStackTraceAsString(e));
+            log.error("delete DoctorGroupMaterials fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("delete DoctorGroupMaterials fai");
         }
     }
@@ -44,7 +44,7 @@ public class DoctorGroupMaterialWriteServerImpl implements DoctorGroupMaterialWr
             }, "insterDoctorGroupMaterialWareDetails").start();
             return Response.ok(Boolean.TRUE);
             } catch (Exception e) {
-            log.error("inster insterDoctorGroupMaterialWareDetails fail, caues:{}", Throwables.getStackTraceAsString(e));
+            log.error("inster insterDoctorGroupMaterialWareDetails fail, cause:{}", Throwables.getStackTraceAsString(e));
                 return Response.fail("inster insterDoctorGroupMaterialWareDetails fail");
             }
         }
