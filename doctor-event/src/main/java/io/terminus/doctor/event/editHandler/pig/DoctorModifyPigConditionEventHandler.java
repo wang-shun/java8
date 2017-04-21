@@ -31,7 +31,6 @@ public class DoctorModifyPigConditionEventHandler extends DoctorAbstractModifyPi
                     .farmId(oldPigEvent.getFarmId())
                     .businessId(oldPigEvent.getPigId())
                     .newEventAt(newConditionDto.eventAt())
-                    .remark(newConditionDto.getConditionRemark())
                     .oldEventAt(oldPigEvent.getEventAt())
                     .weightChange(EventUtil.minusDouble(newConditionDto.getConditionWeight(), oldConditionDto.getConditionWeight()))
                     .build();
@@ -42,7 +41,6 @@ public class DoctorModifyPigConditionEventHandler extends DoctorAbstractModifyPi
                     .farmId(oldPigEvent.getFarmId())
                     .businessId(oldPigEvent.getPigId())
                     .newEventAt(newConditionDto.eventAt())
-                    .remark(newConditionDto.getRemark())
                     .oldEventAt(oldPigEvent.getEventAt())
                     .weightChange(EventUtil.minusDouble(newConditionDto.getWeight(), oldConditionDto.getWeight()))
                     .build();

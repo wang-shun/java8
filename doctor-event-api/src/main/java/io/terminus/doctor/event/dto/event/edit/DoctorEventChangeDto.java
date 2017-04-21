@@ -37,6 +37,17 @@ public class DoctorEventChangeDto {
     private Date oldEventAt;
 
     /**
+     * 更新报表参数
+     * @see io.terminus.doctor.event.model.DoctorPig.PigSex
+     */
+    private Integer pigSex;
+
+    /**
+     * 进场数量变化(更新报表参数)
+     */
+
+    private Integer entryCountChange;
+    /**
      * 新进场来源
      */
     private Integer source;
@@ -61,13 +72,12 @@ public class DoctorEventChangeDto {
      * 新品系id
      */
     private Long pigBreedTypeId;
-    private Long pigBreedTypeName;
+    private String pigBreedTypeName;
 
     /**
      * 新猪舍id
      */
     private Long pigBarnId;
-    private Long pigBarnName;
 
     /**
      * 公猪进场类型
@@ -75,26 +85,43 @@ public class DoctorEventChangeDto {
     private Integer boarType;
 
     /**
-     * 新配种公猪id
+     * 配种类型(更新报表参数)
+     * @see io.terminus.doctor.event.enums.DoctorMatingType
      */
-    private Long matingBoarId;
-    private String matingBoarCode;
+    private Integer doctorMateType;
+
     /**
-     * 新的操作人
+     * 配种类型变化量
      */
-    private Long newOperatorId;
-    private String newOperatorName;
+    private Integer doctorMateTypeCountChange;
+
     /**
-     * 新配种类型
-     * @see io.terminus.doctor.event.enums.MatingType
+     * 妊娠检查结果(更新报表参数)
+     * @see io.terminus.doctor.event.enums.PregCheckResult
      */
-    private Integer mateType;
+    private Integer pregCheckResult;
 
     /**
      * 新妊娠检查结果
      * @see io.terminus.doctor.event.enums.PregCheckResult
      */
-    private Integer pregCheckResult;
+    private Integer newPregCheckResult;
+
+    /**
+     * 原妊娠检查结果
+     * @see io.terminus.doctor.event.enums.PregCheckResult
+     */
+    private Integer oldPregCheckResult;
+
+    /**
+     * 妊娠检查结果变化量
+     */
+    private Integer pregCheckResultCountChange;
+
+    /**
+     * 分娩窝数变化量
+     */
+    private Integer farrowNestChange;
 
     /**
      * 分娩总重(kg)变化量
@@ -149,7 +176,7 @@ public class DoctorEventChangeDto {
     /**
      * 新变动类型,猪群
      */
-    private Long changeTypeId;
+    private Long newChangeTypeId;
 
     /**
      * 数量变化
@@ -187,6 +214,11 @@ public class DoctorEventChangeDto {
     private Long vaccinationId;
 
     /**
+     * 断奶窝数变化量
+     */
+    private Integer weanNestChange;
+
+    /**
      * 猪断奶数变化量
      */
     private Integer weanCountChange;
@@ -194,7 +226,27 @@ public class DoctorEventChangeDto {
     /**
      * 猪断奶均重变化量
      */
-    private Double weanAvgWeightChange;
+    private Double weanAvgWeight;
+
+    /**
+     * 断奶日龄(不是变化量)
+     */
+    private Integer weanDayAge;
+
+    /**
+     * 离场变化量(更新报表参数)
+     */
+    private Integer removeCountChange;
+
+    /**
+     * 变动类型(更新报表参数)
+     */
+    private Long changeTypeId;
+
+    /**
+     * 猪舍类型(更新报表参数)
+     */
+    private Integer barnType;
 
     /**
      * 猪群初生重变化量
@@ -279,11 +331,6 @@ public class DoctorEventChangeDto {
      * 转场的猪群id
      */
     private Long toGroupId;
-
-    /**
-     * 新备注
-     */
-    private String remark;
 
     /**
      * 猪群事件是否由母猪触发

@@ -1237,4 +1237,37 @@
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
         limit #{offset}, #{limit}
     </select>
+
+    <select id="getFarrowEventByParity" parameterType="map" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        status = 1
+        AND pig_id = #{pigId}
+        AND parity = #{parity}
+    </select>
+
+    <select id="getLastStatusEventBeforeEventAt" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        status = 1
+        AND pig_id = #{pigId}
+        AND event_at lt date_format(#{eventAt}, '%Y-%m-%d')
+        AND type in (6, 7, 9, 11, 14, 15, 16)
+        ORDER BY event_at desc , id DESC
+        limit 1
+    </select>
+
+    <select id="getFirstMateEvent" parameterType="map" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        status = 1
+        AND pig_id = #{pigId}
+        AND event_at lt date_format(#{eventAt}, '%Y-%m-%d')
+        AND current_mating_count = 1;
+        ORDER BY event_at desc , id DESC
+        limit 1
+    </select>
 </mapper>

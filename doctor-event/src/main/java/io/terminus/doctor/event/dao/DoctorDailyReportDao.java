@@ -2,7 +2,6 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
-import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.model.DoctorBaseReport;
 import io.terminus.doctor.event.model.DoctorDailyReport;
@@ -37,5 +36,25 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
 
     public DoctorBaseReport findPigChangeSum(Long farmId, Date startAt, Date endAt) {
         return getSqlSession().selectOne(sqlId("findPigChangeSum"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 更新日期之后每日母猪存栏
+     * @param farmId 猪群id
+     * @param sumAt 日期
+     * @param changeCount 变动数量
+     */
+    public void updateDailySowPigLiveStock(Long farmId, Date sumAt, Integer changeCount) {
+        getSqlSession().update(sqlId("updateDailySowPigLiveStock"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt, "changeCount", changeCount));
+    }
+
+    /**
+     * 更新日期之后每日公猪存栏
+     * @param farmId 猪群id
+     * @param sumAt 日期
+     * @param changeCount 变动数量
+     */
+    public void updateDailyBoarPigLiveStock(Long farmId, Date sumAt, Integer changeCount) {
+        getSqlSession().update(sqlId("updateDailyBoarPigLiveStock"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt, "changeCount", changeCount));
     }
 }

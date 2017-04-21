@@ -24,7 +24,7 @@ import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigFarrowEventHandle
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigFosterByEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigFosterEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigMatingEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPigletsChgHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPigletsChgEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPregCheckEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigSemenEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigVaccinEventHandler;
@@ -301,7 +301,7 @@ public class  DoctorEventConfiguration {
             DoctorModifyPigFosterByEventHandler modifyPigFosterByEventHandler,
             DoctorModifyPigFosterEventHandler modifyPigFosterEventHandler,
             DoctorModifyPigMatingEventHandler modifyPigMatingEventHandler,
-            DoctorModifyPigPigletsChgHandler modifyPigPigletsChgHandler,
+            DoctorModifyPigPigletsChgEventHandler modifyPigPigletsChgHandler,
             DoctorModifyPigPregCheckEventHandler modifyPigPregCheckEventHandler,
             DoctorModifyPigSemenEventHandler modifyPigSemenEventHandler,
             DoctorModifyPigVaccinEventHandler modifyPigVaccinEventHandler,

@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.editHandler.pig;
 
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
@@ -30,8 +29,6 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
     private DoctorModifyGroupMoveInEventHandler doctorModifyMoveInEventHandler;
     @Autowired
     private DoctorSowFarrowingHandler doctorSowFarrowingHandler;
-    @Autowired
-    private DoctorGroupEventDao doctorGroupEventDao;
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
@@ -92,17 +89,19 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
             DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
             doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
         } else {
-            DoctorFarrowingDto farrowingDto1 = (DoctorFarrowingDto) inputDto;
-            DoctorEventChangeDto changeDto1 = buildEventChange(new DoctorFarrowingDto(), farrowingDto1);
-            DoctorFarrowingDto farrowingDto2 = JSON_MAPPER.fromJson(oldEvent.getExtra(), DoctorFarrowingDto.class);
-            DoctorEventChangeDto changeDto2 = buildEventChange(farrowingDto2, new DoctorFarrowingDto());
-
-            DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
+            DoctorFarrowingDto farrowingDto1 = JSON_MAPPER.fromJson(oldEvent.getExtra(), DoctorFarrowingDto.class);
+            DoctorEventChangeDto changeDto1 = buildEventChange(farrowingDto1, new DoctorFarrowingDto());
+            changeDto1.setFarrowNestChange(-1);
+            DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
+            oldDailyPig1.setFarrowNest(EventUtil.minusInt(oldDailyPig1.getFarrowNest(), 1));
             doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
 
-            //更新原时间的日记录
-            DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
+            DoctorFarrowingDto farrowingDto2 = (DoctorFarrowingDto) inputDto;
+            DoctorEventChangeDto changeDto2 = buildEventChange(new DoctorFarrowingDto(), farrowingDto2);
+            changeDto2.setFarrowNestChange(1);
+            DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
             doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+
         }
     }
 
@@ -116,6 +115,7 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+        oldDailyPig.setFarrowNest(EventUtil.plusInt(oldDailyPig.getFarrowNest(), changeDto.getFarrowNestChange()));
         oldDailyPig.setFarrowLive(EventUtil.plusInt(oldDailyPig.getFarrowLive(), changeDto.getLiveCountChange()));
         oldDailyPig.setFarrowHealth(EventUtil.plusInt(oldDailyPig.getFarrowHealth(), changeDto.getHealthCountChange()));
         oldDailyPig.setFarrowWeak(EventUtil.plusInt(oldDailyPig.getFarrowWeak(), changeDto.getWeakCountChange()));
@@ -150,8 +150,9 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
     protected void updateDailyForDelete(DoctorPigEvent deletePigEvent) {
         DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(deletePigEvent.getFarmId(), deletePigEvent.getEventAt());
         DoctorFarrowingDto oldDto = JSON_MAPPER.fromJson(deletePigEvent.getExtra(), DoctorFarrowingDto.class);
-        oldDailyPig = buildDailyPig(oldDailyPig, buildEventChange(oldDto, new DoctorFarrowingDto()));
-        oldDailyPig.setFarrowNest(EventUtil.minusInt(oldDailyPig.getFarrowNest(), 1));
+        DoctorEventChangeDto changeDto = buildEventChange(oldDto, new DoctorFarrowingDto());
+        changeDto.setFarrowNestChange(-1);
+        oldDailyPig = buildDailyPig(oldDailyPig, changeDto);
         doctorDailyPigDao.update(oldDailyPig);
     }
 }

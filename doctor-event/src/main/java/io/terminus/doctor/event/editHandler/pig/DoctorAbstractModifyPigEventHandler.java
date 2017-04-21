@@ -7,6 +7,7 @@ import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
@@ -46,6 +47,8 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     protected DoctorPigDao doctorPigDao;
     @Autowired
     protected DoctorDailyReportDao doctorDailyPigDao;
+    @Autowired
+    protected DoctorGroupEventDao doctorGroupEventDao;
     @Autowired
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
 

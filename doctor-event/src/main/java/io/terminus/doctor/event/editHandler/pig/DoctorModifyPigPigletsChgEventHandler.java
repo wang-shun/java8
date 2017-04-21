@@ -3,10 +3,14 @@ package io.terminus.doctor.event.editHandler.pig;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupChangeEventHandler;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -16,7 +20,10 @@ import java.util.Objects;
  * 仔猪变动
  */
 @Component
-public class DoctorModifyPigPigletsChgHandler extends DoctorAbstractModifyPigEventHandler{
+public class DoctorModifyPigPigletsChgEventHandler extends DoctorAbstractModifyPigEventHandler{
+    @Autowired
+    private DoctorModifyGroupChangeEventHandler doctorModifyGroupChangeEventHandler;
+
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         DoctorPigletsChgDto oldDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorPigletsChgDto.class);
@@ -26,7 +33,7 @@ public class DoctorModifyPigPigletsChgHandler extends DoctorAbstractModifyPigEve
                 .businessId(oldPigEvent.getPigId())
                 .newEventAt(newDto.eventAt())
                 .oldEventAt(oldDto.eventAt())
-                .changeTypeId(newDto.getPigletsChangeType())
+                .newChangeTypeId(newDto.getPigletsChangeType())
                 .oldChangeTypeId(oldDto.getPigletsChangeType())
                 .quantityChange(EventUtil.minusInt(newDto.getPigletsCount(), oldDto.getPigletsCount()))
                 .weightChange(EventUtil.minusDouble(newDto.getPigletsWeight(), oldDto.getPigletsWeight()))
@@ -52,8 +59,24 @@ public class DoctorModifyPigPigletsChgHandler extends DoctorAbstractModifyPigEve
         if (!Objects.equals(oldPigTrack.getStatus(), PigStatus.FEED.getKey())) {
             return oldPigTrack;
         }
-        oldPigTrack.setUnweanQty(EventUtil.plusInt(oldPigTrack.getUnweanQty(), changeDto.getQuantityChange()));
+        oldPigTrack.setUnweanQty(EventUtil.minusInt(oldPigTrack.getUnweanQty(), changeDto.getQuantityChange()));
         return oldPigTrack;
     }
 
+    @Override
+    protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
+        super.updateDailyForModify(oldPigEvent, inputDto, changeDto);
+    }
+
+    @Override
+    protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent) {
+        DoctorGroupEvent changeGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(newPigEvent.getId(), GroupEventType.CHANGE.getValue());
+//        doctorModifyGroupChangeEventHandler.modifyHandle(changeGroupEvent, );
+    }
+
+    @Override
+    protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack) {
+        oldPigTrack.setUnweanQty(EventUtil.plusInt(oldPigTrack.getUnweanQty(), deletePigEvent.getQuantity()));
+        return oldPigTrack;
+    }
 }

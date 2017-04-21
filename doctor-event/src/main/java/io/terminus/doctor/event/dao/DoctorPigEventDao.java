@@ -13,7 +13,11 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -466,5 +470,35 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         }
         List<DoctorPigSalesExportDto> doctorPigSalesExportDtos = getSqlSession().selectList(sqlId("findSalesEvent"), maps);
         return new Paging<>(total, doctorPigSalesExportDtos);
+    }
+
+    /**
+     * 获取猪某一胎次下的分娩事件
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @return 分娩事件
+     */
+    public DoctorPigEvent getFarrowEventByParity(Long pigId, Integer parity) {
+        return getSqlSession().selectOne(sqlId("getFarrowEventByParity"), ImmutableMap.of("pigId", pigId, "parity", parity));
+    }
+
+    /**
+     * 获取某时间前的影响状态的最近的事件
+     * @param pigId 猪id
+     * @param eventAt 时间
+     * @return 事件
+     */
+    public DoctorPigEvent getLastStatusEventBeforeEventAt(Long pigId, Date eventAt){
+        return getSqlSession().selectOne(sqlId("getLastStatusEventBeforeEventAt"), ImmutableMap.of("pigId", pigId, "eventAt",eventAt));
+    }
+
+    /**
+     * 获取时间前的初配事件
+     * @param pigId 猪id
+     * @param eventAt 时间
+     * @return 初配事件
+     */
+    public DoctorPigEvent getFirstMateEvent(Long pigId, Date eventAt){
+        return getSqlSession().selectOne(sqlId("getFirstMateEvent"), ImmutableMap.of("pigId", pigId, "eventAt",eventAt));
     }
 }

@@ -81,6 +81,44 @@ public class EventUtil {
     }
 
     /**
+     * 计算日龄,保留两位小数(四舍五入)
+     * @param oldAge
+     * @param oldQty
+     * @param newAge
+     * @param newQty
+     * @return 平均日龄
+     */
+    public static double getAvgDayAge(Double oldAge, Integer oldQty, Double newAge, Integer newQty) {
+
+        double allAge = MoreObjects.firstNonNull(oldAge, 0).doubleValue() * MoreObjects.firstNonNull(oldQty, 0)
+                + MoreObjects.firstNonNull(newAge, 0).doubleValue() * MoreObjects.firstNonNull(newQty, 0);
+        int allQty = MoreObjects.firstNonNull(oldQty, 0) + MoreObjects.firstNonNull(newQty, 0);
+        if (allQty == 0) {
+            return 0D;
+        }
+        return new BigDecimal(allAge).divide(new BigDecimal(allQty), 2, BigDecimal.ROUND_HALF_UP).intValue();
+    }
+
+    /**
+     * 获取均重
+     * @param oldWeight
+     * @param oldQty
+     * @param newWeight
+     * @param newQty
+     * @return
+     */
+    public static double getAvgWeight(Double oldWeight, Integer oldQty, Double newWeight, Integer newQty) {
+
+        double allWeight = MoreObjects.firstNonNull(oldWeight, 0).doubleValue() * MoreObjects.firstNonNull(oldQty, 0)
+                + MoreObjects.firstNonNull(newWeight, 0).doubleValue() * MoreObjects.firstNonNull(newQty, 0);
+        int allQty = MoreObjects.firstNonNull(oldQty, 0) + MoreObjects.firstNonNull(newQty, 0);
+        if (allQty == 0) {
+            return 0D;
+        }
+        return new BigDecimal(allWeight).divide(new BigDecimal(allQty), 2, BigDecimal.ROUND_HALF_UP).intValue();
+    }
+
+    /**
      * 重新计算出生日期(日期-日龄 + 1)
      * @param date  日期
      * @param avgDayAge  日龄
@@ -95,6 +133,10 @@ public class EventUtil {
             return 0L;
         }
         return amount / quantity;
+    }
+
+    public static long getAmount(Long price, Double weight) {
+        return (long) (MoreObjects.firstNonNull(price, 0L) * get2(MoreObjects.firstNonNull(weight, 0D)));
     }
 
     public static double get2(double number) {
