@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorStockStructureDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorRangeReport;
@@ -88,9 +89,9 @@ public class DoctorReports {
      * @return 猪场日报表
      */
     @RequestMapping(value = "/daily/range", method = RequestMethod.GET)
-    public List<DoctorDailyReportDto> findDailyReportByFarmIdAndRange(@RequestParam("farmId") Long farmId,
-                                                                      @RequestParam(value = "startAt", required = false) String startAt,
-                                                                      @RequestParam(value = "endAt", required = false) String endAt) {
+    public List<DoctorDailyReport> findDailyReportByFarmIdAndRange(@RequestParam("farmId") Long farmId,
+                                                                   @RequestParam(value = "startAt", required = false) String startAt,
+                                                                   @RequestParam(value = "endAt", required = false) String endAt) {
         return RespHelper.or500(doctorDailyReportReadService.findDailyReportDtoByFarmIdAndRange(farmId, startAt, endAt));
     }
 

@@ -18,6 +18,19 @@
         <result column="sow_sale" property="sowSale"/>
         <result column="sow_other_out" property="sowOtherOut"/>
         <result column="sow_end" property="sowEnd"/>
+        <result column="sow_ph_start" property="sowPhStart"/>
+        <result column="sow_ph_in_farm_in" property="sowPhInFarmIn"/>
+        <result column="sow_ph_wean_in" property="sowPhWeanIn"/>
+        <result column="sow_ph_dead" property="sowPhDead"/>
+        <result column="sow_ph_weed_out" property="sowPhWeedOut"/>
+        <result column="sow_ph_to_cf" property="sowPhToCf"/>
+        <result column="sow_ph_end" property="sowPhEnd"/>
+        <result column="sow_cf_start" property="sowCfStart"/>
+        <result column="sow_cf_in" property="sowCfIn"/>
+        <result column="sow_cf_dead" property="sowCfDead"/>
+        <result column="sow_cf_weed_out" property="sowCfWeedOut"/>
+        <result column="sow_cf_wean_out" property="sowCfWeanOut"/>
+        <result column="sow_cf_end" property="sowCfEnd"/>
         <result column="boar_start" property="boarStart"/>
         <result column="boar_in" property="boarIn"/>
         <result column="boar_dead" property="boarDead"/>
@@ -53,6 +66,16 @@
         <result column="base_price_10" property="basePrice10"/>
         <result column="base_price_15" property="basePrice15"/>
         <result column="fatten_price" property="fattenPrice"/>
+        <result column="sow_ph_feed" property="sowPhFeed"/>
+        <result column="sow_ph_feed_amount" property="sowPhFeedAmount"/>
+        <result column="sow_ph_medicine_amount" property="sowPhMedicineAmount"/>
+        <result column="sow_ph_vaccination_amount" property="sowPhVaccinationAmount"/>
+        <result column="sow_ph_consumable_amount" property="sowPhConsumableAmount"/>
+        <result column="sow_cf_feed" property="sowCfFeed"/>
+        <result column="sow_cf_feed_amount" property="sowCfFeedAmount"/>
+        <result column="sow_cf_medicine_amount" property="sowCfMedicineAmount"/>
+        <result column="sow_cf_vaccination_amount" property="sowCfVaccinationAmount"/>
+        <result column="sow_cf_consumable_amount" property="sowCfConsumableAmount"/>
         <result column="farrow_feed" property="farrowFeed"/>
         <result column="farrow_feed_amount" property="farrowFeedAmount"/>
         <result column="farrow_medicine_amount" property="farrowMedicineAmount"/>
@@ -98,6 +121,19 @@
         sow_sale,
         sow_other_out,
         sow_end,
+        sow_ph_start,
+        sow_ph_in_farm_in,
+        sow_ph_wean_in,
+        sow_ph_dead,
+        sow_ph_weed_out,
+        sow_ph_to_cf,
+        sow_ph_end,
+        sow_cf_start,
+        sow_cf_in,
+        sow_cf_dead,
+        sow_cf_weed_out,
+        sow_cf_wean_out,
+        sow_cf_end,
         boar_start,
         boar_in,
         boar_dead,
@@ -133,6 +169,16 @@
         base_price_10,
         base_price_15,
         fatten_price,
+        sow_ph_feed,
+        sow_ph_feed_amount,
+        sow_ph_medicine_amount,
+        sow_ph_vaccination_amount,
+        sow_ph_consumable_amount,
+        sow_cf_feed,
+        sow_cf_feed_amount,
+        sow_cf_medicine_amount,
+        sow_cf_vaccination_amount,
+        sow_cf_consumable_amount,
         farrow_feed,
         farrow_feed_amount,
         farrow_medicine_amount,
@@ -170,6 +216,19 @@
         #{sowSale},
         #{sowOtherOut},
         #{sowEnd},
+        #{sowPhStart},
+        #{sowPhInFarmIn},
+        #{sowPhWeanIn},
+        #{sowPhDead},
+        #{sowPhWeedOut},
+        #{sowPhToCf},
+        #{sowPhEnd},
+        #{sowCfStart},
+        #{sowCfIn},
+        #{sowCfDead},
+        #{sowCfWeedOut},
+        #{sowCfWeanOut},
+        #{sowCfEnd},
         #{boarStart},
         #{boarIn},
         #{boarDead},
@@ -205,6 +264,16 @@
         #{basePrice10},
         #{basePrice15},
         #{fattenPrice},
+        #{sowPhFeed},
+        #{sowPhFeedAmount},
+        #{sowPhMedicineAmount},
+        #{sowPhVaccinationAmount},
+        #{sowPhConsumableAmount},
+        #{sowCfFeed},
+        #{sowCfFeedAmount},
+        #{sowCfMedicineAmount},
+        #{sowCfVaccinationAmount},
+        #{sowCfConsumableAmount},
         #{farrowFeed},
         #{farrowFeedAmount},
         #{farrowMedicineAmount},
@@ -226,7 +295,7 @@
         #{houbeiVaccinationAmount},
         #{houbeiConsumableAmount},
         now(),
-        #{updatedAt}
+        now()
 
     </sql>
 
@@ -243,6 +312,19 @@
         <if test="sowSale != null">AND sow_sale = #{sowSale}</if>
         <if test="sowOtherOut != null">AND sow_other_out = #{sowOtherOut}</if>
         <if test="sowEnd != null">AND sow_end = #{sowEnd}</if>
+        <if test="sowPhStart != null">AND sow_ph_start = #{sowPhStart}</if>
+        <if test="sowPhInFarmIn != null">AND sow_ph_in_farm_in = #{sowPhInFarmIn}</if>
+        <if test="sowPhWeanIn != null">AND sow_ph_wean_in = #{sowPhWeanIn}</if>
+        <if test="sowPhDead != null">AND sow_ph_dead = #{sowPhDead}</if>
+        <if test="sowPhWeedOut != null">AND sow_ph_weed_out = #{sowPhWeedOut}</if>
+        <if test="sowPhToCf != null">AND sow_ph_to_cf = #{sowPhToCf}</if>
+        <if test="sowPhEnd != null">AND sow_ph_end = #{sowPhEnd}</if>
+        <if test="sowCfStart != null">AND sow_cf_start = #{sowCfStart}</if>
+        <if test="sowCfIn != null">AND sow_cf_in = #{sowCfIn}</if>
+        <if test="sowCfDead != null">AND sow_cf_dead = #{sowCfDead}</if>
+        <if test="sowCfWeedOut != null">AND sow_cf_weed_out = #{sowCfWeedOut}</if>
+        <if test="sowCfWeanOut != null">AND sow_cf_wean_out = #{sowCfWeanOut}</if>
+        <if test="sowCfEnd != null">AND sow_cf_end = #{sowCfEnd}</if>
         <if test="boarStart != null">AND boar_start = #{boarStart}</if>
         <if test="boarIn != null">AND boar_in = #{boarIn}</if>
         <if test="boarDead != null">AND boar_dead = #{boarDead}</if>
@@ -278,6 +360,16 @@
         <if test="basePrice10 != null">AND base_price_10 = #{basePrice10}</if>
         <if test="basePrice15 != null">AND base_price_15 = #{basePrice15}</if>
         <if test="fattenPrice != null">AND fatten_price = #{fattenPrice}</if>
+        <if test="sowPhFeed != null">AND sow_ph_feed = #{sowPhFeed}</if>
+        <if test="sowPhFeedAmount != null">AND sow_ph_feed_amount = #{sowPhFeedAmount}</if>
+        <if test="sowPhMedicineAmount != null">AND sow_ph_medicine_amount = #{sowPhMedicineAmount}</if>
+        <if test="sowPhVaccinationAmount != null">AND sow_ph_vaccination_amount = #{sowPhVaccinationAmount}</if>
+        <if test="sowPhConsumableAmount != null">AND sow_ph_consumable_amount = #{sowPhConsumableAmount}</if>
+        <if test="sowCfFeed != null">AND sow_cf_feed = #{sowCfFeed}</if>
+        <if test="sowCfFeedAmount != null">AND sow_cf_feed_amount = #{sowCfFeedAmount}</if>
+        <if test="sowCfMedicineAmount != null">AND sow_cf_medicine_amount = #{sowCfMedicineAmount}</if>
+        <if test="sowCfVaccinationAmount != null">AND sow_cf_vaccination_amount = #{sowCfVaccinationAmount}</if>
+        <if test="sowCfConsumableAmount != null">AND sow_cf_consumable_amount = #{sowCfConsumableAmount}</if>
         <if test="farrowFeed != null">AND farrow_feed = #{farrowFeed}</if>
         <if test="farrowFeedAmount != null">AND farrow_feed_amount = #{farrowFeedAmount}</if>
         <if test="farrowMedicineAmount != null">AND farrow_medicine_amount = #{farrowMedicineAmount}</if>
@@ -298,6 +390,8 @@
         <if test="houbeiMedicineAmount != null">AND houbei_medicine_amount = #{houbeiMedicineAmount}</if>
         <if test="houbeiVaccinationAmount != null">AND houbei_vaccination_amount = #{houbeiVaccinationAmount}</if>
         <if test="houbeiConsumableAmount != null">AND houbei_consumable_amount = #{houbeiConsumableAmount}</if>
+
+
 
     </sql>
 
@@ -327,6 +421,19 @@
             <if test="sowSale != null">sow_sale = #{sowSale},</if>
             <if test="sowOtherOut != null">sow_other_out = #{sowOtherOut},</if>
             <if test="sowEnd != null">sow_end = #{sowEnd},</if>
+            <if test="sowPhStart != null">sow_ph_start = #{sowPhStart},</if>
+            <if test="sowPhInFarmIn != null">sow_ph_in_farm_in = #{sowPhInFarmIn},</if>
+            <if test="sowPhWeanIn != null">sow_ph_wean_in = #{sowPhWeanIn},</if>
+            <if test="sowPhDead != null">sow_ph_dead = #{sowPhDead},</if>
+            <if test="sowPhWeedOut != null">sow_ph_weed_out = #{sowPhWeedOut},</if>
+            <if test="sowPhToCf != null">sow_ph_to_cf = #{sowPhToCf},</if>
+            <if test="sowPhEnd != null">sow_ph_end = #{sowPhEnd},</if>
+            <if test="sowCfStart != null">sow_cf_start = #{sowCfStart},</if>
+            <if test="sowCfIn != null">sow_cf_in = #{sowCfIn},</if>
+            <if test="sowCfDead != null">sow_cf_dead = #{sowCfDead},</if>
+            <if test="sowCfWeedOut != null">sow_cf_weed_out = #{sowCfWeedOut},</if>
+            <if test="sowCfWeanOut != null">sow_cf_wean_out = #{sowCfWeanOut},</if>
+            <if test="sowCfEnd != null">sow_cf_end = #{sowCfEnd},</if>
             <if test="boarStart != null">boar_start = #{boarStart},</if>
             <if test="boarIn != null">boar_in = #{boarIn},</if>
             <if test="boarDead != null">boar_dead = #{boarDead},</if>
@@ -362,6 +469,16 @@
             <if test="basePrice10 != null">base_price_10 = #{basePrice10},</if>
             <if test="basePrice15 != null">base_price_15 = #{basePrice15},</if>
             <if test="fattenPrice != null">fatten_price = #{fattenPrice},</if>
+            <if test="sowPhFeed != null">sow_ph_feed = #{sowPhFeed},</if>
+            <if test="sowPhFeedAmount != null">sow_ph_feed_amount = #{sowPhFeedAmount},</if>
+            <if test="sowPhMedicineAmount != null">sow_ph_medicine_amount = #{sowPhMedicineAmount},</if>
+            <if test="sowPhVaccinationAmount != null">sow_ph_vaccination_amount = #{sowPhVaccinationAmount},</if>
+            <if test="sowPhConsumableAmount != null">sow_ph_consumable_amount = #{sowPhConsumableAmount},</if>
+            <if test="sowCfFeed != null">sow_cf_feed = #{sowCfFeed},</if>
+            <if test="sowCfFeedAmount != null">sow_cf_feed_amount = #{sowCfFeedAmount},</if>
+            <if test="sowCfMedicineAmount != null">sow_cf_medicine_amount = #{sowCfMedicineAmount},</if>
+            <if test="sowCfVaccinationAmount != null">sow_cf_vaccination_amount = #{sowCfVaccinationAmount},</if>
+            <if test="sowCfConsumableAmount != null">sow_cf_consumable_amount = #{sowCfConsumableAmount},</if>
             <if test="farrowFeed != null">farrow_feed = #{farrowFeed},</if>
             <if test="farrowFeedAmount != null">farrow_feed_amount = #{farrowFeedAmount},</if>
             <if test="farrowMedicineAmount != null">farrow_medicine_amount = #{farrowMedicineAmount},</if>
@@ -382,6 +499,7 @@
             <if test="houbeiMedicineAmount != null">houbei_medicine_amount = #{houbeiMedicineAmount},</if>
             <if test="houbeiVaccinationAmount != null">houbei_vaccination_amount = #{houbeiVaccinationAmount},</if>
             <if test="houbeiConsumableAmount != null">houbei_consumable_amount = #{houbeiConsumableAmount},</if>
+
 
 
             updated_at=now()
@@ -433,8 +551,13 @@
         WHERE sum_at = #{sumAt}
     </select>
 
-    <select id="findPigChangeSum" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorBaseReport">
+    <select id="findDailyReportSum" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorDailyReportSum">
         select
+            sum(mate_hb+mate_dn+mate_fq+mate_lc+mate_yx) as preFarrowCount,
+            sum(farrow_live)/sum(farrow_nest) as farrowAvgLive,
+            sum(farrow_health)/sum(farrow_nest) as farrowAvgHealth,
+            sum(farrow_weak)/sum(farrow_nest) as farrowAvgWeak,
+            sum(wean_count)/sum(wean_nest) as avgWeanCount,
             sum(case when sum_at = #{startAt} then sow_start else 0 end) as sowStart,
             sum(sow_in) as sowIn,
             sum(sow_dead) as sowDead,
@@ -442,6 +565,21 @@
             sum(sow_sale) as sowSale,
             sum(sow_other_out) as sowOtherOut,
             sum(case when sum_at = #{endAt} then sow_end else 0 end) as sowEnd,
+
+            sum(case when sum_at = #{startAt} then sow_ph_start else 0 end) as sowPhStart,
+            sum(sow_ph_in_farm_in) as sowPhInFarmIn,
+            sum(sow_ph_wean_in) as sowPhWeanIn,
+            sum(sow_ph_dead) as sowPhDead,
+            sum(sow_ph_weed_out) as sowPhWeedOut,
+            sum(sow_ph_to_cf) as sowPhToCf,
+            sum(case when sum_at = #{endAt} then sow_ph_end else 0 end) as sowPhEnd,
+
+            sum(case when sum_at = #{startAt} then sow_cf_start else 0 end) as sowCfStart,
+            sum(sow_cf_in) as sowCfIn,
+            sum(sow_cf_dead) as sowCfDead,
+            sum(sow_cf_weed_out) as sowCfWeedOut,
+            sum(sow_cf_wean_out) as sowCfWeanOut,
+            sum(case when sum_at = #{endAt} then sow_cf_end else 0 end) as sowCfEnd,
 
             sum(case when sum_at = #{startAt} then boar_start else 0 end) as boarStart,
             sum(boar_in) as boarIn,
@@ -477,6 +615,18 @@
             sum(wean_count) as weanCount,
             sum(wean_count*wean_avg_weight)/sum(wean_count) as weanAvgWeight,
             sum(wean_count*wean_day_age)/sum(wean_count) as weanDage,
+
+            sum(sow_ph_feed) as sowPhFeed,
+            sum(sow_ph_feed_amount) as sowPhFeedAmount,
+            sum(sow_ph_medicine_amount) as sowPhMedicineAmount,
+            sum(sow_ph_vaccination_amount) as sowPhVaccinationAmount,
+            sum(sow_ph_consumable_amount) as sowPhConsumableAmount,
+
+            sum(sow_cf_feed) as sowCfFeed,
+            sum(sow_cf_feed_amount) as sowCfFeedAmount,
+            sum(sow_cf_medicine_amount) as sowCfMedicineAmount,
+            sum(sow_cf_vaccination_amount) as sowCfVaccinationAmount,
+            sum(sow_cf_consumable_amount) as sowCfConsumableAmount,
 
             sum(farrow_feed) as farrowFeed,
             sum(farrow_feed_amount) as farrowFeedAmount,
@@ -526,5 +676,12 @@
         group_id = #{groupId}
         AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
     </update>
+
+    <select id="findByRange" parameterType="map" resultMap="DoctorDailyReportMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+          AND sum_at &gt;= #{startAt}
+          AND sum_at &lt;= #{endAt}
+    </select>
 
 </mapper>

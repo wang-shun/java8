@@ -8,7 +8,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Dates;
-import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
@@ -342,5 +341,12 @@ public class DateUtil {
             yearDate = yearDate.plusDays(1);
         }
         return new DateTime(DateUtil.weekEnd(yearDate.plusWeeks(week).toDate()));
+    }
+
+    public static Date getMonthEndOrToday(DateTime datetime) {
+        if(datetime.isBeforeNow()){
+            return DateUtil.getMonthEnd(datetime).toDate();
+        }
+        return new Date();
     }
 }

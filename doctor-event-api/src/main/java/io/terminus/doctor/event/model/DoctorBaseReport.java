@@ -50,6 +50,71 @@ public class DoctorBaseReport implements Serializable{
     private Integer sowEnd;
 
     /**
+     * 配怀母猪期初头数
+     */
+    private Integer sowPhStart;
+
+    /**
+     * 配怀母猪进场转入
+     */
+    private Integer sowPhInFarmIn;
+
+    /**
+     * 配怀母猪断奶转入
+     */
+    private Integer sowPhWeanIn;
+
+    /**
+     * 配怀死亡母猪
+     */
+    private Integer sowPhDead;
+
+    /**
+     * 配怀淘汰母猪
+     */
+    private Integer sowPhWeedOut;
+
+    /**
+     * 配怀舍转产房母猪
+     */
+    private Integer sowPhToCf;
+
+    /**
+     * 配怀母猪期末头数
+     */
+    private Integer sowPhEnd;
+
+    /**
+     * 配怀母猪期初头数
+     */
+    private Integer sowCfStart;
+
+    /**
+     * 产房母猪转入
+     */
+    private Integer sowCfIn;
+
+    /**
+     * 产房死亡母猪
+     */
+    private Integer sowCfDead;
+
+    /**
+     * 产房淘汰母猪
+     */
+    private Integer sowCfWeedOut;
+
+    /**
+     * 产房母猪断奶转出
+     */
+    private Integer sowCfWeanOut;
+
+    /**
+     * 产房母猪期末头数
+     */
+    private Integer sowCfEnd;
+
+    /**
      * 公猪期初头数
      */
     private Integer boarStart;
@@ -208,6 +273,56 @@ public class DoctorBaseReport implements Serializable{
      * 断奶日龄
      */
     private Double weanDayAge;
+
+    /**
+     * 配怀母猪饲料消耗数量
+     */
+    private Double sowPhFeed;
+
+    /**
+     * 配怀母猪饲料消耗金额
+     */
+    private Long sowPhFeedAmount;
+
+    /**
+     * 配怀母猪药品消耗金额
+     */
+    private Long sowPhMedicineAmount;
+
+    /**
+     * 配怀母猪疫苗消耗金额
+     */
+    private Long sowPhVaccinationAmount;
+
+    /**
+     * 配怀母猪易耗品消耗金额
+     */
+    private Long sowPhConsumableAmount;
+
+    /**
+     * 产房母猪饲料消耗数量
+     */
+    private Double sowCfFeed;
+
+    /**
+     * 产房母猪饲料消耗金额
+     */
+    private Long sowCfFeedAmount;
+
+    /**
+     * 产房母猪药品消耗金额
+     */
+    private Long sowCfMedicineAmount;
+
+    /**
+     * 产房母猪疫苗消耗金额
+     */
+    private Long sowCfVaccinationAmount;
+
+    /**
+     * 产房母猪易耗品消耗金额
+     */
+    private Long sowCfConsumableAmount;
 
     /**
      * 产房仔猪饲料消耗数量

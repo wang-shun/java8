@@ -65,10 +65,6 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
         return getSqlSession().selectOne(sqlId("getGroupStock"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
     }
 
-    public List<DoctorDailyReport> findBySumAt(Date sumAt) {
-        return getSqlSession().selectList(sqlId("findBySumAt"), ImmutableMap.of("sumAt", sumAt));
-    }
-
     /**
      * 获取某一段时间的猪群存栏变化
      * @param farmId
@@ -120,4 +116,16 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
         getSqlSession().update(sqlId("updateDailyGroupLiveStock"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt, "changeCount", changeCount));
     }
 
+    public Integer findFattenWillOut(Long farmId, String sumAt) {
+        return getSqlSession().selectOne(sqlId("findFattenWillOut"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+    }
+
+    /**
+     * 查询某一天所有猪群的存栏信息
+     * @param sumAt
+     * @return
+     */
+    public List<DoctorDailyGroup> findGroupInfoBySumAt(String sumAt) {
+        return getSqlSession().selectList(sqlId("findGroupInfoBySumAt"), ImmutableMap.of("sumAt", sumAt));
+    }
 }

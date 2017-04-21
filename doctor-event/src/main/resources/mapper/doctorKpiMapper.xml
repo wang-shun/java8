@@ -2004,4 +2004,76 @@
         and event_at &lt;= #{date}
     </select>
 
+    <select id="getSowPhDead" parameterType="map" resultType="int">
+        SELECT
+        ifnull(count(1), 0)
+        FROM
+        (
+        SELECT
+        barn_id
+        FROM doctor_pig_events
+        WHERE
+        change_type_id = 110 AND -- 变动类型是死亡和淘汰
+        `type` = 6 AND -- 事件类型是离场
+        kind = 1 -- 猪类母猪
+        <include refid="criteria"/>
+        ) AS a
+        LEFT JOIN doctor_barns b ON a.barn_id = b.id
+        WHERE b.pig_type IN (5, 6)
+    </select>
+
+    <select id="getSowPhWeedOut" parameterType="map" resultType="int">
+        SELECT
+        ifnull(count(1), 0)
+        FROM
+        (
+        SELECT
+        barn_id
+        FROM doctor_pig_events
+        WHERE
+        change_type_id = 111 AND -- 变动类型是死亡和淘汰
+        `type` = 6 AND -- 事件类型是离场
+        kind = 1 -- 猪类母猪
+        <include refid="criteria"/>
+        ) AS a
+        LEFT JOIN doctor_barns b ON a.barn_id = b.id
+        WHERE b.pig_type IN (5, 6)
+    </select>
+
+    <select id="getSowCfDead" parameterType="map" resultType="int">
+        SELECT
+        ifnull(count(1), 0)
+        FROM
+        (
+        SELECT
+        barn_id
+        FROM doctor_pig_events
+        WHERE
+        change_type_id = 110 AND -- 变动类型是死亡和淘汰
+        `type` = 6 AND -- 事件类型是离场
+        kind = 1 -- 猪类母猪
+        <include refid="criteria"/>
+        ) AS a
+        LEFT JOIN doctor_barns b ON a.barn_id = b.id
+        WHERE b.pig_type IN (1, 7)
+    </select>
+
+    <select id="getSowCfWeedOut" parameterType="map" resultType="int">
+        SELECT
+        ifnull(count(1), 0)
+        FROM
+        (
+        SELECT
+        barn_id
+        FROM doctor_pig_events
+        WHERE
+        change_type_id = 111 AND -- 变动类型是死亡和淘汰
+        `type` = 6 AND -- 事件类型是离场
+        kind = 1 -- 猪类母猪
+        <include refid="criteria"/>
+        ) AS a
+        LEFT JOIN doctor_barns b ON a.barn_id = b.id
+        WHERE b.pig_type IN (1, 7)
+    </select>
+
 </mapper>

@@ -83,17 +83,13 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     }
 
     @Override
-    public Response<List<DoctorDailyReportDto>> findDailyReportDtoByFarmIdAndRange(Long farmId, String startAt, String endAt) {
+    public Response<List<DoctorDailyReport>> findDailyReportDtoByFarmIdAndRange(Long farmId, String startAt, String endAt) {
         try {
             Date end = isEmpty(endAt) ? new Date() : DateUtil.toDate(endAt);
             Date start = isEmpty(startAt) ? new DateTime(end).plusDays(-30).toDate() : DateUtil.toDate(startAt);
 
-            List<DoctorDailyReportDto> report = Lists.newArrayList();
-            while (!Dates.startOfDay(start).after(Dates.startOfDay(end))) {
-                report.add(getDoctorDailyReportDto(farmId, DateUtil.toDateString(start)));
-                start = new DateTime(start).plusDays(1).toDate();
-            }
-            return Response.ok(report);
+            List<DoctorDailyReport> reports = doctorDailyReportDao.findByRange(farmId, start, end);
+            return Response.ok(reports);
         } catch (Exception e) {
             log.error("find dailyReport by farm id and range fail, farmId:{}, startAt:{}, endAt, cause:{}",
                     farmId, startAt, endAt, Throwables.getStackTraceAsString(e));
@@ -105,7 +101,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     public Response<List<DoctorDailyReportDto>> findDailyReportBySumAt(Date date) {
         List<DoctorDailyReportDto> dtoList = Lists.newArrayList();
         try{
-            List<DoctorDailyReport> reports = doctorDailyGroupDao.findBySumAt(date);
+            List<DoctorDailyReport> reports = doctorDailyReportDao.findBySumAt(date);
             reports.forEach(report -> {
                 dtoList.add(getDoctorDailyReportDto(report));
             });
@@ -122,6 +118,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         dto.setDailyReport(report);
         DoctorGroupChangeSum groupChangeSum = doctorDailyGroupDao.getGroupChangeSum(report.getFarmId(), report.getSumAt());
         dto.setGroupChangeSum(groupChangeSum);
+        dto.setFattenWillOut(doctorDailyGroupDao.findFattenWillOut(report.getFarmId(), report.getSumAt()));
         return dto;
     }
 }

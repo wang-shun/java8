@@ -20,6 +20,8 @@ public class DoctorDailyReportDto implements Serializable {
 
     DoctorGroupChangeSum groupChangeSum; //猪群日存栏变化
 
+    private Integer FattenWillOut;   //待出栏育肥数
+
     /**
      * 是否失败, true 失败
      */

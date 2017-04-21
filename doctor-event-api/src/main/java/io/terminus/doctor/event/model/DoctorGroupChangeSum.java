@@ -1,8 +1,10 @@
 package io.terminus.doctor.event.model;
 
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 
 /**
  * Created by IntelliJ IDEA.

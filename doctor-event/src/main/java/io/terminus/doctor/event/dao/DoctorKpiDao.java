@@ -1005,4 +1005,48 @@ public class DoctorKpiDao {
     public int getGroupUnWean(Long groupId, Date date){
         return sqlSession.selectOne(sqlId("getGroupUnWean"), ImmutableMap.of("groupId", groupId, "date", date));
     }
+
+    /**
+     * 配怀母猪死亡
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getSowPhDead(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getSowPhDead"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配怀母猪淘汰
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getSowPhWeedOut(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getSowPhWeedOut"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产房母猪死亡
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getSowCfDead(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getSowCfDead"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产房母猪淘汰
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getSowCfWeedOut(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getSowCfWeedOut"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
 }
