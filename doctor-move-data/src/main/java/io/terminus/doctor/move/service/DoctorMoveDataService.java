@@ -33,6 +33,7 @@ import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
@@ -109,6 +110,7 @@ import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.model.User;
@@ -177,6 +179,8 @@ public class DoctorMoveDataService {
     private PrimaryUserDao primaryUserDao;
     @Autowired
     private DoctorUserDataPermissionDao doctorUserDataPermissionDao;
+    @Autowired
+    private DoctorPigTypeStatisticDao doctorPigTypeStatisticDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -1606,7 +1610,8 @@ public class DoctorMoveDataService {
         }
 
         //查出公猪, 转换成map
-        Map<String, DoctorPig> boarMap = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PigSex.BOAR.getKey()).stream()
+        List<DoctorPig> boarList = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PigSex.BOAR.getKey());
+        Map<String, DoctorPig> boarMap = boarList.stream()
                 .collect(Collectors.toMap(DoctorPig::getOutId, v -> v));
 
         //2. 迁移DoctorPigEvent
@@ -1698,13 +1703,11 @@ public class DoctorMoveDataService {
         boar.setGeneticName(card.getGenetic());
 
         //附加字段, 公猪类型
-        BoarEntryType boarType = BoarEntryType.from(card.getBoarType());
-        if (boarType != null) {
-            boar.setExtraMap(ImmutableMap.of(
-                    DoctorFarmEntryConstants.BOAR_TYPE_ID, boarType.getKey(),
-                    DoctorFarmEntryConstants.BOAR_TYPE_NAME, boarType.getDesc()
-            ));
-        }
+        BoarEntryType boarType = BoarEntryType.HGZ;
+        boar.setExtraMap(ImmutableMap.of(
+                DoctorFarmEntryConstants.BOAR_TYPE_ID, boarType.getKey(),
+                DoctorFarmEntryConstants.BOAR_TYPE_NAME, boarType.getDesc()
+        ));
         boar.setBoarType(boarType.getKey());
         return boar;
     }
@@ -2806,10 +2809,16 @@ public class DoctorMoveDataService {
         //2.删除猪场主账户以及员工的权限
         List<Long> userIdList = Lists.newArrayList();
         userIdList.addAll(subDao.findSubsByFarmId(farmId).stream().map(Sub::getUserId).collect(Collectors.toList()));
-        userIdList.add(primaryUserDao.findPrimaryByFarmId(farmId).getUserId());
+        PrimaryUser primaryUser = primaryUserDao.findPrimaryByFarmId(farmId);
+        if (notNull(primaryUser)) {
+            userIdList.add(primaryUserDao.findPrimaryByFarmId(farmId).getUserId());
+        }
         if (!userIdList.isEmpty()) {
             doctorUserDataPermissionDao.deletesByUserIds(userIdList);
         }
+
+        //3.删除statistics
+        doctorPigTypeStatisticDao.deleteByFarmId(farmId);
     }
 
     @Transactional

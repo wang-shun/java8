@@ -121,6 +121,6 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
                 .staffId(doctorPigEvent.getOperatorId())
                 .staffName(doctorPigEvent.getOperatorName())
                 .build();
-        doctorSowFostersByHandler.handle(doctorEventInfoList, buildPigEvent(basic, fosterByDto), doctorPigTrack);
+        doctorSowFostersByHandler.handle(doctorEventInfoList, doctorSowFostersByHandler.buildPigEvent(basic, fosterByDto), fosterByTrack);
     }
 }

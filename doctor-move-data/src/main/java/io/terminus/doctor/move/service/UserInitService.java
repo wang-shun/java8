@@ -39,6 +39,7 @@ import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
+import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
@@ -82,6 +83,8 @@ public class UserInitService {
     private DoctorServiceReviewReadService doctorServiceReviewReadService;
     @Autowired
     private DoctorServiceStatusWriteService doctorServiceStatusWriteService;
+    @Autowired
+    private DoctorServiceStatusReadService doctorServiceStatusReadService;
     @Autowired
     private DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     @Autowired
@@ -168,11 +171,26 @@ public class UserInitService {
                 userWriteService.update(primaryUser);
             } else {
                 primaryUser = this.registerByMobile(farmInfo.getMobile(), "123456", farmInfo.getLoginName(), farmInfo.getRealName());
+            }
+            DoctorServiceStatus serviceStatus = RespHelper.orServEx(doctorServiceStatusReadService.findByUserId(primaryUser.getId()));
+            if(serviceStatus == null){
                 //初始化服务状态
                 this.initDefaultServiceStatus(primaryUser.getId());
+            }else{
+                serviceStatus.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
+                serviceStatus.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
+                doctorServiceStatusWriteService.updateServiceStatus(serviceStatus);
+            }
+
+            DoctorServiceReview review = RespHelper.orServEx(doctorServiceReviewReadService.findServiceReviewByUserIdAndType(primaryUser.getId(), DoctorServiceReview.Type.PIG_DOCTOR));
+            if(review == null){
                 //初始化服务的申请审批状态
                 this.initServiceReview(primaryUser.getId(), primaryUser.getMobile(), primaryUser.getName());
+            }else{
+                review.setStatus(DoctorServiceReview.Status.OK.getValue());
+                doctorServiceReviewWriteService.updateReview(review);
             }
+
             Long userId = primaryUser.getId();
             DoctorFarm farm = nameFarmMap.get(farmInfo.getNewFarmName());
             log.info("===farm:{}", farm);
@@ -215,8 +233,7 @@ public class UserInitService {
             for (View_FarmMember member : list) {
                 if(member.getLevels() == 1
                         && Objects.equals(member.getFarmName(), farmInfo.getOldFarmName())
-                        && !Objects.equals(member.getMobilPhone(), primaryUser.getMobile())
-                        && !Objects.equals(member.getMobilPhone(), "13523756995")){
+                        && (!Objects.equals(member.getMobilPhone(), primaryUser.getMobile()))) {
                     this.createSubUser(member, roleId, primaryUser.getId(), primaryUser.getMobile(), farm.getId(), farm.getOutId());
                 }
             }
@@ -237,7 +254,7 @@ public class UserInitService {
     private List<DoctorMoveFarmInfo> analyzeExcelForFarmInfo(Sheet sheet) {
         List<DoctorMoveFarmInfo> infoList = Lists.newArrayList();
         for (Row row : sheet) {
-            if (row.getRowNum() > 1 && notEmpty(ImportExcelUtils.getString(row, 0))) {
+            if (row.getRowNum() > 0 && notEmpty(ImportExcelUtils.getString(row, 0))) {
                 DoctorMoveFarmInfo moveFarmInfo = DoctorMoveFarmInfo.builder()
                         .oldFarmName(ImportExcelUtils.getString(row, 1))
                         .orgName(ImportExcelUtils.getString(row, 2))
@@ -390,6 +407,9 @@ public class UserInitService {
         DoctorFarm farm = doctorFarmDao.findById(farmId);
         String name = member.getLoginName() + "@" + farm.getFarmCode();
 
+        if (member.getMobilPhone().isEmpty()) {
+            member.setMobilPhone(null);
+        }
         Response<User> result = doctorUserReadService.findBy(member.getMobilPhone(), LoginType.MOBILE);
         Response<User> userResponse = doctorUserReadService.findBy(name, LoginType.NAME);
         if(result.isSuccess() && result.getResult() != null) {

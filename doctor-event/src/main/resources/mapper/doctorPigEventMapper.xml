@@ -626,7 +626,7 @@
         FROM
         <include refid="tb"/>
         WHERE pig_id = #{pigId} AND status =1
-        order by event_at ASC , id ASC
+        order by DATE_FORMAT(event_at,'%Y-%m-%d') ASC , id ASC
     </select>
 
     <select id="count" parameterType="map" resultType="long">

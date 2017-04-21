@@ -280,4 +280,11 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<List<DoctorGroup>> findGroupId(Long farmId, Long barnId);
+
+    /**
+     * 查询新建猪群事件
+     * @param groupId 猪群id
+     * @return 新建猪群事件
+     */
+    Response<DoctorGroupEvent> findNewGroupEvent(@NotNull(message = "groupId.not.null") Long groupId);
 }

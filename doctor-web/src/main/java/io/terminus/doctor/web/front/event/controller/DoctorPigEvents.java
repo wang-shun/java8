@@ -1,7 +1,6 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.std.DateTimeSerializerBase;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
@@ -265,7 +264,9 @@ public class DoctorPigEvents {
                         if (Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK.getKey()) && doctorPigEvent.getPregCheckResult() != null) {
                             extraMap.put("checkResult", PregCheckResult.from(doctorPigEvent.getPregCheckResult()).getDesc());
                         }
-                        if( Objects.equals(doctorPigEvent.getType(), PigEvent.ENTRY.getKey()) && doctorPigEvent.getExtraMap().containsKey("boarType")){
+                        if( Objects.equals(doctorPigEvent.getType(), PigEvent.ENTRY.getKey())
+                                && notNull(doctorPigEvent.getExtraMap())
+                                && doctorPigEvent.getExtraMap().containsKey("boarType")){
                             extraMap.put("boarTypeName", BoarEntryType.from(Integer.valueOf(extraMap.get("boarType").toString())).getDesc());
                         }
                         doctorPigEvent.setExtraMap(extraMap);
