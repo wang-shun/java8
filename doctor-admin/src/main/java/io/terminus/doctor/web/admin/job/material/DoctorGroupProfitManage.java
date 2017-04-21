@@ -71,13 +71,14 @@ public class DoctorGroupProfitManage {
                 vaccineAmount = 0.0;
                 medicineAmount = 0.0;
                 consumablesAmount = 0.0;
+                amount = 0.0;
                 for (DoctorProfitExportDto doctorProfitExportDto : profitExportDto) {
                     doctorProfitMaterialOrPig = sumMaterialAmount(startDate, endDate, farmId, doctorProfitExportDto.getBarnId(), doctorProfitMaterialOrPig, true);
                     amountPig += doctorProfitExportDto.getAmount();
                 }
                 date = new DateTime(startDate);
                 startDates = DateUtils.addDays(startDate,1-date.dayOfYear().get());
-                endDates = DateUtils.addSeconds(DateUtils.addYears(startDate,1),-1);
+                endDates = DateUtils.addSeconds(DateUtils.addYears(startDates,1),-1);
                 map.put("startDate", startDates);
                 map.put("endDate", endDates);
                 profitYearExportDto = RespHelper.or500(doctorPigEventReadService.sumProfitAmount(map));
@@ -87,8 +88,7 @@ public class DoctorGroupProfitManage {
                     doctorProfitMaterialOrPig = sumMaterialAmount(startDates, endDates, farmId, doctorProfitExportDto.getBarnId(), doctorProfitMaterialOrPig, false);
                     amountPigYear += doctorProfitExportDto.getAmount();
                 }
-
-                if (!profitExportDto.isEmpty() && !profitYearExportDto.isEmpty()) {
+                if (!profitExportDto.isEmpty()) {
                     doctorProfitMaterialOrPig.setFarmId(farmId);
                     doctorProfitMaterialOrPig.setPigTypeNameId(pigs);
                     doctorProfitMaterialOrPig.setPigTypeName(profitExportDto.get(0).getPigTypeName());
