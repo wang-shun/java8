@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
@@ -17,6 +18,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorDailyGroupReadServiceImpl implements DoctorDailyGroupReadService {
 
     private final DoctorDailyGroupDao doctorDailyGroupDao;

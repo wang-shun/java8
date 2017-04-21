@@ -43,6 +43,8 @@ public class DoctorReportJobs {
     @RpcConsumer(timeout = "60000")
     private DoctorDailyReportWriteService doctorDailyReportWriteService;
     @RpcConsumer(timeout = "60000")
+    private DoctorRangeReportWriteService doctorRangeReportWriteService;
+    @RpcConsumer(timeout = "60000")
     private DoctorCommonReportWriteService doctorCommonReportWriteService;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
@@ -51,8 +53,7 @@ public class DoctorReportJobs {
 
     @RpcConsumer
     private DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
-    @RpcConsumer(timeout = "60000")
-    private DoctorDailyPigWriteService doctorDailyPigWriteService;
+
     @RpcConsumer(timeout = "60000")
     private DoctorDailyGroupWriteService doctorDailyGroupWriteService;
 
@@ -77,7 +78,7 @@ public class DoctorReportJobs {
             }
             log.info("daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            doctorDailyReportWriteService.createYesterdayAndTodayReports(getAllFarmIds());
+            doctorDailyReportWriteService.generateYesterdayAndTodayReports(getAllFarmIds());
 
             log.info("daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
@@ -85,53 +86,20 @@ public class DoctorReportJobs {
         }
     }
 
-    /**
-     * 更新历史日报和月报
-     */
     @Scheduled(cron = "0 0 1 * * ?")
-    @RequestMapping(value = "/updateHistoryReport", method = RequestMethod.GET)
-    public void updateHistoryReport(){
-        Date endDate = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate(); // 昨天的开始时间
-        try{
-            if(!hostLeader.isLeader()) {
+    @RequestMapping(value = "/group/daily", method = RequestMethod.GET)
+    public void groupDaily() {
+        try {
+            if(!hostLeader.isLeader()){
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
                 return;
             }
-            log.info("update history report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
-
-            for(Map.Entry<Long, String> entry : RespHelper.or500(doctorDailyReportReadService.getDailyReport2Update()).entrySet()){
-                Long farmId = entry.getKey();
-                Date beginDate = DateUtil.toDate(entry.getValue()); // 自此日期之后(包括此日期)的日报和月报应当被更新
-                if(beginDate == null) {
-                    continue;
-                }
-
-                //日报更新
-                Date daily = new Date(beginDate.getTime());
-                while(!daily.after(endDate)){
-                    RespHelper.or500(doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), daily));
-                    daily = new DateTime(daily).plusDays(1).toDate();
-                }
-                RespHelper.or500(doctorDailyReportWriteService.deleteDailyReport2Update(farmId));
-
-                // 周报更新
-                Date weekly = new DateTime(beginDate).withDayOfWeek(7).toDate();
-                while (!weekly.after(endDate)) {
-                    RespHelper.or500(doctorCommonReportWriteService.createWeeklyReport(farmId, weekly));
-                    weekly = new DateTime(weekly).plusWeeks(1).toDate();
-                }
-
-                // 月报更新
-                Date monthly = new Date(beginDate.getTime());
-                while(!DateUtil.inSameYearMonth(monthly, endDate)){
-                    RespHelper.or500(doctorCommonReportWriteService.createMonthlyReport(farmId, DateUtil.getMonthEnd(new DateTime(monthly)).toDate()));
-                    monthly = new DateTime(monthly).plusMonths(1).toDate();
-                }
-            }
-
-            log.info("update history report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
-        }catch(Exception e) {
-            log.error("update history report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+            log.info("statistics daily group job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
+            RespHelper.or500(doctorDailyGroupWriteService.generateYesterdayAndToday(getAllFarmIds(),yesterday));
+            log.info("statistics daily group job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        }catch (Exception e){
+            log.error("statistics daily group job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
 
@@ -140,32 +108,20 @@ public class DoctorReportJobs {
      * 每两点执行一发
      */
     @Scheduled(cron = "0 0 2 * * ?")
-    @RequestMapping(value = "/monthly", method = RequestMethod.GET)
+    @RequestMapping(value = "/range", method = RequestMethod.GET)
     public void monthlyReport() {
         try {
             if (!hostLeader.isLeader()) {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
                 return;
             }
-            log.info("monthly report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
-
-            //获取今天的天初
-            Date today = Dates.startOfDay(new Date());
-            List<DoctorDailyReport> dailyReports = RespHelper.orServEx(doctorDailyReportReadService.findDailyReportBySumAt(today));
-            if (!notEmpty(dailyReports)) {
-                log.error("daily report not found, so can not monthly report!");
-                throw new ServiceException("daily.report.find.fail");
-            }
-
+            log.info("range report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
             List<Long> farmIds = getAllFarmIds();
-            farmIds.forEach(farmId -> doctorCommonReportWriteService.createMonthlyReport(farmId, today));
-            farmIds.forEach(farmId -> doctorCommonReportWriteService.update4MonthReports(farmId, today));
-            log.info("monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
-
-            farmIds.forEach(farmId -> doctorCommonReportWriteService.createWeeklyReport(farmId, today));
-            log.info("weekly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+            Date today = Dates.startOfDay(new Date());
+            doctorRangeReportWriteService.generateDoctorRangeReports(farmIds, today);
+            log.info("range report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
-            log.error("monthly and weekly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("range report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
 
@@ -213,40 +169,6 @@ public class DoctorReportJobs {
             log.info("parity monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("parity monthly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
-        }
-    }
-
-    @Scheduled(cron = "0 0 1 * * ?")
-    @RequestMapping(value = "/pig/daily", method = RequestMethod.GET)
-    public void pigDaily() {
-        try {
-            if(!hostLeader.isLeader()){
-                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
-                return;
-            }
-            log.info("statistics daily pig job start, now is:{}", DateUtil.toDateTimeString(new Date()));
-            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
-            RespHelper.or500(doctorDailyPigWriteService.createDailyPigs(getAllFarmIds(),yesterday));
-            log.info("statistics daily pig job end, now is:{}", DateUtil.toDateTimeString(new Date()));
-        }catch (Exception e){
-            log.error("statistics daily pig job failed, cause:{}", Throwables.getStackTraceAsString(e));
-        }
-    }
-
-    @Scheduled(cron = "0 0 1 * * ?")
-    @RequestMapping(value = "/group/daily", method = RequestMethod.GET)
-    public void groupDaily() {
-        try {
-            if(!hostLeader.isLeader()){
-                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
-                return;
-            }
-            log.info("statistics daily group job start, now is:{}", DateUtil.toDateTimeString(new Date()));
-            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
-            RespHelper.or500(doctorDailyGroupWriteService.createDailyGroups(getAllFarmIds(),yesterday));
-            log.info("statistics daily group job end, now is:{}", DateUtil.toDateTimeString(new Date()));
-        }catch (Exception e){
-            log.error("statistics daily group job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
 

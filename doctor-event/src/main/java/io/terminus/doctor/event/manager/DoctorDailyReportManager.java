@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.manager;
 
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
@@ -39,16 +40,16 @@ public class DoctorDailyReportManager {
     public void realTimeDailyReports(Long farmId, Date sumAt) {
         DoctorDailyReport report = new DoctorDailyReport();
         report.setFarmId(farmId);
-        report.setSumAt(sumAt);
+        report.setSumAt(DateUtil.toDateString(sumAt));
 
         DoctorDailyReportDto dto = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, sumAt);
-        report.setSowCount(dto.getSowCount());                      //母猪总存栏
-        report.setFarrowCount(dto.getLiveStock().getFarrow());      //产房仔猪
-        report.setNurseryCount(dto.getLiveStock().getNursery());    //保育猪
-        report.setFattenCount(dto.getLiveStock().getFatten());      //育肥猪
-        report.setHoubeiCount(dto.getLiveStock().getHoubei());      //后备猪
-        report.setReportData(dto);
-        doctorDailyReportDao.deleteByFarmIdAndSumAt(farmId, sumAt);
-        doctorDailyReportDao.create(report);
+//        report.setSowCount(dto.getSowCount());                      //母猪总存栏
+//        report.setFarrowCount(dto.getLiveStock().getFarrow());      //产房仔猪
+//        report.setNurseryCount(dto.getLiveStock().getNursery());    //保育猪
+//        report.setFattenCount(dto.getLiveStock().getFatten());      //育肥猪
+//        report.setHoubeiCount(dto.getLiveStock().getHoubei());      //后备猪
+//        report.setReportData(dto);
+//        doctorDailyReportDao.deleteByFarmIdAndSumAt(farmId, sumAt);
+//        doctorDailyReportDao.create(report);
     }
 }

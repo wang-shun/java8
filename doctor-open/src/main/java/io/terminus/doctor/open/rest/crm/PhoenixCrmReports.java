@@ -5,16 +5,12 @@ import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
-import io.terminus.doctor.event.model.DoctorDailyReport;
-import io.terminus.doctor.event.model.DoctorMonthlyReport;
 import io.terminus.doctor.event.service.DoctorCommonReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.open.dto.DoctorDailyReportOpen;
 import io.terminus.doctor.open.dto.DoctorGroupLiveStockDetailOpen;
 import io.terminus.doctor.open.dto.DoctorMonthlyReportOpen;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -75,25 +71,26 @@ public class PhoenixCrmReports {
      */
     @OpenMethod(key = "get.daily.report", paramNames = "date")
     public String getDailyReport(@NotEmpty(message = "date.not.empty") String date) {
-        Response<List<DoctorDailyReport>> dailyReportsResponse = doctorDailyReportReadService.findDailyReportBySumAt(DTF.parseDateTime(date).toDate());
-        if (!dailyReportsResponse.isSuccess() || Arguments.isNullOrEmpty(dailyReportsResponse.getResult())) {
-            return "";
-        }
-        Response<List<DoctorFarm>> farmsResponse = doctorFarmReadService.findAllFarms();
-        if (!farmsResponse.isSuccess()) {
-            return "";
-        }
-        Response<Map<Long, Integer>> mapResponse = doctorGroupReadService.queryFattenOutBySumAt(date);
-        Map<Long, Integer> fattenOutMap = mapResponse.getResult();
-        Map<Long, String> farmMap = farmsResponse.getResult().stream().collect(Collectors.toMap(k -> k.getId(), v -> v.getName()));
-        List<DoctorDailyReportOpen> doctorDailyReportDtos = dailyReportsResponse.getResult().stream().map(doctorDailyReport -> {
-            DoctorDailyReportOpen doctorDailyReportOpen = new DoctorDailyReportOpen();
-            BeanMapper.copy(doctorDailyReport.getReportData(), doctorDailyReportOpen);
-            doctorDailyReportOpen.setFarmName(farmMap.get(doctorDailyReport.getFarmId()));
-            doctorDailyReportOpen.getLiveStock().setFattenOut(fattenOutMap.containsKey(doctorDailyReport.getFarmId()) ? fattenOutMap.get(doctorDailyReport.getFarmId()) : 0);
-            return doctorDailyReportOpen;
-        }).collect(Collectors.toList());
-        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(doctorDailyReportDtos);
+//        Response<List<DoctorDailyReport>> dailyReportsResponse = doctorDailyReportReadService.findDailyReportBySumAt(DTF.parseDateTime(date).toDate());
+//        if (!dailyReportsResponse.isSuccess() || Arguments.isNullOrEmpty(dailyReportsResponse.getResult())) {
+//            return "";
+//        }
+//        Response<List<DoctorFarm>> farmsResponse = doctorFarmReadService.findAllFarms();
+//        if (!farmsResponse.isSuccess()) {
+//            return "";
+//        }
+//        Response<Map<Long, Integer>> mapResponse = doctorGroupReadService.queryFattenOutBySumAt(date);
+//        Map<Long, Integer> fattenOutMap = mapResponse.getResult();
+//        Map<Long, String> farmMap = farmsResponse.getResult().stream().collect(Collectors.toMap(k -> k.getId(), v -> v.getName()));
+//        List<DoctorDailyReportOpen> doctorDailyReportDtos = dailyReportsResponse.getResult().stream().map(doctorDailyReport -> {
+//            DoctorDailyReportOpen doctorDailyReportOpen = new DoctorDailyReportOpen();
+////            BeanMapper.copy(doctorDailyReport.getReportData(), doctorDailyReportOpen);
+//            doctorDailyReportOpen.setFarmName(farmMap.get(doctorDailyReport.getFarmId()));
+//            doctorDailyReportOpen.getLiveStock().setFattenOut(fattenOutMap.containsKey(doctorDailyReport.getFarmId()) ? fattenOutMap.get(doctorDailyReport.getFarmId()) : 0);
+//            return doctorDailyReportOpen;
+//        }).collect(Collectors.toList());
+//        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(doctorDailyReportDtos);
+        return null;
     }
 
     /**
@@ -103,23 +100,24 @@ public class PhoenixCrmReports {
      */
     @OpenMethod(key = "get.monthly.report", paramNames = "date")
     public String getMonthlyReport(@NotEmpty(message = "date.not.empty") String date) {
-        Response<List<DoctorMonthlyReport>> monthlyReportsResponse = doctorCommonReportReadService.findMonthlyReports(date);
-        if (!monthlyReportsResponse.isSuccess() || Arguments.isNullOrEmpty(monthlyReportsResponse.getResult())) {
-            return "";
-        }
-        Response<List<DoctorFarm>> farmsResponse = doctorFarmReadService.findAllFarms();
-        if (!farmsResponse.isSuccess()) {
-            return "";
-        }
-        Map<Long, String> farmMap = farmsResponse.getResult().stream().collect(Collectors.toMap(k -> k.getId(), v -> v.getName()));
-
-        List<DoctorMonthlyReportOpen> doctorCommonReportDtos = monthlyReportsResponse.getResult().stream().map(doctorMonthlyReport -> {
-            DoctorMonthlyReportOpen doctorMonthlyReportOpen = MAPPER.fromJson(doctorMonthlyReport.getData(), DoctorMonthlyReportOpen.class);
-            doctorMonthlyReportOpen.setDate(doctorMonthlyReport.getSumAt());
-            doctorMonthlyReportOpen.setFarmName(farmMap.get(doctorMonthlyReport.getFarmId()));
-            return doctorMonthlyReportOpen;
-        }).collect(Collectors.toList());
-        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(doctorCommonReportDtos);
+//        Response<List<DoctorMonthlyReport>> monthlyReportsResponse = doctorCommonReportReadService.findMonthlyReports(date);
+//        if (!monthlyReportsResponse.isSuccess() || Arguments.isNullOrEmpty(monthlyReportsResponse.getResult())) {
+//            return "";
+//        }
+//        Response<List<DoctorFarm>> farmsResponse = doctorFarmReadService.findAllFarms();
+//        if (!farmsResponse.isSuccess()) {
+//            return "";
+//        }
+//        Map<Long, String> farmMap = farmsResponse.getResult().stream().collect(Collectors.toMap(k -> k.getId(), v -> v.getName()));
+//
+//        List<DoctorMonthlyReportOpen> doctorCommonReportDtos = monthlyReportsResponse.getResult().stream().map(doctorMonthlyReport -> {
+//            DoctorMonthlyReportOpen doctorMonthlyReportOpen = MAPPER.fromJson(doctorMonthlyReport.getData(), DoctorMonthlyReportOpen.class);
+//            doctorMonthlyReportOpen.setDate(doctorMonthlyReport.getSumAt());
+//            doctorMonthlyReportOpen.setFarmName(farmMap.get(doctorMonthlyReport.getFarmId()));
+//            return doctorMonthlyReportOpen;
+//        }).collect(Collectors.toList());
+//        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(doctorCommonReportDtos);
+        return null;
     }
 
     /**

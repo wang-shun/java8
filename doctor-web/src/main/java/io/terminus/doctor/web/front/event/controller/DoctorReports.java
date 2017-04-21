@@ -2,6 +2,8 @@ package io.terminus.doctor.web.front.event.controller;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
@@ -10,25 +12,21 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.dto.DoctorStockStructureDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
-import io.terminus.doctor.event.service.DoctorCommonReportReadService;
-import io.terminus.doctor.event.service.DoctorDailyReportReadService;
-import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
-import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.model.DoctorRangeReport;
+import io.terminus.doctor.event.service.*;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -62,6 +60,9 @@ public class DoctorReports {
     @RpcConsumer
     private DoctorGroupReadService doctorGroupReadService;
 
+    @RpcConsumer
+    private DoctorRangeReportReadService doctorRangeReportReadService;
+
     /**
      * 根据farmId和日期查询猪场日报表(缓存方式)
      * @param farmId 猪场id
@@ -71,7 +72,12 @@ public class DoctorReports {
     @RequestMapping(value = "/daily", method = RequestMethod.GET)
     public DoctorDailyReportDto findDailyReportByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
                                                                 @RequestParam("date") String date) {
-        return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndSumAt(farmId, date));
+        DoctorDailyReportDto doctorDailyReportDto = new DoctorDailyReportDto();
+        if(DateUtil.toDate(date).after(DateUtil.getDateEnd(DateTime.now()).toDate())){
+            doctorDailyReportDto.setFail(true);
+            return doctorDailyReportDto;
+        }
+        return RespHelper.or500(doctorDailyReportReadService.findDailyReportDtoByFarmIdAndSumAt(farmId, date));
     }
 
     /**
@@ -85,7 +91,7 @@ public class DoctorReports {
     public List<DoctorDailyReportDto> findDailyReportByFarmIdAndRange(@RequestParam("farmId") Long farmId,
                                                                       @RequestParam(value = "startAt", required = false) String startAt,
                                                                       @RequestParam(value = "endAt", required = false) String endAt) {
-        return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndRange(farmId, startAt, endAt));
+        return RespHelper.or500(doctorDailyReportReadService.findDailyReportDtoByFarmIdAndRange(farmId, startAt, endAt));
     }
 
     /**
@@ -99,6 +105,22 @@ public class DoctorReports {
                                                                              @RequestParam("date") String date,
                                                                              @RequestParam(value = "index", required = false) Integer index) {
         return RespHelper.or500(doctorCommonReportReadService.findMonthlyReportTrendByFarmIdAndSumAt(farmId, date, index));
+    }
+
+    /**
+     * 根据farmId和日期查询猪场月报表
+     * @param farmId 猪场id
+     * @param date   日期 yyyy-MM-dd
+     * @return 猪场月报表
+     */
+    @RequestMapping(value = "/monthly/structure", method = RequestMethod.GET)
+    public DoctorStockStructureDto findMonthlyReportByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
+                                                                    @RequestParam("date") String date) {
+        Response<DoctorRangeReport> reportResponse = doctorRangeReportReadService.findMonthlyByFarmIdAndSumAt(farmId, date);
+        if(Arguments.isNull(reportResponse) || Arguments.isNull(reportResponse.getResult())){
+            return new DoctorStockStructureDto();
+        }
+        return reportResponse.getResult().getStockDistributeDto();
     }
 
     /**

@@ -429,8 +429,8 @@
     <!-- 死淘情况: 产房死淘率 -->
     <select id="getDeadFarrowRate" parameterType="map" resultType="double">
         SELECT
-        a.dead_count / case (b.trans_in_count + c.farrow_count) when 0 then 1 else (b.trans_in_count + c.farrow_count)
-        end
+        ifnull(a.dead_count / case (b.trans_in_count + c.farrow_count) when 0 then 1 else (b.trans_in_count + c.farrow_count)
+        end, 0)
         FROM
         (
         SELECT
@@ -458,12 +458,14 @@
         LEFT JOIN
         (
         SELECT
-        farm_id,
-        farrow_count -- 当天产房仔猪存栏
-        FROM doctor_daily_reports
+        ifnull(farm_id, #{farmId}) as farm_id,
+        ifnull(sum(`end`), 0) as farrow_count -- 当天产房仔猪存栏
+        FROM doctor_daily_groups
         WHERE
         farm_id = #{farmId} AND
-        sum_at = date_format(#{endAt}, '%Y-%m-%d')
+        sum_at = date_format(#{endAt}, '%Y-%m-%d') AND
+        type = 7
+        group by farm_id
         ) AS c
         ON a.farm_id = c.farm_id
         limit 1
@@ -472,8 +474,8 @@
     <!-- 死淘情况: 保育死淘率 -->
     <select id="getDeadNurseryRate" parameterType="map" resultType="double">
         SELECT
-        a.dead_count / case (b.trans_in_count + c.nursery_count) when 0 then 1 else (b.trans_in_count + c.nursery_count)
-        end
+        ifnull(a.dead_count / case (b.trans_in_count + c.nursery_count) when 0 then 1 else (b.trans_in_count + c.nursery_count)
+        end, 0)
         FROM
         (
         SELECT
@@ -501,12 +503,14 @@
         LEFT JOIN
         (
         SELECT
-        farm_id,
-        nursery_count -- 当天保育存栏
-        FROM doctor_daily_reports
+        ifnull(farm_id, #{farmId}) as farm_id,
+        ifnull(sum(`end`), 0) as nursery_count -- 当天保育存栏
+        FROM doctor_daily_groups
         WHERE
         farm_id = #{farmId} AND
-        sum_at = date_format(#{endAt}, '%Y-%m-%d')
+        sum_at = date_format(#{endAt}, '%Y-%m-%d') AND
+        type = 2
+        group by farm_id
         ) AS c
         ON a.farm_id = c.farm_id
         limit 1
@@ -515,8 +519,8 @@
     <!-- 死淘情况: 育肥死淘率 -->
     <select id="getDeadFattenRate" parameterType="map" resultType="double">
         SELECT
-        a.dead_count / case (b.trans_in_count + c.fatten_count) when 0 then 1 else (b.trans_in_count + c.fatten_count)
-        end
+        ifnull( a.dead_count / case (b.trans_in_count + c.fatten_count) when 0 then 1 else (b.trans_in_count + c.fatten_count)
+        end, 0)
         FROM
         (
         SELECT
@@ -544,12 +548,14 @@
         LEFT JOIN
         (
         SELECT
-        farm_id,
-        fatten_count -- 当天育肥存栏
-        FROM doctor_daily_reports
+        ifnull(farm_id, #{farmId}) as farm_id,
+        ifnull(sum(`end`), 0) as fatten_count -- 当天育肥存栏
+        FROM doctor_daily_groups
         WHERE
         farm_id = #{farmId} AND
-        sum_at = date_format(#{endAt}, '%Y-%m-%d')
+        sum_at = date_format(#{endAt}, '%Y-%m-%d') AND
+        type = 3
+        group by farm_id
         ) AS c
         ON a.farm_id = c.farm_id
         limit 1
@@ -751,9 +757,9 @@
         ) /
         (
         select
-        case sum(sow_count)/(case count(1) when 0 then 1 else count(1) end)
+        case sum(sow_end)/(case count(1) when 0 then 1 else count(1) end)
         when 0 then 1
-        else sum(sow_count)/(case count(1) when 0 then 1 else count(1) end) end
+        else sum(sow_end)/(case count(1) when 0 then 1 else count(1) end) end
         from doctor_daily_reports
         where 1=1
         <if test="farmId != null">and farm_id = #{farmId}</if>
@@ -773,8 +779,8 @@
         <include refid="criteria" />
         ) /
         (
-        SELECT CASE sum(sow_count)/(CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
-        WHEN 0 THEN 1 ELSE sum(sow_count)/(CASE count(1) WHEN 0 THEN 1 ELSE count(1) END) END
+        SELECT CASE sum(sow_end)/(CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
+        WHEN 0 THEN 1 ELSE sum(sow_end)/(CASE count(1) WHEN 0 THEN 1 ELSE count(1) END) END
         FROM doctor_daily_reports
         WHERE 1=1
         <if test="farmId != null">and farm_id = #{farmId}</if>
@@ -1876,7 +1882,7 @@
         from doctor_group_events
         where
         type = 2
-        and trans_group_type = 1
+        and trans_group_type = 0
         <include refid="groupCriteria"/>
     </select>
 
@@ -1886,7 +1892,7 @@
         from doctor_group_events
         where
         type = 2
-        and trans_group_type = 0
+        and trans_group_type = 1
         <include refid="groupCriteria"/>
     </select>
 
