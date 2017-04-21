@@ -5,7 +5,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
-import io.terminus.doctor.event.dao.DoctorDailyPigDao;
+import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -15,7 +15,7 @@ import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.model.DoctorDailyPig;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -45,7 +45,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Autowired
     protected DoctorPigDao doctorPigDao;
     @Autowired
-    protected DoctorDailyPigDao doctorDailyPigDao;
+    protected DoctorDailyReportDao doctorDailyPigDao;
     @Autowired
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
 
@@ -205,7 +205,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @param changeDto 变化量
      * @return 新记录
      */
-    protected DoctorDailyPig buildDailyPig(DoctorDailyPig oldDailyPig, DoctorEventChangeDto changeDto){return oldDailyPig;}
+    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto){return oldDailyPig;}
 
     /**
      * 触发事件的处理(编辑)

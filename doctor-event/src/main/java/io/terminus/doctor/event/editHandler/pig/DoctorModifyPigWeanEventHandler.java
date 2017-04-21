@@ -7,7 +7,7 @@ import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupWeanEventHandler;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.sow.DoctorSowWeanHandler;
-import io.terminus.doctor.event.model.DoctorDailyPig;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -64,7 +64,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
     }
 
     @Override
-    protected DoctorDailyPig buildDailyPig(DoctorDailyPig oldDailyPig, DoctorEventChangeDto changeDto) {
+    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         return oldDailyPig;
     }
 

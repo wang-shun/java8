@@ -1,26 +1,7 @@
 package io.terminus.doctor.event.manager;
 
-import com.google.common.base.Throwables;
-import io.terminus.common.utils.Dates;
-import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.event.dao.DoctorKpiDao;
-import io.terminus.doctor.event.dao.DoctorMonthlyReportDao;
-import io.terminus.doctor.event.dao.DoctorWeeklyReportDao;
-import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
-import io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport;
-import io.terminus.doctor.event.model.DoctorMonthlyReport;
-import io.terminus.doctor.event.model.DoctorWeeklyReport;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateUtils;
-import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
 
 /**
  * Desc:

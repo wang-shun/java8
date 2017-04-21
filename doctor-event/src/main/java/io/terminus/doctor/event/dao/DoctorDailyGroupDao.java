@@ -101,7 +101,23 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
         return getSqlSession().selectOne(sqlId("getGroupChangeSum"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
-
-
+    /**
+     * 获取猪群每日报表
+     * @param groupId
+     * @param sumAt
+     * @return
+     */
+    public DoctorDailyGroup findByGroupIdAndSumAt(Long groupId, Date sumAt) {
+        return getSqlSession().selectOne(sqlId("findByGroupIdAndSumAt"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt));
+    }
+    /**
+     * 更新日期之后每日猪群存栏
+     * @param groupId 猪群id
+     * @param sumAt 日期
+     * @param changeCount 变动数量
+     */
+    public void updateDailyGroupLiveStock(Long groupId, Date sumAt, Integer changeCount) {
+        getSqlSession().update(sqlId("updateDailyGroupLiveStock"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt, "changeCount", changeCount));
+    }
 
 }
