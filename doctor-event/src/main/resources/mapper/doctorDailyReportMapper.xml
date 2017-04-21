@@ -566,6 +566,21 @@
             sum(sow_other_out) as sowOtherOut,
             sum(case when sum_at = #{endAt} then sow_end else 0 end) as sowEnd,
 
+            sum(case when sum_at = #{startAt} then sow_ph_start else 0 end) as sowPhStart,
+            sum(sow_ph_in_farm_in) as sowPhInFarmIn,
+            sum(sow_ph_wean_in) as sowPhWeanIn,
+            sum(sow_ph_dead) as sowPhDead,
+            sum(sow_ph_weed_out) as sowPhWeedOut,
+            sum(sow_ph_to_cf) as sowPhToCf,
+            sum(case when sum_at = #{endAt} then sow_ph_end else 0 end) as sowPhEnd,
+
+            sum(case when sum_at = #{startAt} then sow_cf_start else 0 end) as sowCfStart,
+            sum(sow_cf_in) as sowCfIn,
+            sum(sow_cf_dead) as sowCfDead,
+            sum(sow_cf_weed_out) as sowCfWeedOut,
+            sum(sow_cf_wean_out) as sowCfWeanOut,
+            sum(case when sum_at = #{endAt} then sow_cf_end else 0 end) as sowCfEnd,
+
             sum(case when sum_at = #{startAt} then boar_start else 0 end) as boarStart,
             sum(boar_in) as boarIn,
             sum(boar_dead) as boarDead,
@@ -600,6 +615,18 @@
             sum(wean_count) as weanCount,
             sum(wean_count*wean_avg_weight)/sum(wean_count) as weanAvgWeight,
             sum(wean_count*wean_day_age)/sum(wean_count) as weanDage,
+
+            sum(sow_ph_feed) as sowPhFeed,
+            sum(sow_ph_feed_amount) as sowPhFeedAmount,
+            sum(sow_ph_medicine_amount) as sowPhMedicineAmount,
+            sum(sow_ph_vaccination_amount) as sowPhVaccinationAmount,
+            sum(sow_ph_consumable_amount) as sowPhConsumableAmount,
+
+            sum(sow_cf_feed) as sowCfFeed,
+            sum(sow_cf_feed_amount) as sowCfFeedAmount,
+            sum(sow_cf_medicine_amount) as sowCfMedicineAmount,
+            sum(sow_cf_vaccination_amount) as sowCfVaccinationAmount,
+            sum(sow_cf_consumable_amount) as sowCfConsumableAmount,
 
             sum(farrow_feed) as farrowFeed,
             sum(farrow_feed_amount) as farrowFeedAmount,
