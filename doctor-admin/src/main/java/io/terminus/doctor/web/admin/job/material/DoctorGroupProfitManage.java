@@ -44,9 +44,9 @@ public class DoctorGroupProfitManage {
     public Double consumablesAmount = 0.0;
     public Double amount = 0.0;
 
-    public void sumDoctorProfitMaterialOrPig(List<Long> farmIds){
+    public void sumDoctorProfitMaterialOrPig(List<Long> farmIds, Date dates){
 
-        Date startDate = DateUtil.monthStart(new Date());
+        Date startDate = DateUtil.monthStart(dates);
         Date endDate = DateUtil.getMonthEnd(new DateTime(startDate)).toDate();
         DateTime date;
         Date startDates;
