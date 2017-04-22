@@ -20,7 +20,6 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -155,12 +154,9 @@ public class DoctorGroupEvents {
     @RequestMapping(value = "/createGroupModifyRequest", method = RequestMethod.POST)
     public void createGroupModifyEventRequest(@RequestParam("groupId") Long groupId,
                                                  @RequestParam("eventType") Integer eventType,
-                                                 @RequestParam("eventId") Long eventId,
-                                                 @RequestParam("data") String data) {
-        Long requestId = RespWithExHelper.orInvalid(doctorGroupWebService.createGroupModifyEventRequest(groupId, eventType, eventId, data));
-        // 通过job 执行
-        DoctorEventModifyRequest modifyRequest = RespHelper.or500(doctorEventModifyRequestReadService.findById(requestId));
-        RespWithExHelper.orInvalid(doctorEventModifyRequestWriteService.modifyEventHandle(modifyRequest));
+                                              @RequestParam("eventId") Long eventId,
+                                              @RequestParam("data") String data) {
+        RespWithExHelper.orInvalid(doctorGroupWebService.createGroupModifyEventRequest(groupId, eventType, eventId, data));
     }
 
     /**

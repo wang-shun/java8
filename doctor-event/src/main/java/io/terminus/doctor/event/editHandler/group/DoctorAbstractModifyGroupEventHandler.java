@@ -59,7 +59,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     @Override
     public void modifyHandle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
-        log.info("modify pig event handler starting, oldGroupEvent:{}, input:{}", oldGroupEvent, input);
+        log.info("modify group event handler starting, oldGroupEvent:{}, input:{}", oldGroupEvent, input);
 
         //1.构建变化记录
         DoctorEventChangeDto changeDto = buildEventChange(oldGroupEvent, input);
@@ -94,7 +94,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         //8.调用触发事件的编辑
         triggerEventModifyHandle(newEvent);
 
-        log.info("modify pig event handler ending");
+        log.info("modify group event handler ending");
     }
     
     @Override

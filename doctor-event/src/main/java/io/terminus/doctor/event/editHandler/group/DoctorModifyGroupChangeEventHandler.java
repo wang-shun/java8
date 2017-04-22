@@ -29,6 +29,8 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
         DoctorChangeGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorChangeGroupInput.class);
         DoctorChangeGroupInput newInput = (DoctorChangeGroupInput) input;
         return DoctorEventChangeDto.builder()
+                .farmId(oldGroupEvent.getFarmId())
+                .businessId(oldGroupEvent.getGroupId())
                 .newEventAt(DateUtil.toDate(newInput.getEventAt()))
                 .oldEventAt(DateUtil.toDate(oldInput.getEventAt()))
                 .oldChangeTypeId(oldInput.getChangeTypeId())
