@@ -7,9 +7,13 @@ import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupAntiepidemicEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupChangeEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupCloseEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupDiseaseEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupNewEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransFarmEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransGroupEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTurnSeedEventHandler;
@@ -26,6 +30,7 @@ import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigFosterEventHandle
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigMatingEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPigletsChgEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPregCheckEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigSemenEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigVaccinEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigWeanEventHandler;
@@ -303,6 +308,7 @@ public class  DoctorEventConfiguration {
             DoctorModifyPigMatingEventHandler modifyPigMatingEventHandler,
             DoctorModifyPigPigletsChgEventHandler modifyPigPigletsChgHandler,
             DoctorModifyPigPregCheckEventHandler modifyPigPregCheckEventHandler,
+            DoctorModifyPigRemoveEventHandler modifyPigRemoveEventHandler,
             DoctorModifyPigSemenEventHandler modifyPigSemenEventHandler,
             DoctorModifyPigVaccinEventHandler modifyPigVaccinEventHandler,
             DoctorModifyPigWeanEventHandler modifyPigWeanEventHandler) {
@@ -318,6 +324,7 @@ public class  DoctorEventConfiguration {
         modifyPigEventHandlerMap.put(PigEvent.MATING.getKey(), modifyPigMatingEventHandler);
         modifyPigEventHandlerMap.put(PigEvent.PIGLETS_CHG.getKey(), modifyPigPigletsChgHandler);
         modifyPigEventHandlerMap.put(PigEvent.PREG_CHECK.getKey(), modifyPigPregCheckEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.REMOVAL.getKey(), modifyPigRemoveEventHandler);
         modifyPigEventHandlerMap.put(PigEvent.SEMEN.getKey(), modifyPigSemenEventHandler);
         modifyPigEventHandlerMap.put(PigEvent.VACCINATION.getKey(), modifyPigVaccinEventHandler);
         modifyPigEventHandlerMap.put(PigEvent.WEAN.getKey(), modifyPigWeanEventHandler);
@@ -328,15 +335,23 @@ public class  DoctorEventConfiguration {
 
     @Bean
     public DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers(
+            DoctorModifyGroupAntiepidemicEventHandler modifyGroupAntiepidemicEventHandler,
             DoctorModifyGroupChangeEventHandler modifyGroupChangeEventHandler,
+            DoctorModifyGroupCloseEventHandler modifyGroupCloseEventHandler,
+            DoctorModifyGroupDiseaseEventHandler modifyGroupDiseaseEventHandler,
             DoctorModifyGroupMoveInEventHandler modifyMoveInEventHandler,
+            DoctorModifyGroupNewEventHandler modifyGroupNewEventHandler,
             DoctorModifyGroupTransFarmEventHandler modifyGroupTransFarmEventHandler,
             DoctorModifyGroupTransGroupEventHandler modifyGroupTransGroupEventHandler,
             DoctorModifyGroupTurnSeedEventHandler modifyGroupTurnSeedEventHandler,
             DoctorModifyGroupWeanEventHandler modifyGroupWeanEventHandler) {
         Map<Integer, DoctorModifyGroupEventHandler> modifyGroupEventHandlerMap = Maps.newHashMap();
+        modifyGroupEventHandlerMap.put(GroupEventType.ANTIEPIDEMIC.getValue(), modifyGroupAntiepidemicEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.CHANGE.getValue(), modifyGroupChangeEventHandler);
+        modifyGroupEventHandlerMap.put(GroupEventType.CLOSE.getValue(), modifyGroupCloseEventHandler);
+        modifyGroupEventHandlerMap.put(GroupEventType.DISEASE.getValue(), modifyGroupDiseaseEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.MOVE_IN.getValue(), modifyMoveInEventHandler);
+        modifyGroupEventHandlerMap.put(GroupEventType.MOVE_IN.getValue(), modifyGroupNewEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.TRANS_FARM.getValue(), modifyGroupTransFarmEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.TRANS_GROUP.getValue(), modifyGroupTransGroupEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.TURN_SEED.getValue(), modifyGroupTurnSeedEventHandler);

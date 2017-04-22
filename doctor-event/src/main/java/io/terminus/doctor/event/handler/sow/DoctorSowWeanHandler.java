@@ -3,7 +3,6 @@ package io.terminus.doctor.event.handler.sow;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.exception.InvalidException;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -13,6 +12,7 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorWeanGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigWeanEventHandler;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
@@ -54,6 +54,8 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     private DoctorBarnDao doctorBarnDao;
     @Autowired
     private DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
+    @Autowired
+    private DoctorModifyPigWeanEventHandler doctorModifyPigWeanEventHandler;
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -176,20 +178,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
 
     @Override
     public BaseGroupInput buildTriggerGroupEventInput(DoctorPigEvent pigEvent) {
-        DoctorWeanDto partWeanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorWeanDto.class);
-        DoctorWeanGroupInput input = new DoctorWeanGroupInput();
-        input.setPartWeanDate(pigEvent.getEventAt());
-        input.setPartWeanPigletsCount(partWeanDto.getPartWeanPigletsCount());
-        input.setPartWeanAvgWeight(partWeanDto.getPartWeanAvgWeight());
-        input.setQualifiedCount(partWeanDto.getQualifiedCount());
-        input.setNotQualifiedCount(partWeanDto.getNotQualifiedCount());
-        input.setGroupId(pigEvent.getGroupId());
-        input.setEventAt(DateUtil.toDateString(pigEvent.getEventAt()));
-        input.setIsAuto(1);
-        input.setCreatorId(pigEvent.getCreatorId());
-        input.setCreatorName(pigEvent.getCreatorName());
-        input.setRelPigEventId(pigEvent.getId());
-        return input;
+        return doctorModifyPigWeanEventHandler.buildTriggerGroupEventInput(pigEvent);
     }
 
 

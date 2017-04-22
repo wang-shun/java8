@@ -13,6 +13,7 @@ import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Created by xjn on 17/4/17.
+ * 断奶
  */
 @Component
 public class DoctorModifyGroupWeanEventHandler extends DoctorAbstractModifyGroupEventHandler

@@ -19,6 +19,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -257,6 +258,14 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         executeEvent.setPigStatusAfter(toTrack.getStatus());
         doctorPigEventDao.update(executeEvent);
     }
+
+    /**
+     * 更新日记录表
+     * @param pigEvent 猪事件
+     * @param inputDto 输入
+     * @param changeDto
+     */
+    protected void updateDailyForNew(DoctorPigEvent pigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto){}
 
     /**
      * 触发事件, 触发其他事件时需要实现此方法

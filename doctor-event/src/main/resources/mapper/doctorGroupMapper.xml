@@ -119,6 +119,7 @@
             <if test="openAt != null">open_at = #{openAt},</if>
             <if test="closeAt != null">close_at = #{closeAt},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="status == 1">close_at = NULL,</if>
             <if test="initBarnId != null">init_barn_id = #{initBarnId},</if>
             <if test="initBarnName != null">init_barn_name = #{initBarnName},</if>
             <if test="currentBarnId != null">current_barn_id = #{currentBarnId},</if>

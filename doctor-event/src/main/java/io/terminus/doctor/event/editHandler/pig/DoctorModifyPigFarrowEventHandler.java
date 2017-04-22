@@ -1,14 +1,23 @@
 package io.terminus.doctor.event.editHandler.pig;
 
+import com.google.common.base.MoreObjects;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.CountUtil;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
+import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
+import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.handler.sow.DoctorSowFarrowingHandler;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
@@ -27,8 +36,6 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
 
     @Autowired
     private DoctorModifyGroupMoveInEventHandler doctorModifyMoveInEventHandler;
-    @Autowired
-    private DoctorSowFarrowingHandler doctorSowFarrowingHandler;
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
@@ -110,7 +117,7 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         // TODO: 17/4/19 新建编辑
         //转入编辑
         DoctorGroupEvent oldGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(newPigEvent.getId(), GroupEventType.MOVE_IN.getValue());
-        doctorModifyMoveInEventHandler.modifyHandle(oldGroupEvent, doctorSowFarrowingHandler.buildTriggerGroupEventInput(newPigEvent));
+        doctorModifyMoveInEventHandler.modifyHandle(oldGroupEvent, buildTriggerGroupEventInput(newPigEvent));
     }
 
     @Override
@@ -154,5 +161,50 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         changeDto.setFarrowNestChange(-1);
         oldDailyPig = buildDailyPig(oldDailyPig, changeDto);
         doctorDailyPigDao.update(oldDailyPig);
+    }
+    
+    public DoctorMoveInGroupInput buildTriggerGroupEventInput(DoctorPigEvent pigEvent) {
+        DoctorFarrowingDto farrowingDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorFarrowingDto.class);
+        // Build 新建猪群操作方式
+        DoctorSowMoveInGroupInput input = new DoctorSowMoveInGroupInput();
+        input.setSowCode(pigEvent.getPigCode());
+        input.setSowId(pigEvent.getPigId());
+        input.setOrgId(pigEvent.getOrgId());
+        input.setOrgName(pigEvent.getOrgName());
+        input.setFarmId(pigEvent.getFarmId());
+        input.setFarmName(pigEvent.getFarmName());
+        input.setGroupCode(farrowingDto.getGroupCode());
+
+        input.setFromBarnId(farrowingDto.getBarnId());
+        input.setFromBarnName(farrowingDto.getBarnName());
+        input.setToBarnId(farrowingDto.getBarnId());
+        input.setToBarnName(farrowingDto.getBarnName());
+        input.setPigType(PigType.DELIVER_SOW.getValue());
+        input.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
+        input.setInTypeName(DoctorMoveInGroupEvent.InType.PIGLET.getDesc());
+        input.setSource(PigSource.LOCAL.getKey());
+
+        Integer farrowingLiveCount = MoreObjects.firstNonNull(farrowingDto.getFarrowingLiveCount(), 0);
+        Integer sowCount = MoreObjects.firstNonNull(farrowingDto.getLiveSowCount(), 0);
+        Integer boarCount = MoreObjects.firstNonNull(farrowingDto.getLiveBoarCount(), 0);
+        if (sowCount == 0 && boarCount == 0) sowCount = farrowingLiveCount;
+
+        input.setSex(DoctorGroupTrack.Sex.MIX.getValue());
+        input.setQuantity(farrowingLiveCount);
+        input.setSowQty(sowCount);
+        input.setBoarQty(boarCount);
+        input.setAvgDayAge(1);
+        input.setAvgWeight(farrowingLiveCount == 0 ? 0d : Double.parseDouble(String.format("%.2f", farrowingDto.getBirthNestAvg() / farrowingLiveCount)));
+        input.setEventAt(DateUtil.toDateString(pigEvent.getEventAt()));
+        input.setIsAuto(IsOrNot.YES.getValue());
+        input.setCreatorId(pigEvent.getCreatorId());
+        input.setCreatorName(pigEvent.getCreatorName());
+
+        input.setSowEvent(true);  //设置为分娩转入
+        input.setWeakQty(CountUtil.getIntegerDefault0(farrowingDto.getWeakCount()));
+        input.setHealthyQty(CountUtil.getIntegerDefault0(farrowingDto.getHealthCount()));
+
+        input.setRelPigEventId(pigEvent.getId());
+        return input;
     }
 }

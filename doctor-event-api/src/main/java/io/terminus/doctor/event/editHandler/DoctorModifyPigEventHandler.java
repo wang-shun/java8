@@ -44,7 +44,6 @@ public interface DoctorModifyPigEventHandler {
      */
     DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto);
 
-    //// TODO: 17/4/13 构建记录表
 
     /**
      * 能否编辑

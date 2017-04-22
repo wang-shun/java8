@@ -65,7 +65,7 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                     .pregCheckResult(changeDto.getOldPregCheckResult())
                     .pregCheckResultCountChange(-1)
                     .build();
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto1));
+            buildDailyPig(oldDailyPig, changeDto1);
             DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                     .pregCheckResult(changeDto.getNewPregCheckResult())
                     .pregCheckResultCountChange(1)
