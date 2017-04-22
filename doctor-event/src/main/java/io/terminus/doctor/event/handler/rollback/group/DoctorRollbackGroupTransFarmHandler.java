@@ -2,7 +2,7 @@ package io.terminus.doctor.event.handler.rollback.group;
 
 import com.google.common.collect.Lists;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
-import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
@@ -71,7 +71,7 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         fromDto.setEsGroupId(groupEvent.getGroupId());
         fromDto.setRollbackTypes(rollbackTypes);
 
-        DoctorTransFarmGroupEvent trans = JSON_MAPPER.fromJson(groupEvent.getExtra(), DoctorTransFarmGroupEvent.class);
+        DoctorTransFarmGroupInput trans = JSON_MAPPER.fromJson(groupEvent.getExtra(), DoctorTransFarmGroupInput.class);
         DoctorRollbackDto toDto = new DoctorRollbackDto();
         toDto.setOrgId(groupEvent.getOrgId());
         toDto.setFarmId(trans.getToFarmId());   //转场事件的目标猪场

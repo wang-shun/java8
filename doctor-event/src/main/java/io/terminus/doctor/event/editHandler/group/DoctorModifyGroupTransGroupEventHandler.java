@@ -2,11 +2,11 @@ package io.terminus.doctor.event.editHandler.group;
 
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
-import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -178,8 +178,8 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
         moveIn.setCreatorName(transGroup.getCreatorName());
         moveIn.setRelGroupEventId(transGroup.getRelGroupEventId());
 
-        moveIn.setInType(DoctorMoveInGroupEvent.InType.GROUP.getValue());       //转入类型
-        moveIn.setInTypeName(DoctorMoveInGroupEvent.InType.GROUP.getDesc());
+        moveIn.setInType(InType.GROUP.getValue());       //转入类型
+        moveIn.setInTypeName(InType.GROUP.getDesc());
         moveIn.setSource(transGroup.getSource());                 //来源可以分为 本场(转群), 外场(转场)
 //        moveIn.setSex(fromGroupTrack.getSex());
         moveIn.setBreedId(transGroup.getBreedId());

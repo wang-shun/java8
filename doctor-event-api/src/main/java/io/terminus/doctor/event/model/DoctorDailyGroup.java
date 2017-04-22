@@ -101,4 +101,7 @@ public class DoctorDailyGroup implements Serializable {
      * 期末
      */
     private Integer end;
+
+    private Date updatedAt;
+    private Date createdAt;
 }

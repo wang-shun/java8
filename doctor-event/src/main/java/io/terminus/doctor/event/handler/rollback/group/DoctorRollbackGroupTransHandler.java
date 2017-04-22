@@ -2,7 +2,7 @@ package io.terminus.doctor.event.handler.rollback.group;
 
 import com.google.common.collect.Lists;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
-import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.RollbackType;
@@ -89,7 +89,7 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
         fromDto.setRollbackTypes(Lists.newArrayList(RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT,
                 RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP));
 
-        DoctorTransGroupEvent trans = JSON_MAPPER.fromJson(groupEvent.getExtra(), DoctorTransGroupEvent.class);
+        DoctorTransGroupInput trans = JSON_MAPPER.fromJson(groupEvent.getExtra(), DoctorTransGroupInput.class);
         DoctorRollbackDto toDto = new DoctorRollbackDto();
         toDto.setOrgId(groupEvent.getOrgId());
         toDto.setFarmId(groupEvent.getFarmId());

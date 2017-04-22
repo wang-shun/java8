@@ -3,7 +3,7 @@ package io.terminus.doctor.event.model;
 import com.google.common.base.Objects;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
-import io.terminus.doctor.event.dto.event.group.BaseGroupEvent;
+import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -21,7 +21,7 @@ import java.util.Map;
  * Date: 2016-05-20
  */
 @Data
-public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable {
+public class DoctorGroupEvent<T extends BaseGroupInput> implements Serializable {
     private static final long serialVersionUID = 2651236908562482893L;
 
     private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.nonEmptyMapper();
@@ -155,7 +155,7 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
 
     /**
      * 仔猪转入事件: 转入类型
-     * @see io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent.InType
+     * @see io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupInput.InType
      */
     private Integer inType;
 
@@ -235,7 +235,7 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
 
     /**
      * 防疫结果
-     * @see io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent.VaccinResult
+     * @see io.terminus.doctor.event.enums.VaccinResult
      */
     private Integer vaccinResult;
 
@@ -261,7 +261,7 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
 
     /**
      * 具体事件转换成的实体类
-     * @see io.terminus.doctor.event.dto.event.group.BaseGroupEvent
+     * @see BaseGroupInput
      */
     @Setter(AccessLevel.NONE)
     private T extraMap;

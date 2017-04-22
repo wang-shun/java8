@@ -16,8 +16,8 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
@@ -440,7 +440,7 @@ public class DoctorGroupEvents {
                 try {
                     DoctorGroupEvent relEvent = RespHelper.or500(doctorGroupReadService.findGroupEventById(doctorGroupEvent.getRelGroupEventId()));
                     if (Objects.equals(relEvent.getType(), GroupEventType.TRANS_GROUP.getValue())) {
-                        DoctorTransGroupEvent doctorTransGroupEvent = JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(relEvent.getExtra(), DoctorTransGroupEvent.class);
+                        DoctorTransGroupInput doctorTransGroupEvent = JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(relEvent.getExtra(), DoctorTransGroupInput.class);
                         doctorTransGroupEvent.setToGroupId(doctorGroupEvent.getGroupId());
                         relEvent.setExtraMap(doctorTransGroupEvent);
                         doctorGroupWriteService.updateGroupEvent(relEvent);

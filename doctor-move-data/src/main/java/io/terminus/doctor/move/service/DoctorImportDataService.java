@@ -46,7 +46,6 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
@@ -58,6 +57,7 @@ import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
@@ -937,7 +937,7 @@ public class DoctorImportDataService {
         event.setDesc("转移类型：仔猪转入#猪只数：" + groupTrack.getQuantity() + "#平均日龄：" + groupTrack.getAvgDayAge() + "#均重：" + avgWeight);
         event.setAvgDayAge(dayAge);
         event.setIsAuto(IsOrNot.YES.getValue());
-        event.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
+        event.setInType(InType.PIGLET.getValue());
         event.setStatus(EventStatus.VALID.getValue());
         event.setEventSource(SourceType.IMPORT.getValue());
         if (isSowEvent) {

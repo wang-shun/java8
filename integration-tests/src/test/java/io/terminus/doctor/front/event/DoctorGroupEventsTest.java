@@ -3,13 +3,9 @@ package io.terminus.doctor.front.event;
 import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.model.Paging;
-import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
-import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -19,7 +15,9 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.enums.VaccinResult;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.web.front.event.controller.DoctorGroupEvents;
@@ -140,7 +138,7 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
 
     /**
      * 查询猪群详情测试
-     * @see DoctorGroupEvents#findGroupDetailByGroupId(java.lang.Long)
+     * @see DoctorGroupEvents#(java.lang.Long)
      */
     @Test
     public void findGroupDetailByGroupIdTest() {
@@ -158,7 +156,7 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
 
     /**
      * 分页查询猪群历史事件测试
-     * @see DoctorGroupEvents#pagingGroupEvent(java.lang.Long, java.lang.Long, java.lang.Integer, java.lang.Integer, java.lang.Integer)
+     * @see DoctorGroupEvents#(java.lang.Long, java.lang.Long, java.lang.Integer, java.lang.Integer, java.lang.Integer)
      */
     @Test
     public void pagingGroupEventTest() {
@@ -208,7 +206,7 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
         input.setEventAt("2016-06-11");
         input.setQuantity(1);
         input.setVaccinId(9L);
-        input.setVaccinResult(DoctorAntiepidemicGroupEvent.VaccinResult.POSITIVE.getValue());
+        input.setVaccinResult(VaccinResult.POSITIVE.getValue());
         return JSON_MAPPER.toJson(input);
     }
 
@@ -254,7 +252,7 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
     private String mockMoveInGroupInput() {
         DoctorMoveInGroupInput input = new DoctorMoveInGroupInput();
         input.setEventAt("2016-06-11");
-        input.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
+        input.setInType(InType.PIGLET.getValue());
         input.setSource(PigSource.LOCAL.getKey());
         input.setSex(DoctorGroupTrack.Sex.MIX.getValue());
         input.setQuantity(5);

@@ -19,6 +19,9 @@ import java.util.Map;
 public class DoctorTransFarmGroupInput extends DoctorTransGroupInput implements Serializable {
     private static final long serialVersionUID = -2076403155703080256L;
 
+    private Long fromFarmId;
+
+    private String fromFarmName;
     /**
      * 转入猪场id
      */
@@ -27,6 +30,8 @@ public class DoctorTransFarmGroupInput extends DoctorTransGroupInput implements 
 
     @NotEmpty(message = "to.farm.not.null")
     private String toFarmName;
+
+    private Integer toBarnType;
 
     @Override
     public Map<String, String> descMap() {

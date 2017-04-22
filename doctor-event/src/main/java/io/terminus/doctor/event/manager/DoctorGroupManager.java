@@ -19,7 +19,6 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInputInfo;
 import io.terminus.doctor.event.enums.EventStatus;
@@ -100,7 +99,7 @@ public class DoctorGroupManager {
         Long groupId = group.getId();
 
         //2. 创建新建猪群事件
-        DoctorGroupEvent<DoctorNewGroupEvent> groupEvent = getNewGroupEvent(group, newGroupInput);
+        DoctorGroupEvent groupEvent = getNewGroupEvent(group, newGroupInput);
         groupEvent.setEventSource(SourceType.INPUT.getValue());
         groupEvent.setSowId(newGroupInput.getSowId());
         groupEvent.setSowCode(newGroupInput.getSowCode());
@@ -215,8 +214,8 @@ public class DoctorGroupManager {
     }
 
     //构造新建猪群事件
-    private DoctorGroupEvent<DoctorNewGroupEvent> getNewGroupEvent(DoctorGroup group, DoctorNewGroupInput newGroupInput) {
-        DoctorGroupEvent<DoctorNewGroupEvent> groupEvent = new DoctorGroupEvent<>();
+    private DoctorGroupEvent<DoctorNewGroupInput> getNewGroupEvent(DoctorGroup group, DoctorNewGroupInput newGroupInput) {
+        DoctorGroupEvent<DoctorNewGroupInput> groupEvent = new DoctorGroupEvent<>();
 
         groupEvent.setGroupId(group.getId());   //关联猪群id
         groupEvent.setRelGroupEventId(newGroupInput.getRelGroupEventId()); //关联猪群事件id
@@ -243,9 +242,8 @@ public class DoctorGroupManager {
         groupEvent.setCreatorName(group.getCreatorName());
         groupEvent.setRemark(group.getRemark());
 
-        DoctorNewGroupEvent newGroupEvent = new DoctorNewGroupEvent();
-        newGroupEvent.setSource(newGroupInput.getSource());
-        groupEvent.setExtraMap(newGroupEvent);
+        newGroupInput.setSource(newGroupInput.getSource());
+        groupEvent.setExtraMap(newGroupInput);
         groupEvent.setStatus(EventStatus.VALID.getValue());
         return groupEvent;
     }

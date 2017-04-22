@@ -2,12 +2,12 @@ package io.terminus.doctor.web.util;
 
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.enums.VaccinResult;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -81,7 +81,7 @@ public class TransFromUtil {
                     extraMap.put("source", PigSource.from(toInteger(extraMap.get("source"))).getDesc());
                 }
                 if (getInteger(extraMap, "vaccinResult") != null) {
-                    extraMap.put("vaccinResult", (toInteger(extraMap.get("vaccinResult")) == 1) ? DoctorAntiepidemicGroupEvent.VaccinResult.POSITIVE : DoctorAntiepidemicGroupEvent.VaccinResult.NEGATIVE);
+                    extraMap.put("vaccinResult", (toInteger(extraMap.get("vaccinResult")) == 1) ? VaccinResult.POSITIVE : VaccinResult.NEGATIVE);
                 }
             }
         }

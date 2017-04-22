@@ -5,11 +5,13 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -36,6 +38,8 @@ public class DoctorDailyReportManager {
     private final DoctorDailyReportCache doctorDailyReportCache;
     private final DoctorKpiDao doctorKpiDao;
     private final DoctorDailyGroupDao doctorDailyGroupDao;
+    @Autowired
+    private DoctorGroupDao doctorGroupDao;
 
     @Autowired
     public DoctorDailyReportManager(DoctorDailyReportDao doctorDailyReportDao,
@@ -76,12 +80,15 @@ public class DoctorDailyReportManager {
      * @return 猪群记录
      */
     public DoctorDailyGroup findByGroupIdAndSumAt(Long groupId, Date sumAt) {
+        DoctorGroup group = doctorGroupDao.findById(groupId);
         DoctorDailyGroup doctorDailyGroup = doctorDailyGroupDao.findByGroupIdAndSumAt(groupId, sumAt);
         if (isNull(doctorDailyGroup)) {
             doctorDailyGroup = new DoctorDailyGroup();
             doctorDailyGroup.setStart(doctorKpiDao.realTimeLivetockGroup(groupId, sumAt));
             doctorDailyGroup.setEnd(doctorDailyGroup.getStart());
             doctorDailyGroup.setSumAt(sumAt);
+            doctorDailyGroup.setGroupId(groupId);
+            doctorDailyGroup.setFarmId(group.getFarmId());
         }
         return doctorDailyGroup;
     }

@@ -6,12 +6,12 @@ import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
-import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -194,8 +194,8 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         input.setToBarnId(farrowingDto.getBarnId());
         input.setToBarnName(farrowingDto.getBarnName());
         input.setPigType(PigType.DELIVER_SOW.getValue());
-        input.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
-        input.setInTypeName(DoctorMoveInGroupEvent.InType.PIGLET.getDesc());
+        input.setInType(InType.PIGLET.getValue());
+        input.setInTypeName(InType.PIGLET.getDesc());
         input.setSource(PigSource.LOCAL.getKey());
 
         Integer farrowingLiveCount = MoreObjects.firstNonNull(farrowingDto.getFarrowingLiveCount(), 0);

@@ -2,7 +2,6 @@ package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.Arguments;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
@@ -14,7 +13,6 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
@@ -111,11 +109,10 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         checkQuantityEqual(moveIn.getQuantity(), moveIn.getBoarQty(), moveIn.getSowQty());
 
         //1.转换转入猪群事件
-        DoctorMoveInGroupEvent moveInEvent = BeanMapper.map(moveIn, DoctorMoveInGroupEvent.class);
-        checkBreed(group.getBreedId(), moveInEvent.getBreedId());
+        checkBreed(group.getBreedId(), moveIn.getBreedId());
 
         //2.创建转入猪群事件
-        DoctorGroupEvent<DoctorMoveInGroupEvent> event = dozerGroupEvent(group, GroupEventType.MOVE_IN, moveIn);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.MOVE_IN, moveIn);
         event.setSowId(moveIn.getSowId());
         event.setSowCode(moveIn.getSowCode());
         event.setQuantity(moveIn.getQuantity());
@@ -126,7 +123,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         if (moveIn.getFromBarnId() != null) {
             DoctorBarn fromBarn = getBarnById(moveIn.getFromBarnId());
-            moveInEvent.setFromBarnType(fromBarn.getPigType());
+            moveIn.setFromBarnType(fromBarn.getPigType());
             event.setTransGroupType(getTransType(moveIn.getInType(), group.getPigType(), fromBarn).getValue());   //区别内转还是外转
             event.setOtherBarnId(moveIn.getFromBarnId());  //来源猪舍id
             event.setOtherBarnType(fromBarn.getPigType());   //来源猪舍类型
@@ -139,7 +136,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
             groupTrack.setWeanWeight(EventUtil.plusDouble(groupTrack.getWeanWeight(), event.getAvgWeight() * event.getQuantity()));
         }
 
-        event.setExtraMap(moveInEvent);
+        event.setExtraMap(moveIn);
         event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
@@ -154,11 +151,11 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
     @Override
     public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
-        DoctorMoveInGroupEvent doctorMoveInGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorMoveInGroupEvent.class);
+        DoctorMoveInGroupInput doctorMoveInGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorMoveInGroupInput.class);
         if(Arguments.isNull(doctorMoveInGroupEvent)) {
             log.info("parse doctorMoveInGroupEvent faild, doctorGroupEvent = {}", event);
             //throw new InvalidException("movein.group.event.info.broken", event.getId());
-            doctorMoveInGroupEvent = new DoctorMoveInGroupEvent();
+            doctorMoveInGroupEvent = new DoctorMoveInGroupInput();
         }
         //1.更新猪群跟踪
         track.setQuantity(EventUtil.plusInt(track.getQuantity(), event.getQuantity()));

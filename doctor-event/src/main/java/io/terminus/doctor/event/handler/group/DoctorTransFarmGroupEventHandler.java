@@ -10,7 +10,6 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
@@ -70,12 +69,11 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         DoctorBarn toBarn = getBarn(transFarm.getToBarnId());
 
         //1.转换转场事件
-        DoctorTransFarmGroupEvent transFarmEvent = BeanMapper.map(transFarm, DoctorTransFarmGroupEvent.class);
-        checkBreed(group.getBreedId(), transFarmEvent.getBreedId());
-        transFarmEvent.setToBarnType(toBarn.getPigType());
+        checkBreed(group.getBreedId(), transFarm.getBreedId());
+        transFarm.setToBarnType(toBarn.getPigType());
 
         //2.创建转场事件
-        DoctorGroupEvent<DoctorTransFarmGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_FARM, transFarm);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.TRANS_FARM, transFarm);
         event.setQuantity(transFarm.getQuantity());
 
         event.setWeight(transFarm.getWeight());
@@ -83,14 +81,14 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setTransGroupType(DoctorGroupEvent.TransGroupType.OUT.getValue());   //转场肯定是外转
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
-        event.setExtraMap(transFarmEvent);
+        event.setExtraMap(transFarm);
         event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 
     @Override
     public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
-        DoctorTransFarmGroupEvent doctorTransFarmGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransFarmGroupEvent.class);
+        DoctorTransFarmGroupInput doctorTransFarmGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransFarmGroupInput.class);
         if(Arguments.isNull(doctorTransFarmGroupEvent)) {
             log.error("parse doctorTransFarmGroupEvent faild, doctorGroupEvent = {}", event);
             throw new InvalidException("transfarm.group.event.info.broken", event.getId());
@@ -128,12 +126,12 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         }
 
         //1.转换转场事件
-        DoctorTransFarmGroupEvent transFarmEvent = BeanMapper.map(transFarm, DoctorTransFarmGroupEvent.class);
+        DoctorTransFarmGroupInput transFarmEvent = BeanMapper.map(transFarm, DoctorTransFarmGroupInput.class);
         checkBreed(group.getBreedId(), transFarmEvent.getBreedId());
         transFarmEvent.setToBarnType(toBarn.getPigType());
 
         //2.创建转场事件
-        DoctorGroupEvent<DoctorTransFarmGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_FARM, transFarm);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.TRANS_FARM, transFarm);
         event.setQuantity(transFarm.getQuantity());
 
         event.setWeight(transFarm.getWeight());
@@ -141,7 +139,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setTransGroupType(DoctorGroupEvent.TransGroupType.OUT.getValue());   //转场肯定是外转
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
-        event.setExtraMap(transFarmEvent);
+        event.setExtraMap(transFarm);
         doctorGroupEventDao.create(event);
         transFarm.setRelGroupEventId(event.getId());
 

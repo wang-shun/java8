@@ -24,7 +24,6 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -38,6 +37,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -238,7 +238,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             switch (groupEventType) {
                 case MOVE_IN:
                     params.put("breedName", getBasicName(getLong(params, "breedId")));
-                    params.put("inTypeName", DoctorMoveInGroupEvent.InType.from(getInteger(params, "inType")).getDesc());
+                    params.put("inTypeName", InType.from(getInteger(params, "inType")).getDesc());
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                     orInvalid(doctorGroupWriteService.groupEventMoveIn(groupDetail, doctorValidService.valid(map(putBasicFields(params), DoctorMoveInGroupInput.class), groupCode)));
                     break;
@@ -430,7 +430,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         switch (groupEventType) {
             case MOVE_IN:
                 params.put("breedName", getBasicName(getLong(params, "breedId")));
-                params.put("inTypeName", DoctorMoveInGroupEvent.InType.from(getInteger(params, "inType")).getDesc());
+                params.put("inTypeName", InType.from(getInteger(params, "inType")).getDesc());
                 params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                 return new DoctorGroupInputInfo(groupDetail, map(putBasicFields(params), DoctorMoveInGroupInput.class));
             case CHANGE:

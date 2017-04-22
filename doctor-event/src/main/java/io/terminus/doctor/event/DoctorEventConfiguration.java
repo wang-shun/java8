@@ -351,7 +351,7 @@ public class  DoctorEventConfiguration {
         modifyGroupEventHandlerMap.put(GroupEventType.CLOSE.getValue(), modifyGroupCloseEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.DISEASE.getValue(), modifyGroupDiseaseEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.MOVE_IN.getValue(), modifyMoveInEventHandler);
-        modifyGroupEventHandlerMap.put(GroupEventType.MOVE_IN.getValue(), modifyGroupNewEventHandler);
+        modifyGroupEventHandlerMap.put(GroupEventType.NEW.getValue(), modifyGroupNewEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.TRANS_FARM.getValue(), modifyGroupTransFarmEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.TRANS_GROUP.getValue(), modifyGroupTransGroupEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.TURN_SEED.getValue(), modifyGroupTurnSeedEventHandler);

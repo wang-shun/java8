@@ -12,7 +12,6 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorChangeGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupChangeEventHandler;
@@ -76,10 +75,10 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
 
         //1.转换猪群变动事件
-        DoctorChangeGroupEvent changeEvent = BeanMapper.map(change, DoctorChangeGroupEvent.class);
+        DoctorChangeGroupInput changeEvent = BeanMapper.map(change, DoctorChangeGroupInput.class);
 
         //2.创建猪群变动事件
-        DoctorGroupEvent<DoctorChangeGroupEvent> event = dozerGroupEvent(group, GroupEventType.CHANGE, change);
+        DoctorGroupEvent<DoctorChangeGroupInput> event = dozerGroupEvent(group, GroupEventType.CHANGE, change);
         event.setQuantity(change.getQuantity());
         event.setCustomerId(change.getCustomerId());
         event.setCustomerName(change.getCustomerName());
@@ -91,7 +90,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         //销售相关
         setSaleEvent(event, change, group.getPigType());
 
-        event.setExtraMap(changeEvent);
+        event.setExtraMap(change);
         event.setEventSource(SourceType.INPUT.getValue());
         doctorGroupEventDao.create(event);
 
@@ -138,30 +137,27 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.CHANGE.getValue());
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
-        //1.转换猪群变动事件
-        DoctorChangeGroupEvent changeEvent = BeanMapper.map(change, DoctorChangeGroupEvent.class);
-
         //2.创建猪群变动事件
-        DoctorGroupEvent<DoctorChangeGroupEvent> event = dozerGroupEvent(group, GroupEventType.CHANGE, change);
+        DoctorGroupEvent<DoctorChangeGroupInput> event = dozerGroupEvent(group, GroupEventType.CHANGE, change);
         event.setQuantity(change.getQuantity());
 
         event.setSowId(change.getSowId());
         event.setSowCode(change.getSowCode());
         event.setWeight(change.getWeight());            //总重
         event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
-        event.setChangeTypeId(changeEvent.getChangeTypeId());   //变动类型id
+        event.setChangeTypeId(change.getChangeTypeId());   //变动类型id
 
         //销售相关
         setSaleEvent(event, change, group.getPigType());
 
-        event.setExtraMap(changeEvent);
+        event.setExtraMap(change);
         return event;
     }
 
 
     @Override
     public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
-        DoctorChangeGroupEvent changeEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorChangeGroupEvent.class);
+        DoctorChangeGroupInput changeEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorChangeGroupInput.class);
         track.setQuantity(EventUtil.minusQuantity(track.getQuantity(), event.getQuantity()));
 
         //计算公猪、母猪数量
@@ -201,7 +197,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     }
 
     //如果是销售事件, 记录价格与重量
-    private void setSaleEvent(DoctorGroupEvent<DoctorChangeGroupEvent> event, DoctorChangeGroupInput change, Integer pigType) {
+    private void setSaleEvent(DoctorGroupEvent event, DoctorChangeGroupInput change, Integer pigType) {
         event.setPrice(change.getPrice());          //销售单价(分)(基础价)
         event.setBaseWeight(change.getBaseWeight());//基础重量
         event.setOverPrice(change.getOverPrice());  //超出价格(分/kg)
