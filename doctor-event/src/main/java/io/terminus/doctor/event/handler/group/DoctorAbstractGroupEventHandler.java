@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
@@ -26,7 +25,6 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.event.DoctorGroupEventListener;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
-import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorEventRelation;
@@ -112,6 +110,13 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         track.setRelEventId(event.getId());
         return track;
     }
+
+
+    /**
+     * 更新日记录表
+     * @param newGroupEvent 猪事件
+     */
+    protected void updateDailyForNew(DoctorGroupEvent newGroupEvent){}
 
     protected void updateAvgDayAge(DoctorGroupEvent event, DoctorGroupTrack track) {
         track.setAvgDayAge(DateUtil.getDeltaDaysAbs(event.getEventAt(), MoreObjects.firstNonNull(track.getBirthDate(), event.getEventAt())));

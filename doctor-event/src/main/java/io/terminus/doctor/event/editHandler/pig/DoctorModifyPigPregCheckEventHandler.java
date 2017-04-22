@@ -72,19 +72,8 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                     .build();
             doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto2));
         } else {
-            DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
-            DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
-                    .pregCheckResult(changeDto.getOldPregCheckResult())
-                    .pregCheckResultCountChange(-1)
-                    .build();
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
-
-            DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
-            DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
-                    .pregCheckResult(changeDto.getNewPregCheckResult())
-                    .pregCheckResultCountChange(1)
-                    .build();
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+            updateDailyOfDelete(oldPigEvent);
+            updateDailyOfNew(oldPigEvent, inputDto);
         }
     }
 
@@ -109,13 +98,30 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
 
     @Override
     protected void updateDailyForDelete(DoctorPigEvent deletePigEvent) {
-        DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(deletePigEvent.getFarmId(), deletePigEvent.getEventAt());
-        DoctorEventChangeDto changeDto = DoctorEventChangeDto.builder()
-                .pregCheckResult(deletePigEvent.getPregCheckResult())
+        updateDailyOfDelete(deletePigEvent);
+    }
+
+    @Override
+    public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
+        DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
+                .pregCheckResult(oldPigEvent.getPregCheckResult())
                 .pregCheckResultCountChange(-1)
                 .build();
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
     }
+
+    @Override
+    public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
+        DoctorPregChkResultDto newDto = (DoctorPregChkResultDto) inputDto;
+        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), newDto.eventAt());
+        DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
+                .pregCheckResult(newDto.getCheckResult())
+                .pregCheckResultCountChange(1)
+                .build();
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+    }
+
 
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {

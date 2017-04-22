@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.manager;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
@@ -47,8 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Created by xjn.
@@ -214,14 +211,14 @@ public class DoctorPigEventManager {
      * 校验携带数据正确性，发布事件
      */
     public static void  checkAndPublishEvent(List<DoctorEventInfo> dtos, CoreEventDispatcher coreEventDispatcher, Publisher publisher) {
-        try {
-            if (notEmpty(dtos)) {
-                //checkFarmIdAndEventAt(dtos);
-                publishPigEvent(dtos, coreEventDispatcher, publisher);
-            }
-        } catch (Exception e) {
-            log.error("publish event failed, dtos:{}, cause: {}", dtos, Throwables.getStackTraceAsString(e));
-        }
+//        try {
+//            if (notEmpty(dtos)) {
+//                //checkFarmIdAndEventAt(dtos);
+//                publishPigEvent(dtos, coreEventDispatcher, publisher);
+//            }
+//        } catch (Exception e) {
+//            log.error("publish event failed, dtos:{}, cause: {}", dtos, Throwables.getStackTraceAsString(e));
+//        }
     }
 
     //发布事件, 用于更新创建操作

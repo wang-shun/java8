@@ -257,11 +257,24 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     protected void updateDailyForDelete(DoctorPigEvent deletePigEvent){}
 
     /**
-     * 是否需要更新猪(编辑)
-     *
-     * @param changeDto 变化记录
-     * @return
+     * 删除事件更新日记录
+     * @param oldPigEvent 被删除事件
      */
+    public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {}
+
+    /**
+     * 新建事件更新日记录
+     * @param newPigEvent 新建事件
+     * @param inputDto 新输入
+     */
+    public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {}
+
+        /**
+         * 是否需要更新猪(编辑)
+         *
+         * @param changeDto 变化记录
+         * @return
+         */
     private boolean isUpdatePig(DoctorEventChangeDto changeDto) {
         return notNull(changeDto)
                 && (notNull(changeDto.getSource())

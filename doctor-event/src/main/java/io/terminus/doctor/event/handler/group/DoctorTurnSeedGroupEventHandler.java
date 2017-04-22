@@ -14,6 +14,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTurnSeedEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -39,6 +40,8 @@ import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 @Component
 public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
+    @Autowired
+    private DoctorModifyGroupTurnSeedEventHandler doctorModifyGroupTurnSeedEventHandler;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
@@ -137,6 +140,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
         updateGroupTrack(groupTrack, event);
 
+        updateDailyForNew(event);
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.TURN_SEED);
 
@@ -155,6 +159,12 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
         //发布统计事件
         //publistGroupAndBarn(event);
+    }
+
+    @Override
+    protected void updateDailyForNew(DoctorGroupEvent newGroupEvent) {
+        BaseGroupInput input = JSON_MAPPER.fromJson(newGroupEvent.getExtra(), DoctorTurnSeedGroupInput.class);
+        doctorModifyGroupTurnSeedEventHandler.updateDailyOfNew(newGroupEvent, input);
     }
 
     //后备舍又他妈不分公母了, 艹

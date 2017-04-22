@@ -64,25 +64,8 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
             DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
             doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
         } else {
-            DoctorPigEvent farrowEvent = doctorPigEventDao.getFarrowEventByParity(oldPigEvent.getPigId(), oldPigEvent.getParity());
-            DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
-            DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
-                    .weanAvgWeight(oldPigEvent.getWeanAvgWeight())
-                    .weanCountChange(-oldPigEvent.getWeanCount())
-                    .weanNestChange(-1)
-                    .weanDayAge(DateUtil.getDeltaDays(farrowEvent.getEventAt(), changeDto.getOldEventAt()))
-                    .build();
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
-
-            DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
-            DoctorWeanDto weanDto2 = (DoctorWeanDto) inputDto;
-            DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
-                    .weanAvgWeight(weanDto2.getPartWeanAvgWeight())
-                    .weanCountChange(weanDto2.getWeanPigletsCount())
-                    .weanNestChange(1)
-                    .weanDayAge(DateUtil.getDeltaDays(farrowEvent.getEventAt(), changeDto.getNewEventAt()))
-                    .build();
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+            updateDailyOfDelete(oldPigEvent);
+            updateDailyOfNew(oldPigEvent, inputDto);
         }
 
     }
@@ -117,15 +100,36 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
 
     @Override
     protected void updateDailyForDelete(DoctorPigEvent deletePigEvent) {
-        DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(deletePigEvent.getFarmId(), deletePigEvent.getEventAt());
-        DoctorPigEvent farrowEvent = doctorPigEventDao.getFarrowEventByParity(deletePigEvent.getPigId(), deletePigEvent.getParity());
-        DoctorEventChangeDto changeDto = DoctorEventChangeDto.builder()
+        updateDailyOfDelete(deletePigEvent);
+    }
+
+    @Override
+    public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
+        DoctorPigEvent farrowEvent = doctorPigEventDao.getFarrowEventByParity(oldPigEvent.getPigId(), oldPigEvent.getParity());
+        DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
+                .weanAvgWeight(oldPigEvent.getWeanAvgWeight())
+                .weanCountChange(-oldPigEvent.getWeanCount())
                 .weanNestChange(-1)
-                .weanCountChange(-deletePigEvent.getWeanCount())
-                .weanAvgWeight(deletePigEvent.getWeanAvgWeight())
-                .weanDayAge(DateUtil.getDeltaDays(farrowEvent.getEventAt(), deletePigEvent.getEventAt()))
+                .weanDayAge(DateUtil.getDeltaDays(farrowEvent.getEventAt(), oldPigEvent.getEventAt()))
                 .build();
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+
+    }
+
+    @Override
+    public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
+        DoctorPigEvent farrowEvent = doctorPigEventDao.getFarrowEventByParity(newPigEvent.getPigId(), newPigEvent.getParity());
+        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
+        DoctorWeanDto weanDto2 = (DoctorWeanDto) inputDto;
+        DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
+                .weanAvgWeight(weanDto2.getPartWeanAvgWeight())
+                .weanCountChange(weanDto2.getWeanPigletsCount())
+                .weanNestChange(1)
+                .weanDayAge(DateUtil.getDeltaDays(farrowEvent.getEventAt(), inputDto.eventAt()))
+                .build();
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+
     }
 
     public BaseGroupInput buildTriggerGroupEventInput(DoctorPigEvent pigEvent) {

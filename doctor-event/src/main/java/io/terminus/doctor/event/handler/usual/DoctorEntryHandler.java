@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEntryEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
@@ -42,6 +43,8 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
 
     @Autowired
     private  DoctorPigInfoCache doctorPigInfoCache;
+    @Autowired
+    private DoctorModifyPigEntryEventHandler doctorModifyPigEntryEventHandler;
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -220,5 +223,11 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
     protected void specialHandle(DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
         super.specialHandle(executeEvent, toTrack);
         doctorPigInfoCache.addPigCodeToFarm(executeEvent.getFarmId(), executeEvent.getPigCode());
+    }
+
+    @Override
+    protected void updateDailyForNew(DoctorPigEvent newPigEvent) {
+        BasePigEventInputDto inputDto = JSON_MAPPER.fromJson(newPigEvent.getExtra(), DoctorFarmEntryDto.class);
+        doctorModifyPigEntryEventHandler.updateDailyOfNew(newPigEvent, inputDto);
     }
 }

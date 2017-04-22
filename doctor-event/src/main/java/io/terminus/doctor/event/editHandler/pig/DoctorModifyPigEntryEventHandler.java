@@ -68,36 +68,14 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
     @Override
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
         if (!Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
-            DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
-            DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder().entryCountChange(-1).build();
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
-            if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
-                doctorDailyPigDao.updateDailySowPigLiveStock(changeDto.getFarmId(), getAfterDay(changeDto.getOldEventAt()), -1);
-            } else {
-                doctorDailyPigDao.updateDailyBoarPigLiveStock(changeDto.getFarmId(), getAfterDay(changeDto.getOldEventAt()), -1);
-            }
-
-            DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
-            DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder().entryCountChange(1).build();
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
-            if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
-                doctorDailyPigDao.updateDailySowPigLiveStock(changeDto.getFarmId(), getAfterDay(changeDto.getNewEventAt()), 1);
-            } else {
-                doctorDailyPigDao.updateDailyBoarPigLiveStock(changeDto.getFarmId(), getAfterDay(changeDto.getNewEventAt()), 1);
-            }
+            updateDailyOfDelete(oldPigEvent);
+            updateDailyOfNew(oldPigEvent, inputDto);
         }
     }
 
     @Override
     protected void updateDailyForDelete(DoctorPigEvent deletePigEvent) {
-        DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(deletePigEvent.getFarmId(), deletePigEvent.getEventAt());
-        DoctorEventChangeDto changeDto = DoctorEventChangeDto.builder().entryCountChange(-1).build();
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
-        if (Objects.equals(deletePigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
-            doctorDailyPigDao.updateDailySowPigLiveStock(deletePigEvent.getFarmId(), getAfterDay(deletePigEvent.getEventAt()), -1);
-        } else {
-            doctorDailyPigDao.updateDailyBoarPigLiveStock(deletePigEvent.getFarmId(), getAfterDay(deletePigEvent.getEventAt()), -1);
-        }
+        updateDailyOfDelete(deletePigEvent);
     }
 
     @Override
@@ -111,5 +89,29 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
             oldDailyPig.setBoarEnd(EventUtil.plusInt(oldDailyPig.getBoarEnd(), changeDto.getEntryCountChange()));
         }
         return oldDailyPig;
+    }
+
+    @Override
+    public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
+        DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder().entryCountChange(-1).build();
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+        if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
+            doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(),  getAfterDay(oldPigEvent.getEventAt()), -changeDto1.getEntryCountChange());
+        } else {
+            doctorDailyPigDao.updateDailyBoarPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()), -changeDto1.getEntryCountChange());
+        }
+    }
+
+    @Override
+    public void updateDailyOfNew(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), inputDto.eventAt());
+        DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder().entryCountChange(1).build();
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+        if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
+            doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()), changeDto2.getEntryCountChange());
+        } else {
+            doctorDailyPigDao.updateDailyBoarPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()), changeDto2.getEntryCountChange());
+        }
     }
 }

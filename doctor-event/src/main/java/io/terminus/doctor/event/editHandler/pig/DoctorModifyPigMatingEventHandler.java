@@ -50,20 +50,10 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
         if (!Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
             //原日期记录更新
-            DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
-            DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
-                    .doctorMateType(oldPigEvent.getDoctorMateType())
-                    .doctorMateTypeCountChange(-1)
-                    .build();
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+            updateDailyOfDelete(oldPigEvent);
 
             //新日记记录更新
-            DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
-            DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
-                    .doctorMateType(oldPigEvent.getDoctorMateType())
-                    .doctorMateTypeCountChange(1)
-                    .build();
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+            updateDailyOfNew(oldPigEvent, inputDto);
         }
     }
 
@@ -108,12 +98,28 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected void updateDailyForDelete(DoctorPigEvent deletePigEvent) {
-        DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(deletePigEvent.getFarmId(), deletePigEvent.getEventAt());
-        DoctorEventChangeDto changeDto = DoctorEventChangeDto.builder()
-                .doctorMateType(deletePigEvent.getDoctorMateType())
+        updateDailyOfDelete(deletePigEvent);
+    }
+
+    @Override
+    public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
+        DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
+                .doctorMateType(oldPigEvent.getDoctorMateType())
                 .doctorMateTypeCountChange(-1)
                 .build();
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+    }
+
+    @Override
+    public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
+        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
+        DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
+                .doctorMateType(newPigEvent.getDoctorMateType())
+                .doctorMateTypeCountChange(1)
+                .build();
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+
     }
 
     @Override

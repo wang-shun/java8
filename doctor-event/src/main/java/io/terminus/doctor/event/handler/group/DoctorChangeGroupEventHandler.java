@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorChangeGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupChangeEventHandler;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -38,6 +39,9 @@ import java.util.Objects;
 @Component
 @SuppressWarnings("unchecked")
 public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandler {
+
+    @Autowired
+    private DoctorModifyGroupChangeEventHandler doctorModifyGroupChangeEventHandler;
 
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
@@ -116,6 +120,8 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
         updateGroupTrack(groupTrack, event);
 
+        updateDailyForNew(event);
+
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.CHANGE);
 
@@ -174,6 +180,12 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
             track.setUnweanQty(track.getUnweanQty() - event.getQuantity());
         }
         return track;
+    }
+
+    @Override
+    protected void updateDailyForNew(DoctorGroupEvent newGroupEvent) {
+        BaseGroupInput input = JSON_MAPPER.fromJson(newGroupEvent.getExtra(), DoctorChangeGroupInput.class);
+        doctorModifyGroupChangeEventHandler.updateDailyOfNew(newGroupEvent, input);
     }
 
     //校验金额不能为空, 基础重量不能为空

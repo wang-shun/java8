@@ -17,6 +17,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -45,6 +46,8 @@ import static io.terminus.common.utils.Arguments.notNull;
 @SuppressWarnings("unchecked")
 public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
+    @Autowired
+    private DoctorModifyGroupMoveInEventHandler doctorModifyGroupMoveInEventHandler;
     private final DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired
@@ -91,6 +94,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
         updateGroupTrack(groupTrack, event);
 
+        updateDailyForNew(event);
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.MOVE_IN);
 
@@ -184,6 +188,12 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         track.setSex(DoctorGroupTrack.Sex.MIX.getValue());
         return track;
+    }
+
+    @Override
+    protected void updateDailyForNew(DoctorGroupEvent newGroupEvent) {
+        BaseGroupInput input = JSON_MAPPER.fromJson(newGroupEvent.getExtra(), DoctorMoveInGroupInput.class);
+        doctorModifyGroupMoveInEventHandler.updateDailyOfNew(newGroupEvent, input);
     }
 
     private void checkEventAt(DoctorGroupEvent groupEvent){

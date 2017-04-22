@@ -231,6 +231,19 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     protected void updateDailyForDelete(DoctorGroupEvent deleteGroupEvent) {}
 
     /**
+     * 删除事件更新日记录
+     * @param oldGroupEvent 被删除事件
+     */
+    public void updateDailyOfDelete(DoctorGroupEvent oldGroupEvent) {}
+
+    /**
+     * 新建事件更新日记录
+     * @param newGroupEvent 新建事件
+     * @param input 新输入
+     */
+    public void updateDailyOfNew(DoctorGroupEvent newGroupEvent, BaseGroupInput input) {}
+
+    /**
      * 是否需要更新猪群(编辑)
      * @param changeDto 变化记录
      * @return

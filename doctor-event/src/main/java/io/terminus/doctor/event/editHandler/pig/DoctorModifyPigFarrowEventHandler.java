@@ -103,11 +103,6 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
             oldDailyPig1.setFarrowNest(EventUtil.minusInt(oldDailyPig1.getFarrowNest(), 1));
             doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
 
-            DoctorFarrowingDto farrowingDto2 = (DoctorFarrowingDto) inputDto;
-            DoctorEventChangeDto changeDto2 = buildEventChange(new DoctorFarrowingDto(), farrowingDto2);
-            changeDto2.setFarrowNestChange(1);
-            DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
 
         }
     }
@@ -162,7 +157,26 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         oldDailyPig = buildDailyPig(oldDailyPig, changeDto);
         doctorDailyPigDao.update(oldDailyPig);
     }
-    
+
+    @Override
+    public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
+        DoctorFarrowingDto farrowingDto1 = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorFarrowingDto.class);
+        DoctorEventChangeDto changeDto1 = buildEventChange(farrowingDto1, new DoctorFarrowingDto());
+        changeDto1.setFarrowNestChange(-1);
+        DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+    }
+
+    @Override
+    public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
+        DoctorFarrowingDto farrowingDto2 = (DoctorFarrowingDto) inputDto;
+        DoctorEventChangeDto changeDto2 = buildEventChange(new DoctorFarrowingDto(), farrowingDto2);
+        changeDto2.setFarrowNestChange(1);
+        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), farrowingDto2.eventAt());
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+
+    }
+
     public DoctorMoveInGroupInput buildTriggerGroupEventInput(DoctorPigEvent pigEvent) {
         DoctorFarrowingDto farrowingDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorFarrowingDto.class);
         // Build 新建猪群操作方式

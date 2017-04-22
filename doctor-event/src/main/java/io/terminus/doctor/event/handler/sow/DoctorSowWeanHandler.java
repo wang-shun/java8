@@ -144,6 +144,12 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
+    protected void updateDailyForNew(DoctorPigEvent newPigEvent) {
+        BasePigEventInputDto inputDto = JSON_MAPPER.fromJson(newPigEvent.getExtra(), DoctorWeanDto.class);
+        doctorModifyPigWeanEventHandler.updateDailyOfNew(newPigEvent, inputDto);
+    }
+
+    @Override
     protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack) {
         DoctorWeanDto partWeanDto = JSON_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorWeanDto.class);
         //触发猪群断奶事件

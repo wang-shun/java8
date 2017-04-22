@@ -18,6 +18,7 @@ import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransGroupEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
@@ -47,6 +48,8 @@ import java.util.Objects;
 @SuppressWarnings("unchecked")
 public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
+    @Autowired
+    private DoctorModifyGroupTransGroupEventHandler doctorModifyGroupTransGroupEventHandler;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
     private final DoctorGroupManager doctorGroupManager;
@@ -222,6 +225,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         updateGroupTrack(groupTrack, event);
 
+        updateDailyForNew(event);
         //4.创建镜像
         DoctorGroupSnapshot doctorGroupSnapshot = createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.TRANS_GROUP);
 
@@ -262,6 +266,12 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //发布统计事件
         //publistGroupAndBarn(event);
+    }
+
+    @Override
+    protected void updateDailyForNew(DoctorGroupEvent newGroupEvent) {
+        BaseGroupInput input = JSON_MAPPER.fromJson(newGroupEvent.getExtra(), DoctorTransGroupInput.class);
+        doctorModifyGroupTransGroupEventHandler.updateDailyOfNew(newGroupEvent, input);
     }
 
     /**
