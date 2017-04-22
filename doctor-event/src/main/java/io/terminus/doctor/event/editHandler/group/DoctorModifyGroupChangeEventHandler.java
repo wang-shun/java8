@@ -123,8 +123,8 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
                 .changeTypeId(newInput.getChangeTypeId())
                 .isSowTrigger(notNull(newGroupEvent.getSowId()))
                 .build();
-        DoctorDailyGroup oldDailyGroup2 = doctorDailyGroupDao.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
-        doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup2, changeDto2));
+        DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
+        doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
         updateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
 
     }

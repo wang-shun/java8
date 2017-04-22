@@ -51,8 +51,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
                 .build();
     }
 
-    @Override
-    protected DoctorEventChangeDto buildEventChange(BaseGroupInput oldInputDto, BaseGroupInput newInputDto) {
+    private DoctorEventChangeDto buildEventChange(BaseGroupInput oldInputDto, BaseGroupInput newInputDto) {
         DoctorTransGroupInput oldInput = (DoctorTransGroupInput) oldInputDto;
         DoctorTransGroupInput newInput = (DoctorTransGroupInput) newInputDto;
         return DoctorEventChangeDto.builder()
@@ -147,8 +146,8 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
                 .isSowTrigger(notNull(newGroupEvent.getSowId()))
                 .transGroupType(newGroupEvent.getTransGroupType())
                 .build();
-        DoctorDailyGroup oldDailyGroup2 = doctorDailyGroupDao.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
-        doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup2, changeDto2));
+        DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
+        doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
         updateDailyGroupLiveStock(newGroupEvent.getGroupId(), eventAt, -changeDto2.getQuantityChange());
 
     }

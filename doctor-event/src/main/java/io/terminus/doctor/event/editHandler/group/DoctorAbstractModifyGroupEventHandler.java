@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -43,6 +44,8 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     protected DoctorDailyGroupDao doctorDailyGroupDao;
     @Autowired
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
+    @Autowired
+    protected DoctorDailyReportManager doctorDailyReportManager;
 
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
@@ -114,6 +117,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         doctorGroupEventDao.delete(deleteGroupEvent.getId());
 
         //4.删除记录
+        createModifyLog(deleteGroupEvent);
 
         //5.更新猪
         if (isUpdateGroup(deleteGroupEvent.getType())) {
@@ -154,11 +158,6 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
-        return null;
-    }
-
-
-    protected DoctorEventChangeDto buildEventChange(BaseGroupInput oldInputDto, BaseGroupInput newInputDto) {
         return null;
     }
 
@@ -296,6 +295,21 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 .farmId(newEvent.getFarmId())
                 .fromEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(oldEvent))
                 .toEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(newEvent))
+                .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .build();
+        doctorEventModifyLogDao.create(modifyLog);
+    }
+
+    /**
+     * 创建删除记录
+     * @param deleteEvent 删除事件
+     */
+    private void createModifyLog(DoctorGroupEvent deleteEvent) {
+        DoctorEventModifyLog modifyLog = DoctorEventModifyLog.builder()
+                .businessId(deleteEvent.getGroupId())
+                .businessCode(deleteEvent.getGroupCode())
+                .farmId(deleteEvent.getFarmId())
+                .deleteEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(deleteEvent))
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);

@@ -126,6 +126,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         doctorPigEventDao.delete(deletePigEvent.getId());
 
         //4.删除记录
+        createModifyLog(deletePigEvent);
 
         //5.更新猪
         if (isUpdatePig(deletePigEvent.getType())) {
@@ -301,16 +302,13 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @return
      */
     private boolean isUpdateTrack(DoctorEventChangeDto changeDto) {
-        return notNull(changeDto)
-                && (notNullAndNotZero(changeDto.getWeightChange())
-                || notNullAndNotZero(changeDto.getLiveCountChange())
-                || notNullAndNotZero(changeDto.getWeanCountChange()));
-        // TODO: 17/4/13 是否需要跟新
+        return true;
     }
 
     private boolean isUpdateTrack(Integer eventType) {
         return !IGNORE_EVENT.contains(eventType);
     }
+
     /**
      * 创建编辑记录
      * @param oldEvent 原事件
@@ -323,6 +321,21 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 .farmId(newEvent.getFarmId())
                 .fromEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(oldEvent))
                 .toEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(newEvent))
+                .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .build();
+        doctorEventModifyLogDao.create(modifyLog);
+    }
+
+    /**
+     * 创建删除记录
+     * @param deleteEvent 删除事件
+     */
+    private void createModifyLog(DoctorPigEvent deleteEvent) {
+        DoctorEventModifyLog modifyLog = DoctorEventModifyLog.builder()
+                .businessId(deleteEvent.getPigId())
+                .businessCode(deleteEvent.getPigCode())
+                .farmId(deleteEvent.getFarmId())
+                .deleteEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(deleteEvent))
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);

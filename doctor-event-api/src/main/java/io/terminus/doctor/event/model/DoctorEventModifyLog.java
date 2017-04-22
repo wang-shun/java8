@@ -49,6 +49,11 @@ public class DoctorEventModifyLog implements Serializable {
      * 编辑申请id
      */
     private Long modifyRequestId;
+
+    /**
+     * 删除事件
+     */
+    private String deleteEvent;
     
     /**
      * 修改前事件

@@ -12,6 +12,7 @@
         <result column="business_code" property="businessCode"/>
         <result column="type" property="type"/>
         <result column="modify_request_id" property="modifyRequestId"/>
+        <result column="delete_event" property="deleteEvent"/>
         <result column="from_event" property="fromEvent"/>
         <result column="to_event" property="toEvent"/>
         <result column="created_at" property="createdAt"/>
@@ -33,8 +34,9 @@
         business_code, 
         type, 
         modify_request_id, 
-        from_event, 
-        to_event, 
+        delete_event,
+        from_event,
+        to_event,
         created_at, 
         updated_at
         
@@ -46,8 +48,9 @@
         #{businessCode}, 
         #{type}, 
         #{modifyRequestId}, 
-        #{fromEvent}, 
-        #{toEvent}, 
+        #{deleteEvent},
+        #{fromEvent},
+        #{toEvent},
         now(), 
         now()
         
@@ -60,6 +63,7 @@
         <if test="businessCode != null">AND business_code = #{businessCode}</if>
         <if test="type != null">AND type = #{type}</if>
         <if test="modifyRequestId != null">AND modify_request_id = #{modifyRequestId}</if>
+        <if test="deleteEvent != null">AND delete_event = #{deleteEvent}</if>
         <if test="fromEvent != null">AND from_event = #{fromEvent}</if>
         <if test="toEvent != null">AND to_event = #{toEvent}</if>
         
@@ -87,11 +91,9 @@
             <if test="businessCode != null">business_code = #{businessCode},</if>
             <if test="type != null">type = #{type},</if>
             <if test="modifyRequestId != null">modify_request_id = #{modifyRequestId},</if>
+            <if test="deleteEvent != null">delete_event = #{deleteEvent},</if>
             <if test="fromEvent != null">from_event = #{fromEvent},</if>
             <if test="toEvent != null">to_event = #{toEvent},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}
