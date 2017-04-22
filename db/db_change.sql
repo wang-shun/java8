@@ -877,11 +877,135 @@ CREATE TABLE `doctor_event_modify_logs` (
 
 
 -- 2017-04-18
-drop table if exists `doctor_daily_pigs`;
-CREATE TABLE `doctor_daily_pigs` (
+-- 销售视图
+create or replace view
+v_doctor_sales
+AS
+select
+null as
+batch_no,
+farm_id,
+farm_name,
+5 as pig_type,
+"种猪" as pig_type_name,
+null as day_age,
+barn_id,
+barn_name,
+date_format(event_at, '%Y-%m-%d') as event_at,
+quantity,
+weight,
+price,
+amount,
+customer_id,
+customer_name
+from doctor_pig_events
+where type = 6
+and change_type_id = 109
+group by farm_id, farm_name, barn_id, barn_name, date_format(event_at, '%Y-%m-%d'), customer_id, customer_name,day_age
+
+union all
+select
+group_code as batch_no,
+farm_id,
+farm_name,
+pig_type,
+"育肥猪" as pig_type_name,
+avg_day_age as day_age,
+barn_id,
+barn_name,
+date_format(event_at, '%Y-%m-%d') as event_at,
+quantity,
+weight,
+price,
+amount,
+customer_id,
+customer_name
+from doctor_group_events
+where type = 3
+and pig_type = 3
+and change_type_id = 109
+group by  group_code,farm_id, farm_name, barn_id, barn_name, date_format(event_at, '%Y-%m-%d'), customer_id, customer_name,day_age
+
+union all
+select
+group_code as batch_no,
+farm_id,
+farm_name,
+pig_type,
+"后备猪" as pig_type_name,
+avg_day_age as day_age,
+barn_id,
+barn_name,
+date_format(event_at, '%Y-%m-%d') as event_at,
+quantity,
+weight,
+price,
+amount,
+customer_id,
+customer_name
+from doctor_group_events
+where type = 3
+and pig_type = 4
+and change_type_id = 109
+group by group_code, farm_id, farm_name, barn_id, barn_name, date_format(event_at, '%Y-%m-%d'), customer_id, customer_name,day_age
+
+union all
+select
+group_code as batch_no,
+farm_id,
+farm_name,
+'7_2' as pig_type,
+"仔猪" as pig_type_name,
+avg_day_age as day_age,
+barn_id,
+barn_name,
+date_format(event_at, '%Y-%m-%d') as event_at,
+sum(quantity) as quantity,
+sum(weight) as weight,
+sum(amount)/sum(quantity) as price,
+sum(amount) as amount,
+customer_id,
+customer_name
+from doctor_group_events
+where type = 3
+and pig_type in ( 2,7 )
+and change_type_id = 109
+group by group_code , farm_id, farm_name, barn_id, barn_name, date_format(event_at, '%Y-%m-%d'), customer_id, customer_name,day_age;
+
+drop table if exists `doctor_range_reports`;
+CREATE TABLE `doctor_range_reports` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
   `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
-  `sum_at` date DEFAULT NULL COMMENT '日期',
+  `type` tinyint(4) DEFAULT NULL COMMENT '类型，1月报，2周报',
+  `sum_at` varchar(10) DEFAULT NULL COMMENT '统计时间',
+  `sum_from` date DEFAULT NULL COMMENT '开始时间',
+  `sum_to` date DEFAULT NULL COMMENT '结算时间',
+  `mate_estimate_preg_rate` double DEFAULT NULL COMMENT '估算受胎率',
+  `mate_real_preg_rate` double DEFAULT NULL COMMENT '实际受胎率',
+  `mate_estimate_farrowing_rate` double DEFAULT NULL COMMENT '估算配种分娩率',
+  `mate_real_farrowing_rate` double DEFAULT NULL COMMENT '实际配种分娩率',
+  `wean_avg_count` double DEFAULT NULL COMMENT '窝均断奶数',
+  `wean_avg_day_age` double DEFAULT NULL COMMENT '窝均断奶日龄',
+  `dead_farrow_rate` double DEFAULT NULL COMMENT '产房死淘率',
+  `dead_nursery_rate` double DEFAULT NULL COMMENT '保育死淘率',
+  `dead_fatten_rate` double DEFAULT NULL COMMENT '育肥死淘率',
+  `npd` double DEFAULT NULL COMMENT '非生产天数',
+  `psy` double DEFAULT NULL COMMENT 'psy',
+  `mate_in_seven` double DEFAULT NULL COMMENT '断奶七天配种率',
+  `extra` text,
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_doctor_range_reports_farm_id_type_sum_at` (`farm_id`,`type`,`sum_at`),
+  KEY `idx_doctor_range_reports_farm_id` (`farm_id`),
+  KEY `idx_doctor_range_reports_sum_at` (`sum_at`)
+) DEFAULT CHARSET=utf8 COMMENT='指标月报';
+
+drop table if exists `doctor_daily_reports`;
+CREATE TABLE `doctor_daily_reports` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
+  `sum_at` varchar(10) DEFAULT NULL COMMENT '日期',
   `sow_ph` int(11) DEFAULT NULL COMMENT '配怀母猪头数',
   `sow_cf` int(11) DEFAULT NULL COMMENT '产房母猪头数',
   `sow_start` int(11) DEFAULT NULL COMMENT '母猪期初头数',
@@ -891,6 +1015,19 @@ CREATE TABLE `doctor_daily_pigs` (
   `sow_sale` int(11) DEFAULT NULL COMMENT '母猪销售',
   `sow_other_out` int(11) DEFAULT NULL COMMENT '母猪其他减少',
   `sow_end` int(11) DEFAULT NULL COMMENT '母猪期末头数',
+  `sow_ph_start` int(11) DEFAULT NULL COMMENT '配怀母猪期初',
+  `sow_ph_in_farm_in` int(11) DEFAULT NULL COMMENT '配怀母猪进场',
+  `sow_ph_wean_in` int(11) DEFAULT NULL COMMENT '配怀母猪断奶转入',
+  `sow_ph_dead` int(11) DEFAULT NULL COMMENT '配怀母猪死亡',
+  `sow_ph_weed_out` int(11) DEFAULT NULL COMMENT '配怀母猪淘汰',
+  `sow_ph_to_cf` int(11) DEFAULT NULL COMMENT '配怀母猪转产房',
+  `sow_ph_end` int(11) DEFAULT NULL COMMENT '配怀母猪期末',
+  `sow_cf_start` int(11) DEFAULT NULL COMMENT '配怀母猪期初',
+  `sow_cf_in` int(11) DEFAULT NULL COMMENT '产房母猪转入',
+  `sow_cf_dead` int(11) DEFAULT NULL COMMENT '产房母猪死亡',
+  `sow_cf_weed_out` int(11) DEFAULT NULL COMMENT '铲翻母猪淘汰',
+  `sow_cf_wean_out` int(11) DEFAULT NULL COMMENT '产房母猪断奶转出',
+  `sow_cf_end` int(11) DEFAULT NULL COMMENT '产房母猪期末',
   `boar_start` int(11) DEFAULT NULL COMMENT '公猪期初头数',
   `boar_in` int(11) DEFAULT NULL COMMENT '公猪转入',
   `boar_dead` int(11) DEFAULT NULL COMMENT '死亡母猪',
@@ -923,9 +1060,47 @@ CREATE TABLE `doctor_daily_pigs` (
   `wean_count` int(11) DEFAULT NULL COMMENT '断奶仔猪数',
   `wean_avg_weight` double DEFAULT NULL COMMENT '断奶均重',
   `wean_day_age` double DEFAULT NULL COMMENT '断奶日龄',
+  `base_price_10` int(11) DEFAULT NULL COMMENT '10kg基础价格',
+  `base_price_15` int(11) DEFAULT NULL COMMENT '15kg基础价格',
+  `fatten_price` double DEFAULT NULL COMMENT '育肥猪价格',
+  `sow_ph_feed` double DEFAULT NULL COMMENT '配怀母猪饲料消耗数量',
+  `sow_ph_feed_amount` int(11) DEFAULT NULL COMMENT '配怀母猪饲料消耗金额',
+  `sow_ph_medicine_amount` int(11) DEFAULT NULL COMMENT '配怀母猪药品消耗金额',
+  `sow_ph_vaccination_amount` int(11) DEFAULT NULL COMMENT '配怀母猪疫苗消耗金额',
+  `sow_ph_consumable_amount` int(11) DEFAULT NULL COMMENT '配怀母猪易耗品消耗金额',
+  `sow_cf_feed` double DEFAULT NULL COMMENT '产房母猪饲料消耗数量',
+  `sow_cf_feed_amount` int(11) DEFAULT NULL COMMENT '产房母猪饲料消耗金额',
+  `sow_cf_medicine_amount` int(11) DEFAULT NULL COMMENT '产房母猪药品消耗金额',
+  `sow_cf_vaccination_amount` int(11) DEFAULT NULL COMMENT '产房母猪疫苗消耗金额',
+  `sow_cf_consumable_amount` int(11) DEFAULT NULL COMMENT '产房母猪易耗品消耗金额',
+  `farrow_feed` double DEFAULT NULL COMMENT '产房仔猪饲料消耗数量',
+  `farrow_feed_amount` int(11) DEFAULT NULL COMMENT '产房仔猪饲料消耗金额',
+  `farrow_medicine_amount` int(11) DEFAULT NULL COMMENT '产房仔猪药品消耗金额',
+  `farrow_vaccination_amount` int(11) DEFAULT NULL COMMENT '产房仔猪疫苗消耗金额',
+  `farrow_consumable_amount` int(11) DEFAULT NULL COMMENT '产房仔猪易耗品消耗金额',
+  `nursery_feed` double DEFAULT NULL COMMENT '保育猪饲料消耗数量',
+  `nursery_feed_amount` int(11) DEFAULT NULL COMMENT '保育猪饲料消耗金额',
+  `nursery_medicine_amount` int(11) DEFAULT NULL COMMENT '保育猪药品消耗金额',
+  `nursery_vaccination_amount` int(11) DEFAULT NULL COMMENT '保育猪疫苗消耗金额',
+  `nursery_consumable_amount` int(11) DEFAULT NULL COMMENT '保育猪易耗品消耗金额',
+  `fatten_feed` double DEFAULT NULL COMMENT '育肥猪饲料消耗数量',
+  `fatten_feed_amount` int(11) DEFAULT NULL COMMENT '育肥猪饲料消耗金额',
+  `fatten_medicine_amount` int(11) DEFAULT NULL COMMENT '育肥猪药品消耗金额',
+  `fatten_vaccination_amount` int(11) DEFAULT NULL COMMENT '育肥猪疫苗消耗金额',
+  `fatten_consumable_amount` int(11) DEFAULT NULL COMMENT '育肥猪易耗品消耗金额',
+  `houbei_feed` double DEFAULT NULL COMMENT '后备猪饲料消耗数量',
+  `houbei_feed_amount` int(11) DEFAULT NULL COMMENT '后备猪饲料消耗金额',
+  `houbei_medicine_amount` int(11) DEFAULT NULL COMMENT '后备猪药品消耗金额',
+  `houbei_vaccination_amount` int(11) DEFAULT NULL COMMENT '后备猪疫苗消耗金额',
+  `houbei_consumable_amount` int(11) DEFAULT NULL COMMENT '后备猪易耗品消耗金额',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新事件',
   PRIMARY KEY (`id`),
-  KEY `doctor_daily_pigs_farm_id` (`farm_id`)
-) DEFAULT CHARSET=utf8 COMMENT='猪数量每天记录表';
+  UNIQUE KEY `idx_doctor_daily_reports_farm_id_sum_at` (`farm_id`,`sum_at`),
+  KEY `doctor_daily_reports_farm_id` (`farm_id`),
+  KEY `doctor_daily_reports_sum_at` (`sum_at`)
+) DEFAULT CHARSET=utf8 COMMENT='日报';
+
 
 drop table if exists `doctor_daily_groups`;
 CREATE TABLE `doctor_daily_groups` (
@@ -948,6 +1123,8 @@ CREATE TABLE `doctor_daily_groups` (
   `outer_out` int(11) DEFAULT NULL COMMENT '不同类型猪群转群,转种猪',
   `end` int(11) DEFAULT NULL COMMENT '期末',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_doctor_daily_groups_farm_id_group_id_sum_at` (`farm_id`,`group_id`,`sum_at`),
   KEY `doctor_daily_groups_farm_id` (`farm_id`),
-  KEY `doctor_daily_groups_group_id` (`group_id`)
+  KEY `doctor_daily_groups_group_id` (`group_id`),
+  KEY `idx_doctor_daily_groups_sum_at` (`sum_at`)
 ) DEFAULT CHARSET=utf8 COMMENT='猪群数量每天记录表';
