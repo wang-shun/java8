@@ -105,7 +105,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
 
     @Override
     public Response<DoctorCommonReportTrendDto> findWeeklyReportTrendByFarmIdAndSumAt(Long farmId, Integer year, Integer week, Integer index) {
-        String weekStr = DateUtil.getYearWeek(year, week); //取周一代表一周
+        String weekStr = DateUtil.getYearWeek(MoreObjects.firstNonNull(year, DateTime.now().getWeekyear()), MoreObjects.firstNonNull(week, DateTime.now().getWeekOfWeekyear())); //取周一代表一周
 
         try {
             //如果查询未来的数据, 返回失败查询
@@ -217,10 +217,10 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
 
     //获取周报趋势
     private List<DoctorCommonReportDto> getWeeklyReportByIndex(Long farmId, Date date, Integer index) {
-        return DateUtil.getBeforeMonthEnds(date, MoreObjects.firstNonNull(index, WEEK_INDEX)).stream()
+        return DateUtil.getBeforeWeekEnds(date, MoreObjects.firstNonNull(index, WEEK_INDEX)).stream()
                 .map(week -> {
                     String sumAt = DateUtil.getYearWeek(week);
-                    DoctorRangeReport report = doctorRangeReportDao.findByRangeReport(farmId, ReportRangeType.MONTH.getValue(), sumAt);
+                    DoctorRangeReport report = doctorRangeReportDao.findByRangeReport(farmId, ReportRangeType.WEEK.getValue(), sumAt);
                     if (report == null) {
                         return failReportDto(sumAt);
                     }

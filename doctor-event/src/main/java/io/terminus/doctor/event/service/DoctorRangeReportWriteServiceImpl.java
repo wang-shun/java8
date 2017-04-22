@@ -151,7 +151,7 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
             Date startAt = DateUtil.monthStart(date);
             Date endAt = DateUtil.monthEnd(date);
             String month = DateUtil.getYearMonth(date);
-            log.info("generate DoctorMonthlyReports start, farmId: {}, start: {}, end: {}, now: {}", farmId, startAt, endAt, DateUtil.toDateTimeString(new Date()));
+            log.info("generate DoctorMonthlyReports start, farmId: {}, start: {}, end: {}, now: {}", farmId, DateUtil.toDateString(startAt), DateUtil.toDateString(endAt), DateUtil.toDateTimeString(new Date()));
             createDoctorRangeReport(farmId, ReportRangeType.MONTH.getValue(), month, startAt, endAt);
         }catch(Exception e){
             log.info("generate DoctorMonthlyReports failed, farmId: {}, date: {}, cause: {}", farmId, DateUtil.toDateString(date),  Throwables.getStackTraceAsString(e));
@@ -166,10 +166,10 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
         Date endAt = DateUtil.weekEnd(date);
         try{
             String week = DateUtil.getYearWeek(date);
-            log.info("generate DoctorWeeklyReports start, farmId: {}, start: {}, end: {}, now: {}", farmId, startAt, endAt, DateUtil.toDateTimeString(new Date()));
+            log.info("generate DoctorWeeklyReports start, farmId: {}, start: {}, end: {}, now: {}", farmId, DateUtil.toDateString(startAt), DateUtil.toDateString(endAt), DateUtil.toDateTimeString(new Date()));
             createDoctorRangeReport(farmId, ReportRangeType.WEEK.getValue(), week, startAt, endAt);
         }catch(Exception e){
-            log.info("generate DoctorWeeklyReports failed,farmId: {}, start: {}, end: {}, cause: {}", farmId, startAt, endAt, Throwables.getStackTraceAsString(e));
+            log.info("generate DoctorWeeklyReports failed,farmId: {}, start: {}, end: {}, cause: {}", farmId, DateUtil.toDateString(startAt), DateUtil.toDateString(endAt), Throwables.getStackTraceAsString(e));
             return Boolean.FALSE;
         }
         return Boolean.TRUE;

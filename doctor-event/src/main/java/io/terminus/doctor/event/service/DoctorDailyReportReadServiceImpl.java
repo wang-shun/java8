@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
@@ -76,6 +77,10 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     private DoctorDailyReportDto getDoctorDailyReportDto(Long farmId, String date) {
         DoctorDailyReportDto doctorDailyReportDto = new DoctorDailyReportDto();
         DoctorDailyReport dailyReport = doctorDailyReportDao.findByFarmIdAndSumAt(farmId, date);
+        if(Arguments.isNull(dailyReport)){
+            doctorDailyReportDto.setFail(Boolean.TRUE);
+            return doctorDailyReportDto;
+        }
         DoctorGroupChangeSum groupChangeSum = doctorDailyGroupDao.getGroupChangeSum(farmId, date);
         doctorDailyReportDto.setDailyReport(dailyReport);
         doctorDailyReportDto.setGroupChangeSum(groupChangeSum);
