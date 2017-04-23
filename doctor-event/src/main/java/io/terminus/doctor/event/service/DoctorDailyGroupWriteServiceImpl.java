@@ -138,7 +138,7 @@ public class DoctorDailyGroupWriteServiceImpl implements DoctorDailyGroupWriteSe
         doctorDailyGroup.setGroupId(groupId);
         doctorDailyGroup.setType(group.getPigType());
         doctorDailyGroup.setSumAt(startAt);
-        doctorDailyGroup.setStart(doctorKpiDao.realTimeLivetockGroup(groupId, DateUtil.getDateEnd(new DateTime(startAt).minusDays(1)).toDate()));
+        doctorDailyGroup.setStart(doctorKpiDao.realTimeLivetockGroup(groupId, new DateTime(startAt).minusDays(1).toDate()));
         if(Objects.equals(PigType.DELIVER_SOW.getValue(), group.getPigType())){
             doctorDailyGroup.setUnweanCount(doctorKpiDao.getGroupUnWean(groupId, endAt));
             doctorDailyGroup.setWeanCount(doctorKpiDao.getGroupWean(groupId, endAt));
@@ -156,7 +156,7 @@ public class DoctorDailyGroupWriteServiceImpl implements DoctorDailyGroupWriteSe
         }else {
             doctorDailyGroup.setOuterOut(doctorKpiDao.getGroupOuterOut(groupId, startAt, endAt));
         }
-        doctorDailyGroup.setEnd(doctorKpiDao.realTimeLivetockGroup(groupId, endAt));
+        doctorDailyGroup.setEnd(doctorKpiDao.realTimeLivetockGroup(groupId, startAt));
         return doctorDailyGroup;
     }
 }

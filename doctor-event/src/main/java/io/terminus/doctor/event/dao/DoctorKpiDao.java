@@ -1006,6 +1006,17 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 配怀母猪进场
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getSowPhInFarm(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getSowPhInFarm"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 配怀母猪死亡
      * @param farmId
      * @param startAt

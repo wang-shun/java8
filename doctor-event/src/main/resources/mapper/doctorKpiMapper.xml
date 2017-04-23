@@ -264,7 +264,7 @@
         FROM doctor_group_events
         WHERE
         change_type_id = 109 AND -- 变动类型是销售
-        pig_type IN (1, 7, 2) -- 产房 + 保育
+        pig_type IN (7, 2) -- 产房 + 保育
         <include refid="criteria"/>
     </select>
 
@@ -345,7 +345,7 @@
         FROM doctor_group_events
         WHERE
         change_type_id = 110 AND -- 变动类型是死亡和淘汰
-        pig_type IN (1, 7) -- 产房仔猪
+        pig_type = 7 -- 产房仔猪
         <include refid="criteria"/>
     </select>
 
@@ -356,7 +356,7 @@
         FROM doctor_group_events
         WHERE
         change_type_id = 111 AND -- 变动类型是死亡和淘汰
-        pig_type IN (1, 7) -- 产房仔猪
+        pig_type = 7 -- 产房仔猪
         <include refid="criteria"/>
     </select>
 
@@ -439,7 +439,7 @@
         FROM doctor_group_events
         WHERE
         change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-        pig_type IN (1, 7) -- 产房仔猪
+        pig_type = 7 -- 产房仔猪
         <include refid="criteria"/>
         ) AS a
         LEFT JOIN
@@ -449,7 +449,7 @@
         ifnull(sum(quantity),0) AS trans_in_count
         FROM doctor_group_events
         WHERE
-        pig_type IN (1, 7) AND -- 产房仔猪
+        pig_type = 7 AND -- 产房仔猪
         type = 2 AND -- 转入猪群事件
         trans_group_type != 0 -- 排除掉内转
         <include refid="criteria"/>
@@ -854,7 +854,7 @@
             (
               SELECT id
               FROM doctor_groups
-              WHERE `status` = 1 AND pig_type IN (1, 7) AND farm_id = #{farmId}
+              WHERE `status` = 1 AND pig_type = 7 AND farm_id = #{farmId}
             ) AS a
             LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
         )
@@ -871,7 +871,7 @@
                    WHERE
                      farm_id = #{farmId} AND
                      event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
-                     pig_type IN (1, 7) AND
+                     pig_type = 7 AND
                      TYPE IN (2, 3, 4, 5, 9)
                      AND status = 1
                  ) AS delta
@@ -1063,7 +1063,7 @@
         where a.farm_id = #{farmId}
         and a.kind = 1
         and a.type in(6, 7)
-        and a.event_at &lt;= date_add(date(#{date}), INTERVAL 1 day)
+        and a.event_at &lt;= date_add(date(#{date}), INTERVAL 85399 SECOND )
     </select>
 
     <!-- 实时存栏: 在产房的母猪 -->
@@ -1076,7 +1076,7 @@
         WHERE
         a.farm_id = #{farmId} AND
         a.is_removal = 0 AND
-        b.pig_type in (1, 7) -- 产房
+        b.pig_type = 7 -- 产房
         )
         -
         (
@@ -1091,7 +1091,7 @@
         a.kind = 1 AND
         ((a.type IN (2, 6, 7, 10, 12) AND b.pig_type = 7) OR a.type = 14) AND
         a.status = 1
-        ) ;
+        )
     </select>
 
     <select id="realTimeLiveStockPHSow" parameterType="map" resultType="int">
@@ -1103,23 +1103,22 @@
             WHERE
             a.farm_id = #{farmId} AND
             a.is_removal = 0 AND
+            a.pig_type = 1 and
             b.pig_type in (5 ,6 ) -- 配怀舍
         )
         -
         (
             SELECT
             ifnull(sum(case type when 7 then 1 when 12 then 1 else 0 end ), 0) -
-            ifnull(sum(case type when 6 then 1 else 0 end ), 0)
-            FROM doctor_pig_events a
-            left join doctor_barns b on a.barn_id = b.id
+            ifnull(sum(case type when 2 then 1 when 6 then 1 when 14 then 1 else 0 end ), 0)
+            FROM doctor_pig_events
             WHERE
-            a.farm_id = #{farmId} AND
-            a.event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
-            a.kind = 1 AND
-            a.type IN (2, 6, 7, 10, 12)  AND
-            a.status = 1 AND
-            b.pig_type in ( 5, 6 )
-         )
+            farm_id = #{farmId} AND
+            event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
+            kind = 1 AND
+            status = 1 AND
+            (( barn_type in ( 5, 6 ) and type in(2,6,7,14) ) OR ( barn_type = 7 and type in(7, 12) ) )  -- 保育舍发生的转场+销售+转分娩舍-(产房发生的进场+转配怀舍)
+        )
     </select>
 
     <select id="getInSow" parameterType="map" resultType="int">
@@ -1159,7 +1158,7 @@
         FROM doctor_group_events
         WHERE
             change_type_id = 109 AND  -- 变动类型是销售
-            pig_type IN (1, 2, 7) AND -- 产房仔猪和保育猪
+            pig_type IN (2, 7) AND -- 产房仔猪和保育猪
             base_weight = 10
             <include refid="criteria"/>
     </select>
@@ -1171,7 +1170,7 @@
         FROM doctor_group_events
         WHERE
             change_type_id = 109 AND  -- 变动类型是销售
-            pig_type IN (1, 2, 7) AND -- 产房仔猪和保育猪
+            pig_type IN (2, 7) AND -- 产房仔猪和保育猪
             base_weight = 15
             <include refid="criteria"/>
     </select>
@@ -1347,7 +1346,7 @@
               <include refid="criteria"/>
         ) a
         LEFT JOIN doctor_barns b ON a.barn_id = b.id
-        WHERE b.pig_type IN (1, 7)
+        WHERE b.pig_type = 7
     </select>
 
     <!--存栏变动月报: 配怀转产房-->
@@ -1374,7 +1373,7 @@
             SELECT other_barn_id, quantity
             FROM doctor_group_events
             WHERE `type` = 4 AND  -- 转群事件
-              pig_type IN (1, 7)
+              pig_type = 7
               <include refid="criteria"/>
         ) AS a
         LEFT JOIN doctor_barns b ON a.other_barn_id = b.id
@@ -1510,7 +1509,7 @@
                         <include refid="criteria"/>
             ) AS a
             LEFT JOIN doctor_barns b ON a.barn_id = b.id
-            WHERE b.pig_type IN (1, 5, 6, 7)
+            WHERE b.pig_type IN (5, 6, 7)
             GROUP BY b.pig_type
         ) AS c
     </select>
@@ -1848,7 +1847,7 @@
                     CASE WHEN TYPE = 5 THEN 1 ELSE 0 END AS turnCount
                FROM doctor_group_events
                WHERE event_at &gt;= date_add(DATE(#{date}), INTERVAL 1 DAY)   -- 日期取下一天的天初(因为每天的存栏算的是天末)
-                    AND pig_type IN (1, 7)
+                    AND pig_type = 7
                     AND TYPE IN (2, 3, 4, 5, 9)
                     AND status = 1
                 GROUP BY group_id
@@ -1859,6 +1858,14 @@
 
     <select id="realTimeLivetockGroup" parameterType="map" resultType="int">
         select
+        (
+        select ifnull(quantity, 0)
+        from doctor_group_tracks
+        where group_id = #{groupId}
+        )
+        -
+        (
+        select
         ifnull(
         sum(
         CASE WHEN TYPE = 2 THEN quantity ELSE 0 END -
@@ -1868,8 +1875,9 @@
         ,0)
         from doctor_group_events
         where group_id = #{groupId}
-        and event_at &lt;=  date_add(date(#{date}), INTERVAL 86399 SECOND)  -- 当前23:59:59
+        and event_at &gt;=  date_add(date(#{date}), INTERVAL 1 day)  -- 当前23:59:59
         and type in(2,3,4,5,9)
+        )
     </select>
 
     <select id="getGroupInnerIn" parameterType="map" resultType="int">
@@ -2051,7 +2059,7 @@
         <include refid="criteria"/>
         ) AS a
         LEFT JOIN doctor_barns b ON a.barn_id = b.id
-        WHERE b.pig_type IN (1, 7)
+        WHERE b.pig_type = 7
     </select>
 
     <select id="getSowCfWeedOut" parameterType="map" resultType="int">
@@ -2069,7 +2077,7 @@
         <include refid="criteria"/>
         ) AS a
         LEFT JOIN doctor_barns b ON a.barn_id = b.id
-        WHERE b.pig_type IN (1, 7)
+        WHERE b.pig_type = 7
     </select>
 
     <select id="getBarnChangeCount" parameterType="map" resultType="int">
@@ -2104,5 +2112,14 @@
         on a.id = b.group_id
         where a.current_barn_id = #{barnId}
         and a.status = 1;
+    </select>
+
+    <select id="getSowPhInFarm" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM  doctor_pig_events
+        WHERE `type` = 7
+        and kind = 1
+        and barn_type in (5,6)
+        <include refid="criteria"/>
     </select>
 </mapper>
