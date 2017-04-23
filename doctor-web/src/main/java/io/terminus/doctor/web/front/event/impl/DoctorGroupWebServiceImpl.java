@@ -5,7 +5,6 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
-import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Dates;
@@ -24,7 +23,6 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -38,6 +36,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -46,6 +45,7 @@ import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
+import io.terminus.doctor.event.service.DoctorModifyEventService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -105,6 +105,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
     @RpcConsumer
     private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
+    @RpcConsumer
+    private DoctorModifyEventService doctorModifyEventService;
 
     @Autowired
     public DoctorGroupWebServiceImpl(DoctorGroupWriteService doctorGroupWriteService,
@@ -238,7 +240,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             switch (groupEventType) {
                 case MOVE_IN:
                     params.put("breedName", getBasicName(getLong(params, "breedId")));
-                    params.put("inTypeName", DoctorMoveInGroupEvent.InType.from(getInteger(params, "inType")).getDesc());
+                    params.put("inTypeName", InType.from(getInteger(params, "inType")).getDesc());
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                     orInvalid(doctorGroupWriteService.groupEventMoveIn(groupDetail, doctorValidService.valid(map(putBasicFields(params), DoctorMoveInGroupInput.class), groupCode)));
                     break;
@@ -360,33 +362,13 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     }
 
     @Override
-    public RespWithEx<Long> createGroupModifyEventRequest(Long groupId, Integer eventType, Long eventId, String data) {
+    public RespWithEx<Boolean> createGroupModifyEventRequest(Long groupId, Integer eventType, Long eventId, String data) {
         try {
-            String groupCode = getGroupCode(groupId);
-            try {
-                DoctorGroupDetail groupDetail = checkGroupExist(groupId);
-                Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
-                DoctorGroupInputInfo groupInputInfo = buildGroupEventInfo(eventType, groupDetail, params);
-                doctorValidService.valid(groupInputInfo, groupInputInfo.getGroupDetail().getGroup().getGroupCode());
-
-                //获取编辑人信息
-                BaseUser user = UserUtil.getCurrentUser();
-                if (isNull(user)) {
-                    throw new ServiceException("user.not.login");
-                }
-                //获取真实姓名
-                String userName = user.getName();
-                Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(user.getId());
-                if (userProfileResponse.isSuccess() && notNull(userProfileResponse.getResult())) {
-                    userName = userProfileResponse.getResult().getRealName();
-                }
-                Long requestId = RespHelper.orServEx(doctorEventModifyRequestWriteService.createGroupModifyEventRequest(groupInputInfo, eventId, eventType, user.getId(), userName));
-                return RespWithEx.ok(requestId);
-            } catch (InvalidException e) {
-                throw new InvalidException(true, e.getError(), groupCode, e.getParams());
-            } catch (ServiceException e) {
-                throw new InvalidException(true, e.getMessage(), groupCode);
-            }
+            DoctorGroupDetail groupDetail = checkGroupExist(groupId);
+            Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
+            DoctorGroupInputInfo groupInputInfo = buildGroupEventInfo(eventType, groupDetail, params);
+            doctorModifyEventService.modifyGroupEvent(groupInputInfo.getInput(), eventId, eventType);
+            return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
             log.error("batch group event failed, groupId:{}, eventType:{}, eventId:{}, data:{}, cause:{}", groupId, eventType, eventId, data, Throwables.getStackTraceAsString(e));
             return RespWithEx.exception(e);
@@ -430,7 +412,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         switch (groupEventType) {
             case MOVE_IN:
                 params.put("breedName", getBasicName(getLong(params, "breedId")));
-                params.put("inTypeName", DoctorMoveInGroupEvent.InType.from(getInteger(params, "inType")).getDesc());
+                params.put("inTypeName", InType.from(getInteger(params, "inType")).getDesc());
                 params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                 return new DoctorGroupInputInfo(groupDetail, map(putBasicFields(params), DoctorMoveInGroupInput.class));
             case CHANGE:

@@ -33,6 +33,8 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
     @NotEmpty(message = "to.barn.not.null")
     private String toBarnName;
 
+    private Integer toBarnType;
+
     /**
      * 转入猪群id
      */
@@ -44,6 +46,11 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
     @NotNull(message = "to.group.not.null")
     private String toGroupCode;
 
+    private Long fromGroupId;
+
+    private String fromGroupCode;
+    private Long fromBarnId;
+    private String fromBarnName;
     /**
      * 是否新建猪群 0:否 1:是
      * @see IsOrNot

@@ -105,7 +105,10 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         //5.特殊处理
         specialHandle(executeEvent, toTrack);
 
-        //6.记录发生的事件信息
+        //6.更新日记录
+        updateDailyForNew(executeEvent);
+
+        //7.记录发生的事件信息
         DoctorBarn doctorBarn = doctorBarnDao.findById(toTrack.getCurrentBarnId());
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(executeEvent.getOrgId())
@@ -126,16 +129,16 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
 
-        //7.触发事件
+        //8.触发事件
         if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
             triggerEvent(doctorEventInfoList, executeEvent, toTrack);
         }
 
-        //8.创建镜像
-        if (!IGNORE_EVENT.contains(executeEvent.getType())) {
-            //创建镜像
-            createPigSnapshot(toTrack, executeEvent, currentEventId);
-        }
+//        //8.创建镜像
+//        if (!IGNORE_EVENT.contains(executeEvent.getType())) {
+//            //创建镜像
+//            createPigSnapshot(toTrack, executeEvent, currentEventId);
+//        }
     }
 
     @Override
@@ -257,6 +260,12 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         executeEvent.setPigStatusAfter(toTrack.getStatus());
         doctorPigEventDao.update(executeEvent);
     }
+
+    /**
+     * 更新日记录表
+     * @param newPigEvent 猪事件
+     */
+    protected void updateDailyForNew(DoctorPigEvent newPigEvent){}
 
     /**
      * 触发事件, 触发其他事件时需要实现此方法

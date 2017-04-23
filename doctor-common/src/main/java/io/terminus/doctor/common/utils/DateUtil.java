@@ -292,4 +292,61 @@ public class DateUtil {
         }
         return DateUtil.getMonthEnd(new DateTime(date)).toDate();
     }
+
+    public static String getYearWeek(Date date){
+        DateTime dateTime = new DateTime(date);
+        StringBuffer stringBuffer = new StringBuffer();
+        int week = dateTime.getWeekOfWeekyear();
+        stringBuffer.append(dateTime.getWeekyear());
+        stringBuffer.append("-");
+        if(week < 10){
+            stringBuffer.append(0);
+        }
+        stringBuffer.append(dateTime.getWeekOfWeekyear());
+        return stringBuffer.toString();
+    }
+
+    public static String getYearMonth(Date date){
+        DateTime dateTime = new DateTime(date);
+        return dateTime.toString(YYYYMM);
+    }
+
+    public static String getYearWeek(Integer year, Integer week){
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(year);
+        stringBuffer.append("-");
+        if(week < 10){
+            stringBuffer.append(0);
+        }
+        stringBuffer.append(week);
+        return stringBuffer.toString();
+    }
+
+    /**
+     * 获取指定年份和周的日期, 如果是未来时间，返回今天
+     * @param year 年
+     * @param week 周
+     * @return 日期
+     */
+    private static DateTime withWeekOfYear(Integer year, Integer week) {
+        if (year == null || week == null) {
+            return DateUtil.getDateEnd(DateTime.now());
+        }
+        DateTime yearDate = new DateTime(year, 1, 1, 0, 0);
+
+        while (true) {
+            if (yearDate.getDayOfWeek() == 7) {
+                break;
+            }
+            yearDate = yearDate.plusDays(1);
+        }
+        return new DateTime(DateUtil.weekEnd(yearDate.plusWeeks(week).toDate()));
+    }
+
+    public static Date getMonthEndOrToday(DateTime datetime) {
+        if(datetime.isBeforeNow()){
+            return DateUtil.getMonthEnd(datetime).toDate();
+        }
+        return new Date();
+    }
 }

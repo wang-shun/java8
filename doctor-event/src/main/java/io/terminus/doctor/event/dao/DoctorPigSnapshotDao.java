@@ -60,7 +60,7 @@ public class DoctorPigSnapshotDao extends MyBatisDao<DoctorPigSnapshot>{
     }
 
     /**
-     * 删除猪镜像
+     * 根据猪id删除猪所有镜像
      * @param pigId 猪id
      */
     public void deleteForPigId(Long pigId) {
@@ -68,6 +68,7 @@ public class DoctorPigSnapshotDao extends MyBatisDao<DoctorPigSnapshot>{
     }
 
     /**
+<<<<<<< HEAD
      * 从这个事件来的镜像列表
      * @param fromEventId 原事件
      * @return 镜像列表
@@ -86,7 +87,15 @@ public class DoctorPigSnapshotDao extends MyBatisDao<DoctorPigSnapshot>{
     }
 
 
-    public void updates(List<DoctorPigSnapshot> snapshots){
+    public void updates(List<DoctorPigSnapshot> snapshots) {
         getSqlSession().update(sqlId("updates"), snapshots);
+    }
+    /**
+     * 删除猪某一事件所对应镜像后的镜像(包括所在镜像)
+     * @param pigId
+     * @param id
+     */
+    public void deleteAfterAndInclude(Long pigId, Long id) {
+        getSqlSession().delete(sqlId("deleteAfterAndInclude"), ImmutableMap.of("pigId", pigId, "id", id));
     }
 }

@@ -66,7 +66,7 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
     /**
      * 品种id
      */
-    private Integer breedId;
+    private Long breedId;
 
     private String breedName;
 

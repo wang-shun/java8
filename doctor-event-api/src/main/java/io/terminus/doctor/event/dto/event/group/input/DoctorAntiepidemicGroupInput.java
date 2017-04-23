@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
-import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
+import io.terminus.doctor.event.enums.VaccinResult;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -43,7 +43,7 @@ public class DoctorAntiepidemicGroupInput extends BaseGroupInput implements Seri
 
     /**
      *  防疫结果: 1:阳性 -1:阴性
-     *  @see io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent.VaccinResult
+     *  @see io.terminus.doctor.event.enums.VaccinResult
      */
     private Integer vaccinResult;
 
@@ -77,7 +77,7 @@ public class DoctorAntiepidemicGroupInput extends BaseGroupInput implements Seri
             descMap.put("疫苗", this.vaccinName);
         }
         if(vaccinResult != null){
-            DoctorAntiepidemicGroupEvent.VaccinResult result = DoctorAntiepidemicGroupEvent.VaccinResult.from(vaccinResult);
+            VaccinResult result = VaccinResult.from(vaccinResult);
             if(result != null){
                 descMap.put("结果", result.getDesc());
             }

@@ -20,7 +20,7 @@ public class DoctorVaccinationGroupExportDto extends DoctorGroupEvent{
 
     /**
      *  防疫结果: 1:阳性 -1:阴性
-     *  @see io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent.VaccinResult
+     *  @see io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupInput.VaccinResult
      */
     private Integer vaccinResult;
 

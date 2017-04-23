@@ -2,7 +2,6 @@ package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.event.DataEvent;
@@ -14,7 +13,6 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorCloseGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -69,12 +67,11 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         DoctorCloseGroupInput close = (DoctorCloseGroupInput) input;
 
         //1.转换下信息
-        DoctorCloseGroupEvent closeEvent = BeanMapper.map(close, DoctorCloseGroupEvent.class);
 
         //2.创建关闭猪群事件
-        DoctorGroupEvent<DoctorCloseGroupEvent> event = dozerGroupEvent(group, GroupEventType.CLOSE, close);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.CLOSE, close);
 
-        event.setExtraMap(closeEvent);
+        event.setExtraMap(close);
         event.setEventSource(SourceType.INPUT.getValue());
         doctorGroupEventDao.create(event);
 
@@ -110,13 +107,10 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         DoctorCloseGroupInput close = (DoctorCloseGroupInput) input;
 
-        //1.转换下信息
-        DoctorCloseGroupEvent closeEvent = BeanMapper.map(close, DoctorCloseGroupEvent.class);
-
         //2.创建关闭猪群事件
-        DoctorGroupEvent<DoctorCloseGroupEvent> event = dozerGroupEvent(group, GroupEventType.CLOSE, close);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.CLOSE, close);
 
-        event.setExtraMap(closeEvent);
+        event.setExtraMap(close);
 
         return event;
     }

@@ -78,8 +78,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             if (groupEvent == null) {
                 throw  new InvalidException("group.event.not.found", eventId);
             }
-            List<DoctorRollbackDto> dtos = doctorRollbackManager.rollbackGroup(groupEvent, operatorId, operatorName);
-            doctorRollbackManager.checkAndPublishRollback(dtos);
+            doctorRollbackManager.rollbackGroup(groupEvent, operatorId, operatorName);
             return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return RespWithEx.fail(e.getMessage());
@@ -98,8 +97,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             if (pigEvent == null) {
                 throw new InvalidException("pig.event.not.found", eventId);
             }
-            List<DoctorRollbackDto> dtos = doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
-            doctorRollbackManager.checkAndPublishRollback(dtos);
+            doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
             return RespWithEx.exception(e);
@@ -145,36 +143,36 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             return;
         }
         for (RollbackType type : dto.getRollbackTypes()) {
-            switch (type) {
-                //日报实时更新
-                case DAILY_DEAD:
-                    report.setDead(getDeadDailyReport(farmId, startAt, endAt));
-                    break;
-                case DAILY_FARROW:
-                    report.setDeliver(getDeliverDailyReport(farmId, startAt, endAt));
-                    break;
-                case DAILY_MATE:
-                    report.setMating(getMatingDailyReport(farmId, startAt, endAt));
-                    break;
-                case DAILY_SALE:
-                    report.setSale(getSaleDailyReport(farmId, startAt, endAt));
-                    break;
-                case DAILY_WEAN:
-                    report.setWean(getWeanDailyReport(farmId, startAt, endAt));
-                    break;
-                case DAILY_PREG_CHECK:
-                    report.setCheckPreg(getCheckPregDailyReport(farmId, startAt, endAt));
-                    break;
-
-                //直接删除
-                case GROUP_BATCH:
-                    if (dto.getEsGroupId() != null) {
-                        doctorGroupBatchSummaryDao.deleteByGroupId(dto.getEsGroupId());
-                    }
-                    break;
-                default:
-                    break;
-            }
+//            switch (type) {
+//                //日报实时更新
+//                case DAILY_DEAD:
+//                    report.setDead(getDeadDailyReport(farmId, startAt, endAt));
+//                    break;
+//                case DAILY_FARROW:
+//                    report.setDeliver(getDeliverDailyReport(farmId, startAt, endAt));
+//                    break;
+//                case DAILY_MATE:
+//                    report.setMating(getMatingDailyReport(farmId, startAt, endAt));
+//                    break;
+//                case DAILY_SALE:
+//                    report.setSale(getSaleDailyReport(farmId, startAt, endAt));
+//                    break;
+//                case DAILY_WEAN:
+//                    report.setWean(getWeanDailyReport(farmId, startAt, endAt));
+//                    break;
+//                case DAILY_PREG_CHECK:
+//                    report.setCheckPreg(getCheckPregDailyReport(farmId, startAt, endAt));
+//                    break;
+//
+//                //直接删除
+//                case GROUP_BATCH:
+//                    if (dto.getEsGroupId() != null) {
+//                        doctorGroupBatchSummaryDao.deleteByGroupId(dto.getEsGroupId());
+//                    }
+//                    break;
+//                default:
+//                    break;
+//            }
         }
         doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, report);
     }
@@ -212,7 +210,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             if (everyRedis == null ) {
                 continue;
             }
-            everyRedis.setLiveStock(liveStock);
+//            everyRedis.setLiveStock(liveStock);
             doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, everyRedis);
             startAt = new DateTime(startAt).plusDays(1).toDate();
         }

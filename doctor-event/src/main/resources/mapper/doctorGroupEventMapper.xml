@@ -606,6 +606,15 @@
         AND type = 1
     </select>
 
+    <select id="findByRelPigEventIdAndType" parameterType="map" resultMap="DoctorGroupEventMap" >
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE rel_pig_event_id = #{relPigEventId}
+        AND `type` = #{type}
+    </select>
+
     <select id="getEventCount" parameterType="long" resultType="int" >
         SELECT
         ifnull(

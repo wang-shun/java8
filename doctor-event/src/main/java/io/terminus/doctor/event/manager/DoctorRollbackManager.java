@@ -3,9 +3,11 @@ package io.terminus.doctor.event.manager;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
+import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
+import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.event.ListenedRollbackEvent;
-import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
-import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -30,6 +32,10 @@ public class DoctorRollbackManager {
 
     @Autowired
     private DoctorRollbackHandlerChain doctorRollbackHandlerChain;
+    @Autowired
+    private DoctorModifyPigEventHandlers doctorModifyPigEventHandlers;
+    @Autowired
+    private DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers;
 
     @Autowired
     private CoreEventDispatcher coreEventDispatcher;
@@ -38,12 +44,12 @@ public class DoctorRollbackManager {
      * 事务回滚猪群
      */
     @Transactional
-    public List<DoctorRollbackDto> rollbackGroup(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+    public void rollbackGroup(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         //获取拦截器链, 判断能否回滚,执行回滚操作, 返回需要更新的报表
-        DoctorRollbackGroupEventHandler handler = doctorRollbackHandlerChain.getRollbackGroupEventHandlers().get(groupEvent.getType());
+        DoctorModifyGroupEventHandler handler = doctorModifyGroupEventHandlers.getModifyGroupEventHandlerMap().get(groupEvent.getType());
         if (handler.canRollback(groupEvent)) {
-            handler.rollback(groupEvent, operatorId, operatorName);
-            return handler.updateReport(groupEvent);
+            handler.rollbackHandle(groupEvent, operatorId, operatorName);
+            return;
         }
         throw new ServiceException("rollback.group.not.allow");
     }
@@ -52,12 +58,12 @@ public class DoctorRollbackManager {
      * 事务回滚猪
      */
     @Transactional
-    public List<DoctorRollbackDto> rollbackPig(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+    public void rollbackPig(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //获取拦截器链, 判断能否回滚, 执行回滚操作, 返回需要更新的报表
-        DoctorRollbackPigEventHandler handler = doctorRollbackHandlerChain.getRollbackPigEventHandlers().get(pigEvent.getType(), pigEvent.getKind());
+        DoctorModifyPigEventHandler handler = doctorModifyPigEventHandlers.getModifyPigEventHandlerMap().get(pigEvent.getType());
             if (handler.canRollback(pigEvent)) {
-                handler.rollback(pigEvent, operatorId, operatorName);
-                return handler.updateReport(pigEvent);
+                handler.rollbackHandle(pigEvent, operatorId, operatorName);
+                return;
             }
         throw new ServiceException("rollback.pig.not.allow");
     }

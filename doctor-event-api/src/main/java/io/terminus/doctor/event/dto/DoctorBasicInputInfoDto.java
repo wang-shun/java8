@@ -63,7 +63,7 @@ public class DoctorBasicInputInfoDto implements Serializable{
                 .build();
     }
 
-    public String generateEventDescFromExtra(BasePigEventInputDto inputDto){
+    public static String generateEventDescFromExtra(BasePigEventInputDto inputDto){
         if(inputDto.getEventType() == null){
             return inputDto.getEventDesc();
         }

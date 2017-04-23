@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.Arguments;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -11,9 +10,9 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTurnSeedEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -39,6 +38,8 @@ import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 @Component
 public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
+    @Autowired
+    private DoctorModifyGroupTurnSeedEventHandler doctorModifyGroupTurnSeedEventHandler;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
@@ -65,13 +66,12 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         checkTurnSeedData(group.getPigType(), toBarn.getPigType());
 
         //1. 转换转种猪事件
-        DoctorTurnSeedGroupEvent turnSeedEvent = BeanMapper.map(turnSeed, DoctorTurnSeedGroupEvent.class);
-        turnSeedEvent.setToBarnType(toBarn.getPigType());
+        turnSeed.setToBarnType(toBarn.getPigType());
 
 
         //2. 创建转种猪事件
-        DoctorGroupEvent<DoctorTurnSeedGroupEvent> event = dozerGroupEvent(group, GroupEventType.TURN_SEED, turnSeed);
-        event.setExtraMap(turnSeedEvent);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.TURN_SEED, turnSeed);
+        event.setExtraMap(turnSeed);
         event.setQuantity(1);
 
         event.setWeight(turnSeed.getWeight());
@@ -84,7 +84,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
     @Override
     public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
-        DoctorTurnSeedGroupEvent doctorTurnSeedGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTurnSeedGroupEvent.class);
+        DoctorTurnSeedGroupInput doctorTurnSeedGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTurnSeedGroupInput.class);
         if(Arguments.isNull(doctorTurnSeedGroupEvent)) {
             log.error("parse doctorTurnSeedGroupEvent faild, doctorGroupEvent = {}", event);
             throw new InvalidException("trunseed.group.event.info.broken", event.getId());
@@ -111,13 +111,12 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         checkTurnSeedData(group.getPigType(), toBarn.getPigType());
 
         //1. 转换转种猪事件
-        DoctorTurnSeedGroupEvent turnSeedEvent = BeanMapper.map(turnSeed, DoctorTurnSeedGroupEvent.class);
-        turnSeedEvent.setToBarnType(toBarn.getPigType());
+        turnSeed.setToBarnType(toBarn.getPigType());
 
 
         //2. 创建转种猪事件
-        DoctorGroupEvent<DoctorTurnSeedGroupEvent> event = dozerGroupEvent(group, GroupEventType.TURN_SEED, turnSeed);
-        event.setExtraMap(turnSeedEvent);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.TURN_SEED, turnSeed);
+        event.setExtraMap(turnSeed);
         event.setQuantity(1);
 
         event.setWeight(turnSeed.getWeight());
@@ -137,6 +136,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
         updateGroupTrack(groupTrack, event);
 
+        updateDailyForNew(event);
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.TURN_SEED);
 
@@ -155,6 +155,12 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
         //发布统计事件
         //publistGroupAndBarn(event);
+    }
+
+    @Override
+    protected void updateDailyForNew(DoctorGroupEvent newGroupEvent) {
+        BaseGroupInput input = JSON_MAPPER.fromJson(newGroupEvent.getExtra(), DoctorTurnSeedGroupInput.class);
+        doctorModifyGroupTurnSeedEventHandler.updateDailyOfNew(newGroupEvent, input);
     }
 
     //后备舍又他妈不分公母了, 艹

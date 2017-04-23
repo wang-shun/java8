@@ -18,12 +18,18 @@ import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dto.*;
+import io.terminus.doctor.event.dto.DoctorNpdExportDto;
+import io.terminus.doctor.event.dto.DoctorPigSalesExportDto;
+import io.terminus.doctor.event.dto.DoctorProfitExportDto;
+import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
+import io.terminus.doctor.event.dto.DoctorSowParityCount;
+import io.terminus.doctor.event.dto.DoctorSuggestPig;
+import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
+import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
-import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -35,7 +41,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -62,7 +72,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     private DoctorPigEventManager pigEventManager;
 
     @Autowired
-    private DoctorRollbackHandlerChain doctorRollbackHandlerChain;
+    private DoctorModifyPigEventHandlers doctorModifyPigEventHandlers;
 
     @Autowired
     private DoctorBarnDao doctorBarnDao;
@@ -274,7 +284,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             if (pigEvent == null) {
                 return RespWithEx.ok(null);
             }
-            DoctorRollbackPigEventHandler handler = doctorRollbackHandlerChain.getRollbackPigEventHandlers().get(pigEvent.getType(), pigEvent.getKind());
+            DoctorModifyPigEventHandler handler = doctorModifyPigEventHandlers.getModifyPigEventHandlerMap().get(pigEvent.getType());
             if (handler.canRollback(pigEvent)) {
                 return RespWithEx.ok(pigEvent);
             }
@@ -291,7 +301,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     public RespWithEx<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId) {
         try {
             DoctorPigEvent pigEvent = doctorPigEventDao.findById(eventId);
-            DoctorRollbackPigEventHandler handler = doctorRollbackHandlerChain.getRollbackPigEventHandlers().get(pigEvent.getType(), pigEvent.getKind());
+            DoctorModifyPigEventHandler handler = doctorModifyPigEventHandlers.getModifyPigEventHandlerMap().get(pigEvent.getType());
             if (handler.canRollback(pigEvent)) {
                 return RespWithEx.ok(Boolean.TRUE);
             }

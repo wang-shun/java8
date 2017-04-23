@@ -5,6 +5,7 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPregCheckEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -17,6 +18,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -36,6 +38,9 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
 @Slf4j
 @Component
 public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
+
+    @Autowired
+    private DoctorModifyPigPregCheckEventHandler doctorModifyPigPregCheckEventHandler;
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -176,6 +181,12 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         }
         //doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return toTrack;
+    }
+
+    @Override
+    protected void updateDailyForNew(DoctorPigEvent newPigEvent) {
+        BasePigEventInputDto inputDto = JSON_MAPPER.fromJson(newPigEvent.getExtra(), DoctorPregChkResultDto.class);
+        doctorModifyPigPregCheckEventHandler.updateDailyOfNew(newPigEvent, inputDto);
     }
 
     //校验能否置成此妊娠检查状态

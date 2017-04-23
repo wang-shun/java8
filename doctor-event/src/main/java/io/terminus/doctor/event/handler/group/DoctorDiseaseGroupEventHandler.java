@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.group;
 
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -8,7 +7,6 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorDiseaseGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorDiseaseGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -50,15 +48,14 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         DoctorDiseaseGroupInput disease = (DoctorDiseaseGroupInput) input;
 
         //1.转换下疾病信息
-        DoctorDiseaseGroupEvent diseaseEvent = BeanMapper.map(disease, DoctorDiseaseGroupEvent.class);
 
         //2.创建疾病事件
-        DoctorGroupEvent<DoctorDiseaseGroupEvent> event = dozerGroupEvent(group, GroupEventType.DISEASE, disease);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.DISEASE, disease);
 
         event.setBasicId(disease.getDiseaseId());
         event.setBasicName(disease.getDiseaseName());
         event.setQuantity(disease.getQuantity());
-        event.setExtraMap(diseaseEvent);
+        event.setExtraMap(disease);
         event.setEventSource(SourceType.INPUT.getValue());
         event.setOperatorId(disease.getDoctorId());
         event.setOperatorName(disease.getDoctorName());
@@ -80,15 +77,12 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         DoctorDiseaseGroupInput disease = (DoctorDiseaseGroupInput) input;
         checkQuantity(groupTrack.getQuantity(), disease.getQuantity());
 
-        //1.转换下疾病信息
-        DoctorDiseaseGroupEvent diseaseEvent = BeanMapper.map(disease, DoctorDiseaseGroupEvent.class);
-
         //2.创建疾病事件
-        DoctorGroupEvent<DoctorDiseaseGroupEvent> event = dozerGroupEvent(group, GroupEventType.DISEASE, disease);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.DISEASE, disease);
 
 
         event.setQuantity(disease.getQuantity());
-        event.setExtraMap(diseaseEvent);
+        event.setExtraMap(disease);
         doctorGroupEventDao.create(event);
 
         //疾病事件不更新track,不增加snapshot

@@ -14,10 +14,10 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransGroupEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
@@ -47,6 +47,8 @@ import java.util.Objects;
 @SuppressWarnings("unchecked")
 public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
+    @Autowired
+    private DoctorModifyGroupTransGroupEventHandler doctorModifyGroupTransGroupEventHandler;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
     private final DoctorGroupManager doctorGroupManager;
@@ -92,12 +94,12 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         }
 
         //1.转换转群事件
-        DoctorTransGroupEvent transGroupEvent = BeanMapper.map(transGroup, DoctorTransGroupEvent.class);
+        DoctorTransGroupInput transGroupEvent = BeanMapper.map(transGroup, DoctorTransGroupInput.class);
         checkBreed(group.getBreedId(), transGroupEvent.getBreedId());
         transGroupEvent.setToBarnType(toBarn.getPigType());
 
         //2.创建转群事件
-        DoctorGroupEvent<DoctorTransGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
         event.setQuantity(transGroup.getQuantity());
 
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
@@ -108,18 +110,18 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setTransGroupType(getTransType(null, group.getPigType(), toBarn).getValue());   //区别内转还是外转(null是因为不用判断转入类型)
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
-        event.setExtraMap(transGroupEvent);
+        event.setExtraMap(transGroup);
         event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 
     @Override
     public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
-        DoctorTransGroupEvent doctorTransGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
+        DoctorTransGroupInput doctorTransGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupInput.class);
         if(Arguments.isNull(doctorTransGroupEvent)) {
             log.error("parse doctorTransGroupEvent faild, doctorGroupEvent = {}", event);
             throw new InvalidException("transgroup.event.info.broken", event.getId());
-//            doctorTransGroupEvent = new DoctorTransGroupEvent();
+//            doctorTransGroupEvent = new DoctorTransGroupInput();
         }
 
         //更新quanity
@@ -174,12 +176,11 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         }
 
         //1.转换转群事件
-        DoctorTransGroupEvent transGroupEvent = BeanMapper.map(transGroup, DoctorTransGroupEvent.class);
-        checkBreed(group.getBreedId(), transGroupEvent.getBreedId());
-        transGroupEvent.setToBarnType(toBarn.getPigType());
+        checkBreed(group.getBreedId(), transGroup.getBreedId());
+        transGroup.setToBarnType(toBarn.getPigType());
 
         //2.创建转群事件
-        DoctorGroupEvent<DoctorTransGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
         event.setQuantity(transGroup.getQuantity());
 
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
@@ -192,7 +193,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setTransGroupType(getTransType(null, group.getPigType(), toBarn).getValue());   //区别内转还是外转(null是因为不用判断转入类型)
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
-        event.setExtraMap(transGroupEvent);
+        event.setExtraMap(transGroup);
         doctorGroupEventDao.create(event);
 
         //创建关联关系
@@ -222,6 +223,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         updateGroupTrack(groupTrack, event);
 
+        updateDailyForNew(event);
         //4.创建镜像
         DoctorGroupSnapshot doctorGroupSnapshot = createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.TRANS_GROUP);
 
@@ -240,8 +242,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
             transGroup.setToGroupId(toGroupId);
 
             //更新事件
-            transGroupEvent.setToGroupId(toGroupId);
-            event.setExtraMap(transGroupEvent);
+            event.setExtraMap(transGroup);
             doctorGroupEventDao.update(event);
 
             //更新镜像
@@ -262,6 +263,12 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //发布统计事件
         //publistGroupAndBarn(event);
+    }
+
+    @Override
+    protected void updateDailyForNew(DoctorGroupEvent newGroupEvent) {
+        BaseGroupInput input = JSON_MAPPER.fromJson(newGroupEvent.getExtra(), DoctorTransGroupInput.class);
+        doctorModifyGroupTransGroupEventHandler.updateDailyOfNew(newGroupEvent, input);
     }
 
     /**

@@ -30,7 +30,7 @@ public class DoctorCommonReportWriteServiceImpl implements DoctorCommonReportWri
     @Override
     public Response<Boolean> createMonthlyReport(Long farmId, Date sumAt) {
         try {
-            doctorCommonReportManager.createMonthlyReport(farmId, sumAt);
+//            doctorCommonReportManager.createMonthlyReport(farmId, sumAt);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("create monthly reports failed, sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
@@ -41,7 +41,7 @@ public class DoctorCommonReportWriteServiceImpl implements DoctorCommonReportWri
     @Override
     public Response<Boolean> createWeeklyReport(Long farmId, Date sumAt) {
         try {
-            doctorCommonReportManager.createWeeklyReport(farmId, sumAt);
+//            doctorCommonReportManager.createWeeklyReport(farmId, sumAt);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("create weekly reports failed, sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
@@ -52,7 +52,7 @@ public class DoctorCommonReportWriteServiceImpl implements DoctorCommonReportWri
     @Override
     public Response<Boolean> update4MonthReports(Long farmId, Date date) {
         try {
-            doctorCommonReportManager.update4MonthRate(new DoctorCommonReportManager.FarmIdAndEventAt(farmId, date));
+//            doctorCommonReportManager.update4MonthRate(new DoctorCommonReportManager.FarmIdAndEventAt(farmId, date));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("update 4month. report rate failed, farmId:{}, date:{}, cause:{}", farmId, date, Throwables.getStackTraceAsString(e));

@@ -60,6 +60,8 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
     @NotEmpty(message = "barnId.not.null")
     private String toBarnName;
 
+    private Integer toBarnType;
+
     /**
      * 重量(kg)
      */

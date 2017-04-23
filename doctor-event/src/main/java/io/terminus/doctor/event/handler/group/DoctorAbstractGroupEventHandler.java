@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
@@ -18,15 +17,14 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.event.DoctorGroupEventListener;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
-import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorEventRelation;
@@ -112,6 +110,13 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         track.setRelEventId(event.getId());
         return track;
     }
+
+
+    /**
+     * 更新日记录表
+     * @param newGroupEvent 猪事件
+     */
+    protected void updateDailyForNew(DoctorGroupEvent newGroupEvent){}
 
     protected void updateAvgDayAge(DoctorGroupEvent event, DoctorGroupTrack track) {
         track.setAvgDayAge(DateUtil.getDeltaDaysAbs(event.getEventAt(), MoreObjects.firstNonNull(track.getBirthDate(), event.getEventAt())));
@@ -237,11 +242,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //发布猪群猪舍事件(不发统计事件了，事务里套事务，事件区分不开，改成同步统计)
     protected void publistGroupAndBarn(DoctorGroupEvent event) {
-        doctorGroupEventListener.handleGroupEvent(ListenedGroupEvent.builder()
-                .orgId(event.getOrgId())
-                .farmId(event.getFarmId())
-                .groups(Lists.newArrayList(getPublishGroup(event)))
-                .build());
+//        doctorGroupEventListener.handleGroupEvent(ListenedGroupEvent.builder()
+//                .orgId(event.getOrgId())
+//                .farmId(event.getFarmId())
+//                .groups(Lists.newArrayList(getPublishGroup(event)))
+//                .build());
     }
 
     private static DoctorGroupPublishDto getPublishGroup(DoctorGroupEvent event) {
@@ -346,7 +351,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //判断内转还是外转
     protected static DoctorGroupEvent.TransGroupType getTransType(Integer inType, Integer pigType, DoctorBarn toBarn) {
-        if (inType != null && !Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
+        if (inType != null && !Objects.equals(inType, InType.GROUP.getValue())) {
             return DoctorGroupEvent.TransGroupType.OUT;
         }
         return Objects.equals(pigType, toBarn.getPigType()) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarn.getPigType())) ?
