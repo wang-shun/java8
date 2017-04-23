@@ -837,7 +837,7 @@ alter table doctor_pig_events add column weight DOUBLE default null comment '重
 alter table doctor_pig_events add column basic_id bigint(20) default null comment '基础数据id(流产原因id,疾病id,防疫项目id)' after change_type_id;
 alter table doctor_pig_events add column basic_name varchar(32) default null comment '基础数据名(流产原因,疾病,防疫)' after basic_id;
 alter table doctor_pig_events add column customer_id bigint(20) default null comment '客户id' after basic_name;
-alter table doctor_pig_events add column customer_name varchar(32) default null comment '客户名' after customer_id;
+alter table doctor_pig_events add column customer_name varchar(64) default null comment '客户名' after customer_id;
 alter table doctor_pig_events add column vaccination_id bigint(20) default null comment '疫苗' after customer_name;
 alter table doctor_pig_events add column vaccination_name varchar(32) default null comment '疫苗名称' after vaccination_id;
 alter table doctor_pig_events add column mate_type tinyint(4) default null comment '配种类型(人工、自然)' after doctor_mate_type;
@@ -848,7 +848,7 @@ alter table doctor_pig_events add column barn_type tinyint(4) default null comme
 ALTER TABLE doctor_group_events ADD COLUMN sow_id bigint(20) DEFAULT NULL comment '有母猪触发的事件关联的猪id' after barn_name;
 ALTER TABLE doctor_group_events ADD COLUMN sow_code varchar(32) DEFAULT NULL comment '有母猪触发的事件关联的猪code' after sow_id;
 ALTER TABLE doctor_group_events ADD COLUMN customer_id bigint(20) DEFAULT NULL comment '销售时客户id' after over_price;
-ALTER TABLE doctor_group_events ADD COLUMN customer_name varchar(32) DEFAULT NULL comment '销售时客户名' after customer_id;
+ALTER TABLE doctor_group_events ADD COLUMN customer_name varchar(64) DEFAULT NULL comment '销售时客户名' after customer_id;
 ALTER TABLE doctor_group_events ADD COLUMN basic_id bigint(20) DEFAULT NULL comment '基础数据id(疾病id,防疫项目id)' after customer_name;
 ALTER TABLE doctor_group_events ADD COLUMN basic_name varchar(32) DEFAULT NULL comment '基础数据名(疾病,防疫)' after basic_id;
 ALTER TABLE doctor_group_events ADD COLUMN vaccin_result tinyint(4) DEFAULT NULL comment '防疫结果' after basic_name;
@@ -856,6 +856,10 @@ alter table doctor_group_events add column vaccination_id bigint(20) default nul
 alter table doctor_group_events add column vaccination_name varchar(32) default null comment '疫苗名称' after vaccination_id;
 ALTER TABLE doctor_group_events ADD COLUMN operator_id bigint(20) DEFAULT NULL comment '操作人id' after creator_name;
 ALTER TABLE doctor_group_events ADD COLUMN operator_name varchar(32) DEFAULT NULL comment '操作人姓名' after operator_id;
+
+create index idx_doctor_pig_events_barn_id  on doctor_pig_events(`barn_id`);
+create index idx_doctor_pig_events_event_at  on doctor_pig_events(`event_at`);
+create index idx_doctor_group_events_event_at  on doctor_group_events(`event_at`);
 
 -- 2017-04-06 编辑事件记录
 drop table if exists `doctor_event_modify_logs`;
