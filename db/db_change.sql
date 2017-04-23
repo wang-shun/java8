@@ -1131,3 +1131,9 @@ CREATE TABLE `doctor_daily_groups` (
   KEY `doctor_daily_groups_group_id` (`group_id`),
   KEY `idx_doctor_daily_groups_sum_at` (`sum_at`)
 ) DEFAULT CHARSET=utf8 COMMENT='猪群数量每天记录表，存放可以时间段累加数量指标';
+
+create index doctor_pig_events_barn_id on doctor_pig_events(barn_id);
+-- 更新猪事件中barn_type
+update doctor_pig_events a, doctor_barns b
+set a.barn_type = b.pig_type where a.barn_id = b.id;
+
