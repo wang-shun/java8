@@ -4,11 +4,13 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -23,6 +25,9 @@ import static io.terminus.common.utils.Arguments.notNull;
  */
 @Component
 public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGroupEventHandler {
+
+    @Autowired
+    private DoctorModifyGroupCloseEventHandler modifyGroupCloseEventHandler;
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
@@ -86,6 +91,14 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
         } else {
             updateDailyForDelete(oldGroupEvent);
             updateDailyOfNew(oldGroupEvent, newInput);
+        }
+    }
+
+    @Override
+    protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
+        DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.CLOSE.getValue());
+        if (notNull(closeEvent)) {
+            modifyGroupCloseEventHandler.rollbackHandle(closeEvent, operatorId, operatorName);
         }
     }
 

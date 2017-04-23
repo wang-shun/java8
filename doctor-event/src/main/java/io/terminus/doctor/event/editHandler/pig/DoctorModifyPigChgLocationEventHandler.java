@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransGroupEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -36,6 +37,7 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                 .businessId(oldPigEvent.getPigId())
                 .oldEventAt(oldPigEvent.getEventAt())
                 .newEventAt(inputDto.eventAt())
+                .eventType(oldPigEvent.getType())
                 .toBarnId(newDto.getChgLocationToBarnId())
                 .build();
     }
@@ -46,6 +48,9 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
         oldPigTrack.setCurrentBarnId(doctorBarn.getId());
         oldPigTrack.setCurrentBarnName(doctorBarn.getName());
         oldPigTrack.setCurrentBarnType(doctorBarn.getPigType());
+        if (Objects.equals(changeDto.getEventType(), PigEvent.TO_FARROWING.getKey())) {
+            oldPigTrack.setStatus(PigStatus.Pregnancy.getKey());
+        }
         return oldPigTrack;
     }
 

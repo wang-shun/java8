@@ -31,6 +31,8 @@ import static io.terminus.common.utils.Arguments.notNull;
 public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModifyGroupEventHandler{
     @Autowired
     private DoctorModifyGroupMoveInEventHandler doctorModifyGroupMoveInEventHandler;
+    @Autowired
+    private DoctorModifyGroupCloseEventHandler modifyGroupCloseEventHandler;
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
@@ -48,16 +50,6 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
                 .weightChange(EventUtil.minusDouble(newInput.getWeight(), oldInput.getWeight()))
                 .isSowTrigger(notNull(oldGroupEvent.getSowId()))
                 .transGroupType(oldGroupEvent.getTransGroupType())
-                .build();
-    }
-
-    private DoctorEventChangeDto buildEventChange(BaseGroupInput oldInputDto, BaseGroupInput newInputDto) {
-        DoctorTransGroupInput oldInput = (DoctorTransGroupInput) oldInputDto;
-        DoctorTransGroupInput newInput = (DoctorTransGroupInput) newInputDto;
-        return DoctorEventChangeDto.builder()
-                .quantityChange(EventUtil.minusInt(newInput.getQuantity(), oldInput.getQuantity()))
-                .avgWeightChange(EventUtil.minusDouble(newInput.getAvgWeight(), oldInput.getAvgWeight()))
-                .weightChange(EventUtil.minusDouble(newInput.getWeight(), oldInput.getWeight()))
                 .build();
     }
 
@@ -105,6 +97,11 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
     protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
         DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.MOVE_IN.getValue());
         doctorModifyGroupMoveInEventHandler.rollbackHandle(moveInEvent, operatorId, operatorName);
+
+        DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.CLOSE.getValue());
+        if (notNull(closeEvent)) {
+            modifyGroupCloseEventHandler.rollbackHandle(closeEvent, operatorId, operatorName);
+        }
     }
 
     @Override
@@ -140,7 +137,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
     @Override
     public void updateDailyOfNew(DoctorGroupEvent newGroupEvent, BaseGroupInput input) {
         Date eventAt = DateUtil.toDate(input.getEventAt());
-        DoctorMoveInGroupInput newInput = (DoctorMoveInGroupInput) input;
+        DoctorTransGroupInput newInput = (DoctorTransGroupInput) input;
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .quantityChange(newInput.getQuantity())
                 .isSowTrigger(notNull(newGroupEvent.getSowId()))

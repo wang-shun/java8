@@ -10,6 +10,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEntryEventHandler;
 import io.terminus.doctor.event.enums.BoarEntryType;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
@@ -26,6 +27,8 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 /**
  * Created by IntelliJ IDEA.
  * Author: luoys
@@ -35,6 +38,8 @@ import java.util.Objects;
 public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyGroupEventHandler{
     @Autowired
     private DoctorModifyPigEntryEventHandler doctorModifyPigEntryEventHandler;
+    @Autowired
+    private DoctorModifyGroupCloseEventHandler modifyGroupCloseEventHandler;
     @Autowired
     private DoctorPigEventDao doctorPigEventDao;
     @Autowired
@@ -66,6 +71,18 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
     protected void triggerEventModifyHandle(DoctorGroupEvent newEvent) {
         DoctorPigEvent entryEvent = doctorPigEventDao.findByRelGroupEventId(newEvent.getId());
         doctorModifyPigEntryEventHandler.modifyHandle(entryEvent, buildTriggerEventInput(newEvent));
+    }
+
+    @Override
+    protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
+        DoctorPigEvent entryEvent = doctorPigEventDao.findByRelGroupEventId(deleteGroupEvent.getId());
+        doctorModifyPigEntryEventHandler.rollbackHandle(entryEvent, operatorId, operatorName);
+
+
+        DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.CLOSE.getValue());
+        if (notNull(closeEvent)) {
+            modifyGroupCloseEventHandler.rollbackHandle(closeEvent, operatorId, operatorName);
+        }
     }
 
     @Override

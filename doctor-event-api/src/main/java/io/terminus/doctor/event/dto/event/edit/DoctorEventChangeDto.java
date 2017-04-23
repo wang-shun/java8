@@ -80,6 +80,11 @@ public class DoctorEventChangeDto {
     private Long pigBarnId;
 
     /**
+     * 事件类型
+     */
+    private Integer eventType;
+
+    /**
      * 公猪进场类型
      */
     private Integer boarType;

@@ -12,6 +12,7 @@ import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupChangeEventHa
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupCloseEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupDiseaseEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupLiveStockEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupNewEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransFarmEventHandler;
@@ -315,6 +316,8 @@ public class  DoctorEventConfiguration {
         Map<Integer, DoctorModifyPigEventHandler> modifyPigEventHandlerMap = Maps.newHashMap();
         modifyPigEventHandlerMap.put(PigEvent.CHG_FARM.getKey(), modifyPigChgFarmEventHandler);
         modifyPigEventHandlerMap.put(PigEvent.CHG_LOCATION.getKey(), modifyPigChgLocationEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.TO_FARROWING.getKey(), modifyPigChgLocationEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.TO_MATING.getKey(), modifyPigChgLocationEventHandler);
         modifyPigEventHandlerMap.put(PigEvent.CONDITION.getKey(), modifyPigConditionEventHandler);
         modifyPigEventHandlerMap.put(PigEvent.DISEASE.getKey(), modifyPigDiseaseEventHandler);
         modifyPigEventHandlerMap.put(PigEvent.ENTRY.getKey(), modifyPigEntryEventHandler);
@@ -339,6 +342,7 @@ public class  DoctorEventConfiguration {
             DoctorModifyGroupChangeEventHandler modifyGroupChangeEventHandler,
             DoctorModifyGroupCloseEventHandler modifyGroupCloseEventHandler,
             DoctorModifyGroupDiseaseEventHandler modifyGroupDiseaseEventHandler,
+            DoctorModifyGroupLiveStockEventHandler modifyGroupLiveStockEventHandler,
             DoctorModifyGroupMoveInEventHandler modifyMoveInEventHandler,
             DoctorModifyGroupNewEventHandler modifyGroupNewEventHandler,
             DoctorModifyGroupTransFarmEventHandler modifyGroupTransFarmEventHandler,
@@ -350,6 +354,7 @@ public class  DoctorEventConfiguration {
         modifyGroupEventHandlerMap.put(GroupEventType.CHANGE.getValue(), modifyGroupChangeEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.CLOSE.getValue(), modifyGroupCloseEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.DISEASE.getValue(), modifyGroupDiseaseEventHandler);
+        modifyGroupEventHandlerMap.put(GroupEventType.LIVE_STOCK.getValue(), modifyGroupLiveStockEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.MOVE_IN.getValue(), modifyMoveInEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.NEW.getValue(), modifyGroupNewEventHandler);
         modifyGroupEventHandlerMap.put(GroupEventType.TRANS_FARM.getValue(), modifyGroupTransFarmEventHandler);
