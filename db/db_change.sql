@@ -876,8 +876,7 @@ CREATE TABLE `doctor_event_modify_logs` (
 ) DEFAULT CHARSET=utf8;
 
 
--- 2017-04-18
--- 销售视图
+-- 2017-04-18 销售视图
 create or replace view
 v_doctor_sales
 AS
@@ -972,6 +971,7 @@ and pig_type in ( 2,7 )
 and change_type_id = 109
 group by group_code , farm_id, farm_name, barn_id, barn_name, date_format(event_at, '%Y-%m-%d'), customer_id, customer_name,day_age;
 
+-- 新的周报和月报指标表
 drop table if exists `doctor_range_reports`;
 CREATE TABLE `doctor_range_reports` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
@@ -999,8 +999,9 @@ CREATE TABLE `doctor_range_reports` (
   UNIQUE KEY `idx_doctor_range_reports_farm_id_type_sum_at` (`farm_id`,`type`,`sum_at`),
   KEY `idx_doctor_range_reports_farm_id` (`farm_id`),
   KEY `idx_doctor_range_reports_sum_at` (`sum_at`)
-) DEFAULT CHARSET=utf8 COMMENT='指标月报';
+) DEFAULT CHARSET=utf8 COMMENT='指标周报和月报';
 
+-- 新的日报表，存放一些可以时间段累加的数量指标
 drop table if exists `doctor_daily_reports`;
 CREATE TABLE `doctor_daily_reports` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
@@ -1099,9 +1100,9 @@ CREATE TABLE `doctor_daily_reports` (
   UNIQUE KEY `idx_doctor_daily_reports_farm_id_sum_at` (`farm_id`,`sum_at`),
   KEY `doctor_daily_reports_farm_id` (`farm_id`),
   KEY `doctor_daily_reports_sum_at` (`sum_at`)
-) DEFAULT CHARSET=utf8 COMMENT='日报';
+) DEFAULT CHARSET=utf8 COMMENT='日报，存放一些可以时间段累加的数量指标';
 
-
+-- 猪群每天的数量汇总表，存放可以时间段累加数量指标
 drop table if exists `doctor_daily_groups`;
 CREATE TABLE `doctor_daily_groups` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
@@ -1129,4 +1130,4 @@ CREATE TABLE `doctor_daily_groups` (
   KEY `doctor_daily_groups_farm_id` (`farm_id`),
   KEY `doctor_daily_groups_group_id` (`group_id`),
   KEY `idx_doctor_daily_groups_sum_at` (`sum_at`)
-) DEFAULT CHARSET=utf8 COMMENT='猪群数量每天记录表';
+) DEFAULT CHARSET=utf8 COMMENT='猪群数量每天记录表，存放可以时间段累加数量指标';
