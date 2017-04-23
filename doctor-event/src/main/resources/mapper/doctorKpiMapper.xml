@@ -1063,36 +1063,35 @@
         where a.farm_id = #{farmId}
         and a.kind = 1
         and a.type in(6, 7)
-        and a.event_at &lt;= date_add(date(#{date}), INTERVAL 86399 SECOND)
+        and a.event_at &lt;= date_add(date(#{date}), INTERVAL 1 day)
     </select>
 
     <!-- 实时存栏: 在产房的母猪 -->
     <select id="realTimeLiveStockFarrowSow" parameterType="map" resultType="int">
         select
         (
-            SELECT ifnull(count(1) , 0)
-            FROM doctor_pig_tracks a
-            left join doctor_barns b on a.current_barn_id = b.id
-            WHERE
-            a.farm_id = #{farmId} AND
-            a.pig_type = 1 AND
-            a.is_removal = 0 AND
-            b.pig_type = 7 -- 产房
+        SELECT ifnull(count(1) , 0)
+        FROM doctor_pig_tracks a
+        left join doctor_barns b on a.current_barn_id = b.id
+        WHERE
+        a.farm_id = #{farmId} AND
+        a.is_removal = 0 AND
+        b.pig_type in (1, 7) -- 产房
         )
         -
         (
-            SELECT
-            ifnull(sum(case type when 7 then 1 when 14 then 1 else 0 end ), 0) -
-            ifnull(sum(case type when 6 then 1 when 10 then 1 when 12 then 1 else 0 end ), 0)
-            FROM doctor_pig_events a
-            left join doctor_barns b on a.barn_id = b.id
-            WHERE
-            a.farm_id = 1 AND
-            a.event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
-            a.kind = 1 AND
-            ((a.type IN (2, 6, 7, 10, 12) AND b.pig_type = 7) OR a.type = 14) AND
-            a.status = 1
-         ) ;
+        SELECT
+        ifnull(sum(case type when 7 then 1 when 14 then 1 else 0 end ), 0) -
+        ifnull(sum(case type when 6 then 1 when 10 then 1 when 12 then 1 else 0 end ), 0)
+        FROM doctor_pig_events a
+        left join doctor_barns b on a.barn_id = b.id
+        WHERE
+        a.farm_id = #{farmId} AND
+        a.event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
+        a.kind = 1 AND
+        ((a.type IN (2, 6, 7, 10, 12) AND b.pig_type = 7) OR a.type = 14) AND
+        a.status = 1
+        ) ;
     </select>
 
     <select id="realTimeLiveStockPHSow" parameterType="map" resultType="int">
@@ -1103,7 +1102,6 @@
             left join doctor_barns b on a.current_barn_id = b.id
             WHERE
             a.farm_id = #{farmId} AND
-            a.pig_type = 1 AND
             a.is_removal = 0 AND
             b.pig_type in (5 ,6 ) -- 配怀舍
         )
@@ -1111,11 +1109,11 @@
         (
             SELECT
             ifnull(sum(case type when 7 then 1 when 12 then 1 else 0 end ), 0) -
-            ifnull(sum(case type when 6 then 1 when 10 then 1 else 0 end ), 0)
+            ifnull(sum(case type when 6 then 1 else 0 end ), 0)
             FROM doctor_pig_events a
             left join doctor_barns b on a.barn_id = b.id
             WHERE
-            a.farm_id = 1 AND
+            a.farm_id = #{farmId} AND
             a.event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
             a.kind = 1 AND
             a.type IN (2, 6, 7, 10, 12)  AND
