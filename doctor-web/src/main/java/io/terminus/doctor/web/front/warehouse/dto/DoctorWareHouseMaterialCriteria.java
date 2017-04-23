@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.warehouse.dto;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by xjn on 17/3/2.
@@ -27,6 +28,8 @@ public class DoctorWareHouseMaterialCriteria implements Serializable {
     private Long barnId;
 
     private String barnName;
+
+    private List<Long> groupId;
 
     private String startDate;
 

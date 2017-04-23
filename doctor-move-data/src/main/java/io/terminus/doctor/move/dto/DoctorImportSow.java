@@ -44,4 +44,5 @@ public class DoctorImportSow implements Serializable {
     private Integer weanCount;       //断奶数
     private String fatherCode;       //父号
     private String motherCode;       //母号
+    private Date inFarmDate;          //进场日期
 }

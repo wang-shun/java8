@@ -121,11 +121,49 @@ public interface DoctorMaterialConsumeProviderReadService {
 
     /**
      * 根据事件的时间查询事件中物料的统计数据
-     * 添加分页
+     * 带有分页
      * @param startDate 事件开始时间
      * @param endDate 事件结束时间
      * @param farmId 公司Id
      */
-    Response<Paging<DoctorMaterialConsumeProvider>> pagingfindMaterialConsume(Long farmId, Long wareHouseId, Long materialId, String materialName,
+    Response<Paging<DoctorMaterialConsumeProvider>> pagingfindMaterialConsume(Long farmId, Long wareHouseId, Long materialId, Long groupId, String materialName,
                                                                               Long barnId, Long type, Date startDate, Date endDate ,Integer pageNo, Integer size);
+
+    /**
+     * 根据猪场id查询数据
+     * @param farmId
+     * @param type
+     * @param barnId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    Response<List<DoctorMaterialConsumeProvider>> findMaterialProfit(Long farmId, Long type, Long barnId, Date startDate, Date endDate );
+
+    /**
+     *
+     * @param farmId
+     * @param groupId
+     * @param materialId
+     * @param type
+     * @param wareHouseId
+     * @param barnId
+     * @param materialType
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    Response<List<DoctorMaterialConsumeProvider>> findMaterialByGroupId(Long farmId, Long groupId, Long materialId, Long type, Long wareHouseId, Long barnId, Long materialType, Date startDate, Date endDate);
+
+    /**
+     * 根据groupID来获取批次数据统计的物料数据
+     * @param farmId
+     * @param type
+     * @param barnId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    Response<List<DoctorMaterialConsumeProvider>> findMaterialByGroup(Long farmId, Long wareHouseId, Long materialId, List<Long> groupId, String materialName,
+                                                                              Long barnId, Long type, Date startDate, Date endDate);
 }

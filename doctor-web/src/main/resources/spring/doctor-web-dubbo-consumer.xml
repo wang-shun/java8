@@ -124,4 +124,7 @@
     <!--statistic-->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService" id="doctorPigTypeStatisticWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserRoleLoader" id="doctorUserRoleLoader" check="false"/>
+
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorValueOfInputReadService" id="doctorValueOfInputReadService" check="false"/>
+
 </beans>

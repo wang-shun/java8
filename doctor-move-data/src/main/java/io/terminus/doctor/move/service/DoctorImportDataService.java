@@ -337,7 +337,7 @@ public class DoctorImportDataService {
                 if (notNull(subUser)) {
                     DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(subUser.getId());
                     if (notNull(permission)) {
-                        throw new JsonResponseException("user.has.related.farm");
+                        throw new JsonResponseException("用户已关联猪场, 用户手机号:" + subUser.getMobile());
                     }
 
                     subUser.setName(loginName + "@" + farm.getFarmCode());
@@ -1232,10 +1232,13 @@ public class DoctorImportDataService {
         sow.setBirthWeight(0D);
 
         //设置进场日期
-        if (first.getMateDate() != null) {
+        if (notNull(first.getInFarmDate())) {
+            sow.setInFarmDate(first.getInFarmDate());
+        }
+        else if (first.getMateDate() != null) {
             sow.setInFarmDate(new DateTime(first.getMateDate()).plusDays(-1).toDate()); //进场时间取第一次配种时间减一天
         } else {
-            sow.setInFarmDate(DateTime.now().plusDays(-7).toDate()); //进场时间取当前日期减7天
+            throw new JsonResponseException("母猪:" + sow.getPigCode() + "进场日期为空");
         }
         
         sow.setInitBarnName(last.getBarnName());
@@ -1634,6 +1637,7 @@ public class DoctorImportDataService {
                 sow.setWeanCount(ImportExcelUtils.getIntOrDefault(row, 26, 0));                         //断奶数
                 sow.setFatherCode(ImportExcelUtils.getString(row, 27));                                 //父号
                 sow.setMotherCode(ImportExcelUtils.getString(row, 28));                                 //母号
+                sow.setInFarmDate(ImportExcelUtils.getDate(row, 29));
                 sows.add(sow);
             }
         }
@@ -1769,7 +1773,7 @@ public class DoctorImportDataService {
 
     //第一行是表头，跳过  第一列不能为空
     private static boolean canImport(Row row) {
-        return row.getRowNum() > 0 && notEmpty(ImportExcelUtils.getString(row, 0));
+        return row.getRowNum() > 0 && StringUtils.isNotBlank(ImportExcelUtils.getString(row, 0));
     }
 
     /**

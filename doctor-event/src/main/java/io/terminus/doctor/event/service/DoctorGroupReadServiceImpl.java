@@ -503,4 +503,34 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             return Response.fail("get.group.count.failed");
         }
     }
+
+    @Override
+    public Response<List<DoctorGroup>> findGroupIds(Long farmId, Date startAt, Date endAt) {
+        try {
+            return Response.ok(doctorGroupDao.findGroupId(farmId, startAt, endAt));
+        }catch (Exception e) {
+            log.error("find.groupId.fail, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.groupId.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorGroup>> findGroupId(Long farmId, Long barnId) {
+        try {
+            return Response.ok(doctorGroupDao.findGroupIdByBranId(farmId, barnId));
+        } catch (Exception e) {
+            log.error("find.groupId.fail, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.groupIdByBarnId.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorGroupEvent> findNewGroupEvent(@NotNull(message = "groupId.not.null") Long groupId) {
+        try {
+            return Response.ok(doctorGroupEventDao.findNewGroupByGroupId(groupId));
+        } catch (Exception e) {
+            log.error("find new group event failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.new.group.event.failed");
+        }
+    }
 }

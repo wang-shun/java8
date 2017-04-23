@@ -33,4 +33,13 @@ public class DoctorPigTypeStatisticDao extends MyBatisDao<DoctorPigTypeStatistic
     public Boolean updateByFarmId(DoctorPigTypeStatistic pigTypeStatistic) {
         return getSqlSession().update("updateByFarmId", pigTypeStatistic) == 1;
     }
+
+    /**
+     * 根据farmid 删除
+     * @param farmId 猪场id
+     * @return
+     */
+    public Boolean deleteByFarmId(Long farmId) {
+        return getSqlSession().delete(sqlId("deleteByFarmId"), farmId) == 1;
+    }
 }

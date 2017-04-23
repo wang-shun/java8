@@ -1,13 +1,16 @@
 package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.sun.org.apache.xpath.internal.Arg;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
@@ -295,6 +298,26 @@ public class DoctorSearches {
         return new GroupPigPaging<>(paging, groupCount, sowCount);
     }
 
+    @RequestMapping(value = "/barn-info", method = RequestMethod.GET)
+    public SearchedGroup getBarnInfo(@RequestParam Long barnId){
+        SearchedGroup searchDto = new SearchedGroup();
+        DoctorBarn doctorBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId));
+        searchDto.setFarmId(doctorBarn.getFarmId());
+        searchDto.setFarmName(doctorBarn.getFarmName());
+        searchDto.setPigType(doctorBarn.getPigType());
+        searchDto.setPigTypeName(PigType.from(doctorBarn.getPigType()).getDesc());
+        searchDto.setCurrentBarnId(doctorBarn.getId());
+        searchDto.setCurrentBarnName(doctorBarn.getName());
+        List<DoctorGroup> groups = RespHelper.orServEx(doctorGroupReadService.findGroupByCurrentBarnId(barnId));
+        groups.forEach(doctorGroup -> {
+            DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(doctorGroup.getId()));
+            if(!Arguments.isNull(groupDetail) && !Arguments.isNull(groupDetail.getGroupTrack())){
+                searchDto.setQuantity(MoreObjects.firstNonNull(searchDto.getQuantity(), 0) + MoreObjects.firstNonNull(groupDetail.getGroupTrack().getQuantity(), 0));
+            }
+        });
+        return searchDto;
+    }
+
     //猪群分页
     private Paging<SearchedGroup> pagingGroup(Integer pageNo, Integer pageSize, DoctorGroupSearchDto searchDto) {
         if (searchDto == null || searchDto.getFarmId() == null) {
@@ -391,6 +414,50 @@ public class DoctorSearches {
                                       @RequestParam(required = false) Integer pageSize,
                                       @RequestParam Map<String, String> params) {
         return SearchedBarnDto.builder().barns(this.searchBarnsPC(pageNo, pageSize, params)).build();
+    }
+
+
+    /**
+     * 猪舍搜索方法
+     *
+     * @param pageNo   起始页
+     * @param pageSize 页大小
+     * @param params   搜索参数
+     *                 搜索参数可以参照:
+     * @return
+     */
+    @RequestMapping(value = "/wsn/barns", method = RequestMethod.GET)
+    public SearchedBarnDto searchWsnBarn(@RequestParam(required = false) Integer pageNo,
+                                         @RequestParam(required = false) Integer pageSize,
+                                         @RequestParam Map<String, String> params) {
+        DoctorBarnDto barnDto = new DoctorBarnDto();
+        if (Params.containsNotEmpty(params, "barnIds")){
+            List<Long> barnIds = Splitters.splitToLong(params.get("barnIds").toString(), Splitters.COMMA);
+            barnDto.setBarnIds(barnIds);
+        }
+
+        if (Params.containsNotEmpty(params, "q")) {
+            barnDto.setName(params.get("q"));
+        }
+        if (Params.containsNotEmpty(params, "farmId")) {
+            barnDto.setFarmId(Long.valueOf(params.get("farmId")));
+        }
+        if (Params.containsNotEmpty(params, "pigType")) {
+            barnDto.setPigType(Integer.valueOf(params.get("pigType")));
+        }
+        if (Params.containsNotEmpty(params, "pigTypes")) {
+            barnDto.setPigTypes(Splitters.splitToInteger(params.get("pigTypes"), Splitters.COMMA));
+        }
+        if (Params.containsNotEmpty(params, "status")) {
+            barnDto.setStatus(Integer.valueOf(params.get("status")));
+        }
+        if (barnDto.getFarmId() == null) {
+            return new SearchedBarnDto();
+        }
+
+        Paging<DoctorBarn> barns = RespHelper.or500(doctorBarnReadService.pagingBarn(barnDto, pageNo, pageSize));
+        Paging<SearchedBarn> result = new Paging<>(barns.getTotal(), getSearchedBarn(barns.getData()));
+        return SearchedBarnDto.builder().barns(result).build();
     }
 
     /**

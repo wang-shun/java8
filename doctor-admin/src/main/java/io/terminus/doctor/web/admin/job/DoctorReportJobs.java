@@ -40,7 +40,7 @@ public class DoctorReportJobs {
 
     @RpcConsumer
     private DoctorDailyReportReadService doctorDailyReportReadService;
-    @RpcConsumer(timeout = "60000")
+    @RpcConsumer
     private DoctorDailyReportWriteService doctorDailyReportWriteService;
     @RpcConsumer(timeout = "60000")
     private DoctorRangeReportWriteService doctorRangeReportWriteService;

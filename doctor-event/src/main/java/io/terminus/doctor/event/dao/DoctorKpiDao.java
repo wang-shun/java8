@@ -865,7 +865,6 @@ public class DoctorKpiDao {
         return sqlSession.selectList(sqlId("getEveryGroupInfo"), ImmutableMap.of("date", date));
     }
 
-
     /**
      * 猪群实时存栏
      * @param groupId
@@ -1046,7 +1045,29 @@ public class DoctorKpiDao {
      * @param endAt
      * @return
      */
-    public int getSowCfWeedOut(Long farmId, Date startAt, Date endAt){
+    public int getSowCfWeedOut(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne(sqlId("getSowCfWeedOut"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+    /**
+     * @param barnId
+     * @param date
+     * @param index
+     * @return
+     */
+    public Integer getBarnChangeCount(Long barnId, Date date, Integer index){
+        return sqlSession.selectOne(sqlId("getBarnChangeCount"), ImmutableMap.of("barnId", barnId, "date", date, "index", index));
+    }
+
+    /**
+     * 获取猪舍存栏
+     * @param barnId 猪舍id
+     * @return 猪舍存栏
+     */
+    public Integer getBarnLiveStock(Long barnId){
+        return sqlSession.selectOne(sqlId("getBarnLiveStock"), barnId);
+    }
+
+    public Integer getOutTrasGroup(Long barnId,Date date, Integer index) {
+        return sqlSession.selectOne(sqlId("getOutTrasGroup"), ImmutableMap.of("barnId", barnId, "date", date, "index", index));
     }
 }

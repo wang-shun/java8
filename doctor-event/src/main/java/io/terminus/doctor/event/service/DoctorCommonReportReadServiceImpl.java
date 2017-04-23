@@ -195,6 +195,28 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     }
 
     //后去月报趋势图
+    @Override
+    public Response<Map<String, Integer>> findBarnLiveStock(Long barnId, Date date, Integer index) {
+        try {
+            Integer currentLiveStock = doctorKpiDao.getBarnLiveStock(barnId);
+            Map<String, Integer> liveStockMap = Maps.newLinkedHashMap();
+            liveStockMap.put(DateUtil.toDateString(date), currentLiveStock);
+            int i = 1;
+            while (i != index) {
+                Integer liveStock = currentLiveStock
+                        - doctorKpiDao.getBarnChangeCount(barnId, date, i)
+                        - doctorKpiDao.getOutTrasGroup(barnId, date, i);
+                liveStockMap.put(DateUtil.toDateString(new DateTime(date).minusWeeks(i).toDate()), liveStock);
+                i++;
+            }
+            return Response.ok(liveStockMap);
+        }catch (Exception e) {
+            log.error("find barn live stock failed, barnId:{}, date:{}, index:{}, cause:{}", barnId, date.toString(), index, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.barn.live.stock");
+        }
+    }
+
+    //查询趋势图
     private List<DoctorCommonReportDto> getMonthlyReportByIndex(Long farmId, Date date, Integer index) {
         return DateUtil.getBeforeMonthEnds(date, MoreObjects.firstNonNull(index, MONTH_INDEX)).stream()
                 .map(month -> {

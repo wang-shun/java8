@@ -2,18 +2,22 @@ package io.terminus.doctor.web.front.msg.controller;
 
 import com.google.api.client.util.Lists;
 import com.google.common.base.Preconditions;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorMessageRule;
 import io.terminus.doctor.event.model.DoctorMessageRuleRole;
+import io.terminus.doctor.event.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.event.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.event.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.event.service.DoctorMessageRuleRoleWriteService;
+import io.terminus.doctor.event.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.event.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.SubRoleReadService;
+import io.terminus.doctor.web.front.msg.dto.DoctorMessageRuleWithDefaultValueDto;
 import io.terminus.doctor.web.front.msg.dto.MsgRoleDto;
 import io.terminus.doctor.web.front.msg.dto.MsgRuleDto;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +54,9 @@ public class DoctorMsgRules {
 
     private final DoctorFarmReadService doctorFarmReadService;
 
+    @RpcConsumer
+    private DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService;
+
 
     @Autowired
     public DoctorMsgRules(DoctorMessageRuleReadService doctorMessageRuleReadService,
@@ -83,8 +90,12 @@ public class DoctorMsgRules {
      * @return
      */
     @RequestMapping(value = "/rule/detail", method = RequestMethod.GET)
-    public DoctorMessageRule findDetailById(@RequestParam Long id) {
-        return RespHelper.or500(doctorMessageRuleReadService.findMessageRuleById(id));
+    public DoctorMessageRuleWithDefaultValueDto findDetailById(@RequestParam Long id) {
+        DoctorMessageRule messageRule = RespHelper.or500(doctorMessageRuleReadService.findMessageRuleById(id));
+        DoctorMessageRuleTemplate ruleTemplate = RespHelper.or500(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(messageRule.getTemplateId()));
+        DoctorMessageRuleWithDefaultValueDto valueDto = BeanMapper.map(messageRule, DoctorMessageRuleWithDefaultValueDto.class);
+        valueDto.setDefaultValues(ruleTemplate.getRule().getValues());
+        return valueDto;
     }
 
     /**

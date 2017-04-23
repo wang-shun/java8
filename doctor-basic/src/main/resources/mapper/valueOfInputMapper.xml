@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="ValueOfInput">
+
+    <resultMap id="ValueOfInputMap" type="ValueOfInput">
+        <result column="name" property="name"/>
+        <result column="count" property="count"/>
+    </resultMap>
+
+    <sql id="tb"> doctor_material_consume_providers </sql>
+
+    <select id="rankingValueOfInput" parameterType="map" resultMap="ValueOfInputMap">
+        select count(1) as count, material_name as name
+        FROM <include refid="tb"/>
+        WHERE `type` = #{type} AND `event_type` = 1 AND `farm_id` = #{farmId}
+        GROUP BY material_name
+        ORDER By `count` DESC
+        LiMIT 20
+    </select>
+    
+</mapper>

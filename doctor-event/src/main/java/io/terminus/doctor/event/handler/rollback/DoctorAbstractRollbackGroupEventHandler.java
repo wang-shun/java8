@@ -18,6 +18,7 @@ import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
 import lombok.extern.slf4j.Slf4j;
@@ -107,7 +108,9 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
 
         //删除此事件 -> 回滚猪群跟踪 -> 回滚猪群 -> 删除镜像
         doctorGroupEventDao.delete(groupEvent.getId());
-        doctorGroupTrackDao.update(info.getGroupTrack());
+        DoctorGroupTrack newTrack = info.getGroupTrack();
+        newTrack.setQuantity(doctorGroupEventDao.getEventCount(newTrack.getGroupId()));
+        doctorGroupTrackDao.update(newTrack);
         doctorGroupDao.update(info.getGroup());
         doctorGroupSnapshotDao.delete(snapshot.getId());
 

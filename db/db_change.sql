@@ -1141,3 +1141,80 @@ create index doctor_pig_events_barn_id on doctor_pig_events(barn_id);
 update doctor_pig_events a, doctor_barns b
 set a.barn_type = b.pig_type where a.barn_id = b.id;
 
+-- 2017-04-12
+-- 如果因子没有范围，from和to的值一直，from没有值时默认double最小值， to没有值时默认double最大值
+drop table if exists `doctor_data_factors`;
+CREATE TABLE `doctor_data_factors` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `type` tinyint(4) DEFAULT NULL COMMENT '类型',
+  `type_name` varchar(64) DEFAULT NULL,
+  `sub_type` tinyint(4) DEFAULT NULL COMMENT '小类：猪类等',
+  `sub_type_name` varchar(64) DEFAULT NULL,
+  `factor` double DEFAULT NULL COMMENT '系数',
+  `range_from` double DEFAULT NULL COMMENT '范围,默认double最小值',
+  `range_to` double DEFAULT NULL COMMENT '范围，默认double最大值',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) DEFAULT CHARSET=utf8 COMMENT='大数据信用价值计算因子';
+alter table doctor_data_factors ADD `is_delete` smallint(6) DEFAULT 0  AFTER `range_to`;
+
+
+-- 2017-04-15 利润表
+drop table if exists `doctor_export_porfit`;
+CREATE TABLE `doctor_export_porfit` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场ID',
+  `feed_type_name` varchar(20) DEFAULT NULL COMMENT '饲料名',
+  `feed_type_id` tinyint(11) DEFAULT NULL COMMENT '饲料ID',
+  `feed_amount` double DEFAULT NULL COMMENT '饲料金额',
+  `vaccine_type_name` varchar(20) DEFAULT NULL COMMENT '疫苗名称',
+  `vaccine_type_id` tinyint(11) DEFAULT NULL COMMENT '疫苗ID',
+  `vaccine_amount` double DEFAULT NULL COMMENT '疫苗金额',
+  `medicine_type_name` varchar(20) DEFAULT NULL COMMENT '药品名称',
+  `medicine_type_id` tinyint(11) DEFAULT NULL COMMENT '药品ID',
+  `medicine_amount` double DEFAULT NULL COMMENT '药品金额',
+  `consumables_type_name` varchar(20) DEFAULT NULL COMMENT '消耗品名称',
+  `consumables_type_id` tinyint(11) DEFAULT NULL COMMENT '消耗品ID',
+  `consumables_amount` double DEFAULT NULL COMMENT '消耗品金额',
+  `material_type_name` varchar(20) DEFAULT NULL COMMENT '原料名称',
+  `material_type_id` tinyint(11) DEFAULT NULL COMMENT '原料ID',
+  `material_amount` double DEFAULT NULL COMMENT '原料金额',
+  `pig_type_name` varchar(20) DEFAULT NULL COMMENT '猪类型名称',
+  `pig_type_name_id` varchar(20) DEFAULT NULL COMMENT '猪类型ID',
+  `amount_pig` double DEFAULT NULL COMMENT '猪金额',
+  `amount_year_pig` double DEFAULT NULL COMMENT '猪的年利润',
+  `amount_year_material` double DEFAULT NULL COMMENT '物料的年消耗',
+  `sum_time` datetime DEFAULT NULL COMMENT '统计时间',
+  `refresh_time` datetime DEFAULT NULL COMMENT '刷新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9727 DEFAULT CHARSET=utf8;
+
+-- 2017-04-18 领用统计
+drop table if exists `doctor_masterial_datails_groups`;
+CREATE TABLE `doctor_masterial_datails_groups` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '唯一ID',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '公司ID',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '物料ID',
+  `material_name` varchar(512) DEFAULT NULL COMMENT '物料名',
+  `material_type` int(11) DEFAULT NULL COMMENT '物料类型',
+  `types` int(11) DEFAULT NULL COMMENT '类型',
+  `type_name` varchar(20) DEFAULT NULL COMMENT '类型名',
+  `barn_id` bigint(20) DEFAULT NULL COMMENT '猪舍ID',
+  `barn_name` varchar(20) DEFAULT NULL COMMENT '猪舍名',
+  `numbers` double DEFAULT NULL COMMENT '数量',
+  `price` bigint(20) DEFAULT NULL COMMENT '单价',
+  `price_sum` double DEFAULT NULL COMMENT '金额',
+  `unit_name` varchar(20) DEFAULT NULL COMMENT '物料单位',
+  `group_id` bigint(20) DEFAULT NULL COMMENT '猪群ID',
+  `group_name` varchar(512) DEFAULT NULL COMMENT '猪群名',
+  `ware_house_id` bigint(20) DEFAULT NULL COMMENT '仓库ID',
+  `ware_house_name` varchar(20) DEFAULT NULL COMMENT '仓库名',
+  `event_at` datetime DEFAULT NULL,
+  `people` varchar(20) DEFAULT NULL COMMENT '饲养员',
+  `flag` smallint(2) DEFAULT NULL COMMENT '标志位',
+  `open_at` datetime DEFAULT NULL COMMENT '建群时间',
+  `close_at` datetime DEFAULT NULL COMMENT '关群时间',
+  `flush_date` datetime DEFAULT NULL COMMENT '刷新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=471866 DEFAULT CHARSET=utf8;
