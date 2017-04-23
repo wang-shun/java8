@@ -857,6 +857,10 @@ alter table doctor_group_events add column vaccination_name varchar(32) default 
 ALTER TABLE doctor_group_events ADD COLUMN operator_id bigint(20) DEFAULT NULL comment '操作人id' after creator_name;
 ALTER TABLE doctor_group_events ADD COLUMN operator_name varchar(32) DEFAULT NULL comment '操作人姓名' after operator_id;
 
+create index idx_doctor_pig_events_barn_id  on doctor_pig_events(`barn_id`);
+create index idx_doctor_pig_events_event_at  on doctor_pig_events(`event_at`);
+create index idx_doctor_group_events_event_at  on doctor_group_events(`event_at`);
+
 -- 2017-04-06 编辑事件记录
 drop table if exists `doctor_event_modify_logs`;
 CREATE TABLE `doctor_event_modify_logs` (
