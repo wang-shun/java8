@@ -45,8 +45,6 @@ public class DoctorModifyPigConditionEventHandler extends DoctorAbstractModifyPi
                     .weightChange(EventUtil.minusDouble(newConditionDto.getWeight(), oldConditionDto.getWeight()))
                     .build();
         }
-
-
     }
 
     @Override
@@ -72,7 +70,6 @@ public class DoctorModifyPigConditionEventHandler extends DoctorAbstractModifyPi
 
     @Override
     public DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto) {
-
         oldPigTrack.setWeight(EventUtil.minusDouble(changeDto.getWeightChange(), oldPigTrack.getWeight()));
         return oldPigTrack;
     }

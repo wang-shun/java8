@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 /**
  * Created by xjn on 17/4/19.
  * 妊娠检查
@@ -122,11 +124,10 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
     }
 
-
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         PregCheckResult checkResult = PregCheckResult.from(changeDto.getPregCheckResult());
-        Checks.expectNotNull(checkResult, "");
+        Checks.expectTrue(notNull(checkResult), "preg.check.result.error", changeDto.getPregCheckResult());
         switch (checkResult) {
             case YANG :
                 oldDailyPig.setPregPositive(EventUtil.plusInt(oldDailyPig.getPregPositive(), changeDto.getPregCheckResultCountChange()));
@@ -141,7 +142,7 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 oldDailyPig.setPregNegative(EventUtil.plusInt(oldDailyPig.getPregNegative(), changeDto.getPregCheckResultCountChange()));
                 break;
             default:
-                throw new InvalidException("");
+                throw new InvalidException("preg.check.result.error", checkResult.getKey());
         }
         return oldDailyPig;
     }

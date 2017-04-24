@@ -30,6 +30,7 @@ import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
+import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.validEventAt;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
 
 
@@ -72,11 +73,11 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     public void modifyHandle(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
        log.info("modify pig event handler starting, oldPigEvent:{}, inputDto:{}", oldPigEvent, inputDto);
 
-        //1.构建变化量
-        DoctorEventChangeDto changeDto = buildEventChange(oldPigEvent, inputDto);
+        //1.校验
+        modifyHandleCheck(oldPigEvent, inputDto);
 
-        //2.校验
-        modifyHandleCheck(oldPigEvent, changeDto);
+        //2.构建变化量
+        DoctorEventChangeDto changeDto = buildEventChange(oldPigEvent, inputDto);
 
         //3.更新事件
         DoctorPigEvent newEvent = buildNewEvent(oldPigEvent, inputDto);
@@ -112,6 +113,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     public Boolean canRollback(DoctorPigEvent deletePigEvent) {
         return Objects.equals(deletePigEvent.getIsAuto(), IsOrNot.NO.getValue())
                 && Objects.equals(deletePigEvent.getEventSource(), SourceType.INPUT.getValue())
+                && isLastEvent(deletePigEvent)
                 && rollbackHandleCheck(deletePigEvent);
     }
 
@@ -119,16 +121,16 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     public void rollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
        log.info("rollback handle starting, deletePigEvent:{}", deletePigEvent);
 
-        //2.删除触发事件
+        //1.删除触发事件
         triggerEventRollbackHandle(deletePigEvent, operatorId, operatorName);
 
-        //3.删除事件
+        //2.删除事件
         doctorPigEventDao.delete(deletePigEvent.getId());
 
-        //4.删除记录
+        //3.删除记录
         createModifyLog(deletePigEvent);
 
-        //5.更新猪
+        //4.更新猪
         if (isUpdatePig(deletePigEvent.getType())) {
             DoctorPig oldPig = doctorPigDao.findById(deletePigEvent.getPigId());
             if (Objects.equals(deletePigEvent.getType(), PigEvent.ENTRY.getKey())) {
@@ -139,7 +141,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
             }
         }
 
-        //6.更新track
+        //5.更新track
         if (isUpdateTrack(deletePigEvent.getType())) {
             DoctorPigTrack oldTrack = doctorPigTrackDao.findByPigId(deletePigEvent.getPigId());
             if (Objects.equals(deletePigEvent.getType(), PigEvent.ENTRY.getKey())) {
@@ -150,7 +152,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
             }
         }
 
-        //7.更新报表
+        //6.更新报表
         updateDailyForDelete(deletePigEvent);
 
         log.info("rollback handle ending");
@@ -166,12 +168,13 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     }
 
     /**
-     * 子类的具体实现
+     * 默认实现
      * @param oldPigEvent 原事件
-     * @param changeDto 变化
+     * @param inputDto 新输入
      */
-    protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, DoctorEventChangeDto changeDto) {
-
+    protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        DoctorPigEvent lastEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(oldPigEvent.getPigId(), oldPigEvent.getEventAt());
+        validEventAt(inputDto.eventAt(), notNull(lastEvent) ? lastEvent.getEventAt() : null);
     }
 
     @Override
@@ -272,9 +275,8 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
         /**
          * 是否需要更新猪(编辑)
-         *
          * @param changeDto 变化记录
-         * @return
+         * @return 是否需要更新猪
          */
     private boolean isUpdatePig(DoctorEventChangeDto changeDto) {
         return notNull(changeDto)
@@ -289,8 +291,8 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 是否需要更新猪(删除)
-     * @param eventType
-     * @return
+     * @param eventType 事件类型
+     * @return  是否需要更新猪
      */
     private boolean isUpdatePig(Integer eventType) {
         return EFFECT_PIG_EVENTS.contains(eventType);
@@ -299,7 +301,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     /**
      * 是否需要更新track(编辑)
      * @param changeDto 变化记录
-     * @return
+     * @return 是否需要更新track
      */
     private boolean isUpdateTrack(DoctorEventChangeDto changeDto) {
         return true;
@@ -357,5 +359,17 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      */
     private boolean notNullAndNotZero(Integer d) {
         return notNull(d) && d != 0;
+    }
+
+    /**
+     * 是否是最新事件
+     * @param pigEvent 猪事件
+     */
+    private boolean isLastEvent(DoctorPigEvent pigEvent) {
+        if (IGNORE_EVENT.contains(pigEvent.getType())) {
+            return true;
+        }
+        DoctorPigEvent lastEvent = doctorPigEventDao.findLastEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
+        return Objects.equals(pigEvent.getId(), lastEvent.getId());
     }
 }

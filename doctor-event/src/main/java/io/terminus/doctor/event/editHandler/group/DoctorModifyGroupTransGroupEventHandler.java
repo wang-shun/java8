@@ -35,6 +35,15 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
     private DoctorModifyGroupCloseEventHandler modifyGroupCloseEventHandler;
 
     @Override
+    protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        super.modifyHandleCheck(oldGroupEvent, input);
+        DoctorTransGroupInput newInput = (DoctorTransGroupInput) input;
+        validGroupLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getGroupCode(),
+                oldGroupEvent.getEventAt(), DateUtil.toDate(newInput.getEventAt()),
+                oldGroupEvent.getQuantity(), newInput.getQuantity());
+    }
+
+    @Override
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         DoctorTransGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorTransGroupInput.class);
         DoctorTransGroupInput newInput = (DoctorTransGroupInput) input;
@@ -94,6 +103,11 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
     }
 
     @Override
+    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+        return validGroupLiveStock(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), -deleteGroupEvent.getQuantity());
+    }
+
+    @Override
     protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
         DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.MOVE_IN.getValue());
         doctorModifyGroupMoveInEventHandler.rollbackHandle(moveInEvent, operatorId, operatorName);
@@ -149,7 +163,8 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
 
     }
 
-    private DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+    @Override
+    protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
         if (Objects.equals(changeDto.getTransGroupType(), DoctorGroupEvent.TransGroupType.OUT.getValue())) {
             oldDailyGroup.setOuterOut(EventUtil.plusInt(oldDailyGroup.getOuterOut(), changeDto.getQuantityChange()));
         } else {
@@ -163,6 +178,11 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
         return oldDailyGroup;
     }
 
+    /**
+     * 构建触发猪群事件输入
+     * @param transGroupEvent 原事件
+     * @return 触发事件输入
+     */
     public DoctorMoveInGroupInput buildTriggerGroupEventInput(DoctorGroupEvent transGroupEvent) {
         DoctorTransGroupInput transGroup = JSON_MAPPER.fromJson(transGroupEvent.getExtra(), DoctorTransGroupInput.class);
         DoctorMoveInGroupInput moveIn = new DoctorMoveInGroupInput();

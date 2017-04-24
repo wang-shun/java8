@@ -5,6 +5,7 @@ import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
+import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -25,6 +26,15 @@ import static io.terminus.common.utils.Arguments.notNull;
 @Slf4j
 @Component
 public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGroupEventHandler {
+
+    @Override
+    protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        super.modifyHandleCheck(oldGroupEvent, input);
+        DoctorMoveInGroupInput newInput = (DoctorMoveInGroupInput) input;
+        validGroupLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getGroupCode(),
+                oldGroupEvent.getEventAt(), DateUtil.toDate(newInput.getEventAt()),
+                -oldGroupEvent.getQuantity(), -newInput.getQuantity());
+    }
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
@@ -95,6 +105,11 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
     }
 
     @Override
+    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+        return validGroupLiveStock(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), deleteGroupEvent.getQuantity());
+    }
+
+    @Override
     protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {
         if (notNull(deleteGroupEvent.getSowId())) {
             oldGroupTrack.setNest(EventUtil.minusInt(oldGroupTrack.getNest(), 1));
@@ -110,9 +125,9 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
     @Override
     public void updateDailyOfDelete(DoctorGroupEvent oldGroupEvent) {
         DoctorMoveInGroupInput input1 = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorMoveInGroupInput.class);
-        DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
+               DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .quantityChange(EventUtil.minusInt(0, input1.getQuantity()))
-                .transGroupType(oldGroupEvent.getTransGroupType())
+                .transGroupType(getTransGroupType(oldGroupEvent))
                 .isSowTrigger(notNull(oldGroupEvent.getSowId()))
                 .build();
         DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
@@ -126,20 +141,23 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         DoctorMoveInGroupInput input2 = (DoctorMoveInGroupInput) input;
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .quantityChange(input2.getQuantity())
-                .transGroupType(newGroupEvent.getTransGroupType())
+                .transGroupType(getTransGroupType(newGroupEvent))
                 .isSowTrigger(notNull(newGroupEvent.getSowId()))
                 .build();
         DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
         doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
         updateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), changeDto2.getQuantityChange());
     }
-        /**
-         * 构建日记录
-         * @param oldDailyGroup 原记录
-         * @param changeDto 变化量
-         * @return 新记录
-         */
-    private DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+
+    /**
+     * 构建日记录
+     *
+     * @param oldDailyGroup 原记录
+     * @param changeDto     变化量
+     * @return 新记录
+     */
+    @Override
+    protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
         if (Objects.equals(changeDto.getTransGroupType(), DoctorGroupEvent.TransGroupType.OUT.getValue())) {
             oldDailyGroup.setOuterIn(EventUtil.plusInt(oldDailyGroup.getOuterIn(), changeDto.getQuantityChange()));
         } else {
@@ -150,5 +168,15 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         }
         oldDailyGroup.setEnd(EventUtil.plusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
         return oldDailyGroup;
+    }
+
+    /**
+     * 获取转移类型
+     * @param moveInEvent 转入事件
+     * @return 转入类型
+     */
+    private Integer getTransGroupType(DoctorGroupEvent moveInEvent) {
+        return !Objects.equals(moveInEvent.getInType(), InType.GROUP.getValue()) ?
+                DoctorGroupEvent.TransGroupType.OUT.getValue() : moveInEvent.getTransGroupType();
     }
 }
