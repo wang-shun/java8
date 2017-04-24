@@ -664,7 +664,7 @@
         SET sow_start = sow_start + #{changeCount},
         `sow_end` = `sow_end` + #{changeCount}
         WHERE
-        group_id = #{groupId}
+        farm_id = #{farmId}
         AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
     </update>
 
@@ -673,7 +673,7 @@
         SET boar_start = boar_start + #{changeCount},
         `boar_end` = `boar_end` + #{changeCount}
         WHERE
-        group_id = #{groupId}
+        farm_id = #{farmId}
         AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
     </update>
 
