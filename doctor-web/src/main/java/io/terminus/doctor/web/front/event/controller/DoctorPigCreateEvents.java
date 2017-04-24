@@ -524,29 +524,14 @@ public class DoctorPigCreateEvents {
         //构建事件所需信息
         PigEvent pigEvent = PigEvent.from(eventType);
         DoctorBasicInputInfoDto basic = buildBasicInputInfoDto(farmId, pigEvent);
-        BasePigEventInputDto inputDto = eventInput(pigEvent, input, farmId, pigSex, null);
-//        if (Objects.equals(eventType, PigEvent.ENTRY.getKey())) {
-//            inputDto = buildEntryEventInput(inputDto, pigEvent);
-//        } else {
-//            inputDto = buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
-//        }
-//
-//        //获取编辑人信息
-//        DoctorUser user = UserUtil.getCurrentUser();
-//        if (isNull(user)) {
-//            throw new JsonResponseException("user.not.login");
-//        }
-//        //获取真实姓名
-//        String userName = user.getName();
-//        Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(user.getId());
-//        if (userProfileResponse.isSuccess() && notNull(userProfileResponse.getResult())) {
-//            userName = userProfileResponse.getResult().getRealName();
-//        }
-//
-//        Long requestId = RespHelper.or500(doctorEventModifyRequestWriteService.createPigModifyEventRequest(basic, inputDto, eventId, user.getId(), userName));
-//
-//        DoctorEventModifyRequest modifyRequest = RespHelper.or500(doctorEventModifyRequestReadService.findById(requestId));
-//        RespWithExHelper.orInvalid(doctorEventModifyRequestWriteService.modifyEventHandle(modifyRequest));
+        BasePigEventInputDto inputDto;
+        if (Objects.equals(eventType, PigEvent.ENTRY.getKey())) {
+            inputDto = jsonMapper.fromJson(input, DoctorFarmEntryDto.class);
+            buildEntryEventInput(inputDto, pigEvent);
+        } else {
+            inputDto = eventInput(pigEvent, input, farmId, pigSex, null);
+            buildEventInput(inputDto, inputDto.getPigId(), pigEvent);
+        }
         RespWithExHelper.orInvalid(doctorModifyEventService.modifyPigEvent(inputDto, eventId ,eventType));
     }
 

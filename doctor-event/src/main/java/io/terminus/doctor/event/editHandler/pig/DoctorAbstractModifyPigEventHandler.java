@@ -88,7 +88,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
         //5.更新猪信息
         if (isUpdatePig(changeDto)) {
-            DoctorPig oldPig = doctorPigDao.findById(oldPigEvent.getId());
+            DoctorPig oldPig = doctorPigDao.findById(oldPigEvent.getPigId());
             DoctorPig newPig = buildNewPig(oldPig, inputDto);
             doctorPigDao.update(newPig);
         }
