@@ -367,8 +367,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             DoctorGroupDetail groupDetail = checkGroupExist(groupId);
             Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
             DoctorGroupInputInfo groupInputInfo = buildGroupEventInfo(eventType, groupDetail, params);
-            doctorModifyEventService.modifyGroupEvent(groupInputInfo.getInput(), eventId, eventType);
-            return RespWithEx.ok(Boolean.TRUE);
+            return doctorModifyEventService.modifyGroupEvent(groupInputInfo.getInput(), eventId, eventType);
         } catch (InvalidException e) {
             log.error("batch group event failed, groupId:{}, eventType:{}, eventId:{}, data:{}, cause:{}", groupId, eventType, eventId, data, Throwables.getStackTraceAsString(e));
             return RespWithEx.exception(e);

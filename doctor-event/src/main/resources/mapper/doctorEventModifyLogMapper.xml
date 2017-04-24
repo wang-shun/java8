@@ -66,9 +66,6 @@
         <if test="deleteEvent != null">AND delete_event = #{deleteEvent}</if>
         <if test="fromEvent != null">AND from_event = #{fromEvent}</if>
         <if test="toEvent != null">AND to_event = #{toEvent}</if>
-        
-        
-        
     </sql>
 
     <insert id="create" parameterType="DoctorEventModifyLog" keyProperty="id" useGeneratedKeys="true">
@@ -121,7 +118,17 @@
     <select id="paging" parameterType="map" resultMap="DoctorEventModifyLogMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         <where>
+            delete_event is NULL
             <include refid="criteria"/>
+        </where>
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="pagingExcludeDeleteLog" parameterType="map" resultMap="DoctorEventModifyLogMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+
         </where>
         LIMIT #{offset}, #{limit}
     </select>

@@ -71,8 +71,8 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     @Override
     public void modifyHandle(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
-       log.info("modify pig event handler starting, oldPigEvent:{}, inputDto:{}", oldPigEvent, inputDto);
-
+        log.info("modify pig event handler starting, oldPigEvent:{}", oldPigEvent);
+        log.info("inputDto:{}", inputDto);
         //1.校验
         modifyHandleCheck(oldPigEvent, inputDto);
 

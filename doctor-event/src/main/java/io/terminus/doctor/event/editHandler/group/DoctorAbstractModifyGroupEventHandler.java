@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
@@ -67,8 +68,8 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     @Override
     public void modifyHandle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
-        log.info("modify group event handler starting, oldGroupEvent:{}, input:{}", oldGroupEvent, input);
-
+        log.info("modify group event handler starting, oldGroupEvent:{}", oldGroupEvent);
+        log.info("input:{}", input);
         //1.校验
         modifyHandleCheck(oldGroupEvent, input);
 
@@ -371,6 +372,13 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     protected void validGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity, Integer newQuantity){
         Date sumAt = oldEventAt.before(newEventAt) ? oldEventAt : newEventAt;
         List<DoctorDailyGroup> dailyGroupList = doctorDailyGroupDao.findAfterSumAt(groupId, DateUtil.toDateString(sumAt));
+
+        //如果新日期的猪群记录不存在则初始化一个进行校验
+        DoctorDailyGroup doctorDailyGroup = doctorDailyGroupDao.findByGroupIdAndSumAt(groupId, newEventAt);
+        if (isNull(doctorDailyGroup)) {
+            dailyGroupList.add(doctorDailyReportManager.findByGroupIdAndSumAt(groupId, newEventAt));
+        }
+
         if (Objects.equals(oldEventAt, newEventAt)) {
             dailyGroupList.stream()
                     .filter(dailyGroup -> !oldEventAt.before(dailyGroup.getSumAt()))

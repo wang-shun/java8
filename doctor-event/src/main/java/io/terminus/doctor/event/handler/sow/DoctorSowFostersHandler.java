@@ -43,6 +43,7 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
         doctorPigEvent.setQuantity(fostersDto.getFostersCount());
+        doctorPigEvent.setWeight(fostersDto.getFosterTotalWeight());
         return doctorPigEvent;
     }
 

@@ -49,11 +49,12 @@ import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorEventModifyRequest;
+import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorEventModifyLogReadService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
 import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorModifyEventService;
@@ -136,6 +137,8 @@ public class DoctorPigCreateEvents {
     private DoctorModifyEventService doctorModifyEventService;
 
     private static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
+    @RpcConsumer
+    private DoctorEventModifyLogReadService doctorEventModifyLogReadService;
 
     @Autowired
     public DoctorPigCreateEvents(DoctorPigEventWriteService doctorPigEventWriteService,
@@ -526,7 +529,7 @@ public class DoctorPigCreateEvents {
         DoctorBasicInputInfoDto basic = buildBasicInputInfoDto(farmId, pigEvent);
         BasePigEventInputDto inputDto;
         if (Objects.equals(eventType, PigEvent.ENTRY.getKey())) {
-            inputDto = jsonMapper.fromJson(input, DoctorFarmEntryDto.class);
+            inputDto = getEntryDto(input);
             buildEntryEventInput(inputDto, pigEvent);
         } else {
             inputDto = eventInput(pigEvent, input, farmId, pigSex, null);
@@ -546,8 +549,8 @@ public class DoctorPigCreateEvents {
                                                              @RequestParam(required = false) String code,
                                                              @RequestParam Integer pageNo,
                                                              @RequestParam Integer pageSize) {
-        return RespHelper.or500(doctorEventModifyRequestReadService
-                .pagingRequest(DoctorEventModifyRequest.builder().farmId(farmId).status(status).build(), pageNo, pageSize));
+        return RespHelper.or500(doctorEventModifyLogReadService
+                .pageModifyLog(DoctorEventModifyLog.builder().farmId(farmId).build(), pageNo, pageSize));
     }
 
     /**
@@ -557,7 +560,7 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/findModifyReuqest/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public DoctorEventModifyRequestDto findModifyRequest(@PathVariable Long id) {
-        return RespHelper.or500(doctorEventModifyRequestReadService.findDtoById(id));
+        return RespHelper.or500(doctorEventModifyLogReadService.findRequestDto(id));
     }
 
     /**
@@ -773,6 +776,13 @@ public class DoctorPigCreateEvents {
         }
     }
 
+    private BasePigEventInputDto getEntryDto(String input){
+        DoctorFarmEntryDto farmEntryDto = JSON_NON_DEFAULT_MAPPER.fromJson(input, DoctorFarmEntryDto.class);
+        farmEntryDto = doctorValidService.valid(farmEntryDto, farmEntryDto.getPigCode());
+        farmEntryDto.setBreedName(RespHelper.orServEx(doctorBasicReadService.findBasicById(farmEntryDto.getBreed())).getName());
+        farmEntryDto.setBreedTypeName(RespHelper.orServEx(doctorBasicReadService.findBasicById(farmEntryDto.getBreedType())).getName());
+        return farmEntryDto;
+    }
     /**
      * 从json获取pidCode
      * @param inputJson
