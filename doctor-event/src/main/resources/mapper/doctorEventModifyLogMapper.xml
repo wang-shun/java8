@@ -121,6 +121,7 @@
             delete_event is NULL
             <include refid="criteria"/>
         </where>
+        ORDER BY id DESC
         LIMIT #{offset}, #{limit}
     </select>
 

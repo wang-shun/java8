@@ -92,7 +92,6 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
         DoctorPigEvent entryEvent = doctorPigEventDao.findByRelGroupEventId(deleteGroupEvent.getId());
         doctorModifyPigEntryEventHandler.rollbackHandle(entryEvent, operatorId, operatorName);
 
-
         DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.CLOSE.getValue());
         if (notNull(closeEvent)) {
             modifyGroupCloseEventHandler.rollbackHandle(closeEvent, operatorId, operatorName);

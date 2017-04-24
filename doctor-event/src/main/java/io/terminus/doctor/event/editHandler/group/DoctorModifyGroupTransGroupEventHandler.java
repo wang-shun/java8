@@ -30,7 +30,9 @@ import static io.terminus.common.utils.Arguments.notNull;
 @Component
 public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModifyGroupEventHandler{
     @Autowired
-    private DoctorModifyGroupMoveInEventHandler doctorModifyGroupMoveInEventHandler;
+    private DoctorModifyGroupMoveInEventHandler modifyGroupMoveInEventHandler;
+    @Autowired
+    private DoctorModifyGroupNewEventHandler modifyGroupNewEventHandler;
     @Autowired
     private DoctorModifyGroupCloseEventHandler modifyGroupCloseEventHandler;
 
@@ -99,7 +101,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
     @Override
     protected void triggerEventModifyHandle(DoctorGroupEvent newEvent) {
         DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(newEvent.getId(), GroupEventType.MOVE_IN.getValue());
-        doctorModifyGroupMoveInEventHandler.modifyHandle(moveInEvent, buildTriggerGroupEventInput(newEvent));
+        modifyGroupMoveInEventHandler.modifyHandle(moveInEvent, buildTriggerGroupEventInput(newEvent));
     }
 
     @Override
@@ -110,8 +112,11 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
     @Override
     protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
         DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.MOVE_IN.getValue());
-        doctorModifyGroupMoveInEventHandler.rollbackHandle(moveInEvent, operatorId, operatorName);
-
+        modifyGroupMoveInEventHandler.rollbackHandle(moveInEvent, operatorId, operatorName);
+        DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.NEW.getValue());
+        if (notNull(newCreateEvent)) {
+            modifyGroupNewEventHandler.rollbackHandle(newCreateEvent, operatorId, operatorName);
+        }
         DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.CLOSE.getValue());
         if (notNull(closeEvent)) {
             modifyGroupCloseEventHandler.rollbackHandle(closeEvent, operatorId, operatorName);

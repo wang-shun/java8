@@ -10,6 +10,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupNewEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -26,6 +27,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 
 /**
  * Created by xjn on 17/4/14.
@@ -35,7 +38,9 @@ import java.util.Objects;
 public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEventHandler {
 
     @Autowired
-    private DoctorModifyGroupMoveInEventHandler doctorModifyMoveInEventHandler;
+    private DoctorModifyGroupNewEventHandler modifyGroupNewEventHandler;
+    @Autowired
+    private DoctorModifyGroupMoveInEventHandler modifyGroupMoveInEventHandler;
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
@@ -108,10 +113,9 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent) {
-        // TODO: 17/4/19 新建编辑
         //转入编辑
         DoctorGroupEvent oldGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(newPigEvent.getId(), GroupEventType.MOVE_IN.getValue());
-        doctorModifyMoveInEventHandler.modifyHandle(oldGroupEvent, buildTriggerGroupEventInput(newPigEvent));
+        modifyGroupMoveInEventHandler.modifyHandle(oldGroupEvent, buildTriggerGroupEventInput(newPigEvent));
     }
 
     @Override
@@ -131,10 +135,13 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
-        // TODO: 17/4/19 新建回滚
+        DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.NEW.getValue());
+        if (notNull(newCreateEvent)) {
+            modifyGroupNewEventHandler.rollbackHandle(newCreateEvent, operatorId, operatorName);
+        }
         //转入回滚
         DoctorGroupEvent deleteGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.MOVE_IN.getValue());
-        doctorModifyMoveInEventHandler.rollbackHandle(deleteGroupEvent, operatorId, operatorName);
+        modifyGroupMoveInEventHandler.rollbackHandle(deleteGroupEvent, operatorId, operatorName);
     }
 
     @Override
