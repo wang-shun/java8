@@ -85,7 +85,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         //5.更新猪群
         if (isUpdateGroup(changeDto)) {
             DoctorGroup oldGroup = doctorGroupDao.findById(oldGroupEvent.getGroupId());
-            DoctorGroup newGroup = buildNewGroup(oldGroup, changeDto);
+            DoctorGroup newGroup = buildNewGroup(oldGroup, input);
             doctorGroupDao.update(newGroup);
         }
 
@@ -180,7 +180,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     }
 
     @Override
-    public DoctorGroup buildNewGroup(DoctorGroup oldGroup, DoctorEventChangeDto changeDto) {
+    public DoctorGroup buildNewGroup(DoctorGroup oldGroup, BaseGroupInput input) {
         return null;
     }
 

@@ -14,8 +14,8 @@ public class DoctorModifyPigDiseaseEventHandler extends DoctorAbstractModifyPigE
 
     @Override
     public DoctorPigEvent buildNewEvent(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
-        DoctorDiseaseDto diseaseDto = (DoctorDiseaseDto) inputDto;
         DoctorPigEvent doctorPigEvent = super.buildNewEvent(oldPigEvent, inputDto);
+        DoctorDiseaseDto diseaseDto = (DoctorDiseaseDto) inputDto;
         doctorPigEvent.setBasicId(diseaseDto.getDiseaseId());
         doctorPigEvent.setBasicName(diseaseDto.getDiseaseName());
         return doctorPigEvent;

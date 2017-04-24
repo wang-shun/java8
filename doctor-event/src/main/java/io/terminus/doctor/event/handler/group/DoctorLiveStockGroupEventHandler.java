@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.group;
 
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -47,9 +46,6 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
         input.setEventType(GroupEventType.LIVE_STOCK.getValue());
 
         DoctorLiveStockGroupInput liveStock = (DoctorLiveStockGroupInput) input;
-
-        //1.转换下猪只存栏信息
-        DoctorLiveStockGroupInput liveStockEvent = BeanMapper.map(liveStock, DoctorLiveStockGroupInput.class);
 
         //2.创建猪只存栏事件
         DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.LIVE_STOCK, liveStock);

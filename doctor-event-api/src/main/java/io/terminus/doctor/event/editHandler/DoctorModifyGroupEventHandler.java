@@ -31,10 +31,10 @@ public interface DoctorModifyGroupEventHandler {
     /**
      * 构建新猪群信息
      * @param oldGroup 原猪群信息
-     * @param changeDto 变化
+     * @param input 新输入
      * @return 新猪群信息
      */
-    DoctorGroup buildNewGroup(DoctorGroup oldGroup, DoctorEventChangeDto changeDto);
+    DoctorGroup buildNewGroup(DoctorGroup oldGroup, BaseGroupInput input);
 
     /**
      * 根据原track和变化构建新track
