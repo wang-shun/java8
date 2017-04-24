@@ -163,10 +163,6 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         return null;
     }
 
-    protected DoctorEventChangeDto buildEventChange(BasePigEventInputDto oldInputDto, BasePigEventInputDto newInputDto) {
-        return null;
-    }
-
     /**
      * 默认实现
      * @param oldPigEvent 原事件
@@ -307,6 +303,11 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         return true;
     }
 
+    /**
+     * 是否需要更新track(删除)
+     * @param eventType 事件类型
+     * @return 是否需要更新track
+     */
     private boolean isUpdateTrack(Integer eventType) {
         return !IGNORE_EVENT.contains(eventType);
     }

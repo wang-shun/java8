@@ -47,8 +47,7 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         return changeDto;
     }
 
-    @Override
-    protected DoctorEventChangeDto buildEventChange(BasePigEventInputDto oldInputDto, BasePigEventInputDto newInputDto) {
+    private DoctorEventChangeDto buildEventChange(BasePigEventInputDto oldInputDto, BasePigEventInputDto newInputDto) {
         DoctorFarrowingDto newDto = (DoctorFarrowingDto) newInputDto;
         DoctorFarrowingDto oldDto = (DoctorFarrowingDto) oldInputDto;
         return DoctorEventChangeDto.builder()
