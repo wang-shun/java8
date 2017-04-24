@@ -1063,7 +1063,7 @@
         where a.farm_id = #{farmId}
         and a.kind = 1
         and a.type in(6, 7)
-        and a.event_at &lt;= date_add(date(#{date}), INTERVAL 85399 SECOND )
+        and a.event_at &lt;= date_add(date(#{date}), INTERVAL 1 day)
     </select>
 
     <!-- 实时存栏: 在产房的母猪 -->
