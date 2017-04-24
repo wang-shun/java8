@@ -306,4 +306,11 @@
         WHERE sum_at = #{sumAt}
     </select>
 
+    <select id="findAfterSumAt" parameterType="map" resultMap="DoctorDailyGroupMap" >
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE
+        group_id = #{groupId}
+        AND sum_at &gt;= #{sumAt}
+    </select>
+
 </mapper>

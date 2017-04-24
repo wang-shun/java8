@@ -17,6 +17,11 @@ import org.springframework.stereotype.Component;
 public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModifyGroupEventHandler{
 
     @Override
+    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+        return false;
+    }
+
+    @Override
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         DoctorTransFarmGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorTransFarmGroupInput.class);
         DoctorTransFarmGroupInput newInput = (DoctorTransFarmGroupInput) input;

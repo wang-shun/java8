@@ -30,6 +30,15 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
     private DoctorModifyGroupCloseEventHandler modifyGroupCloseEventHandler;
 
     @Override
+    protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        super.modifyHandleCheck(oldGroupEvent, input);
+        DoctorChangeGroupInput newInput = (DoctorChangeGroupInput) input;
+        validGroupLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getGroupCode(),
+                oldGroupEvent.getEventAt(), DateUtil.toDate(newInput.getEventAt()),
+                oldGroupEvent.getQuantity(), newInput.getQuantity());
+    }
+
+    @Override
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         DoctorChangeGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorChangeGroupInput.class);
         DoctorChangeGroupInput newInput = (DoctorChangeGroupInput) input;
@@ -95,6 +104,11 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
     }
 
     @Override
+    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+        return validGroupLiveStock(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), -deleteGroupEvent.getQuantity());
+    }
+
+    @Override
     protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
         DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.CLOSE.getValue());
         if (notNull(closeEvent)) {
@@ -144,7 +158,8 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
 
     }
 
-    private DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+    @Override
+    protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
         updateChange(oldDailyGroup, changeDto.getQuantityChange(), changeDto.getChangeTypeId());
         if (changeDto.getIsSowTrigger()) {
             oldDailyGroup.setUnweanCount(EventUtil.minusInt(oldDailyGroup.getUnweanCount(), changeDto.getQuantityChange()));

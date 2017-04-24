@@ -65,7 +65,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
-    public static final List<Integer> IGNORE_EVENT = Lists.newArrayList(PigEvent.VACCINATION.getKey(), PigEvent.DISEASE.getKey(), PigEvent.SEMEN.getKey());
+    public static final List<Integer> IGNORE_EVENT = Lists.newArrayList(PigEvent.CONDITION.getKey(), PigEvent.VACCINATION.getKey(), PigEvent.DISEASE.getKey(), PigEvent.SEMEN.getKey());
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {

@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.editHandler.pig;
 
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -8,4 +9,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigEventHandler {
+    @Override
+    protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
+        return false;
+    }
 }

@@ -44,6 +44,15 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
     private DoctorPigEventDao doctorPigEventDao;
     @Autowired
     private DoctorBarnDao doctorBarnDao;
+
+    @Override
+    protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        super.modifyHandleCheck(oldGroupEvent, input);
+        validGroupLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getGroupCode(),
+                oldGroupEvent.getEventAt(), DateUtil.toDate(input.getEventAt()),
+                1, 1);
+    }
+
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         DoctorTurnSeedGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorTurnSeedGroupInput.class);
@@ -71,6 +80,11 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
     protected void triggerEventModifyHandle(DoctorGroupEvent newEvent) {
         DoctorPigEvent entryEvent = doctorPigEventDao.findByRelGroupEventId(newEvent.getId());
         doctorModifyPigEntryEventHandler.modifyHandle(entryEvent, buildTriggerEventInput(newEvent));
+    }
+
+    @Override
+    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+        return validGroupLiveStock(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), -deleteGroupEvent.getQuantity());
     }
 
     @Override
@@ -115,13 +129,19 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
 
     }
 
-    private DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+    @Override
+    protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
         oldDailyGroup.setOuterOut(EventUtil.plusInt(oldDailyGroup.getOuterOut(), changeDto.getQuantityChange()));
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
         return oldDailyGroup;
     }
 
-    private DoctorFarmEntryDto buildTriggerEventInput(DoctorGroupEvent turnSeedEvent) {
+    /**
+     * 构建触发的猪事件输入
+     * @param turnSeedEvent 转种猪事件
+     * @return 进场输入
+     */
+    public DoctorFarmEntryDto buildTriggerEventInput(DoctorGroupEvent turnSeedEvent) {
         DoctorFarmEntryDto farmEntryDto = new DoctorFarmEntryDto();
         DoctorTurnSeedGroupInput input = JSON_MAPPER.fromJson(turnSeedEvent.getExtra(), DoctorTurnSeedGroupInput.class);
         DoctorBarn entryBarn = doctorBarnDao.findById(input.getToBarnId());

@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.editHandler.group;
 
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.SourceType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
@@ -16,17 +18,23 @@ import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
+import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by xjn on 17/4/13.
@@ -61,11 +69,11 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     public void modifyHandle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         log.info("modify group event handler starting, oldGroupEvent:{}, input:{}", oldGroupEvent, input);
 
-        //1.构建变化记录
-        DoctorEventChangeDto changeDto = buildEventChange(oldGroupEvent, input);
+        //1.校验
+        modifyHandleCheck(oldGroupEvent, input);
 
-        //2.校验
-        modifyHandleCheck(oldGroupEvent, changeDto);
+        //2.构建变化记录
+        DoctorEventChangeDto changeDto = buildEventChange(oldGroupEvent, input);
 
         //3.更新事件
         DoctorGroupEvent newEvent = buildNewEvent(oldGroupEvent, input);
@@ -100,15 +108,13 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     @Override
     public Boolean canRollback(DoctorGroupEvent deleteGroupEvent) {
         return Objects.equals(deleteGroupEvent.getIsAuto(), IsOrNot.NO.getValue())
-                && Objects.equals(deleteGroupEvent.getEventSource(), SourceType.INPUT.getValue());
+                && Objects.equals(deleteGroupEvent.getEventSource(), SourceType.INPUT.getValue())
+                && rollbackHandleCheck(deleteGroupEvent);
     }
     
     @Override
     public void rollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
         log.info("rollback handle starting, deleteGroupEvent:{}", deleteGroupEvent);
-
-        //1.删除校验
-        rollbackHandleCheck(deleteGroupEvent);
 
         //2.删除触发事件
         triggerEventRollbackHandle(deleteGroupEvent, operatorId, operatorName);
@@ -150,10 +156,11 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     /**
      * 编辑校验的具体事件
      * @param oldGroupEvent 原事件
-     * @param changeDto 变化
+     * @param input 输入
      */
-    protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, DoctorEventChangeDto changeDto) {
-
+    protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findNewGroupByGroupId(oldGroupEvent.getGroupId());
+        validEventAt(DateUtil.toDate(input.getEventAt()), notNull(newCreateEvent) ? newCreateEvent.getEventAt() : null);
     }
 
     @Override
@@ -200,7 +207,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * 删除事件校验的具体实现(删除)
      * @param deleteGroupEvent 删除事件
      */
-    protected void rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {}
+    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+        return true;
+    }
 
     /**
      * 触发事件的删除处理(删除)
@@ -243,11 +252,21 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     public void updateDailyOfNew(DoctorGroupEvent newGroupEvent, BaseGroupInput input) {}
 
     /**
+     * 构建猪群日记录
+     * @param oldDailyGroup 原记录
+     * @param changeDto 变化量
+     * @return 新猪群记录
+     */
+    protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+        return null;
+    }
+
+    /**
      * 是否需要更新猪群(编辑)
      * @param changeDto 变化记录
      * @return
      */
-    private boolean isUpdateGroup(DoctorEventChangeDto changeDto){
+    private boolean isUpdateGroup(DoctorEventChangeDto changeDto) {
         //// TODO: 17/4/13 是否需要更新
         return true;
     }
@@ -326,11 +345,65 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     }
 
     /**
+     * 校验猪群之后存栏数量(不小于零)
+     * @param groupId 猪群id
+     * @param sumAt 统计时间(包括)
+     * @param changeCount 变化数量
+     */
+    protected boolean validGroupLiveStock(Long groupId, Date sumAt, Integer changeCount) {
+        List<DoctorDailyGroup> dailyGroupList = doctorDailyGroupDao.findAfterSumAt(groupId, DateUtil.toDateString(sumAt));
+        for(DoctorDailyGroup dailyGroup : dailyGroupList){
+            if (EventUtil.plusInt(dailyGroup.getEnd(), changeCount) < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 猪群存栏校验
+     * @param groupId 猪群id
+     * @param oldEventAt 原时间
+     * @param newEventAt 新时间
+     * @param oldQuantity 原数量
+     * @param newQuantity 新数量
+     */
+    protected void validGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity, Integer newQuantity){
+        Date sumAt = oldEventAt.before(newEventAt) ? oldEventAt : newEventAt;
+        List<DoctorDailyGroup> dailyGroupList = doctorDailyGroupDao.findAfterSumAt(groupId, DateUtil.toDateString(sumAt));
+        if (Objects.equals(oldEventAt, newEventAt)) {
+            dailyGroupList.stream()
+                    .filter(dailyGroup -> !oldEventAt.before(dailyGroup.getSumAt()))
+                    .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.minusInt(dailyGroup.getEnd(), EventUtil.minusInt(newQuantity, oldQuantity))));
+        } else {
+            dailyGroupList.stream()
+                    .filter(dailyGroup -> !oldEventAt.before(dailyGroup.getSumAt()))
+                    .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.minusInt(dailyGroup.getEnd(), oldQuantity)));
+            dailyGroupList.stream()
+                    .filter(dailyGroup -> !newEventAt.before(dailyGroup.getSumAt()))
+                    .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.minusInt(dailyGroup.getEnd(), newQuantity)));
+        }
+        for (DoctorDailyGroup dailyGroup : dailyGroupList) {
+            expectTrue(notNull(dailyGroup.getEnd()) && dailyGroup.getEnd() >= 0, "group.live.stock.lower.zero", groupCode, DateUtil.toDateString(dailyGroup.getSumAt()));
+        }
+    }
+    /**
      * 获取日期下一天
      * @param date 日期
      * @return 下一天
      */
     public static Date getAfterDay(Date date) {
         return new DateTime(date).plusDays(1).toDate();
+    }
+
+    /**
+     * 事件时间校验, 不小于下限时间, 不大于当前事件
+     * @param eventAt 事件时间
+     * @param lastEventAt 下限时间
+     */
+    public static void validEventAt(Date eventAt, Date lastEventAt) {
+        if ((notNull(lastEventAt) && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEventAt))) || Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date()))) {
+            throw new InvalidException("event.at.error", DateUtil.toDateString(lastEventAt), DateUtil.toDateString(new Date()));
+        }
     }
 }

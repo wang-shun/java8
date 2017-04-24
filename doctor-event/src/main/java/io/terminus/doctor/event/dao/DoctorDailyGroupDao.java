@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
-import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorGroupChangeSum;
 import io.terminus.doctor.event.model.DoctorGroupStock;
 import org.springframework.stereotype.Repository;
@@ -127,5 +126,15 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
      */
     public List<DoctorDailyGroup> findGroupInfoBySumAt(String sumAt) {
         return getSqlSession().selectList(sqlId("findGroupInfoBySumAt"), ImmutableMap.of("sumAt", sumAt));
+    }
+
+    /**
+     * 查询某一猪群某天后包括某天的记录
+     * @param groupId 猪群id
+     * @param sumAt 统计开始时间(包括)
+     * @return
+     */
+    public List<DoctorDailyGroup> findAfterSumAt(Long groupId, String sumAt) {
+        return getSqlSession().selectList(sqlId("findAfterSumAt"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt));
     }
 }

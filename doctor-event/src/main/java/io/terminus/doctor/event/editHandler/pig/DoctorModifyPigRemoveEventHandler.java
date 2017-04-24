@@ -186,7 +186,7 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
      * @param removalEvent 离场事件
      */
     private void updateNpd(DoctorPigEvent removalEvent){
-            //如果是死亡 或者淘汰,查找最近一次配种事件
+            //如果是死亡或者淘汰,查找最近一次配种事件
             DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(removalEvent.getPigId(), removalEvent.getParity());
             if (lastMate == null) {
                 return;
