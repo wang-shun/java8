@@ -68,7 +68,7 @@ public class DoctorProfitJobs {
             }
             log.info("daily profit job start, now is:{}", DateUtil.toDateTimeString(new Date()));
             List<Long> farmIds = getAllFarmIds();
-            doctorGroupProfitManage.sumDoctorProfitMaterialOrPig(farmIds);
+            doctorGroupProfitManage.sumDoctorProfitMaterialOrPig(farmIds, new Date());
             log.info("daily profit job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("daily profit job failed, cause:{}", Throwables.getStackTraceAsString(e));
@@ -76,5 +76,39 @@ public class DoctorProfitJobs {
     }
     private List<Long> getAllFarmIds() {
         return RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
+    }
+
+    @RequestMapping(value = "/all", method = RequestMethod.GET)
+    public void profitReportAll() {
+        try {
+            if(!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("daily all profit job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+            List<Long> farmIds = getAllFarmIds();
+
+
+            for (int i = 0; i <= 6 ;i++) {
+                int finalI = i;
+                new Thread(new Runnable() {
+                    Date dateStart = DateUtils.addYears(DateUtil.toDate("2011-01-01"), finalI);
+                    Date nowDate = DateUtil.monthStart(DateUtils.addYears(dateStart, 1));
+                    @Override
+                    public void run() {
+                        Date date = dateStart;
+                        while (!DateUtil.inSameYearMonth(date, nowDate)) {
+                            log.info("profit job time, now is:{},{}", DateUtil.toDateTimeString(date),Thread.currentThread().getName());
+                            doctorGroupProfitManage.sumDoctorProfitMaterialOrPig(farmIds, date);
+                            date = DateUtils.addMonths(date, 1);
+                        }
+                    }
+                },"TTT-->>"+i+"<<--:").start();
+            }
+
+            log.info("daily all profit job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        } catch (Exception e) {
+            log.error("daily all profit job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
     }
 }
