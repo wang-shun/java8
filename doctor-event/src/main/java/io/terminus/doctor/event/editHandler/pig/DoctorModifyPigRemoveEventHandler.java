@@ -33,7 +33,6 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
     private final  Map<Integer, Integer> EVENT_TO_STATUS = Maps.newHashMap();
 
     {
-        EVENT_TO_STATUS.put(PigEvent.ENTRY.getKey(), PigStatus.Entry.getKey());
         EVENT_TO_STATUS.put(PigEvent.MATING.getKey(), PigStatus.Mate.getKey());
         EVENT_TO_STATUS.put(PigEvent.TO_FARROWING.getKey(), PigStatus.Farrow.getKey());
         EVENT_TO_STATUS.put(PigEvent.FARROWING.getKey(), PigStatus.FEED.getKey());
@@ -208,10 +207,20 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
     }
 
     private Integer getStatus(DoctorPigEvent pigEvent) {
+        //1.进场
+        if (Objects.equals(pigEvent.getType(), PigEvent.ENTRY.getKey())) {
+            return Objects.equals(pigEvent.getKind(), DoctorPig.PigSex.SOW.getKey()) ?
+                    PigStatus.Entry.getKey() :
+                    PigStatus.BOAR_ENTRY.getKey();
+        }
+
+        //2.妊娠检查
         if (Objects.equals(pigEvent.getType(), PigEvent.PREG_CHECK.getKey())) {
             return Objects.equals(pigEvent.getPregCheckResult(), PregCheckResult.YANG.getKey())
                     ? PigStatus.Pregnancy.getKey() : PigStatus.KongHuai.getKey();
         }
+
+        //3.其他事件
         return EVENT_TO_STATUS.get(pigEvent.getType());
     }
 }

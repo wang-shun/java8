@@ -91,7 +91,11 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
     @Override
     public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigTrack toTrack = super.buildPigTrack(executeEvent, fromTrack);
-        toTrack.setStatus(PigStatus.Removal.getKey());
+        if (Objects.equals(executeEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
+            toTrack.setStatus(PigStatus.Removal.getKey());
+        } else {
+            toTrack.setStatus(PigStatus.BOAR_LEAVE.getKey());
+        }
         toTrack.setIsRemoval(IsOrNot.YES.getValue());
         return toTrack;
     }
