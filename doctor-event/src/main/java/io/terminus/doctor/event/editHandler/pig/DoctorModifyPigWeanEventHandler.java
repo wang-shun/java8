@@ -55,6 +55,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
     public DoctorPigEvent buildNewEvent(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         DoctorPigEvent newEvent = super.buildNewEvent(oldPigEvent, inputDto);
         DoctorWeanDto newDto = (DoctorWeanDto) inputDto;
+        newEvent.setFeedDays(getWeanAvgAge(oldPigEvent.getPigId(), oldPigEvent.getParity(), newDto.eventAt()));
         newEvent.setWeanCount(newDto.getPartWeanPigletsCount());
         newEvent.setWeanAvgWeight(newDto.getPartWeanAvgWeight());
         return newEvent;
@@ -168,7 +169,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
      * @param eventAt 事件事件
      * @return 断奶平均日龄
      */
-    private Integer getWeanAvgAge(Long pigId, Integer parity, Date eventAt) {
+    public Integer getWeanAvgAge(Long pigId, Integer parity, Date eventAt) {
         DoctorPigEvent farrowEvent = doctorPigEventDao.getFarrowEventByParity(pigId, parity);
         return DateUtil.getDeltaDays(farrowEvent.getEventAt(), eventAt) + 1;
     }

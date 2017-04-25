@@ -24,8 +24,6 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -76,17 +74,10 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorWeanDto weanDto = (DoctorWeanDto) inputDto;
-        DoctorPigEvent lastFarrow = doctorPigEventDao.queryLastFarrowing(weanDto.getPigId());
-        expectTrue(notNull(lastFarrow), "last.farrow.not.null", inputDto.getPigId());
-        //分娩时间
-        DateTime farrowingDate = new DateTime(lastFarrow.getEventAt());
-
-        //断奶时间
-        DateTime partWeanDate = new DateTime(weanDto.eventAt());
-        doctorPigEvent.setPartweanDate(partWeanDate.toDate());
+        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
 
         //哺乳天数
-        doctorPigEvent.setFeedDays(Math.abs(Days.daysBetween(farrowingDate, partWeanDate).getDays()));
+        doctorPigEvent.setFeedDays(doctorModifyPigWeanEventHandler.getWeanAvgAge(pigTrack.getPigId(), pigTrack.getCurrentParity(), weanDto.eventAt()));
 
         //断奶只数和断奶均重
         doctorPigEvent.setWeanCount(weanDto.getPartWeanPigletsCount());
@@ -99,7 +90,6 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setHealthCount(quaQty);    //额 这个字段存一下合格数吧
         doctorPigEvent.setWeakCount(doctorPigEvent.getWeanCount() - quaQty);
 
-        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
         expectTrue(notNull(pigTrack), "pig.track.not.null", inputDto.getPigId());
         expectTrue(notNull(pigTrack.getGroupId()), "farrow.groupId.not.null", weanDto.getPigId());
         doctorPigEvent.setGroupId(pigTrack.getGroupId());   //必须设置下断奶的groupId

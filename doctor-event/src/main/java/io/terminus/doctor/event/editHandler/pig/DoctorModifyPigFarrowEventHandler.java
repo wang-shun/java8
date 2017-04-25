@@ -65,6 +65,7 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
                 .mnyCountChange(EventUtil.minusInt(newDto.getMnyCount(), oldDto.getMnyCount()))
                 .blackCountChange(EventUtil.minusInt(newDto.getBlackCount(), oldDto.getBlackCount()))
                 .deadCountChange(EventUtil.minusInt(newDto.getDeadCount(), oldDto.getDeadCount()))
+                .jxCountChange(EventUtil.minusInt(newDto.getJxCount(), oldDto.getJxCount()))
                 .build();
     }
 
