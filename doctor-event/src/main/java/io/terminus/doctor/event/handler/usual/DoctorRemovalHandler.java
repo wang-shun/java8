@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.usual;
 
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -14,6 +15,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -30,6 +32,8 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
 @Component
 @Slf4j
 public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
+    @Autowired
+    private DoctorModifyPigRemoveEventHandler modifyPigRemoveEventHandler;
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         super.handleCheck(executeEvent, fromTrack);
@@ -103,5 +107,11 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
             }
         }
         return doctorPigEvent;
+    }
+
+    @Override
+    protected void updateDailyForNew(DoctorPigEvent newPigEvent) {
+        BasePigEventInputDto newDto = JSON_MAPPER.fromJson(newPigEvent.getExtra(), DoctorRemovalDto.class);
+        modifyPigRemoveEventHandler.updateDailyOfNew(newPigEvent, newDto);
     }
 }
