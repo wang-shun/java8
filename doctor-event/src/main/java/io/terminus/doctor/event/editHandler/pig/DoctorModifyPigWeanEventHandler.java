@@ -46,7 +46,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
                 .businessId(oldPigEvent.getPigId())
                 .newEventAt(newDto.eventAt())
                 .oldEventAt(oldDto.eventAt())
-                .weanCountChange(EventUtil.minusInt(newDto.getWeanPigletsCount(), oldDto.getPartWeanPigletsCount()))
+                .weanCountChange(EventUtil.minusInt(newDto.getPartWeanPigletsCount(), oldDto.getPartWeanPigletsCount()))
                 .weanAvgWeight(newDto.getPartWeanAvgWeight())
                 .build();
     }

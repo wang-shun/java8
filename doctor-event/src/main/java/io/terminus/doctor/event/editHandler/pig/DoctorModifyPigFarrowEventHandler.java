@@ -25,6 +25,7 @@ import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
@@ -81,6 +82,7 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         newEvent.setBlackCount(newDto.getBlackCount());
         newEvent.setJxCount(newDto.getJxCount());
         newEvent.setDeadCount(newDto.getDeadCount());
+        newEvent.setPregDays(getPregDays(oldPigEvent.getPigId(), oldPigEvent.getParity(), inputDto.eventAt()));
         return newEvent;
     }
 
@@ -230,5 +232,17 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
 
         input.setRelPigEventId(pigEvent.getId());
         return input;
+    }
+
+    /**
+     * 怀孕天数
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @param eventAt 分娩时间
+     * @return 怀孕天数
+     */
+    public int getPregDays(Long pigId, Integer parity, Date eventAt) {
+        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(pigId, parity);
+        return DateUtil.getDeltaDays(firstMate.getEventAt(), eventAt) + 1;
     }
 }

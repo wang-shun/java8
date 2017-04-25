@@ -115,7 +115,7 @@ public class EventUtil {
         if (allQty == 0) {
             return 0D;
         }
-        return new BigDecimal(allWeight).divide(new BigDecimal(allQty), 2, BigDecimal.ROUND_HALF_UP).intValue();
+        return new BigDecimal(allWeight).divide(new BigDecimal(allQty), 2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     /**
