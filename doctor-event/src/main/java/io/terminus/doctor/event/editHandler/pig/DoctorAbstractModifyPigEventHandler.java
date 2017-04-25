@@ -169,7 +169,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @param inputDto 新输入
      */
     protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
-        DoctorPigEvent lastEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(oldPigEvent.getPigId(), oldPigEvent.getEventAt());
+        DoctorPigEvent lastEvent = doctorPigEventDao.getLastStatusEventBeforeEventAtExcludeId(oldPigEvent.getPigId(), oldPigEvent.getEventAt(), oldPigEvent.getId());
         validEventAt(inputDto.eventAt(), notNull(lastEvent) ? lastEvent.getEventAt() : null);
     }
 

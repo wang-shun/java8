@@ -731,6 +731,7 @@ public class DoctorPigCreateEvents {
                 DoctorMatingDto matingDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorMatingDto.class);
                 DoctorPig matingBoar = expectNotNull(RespHelper.or500(doctorPigReadService.findPigById(matingDto.getMatingBoarPigId())), "mating.boar.not.null", matingDto.getMatingBoarPigId());
                 matingDto.setMatingBoarPigCode(matingBoar.getPigCode());
+                matingDto.setOperatorName(RespHelper.orServEx(doctorGroupWebService.findRealName(matingDto.getOperatorId())));
                 return doctorValidService.valid(matingDto, doctorPig.getPigCode());
             case TO_PREG:
                 DoctorChgLocationDto chgLocationDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorChgLocationDto.class);
@@ -780,7 +781,9 @@ public class DoctorPigCreateEvents {
         DoctorFarmEntryDto farmEntryDto = JSON_NON_DEFAULT_MAPPER.fromJson(input, DoctorFarmEntryDto.class);
         farmEntryDto = doctorValidService.valid(farmEntryDto, farmEntryDto.getPigCode());
         farmEntryDto.setBreedName(RespHelper.orServEx(doctorBasicReadService.findBasicById(farmEntryDto.getBreed())).getName());
-        farmEntryDto.setBreedTypeName(RespHelper.orServEx(doctorBasicReadService.findBasicById(farmEntryDto.getBreedType())).getName());
+        if (notNull(farmEntryDto.getBreedType())) {
+            farmEntryDto.setBreedTypeName(RespHelper.orServEx(doctorBasicReadService.findBasicById(farmEntryDto.getBreedType())).getName());
+        }
         return farmEntryDto;
     }
     /**
