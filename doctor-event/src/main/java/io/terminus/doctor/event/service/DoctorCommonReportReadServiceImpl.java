@@ -106,7 +106,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     @Override
     public Response<DoctorCommonReportTrendDto> findWeeklyReportTrendByFarmIdAndSumAt(Long farmId, Integer year, Integer week, Integer index) {
         String weekStr = DateUtil.getYearWeek(MoreObjects.firstNonNull(year, DateTime.now().getWeekyear()), MoreObjects.firstNonNull(week, DateTime.now().getWeekOfWeekyear())); //取周一代表一周
-
+        log.info("find weekly report, week is : {}", weekStr);
         try {
             //如果查询未来的数据, 返回失败查询
             if (weekStr.compareTo(DateUtil.getYearWeek(new Date())) == 1) {
