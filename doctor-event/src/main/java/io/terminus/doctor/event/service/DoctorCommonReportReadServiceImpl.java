@@ -6,28 +6,34 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
-import io.terminus.doctor.event.dao.*;
+import io.terminus.doctor.event.dao.DoctorBoarMonthlyReportDao;
+import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
+import io.terminus.doctor.event.dao.DoctorDailyReportDao;
+import io.terminus.doctor.event.dao.DoctorKpiDao;
+import io.terminus.doctor.event.dao.DoctorParityMonthlyReportDao;
+import io.terminus.doctor.event.dao.DoctorRangeReportDao;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
 import io.terminus.doctor.event.enums.ReportRangeType;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.model.DoctorBoarMonthlyReport;
+import io.terminus.doctor.event.model.DoctorDailyReportSum;
+import io.terminus.doctor.event.model.DoctorGroupChangeSum;
+import io.terminus.doctor.event.model.DoctorParityMonthlyReport;
+import io.terminus.doctor.event.model.DoctorRangeReport;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -106,7 +112,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     @Override
     public Response<DoctorCommonReportTrendDto> findWeeklyReportTrendByFarmIdAndSumAt(Long farmId, Integer year, Integer week, Integer index) {
         String weekStr = DateUtil.getYearWeek(MoreObjects.firstNonNull(year, DateTime.now().getWeekyear()), MoreObjects.firstNonNull(week, DateTime.now().getWeekOfWeekyear())); //取周一代表一周
-
+        log.info("find weekly report, week is : {}", weekStr);
         try {
             //如果查询未来的数据, 返回失败查询
             if (weekStr.compareTo(DateUtil.getYearWeek(new Date())) == 1) {
