@@ -38,11 +38,11 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
     @Override
     public DoctorPigEvent buildNewEvent(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildNewEvent(oldPigEvent, inputDto);
-        DoctorMatingDto doctorMatingDto = (DoctorMatingDto) inputDto;
-        doctorPigEvent.setMateType(doctorMatingDto.getMatingType());
-        doctorPigEvent.setBoarCode(doctorMatingDto.getMatingBoarPigCode());
-        doctorPigEvent.setOperatorName(doctorMatingDto.getOperatorName());
-        doctorPigEvent.setOperatorId(doctorMatingDto.getOperatorId());
+        DoctorMatingDto newDto = (DoctorMatingDto) inputDto;
+        doctorPigEvent.setMateType(newDto.getMatingType());
+        doctorPigEvent.setBoarCode(newDto.getMatingBoarPigCode());
+        doctorPigEvent.setOperatorName(newDto.getOperatorName());
+        doctorPigEvent.setOperatorId(newDto.getOperatorId());
         return doctorPigEvent;
     }
 

@@ -15,6 +15,7 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -35,6 +36,7 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     private DoctorGroupEventDao doctorGroupEventDao;
 
     @Override
+    @Transactional
     public RespWithEx<Boolean> modifyPigEvent(BasePigEventInputDto inputDto, Long eventId, Integer eventType) {
         try {
             DoctorPigEvent oldPigEvent = doctorPigEventDao.findById(eventId);
@@ -50,6 +52,7 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     }
 
     @Override
+    @Transactional
     public RespWithEx<Boolean> modifyGroupEvent(BaseGroupInput inputDto, Long eventId, Integer eventType) {
         try {
             DoctorGroupEvent oldGroupEvent = doctorGroupEventDao.findById(eventId);

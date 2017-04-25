@@ -56,6 +56,7 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
         oldPig.setBoarType(newDto.getBoarType());
         oldPig.setPigFatherCode(newDto.getFatherCode());
         oldPig.setPigMotherCode(newDto.getMotherCode());
+        oldPig.setBirthDate(newDto.getBirthday());
         return oldPig;
     }
 

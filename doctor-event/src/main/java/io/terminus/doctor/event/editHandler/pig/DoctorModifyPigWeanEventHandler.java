@@ -19,6 +19,7 @@ import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
@@ -69,6 +70,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
         if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
             DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
+            changeDto.setWeanDayAge(getWeanAvgAge(oldPigEvent.getPigId(), oldPigEvent.getParity(), changeDto.getOldEventAt()));
             doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
         } else {
             updateDailyOfDelete(oldPigEvent);
@@ -76,8 +78,6 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         }
 
     }
-
-
 
     @Override
     protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
@@ -110,13 +110,12 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
 
     @Override
     public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
-        DoctorPigEvent farrowEvent = doctorPigEventDao.getFarrowEventByParity(oldPigEvent.getPigId(), oldPigEvent.getParity());
         DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .weanAvgWeight(oldPigEvent.getWeanAvgWeight())
                 .weanCountChange(-oldPigEvent.getWeanCount())
                 .weanNestChange(-1)
-                .weanDayAge(DateUtil.getDeltaDays(farrowEvent.getEventAt(), oldPigEvent.getEventAt()) + 1)
+                .weanDayAge(getWeanAvgAge(oldPigEvent.getPigId(), oldPigEvent.getParity(), oldPigEvent.getEventAt()))
                 .build();
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
 
@@ -124,14 +123,13 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
 
     @Override
     public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
-        DoctorPigEvent farrowEvent = doctorPigEventDao.getFarrowEventByParity(newPigEvent.getPigId(), newPigEvent.getParity());
         DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
         DoctorWeanDto weanDto2 = (DoctorWeanDto) inputDto;
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .weanAvgWeight(weanDto2.getPartWeanAvgWeight())
                 .weanCountChange(weanDto2.getPartWeanPigletsCount())
                 .weanNestChange(1)
-                .weanDayAge(DateUtil.getDeltaDays(farrowEvent.getEventAt(), inputDto.eventAt()) + 1)
+                .weanDayAge(getWeanAvgAge(newPigEvent.getPigId(), newPigEvent.getParity(), inputDto.eventAt()))
                 .build();
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
 
@@ -161,5 +159,17 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         input.setCreatorName(pigEvent.getCreatorName());
         input.setRelPigEventId(pigEvent.getId());
         return input;
+    }
+
+    /**
+     * 获取
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @param eventAt 事件事件
+     * @return 断奶平均日龄
+     */
+    private Integer getWeanAvgAge(Long pigId, Integer parity, Date eventAt) {
+        DoctorPigEvent farrowEvent = doctorPigEventDao.getFarrowEventByParity(pigId, parity);
+        return DateUtil.getDeltaDays(farrowEvent.getEventAt(), eventAt) + 1;
     }
 }
