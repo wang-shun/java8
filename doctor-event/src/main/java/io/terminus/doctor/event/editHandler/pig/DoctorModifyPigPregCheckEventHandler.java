@@ -7,6 +7,7 @@ import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
+import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
@@ -28,6 +29,13 @@ import static io.terminus.common.utils.Arguments.notNull;
 @Component
 public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPigEventHandler {
 
+    private final Map<Integer, Integer> PREG_CHECK_RESULT = Maps.newHashMap();
+    {
+        PREG_CHECK_RESULT.put(PregCheckResult.YANG.getKey(), PregCheckResult.YANG.getKey());
+        PREG_CHECK_RESULT.put(PregCheckResult.YING.getKey(), KongHuaiPregCheckResult.YING.getKey());
+        PREG_CHECK_RESULT.put(PregCheckResult.FANQING.getKey(), KongHuaiPregCheckResult.FANQING.getKey());
+        PREG_CHECK_RESULT.put(PregCheckResult.LIUCHAN.getKey(), KongHuaiPregCheckResult.LIUCHAN.getKey());
+    }
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         DoctorPregChkResultDto newDto = (DoctorPregChkResultDto) inputDto;
@@ -55,7 +63,8 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 ? PigStatus.Pregnancy.getKey() : PigStatus.KongHuai.getKey();
         oldPigTrack.setStatus(newStatus);
         Map<String, Object> extra = MoreObjects.firstNonNull(oldPigTrack.getExtraMap(), Maps.newHashMap());
-        extra.put("pregCheckResult", changeDto.getNewPregCheckResult());
+        extra.put("pregCheckResult", PREG_CHECK_RESULT.get(changeDto.getNewPregCheckResult()));
+        oldPigTrack.setExtraMap(extra);
         return oldPigTrack;
     }
 
