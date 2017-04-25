@@ -1,10 +1,12 @@
 package io.terminus.doctor.event.editHandler.group;
 
+import com.google.common.collect.Lists;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -15,6 +17,7 @@ import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
@@ -85,8 +88,9 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
             oldGroupTrack.setUnweanQty(EventUtil.plusInt(oldGroupTrack.getUnweanQty(), changeDto.getQuantityChange()));
             oldGroupTrack.setHealthyQty(EventUtil.plusInt(oldGroupTrack.getHealthyQty(), changeDto.getGroupHealthyQtyChange()));
             oldGroupTrack.setWeakQty(EventUtil.plusInt(oldGroupTrack.getWeakQty(), changeDto.getGroupWeakQtyChange()));
-
         }
+        oldGroupTrack.setAvgDayAge(getAvgDay(oldGroupTrack.getGroupId()));
+        oldGroupTrack.setBirthDate(DateTime.now().minusDays(oldGroupTrack.getAvgDayAge()).toDate());
         return oldGroupTrack;
     }
 
@@ -114,6 +118,8 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         if (notNull(deleteGroupEvent.getSowId())) {
             oldGroupTrack.setNest(EventUtil.minusInt(oldGroupTrack.getNest(), 1));
         }
+        oldGroupTrack.setAvgDayAge(getAvgDay(oldGroupTrack.getGroupId()));
+        oldGroupTrack.setBirthDate(DateTime.now().minusDays(oldGroupTrack.getAvgDayAge()).toDate());
         return buildNewTrack(oldGroupTrack, buildEventChange(deleteGroupEvent, new DoctorMoveInGroupInput()));
     }
 
@@ -178,5 +184,30 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
     private Integer getTransGroupType(DoctorGroupEvent moveInEvent) {
         return !Objects.equals(moveInEvent.getInType(), InType.GROUP.getValue()) ?
                 DoctorGroupEvent.TransGroupType.OUT.getValue() : moveInEvent.getTransGroupType();
+    }
+
+    /**
+     * 获取猪群的日龄
+     * @param groupId 猪群id
+     * @return 日龄
+     */
+    public int getAvgDay(Long groupId) {
+        List<Integer> includeTypes = Lists.newArrayList(GroupEventType.CHANGE.getValue(), GroupEventType.MOVE_IN.getValue(),
+                GroupEventType.TRANS_FARM.getValue(), GroupEventType.TRANS_GROUP.getValue());
+        List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypes(groupId, includeTypes);
+        int currentQuantity = 0;
+        int avgDay = 0;
+        Date lastEvent = new Date();
+        for (DoctorGroupEvent groupEvent : groupEventList) {
+            if (Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
+                avgDay = avgDay + DateUtil.getDeltaDays(lastEvent, groupEvent.getEventAt());
+                avgDay = EventUtil.getAvgDayAge(avgDay, currentQuantity, groupEvent.getAvgDayAge(), groupEvent.getQuantity());
+                currentQuantity += groupEvent.getQuantity();
+                lastEvent = groupEvent.getEventAt();
+            } else {
+                currentQuantity -= groupEvent.getQuantity();
+            }
+        }
+        return avgDay + DateUtil.getDeltaDays(lastEvent, new Date());
     }
 }

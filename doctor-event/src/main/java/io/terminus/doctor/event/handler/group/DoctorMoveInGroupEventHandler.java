@@ -27,7 +27,6 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -78,8 +77,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         groupTrack.setSowQty(EventUtil.plusInt(groupTrack.getSowQty(), moveIn.getSowQty()));
 
         //重新计算日龄, 按照事件录入日期计算
-        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()) + deltaDays);
+        groupTrack.setAvgDayAge(doctorModifyGroupMoveInEventHandler.getAvgDay(groupTrack.getGroupId()));
 
         //如果是母猪分娩转入或母猪转舍转入，窝数，分娩统计字段需要累加
         if (moveIn.isSowEvent()) {
