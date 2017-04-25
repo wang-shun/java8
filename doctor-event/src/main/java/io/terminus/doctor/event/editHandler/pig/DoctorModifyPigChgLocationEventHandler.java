@@ -10,9 +10,11 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -64,10 +66,63 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
     }
 
     @Override
+    protected void updateDailyForDelete(DoctorPigEvent deletePigEvent) {
+        updateDailyOfDelete(deletePigEvent);
+    }
+
+    @Override
     protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack) {
         oldPigTrack.setCurrentBarnId(deletePigEvent.getBarnId());
         oldPigTrack.setCurrentBarnName(deletePigEvent.getBarnName());
         oldPigTrack.setCurrentBarnType(deletePigEvent.getBarnType());
         return oldPigTrack;
+    }
+
+    @Override
+    public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
+        DoctorEventChangeDto changeDto;
+        if (Objects.equals(newPigEvent.getType(), PigEvent.TO_FARROWING.getKey())) {
+            changeDto = DoctorEventChangeDto.builder()
+                    .toFarrowChangeCount(1)
+                    .toMatingChangeCount(-1)
+                    .build();
+        } else if (Objects.equals(newPigEvent.getType(), PigEvent.TO_MATING.getKey())) {
+            changeDto = DoctorEventChangeDto.builder()
+                    .toMatingChangeCount(1)
+                    .toFarrowChangeCount(-1)
+                    .build();
+        } else {
+            return;
+        }
+        DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
+
+    }
+
+    @Override
+    public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
+        DoctorEventChangeDto changeDto;
+        if (Objects.equals(oldPigEvent.getType(), PigEvent.TO_FARROWING.getKey())) {
+            changeDto = DoctorEventChangeDto.builder()
+                    .toFarrowChangeCount(-1)
+                    .toMatingChangeCount(1)
+                    .build();
+        } else if (Objects.equals(oldPigEvent.getType(), PigEvent.TO_MATING.getKey())) {
+            changeDto = DoctorEventChangeDto.builder()
+                    .toMatingChangeCount(-1)
+                    .toFarrowChangeCount(1)
+                    .build();
+        } else {
+            return;
+        }
+        DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
+    }
+
+    @Override
+    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+        oldDailyPig.setSowPh(EventUtil.plusInt(oldDailyPig.getSowPh(), changeDto.getToMatingChangeCount()));
+        oldDailyPig.setSowCf(EventUtil.plusInt(oldDailyPig.getSowCf(), changeDto.getToFarrowChangeCount()));
+        return oldDailyPig;
     }
 }

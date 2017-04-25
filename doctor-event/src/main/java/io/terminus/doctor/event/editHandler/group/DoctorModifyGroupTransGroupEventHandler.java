@@ -91,7 +91,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
         if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
             DoctorDailyGroup oldDailyGroup = doctorDailyGroupDao.findByGroupIdAndSumAt(changeDto.getBusinessId(), changeDto.getOldEventAt());
             doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup, changeDto));
-            updateDailyGroupLiveStock(changeDto.getBusinessId(), new DateTime(changeDto.getOldEventAt()).plusDays(1).toDate(), EventUtil.minusInt(0, changeDto.getQuantityChange()));
+            updateDailyGroupLiveStock(changeDto.getBusinessId(), getAfterDay(oldGroupEvent.getEventAt()), EventUtil.minusInt(0, changeDto.getQuantityChange()));
         } else {
             updateDailyOfDelete(oldGroupEvent);
             updateDailyOfNew(oldGroupEvent, input);
@@ -150,7 +150,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
                 .build();
         DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
         doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
-        updateDailyGroupLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt(), -changeDto1.getQuantityChange());
+        updateDailyGroupLiveStock(oldGroupEvent.getGroupId(), getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
     }
 
     @Override
@@ -164,7 +164,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
                 .build();
         DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
         doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
-        updateDailyGroupLiveStock(newGroupEvent.getGroupId(), eventAt, -changeDto2.getQuantityChange());
+        updateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
 
     }
 

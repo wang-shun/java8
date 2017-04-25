@@ -9,7 +9,6 @@ import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -96,7 +95,7 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
                 updateChange(oldDailyGroup, EventUtil.minusInt(0 , oldInput.getQuantity()), changeDto.getNewChangeTypeId());
             }
             doctorDailyGroupDao.update(oldDailyGroup);
-            updateDailyGroupLiveStock(changeDto.getBusinessId(), new DateTime(changeDto.getNewEventAt()).plusDays(1).toDate(), changeDto.getQuantityChange());
+            updateDailyGroupLiveStock(changeDto.getBusinessId(), getAfterDay(changeDto.getOldEventAt()), changeDto.getQuantityChange());
         } else {
             updateDailyForDelete(oldGroupEvent);
             updateDailyOfNew(oldGroupEvent, newInput);

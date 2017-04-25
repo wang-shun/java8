@@ -11,6 +11,7 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgLocationEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
@@ -56,6 +57,8 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     private DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired
     private DoctorTransGroupEventHandler transGroupEventHandler;
+    @Autowired
+    private DoctorModifyPigChgLocationEventHandler modifyPigChgLocationEventHandler;
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -122,6 +125,12 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
             toTrack.setGroupId(groupId);  //更新猪群id
             doctorPigTrackDao.update(toTrack);
         }
+    }
+
+    @Override
+    protected void updateDailyForNew(DoctorPigEvent newPigEvent) {
+        BasePigEventInputDto inputDto = JSON_MAPPER.fromJson(newPigEvent.getExtra(), DoctorChgLocationDto.class);
+        modifyPigChgLocationEventHandler.updateDailyOfNew(newPigEvent, inputDto);
     }
 
     //未断奶仔猪转群

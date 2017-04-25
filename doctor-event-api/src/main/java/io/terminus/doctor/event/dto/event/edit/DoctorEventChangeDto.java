@@ -321,6 +321,15 @@ public class DoctorEventChangeDto {
      */
     private double avgWeightChange;
 
+    /**
+     * 去分娩变化量(更新报表参数)
+     */
+    private Integer toFarrowChangeCount;
+
+    /**
+     * 去配种变化量(更新报表参数)
+     */
+    private Integer toMatingChangeCount;
 
     /**
      * 旧事件转场的猪场id
