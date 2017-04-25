@@ -174,6 +174,15 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
             oldDailyPig.setSowIn(EventUtil.minusInt(oldDailyPig.getSowIn(), changeDto.getRemoveCountChange()));
             oldDailyPig.setSowEnd(EventUtil.minusInt(oldDailyPig.getSowEnd(), changeDto.getRemoveCountChange()));
         } else {
+            if (Objects.equals(changeDto.getChangeTypeId(), 109L)) { //销售
+                oldDailyPig.setBoarSale(EventUtil.plusInt(oldDailyPig.getBoarSale(), changeDto.getRemoveCountChange()));
+            } else if (Objects.equals(changeDto.getChangeTypeId(), 110L)){ //死亡
+                oldDailyPig.setBoarDead(EventUtil.plusInt(oldDailyPig.getBoarDead(), changeDto.getRemoveCountChange()));
+            } else if (Objects.equals(changeDto.getChangeTypeId(), 111L)) { //淘汰
+                oldDailyPig.setBoarWeedOut(EventUtil.plusInt(oldDailyPig.getBoarWeedOut(), changeDto.getRemoveCountChange()));
+            } else {
+                oldDailyPig.setBoarOtherOut(EventUtil.plusInt(oldDailyPig.getBoarOtherOut(), changeDto.getRemoveCountChange()));
+            }
             oldDailyPig.setBoarIn(EventUtil.minusInt(oldDailyPig.getBoarIn(), changeDto.getRemoveCountChange()));
             oldDailyPig.setBoarEnd(EventUtil.minusInt(oldDailyPig.getBoarEnd(), changeDto.getRemoveCountChange()));
         }
