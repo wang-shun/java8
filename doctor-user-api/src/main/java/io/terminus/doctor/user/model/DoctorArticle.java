@@ -11,7 +11,7 @@ import java.util.Date;
  * Date: 2017/04/24
  */
 @Data
-public class Article implements Serializable {
+public class DoctorArticle implements Serializable {
 
     private static final long serialVersionUID = -1919998813097741662L;
 

@@ -5,9 +5,9 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.user.model.Article;
-import io.terminus.doctor.user.service.ArticleReadService;
-import io.terminus.doctor.user.service.ArticleWriteService;
+import io.terminus.doctor.user.model.DoctorArticle;
+import io.terminus.doctor.user.service.DoctorArticleReadService;
+import io.terminus.doctor.user.service.DoctorArticleWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -17,22 +17,22 @@ import java.util.List;
 /**
  * Desc: 
  * Mail: hehaiyang@terminus.io
- * Date: 24
+ * Date: 2017/04/25
  */
 @Slf4j
 @RestController
-@RequestMapping
-public class Articles {
+@RequestMapping("/api/articles")
+public class DoctorArticles {
 
     @RpcConsumer
-    private ArticleWriteService articleWriteService;
+    private DoctorArticleWriteService doctorArticleWriteService;
 
     @RpcConsumer
-    private ArticleReadService articleReadService;
+    private DoctorArticleReadService doctorArticleReadService;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Article findArticle(@PathVariable Long id) {
-        Response<Article> response =  articleReadService.findById(id);
+    public DoctorArticle findArticle(@PathVariable Long id) {
+        Response<DoctorArticle> response =  doctorArticleReadService.findById(id);
         if (!response.isSuccess()) {
             throw new JsonResponseException(500, response.getError());
         }
@@ -41,7 +41,7 @@ public class Articles {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean deleteArticle(@PathVariable Long id) {
-        Response<Boolean> response = articleWriteService.delete(id);
+        Response<Boolean> response = doctorArticleWriteService.delete(id);
         if (!response.isSuccess()) {
             throw new JsonResponseException(500, response.getError());
         }
@@ -53,8 +53,8 @@ public class Articles {
      * @param
      */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Long createArticle(@RequestBody Article article) {
-        Response<Long> response = articleWriteService.create(article);
+    public Long createArticle(@RequestBody DoctorArticle article) {
+        Response<Long> response = doctorArticleWriteService.create(article);
         if (!response.isSuccess()) {
             throw new JsonResponseException(500, response.getError());
         }
@@ -66,8 +66,8 @@ public class Articles {
      * @param
      */
     @RequestMapping(method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean updateArticle(@RequestBody Article article) {
-        Response<Boolean> response = articleWriteService.update(article);
+    public Boolean updateArticle(@RequestBody DoctorArticle article) {
+        Response<Boolean> response = doctorArticleWriteService.update(article);
         if (!response.isSuccess()) {
             throw new JsonResponseException(500, response.getError());
         }
@@ -79,8 +79,8 @@ public class Articles {
      * @return
      */
     @RequestMapping(value = "/category/{categoryId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Article> listArticle(@PathVariable Integer categoryId) {
-        Response<List<Article>> response =  articleReadService.list(ImmutableMap.of("categoryId", categoryId));
+    public List<DoctorArticle> listArticle(@PathVariable Integer categoryId) {
+        Response<List<DoctorArticle>> response =  doctorArticleReadService.list(ImmutableMap.of("categoryId", categoryId));
         if (!response.isSuccess()) {
             throw new JsonResponseException(500, response.getError());
         }
@@ -88,10 +88,10 @@ public class Articles {
     }
 
     @RequestMapping(value = "/paging/{categoryId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Paging<Article> pagingArticle(@RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                         @RequestParam(value = "pageSize", required = false) Integer pageSize,
-                                         @PathVariable Integer categoryId) {
-        Response<Paging<Article>> result =  articleReadService.paging(pageNo, pageSize, ImmutableMap.of("categoryId", categoryId));
+    public Paging<DoctorArticle> pagingArticle(@RequestParam(value = "pageNo", required = false) Integer pageNo,
+                                               @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                               @PathVariable Integer categoryId) {
+        Response<Paging<DoctorArticle>> result =  doctorArticleReadService.paging(pageNo, pageSize, ImmutableMap.of("categoryId", categoryId));
         if(!result.isSuccess()){
             throw new JsonResponseException(result.getError());
         }

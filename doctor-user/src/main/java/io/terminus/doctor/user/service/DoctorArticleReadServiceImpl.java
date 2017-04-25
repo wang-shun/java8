@@ -5,8 +5,8 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.user.dao.ArticleDao;
-import io.terminus.doctor.user.model.Article;
+import io.terminus.doctor.user.dao.DoctorArticleDao;
+import io.terminus.doctor.user.model.DoctorArticle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,15 +22,15 @@ import java.util.Map;
 @Slf4j
 @Service
 @RpcProvider
-public class ArticleReadServiceImpl implements ArticleReadService {
+public class DoctorArticleReadServiceImpl implements DoctorArticleReadService {
 
     @Autowired
-    private ArticleDao articleDao;
+    private DoctorArticleDao doctorArticleDao;
 
     @Override
-    public Response<Article> findById(Long id) {
+    public Response<DoctorArticle> findById(Long id) {
         try{
-            return Response.ok(articleDao.findById(id));
+            return Response.ok(doctorArticleDao.findById(id));
         }catch (Exception e){
             log.error("failed to find article by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
             return Response.fail("article.find.fail");
@@ -38,10 +38,10 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     }
 
     @Override
-    public Response<Paging<Article>> paging(Integer pageNo, Integer pageSize, Map<String, Object> criteria) {
+    public Response<Paging<DoctorArticle>> paging(Integer pageNo, Integer pageSize, Map<String, Object> criteria) {
         try{
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
-            return Response.ok(articleDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
+            return Response.ok(doctorArticleDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         }catch (Exception e){
             log.error("failed to paging article by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
             return Response.fail("article.paging.fail");
@@ -49,9 +49,9 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     }
 
     @Override
-    public Response<List<Article>> list(Map<String, Object> criteria) {
+    public Response<List<DoctorArticle>> list(Map<String, Object> criteria) {
         try{
-            return Response.ok(articleDao.list(criteria));
+            return Response.ok(doctorArticleDao.list(criteria));
         }catch (Exception e){
             log.error("failed to list article , cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("article .list.fail");

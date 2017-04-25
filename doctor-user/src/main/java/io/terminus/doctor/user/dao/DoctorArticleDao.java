@@ -2,7 +2,7 @@ package io.terminus.doctor.user.dao;
 
 import io.terminus.common.mysql.dao.MyBatisDao;
 
-import io.terminus.doctor.user.model.Article;
+import io.terminus.doctor.user.model.DoctorArticle;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
  * Date: 2017/04/24
  */
 @Repository
-public class ArticleDao extends MyBatisDao<Article> {
+public class DoctorArticleDao extends MyBatisDao<DoctorArticle> {
 
 }

@@ -3,8 +3,8 @@ package io.terminus.doctor.user.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.user.dao.ArticleDao;
-import io.terminus.doctor.user.model.Article;
+import io.terminus.doctor.user.dao.DoctorArticleDao;
+import io.terminus.doctor.user.model.DoctorArticle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,15 +17,15 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RpcProvider
-public class ArticleWriteServiceImpl implements ArticleWriteService {
+public class DoctorArticleWriteServiceImpl implements DoctorArticleWriteService {
 
     @Autowired
-    private ArticleDao articleDao;
+    private DoctorArticleDao doctorArticleDao;
 
     @Override
-    public Response<Long> create(Article article) {
+    public Response<Long> create(DoctorArticle article) {
         try{
-            articleDao.create(article);
+            doctorArticleDao.create(article);
             return Response.ok(article.getId());
         }catch (Exception e){
             log.error("failed to create article, cause:{}", Throwables.getStackTraceAsString(e));
@@ -34,9 +34,9 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
     }
 
     @Override
-    public Response<Boolean> update(Article article) {
+    public Response<Boolean> update(DoctorArticle article) {
         try{
-            return Response.ok(articleDao.update(article));
+            return Response.ok(doctorArticleDao.update(article));
         }catch (Exception e){
             log.error("failed to update article, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("article.update.fail");
@@ -46,7 +46,7 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
    @Override
     public Response<Boolean> delete(Long id) {
         try{
-            return Response.ok(articleDao.delete(id));
+            return Response.ok(doctorArticleDao.delete(id));
         }catch (Exception e){
             log.error("failed to delete article by id:{}, cause:{}", id,  Throwables.getStackTraceAsString(e));
             return Response.fail("delete.article.fail");

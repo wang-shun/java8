@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="Article">
-    <resultMap id="ArticleMap" type="Article">
+<mapper namespace="DoctorArticle">
+    <resultMap id="DoctorArticleMap" type="DoctorArticle">
         <id property="id" column="id"/>
         <result property="categoryId" column="categoryId"/>
         <result property="title" column="title"/>
@@ -42,7 +42,7 @@
         </where>
     </sql>
 
-    <insert id="create" parameterType="Article" useGeneratedKeys="true" keyProperty="id">
+    <insert id="create" parameterType="DoctorArticle" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
         <include refid="tb"/>
         (<include refid="cols_exclude_id"/>)
@@ -50,7 +50,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findById" parameterType="long" resultMap="ArticleMap">
+    <select id="findById" parameterType="long" resultMap="DoctorArticleMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -58,7 +58,7 @@
         WHERE id = #{id} LIMIT 1
     </select>
 
-    <select id="findByIds" parameterType="list" resultMap="ArticleMap">
+    <select id="findByIds" parameterType="list" resultMap="DoctorArticleMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -69,7 +69,7 @@
         </foreach>
     </select>
 
-    <update id="update" parameterType="Article">
+    <update id="update" parameterType="DoctorArticle">
         UPDATE
         <include refid="tb"/>
         <set>
@@ -95,7 +95,7 @@
     </select>
 
     <!--  分页  -->
-    <select id="paging" parameterType="map" resultMap="ArticleMap">
+    <select id="paging" parameterType="map" resultMap="DoctorArticleMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
@@ -103,7 +103,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="list" parameterType="map" resultMap="ArticleMap">
+    <select id="list" parameterType="map" resultMap="DoctorArticleMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
