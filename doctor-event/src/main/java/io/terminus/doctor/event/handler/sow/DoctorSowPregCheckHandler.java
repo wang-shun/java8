@@ -99,25 +99,10 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.KongHuai.getKey())) {
             DoctorPigEvent lastPregEvent = doctorPigEventDao.queryLastPregCheck(doctorPigTrack.getPigId());
             expectTrue(notNull(lastPregEvent), "preg.check.event.not.null", pregChkResultDto.getPigId());
-            expectTrue(PregCheckResult.KONGHUAI_RESULTS.contains(lastPregEvent.getPregCheckResult()), "preg.check.result.error", lastPregEvent.getPregCheckResult(), pregChkResultDto.getPigCode());
-            log.info("remove old preg check event info:{}", lastPregEvent);
-
-            doctorPigEvent.setId(lastPregEvent.getId());    //把id放进去, 用于更新数据
-            doctorPigEvent.setRelEventId(lastPregEvent.getRelEventId()); //重新覆盖下relEventId
-
-            //上一次妊娠检查事件
+            expectTrue(PregCheckResult.KONGHUAI_RESULTS.contains(lastPregEvent.getPregCheckResult()), "preg.check.result.error",
+                    lastPregEvent.getPregCheckResult(), pregChkResultDto.getPigCode());
             doctorPigEventDao.delete(lastPregEvent.getId());
-            //更新镜像
-//            DoctorPigSnapshot pregSnapshot = doctorPigSnapshotDao.findByToEventId(lastPregEvent.getId());
-//            List<DoctorPigSnapshot> snapshotList = doctorPigSnapshotDao.findByFromEventId(lastPregEvent.getId());
-//            if (snapshotList.isEmpty()) {
-//                doctorPigTrack.setCurrentEventId(pregSnapshot.getFromEventId());
-//                doctorPigTrackDao.update(doctorPigTrack);
-//            } else {
-//                doctorPigSnapshotDao.updateFromEventIdByFromEventId(snapshotList.stream().map(DoctorPigSnapshot::getId).collect(Collectors.toList()), pregSnapshot.getFromEventId());
-//            }
-//            //删掉镜像里的数据
-//            doctorPigSnapshotDao.deleteByEventId(lastPregEvent.getId());
+            doctorModifyPigPregCheckEventHandler.updateDailyOfDelete(lastPregEvent);
         }
 
         return doctorPigEvent;
