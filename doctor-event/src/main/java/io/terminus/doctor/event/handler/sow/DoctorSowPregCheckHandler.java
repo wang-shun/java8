@@ -111,16 +111,16 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
             //上一次妊娠检查事件
             doctorPigEventDao.delete(lastPregEvent.getId());
             //更新镜像
-            DoctorPigSnapshot pregSnapshot = doctorPigSnapshotDao.findByToEventId(lastPregEvent.getId());
-            List<DoctorPigSnapshot> snapshotList = doctorPigSnapshotDao.findByFromEventId(lastPregEvent.getId());
-            if (snapshotList.isEmpty()) {
-                doctorPigTrack.setCurrentEventId(pregSnapshot.getFromEventId());
-                doctorPigTrackDao.update(doctorPigTrack);
-            } else {
-                doctorPigSnapshotDao.updateFromEventIdByFromEventId(snapshotList.stream().map(DoctorPigSnapshot::getId).collect(Collectors.toList()), pregSnapshot.getFromEventId());
-            }
-            //删掉镜像里的数据
-            doctorPigSnapshotDao.deleteByEventId(lastPregEvent.getId());
+//            DoctorPigSnapshot pregSnapshot = doctorPigSnapshotDao.findByToEventId(lastPregEvent.getId());
+//            List<DoctorPigSnapshot> snapshotList = doctorPigSnapshotDao.findByFromEventId(lastPregEvent.getId());
+//            if (snapshotList.isEmpty()) {
+//                doctorPigTrack.setCurrentEventId(pregSnapshot.getFromEventId());
+//                doctorPigTrackDao.update(doctorPigTrack);
+//            } else {
+//                doctorPigSnapshotDao.updateFromEventIdByFromEventId(snapshotList.stream().map(DoctorPigSnapshot::getId).collect(Collectors.toList()), pregSnapshot.getFromEventId());
+//            }
+//            //删掉镜像里的数据
+//            doctorPigSnapshotDao.deleteByEventId(lastPregEvent.getId());
         }
 
         return doctorPigEvent;
