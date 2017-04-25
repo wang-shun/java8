@@ -77,7 +77,8 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         //3.特殊处理
         specialHandle(executeEvent, toTrack);
         //4.创建镜像
-        createPigSnapshot(toTrack, executeEvent, 0L);
+//        createPigSnapshot(toTrack, executeEvent, 0L);
+        updateDailyForNew(executeEvent);
         //5.记录发生的事件信息
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(executeEvent.getOrgId())

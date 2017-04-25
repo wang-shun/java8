@@ -106,7 +106,10 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
     @Override
     public void updateDailyOfNew(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), inputDto.eventAt());
-        DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder().entryCountChange(1).build();
+        DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
+                .pigSex(oldPigEvent.getKind())
+                .entryCountChange(1)
+                .build();
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
         if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()), changeDto2.getEntryCountChange());

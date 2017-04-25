@@ -103,6 +103,9 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
+        if (oldPigEvent.getCurrentMatingCount() > 1) {
+            return;
+        }
         DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .doctorMateType(oldPigEvent.getDoctorMateType())
@@ -113,6 +116,9 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
+        if (newPigEvent.getCurrentMatingCount() > 1) {
+            return;
+        }
         DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .doctorMateType(newPigEvent.getDoctorMateType())
@@ -125,7 +131,7 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         DoctorMatingType matingType = DoctorMatingType.from(changeDto.getDoctorMateType());
-        Checks.expectNotNull(matingType, "");
+        Checks.expectNotNull(matingType, "mating.type.is.null");
         switch (matingType) {
             case HP:
                 oldDailyPig.setMateHb(EventUtil.plusInt(oldDailyPig.getMateHb(), changeDto.getDoctorMateTypeCountChange()));
@@ -143,7 +149,7 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
                 oldDailyPig.setMateFq(EventUtil.plusInt(oldDailyPig.getMateFq(), changeDto.getDoctorMateTypeCountChange()));
                 break;
             default:
-                throw new InvalidException("");
+                throw new InvalidException("mating.type.error");
         }
         return oldDailyPig;
     }

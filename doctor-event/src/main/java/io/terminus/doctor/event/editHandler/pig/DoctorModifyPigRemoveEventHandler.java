@@ -171,11 +171,11 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
             } else {
                 oldDailyPig.setSowPh(EventUtil.minusInt(oldDailyPig.getSowPh(), changeDto.getRemoveCountChange()));
             }
-            oldDailyPig.setSowIn(EventUtil.plusInt(oldDailyPig.getSowIn(), changeDto.getRemoveCountChange()));
-            oldDailyPig.setSowEnd(EventUtil.plusInt(oldDailyPig.getSowEnd(), changeDto.getRemoveCountChange()));
+            oldDailyPig.setSowIn(EventUtil.minusInt(oldDailyPig.getSowIn(), changeDto.getRemoveCountChange()));
+            oldDailyPig.setSowEnd(EventUtil.minusInt(oldDailyPig.getSowEnd(), changeDto.getRemoveCountChange()));
         } else {
-            oldDailyPig.setBoarIn(EventUtil.plusInt(oldDailyPig.getBoarIn(), changeDto.getRemoveCountChange()));
-            oldDailyPig.setBoarEnd(EventUtil.plusInt(oldDailyPig.getBoarEnd(), changeDto.getRemoveCountChange()));
+            oldDailyPig.setBoarIn(EventUtil.minusInt(oldDailyPig.getBoarIn(), changeDto.getRemoveCountChange()));
+            oldDailyPig.setBoarEnd(EventUtil.minusInt(oldDailyPig.getBoarEnd(), changeDto.getRemoveCountChange()));
         }
         return oldDailyPig;
     }

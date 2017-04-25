@@ -7,6 +7,7 @@ import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
@@ -38,6 +39,8 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
 
     @Autowired
     private DoctorBarnDao doctorBarnDao;
+    @Autowired
+    private DoctorModifyPigChgFarmEventHandler modifyPigChgFarmEventHandler;
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -105,6 +108,12 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
         DoctorPig oldPig = doctorPigDao.findById(executeEvent.getPigId());
         oldPig.setIsRemoval(IsOrNot.YES.getValue());
         doctorPigDao.update(oldPig);
+    }
+
+    @Override
+    protected void updateDailyForNew(DoctorPigEvent newPigEvent) {
+        BasePigEventInputDto inputDto = JSON_MAPPER.fromJson(newPigEvent.getExtra(), DoctorChgFarmDto.class);
+        modifyPigChgFarmEventHandler.updateDailyOfNew(newPigEvent, inputDto);
     }
 
     /**
