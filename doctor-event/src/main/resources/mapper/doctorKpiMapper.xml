@@ -1959,7 +1959,7 @@
         from doctor_group_events
         where
         type = 4
-        and trans_group_type = 1
+        and trans_group_type = 0
         <include refid="groupCriteria"/>
     </select>
 
@@ -1969,7 +1969,7 @@
         from doctor_group_events
         where
         type = 4
-        and trans_group_type = 0
+        and trans_group_type = 1
         <include refid="groupCriteria"/>
     </select>
 

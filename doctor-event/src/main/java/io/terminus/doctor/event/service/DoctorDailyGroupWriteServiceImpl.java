@@ -115,7 +115,7 @@ public class DoctorDailyGroupWriteServiceImpl implements DoctorDailyGroupWriteSe
         try{
             log.info("create group daily start, farmId: {}, date: {}, now is: {}", farmId, DateUtil.toDateString(date), DateUtil.toDateTimeString(new Date()));
             doctorDailyGroupDao.deleteByFarmIdAndSumAt(farmId, date);
-            List<DoctorGroup> groups= doctorGroupDao.findByFarmIdAndDate(farmId, date);
+            List<DoctorGroup> groups= doctorGroupDao.findByFarmIdAndDate(farmId, DateUtil.getDateEnd(new DateTime(date)).toDate());
             List<DoctorDailyGroup> dailyGroups = Lists.newArrayList();
             groups.forEach(group -> {
                 DoctorDailyGroup doctorDailyGroup = getDoctorDailyGroup(group, date, DateUtil.getDateEnd(new DateTime(date)).toDate());

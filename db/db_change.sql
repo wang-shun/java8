@@ -437,6 +437,7 @@ CREATE INDEX idx_doctor_group_events_rel_pig_event_id ON doctor_group_events(rel
 CREATE INDEX idx_doctor_pig_events_rel_group_event_id ON doctor_pig_events(rel_group_event_id);
 CREATE INDEX idx_doctor_pig_events_rel_pig_event_id ON doctor_pig_events(rel_pig_event_id);
 CREATE INDEX idx_doctor_group_events_other_barn_id ON doctor_group_events(other_barn_id);
+CREATE index idx_doctor_pig_events_event_at ON doctor_pig_events(event_at);
 
 -- 2016-09-29 物资入库时可选择的厂家
 CREATE TABLE `doctor_material_factorys` (
