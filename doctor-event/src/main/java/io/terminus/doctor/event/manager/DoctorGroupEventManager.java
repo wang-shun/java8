@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
@@ -71,6 +72,8 @@ public class DoctorGroupEventManager {
     private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     @Autowired
     private DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
+    @Autowired
+    private DoctorModifyGroupEventHandlers modifyGroupEventHandlers;
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
@@ -179,6 +182,18 @@ public class DoctorGroupEventManager {
         doctorGroupDao.update(info.getGroup());
         doctorGroupSnapshotDao.delete(snapshot.getId());
         log.info("rollback group event ending, group event id:{}", groupEvent.getId());
+    }
+
+    /**
+     * 猪群事件编辑处理
+     * @param inputDto 编辑输入
+     * @param eventId 事件id
+     * @param eventType 事件类型
+     */
+    @Transactional
+    public void modifyGroupEventHandle(BaseGroupInput inputDto, Long eventId, Integer eventType) {
+        DoctorGroupEvent oldGroupEvent = doctorGroupEventDao.findById(eventId);
+        modifyGroupEventHandlers.getModifyGroupEventHandlerMap().get(eventType).modifyHandle(oldGroupEvent, inputDto);
     }
 
     //校验能否回滚

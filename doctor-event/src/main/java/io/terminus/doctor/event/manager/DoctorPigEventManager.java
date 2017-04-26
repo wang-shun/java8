@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -66,6 +67,8 @@ public class DoctorPigEventManager {
     private DoctorPigDao doctorPigDao;
     @Autowired
     private DoctorEventRelationDao doctorEventRelationDao;
+    @Autowired
+    private DoctorModifyPigEventHandlers modifyPigEventHandlers;
 
     /**
      * 事件处理
@@ -196,6 +199,19 @@ public class DoctorPigEventManager {
         });
         log.info("batch pig event handle ending, event type:{}", eventInputs.get(0).getEventType());
         return eventInfos;
+    }
+
+    /**
+     * 猪事件编辑处理
+     * @param inputDto 编辑输入
+     * @param eventId 事件id
+     * @param eventType 事件输入
+     */
+    @Transactional
+    public void modifyPigEventHandle(BasePigEventInputDto inputDto, Long eventId, Integer eventType) {
+        DoctorPigEvent oldPigEvent = doctorPigEventDao.findById(eventId);
+        modifyPigEventHandlers.getModifyPigEventHandlerMap().get(eventType).modifyHandle(oldPigEvent, inputDto);
+
     }
 
     /**
