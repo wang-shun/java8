@@ -78,8 +78,15 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
 
     @Override
     protected void triggerEventModifyHandle(DoctorGroupEvent newEvent) {
+        //1.进场编辑
         DoctorPigEvent entryEvent = doctorPigEventDao.findByRelGroupEventId(newEvent.getId());
         doctorModifyPigEntryEventHandler.modifyHandle(entryEvent, buildTriggerEventInput(newEvent));
+
+        //2.关闭事件编辑
+        DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(newEvent.getId(), GroupEventType.CLOSE.getValue());
+        if (notNull(closeEvent)) {
+            modifyGroupCloseEventHandler.modifyHandle(closeEvent, buildGroupCloseInput(newEvent));
+        }
     }
 
     @Override

@@ -6,7 +6,9 @@ import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
+import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
@@ -111,20 +113,30 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent) {
-        //转入编辑
-        DoctorGroupEvent oldGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(newPigEvent.getId(), GroupEventType.MOVE_IN.getValue());
-        modifyGroupMoveInEventHandler.modifyHandle(oldGroupEvent, buildTriggerGroupEventInput(newPigEvent));
+        //1.新建编辑
+        DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findByRelPigEventIdAndType(newPigEvent.getId(), GroupEventType.NEW.getValue());
+        if (notNull(newCreateEvent)) {
+            BaseGroupInput newInput = JSON_MAPPER.fromJson(newCreateEvent.getExtra(), DoctorNewGroupInput.class);
+            newInput.setEventAt(DateUtil.toDateString(newPigEvent.getEventAt()));
+            modifyGroupNewEventHandler.modifyHandle(newCreateEvent, newInput);
+        }
+
+        //2.转入编辑
+        DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelPigEventIdAndType(newPigEvent.getId(), GroupEventType.MOVE_IN.getValue());
+        modifyGroupMoveInEventHandler.modifyHandle(moveInEvent, buildTriggerGroupEventInput(newPigEvent));
     }
 
     @Override
     protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
+        //1.转入回滚
+        DoctorGroupEvent deleteGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.MOVE_IN.getValue());
+        modifyGroupMoveInEventHandler.rollbackHandle(deleteGroupEvent, operatorId, operatorName);
+
+        //2.新建回滚
         DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.NEW.getValue());
         if (notNull(newCreateEvent)) {
             modifyGroupNewEventHandler.rollbackHandle(newCreateEvent, operatorId, operatorName);
         }
-        //转入回滚
-        DoctorGroupEvent deleteGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.MOVE_IN.getValue());
-        modifyGroupMoveInEventHandler.rollbackHandle(deleteGroupEvent, operatorId, operatorName);
     }
 
     @Override

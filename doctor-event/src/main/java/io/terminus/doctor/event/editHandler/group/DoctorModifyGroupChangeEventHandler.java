@@ -103,6 +103,15 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
     }
 
     @Override
+    protected void triggerEventModifyHandle(DoctorGroupEvent newEvent) {
+        //关闭事件编辑
+        DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(newEvent.getId(), GroupEventType.CLOSE.getValue());
+        if (notNull(closeEvent)) {
+            modifyGroupCloseEventHandler.modifyHandle(closeEvent, buildGroupCloseInput(newEvent));
+        }
+    }
+
+    @Override
     protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
         return validGroupLiveStock(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), -deleteGroupEvent.getQuantity());
     }
