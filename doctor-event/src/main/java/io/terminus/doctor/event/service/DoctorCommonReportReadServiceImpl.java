@@ -18,10 +18,13 @@ import io.terminus.doctor.event.dao.DoctorRangeReportDao;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 import io.terminus.doctor.event.enums.ReportRangeType;
 import io.terminus.doctor.event.model.DoctorBoarMonthlyReport;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorDailyReportSum;
 import io.terminus.doctor.event.model.DoctorGroupChangeSum;
+import io.terminus.doctor.event.model.DoctorGroupStock;
 import io.terminus.doctor.event.model.DoctorParityMonthlyReport;
 import io.terminus.doctor.event.model.DoctorRangeReport;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +38,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.isNull;
 
 /**
  * Desc: 猪场报表读服务实现类
@@ -220,6 +225,50 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             log.error("find barn live stock failed, barnId:{}, date:{}, index:{}, cause:{}", barnId, date.toString(), index, Throwables.getStackTraceAsString(e));
             return Response.fail("find.barn.live.stock");
         }
+    }
+
+    @Override
+    public Response<DoctorFarmLiveStockDto> findFarmCurrentLiveStock(Long farmId) {
+        try {
+            return Response.ok(buildFarmLiveStockByFarmId(farmId));
+        } catch (Exception e) {
+            log.error("find farm current live stock failed, farmId:{}, cause:{}",
+                    farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.farm.current.live.stock.failed");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList) {
+        try {
+            return Response.ok(farmIdList.stream().map(this::buildFarmLiveStockByFarmId).collect(Collectors.toList()));
+        } catch (Exception e) {
+            log.error("find farms live stock failed, farmIdList:{}, cause:{}",
+                    farmIdList, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.farms.live.stock.failed");
+        }
+    }
+
+    /**
+     * 根据猪场id获取数据
+     * @param farmId 猪场id
+     * @return 数据信息
+     */
+    private DoctorFarmLiveStockDto buildFarmLiveStockByFarmId(Long farmId) {
+        DoctorDailyReport dailyReport = doctorDailyReportDao.findByFarmIdAndSumAt(farmId, new Date());
+        DoctorGroupStock groupStock = doctorDailyGroupDao.getGroupStock(farmId, new Date());
+        if (isNull(groupStock)) {
+            groupStock = new DoctorGroupStock();
+        }
+        return DoctorFarmLiveStockDto.builder()
+                .farmId(farmId)
+                .boar(dailyReport.getBoarEnd())
+                .sow(dailyReport.getSowEnd())
+                .farrow(MoreObjects.firstNonNull(groupStock.getFarrowEnd(), 0))
+                .fatten(MoreObjects.firstNonNull(groupStock.getFattenEnd(), 0))
+                .houbei(MoreObjects.firstNonNull(groupStock.getHoubeiEnd(), 0))
+                .nursery(MoreObjects.firstNonNull(groupStock.getNurseryEnd(),0))
+                .build();
     }
 
     //查询趋势图

@@ -21,6 +21,7 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
 
     /**
      * 删除某一天的猪群统计
+     *
      * @param farmId
      * @param date
      */
@@ -30,6 +31,7 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
 
     /**
      * 删除某一天的猪群统计
+     *
      * @param date
      */
     public void deleteByFarmIdAndSumAt(Date date) {
@@ -46,6 +48,7 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
 
     /**
      * 获取某一天的存栏
+     *
      * @param farmId
      * @param sumAt
      * @return
@@ -56,16 +59,18 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
 
     /**
      * 获取某一天的存栏
+     *
      * @param farmId
      * @param sumAt
      * @return
      */
     public DoctorGroupStock getGroupStock(Long farmId, Date sumAt) {
-        return getSqlSession().selectOne(sqlId("getGroupStock"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+        return getGroupStock(farmId, DateUtil.toDateString(sumAt));
     }
 
     /**
      * 获取某一段时间的猪群存栏变化
+     *
      * @param farmId
      * @param sumAt
      * @return
@@ -76,6 +81,7 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
 
     /**
      * 获取某一段时间的猪群存栏变化
+     *
      * @param farmId
      * @param startAt
      * @param endAt
@@ -87,6 +93,7 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
 
     /**
      * 获取某一段时间的猪群存栏变化
+     *
      * @param farmId
      * @param startAt
      * @param endAt
@@ -98,6 +105,7 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
 
     /**
      * 获取猪群每日报表
+     *
      * @param groupId
      * @param sumAt
      * @return
@@ -105,10 +113,12 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
     public DoctorDailyGroup findByGroupIdAndSumAt(Long groupId, Date sumAt) {
         return getSqlSession().selectOne(sqlId("findByGroupIdAndSumAt"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt));
     }
+
     /**
      * 更新日期之后每日猪群存栏
-     * @param groupId 猪群id
-     * @param sumAt 日期
+     *
+     * @param groupId     猪群id
+     * @param sumAt       日期
      * @param changeCount 变动数量
      */
     public void updateDailyGroupLiveStock(Long groupId, Date sumAt, Integer changeCount) {
@@ -121,6 +131,7 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
 
     /**
      * 查询某一天所有猪群的存栏信息
+     *
      * @param sumAt
      * @return
      */
@@ -130,8 +141,9 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
 
     /**
      * 查询某一猪群某天后包括某天的记录
+     *
      * @param groupId 猪群id
-     * @param sumAt 统计开始时间(包括)
+     * @param sumAt   统计开始时间(包括)
      * @return
      */
     public List<DoctorDailyGroup> findAfterSumAt(Long groupId, String sumAt) {
