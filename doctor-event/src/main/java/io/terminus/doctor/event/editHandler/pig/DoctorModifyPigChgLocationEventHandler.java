@@ -50,9 +50,6 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
         oldPigTrack.setCurrentBarnId(doctorBarn.getId());
         oldPigTrack.setCurrentBarnName(doctorBarn.getName());
         oldPigTrack.setCurrentBarnType(doctorBarn.getPigType());
-        if (Objects.equals(changeDto.getEventType(), PigEvent.TO_FARROWING.getKey())) {
-            oldPigTrack.setStatus(PigStatus.Pregnancy.getKey());
-        }
         return oldPigTrack;
     }
 
@@ -75,6 +72,9 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
         oldPigTrack.setCurrentBarnId(deletePigEvent.getBarnId());
         oldPigTrack.setCurrentBarnName(deletePigEvent.getBarnName());
         oldPigTrack.setCurrentBarnType(deletePigEvent.getBarnType());
+        if (Objects.equals(deletePigEvent.getType(), PigEvent.TO_FARROWING.getKey())) {
+            oldPigTrack.setStatus(PigStatus.Pregnancy.getKey());
+        }
         return oldPigTrack;
     }
 

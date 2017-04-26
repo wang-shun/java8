@@ -9,7 +9,8 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.model.DoctorPigTypeStatistic;
+import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
+import io.terminus.doctor.event.service.DoctorCommonReportReadService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
@@ -48,6 +49,8 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
 
     @RpcConsumer
     private DoctorPigTypeStatisticReadService doctorPigTypeStatisticReadService;
+    @RpcConsumer
+    private DoctorCommonReportReadService doctorCommonReportReadService;
 
     @RpcConsumer
     private DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
@@ -56,11 +59,7 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
     @Override
     public Response<DoctorFarmBasicDto> getFarmStatistic(Long farmId) {
         try {
-            DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(farmId));
-
-            //查询猪只统计, 按照类型拼下list
-            DoctorPigTypeStatistic stat = RespHelper.orServEx(doctorPigTypeStatisticReadService.findPigTypeStatisticByFarmId(farmId));
-            return Response.ok(new DoctorFarmBasicDto(farm, getStatistics(Lists.newArrayList(MoreObjects.firstNonNull(stat, new DoctorPigTypeStatistic())))));
+            return Response.ok(buildFarmBasic(farmId));
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
@@ -81,25 +80,19 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
             DoctorOrg org = orgs.get(0);
 
             DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
-            List<Long> farmList = permission.getFarmIdsList();
+            List<Long> permissionFarmIdsList = permission.getFarmIdsList();
 
             List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(org.getId()));
-            if (!notEmpty(farms)) {
+            List<Long> farmIdList = farms.stream().filter(doctorFarm -> permissionFarmIdsList.contains(doctorFarm.getId()))
+                    .map(DoctorFarm::getId).collect(Collectors.toList());
+
+            if (Arguments.isNullOrEmpty(farmIdList)) {
                 return Response.ok(new DoctorBasicDto(org, Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
             }
 
-            farms = farms.stream().filter(t-> farmList.contains(t.getId())).collect(Collectors.toList());
+            List<DoctorFarmLiveStockDto> stats = RespHelper.orServEx(doctorCommonReportReadService.findFarmsLiveStock(farmIdList));
 
-            //查询公司统计
-            List<DoctorPigTypeStatistic> stats = RespHelper.orServEx(doctorPigTypeStatisticReadService.findPigTypeStatisticsByOrgId(org.getId()));
-
-            //获取猪场统计
-            List<DoctorFarmBasicDto> farmBasicDtos = farms.stream()
-                    .map(farm -> {
-                        DoctorPigTypeStatistic stat = RespHelper.orServEx(doctorPigTypeStatisticReadService.findPigTypeStatisticByFarmId(farm.getId()));
-                        return new DoctorFarmBasicDto(farm, getStatistics(Lists.newArrayList(MoreObjects.firstNonNull(stat, new DoctorPigTypeStatistic()))));
-                    })
-                    .collect(Collectors.toList());
+            List<DoctorFarmBasicDto> farmBasicDtos = farmIdList.stream().map(this::buildFarmBasic).collect(Collectors.toList());
 
             return Response.ok(new DoctorBasicDto(org, getStatistics(stats), farmBasicDtos, orgs));
         } catch (ServiceException e) {
@@ -127,34 +120,21 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
             if (permission == null || !permission.getOrgIdsList().contains(orgId)) {
                 return Response.fail("user.not.permission.org");
             }
-
-
-            List<Long> farmList = permission.getFarmIdsList();
-
-            //查询有权限的公司与猪场
             DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(orgId));
+
+            List<Long> permissionFarmIdsList = permission.getFarmIdsList();
+
             List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(org.getId()));
-            if (!notEmpty(farms)) {
-                return Response.ok(new DoctorBasicDto(org, Collections.emptyList(), Collections.emptyList(), orgs));
+            List<Long> farmIdList = farms.stream().filter(doctorFarm -> permissionFarmIdsList.contains(doctorFarm.getId()))
+                    .map(DoctorFarm::getId).collect(Collectors.toList());
+
+            if (Arguments.isNullOrEmpty(farmIdList)) {
+                return Response.ok(new DoctorBasicDto(org, Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
             }
 
-            farms = farms.stream().filter(t-> farmList.contains(t.getId())).collect(Collectors.toList());
+            List<DoctorFarmLiveStockDto> stats = RespHelper.orServEx(doctorCommonReportReadService.findFarmsLiveStock(farmIdList));
 
-            //查询公司统计
-            List<DoctorPigTypeStatistic> stats = RespHelper.orServEx(doctorPigTypeStatisticReadService.findPigTypeStatisticsByOrgId(org.getId()));
-
-            //查询有权限的猪场的统计
-            if (stats != null){
-                stats = stats.stream().filter(s-> farmList.contains(s.getFarmId())).collect(Collectors.toList());
-            }
-
-            //获取猪场统计
-            List<DoctorFarmBasicDto> farmBasicDtos = farms.stream()
-                    .map(farm -> {
-                        DoctorPigTypeStatistic stat = RespHelper.orServEx(doctorPigTypeStatisticReadService.findPigTypeStatisticByFarmId(farm.getId()));
-                        return new DoctorFarmBasicDto(farm, getStatistics(Lists.newArrayList(MoreObjects.firstNonNull(stat, new DoctorPigTypeStatistic()))));
-                    })
-                    .collect(Collectors.toList());
+            List<DoctorFarmBasicDto> farmBasicDtos = farmIdList.stream().map(this::buildFarmBasic).collect(Collectors.toList());
 
             return Response.ok(new DoctorBasicDto(org, getStatistics(stats), farmBasicDtos, orgs));
         } catch (ServiceException e) {
@@ -165,8 +145,15 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
         }
     }
 
+    private DoctorFarmBasicDto buildFarmBasic(Long farmId) {
+        DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(farmId));
+        //查询猪只统计, 按照类型拼下list
+        DoctorFarmLiveStockDto stat = RespHelper.orServEx(doctorCommonReportReadService.findFarmCurrentLiveStock(farmId));
+        return new DoctorFarmBasicDto(farm, getStatistics(Lists.newArrayList(MoreObjects.firstNonNull(stat, new DoctorFarmLiveStockDto()))));
+    }
+
     //通过猪类统计表计算出统计结果
-    private List<DoctorStatisticDto> getStatistics(List<DoctorPigTypeStatistic> stats) {
+    private List<DoctorStatisticDto> getStatistics(List<DoctorFarmLiveStockDto> stats) {
         return Lists.newArrayList(
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.SOW.getCutDesc(),
                         (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getSow(), 0))),          //母猪

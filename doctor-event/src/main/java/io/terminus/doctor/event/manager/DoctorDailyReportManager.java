@@ -84,11 +84,12 @@ public class DoctorDailyReportManager {
         DoctorDailyGroup doctorDailyGroup = doctorDailyGroupDao.findByGroupIdAndSumAt(groupId, sumAt);
         if (isNull(doctorDailyGroup)) {
             doctorDailyGroup = new DoctorDailyGroup();
-            doctorDailyGroup.setStart(doctorKpiDao.realTimeLivetockGroup(groupId, sumAt));
+            doctorDailyGroup.setStart(doctorKpiDao.realTimeLivetockGroup(groupId, new DateTime(sumAt).minusDays(1).toDate()));
             doctorDailyGroup.setEnd(doctorDailyGroup.getStart());
             doctorDailyGroup.setSumAt(sumAt);
             doctorDailyGroup.setGroupId(groupId);
             doctorDailyGroup.setFarmId(group.getFarmId());
+            doctorDailyGroup.setType(group.getPigType());
         }
         return doctorDailyGroup;
     }

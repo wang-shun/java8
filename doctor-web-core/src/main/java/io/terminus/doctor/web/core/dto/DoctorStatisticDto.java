@@ -21,7 +21,7 @@ public class DoctorStatisticDto implements Serializable {
 
     /**
      * 统计类型
-     *
+     * @see PigType
      */
     private String type;
 
