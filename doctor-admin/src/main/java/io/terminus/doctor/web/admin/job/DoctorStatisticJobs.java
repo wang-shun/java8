@@ -44,7 +44,7 @@ public class DoctorStatisticJobs {
      * 猪场猪类存栏统计job full
      * 每天凌晨2点统计一次
      */
-    @Scheduled(cron = "0 0 2 * * ?")
+//    @Scheduled(cron = "0 0 2 * * ?")
     @RequestMapping(value = "/pigType/full", method = RequestMethod.GET)
     public void fullStatisticPigType() {
         try {
@@ -64,7 +64,7 @@ public class DoctorStatisticJobs {
      * 猪场猪类存栏统计job delta
      * 每1个小时统计一次
      */
-    @Scheduled(cron = "0 0 */1 * * ?")
+//    @Scheduled(cron = "0 0 */1 * * ?")
     public void deltaStatisticPigType() {
         try {
             if(!hostLeader.isLeader()) {

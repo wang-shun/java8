@@ -52,11 +52,11 @@ public class DoctorGroupMaterialJobs {
                 return;
             }
             doctorGroupMaterialWriteServer.deleteDoctorGroupMaterial(GROUP);
-            log.info("daily group job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+            log.info("daily group material job start, now is:{}", DateUtil.toDateTimeString(new Date()));
             doctorMaterialManage.runDoctorGroupMaterialWare(getAllFarmIds(), GROUP);
-            log.info("daily group job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+            log.info("daily group material job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
-            log.error("daily report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("daily group material job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
 
