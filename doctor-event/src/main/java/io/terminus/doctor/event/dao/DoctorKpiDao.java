@@ -1081,4 +1081,8 @@ public class DoctorKpiDao {
     public Integer getOutTrasGroup(Long barnId,Date date, Integer index) {
         return sqlSession.selectOne(sqlId("getOutTrasGroup"), ImmutableMap.of("barnId", barnId, "date", date, "index", index));
     }
+
+    public Integer getPigChgFarm(Long farmId, Integer type, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getPigChgFarm"), ImmutableMap.of("farmId", farmId, "type", type, "startAt", startAt, "endAt", endAt));
+    }
 }

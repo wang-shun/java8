@@ -45,6 +45,11 @@ public class DoctorBaseReport implements Serializable{
     private Integer sowOtherOut;
 
     /**
+     * 母猪转场
+     */
+    private Integer sowChgFarm;
+
+    /**
      * 母猪期末头数
      */
     private Integer sowEnd;
@@ -125,24 +130,29 @@ public class DoctorBaseReport implements Serializable{
     private Integer boarIn;
 
     /**
-     * 死亡母猪
+     * 死亡公猪
      */
     private Integer boarDead;
 
     /**
-     * 淘汰母猪
+     * 淘汰公猪
      */
     private Integer boarWeedOut;
 
     /**
-     * 母猪销售
+     * 公猪销售
      */
     private Integer boarSale;
 
     /**
-     * 母猪其他减少
+     * 公猪其他减少
      */
     private Integer boarOtherOut;
+
+    /**
+     * 公猪转场
+     */
+    private Integer boarChgFarm;
 
     /**
      * 公猪期末头数

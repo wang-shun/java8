@@ -143,6 +143,7 @@ public class DoctorDailyReportManager {
         doctorDailyReport.setSowWeedOut(doctorKpiDao.getWeedOutSow(farmId, startAt, endAt));
         doctorDailyReport.setSowSale(doctorKpiDao.getSaleSow(farmId, startAt, endAt));
         doctorDailyReport.setSowOtherOut(doctorKpiDao.getOtherOutSow(farmId, startAt, endAt));
+        doctorDailyReport.setSowChgFarm(doctorKpiDao.getPigChgFarm(farmId, 1, startAt, endAt));
         doctorDailyReport.setSowEnd(doctorKpiDao.realTimeLiveStockSow(farmId, startAt));
         //产房母猪存栏变化
         doctorDailyReport.setSowCfStart(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, new DateTime(startAt).minusDays(1).toDate()));
@@ -168,6 +169,7 @@ public class DoctorDailyReportManager {
         doctorDailyReport.setBoarWeedOut(doctorKpiDao.getWeedOutBoar(farmId, startAt, endAt));
         doctorDailyReport.setBoarSale(doctorKpiDao.getSaleBoar(farmId, startAt, endAt));
         doctorDailyReport.setBoarOtherOut(doctorKpiDao.getOtherOutBoar(farmId, startAt, endAt));
+        doctorDailyReport.setBoarChgFarm(doctorKpiDao.getPigChgFarm(farmId, 2, startAt, endAt));
         doctorDailyReport.setBoarEnd(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));
         //配种情况
         doctorDailyReport.setMateHb(doctorKpiDao.firstMatingCounts(farmId, startAt, endAt));

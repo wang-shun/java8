@@ -2129,4 +2129,12 @@
         and barn_type in (5,6)
         <include refid="criteria"/>
     </select>
+
+    <select id="getPigChgFarm" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM doctor_pig_events
+        WHERE `type` = 2
+        and kind = #{type}
+        <include refid="criteria" />
+    </select>
 </mapper>
