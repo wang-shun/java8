@@ -1137,10 +1137,15 @@
     </select>
 
     <select id="getInBoar" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events
-        where `type` = 7
-        and kind = 2
-        <include refid="criteria" />
+        select ifnull(count(1),0)
+        from doctor_pig_events a
+        left join doctor_pigs b on a.pig_id = b.id
+        where a.`type` = 7
+        and a.kind = 2
+        and b.boar_type = 1
+        and a.farm_id = #{farmId}
+        and a.event_at &gt;= #{startAt}
+        and a.event_at &lt;= #{endAt}
     </select>
 
     <select id="getOtherOutBoar" parameterType="map" resultType="int">
