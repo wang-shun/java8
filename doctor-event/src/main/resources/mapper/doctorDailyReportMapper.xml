@@ -661,8 +661,14 @@
 
     <update id="updateDailySowPigLiveStock" parameterType="map" >
         UPDATE <include refid="tb"/>
-        SET sow_start = sow_start + #{changeCount},
-        `sow_end` = `sow_end` + #{changeCount}
+        SET sow_start = ifnull(sow_start, 0) + ifnull(#{liveChangeCount}, 0),
+        `sow_end` = ifnull(sow_end, 0) + ifnull(#{liveChangeCount}, 0),
+        sow_ph_start = ifnull(sow_ph_start, 0) + ifnull(#{phChangeCount}, 0),
+        sow_ph_end = ifnull(sow_ph_end, 0) + ifnull(#{phChangeCount}, 0),
+        sow_ph = ifnull(sow_ph, 0) + ifnull(#{phChangeCount}, 0),
+        sow_cf_start = ifnull(sow_cf_start, 0) + ifnull(#{cfChangeCount}, 0),
+        sow_cf_end = ifnull(sow_cf_end, 0) + ifnull(#{cfChangeCount}, 0),
+        sow_cf = ifnull(sow_cf, 0) + ifnull(#{cfChangeCount}, 0)
         WHERE
         farm_id = #{farmId}
         AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')

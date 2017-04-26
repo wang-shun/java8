@@ -34,9 +34,15 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
                 .removeCountChange(1)
                 .barnType(newPigEvent.getBarnType())
                 .build();
+        if (Objects.equals(newPigEvent.getBarnType(), PigType.DELIVER_SOW.getValue())) {
+            changeDto2.setCfCountChange(-1);
+        } else {
+            changeDto2.setPhCountChange(-1);
+        }
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
         if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
-            doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(newDto.eventAt()), -changeDto2.getRemoveCountChange());
+            doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(newDto.eventAt()),
+                    -changeDto2.getRemoveCountChange(), changeDto2.getPhCountChange(), changeDto2.getCfCountChange());
         } else {
             doctorDailyPigDao.updateDailyBoarPigLiveStock(newPigEvent.getFarmId(), getAfterDay(newDto.eventAt()), -changeDto2.getRemoveCountChange());
         }

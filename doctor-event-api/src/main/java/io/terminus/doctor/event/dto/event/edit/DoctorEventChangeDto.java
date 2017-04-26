@@ -43,6 +43,16 @@ public class DoctorEventChangeDto {
     private Integer pigSex;
 
     /**
+     * 配怀数量变化(更新报表参数)
+     */
+    private Integer phCountChange;
+
+    /**
+     * 产房数量变化(更新报表参数)
+     */
+    private Integer cfCountChange;
+
+    /**
      * 进场数量变化(更新报表参数)
      */
 

@@ -127,11 +127,17 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
                 .removeCountChange(-1)
                 .barnType(oldPigEvent.getBarnType())
                 .build();
+        if (Objects.equals(oldPigEvent.getBarnType(), PigType.DELIVER_SOW.getValue())) {
+            changeDto1.setCfCountChange(1);
+        } else {
+            changeDto1.setPhCountChange(1);
+        }
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
         if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
-            doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()), changeDto1.getRemoveCountChange());
+            doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()),
+                    -changeDto1.getRemoveCountChange(), changeDto1.getPhCountChange(), changeDto1.getCfCountChange());
         } else {
-            doctorDailyPigDao.updateDailyBoarPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()), changeDto1.getRemoveCountChange());
+            doctorDailyPigDao.updateDailyBoarPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()), -changeDto1.getRemoveCountChange());
         }
     }
 
@@ -145,9 +151,15 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
                 .removeCountChange(1)
                 .barnType(newPigEvent.getBarnType())
                 .build();
+        if (Objects.equals(newPigEvent.getBarnType(), PigType.DELIVER_SOW.getValue())) {
+            changeDto2.setCfCountChange(-1);
+        } else {
+            changeDto2.setPhCountChange(-1);
+        }
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
         if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
-            doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(newDto.eventAt()), -changeDto2.getRemoveCountChange());
+            doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(newDto.eventAt()),
+                    -changeDto2.getRemoveCountChange(), changeDto2.getPhCountChange(), changeDto2.getCfCountChange());
         } else {
             doctorDailyPigDao.updateDailyBoarPigLiveStock(newPigEvent.getFarmId(), getAfterDay(newDto.eventAt()), -changeDto2.getRemoveCountChange());
         }
@@ -156,6 +168,7 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         if (Objects.equals(changeDto.getPigSex(), DoctorPig.PigSex.SOW.getKey())) {
+            //母猪
             if (Objects.equals(changeDto.getChangeTypeId(), 109L)) { //销售
                 oldDailyPig.setSowSale(EventUtil.plusInt(oldDailyPig.getSowSale(), changeDto.getRemoveCountChange()));
             } else if (Objects.equals(changeDto.getChangeTypeId(), 110L)){ //死亡
@@ -165,13 +178,25 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
             } else {
                 oldDailyPig.setSowOtherOut(EventUtil.plusInt(oldDailyPig.getSowOtherOut(), changeDto.getRemoveCountChange()));
             }
-
+            //产房
             if (Objects.equals(changeDto.getBarnType(), PigType.DELIVER_SOW.getValue())) {
+                if (Objects.equals(changeDto.getChangeTypeId(), 110L)){ //死亡
+                    oldDailyPig.setSowCfDead(EventUtil.plusInt(oldDailyPig.getSowPhDead(), changeDto.getRemoveCountChange()));
+                } else if (Objects.equals(changeDto.getChangeTypeId(), 111L)) { //淘汰
+                    oldDailyPig.setSowCfWeedOut(EventUtil.plusInt(oldDailyPig.getSowPhWeedOut(), changeDto.getRemoveCountChange()));
+                }
                 oldDailyPig.setSowCf(EventUtil.minusInt(oldDailyPig.getSowCf(), changeDto.getRemoveCountChange()));
+                oldDailyPig.setSowCfEnd(EventUtil.minusInt(oldDailyPig.getSowCfEnd(), changeDto.getRemoveCountChange()));
+            //配怀
             } else {
+                if (Objects.equals(changeDto.getChangeTypeId(), 110L)){ //死亡
+                    oldDailyPig.setSowPhDead(EventUtil.plusInt(oldDailyPig.getSowPhDead(), changeDto.getRemoveCountChange()));
+                } else if (Objects.equals(changeDto.getChangeTypeId(), 111L)) { //淘汰
+                    oldDailyPig.setSowPhWeedOut(EventUtil.plusInt(oldDailyPig.getSowPhWeedOut(), changeDto.getRemoveCountChange()));
+                }
                 oldDailyPig.setSowPh(EventUtil.minusInt(oldDailyPig.getSowPh(), changeDto.getRemoveCountChange()));
+                oldDailyPig.setSowPhEnd(EventUtil.minusInt(oldDailyPig.getSowPhEnd(), changeDto.getRemoveCountChange()));
             }
-            oldDailyPig.setSowIn(EventUtil.minusInt(oldDailyPig.getSowIn(), changeDto.getRemoveCountChange()));
             oldDailyPig.setSowEnd(EventUtil.minusInt(oldDailyPig.getSowEnd(), changeDto.getRemoveCountChange()));
         } else {
             if (Objects.equals(changeDto.getChangeTypeId(), 109L)) { //销售
@@ -183,7 +208,6 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
             } else {
                 oldDailyPig.setBoarOtherOut(EventUtil.plusInt(oldDailyPig.getBoarOtherOut(), changeDto.getRemoveCountChange()));
             }
-            oldDailyPig.setBoarIn(EventUtil.minusInt(oldDailyPig.getBoarIn(), changeDto.getRemoveCountChange()));
             oldDailyPig.setBoarEnd(EventUtil.minusInt(oldDailyPig.getBoarEnd(), changeDto.getRemoveCountChange()));
         }
         return oldDailyPig;
