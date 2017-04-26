@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.getAfterDay;
+
 /**
  * Created by xjn on 17/4/19.
  * 转舍
@@ -96,7 +98,8 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
         }
         DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
-
+        doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
+                0, changeDto.getToMatingChangeCount(), changeDto.getToFarrowChangeCount());
     }
 
     @Override
@@ -117,12 +120,16 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
         }
         DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
+        doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()),
+                0, changeDto.getToMatingChangeCount(), changeDto.getToFarrowChangeCount());
     }
 
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig.setSowPh(EventUtil.plusInt(oldDailyPig.getSowPh(), changeDto.getToMatingChangeCount()));
+        oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getToMatingChangeCount()));
         oldDailyPig.setSowCf(EventUtil.plusInt(oldDailyPig.getSowCf(), changeDto.getToFarrowChangeCount()));
+        oldDailyPig.setSowCfEnd(EventUtil.plusInt(oldDailyPig.getSowCfEnd(), changeDto.getToFarrowChangeCount()));
         return oldDailyPig;
     }
 }
