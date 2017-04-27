@@ -1085,4 +1085,48 @@ public class DoctorKpiDao {
     public Integer getPigChgFarm(Long farmId, Integer type, Date startAt, Date endAt) {
         return sqlSession.selectOne(sqlId("getPigChgFarm"), ImmutableMap.of("farmId", farmId, "type", type, "startAt", startAt, "endAt", endAt));
     }
+
+    /**
+     * 产房母猪销售
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public Integer getSowCfSale(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSowCfSale"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配怀母猪销售
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public Integer getSowPhSale(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSowPhSale"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产房母猪其他离场
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public Integer getSowCfOtherOut(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSowCfOtherOut"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产房母猪转场
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public Integer getSowCfChgFarm(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSowCfChgFarm"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
 }
