@@ -81,7 +81,8 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.WEAN, weanInput);
         event.setQuantity(weanInput.getPartWeanPigletsCount());
         event.setAvgWeight(weanInput.getPartWeanAvgWeight());
-
+        event.setSowId(weanInput.getSowId());
+        event.setSowCode(weanInput.getSowCode());
 
         event.setExtraMap(weanInput);
         doctorGroupEventDao.create(event);
