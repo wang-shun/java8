@@ -66,7 +66,6 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
         //之前,事件进场
         if (Objects.equals(beforeStatusEvent.getType(), PigEvent.ENTRY.getKey())) {
             oldPigTrack.setStatus(PigStatus.Entry.getKey());
-            oldPigTrack.setCurrentParity(EventUtil.minusInt(oldPigTrack.getCurrentParity(), 1));
             extra.put("enterToMate", true);
             oldPigTrack.setExtraMap(extra);
             return oldPigTrack;
