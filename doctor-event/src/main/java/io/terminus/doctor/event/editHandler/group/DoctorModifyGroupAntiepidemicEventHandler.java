@@ -22,6 +22,7 @@ public class DoctorModifyGroupAntiepidemicEventHandler extends DoctorAbstractMod
         newEvent.setBasicName(newInput.getVaccinItemName());
         newEvent.setOperatorId(newInput.getVaccinStaffId());
         newEvent.setOperatorName(newInput.getVaccinStaffName());
+        newEvent.setQuantity(newInput.getQuantity());
         return newEvent;
     }
 }
