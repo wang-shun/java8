@@ -79,7 +79,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
         //3.更新事件
         DoctorGroupEvent newEvent = buildNewEvent(oldGroupEvent, input);
-        doctorGroupEventDao.update(newEvent);
+        doctorGroupEventDao.updateIncludeNull(newEvent);
 
         //4.创建事件完成后创建编辑记录
         createModifyLog(oldGroupEvent, newEvent);

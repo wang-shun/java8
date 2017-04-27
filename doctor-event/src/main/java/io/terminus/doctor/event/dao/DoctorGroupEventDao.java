@@ -6,6 +6,7 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -230,5 +231,14 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      */
     public Integer getEventCount(Long groupId) {
         return getSqlSession().selectOne(sqlId("getEventCount"), groupId);
+    }
+
+    /**
+     * 更新事件包括字段为null
+     * @param groupEvent 猪群事件
+     * @return 更新是否成功
+     */
+    public Boolean updateIncludeNull(DoctorGroupEvent groupEvent) {
+        return getSqlSession().update(sqlId("updateIncludeNull"), groupEvent) == 1;
     }
 }

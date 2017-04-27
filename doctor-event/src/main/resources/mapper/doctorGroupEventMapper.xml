@@ -330,6 +330,63 @@
         select count(id) from <include refid="tb" /> where status = 1 AND `barn_id` = #{barnId}
     </select>
 
+    <update id="updateIncludeNull" parameterType="DoctorGroupEvent">
+        UPDATE <include refid="tb"/>
+        <set>
+            org_id = #{orgId},
+            org_name = #{orgName},
+            farm_id = #{farmId},
+            farm_name = #{farmName},
+            group_id = #{groupId},
+            group_code = #{groupCode},
+            event_at = #{eventAt},
+            `type` = #{type},
+            `name` = #{name},
+            `desc` = #{desc},
+            barn_id = #{barnId},
+            barn_name = #{barnName},
+            pig_type = #{pigType},
+            quantity = #{quantity},
+            weight = #{weight},
+            avg_weight = #{avgWeight},
+            base_weight = #{baseWeight},
+            avg_day_age = #{avgDayAge},
+            is_auto = #{isAuto},
+            change_type_id = #{changeTypeId},
+            price = #{price},
+            amount = #{amount},
+            over_price = #{overPrice},
+            trans_group_type = #{transGroupType},
+            in_type = #{inType},
+            other_barn_id = #{otherBarnId},
+            other_barn_type = #{otherBarnType},
+            rel_group_event_id = #{relGroupEventId},
+            rel_pig_event_id = #{relPigEventId},
+            out_id = #{outId},
+            status = #{status},
+            event_source = #{eventSource},
+            remark = #{remark},
+            extra = #{extra},
+            sow_id = #{sowId},
+            sow_code = #{sowCode},
+            customer_id = #{customerId},
+            customer_name = #{customerName},
+            basic_id = #{basicId},
+            basic_name = #{basicName},
+            vaccin_result = #{vaccinResult},
+            vaccination_id = #{vaccinationId},
+            vaccination_name = #{vaccinationName},
+            operator_id = #{operatorId},
+            operator_name = #{operatorName},
+            creator_id = #{creatorId},
+            creator_name = #{creatorName},
+            updator_id = #{updatorId},
+            updator_name = #{updatorName},
+            updated_at=now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
     <update id="update" parameterType="DoctorGroupEvent">
         UPDATE <include refid="tb"/>
         <set>

@@ -540,4 +540,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public DoctorPigEvent getLastEventBeforeRemove(Long pigId, Long id) {
         return getSqlSession().selectOne(sqlId("getLastEventBeforeRemove"), ImmutableMap.of("pigId", pigId, "id", id));
     }
+
+    /**
+     * 更新事件包括字段为null
+     * @param pigEvent 猪事件
+     * @return 更新是否成功
+     */
+    public Boolean updateIncludeNull(DoctorPigEvent pigEvent) {
+        return getSqlSession().update(sqlId("updateIncludeNull"), pigEvent) == 1;
+    }
 }

@@ -83,7 +83,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
         //3.更新事件
         DoctorPigEvent newEvent = buildNewEvent(oldPigEvent, inputDto);
-        doctorPigEventDao.update(newEvent);
+        doctorPigEventDao.updateIncludeNull(newEvent);
 
         //4.创建事件完成后创建编辑记录
         createModifyLog(oldPigEvent, newEvent);
