@@ -175,7 +175,6 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         changeDto2.setFarrowNestChange(1);
         DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), farrowingDto2.eventAt());
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
-
     }
 
     @Override

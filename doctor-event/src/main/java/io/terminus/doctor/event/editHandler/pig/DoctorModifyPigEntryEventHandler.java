@@ -72,11 +72,15 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
         if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())
                 && Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())) {
             DoctorFarmEntryDto newDto = (DoctorFarmEntryDto) inputDto;
+
+            //1.活公猪 => 其他
             if (Objects.equals(oldPigEvent.getBoarType(), BoarEntryType.HGZ.getKey())
                     && !Objects.equals(newDto.getBoarType(), BoarEntryType.HGZ.getKey())) {
                 updateDailyOfDelete(oldPigEvent);
                 return;
             }
+
+            //2.其他 => 火公猪
             if (!Objects.equals(oldPigEvent.getBoarType(), BoarEntryType.HGZ.getKey())
                     && Objects.equals(newDto.getBoarType(), BoarEntryType.HGZ.getKey())) {
                 updateDailyOfNew(oldPigEvent, inputDto);

@@ -1,10 +1,14 @@
 package io.terminus.doctor.web.util;
 
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.MatingType;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.enums.VaccinResult;
@@ -12,6 +16,8 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserProfileReadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +25,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Created by highway on 16/8/11.
@@ -30,6 +38,10 @@ public class TransFromUtil {
     private final DoctorBasicReadService doctorBasicReadService;
     private final UserProfileReadService userProfileReadService;
     private final DoctorBarnReadService doctorBarnReadService;
+    @RpcConsumer
+    private DoctorGroupReadService doctorGroupReadService;
+    @RpcConsumer
+    private DoctorPigEventReadService doctorPigEventReadService;
 
     @Autowired
     public TransFromUtil(DoctorBasicReadService doctorBasicReadService, UserProfileReadService userProfileReadService, DoctorBarnReadService doctorBarnReadService) {
@@ -66,13 +78,26 @@ public class TransFromUtil {
                 if (getLong(extraMap, "toBarnId") != null) {
                     extraMap.put("toBarnId", RespHelper.or500(doctorBarnReadService.findBarnById(toLong(extraMap.get("toBarnId")))).getName());
                 }
+
+                if( Objects.equals(doctorPigEvent.getType(), PigEvent.ENTRY.getKey())
+                        && notNull(doctorPigEvent.getExtraMap())
+                        && doctorPigEvent.getExtraMap().containsKey("boarType")){
+                    extraMap.put("boarTypeName", BoarEntryType.from(Integer.valueOf(extraMap.get("boarType").toString())).getDesc());
+                }
+
+                Boolean isRollback = false;
+                Response<Boolean> booleanResponse = doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId());
+                if (booleanResponse.isSuccess()) {
+                    isRollback = booleanResponse.getResult();
+                }
+                doctorPigEvent.setIsRollback(isRollback);
             }
         }
     }
 
-    public void transFromGroupEvents(List<DoctorGroupEvent> doctorGroupEvents) {
-        for (DoctorGroupEvent doctorGroupEvent : doctorGroupEvents) {
-            Map<String,Object> extraMap = doctorGroupEvent.getExtraData();
+    public List<DoctorGroupEvent> transFromGroupEvents(List<DoctorGroupEvent> doctorGroupEvents) {
+        doctorGroupEvents.forEach(groupEvent -> {
+            Map<String, Object> extraMap = groupEvent.getExtraData();
             if (extraMap != null) {
                 if (getInteger(extraMap, "sex") != null) {
                     extraMap.put("sex", DoctorGroupTrack.Sex.from(toInteger(extraMap.get("sex"))).getDesc());
@@ -84,7 +109,15 @@ public class TransFromUtil {
                     extraMap.put("vaccinResult", (toInteger(extraMap.get("vaccinResult")) == 1) ? VaccinResult.POSITIVE : VaccinResult.NEGATIVE);
                 }
             }
-        }
+
+            Boolean isRollback = false;
+            Response<Boolean> booleanResponse = doctorGroupReadService.eventCanRollback(groupEvent.getId());
+            if (booleanResponse.isSuccess()) {
+                isRollback = booleanResponse.getResult();
+            }
+            groupEvent.setIsRollback(isRollback);
+        });
+        return doctorGroupEvents;
     }
 
     private static Integer toInteger(Object o) {

@@ -48,12 +48,13 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         changeDto.setBusinessId(oldGroupEvent.getGroupId());
         changeDto.setIsSowTrigger(notNull(oldGroupEvent.getSowId()));
         changeDto.setTransGroupType(oldGroupEvent.getTransGroupType());
+
+        //母猪触发
         if (notNull(oldGroupEvent.getSowId())) {
             changeDto.setGroupHealthyQtyChange(EventUtil.minusInt(newInput.getHealthyQty(), oldInput.getHealthyQty()));
             changeDto.setGroupWeakQtyChange(EventUtil.minusInt(newInput.getWeakQty(), oldInput.getWeakQty()));
             changeDto.setGroupBirthWeightChange(EventUtil.minusDouble(EventUtil.getWeight(newInput.getAvgWeight(), newInput.getQuantity()),
                     EventUtil.getAvgWeight(oldInput.getAvgWeight(), oldInput.getQuantity())));
-
         }
         return changeDto;
     }
@@ -81,7 +82,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
 
     @Override
     public DoctorGroupTrack buildNewTrack(DoctorGroupTrack oldGroupTrack, DoctorEventChangeDto changeDto) {
-        oldGroupTrack.setQuantity(EventUtil.plusInt(oldGroupTrack.getQuantity(), changeDto.getQuantityChange()));
+        //母猪触发
         if (changeDto.getIsSowTrigger()) {
             oldGroupTrack.setBirthWeight(EventUtil.plusDouble(oldGroupTrack.getBirthWeight(), changeDto.getGroupBirthWeightChange()));
             oldGroupTrack.setLiveQty(EventUtil.plusInt(oldGroupTrack.getLiveQty(), changeDto.getQuantityChange()));
@@ -89,6 +90,8 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
             oldGroupTrack.setHealthyQty(EventUtil.plusInt(oldGroupTrack.getHealthyQty(), changeDto.getGroupHealthyQtyChange()));
             oldGroupTrack.setWeakQty(EventUtil.plusInt(oldGroupTrack.getWeakQty(), changeDto.getGroupWeakQtyChange()));
         }
+
+        oldGroupTrack.setQuantity(EventUtil.plusInt(oldGroupTrack.getQuantity(), changeDto.getQuantityChange()));
         oldGroupTrack.setAvgDayAge(getAvgDay(oldGroupTrack.getGroupId()));
         oldGroupTrack.setBirthDate(DateTime.now().minusDays(oldGroupTrack.getAvgDayAge()).toDate());
         return oldGroupTrack;
@@ -96,16 +99,15 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
 
     @Override
     protected void updateDailyForModify(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto) {
-
         if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
             DoctorDailyGroup oldDailyGroup = doctorDailyGroupDao.findByGroupIdAndSumAt(changeDto.getBusinessId(), changeDto.getOldEventAt());
             buildDailyGroup(oldDailyGroup, changeDto);
             doctorDailyGroupDao.update(oldDailyGroup);
             updateDailyGroupLiveStock(changeDto.getBusinessId(), getAfterDay(changeDto.getOldEventAt()), changeDto.getQuantityChange());
-        } else {
-            updateDailyForDelete(oldGroupEvent);
-            updateDailyOfNew(oldGroupEvent, input);
+            return;
         }
+        updateDailyForDelete(oldGroupEvent);
+        updateDailyOfNew(oldGroupEvent, input);
     }
 
     @Override

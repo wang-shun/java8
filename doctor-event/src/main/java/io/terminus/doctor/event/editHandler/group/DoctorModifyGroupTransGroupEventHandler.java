@@ -222,18 +222,16 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
 
         moveIn.setInType(InType.GROUP.getValue());       //转入类型
         moveIn.setInTypeName(InType.GROUP.getDesc());
-        moveIn.setSource(transGroup.getSource());                 //来源可以分为 本场(转群), 外场(转场)
-//        moveIn.setSex(fromGroupTrack.getSex());
+        moveIn.setSource(transGroup.getSource());        //来源可以分为 本场(转群), 外场(转场)
         moveIn.setBreedId(transGroup.getBreedId());
         moveIn.setBreedName(transGroup.getBreedName());
-        moveIn.setFromBarnId(transGroupEvent.getBarnId());         //来源猪舍
+        moveIn.setFromBarnId(transGroupEvent.getBarnId());
         moveIn.setFromBarnName(transGroupEvent.getBarnName());
-        moveIn.setFromGroupId(transGroupEvent.getGroupId());                   //来源猪群
+        moveIn.setFromGroupId(transGroupEvent.getGroupId());
         moveIn.setFromGroupCode(transGroupEvent.getGroupCode());
         moveIn.setQuantity(transGroup.getQuantity());
         moveIn.setBoarQty(transGroup.getBoarQty());
         moveIn.setSowQty(transGroup.getSowQty());
-//        moveIn.setAvgDayAge(fromGroupTrack.getAvgDayAge());     //日龄
         moveIn.setAvgWeight(EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity()));  //转入均重
         moveIn.setSowEvent(transGroup.isSowEvent());    //是否是由母猪触发的转入
         return moveIn;

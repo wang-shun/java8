@@ -410,6 +410,11 @@ public class DoctorPigEvent implements Serializable {
     private Integer isModify;
 
     /**
+     * 是否是编辑事件(不存于数据库)
+     */
+    private Boolean isRollback;
+
+    /**
      * 事件来源
      * @see io.terminus.doctor.common.enums.SourceType
      */

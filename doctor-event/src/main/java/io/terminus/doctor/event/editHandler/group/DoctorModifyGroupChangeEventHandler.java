@@ -16,6 +16,9 @@ import java.util.Date;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler.DEAD;
+import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler.SALE;
+import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler.WEED;
 
 /**
  * Created by IntelliJ IDEA.
@@ -183,11 +186,11 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
      * @param changeTypeId 变动类型
      */
     private void updateChange(DoctorDailyGroup oldDailyGroup, Integer quantityChange, Long changeTypeId) {
-        if (Objects.equals(changeTypeId, 109L)) {
+        if (Objects.equals(changeTypeId, SALE)) {
             oldDailyGroup.setSale(EventUtil.plusInt(oldDailyGroup.getSale(), quantityChange));
-        } else if (Objects.equals(changeTypeId, 110L)) {
+        } else if (Objects.equals(changeTypeId, DEAD)) {
             oldDailyGroup.setDead(EventUtil.plusInt(oldDailyGroup.getDead(), quantityChange));
-        } else if (Objects.equals(changeTypeId, 111L)) {
+        } else if (Objects.equals(changeTypeId, WEED)) {
             oldDailyGroup.setWeedOut(EventUtil.plusInt(oldDailyGroup.getWeedOut(), quantityChange));
         } else {
             oldDailyGroup.setOtherChange(EventUtil.plusInt(oldDailyGroup.getOtherChange(), quantityChange));

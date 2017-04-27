@@ -33,7 +33,4 @@ public class DoctorPigInfoDetailDto implements Serializable {
 
     private Integer dayAge; //日龄
 
-    private Long canRollback;
-
-
 }

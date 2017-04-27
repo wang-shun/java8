@@ -36,6 +36,7 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
         PREG_CHECK_RESULT.put(PregCheckResult.FANQING.getKey(), KongHuaiPregCheckResult.FANQING.getKey());
         PREG_CHECK_RESULT.put(PregCheckResult.LIUCHAN.getKey(), KongHuaiPregCheckResult.LIUCHAN.getKey());
     }
+
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         DoctorPregChkResultDto newDto = (DoctorPregChkResultDto) inputDto;
@@ -72,11 +73,15 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
         if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
             DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
+
+            //1.原妊娠检查结果
             DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                     .pregCheckResult(changeDto.getOldPregCheckResult())
                     .pregCheckResultCountChange(-1)
                     .build();
             buildDailyPig(oldDailyPig, changeDto1);
+
+            //2.新妊娠检查结果
             DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                     .pregCheckResult(changeDto.getNewPregCheckResult())
                     .pregCheckResultCountChange(1)
