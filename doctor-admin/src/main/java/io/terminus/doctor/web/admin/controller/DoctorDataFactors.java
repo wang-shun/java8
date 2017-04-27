@@ -91,7 +91,7 @@ public class DoctorDataFactors {
             }else{
                 dto.setRangeFrom(String.valueOf(factor.getRangeFrom()));
             }
-            if("1.7976931348623157e308".equals(String.valueOf(factor.getRangeTo()).toUpperCase())){
+            if("1.7976931348623157E308".equals(String.valueOf(factor.getRangeTo()).toUpperCase())){
                 dto.setRangeTo("MAX");
             }else{
                 dto.setRangeTo(String.valueOf(factor.getRangeTo()));
