@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
-import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.validEventAt;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
@@ -171,8 +170,6 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @param inputDto 新输入
      */
     protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
-        expectTrue(Objects.equals(oldPigEvent.getIsAuto(), IsOrNot.NO.getValue()), "is.auto.not.modify");
-
         //编辑的事件的时间校验
         DoctorPigEvent lastEvent;
         if (IGNORE_EVENT.contains(oldPigEvent.getType())) {

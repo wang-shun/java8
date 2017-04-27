@@ -161,8 +161,6 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param input 输入
      */
     protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
-        expectTrue(Objects.equals(oldGroupEvent.getIsAuto(), IsOrNot.NO.getValue()), "is.auto.not.modify");
-
         if (!Objects.equals(oldGroupEvent.getType(), GroupEventType.NEW.getValue())) {
             DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findNewGroupByGroupId(oldGroupEvent.getGroupId());
             validEventAt(DateUtil.toDate(input.getEventAt()), notNull(newCreateEvent) ? newCreateEvent.getEventAt() : null);
