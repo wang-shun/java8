@@ -58,6 +58,17 @@
         (<include refid="vals"/>)
     </insert>
 
+    <insert id="creates" parameterType="DoctorDataFactor">
+        INSERT INTO
+        <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        <foreach collection="list" item="i" index="index" separator=",">
+            ( #{i.type}, #{i.typeName}, #{i.subType}, #{i.subTypeName}, #{i.factor}, #{i.rangeFrom}, #{i.rangeTo}, #{i.isDelete},
+            now(), now())
+        </foreach>
+    </insert>
+
     <select id="findById" parameterType="long" resultMap="DoctorDataFactorMap">
         SELECT
         <include refid="cols_all"/>
@@ -121,5 +132,11 @@
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>
+
+
+    <delete id="deleteAll" parameterType="int">
+        DELETE FROM <include refid="tb"/>
+        WHERE `type` = #{type}
+    </delete>
 
 </mapper>

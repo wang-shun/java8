@@ -4,8 +4,8 @@ import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
-import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DataFactorDto;
 import io.terminus.doctor.event.model.DoctorDataFactor;
 import io.terminus.doctor.event.service.DoctorDataFactorReadService;
 import io.terminus.doctor.event.service.DoctorDataFactorWriteService;
@@ -14,8 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Desc: 信用模型计算因子 API
@@ -48,25 +50,6 @@ public class DoctorDataFactors {
     }
 
     /**
-     * 分页
-     * @param pageNo
-     * @param pageSize
-     * @return
-     */
-    @RequestMapping(value = "/paging", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Paging<DoctorDataFactor> pagingDoctorDataFactor(@RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                                 @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-
-        Map<String, Object> criteria = Maps.newHashMap();
-
-        Response<Paging<DoctorDataFactor>> result =  doctorDataFactorReadService.paging(pageNo, pageSize, criteria);
-        if(!result.isSuccess()){
-            throw new JsonResponseException(result.getError());
-        }
-        return result.getResult();
-    }
-
-    /**
      * 列表
      * @return
      */
@@ -81,45 +64,53 @@ public class DoctorDataFactors {
     }
 
     @RequestMapping(value = "/map-list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<Integer, List<DoctorDataFactor>> mapListDoctorDataFactor() {
+    public Map<Integer, List<DataFactorDto>> mapListDoctorDataFactor() {
         Map<String, Object> criteria = Maps.newHashMap();
         Response<List<DoctorDataFactor>> result =  doctorDataFactorReadService.list(criteria);
         if(!result.isSuccess()){
             throw new JsonResponseException(result.getError());
         }
-        Map<Integer, List<DoctorDataFactor>> map = Maps.newHashMap();
+        Map<Integer, List<DataFactorDto>> map = Maps.newHashMap();
         for(DoctorDataFactor factor: result.getResult()){
-            List<DoctorDataFactor> list;
+            List<DataFactorDto> list;
             if(map.containsKey(factor.getType())){
                  list = map.get(factor.getType());
             }else{
                  list = Lists.newArrayList();
             }
-            list.add(factor);
-            map.put(factor.getType(), list);
+
+            DataFactorDto dto = new DataFactorDto();
+            dto.setId(factor.getId());
+            dto.setType(factor.getType());
+            dto.setTypeName(factor.getTypeName());
+            dto.setSubType(factor.getSubType());
+            dto.setSubTypeName(factor.getSubTypeName());
+            dto.setFactor(factor.getFactor());
+            if(factor.getRangeFrom().equals(Double.MIN_VALUE)){
+                dto.setRangeFrom("MIN");
+            }else{
+                dto.setRangeFrom(factor.getRangeFrom().toString());
+            }
+            if(factor.getRangeTo().equals(Double.MIN_VALUE)){
+                dto.setRangeTo("MAX");
+            }else{
+                dto.setRangeTo(factor.getRangeTo().toString());
+            }
+
+            list.add(dto);
+            List<DataFactorDto> sList = list.stream().sorted(Comparator.comparing(it -> changeTo(it.getRangeFrom()))).collect(Collectors.toList());
+            map.put(factor.getType(), sList);
         }
         return map;
     }
 
-    /**
-     * 创建
-     * @param
-     */
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Long createDoctorDataFactor(@RequestBody DoctorDataFactor factor) {
-        if(factor.getFactor() == null){
-            throw new JsonResponseException(500,"doctor.data.factor.invalid");
+
+    private Double changeTo(String value){
+        if("MIN".equals(value)){
+            return Double.MIN_VALUE;
+        }else{
+            return Double.valueOf(value);
         }
-        rangeVerify(factor);
-        if(factor.getRangeFrom()>factor.getRangeTo()){
-            throw new JsonResponseException(500,"range.from.gt.to");
-        }
-        factor.setIsDelete(0);
-        Response<Long> response = doctorDataFactorWriteService.create(factor);
-        if (!response.isSuccess()) {
-            throw new JsonResponseException(500, response.getError());
-        }
-        return response.getResult();
     }
 
     /**
@@ -128,38 +119,33 @@ public class DoctorDataFactors {
      */
     @RequestMapping(method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean updateDoctorDataFactor(@RequestBody DoctorDataFactorDto datas) {
-        Response<Boolean> response = doctorDataFactorWriteService.batchUpdate(datas.getDatas());
+
+        List<DoctorDataFactor> factors = Lists.newArrayList();
+        for(DataFactorDto dto: datas.getDatas()){
+            DoctorDataFactor factor = new DoctorDataFactor();
+
+            factor.setType(dto.getType());
+            factor.setTypeName(dto.getTypeName());
+            factor.setSubType(dto.getSubType());
+            factor.setSubTypeName(dto.getSubTypeName());
+            factor.setFactor(dto.getFactor());
+            if("MIN".equals(dto.getRangeFrom())){
+                factor.setRangeFrom(Double.MIN_VALUE);
+            }else{
+                factor.setRangeFrom(Double.valueOf(dto.getRangeFrom()));
+            }
+            if("MAX".equals(dto.getRangeTo())){
+                factor.setRangeTo(Double.MAX_VALUE);
+            }else{
+                factor.setRangeTo(Double.valueOf(dto.getRangeTo()));
+            }
+            factors.add(factor);
+        }
+        Response<Boolean> response = doctorDataFactorWriteService.batchUpdate(factors);
         if (!response.isSuccess()) {
             throw new JsonResponseException(500, response.getError());
         }
         return true;
     }
 
-    private void rangeVerify(DoctorDataFactor factor){
-        if(factor.getRangeFrom() == null && factor.getRangeTo() == null){
-            factor.setRangeFrom(factor.getFactor());
-            factor.setRangeTo(factor.getRangeTo());
-        }else if(factor.getRangeFrom() == null){
-            factor.setRangeFrom(Double.MIN_VALUE);
-        }else if(factor.getRangeTo() == null){
-            factor.setRangeFrom(Double.MAX_VALUE);
-        }
-    }
-
-    /**
-     * 逻辑删除
-     * @param id
-     * @return
-     */
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean deleteDoctorDataFactor(@PathVariable Long id) {
-        DoctorDataFactor factor = new DoctorDataFactor();
-        factor.setId(id);
-        factor.setIsDelete(1);
-        Response<Boolean> response = doctorDataFactorWriteService.update(factor);
-        if (!response.isSuccess()) {
-            throw new JsonResponseException(500, response.getError());
-        }
-        return response.getResult();
-    }
 }

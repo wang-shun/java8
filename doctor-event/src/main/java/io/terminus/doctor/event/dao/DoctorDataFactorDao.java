@@ -12,4 +12,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorDataFactorDao extends MyBatisDao<DoctorDataFactor> {
 
+
+    public Integer deleteAll(Integer type){
+        return sqlSession.delete(sqlId("deleteAll"), type);
+    }
 }

@@ -55,6 +55,9 @@ public class Articles {
         if (!response.isSuccess()) {
             throw new JsonResponseException(500, response.getError());
         }
+        if(!response.getResult().isEmpty()){
+            response.getResult().stream().forEach(it -> it.setContent(""));
+        }
         return response.getResult();
     }
 

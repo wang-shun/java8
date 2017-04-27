@@ -1,6 +1,6 @@
 package io.terminus.doctor.web.admin.dto;
 
-import io.terminus.doctor.event.model.DoctorDataFactor;
+import io.terminus.doctor.event.dto.DataFactorDto;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,5 +15,5 @@ public class DoctorDataFactorDto implements Serializable{
 
     private static final long serialVersionUID = -2733967481039741714L;
 
-    List<DoctorDataFactor> datas;
+    List<DataFactorDto> datas;
 }
