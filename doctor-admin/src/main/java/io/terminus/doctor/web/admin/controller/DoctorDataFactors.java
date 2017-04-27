@@ -86,12 +86,12 @@ public class DoctorDataFactors {
             dto.setSubType(factor.getSubType());
             dto.setSubTypeName(factor.getSubTypeName());
             dto.setFactor(factor.getFactor());
-            if(factor.getRangeFrom() !=null && factor.getRangeFrom().equals(Double.MIN_VALUE)){
+            if("-1.79769313486232e308".equals(String.valueOf(factor.getRangeFrom()))){
                 dto.setRangeFrom("MIN");
             }else{
                 dto.setRangeFrom(String.valueOf(factor.getRangeFrom()));
             }
-            if(factor.getRangeTo() != null && factor.getRangeTo().equals(Double.MIN_VALUE)){
+            if("1.79769313486232e308".equals(String.valueOf(factor.getRangeFrom()))){
                 dto.setRangeTo("MAX");
             }else{
                 dto.setRangeTo(String.valueOf(factor.getRangeTo()));
