@@ -2137,4 +2137,57 @@
         and kind = #{type}
         <include refid="criteria" />
     </select>
+
+    <select id="getSowCfSale" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM doctor_pig_events
+        WHERE `type` = 6
+        AND barn_type = 7
+        AND change_type_id = 109
+        <include refid="criteria" />
+    </select>
+
+    <select id="getSowCfOtherOut" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM doctor_pig_events
+        WHERE `type` = 6
+        AND barn_type = 7
+        AND change_type_id not in( 109, 110, 111)
+        <include refid="criteria" />
+    </select>
+
+    <select id="getSowCfChgFarm" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM doctor_pig_events
+        WHERE `type` = 2
+        AND barn_type = 7
+        <include refid="criteria" />
+    </select>
+
+
+    <select id="getSowPhSale" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM doctor_pig_events
+        WHERE `type` = 6
+        AND barn_type in (5,6)
+        AND change_type_id = 109
+        <include refid="criteria" />
+    </select>
+
+    <select id="getSowPhOtherOut" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM doctor_pig_events
+        WHERE `type` = 6
+        AND barn_type in (5,6)
+        AND change_type_id not in( 109, 110, 111)
+        <include refid="criteria" />
+    </select>
+
+    <select id="getSowPhChgFarm" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM doctor_pig_events
+        WHERE `type` = 2
+        AND barn_type in (5,6)
+        <include refid="criteria" />
+    </select>
 </mapper>
