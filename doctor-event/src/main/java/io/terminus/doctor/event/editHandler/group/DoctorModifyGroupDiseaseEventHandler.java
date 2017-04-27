@@ -19,6 +19,7 @@ public class DoctorModifyGroupDiseaseEventHandler extends DoctorAbstractModifyGr
         newEvent.setBasicName(newInput.getDiseaseName());
         newEvent.setOperatorId(newInput.getDoctorId());
         newEvent.setOperatorName(newInput.getDoctorName());
+        newEvent.setQuantity(newInput.getQuantity());
         return newEvent;
     }
 }
