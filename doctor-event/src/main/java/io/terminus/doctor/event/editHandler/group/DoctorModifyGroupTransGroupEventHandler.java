@@ -145,7 +145,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
 
     @Override
     protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {
-        if (notNull(deleteGroupEvent)) {
+        if (notNull(deleteGroupEvent.getSowId())) {
             oldGroupTrack.setLiveQty(EventUtil.plusInt(oldGroupTrack.getLiveQty(), deleteGroupEvent.getQuantity()));
             oldGroupTrack.setHealthyQty(EventUtil.plusInt(oldGroupTrack.getLiveQty(), deleteGroupEvent.getQuantity()));
             oldGroupTrack.setBirthWeight(EventUtil.plusDouble(oldGroupTrack.getBirthWeight(), deleteGroupEvent.getWeight()));
