@@ -1367,11 +1367,11 @@
             <if test="healthCount == null"> health_count = 0,</if>
             <if test="healthCount != null"> health_count = #{healthCount},</if>
             <if test="weakCount == null"> weak_count = 0,</if>
-            <if test="weakCount != null"> weakCount = #{weakCount},</if>
+            <if test="weakCount != null"> weak_count = #{weakCount},</if>
             <if test="mnyCount == null"> mny_count = 0,</if>
             <if test="mnyCount != null"> mny_count = #{mnyCount},</if>
-            <if test="weakCount == null"> weakCount = 0,</if>
-            <if test="weakCount != null"> weakCount = #{weakCount},</if>
+            <if test="jxCount == null"> jx_count = 0,</if>
+            <if test="jxCount != null"> jx_count = #{jxCount},</if>
             <if test="deadCount == null"> dead_count = 0,</if>
             <if test="deadCount != null"> dead_count = #{deadCount},</if>
             <if test="blackCount == null"> black_count = 0,</if>
