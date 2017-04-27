@@ -131,6 +131,7 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
         oldDailyPig.setSowPhToCf(EventUtil.plusInt(oldDailyPig.getSowPhToCf(), changeDto.getToFarrowChangeCount()));
         oldDailyPig.setSowCf(EventUtil.plusInt(oldDailyPig.getSowCf(), changeDto.getToFarrowChangeCount()));
         oldDailyPig.setSowCfEnd(EventUtil.plusInt(oldDailyPig.getSowCfEnd(), changeDto.getToFarrowChangeCount()));
+        oldDailyPig.setSowCfIn(EventUtil.plusInt(oldDailyPig.getSowCfIn(), changeDto.getToFarrowChangeCount()));
         return oldDailyPig;
     }
 }
