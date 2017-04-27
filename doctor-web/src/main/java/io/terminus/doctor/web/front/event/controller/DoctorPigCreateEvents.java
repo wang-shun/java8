@@ -674,6 +674,7 @@ public class DoctorPigCreateEvents {
                 expectTrue(notNull(doctorPigTrack1), "pig.track.not.null", realPigId);
                 doctorChgLocationDto.setChgLocationFromBarnId(doctorPigTrack1.getCurrentBarnId());
                 doctorChgLocationDto.setChgLocationFromBarnName(doctorPigTrack1.getCurrentBarnName());
+                doctorChgLocationDto.setChgLocationToBarnName(RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationToBarnId())).getName());
                 doctorChgLocationDto = doctorValidService.valid(doctorChgLocationDto, doctorPig.getPigCode());
                 return doctorChgLocationDto;
             case CONDITION:
