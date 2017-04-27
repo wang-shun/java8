@@ -51,5 +51,7 @@ public interface DoctorDailyGroupWriteService {
      */
     Response<Boolean> createDailyGroups(List<Long> allFarmIds, Date date);
 
-    Response<Boolean> createDailyGroups(Long farmIds, Date date);
+    Response<Boolean> createDailyGroups(Long farmId, Date date);
+
+    Response<Boolean> createDailyGroupsByDateRange(Long farmId, Date fromDate, Date toDate);
 }
