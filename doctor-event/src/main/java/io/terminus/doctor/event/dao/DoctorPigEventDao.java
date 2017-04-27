@@ -523,4 +523,11 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         maps = Params.filterNullOrEmpty(maps);
         return getSqlSession().selectList(sqlId("sumProFitPigType"), maps);
     }
+
+    /**
+     * 删除猪转场触发的事件
+     */
+    public void deleteByChgFarm(Long pigId) {
+        getSqlSession().delete(sqlId("deleteByChgFarm"), pigId);
+     }
 }

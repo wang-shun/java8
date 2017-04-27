@@ -19,7 +19,7 @@ public class DoctorModifyPigVaccinEventHandler extends DoctorAbstractModifyPigEv
         doctorPigEvent.setVaccinationId(doctorVaccinationDto.getVaccinationId());
         doctorPigEvent.setVaccinationName(doctorVaccinationDto.getVaccinationName());
         doctorPigEvent.setBasicId(doctorVaccinationDto.getVaccinationItemId());
-        doctorPigEvent.setBarnName(doctorVaccinationDto.getVaccinationItemName());
+        doctorPigEvent.setBasicName(doctorVaccinationDto.getVaccinationItemName());
         return doctorPigEvent;
     }
 }

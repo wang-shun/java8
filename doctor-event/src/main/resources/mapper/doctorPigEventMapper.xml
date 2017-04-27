@@ -1300,4 +1300,11 @@
         ORDER BY id DESC
         limit 1
     </select>
+
+    <delete id="deleteByChgFarm" parameterType="long" >
+        DELETE FROM <include refid="tb"/>
+        WHERE
+        pig_id = #{pigId}
+        AND event_source = 5
+    </delete>
 </mapper>

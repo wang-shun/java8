@@ -20,6 +20,7 @@ import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransGroupEve
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTurnSeedEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupWeanEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmInEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgLocationEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigConditionEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigDiseaseEventHandler;
@@ -96,6 +97,7 @@ import io.terminus.doctor.event.handler.sow.DoctorSowPigletsChgHandler;
 import io.terminus.doctor.event.handler.sow.DoctorSowPregCheckHandler;
 import io.terminus.doctor.event.handler.sow.DoctorSowWeanHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
+import io.terminus.doctor.event.handler.usual.DoctorChgFarmInHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
 import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
 import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
@@ -233,6 +235,7 @@ public class  DoctorEventConfiguration {
             DoctorSowMatingHandler doctorSowMatingHandler,
             DoctorSowPregCheckHandler doctorSowPregCheckHandler,
             DoctorChgFarmHandler doctorChgFarmHandler,
+            DoctorChgFarmInHandler doctorChgFarmInHandler,
             DoctorChgLocationHandler doctorChgLocationHandler,
             DoctorConditionHandler doctorConditionHandler,
             DoctorDiseaseHandler doctorDiseaseHandler,
@@ -254,6 +257,7 @@ public class  DoctorEventConfiguration {
         eventHandlerMap.put(PigEvent.PREG_CHECK.getKey(), doctorSowPregCheckHandler);
         eventHandlerMap.put(PigEvent.WEAN.getKey(), doctorSowWeanHandler);
         eventHandlerMap.put(PigEvent.CHG_FARM.getKey(), doctorChgFarmHandler);
+        eventHandlerMap.put(PigEvent.CHG_FARM_IN.getKey(), doctorChgFarmInHandler);
         eventHandlerMap.put(PigEvent.CHG_LOCATION.getKey(), doctorChgLocationHandler);
         eventHandlerMap.put(PigEvent.TO_FARROWING.getKey(), doctorChgLocationHandler);
         eventHandlerMap.put(PigEvent.TO_MATING.getKey(), doctorChgLocationHandler);
@@ -299,6 +303,7 @@ public class  DoctorEventConfiguration {
     @Bean
     public DoctorModifyPigEventHandlers doctorModifyPigEventHandlers(
             DoctorModifyPigChgFarmEventHandler modifyPigChgFarmEventHandler,
+            DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler,
             DoctorModifyPigChgLocationEventHandler modifyPigChgLocationEventHandler,
             DoctorModifyPigConditionEventHandler modifyPigConditionEventHandler,
             DoctorModifyPigDiseaseEventHandler modifyPigDiseaseEventHandler,
@@ -315,6 +320,7 @@ public class  DoctorEventConfiguration {
             DoctorModifyPigWeanEventHandler modifyPigWeanEventHandler) {
         Map<Integer, DoctorModifyPigEventHandler> modifyPigEventHandlerMap = Maps.newHashMap();
         modifyPigEventHandlerMap.put(PigEvent.CHG_FARM.getKey(), modifyPigChgFarmEventHandler);
+        modifyPigEventHandlerMap.put(PigEvent.CHG_FARM_IN.getKey(), modifyPigChgFarmInEventHandler);
         modifyPigEventHandlerMap.put(PigEvent.CHG_LOCATION.getKey(), modifyPigChgLocationEventHandler);
         modifyPigEventHandlerMap.put(PigEvent.TO_FARROWING.getKey(), modifyPigChgLocationEventHandler);
         modifyPigEventHandlerMap.put(PigEvent.TO_MATING.getKey(), modifyPigChgLocationEventHandler);

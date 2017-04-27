@@ -1,11 +1,10 @@
 package io.terminus.doctor.event.handler.usual;
 
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -41,6 +40,8 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
     private DoctorBarnDao doctorBarnDao;
     @Autowired
     private DoctorModifyPigChgFarmEventHandler modifyPigChgFarmEventHandler;
+    @Autowired
+    private DoctorChgFarmInHandler doctorChgFarmInHandler;
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -58,37 +59,6 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
     @Override
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         return super.buildPigEvent(basic, inputDto);
-    }
-
-    @Override
-    protected void specialHandleBefore(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
-        DoctorChgFarmDto chgFarmDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorChgFarmDto.class);
-        DoctorPig oldPig = doctorPigDao.findById(executeEvent.getPigId());
-        DoctorPig newPig = BeanMapper.map(oldPig, DoctorPig.class);
-        DoctorBarn toBarn = doctorBarnDao.findById(chgFarmDto.getToBarnId());
-
-        //1.新建一头猪
-        newPig.setFarmId(chgFarmDto.getToFarmId());
-        newPig.setFarmName(chgFarmDto.getToFarmName());
-        doctorPigDao.create(newPig);
-
-        //2.新建track
-        DoctorPigTrack newTrack = BeanMapper.map(fromTrack, DoctorPigTrack.class);
-        newTrack.setPigId(newPig.getId());
-        newTrack.setCurrentBarnId(toBarn.getId());
-        newTrack.setCurrentBarnName(toBarn.getName());
-        newTrack.setCurrentBarnType(toBarn.getPigType());
-        doctorPigTrackDao.create(newTrack);
-
-        //3.复制之前之前更改pigId
-        List<DoctorPigEvent> pigEventList = doctorPigEventDao.findByPigId(oldPig.getId());
-        pigEventList.forEach(pigEvent -> {
-            pigEvent.setFarmId(chgFarmDto.getToFarmId());
-            pigEvent.setFarmName(chgFarmDto.getToFarmName());
-            pigEvent.setPigId(newPig.getId());
-            pigEvent.setEventSource(SourceType.TRANS_FARM.getValue());
-        });
-        doctorPigEventDao.creates(pigEventList);
     }
 
     @Override
@@ -114,6 +84,12 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
     protected void updateDailyForNew(DoctorPigEvent newPigEvent) {
         BasePigEventInputDto inputDto = JSON_MAPPER.fromJson(newPigEvent.getExtra(), DoctorChgFarmDto.class);
         modifyPigChgFarmEventHandler.updateDailyOfNew(newPigEvent, inputDto);
+    }
+
+    @Override
+    protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
+        DoctorPig doctorPig = doctorPigDao.findById(toTrack.getPigId());
+        doctorChgFarmInHandler.handle(executeEvent, toTrack, doctorPig);
     }
 
     /**

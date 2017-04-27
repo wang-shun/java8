@@ -267,7 +267,7 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
      * @param pigEvent 状态事件
      * @return 删除前状态
      */
-    private Integer getStatus(DoctorPigEvent pigEvent) {
+    public static Integer getStatus(DoctorPigEvent pigEvent) {
         //1.进场
         if (Objects.equals(pigEvent.getType(), PigEvent.ENTRY.getKey())) {
             return Objects.equals(pigEvent.getKind(), DoctorPig.PigSex.SOW.getKey()) ?

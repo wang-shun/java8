@@ -82,9 +82,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         //原事件id,编辑可用
         Long oldEventId = executeEvent.getId();
 
-        //1.事件前的特殊处理
-        specialHandleBefore(executeEvent, fromTrack);
-
         //2.创建事件
         executeEvent.setPigStatusBefore(fromTrack.getStatus());
         executeEvent.setParity(fromTrack.getCurrentParity());
@@ -134,12 +131,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
             triggerEvent(doctorEventInfoList, executeEvent, toTrack);
         }
-
-//        //8.创建镜像
-//        if (!IGNORE_EVENT.contains(executeEvent.getType())) {
-//            //创建镜像
-//            createPigSnapshot(toTrack, executeEvent, currentEventId);
-//        }
     }
 
     @Override
@@ -175,7 +166,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         return doctorPigEvent;
     }
 
-    protected void specialHandleBefore(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack){};
     /**
      * 当事件被动触发时创建事件关联
      * @param executeEvent 事件

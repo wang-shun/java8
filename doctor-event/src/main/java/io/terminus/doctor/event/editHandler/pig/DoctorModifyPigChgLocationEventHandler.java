@@ -128,8 +128,10 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig.setSowPh(EventUtil.plusInt(oldDailyPig.getSowPh(), changeDto.getToMatingChangeCount()));
         oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getToMatingChangeCount()));
+        oldDailyPig.setSowPhToCf(EventUtil.plusInt(oldDailyPig.getSowPhToCf(), changeDto.getToFarrowChangeCount()));
         oldDailyPig.setSowCf(EventUtil.plusInt(oldDailyPig.getSowCf(), changeDto.getToFarrowChangeCount()));
         oldDailyPig.setSowCfEnd(EventUtil.plusInt(oldDailyPig.getSowCfEnd(), changeDto.getToFarrowChangeCount()));
+        oldDailyPig.setSowCfIn(EventUtil.plusInt(oldDailyPig.getSowCfIn(), changeDto.getToFarrowChangeCount()));
         return oldDailyPig;
     }
 }
