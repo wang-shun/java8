@@ -1362,14 +1362,22 @@
             npd = #{npd},
             group_id = #{groupId},
             farrow_weight = #{farrowWeight},
-            live_count = #{liveCount},
-            health_count = #{healthCount},
-            weak_count = #{weakCount},
-            mny_count = #{mnyCount},
-            jx_count = #{jxCount},
-            dead_count = #{deadCount},
-            black_count = #{blackCount},
-            wean_count = #{weanCount},
+            <if test="liveCount == null"> live_count = 0,</if>
+            <if test="liveCount != null"> live_count = #{liveCount},</if>
+            <if test="healthCount == null"> health_count = 0,</if>
+            <if test="healthCount != null"> health_count = #{healthCount},</if>
+            <if test="weakCount == null"> weak_count = 0,</if>
+            <if test="weakCount != null"> weakCount = #{weakCount},</if>
+            <if test="mnyCount == null"> mny_count = 0,</if>
+            <if test="mnyCount != null"> mny_count = #{mnyCount},</if>
+            <if test="weakCount == null"> weakCount = 0,</if>
+            <if test="weakCount != null"> weakCount = #{weakCount},</if>
+            <if test="deadCount == null"> dead_count = 0,</if>
+            <if test="deadCount != null"> dead_count = #{deadCount},</if>
+            <if test="blackCount == null"> black_count = 0,</if>
+            <if test="blackCount != null"> black_count = #{blackCount},</if>
+            <if test="weanCount == null"> wean_count = 0,</if>
+            <if test="weanCount != null"> wean_count = #{weanCount},</if>
             wean_avg_weight = #{weanAvgWeight},
             current_mating_count = #{currentMatingCount},
             check_date = #{checkDate},
