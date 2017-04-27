@@ -67,7 +67,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Override
     public final Boolean canModify(DoctorPigEvent oldPigEvent) {
         return Objects.equals(oldPigEvent.getIsAuto(), IsOrNot.NO.getValue())
-                && Objects.equals(oldPigEvent.getEventSource(), SourceType.INPUT.getValue());
+                && !Objects.equals(oldPigEvent.getEventSource(), SourceType.TRANS_FARM.getValue());
     }
 
     @Override

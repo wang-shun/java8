@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
+import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -193,7 +194,11 @@ public class DoctorGroupEventManager {
     @Transactional
     public void modifyGroupEventHandle(BaseGroupInput inputDto, Long eventId, Integer eventType) {
         DoctorGroupEvent oldGroupEvent = doctorGroupEventDao.findById(eventId);
-        modifyGroupEventHandlers.getModifyGroupEventHandlerMap().get(eventType).modifyHandle(oldGroupEvent, inputDto);
+        DoctorModifyGroupEventHandler handler = modifyGroupEventHandlers.getModifyGroupEventHandlerMap().get(eventType);
+        if (!handler.canModify(oldGroupEvent)) {
+            throw new InvalidException("event.not.modify");
+        }
+        handler.modifyHandle(oldGroupEvent, inputDto);
     }
 
     //校验能否回滚

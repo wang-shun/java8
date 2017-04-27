@@ -63,8 +63,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     @Override
     public final Boolean canModify(DoctorGroupEvent oldGroupEvent) {
-        return Objects.equals(oldGroupEvent.getIsAuto(), IsOrNot.NO.getValue())
-                && Objects.equals(oldGroupEvent.getEventSource(), SourceType.INPUT.getValue());
+        return Objects.equals(oldGroupEvent.getIsAuto(), IsOrNot.NO.getValue());
     }
 
     @Override

@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -210,7 +211,11 @@ public class DoctorPigEventManager {
     @Transactional
     public void modifyPigEventHandle(BasePigEventInputDto inputDto, Long eventId, Integer eventType) {
         DoctorPigEvent oldPigEvent = doctorPigEventDao.findById(eventId);
-        modifyPigEventHandlers.getModifyPigEventHandlerMap().get(eventType).modifyHandle(oldPigEvent, inputDto);
+        DoctorModifyPigEventHandler handler = modifyPigEventHandlers.getModifyPigEventHandlerMap().get(eventType);
+        if (!handler.canModify(oldPigEvent)) {
+            throw new InvalidException("event.not.modify");
+        }
+        handler.modifyHandle(oldPigEvent, inputDto);
 
     }
 
