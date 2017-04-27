@@ -3,11 +3,12 @@ package io.terminus.doctor.event.editHandler.pig;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -20,15 +21,52 @@ import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGro
  */
 @Component
 public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigEventHandler {
+    @Autowired
+    private DoctorModifyPigRemoveEventHandler modifyPigRemoveEventHandler;
+    @Autowired
+    private DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler;
+
     @Override
-    protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
-        return false;
+    protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
+        DoctorPigEvent chgFarmInEvent = doctorPigEventDao.findByRelPigEventId(deletePigEvent.getId());
+        modifyPigChgFarmInEventHandler.rollbackHandle(chgFarmInEvent, operatorId, operatorName);
+    }
+
+    @Override
+    protected DoctorPig buildNewPigForRollback(DoctorPigEvent deletePigEvent, DoctorPig oldPig) {
+        return modifyPigRemoveEventHandler.buildNewPigForRollback(deletePigEvent, oldPig);
+    }
+
+    @Override
+    protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack) {
+        return modifyPigRemoveEventHandler.buildNewTrackForRollback(deletePigEvent, oldPigTrack);
+    }
+
+    @Override
+    public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
+        DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
+                .pigSex(oldPigEvent.getKind())
+                .removeCountChange(-1)
+                .barnType(oldPigEvent.getBarnType())
+                .build();
+        if (Objects.equals(oldPigEvent.getBarnType(), PigType.DELIVER_SOW.getValue())) {
+            changeDto1.setCfCountChange(1);
+        } else {
+            changeDto1.setPhCountChange(1);
+        }
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+        if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
+            doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()),
+                    -changeDto1.getRemoveCountChange(), changeDto1.getPhCountChange(), changeDto1.getCfCountChange());
+        } else {
+            doctorDailyPigDao.updateDailyBoarPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()), -changeDto1.getRemoveCountChange());
+        }
     }
 
     @Override
     public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
-        DoctorChgFarmDto newDto = (DoctorChgFarmDto) inputDto;
-        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), newDto.eventAt());
+        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .pigSex(newPigEvent.getKind())
                 .removeCountChange(1)
@@ -41,10 +79,10 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
         }
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
         if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
-            doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(newDto.eventAt()),
+            doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
                     -changeDto2.getRemoveCountChange(), changeDto2.getPhCountChange(), changeDto2.getCfCountChange());
         } else {
-            doctorDailyPigDao.updateDailyBoarPigLiveStock(newPigEvent.getFarmId(), getAfterDay(newDto.eventAt()), -changeDto2.getRemoveCountChange());
+            doctorDailyPigDao.updateDailyBoarPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()), -changeDto2.getRemoveCountChange());
         }
     }
 
@@ -52,6 +90,7 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         //公猪
         if (Objects.equals(changeDto.getPigSex(), DoctorPig.PigSex.BOAR.getKey())) {
+            oldDailyPig.setBoarChgFarm(EventUtil.plusInt(oldDailyPig.getBoarChgFarm(), changeDto.getRemoveCountChange()));
             oldDailyPig.setBoarIn(EventUtil.minusInt(oldDailyPig.getBoarIn(), changeDto.getRemoveCountChange()));
             oldDailyPig.setBoarEnd(EventUtil.minusInt(oldDailyPig.getBoarEnd(), changeDto.getRemoveCountChange()));
            return oldDailyPig;
@@ -63,6 +102,7 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
         } else {
             oldDailyPig.setSowPh(EventUtil.minusInt(oldDailyPig.getSowPh(), changeDto.getRemoveCountChange()));
         }
+        oldDailyPig.setSowChgFarm(EventUtil.plusInt(oldDailyPig.getSowChgFarm(), changeDto.getRemoveCountChange()));
         oldDailyPig.setSowIn(EventUtil.minusInt(oldDailyPig.getSowIn(), changeDto.getRemoveCountChange()));
         oldDailyPig.setSowEnd(EventUtil.minusInt(oldDailyPig.getSowEnd(), changeDto.getRemoveCountChange()));
         return oldDailyPig;

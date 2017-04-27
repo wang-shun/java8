@@ -33,7 +33,8 @@ public enum PigEvent {
     WEAN(16, "断奶", "断奶事件", 1),
     FOSTERS(17, "拼窝", "拼窝事件", 1),
     FOSTERS_BY(19, "被拼窝", "被拼窝母猪", 1),
-    PIGLETS_CHG(18, "仔猪变动", "母猪仔猪变动事件信息", 1);
+    PIGLETS_CHG(18, "仔猪变动", "母猪仔猪变动事件信息", 1),
+    CHG_FARM_IN(20, "转场转入", "转场触发转入", 0);
 
 
     @Getter
