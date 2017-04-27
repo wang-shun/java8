@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.admin.controller;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
@@ -13,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 
@@ -82,7 +84,12 @@ public class DoctorArticles {
     public List<DoctorArticle> listArticle(@PathVariable Integer categoryId,
                                            @RequestParam(value = "status", required = false) Integer status) {
 
-        Response<List<DoctorArticle>> response =  doctorArticleReadService.list(ImmutableMap.of("categoryId", categoryId, "status", status));
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("categoryId", categoryId);
+        if(status != null){
+            params.put("status", status);
+        }
+        Response<List<DoctorArticle>> response =  doctorArticleReadService.list(params);
         if (!response.isSuccess()) {
             throw new JsonResponseException(500, response.getError());
         }
@@ -103,7 +110,12 @@ public class DoctorArticles {
                                                @RequestParam(value = "pageSize", required = false) Integer pageSize,
                                                @RequestParam(value = "status", required = false) Integer status,
                                                @PathVariable Integer categoryId) {
-        Response<Paging<DoctorArticle>> result =  doctorArticleReadService.paging(pageNo, pageSize, ImmutableMap.of("categoryId", categoryId, "status", status));
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("categoryId", categoryId);
+        if(status != null){
+            params.put("status", status);
+        }
+        Response<Paging<DoctorArticle>> result =  doctorArticleReadService.paging(pageNo, pageSize, params);
         if(!result.isSuccess()){
             throw new JsonResponseException(result.getError());
         }
