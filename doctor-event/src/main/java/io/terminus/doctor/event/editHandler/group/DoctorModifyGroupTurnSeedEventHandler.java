@@ -139,7 +139,7 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder().quantityChange(1).build();
         DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
         doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
-        updateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), changeDto2.getQuantityChange());
+        updateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
 
     }
 
