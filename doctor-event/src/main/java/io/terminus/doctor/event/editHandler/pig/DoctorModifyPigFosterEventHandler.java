@@ -23,14 +23,14 @@ public class DoctorModifyPigFosterEventHandler extends DoctorAbstractModifyPigEv
     private DoctorModifyPigFosterByEventHandler doctorModifyPigFosterByEventHandler;
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
-        DoctorPigletsChgDto oldDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorPigletsChgDto.class);
-        DoctorPigletsChgDto newDto = (DoctorPigletsChgDto) inputDto;
+        DoctorFostersDto oldDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorFostersDto.class);
+        DoctorFostersDto newDto = (DoctorFostersDto) inputDto;
         return DoctorEventChangeDto.builder()
                 .farmId(oldPigEvent.getFarmId())
                 .businessId(oldPigEvent.getPigId())
                 .oldEventAt(oldDto.eventAt())
                 .newEventAt(newDto.eventAt())
-                .quantityChange(EventUtil.minusInt(newDto.getPigletsCount(), oldDto.getPigletsCount()))
+                .quantityChange(EventUtil.minusInt(newDto.getFostersCount(), oldDto.getFostersCount()))
                 .build();
     }
 
