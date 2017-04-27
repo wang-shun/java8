@@ -87,6 +87,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
@@ -670,10 +671,16 @@ public class DoctorPigCreateEvents {
                 return chgFarmDto;
             case CHG_LOCATION:
                 DoctorChgLocationDto doctorChgLocationDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorChgLocationDto.class);
-                DoctorPigTrack doctorPigTrack1 = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(realPigId));
-                expectTrue(notNull(doctorPigTrack1), "pig.track.not.null", realPigId);
-                doctorChgLocationDto.setChgLocationFromBarnId(doctorPigTrack1.getCurrentBarnId());
-                doctorChgLocationDto.setChgLocationFromBarnName(doctorPigTrack1.getCurrentBarnName());
+                String fromBarnName;
+                if (isNull(doctorChgLocationDto.getChgLocationFromBarnId())) {
+                    DoctorPigTrack doctorPigTrack1 = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(realPigId));
+                    fromBarnName = doctorPigTrack1.getCurrentBarnName();
+                    doctorChgLocationDto.setChgLocationFromBarnId(doctorPigTrack1.getCurrentBarnId());
+                } else {
+                    DoctorBarn fromBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationFromBarnId()));
+                    fromBarnName = fromBarn.getName();
+                }
+                doctorChgLocationDto.setChgLocationFromBarnName(fromBarnName);
                 doctorChgLocationDto.setChgLocationToBarnName(RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationToBarnId())).getName());
                 doctorChgLocationDto = doctorValidService.valid(doctorChgLocationDto, doctorPig.getPigCode());
                 return doctorChgLocationDto;

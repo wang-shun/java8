@@ -100,6 +100,10 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
         if (Objects.equals(deletePigEvent.getType(), PigEvent.TO_FARROWING.getKey())) {
             oldPigTrack.setStatus(PigStatus.Pregnancy.getKey());
         }
+        if (Objects.equals(deletePigEvent.getType(), PigEvent.CHG_LOCATION.getKey())
+                && Objects.equals(deletePigEvent.getBarnType(), PigType.DELIVER_SOW.getValue())) {
+            oldPigTrack.setGroupId(deletePigEvent.getGroupId());
+        }
         return oldPigTrack;
     }
 
