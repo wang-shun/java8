@@ -226,7 +226,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
      * 是否是最新猪事件
      */
     protected boolean isLastPigEvent(DoctorPigEvent pigEvent) {
-        DoctorPigEvent lastEvent = doctorPigEventDao.findLastEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
+        DoctorPigEvent lastEvent = doctorPigEventDao.findLastManualEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
         if (!Objects.equals(pigEvent.getId(), lastEvent.getId())) {
             return Boolean.FALSE;
         }

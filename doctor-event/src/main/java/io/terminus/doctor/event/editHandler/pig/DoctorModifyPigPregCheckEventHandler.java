@@ -29,7 +29,7 @@ import static io.terminus.common.utils.Arguments.notNull;
 @Component
 public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPigEventHandler {
 
-    private final Map<Integer, Integer> PREG_CHECK_RESULT = Maps.newHashMap();
+    public static final Map<Integer, Integer> PREG_CHECK_RESULT = Maps.newHashMap();
     {
         PREG_CHECK_RESULT.put(PregCheckResult.YANG.getKey(), PregCheckResult.YANG.getKey());
         PREG_CHECK_RESULT.put(PregCheckResult.YING.getKey(), KongHuaiPregCheckResult.YING.getKey());

@@ -43,7 +43,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
         DoctorTransGroupInput newInput = (DoctorTransGroupInput) input;
         validGroupLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getGroupCode(),
                 oldGroupEvent.getEventAt(), DateUtil.toDate(newInput.getEventAt()),
-                oldGroupEvent.getQuantity(), newInput.getQuantity());
+                oldGroupEvent.getQuantity(), -newInput.getQuantity());
     }
 
     @Override
@@ -121,7 +121,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
 
     @Override
     protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
-        return validGroupLiveStock(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), -deleteGroupEvent.getQuantity());
+        return validGroupLiveStock(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), deleteGroupEvent.getQuantity());
     }
 
     @Override

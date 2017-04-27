@@ -50,7 +50,7 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
         super.modifyHandleCheck(oldGroupEvent, input);
         validGroupLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getGroupCode(),
                 oldGroupEvent.getEventAt(), DateUtil.toDate(input.getEventAt()),
-                1, 1);
+                1, -1);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
 
     @Override
     protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
-        return validGroupLiveStock(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), -deleteGroupEvent.getQuantity());
+        return validGroupLiveStock(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), deleteGroupEvent.getQuantity());
     }
 
     @Override

@@ -37,7 +37,7 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
         DoctorChangeGroupInput newInput = (DoctorChangeGroupInput) input;
         validGroupLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getGroupCode(),
                 oldGroupEvent.getEventAt(), DateUtil.toDate(newInput.getEventAt()),
-                oldGroupEvent.getQuantity(), newInput.getQuantity());
+                oldGroupEvent.getQuantity(), -newInput.getQuantity());
     }
 
     @Override
@@ -124,7 +124,7 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
 
     @Override
     protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
-        return validGroupLiveStock(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), -deleteGroupEvent.getQuantity());
+        return validGroupLiveStock(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), deleteGroupEvent.getQuantity());
     }
 
     @Override

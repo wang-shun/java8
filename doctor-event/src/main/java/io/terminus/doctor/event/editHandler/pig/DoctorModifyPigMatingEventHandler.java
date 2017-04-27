@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPregCheckEventHandler.PREG_CHECK_RESULT;
+
 /**
  * Created by terminus on 2017/4/17.
  * 配种
@@ -81,7 +83,7 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
         if (Objects.equals(beforeStatusEvent.getType(), PigEvent.PREG_CHECK.getKey())) {
             DoctorPigEvent firstMateEvent = doctorPigEventDao.getFirstMateEvent(deletePigEvent.getPigId(), deletePigEvent.getEventAt());
             oldPigTrack.setStatus(PigStatus.KongHuai.getKey());
-            extra.put("pregCheckResult", beforeStatusEvent.getPregCheckResult());
+            extra.put("pregCheckResult", PREG_CHECK_RESULT.get(beforeStatusEvent.getPregCheckResult()));
             extra.put("judgePregDate", firstMateEvent.getJudgePregDate());
             oldPigTrack.setExtraMap(extra);
             return oldPigTrack;

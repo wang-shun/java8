@@ -112,9 +112,8 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     @Override
     public Boolean canRollback(DoctorPigEvent deletePigEvent) {
-        return Objects.equals(deletePigEvent.getIsAuto(), IsOrNot.NO.getValue())
-                && Objects.equals(deletePigEvent.getEventSource(), SourceType.INPUT.getValue())
-                && isLastEvent(deletePigEvent)
+        return !Objects.equals(deletePigEvent.getEventSource(), SourceType.TRANS_FARM.getValue())
+                && isLastManualEvent(deletePigEvent)
                 && rollbackHandleCheck(deletePigEvent);
     }
 
@@ -376,11 +375,11 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * 是否是最新事件
      * @param pigEvent 猪事件
      */
-    private boolean isLastEvent(DoctorPigEvent pigEvent) {
+    private boolean isLastManualEvent(DoctorPigEvent pigEvent) {
         if (IGNORE_EVENT.contains(pigEvent.getType())) {
             return true;
         }
-        DoctorPigEvent lastEvent = doctorPigEventDao.findLastEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
+        DoctorPigEvent lastEvent = doctorPigEventDao.findLastManualEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
         return Objects.equals(pigEvent.getId(), lastEvent.getId());
     }
 }
