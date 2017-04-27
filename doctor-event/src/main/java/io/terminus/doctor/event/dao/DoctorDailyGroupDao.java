@@ -23,34 +23,38 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
      * 删除某一天的猪群统计
      *
      * @param farmId
-     * @param date
+     * @param date 格式 YYYY-MM-DD
      */
     public void deleteByFarmIdAndSumAt(Long farmId, Date date) {
+        deleteByFarmIdAndSumAt(farmId, DateUtil.toDateString(date));
+    }
+
+    public void deleteByFarmIdAndSumAt(Long farmId, String date) {
         getSqlSession().delete(sqlId("deleteByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", date));
     }
 
     /**
      * 删除某一天的猪群统计
      *
-     * @param date
+     * @param date  格式 YYYY-MM-DD
      */
     public void deleteByFarmIdAndSumAt(Date date) {
+        deleteByFarmIdAndSumAt(DateUtil.toDateString(date));
+    }
+
+    /**
+     *
+     * @param date  格式 YYYY-MM-DD
+     */
+    public void deleteByFarmIdAndSumAt(String date) {
         getSqlSession().delete(sqlId("deleteBySumAt"), ImmutableMap.of("sumAt", date));
-    }
-
-    public List<DoctorDailyGroup> getDoctorGroupSum(Long farmId, Date date) {
-        return getSqlSession().selectList(sqlId("getDoctorGroupSumBySumAt"), ImmutableMap.of("farmId", farmId, "sumAt", date));
-    }
-
-    public List<DoctorDailyGroup> getDoctorGroupSumByRange(Long farmId, Date startAt, Date endAt) {
-        return getSqlSession().selectList(sqlId("getDoctorGroupSumByRange"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 获取某一天的存栏
      *
      * @param farmId
-     * @param sumAt
+     * @param sumAt 格式 YYYY-MM-DD
      * @return
      */
     public DoctorGroupStock getGroupStock(Long farmId, String sumAt) {
@@ -61,7 +65,7 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
      * 获取某一天的存栏
      *
      * @param farmId
-     * @param sumAt
+     * @param sumAt 格式 YYYY-MM-DD
      * @return
      */
     public DoctorGroupStock getGroupStock(Long farmId, Date sumAt) {
@@ -111,7 +115,7 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
      * @return
      */
     public DoctorDailyGroup findByGroupIdAndSumAt(Long groupId, Date sumAt) {
-        return getSqlSession().selectOne(sqlId("findByGroupIdAndSumAt"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt));
+        return getSqlSession().selectOne(sqlId("findByGroupIdAndSumAt"), ImmutableMap.of("groupId", groupId, "sumAt", DateUtil.toDateString(sumAt)));
     }
 
     /**
@@ -122,7 +126,7 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
      * @param changeCount 变动数量
      */
     public void updateDailyGroupLiveStock(Long groupId, Date sumAt, Integer changeCount) {
-        getSqlSession().update(sqlId("updateDailyGroupLiveStock"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt, "changeCount", changeCount));
+        getSqlSession().update(sqlId("updateDailyGroupLiveStock"), ImmutableMap.of("groupId", groupId, "sumAt", DateUtil.toDateString(sumAt), "changeCount", changeCount));
     }
 
     public Integer findFattenWillOut(Long farmId, String sumAt) {

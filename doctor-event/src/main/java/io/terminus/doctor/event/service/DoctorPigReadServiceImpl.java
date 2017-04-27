@@ -122,14 +122,10 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
             List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
                     doctorPigEventReadService.queryPigDoctorEvents(doctorPig.getFarmId(), doctorPig.getId(), 1, targetEventSize, null, null)).getData();
-            Long canRollback = null;
-            Response<DoctorPigEvent> pigEventResponse = doctorPigEventReadService.canRollbackEvent(doctorPig.getId());
-            if (pigEventResponse.isSuccess() && pigEventResponse.getResult() != null) {
-                canRollback = pigEventResponse.getResult().getId();
-            }
+
 
             return RespWithEx.ok(DoctorPigInfoDetailDto.builder().doctorPig(doctorPig).doctorPigTrack(doctorPigTrack)
-                    .doctorPigEvents(doctorPigEvents).dayAge(dayAge).canRollback(canRollback).build());
+                    .doctorPigEvents(doctorPigEvents).dayAge(dayAge).build());
         } catch (InvalidException e) {
             return RespWithEx.exception(e);
         } catch (Exception e){

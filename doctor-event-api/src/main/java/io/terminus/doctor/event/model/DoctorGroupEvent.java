@@ -155,7 +155,7 @@ public class DoctorGroupEvent<T extends BaseGroupInput> implements Serializable 
 
     /**
      * 仔猪转入事件: 转入类型
-     * @see io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupInput.InType
+     * @see io.terminus.doctor.event.enums.InType
      */
     private Integer inType;
 
@@ -305,6 +305,11 @@ public class DoctorGroupEvent<T extends BaseGroupInput> implements Serializable 
      * @see io.terminus.doctor.common.enums.SourceType
      */
     private Integer eventSource;
+
+    /**
+     * 是否是编辑事件(不存于数据库)
+     */
+    private Boolean isRollback;
 
     @SneakyThrows
     public void setExtraMap(T extraMap){

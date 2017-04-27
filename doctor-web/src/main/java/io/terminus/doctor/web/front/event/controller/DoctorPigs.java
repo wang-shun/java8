@@ -143,10 +143,7 @@ public class DoctorPigs {
 
     private DoctorPigInfoDetailDto getPigDetail(Long pigId, Integer eventSize) {
         DoctorPigInfoDetailDto pigDetail = RespWithExHelper.orInvalid(doctorPigReadService.queryPigDetailInfoByPigId(pigId, eventSize));
-//        if (!response.isSuccess()) {
-//            return null;
-//        }
-//        DoctorPigInfoDetailDto pigDetail = response.getResult();
+
         doctorFarmAuthCenter.checkFarmAuthResponse(pigDetail.getDoctorPig().getFarmId());
         transFromUtil.transFromExtraMap(pigDetail.getDoctorPigEvents());
         return pigDetail;
@@ -175,7 +172,6 @@ public class DoctorPigs {
                 .dayAge(dto.getDayAge())
                 .weight(dto.getDoctorPigTrack().getWeight())
                 .boarType(dto.getDoctorPig().getBoarType())
-                .canRollback(dto.getCanRollback())
                 .build();
     }
 
@@ -203,7 +199,6 @@ public class DoctorPigs {
                     .birthDate(dto.getDoctorPig().getBirthDate())
                     .doctorPigEvents(dto.getDoctorPigEvents())
                     .pregCheckResult(pregCheckResult)
-                    .canRollback(dto.getCanRollback())
                     .build();
         } catch (Exception e) {
             log.error("buildSowDetailDto failed cause by {}", Throwables.getStackTraceAsString(e));

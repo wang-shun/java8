@@ -14,6 +14,7 @@ import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
 import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -160,8 +161,10 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param input 输入
      */
     protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
-        DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findNewGroupByGroupId(oldGroupEvent.getGroupId());
-        validEventAt(DateUtil.toDate(input.getEventAt()), notNull(newCreateEvent) ? newCreateEvent.getEventAt() : null);
+        if (!Objects.equals(oldGroupEvent.getType(), GroupEventType.NEW.getValue())) {
+            DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findNewGroupByGroupId(oldGroupEvent.getGroupId());
+            validEventAt(DateUtil.toDate(input.getEventAt()), notNull(newCreateEvent) ? newCreateEvent.getEventAt() : null);
+        }
     }
 
     @Override
@@ -413,5 +416,18 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         if ((notNull(lastEventAt) && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEventAt))) || Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date()))) {
             throw new InvalidException("event.at.error", DateUtil.toDateString(lastEventAt), DateUtil.toDateString(new Date()));
         }
+    }
+
+    /**
+     * 猪群触发关闭事件
+     * @param groupEvent 原事件
+     * @return 关闭输入
+     */
+    protected BaseGroupInput buildGroupCloseInput(DoctorGroupEvent groupEvent) {
+        DoctorCloseGroupInput closeInput = new DoctorCloseGroupInput();
+        closeInput.setIsAuto(IsOrNot.YES.getValue());   //系统触发事件, 属于自动生成
+        closeInput.setEventAt(DateUtil.toDateString(groupEvent.getEventAt()));
+        closeInput.setRelGroupEventId(groupEvent.getId());
+        return closeInput;
     }
 }

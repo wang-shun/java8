@@ -11,7 +11,6 @@ import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupWeanEventHandler;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorDailyReport;
-import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -21,9 +20,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.Objects;
-
-import static io.terminus.common.utils.Arguments.notNull;
-import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 
 /**
@@ -95,9 +91,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         oldPigTrack.setWeanQty(EventUtil.minusInt(oldPigTrack.getFarrowQty(), oldPigTrack.getUnweanQty()));
         oldPigTrack.setFarrowAvgWeight(EventUtil.getAvgWeight(farrowEvent.getWeight(), farrowEvent.getLiveCount()));
         oldPigTrack.setWeanAvgWeight(0D);
-        DoctorGroup relationGroup = doctorGroupDao.findByFarmIdAndBarnIdAndDate(deletePigEvent.getFarmId(), deletePigEvent.getBarnId(), deletePigEvent.getEventAt());
-        expectTrue(notNull(relationGroup), "farrow.group.not.null");
-        oldPigTrack.setGroupId(relationGroup.getId());
+        oldPigTrack.setGroupId(deletePigEvent.getGroupId());
         oldPigTrack.setExtraMap(Maps.newHashMap());
         return oldPigTrack;
     }

@@ -8,10 +8,8 @@ import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.manager.DoctorGroupEventManager;
+import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,21 +24,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RpcProvider
 public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
-    @Autowired
-    private DoctorModifyPigEventHandlers modifyPigEventHandlers;
-    @Autowired
-    private DoctorModifyGroupEventHandlers modifyGroupEventHandlers;
+
     @Autowired
     private DoctorPigEventDao doctorPigEventDao;
     @Autowired
     private DoctorGroupEventDao doctorGroupEventDao;
+    @Autowired
+    private DoctorPigEventManager pigEventManager;
+    @Autowired
+    private DoctorGroupEventManager groupEventManager;
 
     @Override
-    @Transactional
     public RespWithEx<Boolean> modifyPigEvent(BasePigEventInputDto inputDto, Long eventId, Integer eventType) {
         try {
-            DoctorPigEvent oldPigEvent = doctorPigEventDao.findById(eventId);
-            modifyPigEventHandlers.getModifyPigEventHandlerMap().get(eventType).modifyHandle(oldPigEvent, inputDto);
+            pigEventManager.modifyPigEventHandle(inputDto, eventId, eventType);
             return RespWithEx.ok(true);
         }catch (InvalidException e) {
             log.error("modify pig event failed , inputDto:{}, cuase:{}", inputDto, Throwables.getStackTraceAsString(e));
@@ -52,11 +49,9 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     }
 
     @Override
-    @Transactional
     public RespWithEx<Boolean> modifyGroupEvent(BaseGroupInput inputDto, Long eventId, Integer eventType) {
         try {
-            DoctorGroupEvent oldGroupEvent = doctorGroupEventDao.findById(eventId);
-            modifyGroupEventHandlers.getModifyGroupEventHandlerMap().get(eventType).modifyHandle(oldGroupEvent, inputDto);
+            groupEventManager.modifyGroupEventHandle(inputDto, eventId, eventType);
             return RespWithEx.ok(true);
         }catch (InvalidException e) {
             log.error("modify pig event failed , inputDto:{}, cuase:{}", inputDto, Throwables.getStackTraceAsString(e));

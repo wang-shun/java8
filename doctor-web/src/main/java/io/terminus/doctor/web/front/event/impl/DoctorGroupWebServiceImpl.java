@@ -364,7 +364,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     @Override
     public RespWithEx<Boolean> createGroupModifyEventRequest(Long groupId, Integer eventType, Long eventId, String data) {
         try {
-            DoctorGroupDetail groupDetail = checkGroupExist(groupId);
+            DoctorGroupDetail groupDetail = expectNotNull(RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId)), "group.detail.not.found");
             Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
             DoctorGroupInputInfo groupInputInfo = buildGroupEventInfo(eventType, groupDetail, params);
             return doctorModifyEventService.modifyGroupEvent(groupInputInfo.getInput(), eventId, eventType);

@@ -45,7 +45,6 @@ public class DoctorMoveReportService {
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
 
     private final DoctorDailyReportWriteService doctorDailyReportWriteService;
-    private final DoctorDailyGroupWriteService doctorDailyGroupWriteService;
     private final DoctorRangeReportWriteService doctorRangeReportWriteService;
     private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
     private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
@@ -55,7 +54,6 @@ public class DoctorMoveReportService {
                                    DoctorFarmDao doctorFarmDao,
                                    DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
                                    DoctorDailyReportWriteService doctorDailyReportWriteService,
-                                   DoctorDailyGroupWriteService doctorDailyGroupWriteService,
                                    DoctorRangeReportWriteService doctorRangeReportWriteService,
                                    DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
                                    DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService) {
@@ -63,7 +61,6 @@ public class DoctorMoveReportService {
         this.doctorFarmDao = doctorFarmDao;
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorDailyReportWriteService = doctorDailyReportWriteService;
-        this.doctorDailyGroupWriteService = doctorDailyGroupWriteService;
         this.doctorRangeReportWriteService = doctorRangeReportWriteService;
         this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
         this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
@@ -170,12 +167,4 @@ public class DoctorMoveReportService {
                 .forEach(date -> doctorBoarMonthlyReportWriteService.createMonthlyReport(farmId, date));
     }
 
-    public void flushGroupDaily(Long farmId, Date date){
-        doctorDailyGroupWriteService.createDailyGroups(farmId, date);
-    }
-
-    public void flushGroupDaily(Long farmId, int index) {
-        DateUtil.getBeforeDays(new Date(), MoreObjects.firstNonNull(index, INDEX))
-                .forEach(date -> doctorDailyGroupWriteService.createDailyGroups(farmId, date));
-    }
 }

@@ -760,6 +760,9 @@ public class DoctorPigCreateEvents {
                     expectTrue(notNull(pigletsChg.getPigletsPrice()), "sale.price.not.null");
                     expectTrue(notNull(pigletsChg.getPigletsCustomerId()), "sale.customer.not.null");
                 }
+                if (notNull(pigletsChg.getPigletsChangeReason())) {
+                    pigletsChg.setPigletsChangeReasonName(RespHelper.orServEx(doctorBasicReadService.findChangeReasonById(pigletsChg.getPigletsChangeReason())).getReason());
+                }
                 pigletsChg = doctorValidService.valid(pigletsChg, doctorPig.getPigCode());
 
                 DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(pigletsChg.getPigletsChangeType()));

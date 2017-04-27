@@ -1032,8 +1032,8 @@
         (
         SELECT
         ifnull(
-        ifnull(max(CASE WHEN delta.type = 7 THEN quantity ELSE 0 END), 0) -     -- 进场 - 离场 算出delta数量
-        ifnull(max(CASE WHEN delta.type = 6 THEN quantity ELSE 0 END), 0), 0
+        ifnull(sum(CASE WHEN delta.type = 7 THEN quantity WHEN delta.type = 20 THEN quantity ELSE 0 END), 0) -     -- 进场 - 离场 算出delta数量
+        ifnull(sum(CASE WHEN delta.type = 2 THEN quantity WHEN delta.type = 6 THEN quantity ELSE 0 END), 0), 0
         )
         FROM (
         SELECT
@@ -1045,7 +1045,7 @@
         a.event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
         a.farm_id = #{farmId} AND
         a.kind = 2 AND
-        a.TYPE IN (6, 7) AND
+        a.TYPE IN (2, 6, 7, 20) AND
         b.boar_type = 1
         and a.status = 1
         GROUP BY a.type
@@ -1057,12 +1057,12 @@
     <!-- 实时存栏: 母猪 -->
     <select id="realTimeLiveStockSow" parameterType="map" resultType="int">
         select
-        ifnull(sum(case a.type when 7 then 1 else 0 end - case a.type when 6 then 1 else 0 end), 0) as count
+        ifnull(sum(case a.type when 7 then 1 when 20 then 1 else 0 end - case a.type when 2 then 1 when 6 then 1 else 0 end), 0) as count
         from doctor_pig_events a
         left join doctor_pigs b on a.pig_id = b.id
         where a.farm_id = #{farmId}
         and a.kind = 1
-        and a.type in(6, 7)
+        and a.type in(2, 6, 7, 20)
         and a.event_at &lt;= date_add(date(#{date}), INTERVAL 86399 SECOND)
     </select>
 
@@ -1137,10 +1137,15 @@
     </select>
 
     <select id="getInBoar" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events
-        where `type` = 7
-        and kind = 2
-        <include refid="criteria" />
+        select ifnull(count(1),0)
+        from doctor_pig_events a
+        left join doctor_pigs b on a.pig_id = b.id
+        where a.`type` = 7
+        and a.kind = 2
+        and b.boar_type = 1
+        and a.farm_id = #{farmId}
+        and a.event_at &gt;= #{startAt}
+        and a.event_at &lt;= #{endAt}
     </select>
 
     <select id="getOtherOutBoar" parameterType="map" resultType="int">
@@ -2123,5 +2128,13 @@
         and kind = 1
         and barn_type in (5,6)
         <include refid="criteria"/>
+    </select>
+
+    <select id="getPigChgFarm" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM doctor_pig_events
+        WHERE `type` = 2
+        and kind = #{type}
+        <include refid="criteria" />
     </select>
 </mapper>

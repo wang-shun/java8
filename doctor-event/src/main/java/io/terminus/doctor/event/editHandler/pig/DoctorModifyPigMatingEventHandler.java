@@ -63,7 +63,7 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
         oldPigTrack.setCurrentMatingCount(EventUtil.minusInt(oldPigTrack.getCurrentMatingCount(), 1));
         Map<String, Object> extra = Maps.newHashMap();
 
-        //之前事件进场
+        //之前,事件进场
         if (Objects.equals(beforeStatusEvent.getType(), PigEvent.ENTRY.getKey())) {
             oldPigTrack.setStatus(PigStatus.Entry.getKey());
             oldPigTrack.setCurrentParity(EventUtil.minusInt(oldPigTrack.getCurrentParity(), 1));
@@ -72,13 +72,13 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
             return oldPigTrack;
         }
 
-        //之前事件配种
+        //之前,事件配种
         if (Objects.equals(beforeStatusEvent.getType(), PigEvent.MATING.getKey())) {
             oldPigTrack.setStatus(PigStatus.Mate.getKey());
             return oldPigTrack;
         }
 
-        //之前事件妊娠检查
+        //之前,事件妊娠检查
         if (Objects.equals(beforeStatusEvent.getType(), PigEvent.PREG_CHECK.getKey())) {
             DoctorPigEvent firstMateEvent = doctorPigEventDao.getFirstMateEvent(deletePigEvent.getPigId(), deletePigEvent.getEventAt());
             oldPigTrack.setStatus(PigStatus.KongHuai.getKey());
@@ -88,7 +88,7 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
             return oldPigTrack;
         }
 
-        //之前事件断奶
+        //之前,事件断奶
         oldPigTrack.setStatus(PigStatus.Wean.getKey());
         oldPigTrack.setCurrentParity(EventUtil.minusInt(oldPigTrack.getCurrentParity(), 1));
         extra.put("hasWeanToMating", true);

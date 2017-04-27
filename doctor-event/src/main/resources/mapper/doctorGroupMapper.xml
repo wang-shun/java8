@@ -262,8 +262,8 @@
     <select id="findByFarmIdAndDate" parameterType="map" resultMap="DoctorGroupMap">
         SELECT <include refid="cols_all"/> from <include refid="tb"/>
         WHERE farm_id = #{farmId}
-        AND open_at &lt;= #{date}
-        AND (status = 1 OR close_at &gt;= #{date})
+        AND open_at &lt;= #{openAt}
+        AND (status = 1 OR close_at &gt;= #{colseAt})
     </select>
 
     <select id="findGroupSumByFarmIdAndDate" parameterType="map" resultMap="DoctorGroupMap">

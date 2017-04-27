@@ -109,7 +109,7 @@ public class DoctorModifyPigPigletsChgEventHandler extends DoctorAbstractModifyP
         doctorChangeGroupInput.setIsAuto(IsOrNot.YES.getValue());           //自动生成事件标识
         doctorChangeGroupInput.setCreatorId(pigEvent.getOperatorId());
         doctorChangeGroupInput.setCreatorName(pigEvent.getOperatorName());
-        doctorChangeGroupInput.setRelPigEventId(pigEvent.getId());        //猪事件id
+        doctorChangeGroupInput.setRelPigEventId(pigEvent.getId());
         doctorChangeGroupInput.setSowEvent(true);   //母猪触发的变动事件
         return doctorChangeGroupInput;
     }

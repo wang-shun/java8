@@ -2,11 +2,9 @@ package io.terminus.doctor.web.front.event.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
@@ -24,10 +22,7 @@ import io.terminus.doctor.event.dto.DoctorPigSalesExportDto;
 import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
-import io.terminus.doctor.event.enums.BoarEntryType;
-import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -40,13 +35,10 @@ import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupEventDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupEventExportData;
-import io.terminus.doctor.web.front.event.dto.DoctorPigEventDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorPigEventExportData;
-import io.terminus.doctor.web.front.event.dto.DoctorPigEventPagingDto;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -67,7 +59,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.notNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -153,19 +144,14 @@ public class DoctorPigEvents {
 
     @RequestMapping(value = "/pagingRollbackPigEvent", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DoctorPigEventPagingDto pagingPigEventWithRollback(@RequestParam("farmId") Long farmId,
+    public Paging<DoctorPigEvent> pagingPigEventWithRollback(@RequestParam("farmId") Long farmId,
                                                               @RequestParam("pigId") Long pigId,
                                                               @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                               @RequestParam(value = "pageSize", required = false) Integer pageSize,
                                                               @RequestParam(value = "startDate", required = false) String startDate,
                                                               @RequestParam(value = "endDate", required = false) String endDate) {
-        Paging<DoctorPigEvent> doctorPigEventPaging = pagingDoctorPigEvent(farmId, pigId, pageNo, pageSize, startDate, endDate);
-        Response<DoctorPigEvent> pigEventResponse = doctorPigEventReadService.canRollbackEvent(pigId);
-        Long canRollback = null;
-        if (pigEventResponse.isSuccess() && notNull(pigEventResponse.getResult())) {
-            canRollback = pigEventResponse.getResult().getId();
-        }
-        return DoctorPigEventPagingDto.builder().paging(doctorPigEventPaging).canRollback(canRollback).build();
+       return pagingDoctorPigEvent(farmId, pigId, pageNo, pageSize, startDate, endDate);
+
     }
 
     /**
@@ -235,7 +221,7 @@ public class DoctorPigEvents {
      */
     @RequestMapping(value = "/pigPaging", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorPigEventDetail> queryPigEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+    public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
         }
@@ -255,32 +241,8 @@ public class DoctorPigEvents {
         if (!pigEventPagingResponse.isSuccess()) {
             return Paging.empty();
         }
-        List<DoctorPigEventDetail> pigEventDetailList = pigEventPagingResponse.getResult().getData().stream()
-                .map(doctorPigEvent -> {
-                        Map<String, Object> extraMap = MoreObjects.firstNonNull(doctorPigEvent.getExtraMap(), Maps.newHashMap());
-                        if (Objects.equals(doctorPigEvent.getType(), PigEvent.MATING.getKey()) && doctorPigEvent.getExtraMap().containsKey("matingType")) {
-                            extraMap.put("matingType", MatingType.from((Integer) extraMap.get("matingType")).getDesc());
-                        }
-                        if (Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK.getKey()) && doctorPigEvent.getPregCheckResult() != null) {
-                            extraMap.put("checkResult", PregCheckResult.from(doctorPigEvent.getPregCheckResult()).getDesc());
-                        }
-                        if( Objects.equals(doctorPigEvent.getType(), PigEvent.ENTRY.getKey())
-                                && notNull(doctorPigEvent.getExtraMap())
-                                && doctorPigEvent.getExtraMap().containsKey("boarType")){
-                            extraMap.put("boarTypeName", BoarEntryType.from(Integer.valueOf(extraMap.get("boarType").toString())).getDesc());
-                        }
-                        doctorPigEvent.setExtraMap(extraMap);
-                        DoctorPigEventDetail detail = OBJECT_MAPPER.convertValue(doctorPigEvent, DoctorPigEventDetail.class);
-
-                        Boolean isRollback = false;
-                        Response<Boolean> booleanResponse = doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId());
-                        if (booleanResponse.isSuccess()) {
-                            isRollback = booleanResponse.getResult();
-                        }
-                        detail.setIsRollback(isRollback);
-                        return detail;
-                }).collect(toList());
-        return new Paging<>(pigEventPagingResponse.getResult().getTotal(), pigEventDetailList);
+        transFromUtil.transFromExtraMap(pigEventPagingResponse.getResult().getData());
+        return pigEventPagingResponse.getResult();
     }
 
 
@@ -356,7 +318,6 @@ public class DoctorPigEvents {
         return list;
     }
 
-
     /**
      * 获取拥有事件的操作人列表
      *
@@ -377,28 +338,6 @@ public class DoctorPigEvents {
             return RespHelper.or500(doctorPigEventReadService.queryOperators(params));
         }
     }
-
-//    /**
-//     * 创建编辑事件请求
-//     * @param modifyRequest 事件编辑请求
-//     */
-//    @RequestMapping(value = "/", method = RequestMethod.POST)
-//    public void createEventModify(@RequestBody DoctorEventModifyRequest modifyRequest) {
-//        User user = UserUtil.getCurrentUser();
-//        if (isNull(user)) {
-//            throw new JsonResponseException("user.not.login");
-//        }
-//        //获取真实姓名
-//        String userName = user.getName();
-//        Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(user.getId());
-//        if (userProfileResponse.isSuccess() && notNull(userProfileResponse.getResult())) {
-//            userName = userProfileResponse.getResult().getRealName();
-//        }
-//        modifyRequest.setUserId(user.getId());
-//        modifyRequest.setUserName(userName);
-//        doctorEventModifyRequestWriteService.createRequest(modifyRequest);
-//
-//    }
 
     /**
      * 事件导出
@@ -469,7 +408,7 @@ public class DoctorPigEvents {
      */
     private Paging<DoctorPigEventExportData> pagingPigEvent(Map<String, String> pigEventCriteria) {
         Map<String, Object> criteriaMap = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
-        Paging<DoctorPigEventDetail> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
+        Paging<DoctorPigEvent> pigEventPaging = queryPigEventsByCriteria(criteriaMap, Integer.parseInt(pigEventCriteria.get("pageNo")), Integer.parseInt(pigEventCriteria.get("size")));
         List<DoctorPigEventExportData> list = pigEventPaging.getData()
                 .stream().map(doctorPigEventDetail -> OBJECT_MAPPER.convertValue(doctorPigEventDetail, DoctorPigEventExportData.class)).collect(toList());
         return new Paging<>(pigEventPaging.getTotal(), list);
