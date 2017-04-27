@@ -4,7 +4,10 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Created by xjn on 17/4/22.
@@ -12,6 +15,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DoctorModifyGroupNewEventHandler extends DoctorAbstractModifyGroupEventHandler{
+
+    @Override
+    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+        List<DoctorGroupEvent> list = doctorGroupEventDao.findByGroupId(deleteGroupEvent.getGroupId());
+        return list.size() == 1;
+    }
 
     @Override
     public DoctorGroup buildNewGroup(DoctorGroup oldGroup, BaseGroupInput input) {

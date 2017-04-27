@@ -92,8 +92,8 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         }
 
         oldGroupTrack.setQuantity(EventUtil.plusInt(oldGroupTrack.getQuantity(), changeDto.getQuantityChange()));
-        oldGroupTrack.setAvgDayAge(getAvgDay(oldGroupTrack.getGroupId()));
-        oldGroupTrack.setBirthDate(DateTime.now().minusDays(oldGroupTrack.getAvgDayAge()).toDate());
+        oldGroupTrack.setBirthDate(getAvgDay(oldGroupTrack.getGroupId()));
+        oldGroupTrack.setAvgDayAge(DateUtil.getDeltaDays(oldGroupTrack.getBirthDate(), new Date()));
         return oldGroupTrack;
     }
 
@@ -120,8 +120,8 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         if (notNull(deleteGroupEvent.getSowId())) {
             oldGroupTrack.setNest(EventUtil.minusInt(oldGroupTrack.getNest(), 1));
         }
-        oldGroupTrack.setAvgDayAge(getAvgDay(oldGroupTrack.getGroupId()));
-        oldGroupTrack.setBirthDate(DateTime.now().minusDays(oldGroupTrack.getAvgDayAge()).toDate());
+        oldGroupTrack.setBirthDate(getAvgDay(oldGroupTrack.getGroupId()));
+        oldGroupTrack.setAvgDayAge(DateUtil.getDeltaDays(oldGroupTrack.getBirthDate(), new Date()));
         return buildNewTrack(oldGroupTrack, buildEventChange(deleteGroupEvent, new DoctorMoveInGroupInput()));
     }
 
@@ -189,11 +189,11 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
     }
 
     /**
-     * 获取猪群的日龄
+     * 获取猪群的初始日期用于计算日龄
      * @param groupId 猪群id
      * @return 日龄
      */
-    public int getAvgDay(Long groupId) {
+    public Date getAvgDay(Long groupId) {
         List<Integer> includeTypes = Lists.newArrayList(GroupEventType.CHANGE.getValue(), GroupEventType.MOVE_IN.getValue(),
                 GroupEventType.TRANS_FARM.getValue(), GroupEventType.TRANS_GROUP.getValue());
         List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypes(groupId, includeTypes);
@@ -210,6 +210,6 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
                 currentQuantity -= groupEvent.getQuantity();
             }
         }
-        return avgDay + DateUtil.getDeltaDays(lastEvent, new Date());
+        return new DateTime(lastEvent).minusDays(avgDay).toDate();
     }
 }
