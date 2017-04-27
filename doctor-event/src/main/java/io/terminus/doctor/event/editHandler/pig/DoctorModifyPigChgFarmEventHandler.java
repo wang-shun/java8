@@ -99,8 +99,10 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
         //母猪
         if (Objects.equals(changeDto.getBarnType(), PigType.DELIVER_SOW.getValue())) {
             oldDailyPig.setSowCf(EventUtil.minusInt(oldDailyPig.getSowCf(), changeDto.getRemoveCountChange()));
+            oldDailyPig.setSowCfChgFarm(EventUtil.minusInt(oldDailyPig.getSowCfChgFarm(), changeDto.getRemoveCountChange()));
         } else {
             oldDailyPig.setSowPh(EventUtil.minusInt(oldDailyPig.getSowPh(), changeDto.getRemoveCountChange()));
+            oldDailyPig.setSowPhChgFarm(EventUtil.minusInt(oldDailyPig.getSowPhChgFarm(), changeDto.getRemoveCountChange()));
         }
         oldDailyPig.setSowChgFarm(EventUtil.plusInt(oldDailyPig.getSowChgFarm(), changeDto.getRemoveCountChange()));
         oldDailyPig.setSowIn(EventUtil.minusInt(oldDailyPig.getSowIn(), changeDto.getRemoveCountChange()));
