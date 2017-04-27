@@ -1,11 +1,14 @@
 package io.terminus.doctor.event.model;
 
 import com.google.common.base.Objects;
+import io.terminus.doctor.common.utils.DateUtil;
 import lombok.Data;
 import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 猪群卡片明细表Model类
@@ -144,6 +147,10 @@ public class DoctorGroupTrack implements Serializable {
      * 修改时间
      */
     private Date updatedAt;
+
+    public Integer getAvgDayAge() {
+        return notNull(birthDate) ? DateUtil.getDeltaDays(birthDate, new Date()) : avgDayAge;
+    }
 
     public enum Sex {
         FEMALE(0, "母"),

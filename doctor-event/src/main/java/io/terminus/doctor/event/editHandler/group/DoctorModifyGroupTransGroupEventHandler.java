@@ -210,6 +210,8 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
      */
     public DoctorMoveInGroupInput buildTriggerGroupEventInput(DoctorGroupEvent transGroupEvent) {
         DoctorTransGroupInput transGroup = JSON_MAPPER.fromJson(transGroupEvent.getExtra(), DoctorTransGroupInput.class);
+        DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(transGroupEvent.getGroupId());
+
         DoctorMoveInGroupInput moveIn = new DoctorMoveInGroupInput();
         moveIn.setSowId(transGroup.getSowId());
         moveIn.setSowCode(transGroup.getSowCode());
@@ -234,6 +236,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
         moveIn.setSowQty(transGroup.getSowQty());
         moveIn.setAvgWeight(EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity()));  //转入均重
         moveIn.setSowEvent(transGroup.isSowEvent());    //是否是由母猪触发的转入
+        moveIn.setAvgDayAge(groupTrack.getAvgDayAge());
         return moveIn;
     }
 }
