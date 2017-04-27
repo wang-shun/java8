@@ -49,9 +49,10 @@ public class Articles {
      * @return
      */
     @RequestMapping(value = "/category/{categoryId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<DoctorArticle> listArticle(@PathVariable Integer categoryId) {
+    public List<DoctorArticle> listArticle(@PathVariable Integer categoryId,
+                                           @RequestParam(value = "status", required = false) Integer status) {
 
-        Response<List<DoctorArticle>> response =  doctorArticleReadService.list(ImmutableMap.of("categoryId", categoryId));
+        Response<List<DoctorArticle>> response =  doctorArticleReadService.list(ImmutableMap.of("categoryId", categoryId, "status", status));
         if (!response.isSuccess()) {
             throw new JsonResponseException(500, response.getError());
         }
@@ -70,8 +71,9 @@ public class Articles {
     @RequestMapping(value = "/paging/{categoryId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Paging<DoctorArticle> pagingArticle(@RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                               @RequestParam(value = "status", required = false) Integer status,
                                                @PathVariable Integer categoryId) {
-        Response<Paging<DoctorArticle>> result =  doctorArticleReadService.paging(pageNo, pageSize, ImmutableMap.of("categoryId", categoryId));
+        Response<Paging<DoctorArticle>> result =  doctorArticleReadService.paging(pageNo, pageSize, ImmutableMap.of("categoryId", categoryId, "status", status));
         if(!result.isSuccess()){
             throw new JsonResponseException(result.getError());
         }
