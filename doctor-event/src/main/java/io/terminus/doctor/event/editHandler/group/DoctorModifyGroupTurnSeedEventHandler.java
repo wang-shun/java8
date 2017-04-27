@@ -69,6 +69,14 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
     }
 
     @Override
+    public DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        DoctorGroupEvent newEvent = super.buildNewEvent(oldGroupEvent, input);
+        DoctorTurnSeedGroupInput newInput = (DoctorTurnSeedGroupInput) input;
+        newEvent.setWeight(newInput.getWeight());
+        return newEvent;
+    }
+
+    @Override
     protected void updateDailyForModify(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto) {
         if (!Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
             updateDailyOfDelete(oldGroupEvent);
