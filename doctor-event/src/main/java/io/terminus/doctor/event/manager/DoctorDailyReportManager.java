@@ -134,8 +134,7 @@ public class DoctorDailyReportManager {
         DoctorDailyReport doctorDailyReport = new DoctorDailyReport();
         doctorDailyReport.setFarmId(farmId);
         doctorDailyReport.setSumAt(DateUtil.toDateString(startAt));
-        doctorDailyReport.setSowPh(doctorKpiDao.realTimeLiveStockPHSow(farmId, startAt));
-        doctorDailyReport.setSowCf(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));
+
         //母猪存栏变化
         doctorDailyReport.setSowStart(doctorKpiDao.realTimeLiveStockSow(farmId, new DateTime(startAt).minusDays(1).toDate()));
         doctorDailyReport.setSowIn(doctorKpiDao.getInSow(farmId, startAt, endAt));
@@ -168,6 +167,9 @@ public class DoctorDailyReportManager {
         doctorDailyReport.setSowPhChgFarm(EventUtil.minusInt(doctorDailyReport.getSowChgFarm(), doctorDailyReport.getSowCfChgFarm()));
 //        doctorDailyReport.setSowPhEnd(doctorKpiDao.realTimeLiveStockPHSow(farmId, startAt));
         doctorDailyReport.setSowPhEnd(EventUtil.minusInt(doctorDailyReport.getSowEnd(), doctorDailyReport.getSowCfEnd()));
+
+        doctorDailyReport.setSowPh(doctorDailyReport.getSowPhEnd());
+        doctorDailyReport.setSowCf(doctorDailyReport.getSowCfEnd());
         //公猪存栏变化
         doctorDailyReport.setBoarStart(doctorKpiDao.realTimeLiveStockBoar(farmId, new DateTime(startAt).minusDays(1).toDate()));
         doctorDailyReport.setBoarIn(doctorKpiDao.getInBoar(farmId, startAt, endAt));
