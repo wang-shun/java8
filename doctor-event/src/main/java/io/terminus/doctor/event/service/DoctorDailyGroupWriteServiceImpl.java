@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
@@ -76,9 +77,9 @@ public class DoctorDailyGroupWriteServiceImpl implements DoctorDailyGroupWriteSe
     @Override
     public Response<Boolean> generateYesterdayAndToday(List<Long> farmIds, Date date) {
         try{
-            Date today = new DateTime(date).plus(1).toDate();
+            Date yesterday = new DateTime(date).minusDays(1).toDate();
+            createDailyGroups(farmIds, yesterday);
             createDailyGroups(farmIds, date);
-            createDailyGroups(farmIds, today);
         }catch(Exception e){
             log.info("generate yesterday and today failed, cause: {}", Throwables.getStackTraceAsString(e));
             return Response.ok(Boolean.FALSE);
@@ -92,16 +93,8 @@ public class DoctorDailyGroupWriteServiceImpl implements DoctorDailyGroupWriteSe
         try{
             doctorDailyGroupDao.deleteByFarmIdAndSumAt(date);
             farmIds.forEach(farmId -> {
-                log.info("create group daily start, farmId: {}, now is: {}", farmId, DateUtil.toDateTimeString(new Date()));
-                List<DoctorGroup> groups= doctorGroupDao.findByFarmIdAndDate(farmId, date);
-                List<DoctorDailyGroup> dailyGroups = Lists.newArrayList();
-                groups.forEach(group -> {
-                    DoctorDailyGroup doctorDailyGroup = getDoctorDailyGroup(group, date, DateUtil.getDateEnd(new DateTime(date)).toDate());
-                    dailyGroups.add(doctorDailyGroup);
-                });
-                if(!Arguments.isNullOrEmpty(dailyGroups)){
-                    doctorDailyGroupDao.creates(dailyGroups);
-                }
+                log.info("create group daily start, farmId: {}, date: {}, now is: {}", farmId, DateUtil.toDateString(date), DateUtil.toDateTimeString(new Date()));
+                createDailyGroupReport(farmId, date);
             });
         }catch (Exception e){
             log.error("create group daily failed, cause: {}", Throwables.getStackTraceAsString(e));
@@ -115,20 +108,47 @@ public class DoctorDailyGroupWriteServiceImpl implements DoctorDailyGroupWriteSe
         try{
             log.info("create group daily start, farmId: {}, date: {}, now is: {}", farmId, DateUtil.toDateString(date), DateUtil.toDateTimeString(new Date()));
             doctorDailyGroupDao.deleteByFarmIdAndSumAt(farmId, date);
-            List<DoctorGroup> groups= doctorGroupDao.findByFarmIdAndDate(farmId, DateUtil.getDateEnd(new DateTime(date)).toDate());
-            List<DoctorDailyGroup> dailyGroups = Lists.newArrayList();
-            groups.forEach(group -> {
-                DoctorDailyGroup doctorDailyGroup = getDoctorDailyGroup(group, date, DateUtil.getDateEnd(new DateTime(date)).toDate());
-                dailyGroups.add(doctorDailyGroup);
-            });
-            if(!Arguments.isNullOrEmpty(dailyGroups)){
-                doctorDailyGroupDao.creates(dailyGroups);
-            }
+            createDailyGroupReport(farmId, date);
         }catch (Exception e){
             log.error("create group daily failed, cause: {}", Throwables.getStackTraceAsString(e));
             return Response.fail("create group daily failed");
         }
         return Response.ok(Boolean.TRUE);
+    }
+
+    @Override
+    public Response<Boolean> createDailyGroupsByDateRange(Long farmId, Date fromDate, Date toDate) {
+        log.info("create farm(farmId={}) daily group from {} to {} start", farmId, fromDate, toDate);
+        try {
+            if (Arguments.isNull(fromDate)) {
+                fromDate = Dates.startOfDay(new Date());
+            }
+            if (Arguments.isNull(toDate)) {
+                toDate = Dates.startOfDay(new Date());
+            }
+            while (!fromDate.after(toDate)) {
+                log.info("create group daily start, farmId: {}, date: {}, now is: {}", farmId, DateUtil.toDateString(fromDate), DateUtil.toDateTimeString(new Date()));
+                doctorDailyGroupDao.deleteByFarmIdAndSumAt(farmId, fromDate);
+                createDailyGroupReport(farmId, fromDate);
+                fromDate = new DateTime(fromDate).plusDays(1).toDate();
+            }
+        }catch (Exception e) {
+            log.error("create group daily failed, cause: {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create group daily failed");
+        }
+        return Response.ok(Boolean.TRUE);
+    }
+
+    private void createDailyGroupReport(Long farmId, Date date) {
+        List<DoctorGroup> groups= doctorGroupDao.findByFarmIdAndDate(farmId, DateUtil.getDateEnd(new DateTime(date)).toDate());
+        List<DoctorDailyGroup> dailyGroups = Lists.newArrayList();
+        groups.forEach(group -> {
+            DoctorDailyGroup doctorDailyGroup = getDoctorDailyGroup(group, date, DateUtil.getDateEnd(new DateTime(date)).toDate());
+            dailyGroups.add(doctorDailyGroup);
+        });
+        if(!Arguments.isNullOrEmpty(dailyGroups)){
+            doctorDailyGroupDao.creates(dailyGroups);
+        }
     }
 
     private DoctorDailyGroup getDoctorDailyGroup(DoctorGroup group, Date startAt, Date endAt) {

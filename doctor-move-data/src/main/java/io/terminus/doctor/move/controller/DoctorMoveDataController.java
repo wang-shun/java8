@@ -1,6 +1,7 @@
 package io.terminus.doctor.move.controller;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
@@ -14,15 +15,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
-import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
-import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
-import io.terminus.doctor.event.service.DoctorEditGroupEventService;
-import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
-import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
-import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.move.service.DoctorImportDataService;
@@ -43,7 +36,6 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -56,7 +48,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -94,6 +85,7 @@ public class DoctorMoveDataController {
     private final DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
     private final DoctorEditGroupEventService doctorEditGroupEventService;
     private final DoctorGroupReadService doctorGroupReadService;
+    private final DoctorDailyGroupWriteService doctorDailyGroupWriteService;
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
                                     WareHouseInitService wareHouseInitService,
@@ -112,7 +104,8 @@ public class DoctorMoveDataController {
                                     DoctorPigWriteService doctorPigWriteService,
                                     DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService,
                                     DoctorEditGroupEventService doctorEditGroupEventService,
-                                    DoctorGroupReadService doctorGroupReadService) {
+                                    DoctorGroupReadService doctorGroupReadService,
+                                    DoctorDailyGroupWriteService doctorDailyGroupWriteService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -131,6 +124,7 @@ public class DoctorMoveDataController {
         this.doctorEventModifyRequestWriteService = doctorEventModifyRequestWriteService;
         this.doctorEditGroupEventService = doctorEditGroupEventService;
         this.doctorGroupReadService = doctorGroupReadService;
+        this.doctorDailyGroupWriteService = doctorDailyGroupWriteService;
     }
 
     /**
@@ -581,37 +575,32 @@ public class DoctorMoveDataController {
     }
 
     /**
-     * 迁移从since开始的日报, only = true, 只迁移 since 这一天的数据, 如果farmId=null, 则全部猪场
+     * 迁移从from到to的日报, 如果farmId=null, 则全部猪场
      */
     @RequestMapping(value = "/daily/since", method = RequestMethod.GET)
-    public Boolean moveDailyReport(@RequestParam(value = "farmId", required = false) Long farmId,
-                                   @RequestParam("since") String since,
-                                   @RequestParam(value = "only", defaultValue = "false") boolean only) {
+    public Boolean moveDailyReport(@RequestParam(required = false) Long farmId,
+                                   @RequestParam(required = false) String from,
+                                   @RequestParam(required = false) String to) {
         try {
-            log.warn("move daily report since start, farmId:{}, since:{}, only:{}", farmId, since, only);
-
-            Date startAt = DateUtil.toDate(since);
-            if (startAt == null || startAt.after(new Date())) {
+            log.warn("move daily report since start, farmId:{}, from:{}, to:{}", farmId, from, to);
+            Date startAt = Strings.isNullOrEmpty(from) ? new Date() : DateUtil.toDate(from);
+            Date endAt = Strings.isNullOrEmpty(to) ? new Date() : DateUtil.toDate(to);
+            if (startAt.after(new Date())) {
                 return false;
             }
             if (farmId == null) {
-                if (only) {
-                    doctorDailyReportWriteService.createDailyReports(getAllFarmIds(), startAt);
-                } else {
-                    getAllFarmIds().forEach(fid -> doctorDailyReportWriteService.createDailyReports(fid, startAt, new Date() ));
-                }
+                List<Long> farmIds = getAllFarmIds();
+                farmIds.forEach(fid -> {
+                    doctorDailyReportWriteService.createDailyReports(fid, startAt, endAt);
+                });
             } else {
-                if (only) {
-                    doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), startAt);
-                } else {
-                    doctorDailyReportWriteService.createDailyReports(farmId, startAt, new Date());
-                }
+                doctorDailyReportWriteService.createDailyReports(farmId, startAt, endAt);
             }
             log.warn("move daily report since end");
             return true;
         } catch (Exception e) {
-            log.error("move daily report since failed, farmId:{}, since:{}, only:{}, cause:{}",
-                    farmId, since, only, Throwables.getStackTraceAsString(e));
+            log.error("move daily report since failed, farmId:{}, from:{}, to:{}, cause:{}",
+                    farmId, from, to, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
@@ -1278,32 +1267,28 @@ public class DoctorMoveDataController {
 
     @RequestMapping(value = "/group/daily", method = RequestMethod.GET)
     public Boolean flushGroupDailyHistorty(@RequestParam(required = false) Long farmId,
-                                         @RequestParam("since") String since,
-                                         @RequestParam(value = "only", defaultValue = "false") boolean only){
+                                           @RequestParam(required = false) String from,
+                                           @RequestParam(required = false) String to){
         try {
-            log.warn("flush  gropu daily since start, farmId:{}, since:{}, only:{}", farmId, since, only);
+            log.warn("flush  gropu daily start, farmId:{}, from:{}, to:{}", farmId, from, to);
 
-            Date startAt = DateUtil.toDate(since);
-            if (startAt == null || startAt.after(new Date())) {
+            Date startAt = Strings.isNullOrEmpty(from) ? new Date() : DateUtil.toDate(from);
+            Date endAt = Strings.isNullOrEmpty(to) ? new Date() : DateUtil.toDate(to);
+            if (startAt.after(new Date())) {
                 return false;
             }
-            if(only && !Objects.isNull(since) && !Objects.isNull(farmId)) {
-                doctorMoveReportService.flushGroupDaily(farmId, startAt);
-                return Boolean.TRUE;
-            }
-            int index = DateUtil.getDeltaDaysAbs(startAt, new Date()) + 1;
             if (farmId == null) {
                 List<Long> farmIds = getAllFarmIds();
                 farmIds.forEach(fid -> {
-                    doctorMoveReportService.flushGroupDaily(fid, index);
+                    doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, startAt, endAt);;
                 });
             } else {
-                doctorMoveReportService.flushGroupDaily(farmId, index);
+                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, startAt, endAt);;
             }
-            log.warn("flush gropu daily since end, farmId:{}, since:{}, only:{}", farmId, since, only);
+            log.warn("flush  gropu daily start, farmId:{}, from:{}, to:{}", farmId, from, to);
             return true;
         } catch (Exception e) {
-            log.error("flush gropu daily  since failed, farmId:{}, since:{}, only:{}", farmId, since, only, Throwables.getStackTraceAsString(e));
+            log.error("flush gropu daily  since failed, farmId:{}, from:{}, to:{}, cause: {}", farmId, from, to, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

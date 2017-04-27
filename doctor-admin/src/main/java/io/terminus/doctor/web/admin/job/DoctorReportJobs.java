@@ -72,7 +72,8 @@ public class DoctorReportJobs {
     @RequestMapping(value = "/daily", method = RequestMethod.GET)
     public void dailyReport() {
         try {
-            if(!hostLeader.isLeader()) {
+            if(!hostLeader.isLeader())
+            {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
                 return;
             }
@@ -94,12 +95,11 @@ public class DoctorReportJobs {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
                 return;
             }
-            log.info("statistics daily group job start, now is:{}", DateUtil.toDateTimeString(new Date()));
-            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
-            RespHelper.or500(doctorDailyGroupWriteService.generateYesterdayAndToday(getAllFarmIds(),yesterday));
-            log.info("statistics daily group job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+            log.info("daily group job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+            RespHelper.or500(doctorDailyGroupWriteService.generateYesterdayAndToday(getAllFarmIds(), new Date()));
+            log.info("daily group job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         }catch (Exception e){
-            log.error("statistics daily group job failed, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("daily group job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
 

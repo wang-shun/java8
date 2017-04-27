@@ -3,6 +3,8 @@ package io.terminus.doctor.event.dao;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.common.utils.Dates;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import org.springframework.stereotype.Repository;
@@ -100,7 +102,13 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
         return getSqlSession().selectList("findGroupByBarnId", map);
     }
 
+    /**
+     * 查找需要生成日统计的猪群
+     * @param farmId
+     * @param date
+     * @return
+     */
     public List<DoctorGroup> findByFarmIdAndDate(Long farmId, Date date) {
-        return getSqlSession().selectList(sqlId("findByFarmIdAndDate"), ImmutableMap.of("farmId", farmId, "date", date));
+        return getSqlSession().selectList(sqlId("findByFarmIdAndDate"), ImmutableMap.of("farmId", farmId, "openAt", Dates.endOfDay(date), "colseAt", Dates.startOfDay(date)));
     }
 }
