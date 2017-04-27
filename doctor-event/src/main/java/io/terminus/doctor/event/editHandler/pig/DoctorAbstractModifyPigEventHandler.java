@@ -61,8 +61,9 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     /**
      * 影响猪信息的事件类型
      */
-    public final static List<Integer> EFFECT_PIG_EVENTS = Lists.newArrayList(PigEvent.ENTRY.getKey(),
-            PigEvent.CHG_FARM.getKey(), PigEvent.REMOVAL.getKey());
+    public static final List<Integer> EFFECT_PIG_EVENTS = Lists.newArrayList(PigEvent.ENTRY.getKey(),
+            PigEvent.CHG_FARM.getKey(), PigEvent.CHG_FARM_IN.getKey(), PigEvent.REMOVAL.getKey());
+
 
     @Override
     public final Boolean canModify(DoctorPigEvent oldPigEvent) {
@@ -171,7 +172,17 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      */
     protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         expectTrue(Objects.equals(oldPigEvent.getIsAuto(), IsOrNot.NO.getValue()), "is.auto.not.modify");
-        DoctorPigEvent lastEvent = doctorPigEventDao.getLastStatusEventBeforeEventAtExcludeId(oldPigEvent.getPigId(), oldPigEvent.getEventAt(), oldPigEvent.getId());
+
+        //编辑的事件的时间校验
+        DoctorPigEvent lastEvent;
+        if (IGNORE_EVENT.contains(oldPigEvent.getType())) {
+            lastEvent = doctorPigEventDao.queryLastEnter(oldPigEvent.getPigId());
+        } else if (Objects.equals(oldPigEvent.getType(), PigEvent.REMOVAL.getKey())) {
+            lastEvent = doctorPigEventDao.getLastEventBeforeRemove(oldPigEvent.getPigId(), oldPigEvent.getId());
+        } else {
+            lastEvent = doctorPigEventDao.getLastStatusEventBeforeEventAtExcludeId(
+                    oldPigEvent.getPigId(), oldPigEvent.getEventAt(), oldPigEvent.getId());
+        }
         validEventAt(inputDto.eventAt(), notNull(lastEvent) ? lastEvent.getEventAt() : null);
     }
 

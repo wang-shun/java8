@@ -11,6 +11,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.getAfterDay;
@@ -21,6 +22,12 @@ import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGro
  */
 @Component
 public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEventHandler {
+
+    @Override
+    protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
+        List<DoctorPigEvent> list = doctorPigEventDao.findByPigId(deletePigEvent.getPigId());
+        return list.size() == 1;
+    }
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {

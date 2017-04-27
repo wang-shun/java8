@@ -530,4 +530,14 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public void deleteByChgFarm(Long pigId) {
         getSqlSession().delete(sqlId("deleteByChgFarm"), pigId);
      }
+
+    /**
+     * 获取离场前的最新事件
+     * @param pigId 猪id
+     * @param id 离场事件id
+     * @return 离场前的最新事件
+     */
+    public DoctorPigEvent getLastEventBeforeRemove(Long pigId, Long id) {
+        return getSqlSession().selectOne(sqlId("getLastEventBeforeRemove"), ImmutableMap.of("pigId", pigId, "id", id));
+    }
 }

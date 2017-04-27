@@ -397,7 +397,8 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                     .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.minusInt(dailyGroup.getEnd(), newQuantity)));
         }
         for (DoctorDailyGroup dailyGroup : dailyGroupList) {
-            expectTrue(notNull(dailyGroup.getEnd()) && dailyGroup.getEnd() >= 0, "group.live.stock.lower.zero", groupCode, DateUtil.toDateString(dailyGroup.getSumAt()));
+            expectTrue(notNull(dailyGroup.getEnd()) && dailyGroup.getEnd() >= 0,
+                    "group.live.stock.lower.zero", groupCode, DateUtil.toDateString(dailyGroup.getSumAt()));
         }
     }
     /**
@@ -415,7 +416,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param lastEventAt 下限时间
      */
     public static void validEventAt(Date eventAt, Date lastEventAt) {
-        if ((notNull(lastEventAt) && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEventAt))) || Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date()))) {
+        if ((notNull(lastEventAt)
+                && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEventAt)))
+                || Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date()))) {
             throw new InvalidException("event.at.error", DateUtil.toDateString(lastEventAt), DateUtil.toDateString(new Date()));
         }
     }

@@ -1,9 +1,12 @@
 package io.terminus.doctor.event.editHandler.pig;
 
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
+import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransGroupEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -53,6 +56,26 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
         oldPigTrack.setCurrentBarnName(doctorBarn.getName());
         oldPigTrack.setCurrentBarnType(doctorBarn.getPigType());
         return oldPigTrack;
+    }
+
+    @Override
+    protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
+        if (!Objects.equals(changeDto.getOldEventAt(), changeDto.getNewEventAt())) {
+            updateDailyOfDelete(oldPigEvent);
+            updateDailyOfNew(oldPigEvent, inputDto);
+        }
+    }
+
+    @Override
+    protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent) {
+        if (Objects.equals(newPigEvent.getType(), PigEvent.CHG_LOCATION.getKey())
+                && Objects.equals(newPigEvent.getBarnType(), PigType.DELIVER_SOW.getValue())) {
+            DoctorGroupEvent transGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(newPigEvent.getId(), GroupEventType.TRANS_GROUP.getValue());
+            BaseGroupInput newInput = JSON_MAPPER.fromJson(transGroupEvent.getExtra(), DoctorTransGroupInput.class);
+            //转舍目前只支持更改时间
+            newInput.setEventAt(DateUtil.toDateString(newPigEvent.getEventAt()));
+            doctorModifyGroupTransGroupEventHandler.modifyHandle(transGroupEvent, newInput);
+        }
     }
 
     @Override
