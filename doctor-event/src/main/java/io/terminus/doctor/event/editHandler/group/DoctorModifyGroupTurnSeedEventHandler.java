@@ -64,8 +64,16 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
                 .newEventAt(DateUtil.toDate(newInput.getEventAt()))
                 .oldPigCode(oldInput.getPigCode())
                 .pigCode(newInput.getPigCode())
-                .weightChange(newInput.getWeight() - oldInput.getWeight())
+                .weightChange(EventUtil.minusDouble(newInput.getWeight(), oldInput.getWeight()))
                 .build();
+    }
+
+    @Override
+    public DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        DoctorGroupEvent newEvent = super.buildNewEvent(oldGroupEvent, input);
+        DoctorTurnSeedGroupInput newInput = (DoctorTurnSeedGroupInput) input;
+        newEvent.setWeight(newInput.getWeight());
+        return newEvent;
     }
 
     @Override

@@ -17,6 +17,7 @@
         <result column="sow_weed_out" property="sowWeedOut"/>
         <result column="sow_sale" property="sowSale"/>
         <result column="sow_other_out" property="sowOtherOut"/>
+        <result column="sow_chg_farm" property="sowChgFarm"/>
         <result column="sow_end" property="sowEnd"/>
         <result column="sow_ph_start" property="sowPhStart"/>
         <result column="sow_ph_in_farm_in" property="sowPhInFarmIn"/>
@@ -37,6 +38,7 @@
         <result column="boar_weed_out" property="boarWeedOut"/>
         <result column="boar_sale" property="boarSale"/>
         <result column="boar_other_out" property="boarOtherOut"/>
+        <result column="boar_chg_farm" property="boarChgFarm"/>
         <result column="boar_end" property="boarEnd"/>
         <result column="mate_hb" property="mateHb"/>
         <result column="mate_dn" property="mateDn"/>
@@ -120,6 +122,7 @@
         sow_weed_out,
         sow_sale,
         sow_other_out,
+        sow_chg_farm,
         sow_end,
         sow_ph_start,
         sow_ph_in_farm_in,
@@ -140,6 +143,7 @@
         boar_weed_out,
         boar_sale,
         boar_other_out,
+        boar_chg_farm,
         boar_end,
         mate_hb,
         mate_dn,
@@ -215,6 +219,7 @@
         #{sowWeedOut},
         #{sowSale},
         #{sowOtherOut},
+        #{sowChgFarm},
         #{sowEnd},
         #{sowPhStart},
         #{sowPhInFarmIn},
@@ -235,6 +240,7 @@
         #{boarWeedOut},
         #{boarSale},
         #{boarOtherOut},
+        #{boarChgFarm},
         #{boarEnd},
         #{mateHb},
         #{mateDn},
@@ -420,6 +426,7 @@
             <if test="sowWeedOut != null">sow_weed_out = #{sowWeedOut},</if>
             <if test="sowSale != null">sow_sale = #{sowSale},</if>
             <if test="sowOtherOut != null">sow_other_out = #{sowOtherOut},</if>
+            <if test="sowChgFarm != null">sow_chg_farm = #{sowChgFarm},</if>
             <if test="sowEnd != null">sow_end = #{sowEnd},</if>
             <if test="sowPhStart != null">sow_ph_start = #{sowPhStart},</if>
             <if test="sowPhInFarmIn != null">sow_ph_in_farm_in = #{sowPhInFarmIn},</if>
@@ -440,6 +447,7 @@
             <if test="boarWeedOut != null">boar_weed_out = #{boarWeedOut},</if>
             <if test="boarSale != null">boar_sale = #{boarSale},</if>
             <if test="boarOtherOut != null">boar_other_out = #{boarOtherOut},</if>
+            <if test="boarChgFarm != null">boar_chg_farm = #{boarChgFarm},</if>
             <if test="boarEnd != null">boar_end = #{boarEnd},</if>
             <if test="mateHb != null">mate_hb = #{mateHb},</if>
             <if test="mateDn != null">mate_dn = #{mateDn},</if>
@@ -564,6 +572,7 @@
             sum(sow_weed_out) as sowWeedOut,
             sum(sow_sale) as sowSale,
             sum(sow_other_out) as sowOtherOut,
+            sum(sow_chg_farm) as sowChgFarm,
             sum(case when sum_at = #{endAt} then sow_end else 0 end) as sowEnd,
 
             sum(case when sum_at = #{startAt} then sow_ph_start else 0 end) as sowPhStart,
@@ -587,6 +596,7 @@
             sum(boar_weed_out) as boarWeedOut,
             sum(boar_sale) as boarSale,
             sum(boar_other_out) as boarOtherOut,
+            sum(boar_chg_farm) as boarChgFarm,
             sum(case when sum_at = #{endAt} then boar_end else 0 end) as boarEnd,
             sum(mate_hb) as mateHb,
             sum(mate_dn) as mateDn,
