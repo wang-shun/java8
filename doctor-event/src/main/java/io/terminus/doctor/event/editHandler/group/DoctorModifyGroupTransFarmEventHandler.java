@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModifyGroupEventHandler{
 
+
     @Override
     protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
         return false;

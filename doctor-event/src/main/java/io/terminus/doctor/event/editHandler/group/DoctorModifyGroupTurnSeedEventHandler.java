@@ -50,7 +50,7 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
         super.modifyHandleCheck(oldGroupEvent, input);
         validGroupLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getGroupCode(),
                 oldGroupEvent.getEventAt(), DateUtil.toDate(input.getEventAt()),
-                1, -1);
+                1, -1, 0);
     }
 
     @Override

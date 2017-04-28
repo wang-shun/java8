@@ -364,7 +364,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     }
 
     public void validGroupLiveStock(Long groupId, String groupCode, Date sumAt, Integer changeCount) {
-        validGroupLiveStock(groupId, groupCode, sumAt, sumAt, 0, changeCount);
+        validGroupLiveStock(groupId, groupCode, sumAt, sumAt, null, null, changeCount);
     }
 
     /**
@@ -375,7 +375,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param oldQuantity 原数量
      * @param newQuantity 新数量
      */
-    protected void validGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity, Integer newQuantity){
+    protected void validGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity, Integer newQuantity,  Integer changeCount){
         Date sumAt = oldEventAt.before(newEventAt) ? oldEventAt : newEventAt;
         List<DoctorDailyGroup> dailyGroupList = doctorDailyGroupDao.findAfterSumAt(groupId, DateUtil.toDateString(sumAt));
 
@@ -388,7 +388,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         if (Objects.equals(oldEventAt, newEventAt)) {
             dailyGroupList.stream()
                     .filter(dailyGroup -> !oldEventAt.before(dailyGroup.getSumAt()))
-                    .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.plusInt(dailyGroup.getEnd(), EventUtil.minusInt(newQuantity, oldQuantity))));
+                    .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.plusInt(dailyGroup.getEnd(), changeCount)));
         } else {
             dailyGroupList.stream()
                     .filter(dailyGroup -> !oldEventAt.before(dailyGroup.getSumAt()))

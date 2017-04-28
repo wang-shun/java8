@@ -37,7 +37,8 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
         DoctorChangeGroupInput newInput = (DoctorChangeGroupInput) input;
         validGroupLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getGroupCode(),
                 oldGroupEvent.getEventAt(), DateUtil.toDate(newInput.getEventAt()),
-                oldGroupEvent.getQuantity(), -newInput.getQuantity());
+                oldGroupEvent.getQuantity(), -newInput.getQuantity(),
+                EventUtil.minusInt(oldGroupEvent.getQuantity(), newInput.getQuantity()));
     }
 
     @Override
