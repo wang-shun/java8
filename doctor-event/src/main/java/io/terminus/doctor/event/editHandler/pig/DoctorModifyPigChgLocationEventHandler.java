@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.getAfterDay;
 
 /**
@@ -68,9 +69,8 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
 
     @Override
     protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent) {
-        if (Objects.equals(newPigEvent.getType(), PigEvent.CHG_LOCATION.getKey())
-                && Objects.equals(newPigEvent.getBarnType(), PigType.DELIVER_SOW.getValue())) {
-            DoctorGroupEvent transGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(newPigEvent.getId(), GroupEventType.TRANS_GROUP.getValue());
+        DoctorGroupEvent transGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(newPigEvent.getId(), GroupEventType.TRANS_GROUP.getValue());
+        if (notNull(transGroupEvent)) {
             BaseGroupInput newInput = JSON_MAPPER.fromJson(transGroupEvent.getExtra(), DoctorTransGroupInput.class);
             //转舍目前只支持更改时间
             newInput.setEventAt(DateUtil.toDateString(newPigEvent.getEventAt()));
@@ -80,10 +80,10 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
 
     @Override
     protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
-        if (Objects.equals(deletePigEvent.getType(), PigEvent.CHG_LOCATION.getKey())
-                && Objects.equals(deletePigEvent.getBarnType(), PigType.DELIVER_SOW.getValue())) {
-            DoctorGroupEvent transGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.TRANS_GROUP.getValue());
+        DoctorGroupEvent transGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.TRANS_GROUP.getValue());
+        if (notNull(transGroupEvent)) {
             doctorModifyGroupTransGroupEventHandler.rollbackHandle(transGroupEvent, operatorId, operatorName);
+
         }
     }
 
