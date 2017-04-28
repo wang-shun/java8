@@ -132,7 +132,7 @@ public class DoctorCommonGroupEventHandler {
         moveIn.setQuantity(transGroup.getQuantity());
         moveIn.setBoarQty(transGroup.getBoarQty());
         moveIn.setSowQty(transGroup.getSowQty());
-        moveIn.setAvgDayAge(fromGroupTrack.getAvgDayAge());     //日龄
+        moveIn.setAvgDayAge(DateUtil.getDeltaDays(fromGroupTrack.getBirthDate(), DateUtil.toDate(transGroup.getEventAt())));     //日龄
         moveIn.setAvgWeight(EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity()));  //转入均重
         moveIn.setSowEvent(transGroup.isSowEvent());    //是否是由母猪触发的转入
 

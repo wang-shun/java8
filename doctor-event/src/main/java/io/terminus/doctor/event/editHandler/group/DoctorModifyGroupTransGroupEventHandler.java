@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.editHandler.group;
 
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
@@ -45,6 +46,11 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
                 oldGroupEvent.getEventAt(), DateUtil.toDate(newInput.getEventAt()),
                 oldGroupEvent.getQuantity(), -newInput.getQuantity(),
                 EventUtil.minusInt(oldGroupEvent.getQuantity(), newInput.getQuantity()));
+
+        DoctorTransGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorTransGroupInput.class);
+        if (!Objects.equals(oldInput.getToGroupId(), newInput.getToGroupId())) {
+            throw new InvalidException("move.in.group.not.allow.modify");
+        }
     }
 
     @Override
