@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.admin.job.material;
+package io.terminus.doctor.move.controller.material;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
@@ -7,7 +7,6 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.service.DoctorGroupMaterialWriteServer;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.web.admin.job.material.DoctorMaterialManage;
 import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +41,9 @@ public class DoctorGroupMaterialJobs {
     }
 
     private final static Integer GROUP = 0;
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 3 1 * * ?")
 //    @Scheduled(cron = "0 */1 * * * ?")
-    @RequestMapping(value = "/group", method = RequestMethod.GET)
+        @RequestMapping(value = "/group", method = RequestMethod.GET)
     public void groupMaterialReport() {
         try {
             if(!hostLeader.isLeader()) {

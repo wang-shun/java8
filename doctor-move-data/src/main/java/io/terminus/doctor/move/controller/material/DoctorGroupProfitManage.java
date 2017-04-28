@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.admin.job.material;
+package io.terminus.doctor.move.controller.material;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
