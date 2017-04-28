@@ -353,7 +353,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param sumAt 统计时间(包括)
      * @param changeCount 变化数量
      */
-    protected boolean validGroupLiveStock(Long groupId, Date sumAt, Integer changeCount) {
+    public boolean validGroupLiveStockForDelete(Long groupId, Date sumAt, Integer changeCount) {
         List<DoctorDailyGroup> dailyGroupList = doctorDailyGroupDao.findAfterSumAt(groupId, DateUtil.toDateString(sumAt));
         for(DoctorDailyGroup dailyGroup : dailyGroupList){
             if (EventUtil.plusInt(dailyGroup.getEnd(), changeCount) < 0) {
@@ -361,6 +361,10 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             }
         }
         return true;
+    }
+
+    public void validGroupLiveStock(Long groupId, String groupCode, Date sumAt, Integer changeCount) {
+        validGroupLiveStock(groupId, groupCode, sumAt, sumAt, 0, changeCount);
     }
 
     /**

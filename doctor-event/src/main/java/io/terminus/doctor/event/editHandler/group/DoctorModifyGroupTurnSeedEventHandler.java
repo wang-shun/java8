@@ -98,11 +98,6 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
     }
 
     @Override
-    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
-        return validGroupLiveStock(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), deleteGroupEvent.getQuantity());
-    }
-
-    @Override
     protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
         DoctorPigEvent entryEvent = doctorPigEventDao.findByRelGroupEventId(deleteGroupEvent.getId());
         doctorModifyPigEntryEventHandler.rollbackHandle(entryEvent, operatorId, operatorName);

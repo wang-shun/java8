@@ -6,6 +6,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -61,6 +62,8 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         input.setEventType(GroupEventType.CHANGE.getValue());
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
+
+        doctorModifyGroupChangeEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(), DateUtil.toDate(change.getEventAt()), -change.getQuantity());
 
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());

@@ -4,6 +4,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -59,6 +60,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         input.setEventType(GroupEventType.TURN_SEED.getValue());
 
         DoctorTurnSeedGroupInput turnSeed = (DoctorTurnSeedGroupInput) input;
+
         DoctorBarn toBarn = getBarnById(turnSeed.getToBarnId());
 
         //0. 校验数据
@@ -105,6 +107,8 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTurnSeedGroupInput turnSeed = (DoctorTurnSeedGroupInput) input;
         DoctorBarn toBarn = getBarnById(turnSeed.getToBarnId());
+
+        doctorModifyGroupTurnSeedEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(), DateUtil.toDate(turnSeed.getEventAt()), -1);
 
         //0. 校验数据
         checkQuantity(groupTrack.getQuantity(), 1); // 确保 原数量 >= 1
