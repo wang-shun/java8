@@ -192,8 +192,10 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     private DoctorCommonReportDto getDoctorCommonReportDto(DoctorRangeReport report) {
         DoctorCommonReportDto doctorCommonReportDto = new DoctorCommonReportDto();
         Long farmId = report.getFarmId();
-        Date startAt = getSumAtStart(report.getSumAt(), report.getType());
-        Date endAt = getSumAtEnd(report.getSumAt(), report.getType());
+//        Date startAt = getSumAtStart(report.getSumAt(), report.getType());
+//        Date endAt = getSumAtEnd(report.getSumAt(), report.getType());
+        Date startAt = report.getSumFrom();
+        Date endAt = report.getSumTo();
         doctorCommonReportDto.setFarmId(report.getFarmId());
         doctorCommonReportDto.setDate(report.getSumAt());
         DoctorDailyReportSum dailyReportSum = doctorDailyReportDao.findDailyReportSum(farmId, startAt, endAt);
