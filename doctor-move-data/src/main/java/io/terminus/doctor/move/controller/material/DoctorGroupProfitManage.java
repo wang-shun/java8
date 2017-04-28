@@ -11,6 +11,7 @@ import io.terminus.doctor.event.dto.DoctorProfitExportDto;
 import io.terminus.doctor.event.model.DoctorProfitMaterialOrPig;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorProfitMaterOrPigWriteServer;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import java.util.Map;
  * Created by terminus on 2017/4/20.
  */
 @Component
+@Slf4j
 public class DoctorGroupProfitManage {
 
     @RpcConsumer
@@ -60,49 +62,53 @@ public class DoctorGroupProfitManage {
         map.put("startDate", startDate);
         map.put("endDate", endDate);
         for (Long farmId : farmIds) {
-            map.put("farmId", farmId);
-            for (String pigs : pigType) {
-                map.put("pigTypeId", pigs);
-                profitExportDto = RespHelper.or500(doctorPigEventReadService.sumProfitAmount(map));
-                doctorProfitMaterialOrPig = new DoctorProfitMaterialOrPig();
-                Double amountPig = 0.0;
-                feedAmount = 0.0;
-                materialAmount = 0.0;
-                vaccineAmount = 0.0;
-                medicineAmount = 0.0;
-                consumablesAmount = 0.0;
-                amount = 0.0;
-                for (DoctorProfitExportDto doctorProfitExportDto : profitExportDto) {
-                    doctorProfitMaterialOrPig = sumMaterialAmount(startDate, endDate, farmId, doctorProfitExportDto.getBarnId(), doctorProfitMaterialOrPig, true);
-                    amountPig += doctorProfitExportDto.getAmount();
+            try {
+                map.put("farmId", farmId);
+                for (String pigs : pigType) {
+                    map.put("pigTypeId", pigs);
+                    profitExportDto = RespHelper.or500(doctorPigEventReadService.sumProfitAmount(map));
+                    doctorProfitMaterialOrPig = new DoctorProfitMaterialOrPig();
+                    Double amountPig = 0.0;
+                    feedAmount = 0.0;
+                    materialAmount = 0.0;
+                    vaccineAmount = 0.0;
+                    medicineAmount = 0.0;
+                    consumablesAmount = 0.0;
+                    amount = 0.0;
+                    for (DoctorProfitExportDto doctorProfitExportDto : profitExportDto) {
+                        doctorProfitMaterialOrPig = sumMaterialAmount(startDate, endDate, farmId, doctorProfitExportDto.getBarnId(), doctorProfitMaterialOrPig, true);
+                        amountPig += doctorProfitExportDto.getAmount();
+                    }
+                    date = new DateTime(startDate);
+                    startDates = DateUtils.addDays(startDate, 1 - date.dayOfYear().get());
+                    endDates = DateUtils.addSeconds(DateUtils.addYears(startDates, 1), -1);
+                    map.put("startDate", startDates);
+                    map.put("endDate", endDates);
+                    profitYearExportDto = RespHelper.or500(doctorPigEventReadService.sumProfitAmount(map));
+                    Double amountPigYear = 0.0;
+                    amount = 0.0;
+                    for (DoctorProfitExportDto doctorProfitExportDto : profitYearExportDto) {
+                        doctorProfitMaterialOrPig = sumMaterialAmount(startDates, endDates, farmId, doctorProfitExportDto.getBarnId(), doctorProfitMaterialOrPig, false);
+                        amountPigYear += doctorProfitExportDto.getAmount();
+                    }
+                    if (!profitExportDto.isEmpty()) {
+                        doctorProfitMaterialOrPig.setFarmId(farmId);
+                        doctorProfitMaterialOrPig.setPigTypeNameId(pigs);
+                        doctorProfitMaterialOrPig.setPigTypeName(profitExportDto.get(0).getPigTypeName());
+                        doctorProfitMaterialOrPig.setAmountPig(amountPig);
+                        doctorProfitMaterialOrPig.setSumTime(startDate);
+                        doctorProfitMaterialOrPig.setRefreshTime(DateUtil.toDateTimeString(new Date()));
+                        doctorProfitMaterialOrPig.setAmountYearPig(amountPigYear);
+                        doctorProfitMaterialOrPig.setFeedAmount(feedAmount);
+                        doctorProfitMaterialOrPig.setMaterialAmount(materialAmount);
+                        doctorProfitMaterialOrPig.setMedicineAmount(medicineAmount);
+                        doctorProfitMaterialOrPig.setConsumablesAmount(consumablesAmount);
+                        doctorProfitMaterialOrPig.setAmountYearMaterial(amount);
+                        doctorProfitMaterialOrPigList.add(doctorProfitMaterialOrPig);
+                    }
                 }
-                date = new DateTime(startDate);
-                startDates = DateUtils.addDays(startDate,1-date.dayOfYear().get());
-                endDates = DateUtils.addSeconds(DateUtils.addYears(startDates,1),-1);
-                map.put("startDate", startDates);
-                map.put("endDate", endDates);
-                profitYearExportDto = RespHelper.or500(doctorPigEventReadService.sumProfitAmount(map));
-                Double amountPigYear = 0.0;
-                amount = 0.0;
-                for (DoctorProfitExportDto doctorProfitExportDto : profitYearExportDto) {
-                    doctorProfitMaterialOrPig = sumMaterialAmount(startDates, endDates, farmId, doctorProfitExportDto.getBarnId(), doctorProfitMaterialOrPig, false);
-                    amountPigYear += doctorProfitExportDto.getAmount();
-                }
-                if (!profitExportDto.isEmpty()) {
-                    doctorProfitMaterialOrPig.setFarmId(farmId);
-                    doctorProfitMaterialOrPig.setPigTypeNameId(pigs);
-                    doctorProfitMaterialOrPig.setPigTypeName(profitExportDto.get(0).getPigTypeName());
-                    doctorProfitMaterialOrPig.setAmountPig(amountPig);
-                    doctorProfitMaterialOrPig.setSumTime(startDate);
-                    doctorProfitMaterialOrPig.setRefreshTime(DateUtil.toDateTimeString(new Date()));
-                    doctorProfitMaterialOrPig.setAmountYearPig(amountPigYear);
-                    doctorProfitMaterialOrPig.setFeedAmount(feedAmount);
-                    doctorProfitMaterialOrPig.setMaterialAmount(materialAmount);
-                    doctorProfitMaterialOrPig.setMedicineAmount(medicineAmount);
-                    doctorProfitMaterialOrPig.setConsumablesAmount(consumablesAmount);
-                    doctorProfitMaterialOrPig.setAmountYearMaterial(amount);
-                    doctorProfitMaterialOrPigList.add(doctorProfitMaterialOrPig);
-                }
+            }catch (Exception e) {
+                log.error("doctor group profit fail, farmid:{}", farmId);
             }
         }
         doctorProfitMaterOrPigWriteServer.insterDoctorProfitMaterialOrPig(doctorProfitMaterialOrPigList);

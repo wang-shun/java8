@@ -17,6 +17,7 @@ import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupMaterialWriteServer;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.move.dto.DoctorGroupEventTime;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import static java.util.Objects.isNull;
  * Created by terminus on 2017/4/20.
  */
 @Component
+@Slf4j
 public class DoctorMaterialManage {
 
     @RpcConsumer
@@ -50,33 +52,46 @@ public class DoctorMaterialManage {
 
         List<DoctorMasterialDatailsGroup> doctorMasterialDatailsGroups;
         for (Long farmId : farmIds) {
-            doctorMasterialDatailsGroups = getPagingGroupMaterialHouse(farmId, flag);
-            if (doctorMasterialDatailsGroups == null || doctorMasterialDatailsGroups.isEmpty()) {
-                continue;
+            try {
+
+                doctorMasterialDatailsGroups = getPagingGroupMaterialHouse(farmId, flag);
+                if (doctorMasterialDatailsGroups == null || doctorMasterialDatailsGroups.isEmpty()) {
+                    continue;
+                }
+                doctorGroupMaterialWriteServer.insterDoctorGroupMaterialWareDetails(doctorMasterialDatailsGroups);
+            }catch (Exception e) {
+                log.error("material ware house fail, farmId:{}", farmId);
             }
-            doctorGroupMaterialWriteServer.insterDoctorGroupMaterialWareDetails(doctorMasterialDatailsGroups);
         }
     }
 
     public void runDoctorGroupMaterialWareDetails(List<Long> farmIds, Integer flag) {
         List<DoctorMasterialDatailsGroup> doctorMasterialDatailsGroups;
         for (Long farmId : farmIds) {
-            doctorMasterialDatailsGroups = getPagingGroupMaterialDetails(farmId, flag);
-            if (doctorMasterialDatailsGroups == null || doctorMasterialDatailsGroups.isEmpty()) {
-                continue;
+            try {
+                doctorMasterialDatailsGroups = getPagingGroupMaterialDetails(farmId, flag);
+                if (doctorMasterialDatailsGroups == null || doctorMasterialDatailsGroups.isEmpty()) {
+                    continue;
+                }
+                doctorGroupMaterialWriteServer.insterDoctorGroupMaterialWareDetails(doctorMasterialDatailsGroups);
+            }catch (Exception e) {
+                log.error("material group ware details fail, farmId:{}", farmId);
             }
-            doctorGroupMaterialWriteServer.insterDoctorGroupMaterialWareDetails(doctorMasterialDatailsGroups);
         }
     }
 
     public void runDoctorGroupMaterialWare(List<Long> farmIds, Integer flag) {
             List<DoctorMasterialDatailsGroup> doctorMasterialDatailsGroups;
             for (Long farmId : farmIds) {
-                doctorMasterialDatailsGroups = getPagingGroupMaterial(farmId, flag);
-                if (doctorMasterialDatailsGroups == null || doctorMasterialDatailsGroups.isEmpty()) {
-                    continue;
+                try {
+                    doctorMasterialDatailsGroups = getPagingGroupMaterial(farmId, flag);
+                    if (doctorMasterialDatailsGroups == null || doctorMasterialDatailsGroups.isEmpty()) {
+                        continue;
+                    }
+                    doctorGroupMaterialWriteServer.insterDoctorGroupMaterialWareDetails(doctorMasterialDatailsGroups);
+                }catch (Exception e) {
+                    log.error("doctor group material ware fail, farmId:{}", farmId);
                 }
-                doctorGroupMaterialWriteServer.insterDoctorGroupMaterialWareDetails(doctorMasterialDatailsGroups);
             }
     }
     //物料仓库

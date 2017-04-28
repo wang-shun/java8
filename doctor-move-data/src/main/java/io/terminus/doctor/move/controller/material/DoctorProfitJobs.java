@@ -92,7 +92,7 @@ public class DoctorProfitJobs {
                             date = DateUtils.addMonths(date, 1);
                         }
                     }
-                },"TTT-->>"+i+"<<--:").start();
+                },"-->>"+i+"<<--").start();
             }
 
             log.info("daily all profit job end, now is:{}", DateUtil.toDateTimeString(new Date()));
