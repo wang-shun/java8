@@ -23,6 +23,7 @@
         <result column="chg_farm" property="chgFarm"/>
         <result column="inner_out" property="innerOut"/>
         <result column="outer_out" property="outerOut"/>
+        <result column="turn_seed" property="turnSeed"/>
         <result column="end" property="end"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
@@ -54,6 +55,7 @@
         chg_farm,
         inner_out,
         outer_out,
+        turn_seed,
         end,
         created_at,
         updated_at
@@ -77,6 +79,7 @@
         #{chgFarm},
         #{innerOut},
         #{outerOut},
+        #{turnSeed},
         #{end},
         now(),
         now()
@@ -134,9 +137,10 @@
                 #{item.chgFarm},
                 #{item.innerOut},
                 #{item.outerOut},
+                #{item.turnSeed},
                 #{item.end},
-            now(),
-            now()
+                now(),
+                now()
             )
         </foreach>
     </insert>
@@ -165,6 +169,7 @@
             <if test="chgFarm != null">chg_farm = #{chgFarm},</if>
             <if test="innerOut != null">inner_out = #{innerOut},</if>
             <if test="outerOut != null">outer_out = #{outerOut},</if>
+            <if test="turnSeed != null">turn_seed = #{turnSeed},</if>
             <if test="end != null">end = #{end},</if>
 
             updated_at=now()
@@ -267,6 +272,7 @@
         sum(case when type = 4  then `other_change` else 0 END) as houbeiOtherChange,
         sum(case when type = 4  then `inner_out` else 0 END) as houbeiInnerOut,
         sum(case when type = 4  then `outer_out` else 0 END) as houbeiOuterOut,
+        sum(case when type = 4  then `turn_seed` else 0 END) as houbeiTurnSeed,
         sum(case when type = 4 and sum_at = #{endAt} then `end` else 0 END) as houbeiEnd
         from doctor_daily_groups
         where farm_id = #{farmId}

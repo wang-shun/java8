@@ -96,6 +96,11 @@ public class DoctorDailyGroup implements Serializable {
      * 不同类型猪群转群,转种猪
      */
     private Integer outerOut;
+
+    /**
+     * 转种猪
+     */
+    private Integer turnSeed;
     
     /**
      * 期末
