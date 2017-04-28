@@ -328,7 +328,7 @@ public class DateUtil {
      * @param week 周
      * @return 日期
      */
-    private static DateTime withWeekOfYear(Integer year, Integer week) {
+    public static DateTime withWeekOfYear(Integer year, Integer week) {
         if (year == null || week == null) {
             return DateUtil.getDateEnd(DateTime.now());
         }

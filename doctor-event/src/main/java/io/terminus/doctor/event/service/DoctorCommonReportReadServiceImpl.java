@@ -37,6 +37,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isNull;
@@ -191,8 +192,8 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     private DoctorCommonReportDto getDoctorCommonReportDto(DoctorRangeReport report) {
         DoctorCommonReportDto doctorCommonReportDto = new DoctorCommonReportDto();
         Long farmId = report.getFarmId();
-        Date startAt = report.getSumFrom();
-        Date endAt = report.getSumTo();
+        Date startAt = getSumAtStart(report.getSumAt(), report.getType());
+        Date endAt = getSumAtEnd(report.getSumAt(), report.getType());
         doctorCommonReportDto.setFarmId(report.getFarmId());
         doctorCommonReportDto.setDate(report.getSumAt());
         DoctorDailyReportSum dailyReportSum = doctorDailyReportDao.findDailyReportSum(farmId, startAt, endAt);
@@ -203,6 +204,30 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         doctorCommonReportDto.setIndicatorReport(report);
 
         return doctorCommonReportDto;
+    }
+
+    private Date getSumAtStart(String sumAt, Integer type) {
+        if(Objects.equals(ReportRangeType.WEEK.getValue(), type)){
+            Integer year = Integer.valueOf(sumAt.split("-")[0]);
+            Integer week = Integer.valueOf(sumAt.split("-")[1]);
+            return DateUtil.withWeekOfYear(year, week).minusDays(6).toDate();
+        }
+        if(Objects.equals(ReportRangeType.MONTH.getValue(), type)){
+            return DateUtil.toYYYYMM(sumAt);
+        }
+        return null;
+    }
+
+    private Date getSumAtEnd(String sumAt, Integer type) {
+        if(Objects.equals(ReportRangeType.WEEK.getValue(), type)){
+            Integer year = Integer.valueOf(sumAt.split("-")[0]);
+            Integer week = Integer.valueOf(sumAt.split("-")[1]);
+            return DateUtil.withWeekOfYear(year, week).toDate();
+        }
+        if(Objects.equals(ReportRangeType.MONTH.getValue(), type)){
+            return DateUtil.getMonthEnd(new DateTime(DateUtil.toYYYYMM(sumAt))).toDate();
+        }
+        return null;
     }
 
     //后去月报趋势图

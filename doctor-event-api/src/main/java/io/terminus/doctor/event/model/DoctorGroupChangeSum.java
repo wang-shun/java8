@@ -230,6 +230,11 @@ public class DoctorGroupChangeSum implements Serializable{
     private Integer houbeiOuterOut;
 
     /**
+     * 转种猪
+     */
+    private Integer houbeiTurnSeed;
+
+    /**
      * 期末
      */
     private Integer houbeiEnd;

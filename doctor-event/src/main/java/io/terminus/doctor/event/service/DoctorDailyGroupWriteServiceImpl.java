@@ -171,10 +171,11 @@ public class DoctorDailyGroupWriteServiceImpl implements DoctorDailyGroupWriteSe
         doctorDailyGroup.setOtherChange(doctorKpiDao.getGroupOtherChange(groupId, startAt, endAt));
         doctorDailyGroup.setChgFarm(doctorKpiDao.getGroupChgFarm(groupId, startAt, endAt));
         doctorDailyGroup.setInnerOut(doctorKpiDao.getGroupInnerOut(groupId, startAt, endAt));
+        doctorDailyGroup.setOuterOut(doctorKpiDao.getGroupOuterOut(groupId, startAt, endAt));
         if(Objects.equals(PigType.RESERVE.getValue(), group.getPigType())){
-            doctorDailyGroup.setOuterOut(doctorKpiDao.getGroupTrunSeed(groupId, startAt, endAt));
+            doctorDailyGroup.setTurnSeed(doctorKpiDao.getGroupTrunSeed(groupId, startAt, endAt));
         }else {
-            doctorDailyGroup.setOuterOut(doctorKpiDao.getGroupOuterOut(groupId, startAt, endAt));
+            doctorDailyGroup.setTurnSeed(0);
         }
         doctorDailyGroup.setEnd(doctorKpiDao.realTimeLivetockGroup(groupId, startAt));
         return doctorDailyGroup;

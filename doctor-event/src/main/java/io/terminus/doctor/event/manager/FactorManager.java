@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorDataFactorDao;
@@ -36,18 +37,19 @@ public class FactorManager {
      */
     @Transactional
     public Boolean updateFactors(List<DoctorDataFactor> datas) {
+
+        doctorDataFactorDao.deleteAll(datas.get(0).getType());
+        List<DoctorDataFactor> list = Lists.newArrayList();
         for(DoctorDataFactor factor: datas) {
             rangeVerify(factor);
+            factor.setId(null);
+            factor.setIsDelete(0);
             if(factor.getRangeFrom()>factor.getRangeTo()){
                 throw new JsonResponseException(500,"range.from.gt.to");
             }
-            if (factor.getId() == null){
-                factor.setIsDelete(0);
-                doctorDataFactorDao.create(factor);
-            }else{
-                doctorDataFactorDao.update(factor);
-            }
+            list.add(factor);
         }
+        doctorDataFactorDao.creates(list);
         return Boolean.TRUE;
     }
 

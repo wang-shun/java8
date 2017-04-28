@@ -116,4 +116,7 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorDataFactorReadService" id="doctorDataFactorReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorDataFactorWriteService" id="doctorDataFactorWriteService" check="false"/>
 
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorArticleWriteService" id="doctorArticleWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorArticleReadService" id="doctorArticleReadService" check="false"/>
+
 </beans>

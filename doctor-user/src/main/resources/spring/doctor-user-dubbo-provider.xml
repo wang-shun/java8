@@ -37,4 +37,8 @@
     <!-- article service -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleReadService" ref="articleReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleWriteService" ref="articleWriteServiceImpl"/>
+
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorArticleWriteService" ref="doctorArticleWriteServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorArticleReadService" ref="doctorArticleReadServiceImpl" />
+
 </beans>
