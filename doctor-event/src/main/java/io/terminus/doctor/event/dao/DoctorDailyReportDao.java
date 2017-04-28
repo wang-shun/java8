@@ -20,8 +20,7 @@ import java.util.List;
 public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
 
     public DoctorDailyReport findByFarmIdAndSumAt(Long farmId, Date date) {
-        String sumAt = DateUtil.toDateString(date);
-        return findByFarmIdAndSumAt(farmId, sumAt);
+        return findByFarmIdAndSumAt(farmId, DateUtil.toDateString(date));
     }
 
     public DoctorDailyReport findByFarmIdAndSumAt(Long farmId, String date) {
@@ -37,6 +36,10 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
     }
 
     public DoctorDailyReportSum findDailyReportSum(Long farmId, Date startAt, Date endAt) {
+        return findDailyReportSum(farmId, DateUtil.toDateString(startAt), DateUtil.toDateString(endAt));
+    }
+
+    public DoctorDailyReportSum findDailyReportSum(Long farmId, String startAt, String endAt) {
         return getSqlSession().selectOne(sqlId("findDailyReportSum"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
@@ -46,7 +49,7 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
     }
 
     public List<DoctorDailyReport> findByRange(Long farmId, Date startAt, Date endAt) {
-        return getSqlSession().selectList(sqlId("findByRange"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+        return getSqlSession().selectList(sqlId("findByRange"), ImmutableMap.of("farmId", farmId, "startAt", DateUtil.toDateString(startAt), "endAt", DateUtil.toDateString(endAt)));
     }
 
     /**
@@ -60,7 +63,7 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
      */
     public void updateDailySowPigLiveStock(Long farmId, Date sumAt, Integer liveChangeCount, Integer phChangeCount, Integer cfChangeCount) {
         getSqlSession().update(sqlId("updateDailySowPigLiveStock"),
-                MapBuilder.of().put("farmId", farmId).put("sumAt", sumAt).put("liveChangeCount", liveChangeCount).put("phChangeCount", phChangeCount).put("cfChangeCount", cfChangeCount).map());
+                MapBuilder.of().put("farmId", farmId).put("sumAt", DateUtil.toDateString(sumAt)).put("liveChangeCount", liveChangeCount).put("phChangeCount", phChangeCount).put("cfChangeCount", cfChangeCount).map());
     }
 
     /**
@@ -70,6 +73,6 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
      * @param changeCount 变动数量
      */
     public void updateDailyBoarPigLiveStock(Long farmId, Date sumAt, Integer changeCount) {
-        getSqlSession().update(sqlId("updateDailyBoarPigLiveStock"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt, "changeCount", changeCount));
+        getSqlSession().update(sqlId("updateDailyBoarPigLiveStock"), ImmutableMap.of("farmId", farmId, "sumAt", DateUtil.toDateString(sumAt), "changeCount", changeCount));
     }
 }
