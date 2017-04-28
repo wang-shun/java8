@@ -1393,3 +1393,15 @@ CREATE TABLE `doctor_feed_formulas` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `feed_id` (`feed_id`,`farm_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='饲料配方表';
+
+-- 4.24 用户帮助，未使用装修系统
+CREATE TABLE IF NOT EXISTS `doctor_articles`(
+    `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `categoryId` int(11)  NULL COMMENT '类目ID',
+    `title` VARCHAR(128)  NULL COMMENT '标题',
+    `content` text  NULL COMMENT '内容',
+    `status` TINYINT  NULL COMMENT '状态0未发布-1停用1发布',
+    `created_at` DATETIME            NOT NULL,
+    `updated_at` DATETIME            NOT NULL,
+    PRIMARY KEY (`id`)
+) COMMENT = '文章表';
