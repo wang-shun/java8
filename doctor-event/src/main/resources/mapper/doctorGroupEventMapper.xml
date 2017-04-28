@@ -677,6 +677,15 @@
         AND type = 1
     </select>
 
+    <select id="findCloseGroupByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE group_id = #{groupId}
+        AND type = 10
+    </select>
+
     <select id="findByRelPigEventIdAndType" parameterType="map" resultMap="DoctorGroupEventMap" >
         SELECT
         <include refid="cols_all"/>

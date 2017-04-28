@@ -6,7 +6,6 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -222,6 +221,10 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
 
     public DoctorGroupEvent findNewGroupByGroupId(Long groupId) {
         return getSqlSession().selectOne(sqlId("findNewGroupByGroupId"), groupId);
+    }
+
+    public DoctorGroupEvent findCloseGroupByGroupId(Long groupId) {
+        return getSqlSession().selectOne(sqlId("findCloseGroupByGroupId"), groupId);
     }
 
     /**

@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
 import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
+import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
@@ -95,6 +96,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             DoctorGroupTrack oldTrack = doctorGroupTrackDao.findByGroupId(oldGroupEvent.getGroupId());
             DoctorGroupTrack newTrack = buildNewTrack(oldTrack, changeDto);
             doctorGroupTrackDao.update(newTrack);
+
+            //自动关闭或开启猪群
+            autoCloseOrOpen(newTrack);
         }
 
         //7.更新每日数据记录
@@ -205,6 +209,43 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param newEvent 修改后事件
      */
     protected void triggerEventModifyHandle(DoctorGroupEvent newEvent) {}
+
+    /**
+     * 编辑后自动关闭开启猪群
+     * @param groupTrack 猪群track
+     */
+    protected void autoCloseOrOpen(DoctorGroupTrack groupTrack) {
+        DoctorGroupEvent closeEvent = doctorGroupEventDao.findCloseGroupByGroupId(groupTrack.getGroupId());
+        //1.数量不为0,却已关闭
+        if (!Objects.equals(groupTrack.getQuantity(), 0) && notNull(closeEvent)) {
+            //(1).删除关闭事件
+            doctorGroupEventDao.delete(closeEvent.getId());
+
+            //(2).更新猪群状态
+            DoctorGroup group = doctorGroupDao.findById(groupTrack.getId());
+            group.setStatus(DoctorGroup.Status.CREATED.getValue());
+            doctorGroupDao.update(group);
+            return;
+        }
+
+        //2.数量为零,未关闭
+        if (Objects.equals(groupTrack.getQuantity(), 0) && isNull(closeEvent)){
+            DoctorGroup group = doctorGroupDao.findById(groupTrack.getId());
+
+            //(1).生成关闭事件
+            DoctorCloseGroupInput closeGroupInput = new DoctorCloseGroupInput();
+            closeGroupInput.setEventAt(DateUtil.toDateString(new Date()));
+            closeGroupInput.setIsAuto(IsOrNot.NO.getValue());
+            DoctorGroupEvent closeEvent1 = dozerGroupEvent(group, GroupEventType.CLOSE, closeGroupInput);
+            doctorGroupEventDao.create(closeEvent1);
+
+            //(2).更新猪群状态
+            group.setStatus(DoctorGroup.Status.CLOSED.getValue());
+            group.setCloseAt(new Date());
+            doctorGroupDao.update(group);
+            return;
+        }
+    }
 
     /**
      * 删除事件校验的具体实现(删除)
@@ -435,5 +476,34 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         closeInput.setEventAt(DateUtil.toDateString(groupEvent.getEventAt()));
         closeInput.setRelGroupEventId(groupEvent.getId());
         return closeInput;
+    }
+
+
+    protected DoctorGroupEvent dozerGroupEvent(DoctorGroup group, GroupEventType eventType, BaseGroupInput baseInput) {
+        DoctorGroupEvent event = new DoctorGroupEvent();
+        event.setEventAt(DateUtil.toDate(baseInput.getEventAt()));
+        event.setOrgId(group.getOrgId());       //公司信息
+        event.setOrgName(group.getOrgName());
+        event.setFarmId(group.getFarmId());     //猪场信息
+        event.setFarmName(group.getFarmName());
+        event.setGroupId(group.getId());        //猪群信息
+        event.setGroupCode(group.getGroupCode());
+        event.setType(eventType.getValue());    //事件类型
+        event.setName(eventType.getDesc());
+        event.setBarnId(group.getCurrentBarnId());      //事件发生猪舍
+        event.setBarnName(group.getCurrentBarnName());
+        event.setPigType(group.getPigType());           //猪类
+        event.setIsAuto(baseInput.getIsAuto());
+        event.setCreatorId(baseInput.getCreatorId());   //创建人
+        event.setCreatorName(baseInput.getCreatorName());
+        event.setOperatorId(baseInput.getCreatorId());
+        event.setOperatorName(baseInput.getCreatorName());
+        event.setDesc(baseInput.generateEventDesc());
+        event.setRemark(baseInput.getRemark());
+        event.setRelGroupEventId(baseInput.getRelGroupEventId());
+        event.setRelPigEventId(baseInput.getRelPigEventId());
+        event.setStatus(EventStatus.VALID.getValue());
+        event.setEventSource(SourceType.INPUT.getValue());
+        return event;
     }
 }
