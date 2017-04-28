@@ -2,12 +2,12 @@ package io.terminus.doctor.event.editHandler.pig;
 
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorWeanGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupWeanEventHandler;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorDailyReport;
@@ -21,6 +21,8 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 
 /**
  * Created by xjn on 17/4/17.
@@ -31,7 +33,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
     @Autowired
     private DoctorModifyGroupWeanEventHandler modifyGroupWeanEventHandler;
     @Autowired
-    private DoctorGroupDao doctorGroupDao;
+    private DoctorModifyPigChgLocationEventHandler modifyPigChgLocationEventHandler;
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
@@ -59,8 +61,17 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
 
     @Override
     protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent) {
+        //1.猪群断奶编辑
         DoctorGroupEvent oldGroupEvent = doctorGroupEventDao.findByRelPigEventId(newPigEvent.getId());
         modifyGroupWeanEventHandler.modifyHandle(oldGroupEvent, buildTriggerGroupEventInput(newPigEvent));
+
+        //2.转舍编辑
+        DoctorPigEvent chgLocationEvent = doctorPigEventDao.findByRelPigEventId(newPigEvent.getId());
+        if (notNull(chgLocationEvent)) {
+            DoctorChgLocationDto inputDto = JSON_MAPPER.fromJson(chgLocationEvent.getExtra(), DoctorChgLocationDto.class);
+            inputDto.setChangeLocationDate(newPigEvent.getEventAt());
+            modifyPigChgLocationEventHandler.modifyHandle(chgLocationEvent, inputDto);
+        }
     }
 
     @Override
@@ -78,8 +89,15 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
 
     @Override
     protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
+        //1.猪群断奶回滚
         DoctorGroupEvent weanGroupEvent = doctorGroupEventDao.findByRelPigEventId(deletePigEvent.getId());
         modifyGroupWeanEventHandler.rollbackHandle(weanGroupEvent, operatorId, operatorName);
+
+        //2.转舍回滚
+        DoctorPigEvent chgLocationEvent = doctorPigEventDao.findByRelPigEventId(deletePigEvent.getId());
+        if (notNull(chgLocationEvent)) {
+            modifyPigChgLocationEventHandler.rollbackHandle(chgLocationEvent, operatorId, operatorName);
+        }
     }
 
     @Override

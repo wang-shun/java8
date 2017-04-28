@@ -110,55 +110,76 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
     @Override
     public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
         DoctorEventChangeDto changeDto;
+        Integer matingChangeCount;
+        Integer farrowChangCount;
         if (Objects.equals(newPigEvent.getType(), PigEvent.TO_FARROWING.getKey())) {
             changeDto = DoctorEventChangeDto.builder()
-                    .toFarrowChangeCount(1)
-                    .toMatingChangeCount(-1)
+                    .chgLocationChangeCount(1)
+                    .chgLocationType(PigEvent.TO_FARROWING.getKey())
                     .build();
+            matingChangeCount = -1;
+            farrowChangCount = 1;
         } else if (Objects.equals(newPigEvent.getType(), PigEvent.TO_MATING.getKey())) {
             changeDto = DoctorEventChangeDto.builder()
-                    .toMatingChangeCount(1)
-                    .toFarrowChangeCount(-1)
+                    .chgLocationChangeCount(1)
+                    .chgLocationType(PigEvent.TO_MATING.getKey())
                     .build();
+            matingChangeCount = 1;
+            farrowChangCount = -1;
         } else {
             return;
         }
         DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
         doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
-                0, changeDto.getToMatingChangeCount(), changeDto.getToFarrowChangeCount());
+                0, matingChangeCount, farrowChangCount);
     }
 
     @Override
     public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
         DoctorEventChangeDto changeDto;
+        Integer matingChangeCount;
+        Integer farrowChangCount;
         if (Objects.equals(oldPigEvent.getType(), PigEvent.TO_FARROWING.getKey())) {
             changeDto = DoctorEventChangeDto.builder()
-                    .toFarrowChangeCount(-1)
-                    .toMatingChangeCount(1)
+                    .chgLocationChangeCount(-1)
+                    .chgLocationType(PigEvent.TO_FARROWING.getKey())
                     .build();
+            matingChangeCount = -1;
+            farrowChangCount = 1;
         } else if (Objects.equals(oldPigEvent.getType(), PigEvent.TO_MATING.getKey())) {
             changeDto = DoctorEventChangeDto.builder()
-                    .toMatingChangeCount(-1)
-                    .toFarrowChangeCount(1)
+                    .chgLocationChangeCount(-1)
+                    .chgLocationType(PigEvent.TO_MATING.getKey())
                     .build();
+            matingChangeCount = 1;
+            farrowChangCount = -1;
         } else {
             return;
         }
         DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
         doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()),
-                0, changeDto.getToMatingChangeCount(), changeDto.getToFarrowChangeCount());
+                0, matingChangeCount, farrowChangCount);
     }
 
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
-        oldDailyPig.setSowPh(EventUtil.plusInt(oldDailyPig.getSowPh(), changeDto.getToMatingChangeCount()));
-        oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getToMatingChangeCount()));
-        oldDailyPig.setSowPhToCf(EventUtil.plusInt(oldDailyPig.getSowPhToCf(), changeDto.getToFarrowChangeCount()));
-        oldDailyPig.setSowCf(EventUtil.plusInt(oldDailyPig.getSowCf(), changeDto.getToFarrowChangeCount()));
-        oldDailyPig.setSowCfEnd(EventUtil.plusInt(oldDailyPig.getSowCfEnd(), changeDto.getToFarrowChangeCount()));
-        oldDailyPig.setSowCfIn(EventUtil.plusInt(oldDailyPig.getSowCfIn(), changeDto.getToFarrowChangeCount()));
+        if (Objects.equals(changeDto.getChgLocationType(), PigEvent.TO_MATING.getKey())) {
+            oldDailyPig.setSowPh(EventUtil.plusInt(oldDailyPig.getSowPh(), changeDto.getChgLocationChangeCount()));
+            oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getChgLocationChangeCount()));
+            oldDailyPig.setSowPhWeanIn(EventUtil.plusInt(oldDailyPig.getSowPhWeanIn(), changeDto.getChgLocationChangeCount()));
+            oldDailyPig.setSowCfWeanOut(EventUtil.plusInt(oldDailyPig.getSowCfWeanOut(), changeDto.getChgLocationChangeCount()));
+            oldDailyPig.setSowCf(EventUtil.minusInt(oldDailyPig.getSowCf(), changeDto.getChgLocationChangeCount()));
+            oldDailyPig.setSowCfEnd(EventUtil.minusInt(oldDailyPig.getSowCfEnd(), changeDto.getChgLocationChangeCount()));
+            return oldDailyPig;
+        }
+        oldDailyPig.setSowPh(EventUtil.minusInt(oldDailyPig.getSowPh(), changeDto.getChgLocationChangeCount()));
+        oldDailyPig.setSowPhEnd(EventUtil.minusInt(oldDailyPig.getSowPhEnd(), changeDto.getChgLocationChangeCount()));
+        oldDailyPig.setSowCf(EventUtil.plusInt(oldDailyPig.getSowCf(), changeDto.getChgLocationChangeCount()));
+        oldDailyPig.setSowCfEnd(EventUtil.plusInt(oldDailyPig.getSowCfEnd(), changeDto.getChgLocationChangeCount()));
+        oldDailyPig.setSowPhToCf(EventUtil.plusInt(oldDailyPig.getSowPhToCf(), changeDto.getChgLocationChangeCount()));
+        oldDailyPig.setSowCfIn(EventUtil.plusInt(oldDailyPig.getSowCfIn(), changeDto.getChgLocationChangeCount()));
         return oldDailyPig;
     }
 }
