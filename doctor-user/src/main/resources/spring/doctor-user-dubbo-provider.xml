@@ -41,4 +41,7 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorArticleWriteService" ref="doctorArticleWriteServiceImpl" />
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorArticleReadService" ref="doctorArticleReadServiceImpl" />
 
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PigScoreApplyReadService" ref="pigScoreApplyReadServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PigScoreApplyWriteService" ref="pigScoreApplyWriteServiceImpl" />
+
 </beans>

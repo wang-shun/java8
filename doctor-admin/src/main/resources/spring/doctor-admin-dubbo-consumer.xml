@@ -119,4 +119,7 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorArticleWriteService" id="doctorArticleWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorArticleReadService" id="doctorArticleReadService" check="false"/>
 
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PigScoreApplyReadService" id="pigScoreApplyReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PigScoreApplyWriteService" id="pigScoreApplyWriteService" check="false"/>
+
 </beans>

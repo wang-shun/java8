@@ -1404,4 +1404,22 @@ CREATE TABLE IF NOT EXISTS `doctor_articles`(
     `created_at` DATETIME            NOT NULL,
     `updated_at` DATETIME            NOT NULL,
     PRIMARY KEY (`id`)
-) COMMENT = '文章表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT = '文章表';
+
+-- 5.02 猪场评分功能申请
+CREATE TABLE IF NOT EXISTS `doctor_pig_score_applys`(
+  `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司ID',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场ID',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `user_id` bigint(20) unsigned DEFAULT NULL COMMENT '申请人ID',
+  `user_name` varchar(64) DEFAULT NULL COMMENT '申请人名称',
+  `remark` varchar(255) DEFAULT NULL COMMENT '备注',
+  `status` TINYINT  NULL COMMENT '状态0待审核-1不通过1通过',
+  `created_at` DATETIME            NOT NULL,
+  `updated_at` DATETIME            NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT = '猪场评分功能申请表';
+CREATE INDEX idx_org_id ON doctor_pig_score_applys(`org_id`);
+CREATE INDEX idx_farm_id ON doctor_pig_score_applys(`farm_id`);
