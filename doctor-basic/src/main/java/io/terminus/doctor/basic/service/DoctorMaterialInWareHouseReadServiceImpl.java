@@ -105,4 +105,14 @@ public class DoctorMaterialInWareHouseReadServiceImpl implements DoctorMaterialI
         }
     }
 
+    @Override
+    public Response<List<DoctorMaterialInWareHouse>> allDoctorMaterialInWareHouse(Long farmId) {
+        try {
+            return Response.ok(doctorMaterialInWareHouseDao.allDoctorMaterialInWareHouse(farmId));
+        }catch (Exception e) {
+            log.error("find all DoctorMaterialInWareHouse fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find all DoctorMaterialInWareHouse fail");
+        }
+    }
+
 }
