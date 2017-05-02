@@ -70,4 +70,13 @@ public class DoctorMaterialInWareHouseDao extends MyBatisDao<DoctorMaterialInWar
     public DoctorMaterialInWareHouse findMaterialUnit(Long farmId, Long materialId, Long wareHouseId ) {
         return this.getSqlSession().selectOne(sqlId("findMaterialUnit"), ImmutableMap.of("farmId", farmId, "materialId", materialId, "wareHouseId", wareHouseId));
     }
+
+    /**
+     * 获取所有的物料仓库数据
+     * @param farmId
+     * @return
+     */
+    public List<DoctorMaterialInWareHouse> allDoctorMaterialInWareHouse(Long farmId) {
+        return this.getSqlSession().selectList(sqlId("list"), ImmutableMap.of("farmId", farmId));
+    }
 }

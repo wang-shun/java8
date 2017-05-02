@@ -36,16 +36,11 @@ public class DoctorGroupMaterialWriteServerImpl implements DoctorGroupMaterialWr
     public Response<Boolean> insterDoctorGroupMaterialWareDetails(List<DoctorMasterialDatailsGroup> doctorMasterialDatailsGroups){
 
         try {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    doctorGroupMaterialDao.insterDoctorGroupMaterials(doctorMasterialDatailsGroups);
-                }
-            }, "insterDoctorGroupMaterialWareDetails").start();
+            doctorGroupMaterialDao.insterDoctorGroupMaterials(doctorMasterialDatailsGroups);
             return Response.ok(Boolean.TRUE);
-            } catch (Exception e) {
+        } catch (Exception e) {
             log.error("inster insterDoctorGroupMaterialWareDetails fail, cause:{}", Throwables.getStackTraceAsString(e));
-                return Response.fail("inster insterDoctorGroupMaterialWareDetails fail");
+            return Response.fail("inster insterDoctorGroupMaterialWareDetails fail");
             }
         }
 }

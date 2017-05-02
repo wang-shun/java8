@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.admin.job.material;
+package io.terminus.doctor.move.controller.material;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
@@ -20,12 +20,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Created by terminus on 2017/4/18.
+ * Created by terminus on 2017/4/19.
  */
 @RestController
-@RequestMapping("/api/ware/house")
+@RequestMapping("/api/ware")
 @Slf4j
-public class DoctorWareHouseJobs {
+public class DoctorWareDetailsJobs {
 
     @RpcConsumer
     private DoctorGroupMaterialWriteServer doctorGroupMaterialWriteServer;
@@ -36,23 +36,23 @@ public class DoctorWareHouseJobs {
 
     private final HostLeader hostLeader;
     @Autowired
-    public DoctorWareHouseJobs(HostLeader hostLeader) {
+    public DoctorWareDetailsJobs(HostLeader hostLeader) {
         this.hostLeader = hostLeader;
     }
-    private final static Integer WHARE = 1;
-    @Scheduled(cron = "0 0 1 * * ?")
+    private final static Integer DETAILS = 2;
+    @Scheduled(cron = "0 1 1 * * ?")
 //    @Scheduled(cron = "0 */1 * * * ?")
-    @RequestMapping(value = "/house", method = RequestMethod.GET)
+    @RequestMapping(value = "/details", method = RequestMethod.GET)
     public void groupMaterialReport() {
         try {
             if(!hostLeader.isLeader()) {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
                 return;
             }
-            doctorGroupMaterialWriteServer.deleteDoctorGroupMaterial(WHARE);
-            log.info("daily ware house job start, now is:{}", DateUtil.toDateTimeString(new Date()));
-            doctorMaterialManage.runDoctorGroupMaterialWareHouse(getAllFarmIds(), WHARE);
-            log.info("daily ware house job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+            doctorGroupMaterialWriteServer.deleteDoctorGroupMaterial(DETAILS);
+            log.info("daily ware details job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+            doctorMaterialManage.runDoctorGroupMaterialWareDetails(getAllFarmIds(), DETAILS);
+            log.info("daily ware details job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("daily report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Desc:
@@ -13,6 +14,7 @@ import org.springframework.core.io.ClassPathResource;
  * Date: 16/7/26
  */
 @SpringBootApplication
+@EnableScheduling
 public class DoctorMoveDataApplication {
 
     public static void main(String[] args) {
