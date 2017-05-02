@@ -90,6 +90,7 @@ public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPi
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         if (Objects.equals(changeDto.getPigSex(), DoctorPig.PigSex.SOW.getKey())) {
            if (Objects.equals(changeDto.getBarnType(), PigType.DELIVER_SOW.getValue())) {
+               oldDailyPig.setSowCfIn(EventUtil.plusInt(oldDailyPig.getSowCfIn(), changeDto.getEntryCountChange()));
                oldDailyPig.setSowCf(EventUtil.plusInt(oldDailyPig.getSowCf(), changeDto.getEntryCountChange()));
                oldDailyPig.setSowCfEnd(EventUtil.plusInt(oldDailyPig.getSowCfEnd(), changeDto.getEntryCountChange()));
            } else {
