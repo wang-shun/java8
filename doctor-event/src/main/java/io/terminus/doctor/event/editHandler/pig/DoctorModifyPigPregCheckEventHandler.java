@@ -17,6 +17,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
@@ -35,6 +36,14 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
         PREG_CHECK_RESULT.put(PregCheckResult.YING.getKey(), KongHuaiPregCheckResult.YING.getKey());
         PREG_CHECK_RESULT.put(PregCheckResult.FANQING.getKey(), KongHuaiPregCheckResult.FANQING.getKey());
         PREG_CHECK_RESULT.put(PregCheckResult.LIUCHAN.getKey(), KongHuaiPregCheckResult.LIUCHAN.getKey());
+    }
+
+    @Override
+    protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        DoctorPigEvent lastStatusEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(oldPigEvent.getPigId(), new Date());
+        if (!Objects.equals(lastStatusEvent.getId(), oldPigEvent.getId())) {
+            throw new InvalidException("not.last.pregCheck.event");
+        }
     }
 
     @Override
