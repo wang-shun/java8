@@ -161,6 +161,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
 
         updateGroupTrack(groupTrack, event);
 
+        updateDailyForNew(event);
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.TRANS_FARM);
 
@@ -168,7 +169,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         if (Objects.equals(oldQuantity, transFarm.getQuantity())) {
             doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, transFarm, event.getEventAt(), transFarm.getFcrFeed());
 
-            Long toGroupEventId = doctorEventRelationDao.findGroupEventByGroupOrigin(event.getId()).getTriggerGroupEventId();
+            Long toGroupEventId = doctorGroupEventDao.findByRelGroupEventIdAndType(event.getId(), GroupEventType.CLOSE.getValue()).getId();
             DoctorGroupEvent closeEvent = doctorGroupEventDao.findById(toGroupEventId);
             transFarm.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
@@ -227,5 +228,12 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
 
     private DoctorBarn getBarn(Long barnId) {
         return doctorBarnDao.findById(barnId);
+    }
+
+
+    @Override
+    protected void updateDailyForNew(DoctorGroupEvent newGroupEvent) {
+        BaseGroupInput input = JSON_MAPPER.fromJson(newGroupEvent.getExtra(), DoctorTransFarmGroupInput.class);
+        doctorModifyGroupTransFarmEventHandler.updateDailyOfNew(newGroupEvent, input);
     }
 }

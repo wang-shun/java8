@@ -195,12 +195,12 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     @Override
     public DoctorPig buildNewPig(DoctorPig oldPig, BasePigEventInputDto inputDto) {
-        return null;
+        return oldPig;
     }
 
     @Override
     public DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto) {
-        return null;
+        return oldPigTrack;
     }
 
     /**
@@ -246,7 +246,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @return 新猪
      */
     protected DoctorPig buildNewPigForRollback(DoctorPigEvent deletePigEvent, DoctorPig oldPig) {
-        return null;
+        return oldPig;
     }
 
     /**

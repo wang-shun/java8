@@ -80,6 +80,6 @@ public class DoctorChgFarmInHandler extends DoctorAbstractEventHandler {
         doctorPigTrackDao.create(newTrack);
 
         //4.更新日记录
-        modifyPigChgFarmInEventHandler.updateDailyOfNew(chgFarmIn, chgFarmDto);
+            modifyPigChgFarmInEventHandler.updateDailyOfNew(chgFarmIn, chgFarmDto);
     }
 }

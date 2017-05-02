@@ -188,12 +188,12 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     @Override
     public DoctorGroup buildNewGroup(DoctorGroup oldGroup, BaseGroupInput input) {
-        return null;
+        return oldGroup;
     }
 
     @Override
     public DoctorGroupTrack buildNewTrack(DoctorGroupTrack oldGroupTrack, DoctorEventChangeDto changeDto) {
-        return null;
+        return oldGroupTrack;
     }
 
     /**
