@@ -77,6 +77,8 @@ def insert_new_pig_event(pig_event):
             pig_event.price = extra.get("pigletsPrice")
             pig_event.customer_id = extra.get("pigletsCustomerId")
             pig_event.customer_name = extra.get("pigletsCustomerName")
+            if pig_event.change_type_id is None and extra.get("pigletsChangeType") is not None:
+                pig_event.change_type_id = extra.get("pigletsChangeType")
         if pig_event.type == 4:
             pig_event.basic_id = extra.get("diseaseId")
             pig_event.basic_name = extra.get("diseaseName")
