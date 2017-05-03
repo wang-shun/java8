@@ -22,7 +22,6 @@
         <result column="other_change" property="otherChange"/>
         <result column="chg_farm" property="chgFarm"/>
         <result column="inner_out" property="innerOut"/>
-        <result column="outer_out" property="outerOut"/>
         <result column="to_nursery" property="toNursery"/>
         <result column="to_fatten" property="toFatten"/>
         <result column="to_houbei" property="toHoubei"/>
