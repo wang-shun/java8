@@ -10,14 +10,12 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.PigScoreApplyReadService;
 import io.terminus.doctor.user.service.PigScoreApplyWriteService;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.parana.common.model.ParanaUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -55,7 +53,7 @@ public class PigScoreApplys {
             throw new JsonResponseException(500, "farm.id.not.exist");
         }
         if(loginUser.getOrgId() != null){
-            apply.setFarmId(loginUser.getOrgId());
+            apply.setOrgId(loginUser.getOrgId());
         }else{
             throw new JsonResponseException(500, "org.id.not.exist");
         }

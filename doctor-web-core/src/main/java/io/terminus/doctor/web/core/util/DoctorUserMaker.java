@@ -34,4 +34,15 @@ public class DoctorUserMaker {
         }
         return doctorUser;
     }
+
+    public DoctorUser fromExt(User user){
+        DoctorUser doctorUser = BeanMapper.map(user, DoctorUser.class);
+
+        //设置下猪场软件服务的审核状态  0 未申请, 2 待审核(已提交申请), 1 通过，-1 不通过, -2 冻结申请资格
+        Response<DoctorServiceStatus> response = doctorServiceStatusReadService.findByUserId(user.getId());
+        if (response.isSuccess() && response.getResult() != null) {
+            doctorUser.setReviewStatusDoctor(response.getResult().getPigdoctorReviewStatus());
+        }
+        return doctorUser;
+    }
 }

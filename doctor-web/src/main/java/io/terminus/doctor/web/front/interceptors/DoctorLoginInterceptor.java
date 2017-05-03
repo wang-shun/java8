@@ -7,14 +7,17 @@ package io.terminus.doctor.web.front.interceptors;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Maps;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.web.core.util.DoctorUserMaker;
+import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.web.core.Constants;
+import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.engine.common.WebUtil;
-import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
+import io.terminus.parana.user.service.UserWriteService;
 import io.terminus.session.AFSession;
 import io.terminus.session.AFSessionManager;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +25,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.concurrent.TimeUnit;
+
+import java.util.Map;
 
 /**
  * Author:  <a href="mailto:i@terminus.io">jlchen</a>
@@ -39,6 +45,8 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
     private final DoctorUserMaker doctorUserMaker;
     @Autowired
     private AFSessionManager sessionManager;
+    @RpcConsumer
+    private UserWriteService<User> userWriteService;
     
     @Autowired
     public DoctorLoginInterceptor(final UserReadService<User> userReadService, DoctorUserMaker doctorUserMaker) {
@@ -69,8 +77,35 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
                 }
                 User user = result.getResult();
                 if (user != null) {
-                    ParanaUser paranaUser = doctorUserMaker.from(user);
-                    UserUtil.putCurrentUser(paranaUser);
+                    // 2017.5.2 从cookie里获取 orgId 和 farmId
+                    DoctorUser doctorUser = doctorUserMaker.fromExt(user);
+
+                    Cookie[] cookies = request.getCookies();
+                    if (cookies != null) {
+
+                        Map<String, String> extra;
+                        if(user.getExtra() == null || user.getExtra().isEmpty()){
+                            extra = Maps.newHashMap();
+                        }else{
+                            extra = user.getExtra();
+                        }
+                        for (int i = 0; i < cookies.length; i++) {
+                            Cookie cookie = cookies[i];
+                            if (cookie.getName().equals("farmId")) {
+                                extra.put("farmId", cookie.getValue());
+                                doctorUser.setFarmId(Long.parseLong(cookie.getValue()));
+                            }
+                            if (cookie.getName().equals("orgId")) {
+                                extra.put("orgId", cookie.getValue());
+                                doctorUser.setOrgId(Long.parseLong(cookie.getValue()));
+                            }
+                        }
+                        User toUpdateUser = new User();
+                        toUpdateUser.setId(userId);
+                        toUpdateUser.setExtra(extra);
+                        userWriteService.update(toUpdateUser);
+                    }
+                    UserUtil.putCurrentUser(doctorUser);
 
                     // TODO: 2017/2/9 先手动刷下session过期时间 
                     AFSession afSession = (AFSession) session;

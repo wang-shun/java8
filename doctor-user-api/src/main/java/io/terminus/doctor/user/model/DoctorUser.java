@@ -17,6 +17,10 @@ public class DoctorUser extends ParanaUser {
 
     private String auth;
 
+    private Long orgId;
+
+    private Long farmId;
+
     /**
      * 猪场软件服务的审核状态
      * @see DoctorServiceReview.Status

@@ -4,14 +4,9 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Joiners;
-import io.terminus.doctor.user.dao.OperatorDao;
-import io.terminus.doctor.user.dao.SellerDao;
-import io.terminus.doctor.user.dao.SubDao;
-import io.terminus.doctor.user.dao.SubSellerDao;
-import io.terminus.doctor.user.model.Operator;
-import io.terminus.doctor.user.model.Seller;
-import io.terminus.doctor.user.model.Sub;
-import io.terminus.doctor.user.model.SubSeller;
+import io.terminus.doctor.user.dao.*;
+import io.terminus.doctor.user.model.*;
+import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.auth.UserRoleLoader;
 import io.terminus.parana.user.impl.dao.UserDao;
@@ -20,17 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import static io.terminus.doctor.common.utils.UserRoleUtil.isAdmin;
-import static io.terminus.doctor.common.utils.UserRoleUtil.isNormal;
-import static io.terminus.doctor.common.utils.UserRoleUtil.isOperator;
-import static io.terminus.doctor.common.utils.UserRoleUtil.isPrimary;
-import static io.terminus.doctor.common.utils.UserRoleUtil.isSub;
+import static io.terminus.doctor.common.utils.UserRoleUtil.*;
 
 /**
  * @author Effet
@@ -49,16 +36,18 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
 
     private final SubDao subDao;
 
+    private final PigScoreApplyDao pigScoreApplyDao;
 
     @Autowired
-    public DoctorUserRoleLoaderImpl(UserDao userDao, SellerDao sellerDao, SubSellerDao subSellerDao, OperatorDao operatorDao, SubDao subDao) {
+    public DoctorUserRoleLoaderImpl(UserDao userDao, SellerDao sellerDao, SubSellerDao subSellerDao, OperatorDao operatorDao, SubDao subDao,
+                                    PigScoreApplyDao pigScoreApplyDao) {
         this.userDao = userDao;
         this.sellerDao = sellerDao;
         this.subSellerDao = subSellerDao;
         this.operatorDao = operatorDao;
         this.subDao = subDao;
+        this.pigScoreApplyDao = pigScoreApplyDao;
     }
-
 
     @Override
     public Response<List<String>> hardLoadRoles(Long userId) {
@@ -79,6 +68,7 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
             forNormal(user, roleBuilder);
             forPrimary(user, roleBuilder);
             forSub(user, roleBuilder);
+            forPigScore(user, roleBuilder);
 
             Set<String> originRoles = new HashSet<>();
             if (user.getRoles() != null) {
@@ -135,6 +125,31 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
         if (sub != null) {
             if (sub.isActive() && sub.getRoleId() != null) {
                 mutableRoles.add(String.format("SUB(SUB(%s))", sub.getRoleId()));
+            }
+        }
+    }
+
+    protected void forPigScore(User user, Collection<String> mutableRoles){
+        if (user == null) {
+            return;
+        }
+
+        User u = userDao.findById(user.getId());
+
+        if(u.getExtra() == null || u.getExtra().isEmpty()){
+            return;
+        }
+        Long farmId = null;
+        if(u.getExtra().containsKey("farmId")){
+            farmId = Long.parseLong(u.getExtra().get("farmId"));
+        }
+        if(farmId == null){
+            return;
+        }
+        PigScoreApply apply = pigScoreApplyDao.findByFarmIdAndUserId(farmId, user.getId());
+        if (apply != null) {
+            if (apply.getStatus() == 1) {
+                mutableRoles.add("PIGSCORE");
             }
         }
     }
