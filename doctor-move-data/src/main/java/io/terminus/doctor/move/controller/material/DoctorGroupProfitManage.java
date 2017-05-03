@@ -2,7 +2,6 @@ package io.terminus.doctor.move.controller.material;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -14,6 +13,7 @@ import io.terminus.doctor.event.service.DoctorProfitMaterOrPigWriteServer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -28,11 +28,11 @@ import java.util.Map;
 @Slf4j
 public class DoctorGroupProfitManage {
 
-    @RpcConsumer
+    @Autowired
     private DoctorProfitMaterOrPigWriteServer doctorProfitMaterOrPigWriteServer;
-    @RpcConsumer
+    @Autowired
     private DoctorPigEventReadService doctorPigEventReadService;
-    @RpcConsumer
+    @Autowired
     private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
 
 

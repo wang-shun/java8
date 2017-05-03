@@ -1,7 +1,6 @@
 package io.terminus.doctor.move.controller.material;
 
 import com.google.common.base.Throwables;
-import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.service.DoctorGroupMaterialWriteServer;
@@ -27,11 +26,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DoctorWareDetailsJobs {
 
-    @RpcConsumer
+    @Autowired
     private DoctorGroupMaterialWriteServer doctorGroupMaterialWriteServer;
-    @RpcConsumer
+    @Autowired
     private DoctorFarmReadService doctorFarmReadService;
-    @RpcConsumer
+    @Autowired
     private DoctorMaterialManage doctorMaterialManage;
 
     private final HostLeader hostLeader;
@@ -40,8 +39,8 @@ public class DoctorWareDetailsJobs {
         this.hostLeader = hostLeader;
     }
     private final static Integer DETAILS = 2;
+
     @Scheduled(cron = "0 1 1 * * ?")
-//    @Scheduled(cron = "0 */1 * * * ?")
     @RequestMapping(value = "/details", method = RequestMethod.GET)
     public void groupMaterialReport() {
         try {
