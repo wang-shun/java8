@@ -1228,3 +1228,6 @@ CREATE TABLE `doctor_masterial_datails_groups` (
   `flush_date` datetime DEFAULT NULL COMMENT '刷新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=471866 DEFAULT CHARSET=utf8;
+
+-- 2017-05-03 公猪生产成绩月报
+alter table doctor_boar_monthly_reports add column `boar_type` varchar(32) default null comment '公猪类型' after `boar_code`;
