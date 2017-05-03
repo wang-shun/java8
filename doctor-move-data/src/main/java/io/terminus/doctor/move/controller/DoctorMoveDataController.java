@@ -1056,7 +1056,6 @@ public class DoctorMoveDataController {
     }
 
     /**
-<<<<<<< HEAD
      * 推演track
      * @param pigId 猪id
      * @return
