@@ -40,9 +40,12 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
 
     @Override
     protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
-        DoctorPigEvent lastStatusEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(oldPigEvent.getPigId(), new Date());
-        if (!Objects.equals(lastStatusEvent.getId(), oldPigEvent.getId())) {
-            throw new InvalidException("not.last.pregCheck.event");
+        DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) inputDto;
+        if (!Objects.equals(oldPigEvent.getPregCheckResult(), pregChkResultDto.getCheckResult())) {
+            DoctorPigEvent lastStatusEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(oldPigEvent.getPigId(), new Date());
+            if (!Objects.equals(lastStatusEvent.getId(), oldPigEvent.getId())) {
+                throw new InvalidException("not.last.pregCheck.event");
+            }
         }
     }
 
