@@ -117,17 +117,6 @@ public class DoctorPigEventManager {
         return handler.buildPigTrack(executeEvent, fromTrack);
     }
 
-    /**
-     *  创建猪跟踪和镜像表
-     *  @param toTrack 事件发生导致track
-     *  @param executeEvent 发生事件
-     *  @param lastEventId 上一次事件id
-     *
-     */
-    public void createPigSnapshot(DoctorPigTrack toTrack, DoctorPigEvent executeEvent, Long lastEventId){
-        getHandler(executeEvent.getType()).createPigSnapshot(toTrack, executeEvent, lastEventId);
-    }
-
     @Transactional
     public void transactionalHandle(DoctorPigEventHandler handler, List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         handler.handle(doctorEventInfoList, executeEvent, fromTrack);

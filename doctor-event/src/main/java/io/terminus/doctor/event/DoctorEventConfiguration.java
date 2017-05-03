@@ -56,39 +56,6 @@ import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorWeanGroupEventHandler;
-import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
-import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgFarmEventHandler;
-import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgLocationEventHandler;
-import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarConditionEventHandler;
-import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarDiseaseEventHandler;
-import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarEntryEventHandler;
-import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarRemovalEventHandler;
-import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarSemenEventHandler;
-import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarVaccinationEventHandler;
-import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupChangeHandler;
-import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupDiseaseHandler;
-import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupLiveStockHandler;
-import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupMoveInHandler;
-import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupNewHandler;
-import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransFarmHandler;
-import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransHandler;
-import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTurnSeedHandler;
-import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupVaccinHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowChgFarmEventHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowChgLocationEventHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowConditionEventHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowDiseaseEventHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowEntryEventHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFarrowHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFosterByHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFosterHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowMatingEventHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowPigletChangeEventHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowPregCheckEventHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowRemovalEventHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowToChgLocationEventHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowVaccinationEventHandler;
-import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowWeanHandler;
 import io.terminus.doctor.event.handler.sow.DoctorSowFarrowingHandler;
 import io.terminus.doctor.event.handler.sow.DoctorSowFostersByHandler;
 import io.terminus.doctor.event.handler.sow.DoctorSowFostersHandler;
@@ -143,86 +110,6 @@ public class  DoctorEventConfiguration {
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
     }
-
-    /**
-     * 事件回滚拦截器链
-     */
-    @Bean
-    public DoctorRollbackHandlerChain doctorRollbackHandlerChain(
-            DoctorRollbackSowPigletChangeEventHandler rollbackSowPigletChangeEventHandler,
-            DoctorRollbackSowToChgLocationEventHandler rollbackSowToChgLocationEventHandler,
-            DoctorRollbackGroupChangeHandler rollbackGroupChangeEventHandler,
-            DoctorRollbackGroupDiseaseHandler rollbackGroupDiseaseHandler,
-            DoctorRollbackGroupLiveStockHandler rollbackGroupLiveStockHandler,
-            DoctorRollbackGroupMoveInHandler rollbackGroupMoveInEventHandler,
-            DoctorRollbackGroupNewHandler rollbackGroupNewEventHandler,
-            DoctorRollbackGroupTransFarmHandler rollbackGroupTransFarmHandler,
-            DoctorRollbackGroupTransHandler rollbackGroupTransHandler,
-            DoctorRollbackGroupTurnSeedHandler rollbackGroupTurnSeedHandler,
-            DoctorRollbackGroupVaccinHandler rollbackGroupVaccinHandler,
-            DoctorRollbackBoarChgFarmEventHandler rollbackBoarChgFarmEventHandler,
-            DoctorRollbackBoarChgLocationEventHandler rollbackBoarChgLocationEventHandler,
-            DoctorRollbackBoarConditionEventHandler rollbackBoarConditionEventHandler,
-            DoctorRollbackBoarDiseaseEventHandler rollbackBoarDiseaseEventHandler,
-            DoctorRollbackBoarEntryEventHandler rollbackBoarEntryEventHandler,
-            DoctorRollbackBoarRemovalEventHandler rollbackBoarRemovalEventHandler,
-            DoctorRollbackBoarSemenEventHandler rollbackBoarSemenEventHandler,
-            DoctorRollbackBoarVaccinationEventHandler rollbackBoarVaccinationEventHandler,
-            DoctorRollbackSowChgFarmEventHandler rollbackSowChgFarmEventHandler,
-            DoctorRollbackSowChgLocationEventHandler rollbackSowChgLocationEventHandler,
-            DoctorRollbackSowConditionEventHandler rollbackSowConditionEventHandler,
-            DoctorRollbackSowDiseaseEventHandler rollbackSowDiseaseEventHandler,
-            DoctorRollbackSowEntryEventHandler rollbackSowEntryEventHandler,
-            DoctorRollbackSowFarrowHandler rollbackSowFarrowHandler,
-            DoctorRollbackSowFosterByHandler rollbackSowFosterByHandler,
-            DoctorRollbackSowFosterHandler rollbackSowFosterHandler,
-            DoctorRollbackSowMatingEventHandler rollbackSowMatingEventHandler,
-            DoctorRollbackSowRemovalEventHandler rollbackSowRemovalEventHandler,
-            DoctorRollbackSowVaccinationEventHandler rollbackSowVaccinationEventHandler,
-            DoctorRollbackSowWeanHandler rollbackSowWeanHandler,
-            DoctorRollbackSowPregCheckEventHandler rollbackSowPregCheckEventHandler
-    ) {
-        //猪群事件回滚
-        Map<Integer, DoctorRollbackGroupEventHandler> rollbackGroupEventHandlerMap = Maps.newHashMap();
-        rollbackGroupEventHandlerMap.put(GroupEventType.CHANGE.getValue(), rollbackGroupChangeEventHandler);
-        rollbackGroupEventHandlerMap.put(GroupEventType.DISEASE.getValue(), rollbackGroupDiseaseHandler);
-        rollbackGroupEventHandlerMap.put(GroupEventType.LIVE_STOCK.getValue(), rollbackGroupLiveStockHandler);
-        rollbackGroupEventHandlerMap.put(GroupEventType.MOVE_IN.getValue(), rollbackGroupMoveInEventHandler);
-        rollbackGroupEventHandlerMap.put(GroupEventType.NEW.getValue(), rollbackGroupNewEventHandler);
-        rollbackGroupEventHandlerMap.put(GroupEventType.TRANS_FARM.getValue(), rollbackGroupTransFarmHandler);
-        rollbackGroupEventHandlerMap.put(GroupEventType.TRANS_GROUP.getValue(), rollbackGroupTransHandler);
-        rollbackGroupEventHandlerMap.put(GroupEventType.TURN_SEED.getValue(), rollbackGroupTurnSeedHandler);
-        rollbackGroupEventHandlerMap.put(GroupEventType.ANTIEPIDEMIC.getValue(), rollbackGroupVaccinHandler);
-        //猪事件回滚
-        Table<Integer, Integer, DoctorRollbackPigEventHandler> rollbackPigEventHandlerTable = HashBasedTable.create();
-        rollbackPigEventHandlerTable.put(PigEvent.PIGLETS_CHG.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowPigletChangeEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.CHG_FARM.getKey(), DoctorPig.PigSex.BOAR.getKey(), rollbackBoarChgFarmEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.CHG_LOCATION.getKey(), DoctorPig.PigSex.BOAR.getKey(), rollbackBoarChgLocationEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.CONDITION.getKey(), DoctorPig.PigSex.BOAR.getKey(), rollbackBoarConditionEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.DISEASE.getKey(), DoctorPig.PigSex.BOAR.getKey(), rollbackBoarDiseaseEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.ENTRY.getKey(), DoctorPig.PigSex.BOAR.getKey(), rollbackBoarEntryEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.REMOVAL.getKey(), DoctorPig.PigSex.BOAR.getKey(), rollbackBoarRemovalEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.SEMEN.getKey(), DoctorPig.PigSex.BOAR.getKey(), rollbackBoarSemenEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.VACCINATION.getKey(), DoctorPig.PigSex.BOAR.getKey(), rollbackBoarVaccinationEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.CHG_FARM.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowChgFarmEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.CHG_LOCATION.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowChgLocationEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.CONDITION.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowConditionEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.DISEASE.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowDiseaseEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.ENTRY.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowEntryEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.FARROWING.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowFarrowHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.FOSTERS_BY.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowFosterByHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.FOSTERS.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowFosterHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.MATING.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowMatingEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.REMOVAL.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowRemovalEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.VACCINATION.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowVaccinationEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.WEAN.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowWeanHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.TO_MATING.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowToChgLocationEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.TO_FARROWING.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowToChgLocationEventHandler);
-        rollbackPigEventHandlerTable.put(PigEvent.PREG_CHECK.getKey(), DoctorPig.PigSex.SOW.getKey(), rollbackSowPregCheckEventHandler);
-
-        return new DoctorRollbackHandlerChain(rollbackGroupEventHandlerMap, rollbackPigEventHandlerTable);
-    }
-
 
     /**
      * 对应event handler

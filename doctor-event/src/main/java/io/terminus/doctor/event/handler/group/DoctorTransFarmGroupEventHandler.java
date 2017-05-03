@@ -7,7 +7,6 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -50,13 +49,12 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
     private DoctorModifyGroupTransFarmEventHandler doctorModifyGroupTransFarmEventHandler;
 
     @Autowired
-    public DoctorTransFarmGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                            DoctorGroupTrackDao doctorGroupTrackDao,
+    public DoctorTransFarmGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao,
                                             DoctorGroupEventDao doctorGroupEventDao,
                                             DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
                                             DoctorGroupManager doctorGroupManager,
                                             DoctorBarnDao doctorBarnDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
+        super(doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorGroupManager = doctorGroupManager;
@@ -162,8 +160,6 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         updateGroupTrack(groupTrack, event);
 
         updateDailyForNew(event);
-        //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.TRANS_FARM);
 
         //5.判断转场数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, transFarm.getQuantity())) {

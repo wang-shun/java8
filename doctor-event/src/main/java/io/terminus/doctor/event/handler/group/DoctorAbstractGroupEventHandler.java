@@ -8,12 +8,10 @@ import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
-import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -30,7 +28,6 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +54,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
 
 
-    protected final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorBarnDao doctorBarnDao;
@@ -71,11 +67,9 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private DoctorGroupEventListener doctorGroupEventListener;
 
     @Autowired
-    public DoctorAbstractGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                           DoctorGroupTrackDao doctorGroupTrackDao,
+    public DoctorAbstractGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao,
                                            DoctorGroupEventDao doctorGroupEventDao,
                                            DoctorBarnDao doctorBarnDao) {
-        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorBarnDao = doctorBarnDao;
@@ -207,20 +201,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 BeanMapper.map(groupTrack, DoctorGroupTrack.class));
     }
 
-    //创建猪群镜像信息
-    protected DoctorGroupSnapshot createGroupSnapShot(DoctorGroupSnapShotInfo oldShot, DoctorGroupSnapShotInfo newShot, GroupEventType eventType) {
-        DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-        //录入前的数据
-        groupSnapshot.setGroupId(newShot.getGroup().getId());
-        groupSnapshot.setFromEventId(oldShot.getGroupTrack().getRelEventId());
-        groupSnapshot.setToEventId(newShot.getGroupTrack().getRelEventId());
-        groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
-                .group(newShot.getGroup())
-                .groupTrack(newShot.getGroupTrack())
-                .build()));
-        doctorGroupSnapshotDao.create(groupSnapshot);
-        return groupSnapshot;
-    }
 
     //校验数量
     protected static void checkQuantity(Integer max, Integer actual) {
@@ -236,15 +216,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             log.error("allQty:{}, boarQty:{}, sowQty:{}", all, boar, sow);
             throw new InvalidException("quantity.not.equal", all, boar + sow);
         }
-    }
-
-    //发布猪群猪舍事件(不发统计事件了，事务里套事务，事件区分不开，改成同步统计)
-    protected void publistGroupAndBarn(DoctorGroupEvent event) {
-//        doctorGroupEventListener.handleGroupEvent(ListenedGroupEvent.builder()
-//                .orgId(event.getOrgId())
-//                .farmId(event.getFarmId())
-//                .groups(Lists.newArrayList(getPublishGroup(event)))
-//                .build());
     }
 
     private static DoctorGroupPublishDto getPublishGroup(DoctorGroupEvent event) {

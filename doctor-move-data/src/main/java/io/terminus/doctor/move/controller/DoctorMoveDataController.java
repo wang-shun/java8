@@ -1174,10 +1174,6 @@ public class DoctorMoveDataController {
             } else {
                 farmIds.add(farmId);
             }
-            farmIds.forEach(id -> {
-                log.warn("{} flush farm {} group dateformat start", DateUtil.toDateTimeString(new Date()), id);
-                doctorMoveDataService.flushGroupSnapshotsToInfoDateFormat(id);
-            });
         } catch (Exception e) {
             log.error("flush group dateformat failed, cause: {}", Throwables.getStackTraceAsString(e));
             return false;
@@ -1196,10 +1192,6 @@ public class DoctorMoveDataController {
             } else {
                 farmIds.add(farmId);
             }
-            farmIds.forEach(id -> {
-                log.warn("{} flush farm {} pig dateformat start", DateUtil.toDateTimeString(new Date()), id);
-                doctorMoveDataService.flushPigSnapshotsToInfoDateFormat(id);
-            });
         } catch (Exception e) {
             log.error("flush pig dateformat failed, cause: {}", Throwables.getStackTraceAsString(e));
             return false;

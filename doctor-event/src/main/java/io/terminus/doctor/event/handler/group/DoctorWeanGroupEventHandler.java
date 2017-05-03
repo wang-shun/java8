@@ -5,7 +5,6 @@ import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -35,8 +34,8 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
     private final DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired
-    public DoctorWeanGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao, DoctorGroupTrackDao doctorGroupTrackDao, DoctorGroupEventDao doctorGroupEventDao, DoctorBarnDao doctorBarnDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
+    public DoctorWeanGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao, DoctorGroupEventDao doctorGroupEventDao, DoctorBarnDao doctorBarnDao) {
+        super(doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
@@ -98,9 +97,6 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         groupTrack.setWeanWeight(EventUtil.plusDouble(groupTrack.getWeanWeight(), weanInput.getPartWeanAvgWeight() * weanInput.getPartWeanPigletsCount()));
 
         updateGroupTrack(groupTrack, event);
-
-        //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.MOVE_IN);
 
     }
 

@@ -3,14 +3,11 @@ package io.terminus.doctor.event.handler.group;
 import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -25,7 +22,6 @@ import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -55,13 +51,12 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     private final DoctorBarnDao doctorBarnDao;
 
     @Autowired
-    public DoctorTransGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                        DoctorGroupTrackDao doctorGroupTrackDao,
+    public DoctorTransGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao,
                                         DoctorGroupEventDao doctorGroupEventDao,
                                         DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
                                         DoctorGroupManager doctorGroupManager,
                                         DoctorBarnDao doctorBarnDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
+        super(doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorGroupManager = doctorGroupManager;
@@ -226,8 +221,6 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         updateGroupTrack(groupTrack, event);
 
         updateDailyForNew(event);
-        //4.创建镜像
-        DoctorGroupSnapshot doctorGroupSnapshot = createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.TRANS_GROUP);
 
         //5.判断转群数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, transGroup.getQuantity())) {
@@ -247,16 +240,6 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
             event.setExtraMap(transGroup);
             doctorGroupEventDao.update(event);
 
-            //更新镜像
-            DoctorGroupSnapShotInfo toInfo = JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(doctorGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
-//            toInfo.setGroupEvent(event);
-            doctorGroupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(toInfo));
-            doctorGroupSnapshotDao.update(doctorGroupSnapshot);
-
-//            //刷新最新事件id
-//            DoctorGroupEvent newGroupEvent = doctorGroupEventDao.findLastEventByGroupId(toGroupId);
-//            transGroup.setRelGroupEventId(newGroupEvent.getId());
-//
             //转入猪群
             doctorCommonGroupEventHandler.autoTransEventMoveIn(eventInfoList, group, groupTrack, transGroup);
         } else {

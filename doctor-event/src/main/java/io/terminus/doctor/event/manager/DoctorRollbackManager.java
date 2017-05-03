@@ -8,7 +8,6 @@ import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.event.ListenedRollbackEvent;
-import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +29,6 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @Component
 public class DoctorRollbackManager {
 
-    @Autowired
-    private DoctorRollbackHandlerChain doctorRollbackHandlerChain;
     @Autowired
     private DoctorModifyPigEventHandlers doctorModifyPigEventHandlers;
     @Autowired

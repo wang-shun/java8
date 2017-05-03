@@ -38,14 +38,10 @@ import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
-import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
@@ -66,11 +62,9 @@ import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
@@ -219,10 +213,6 @@ public class DoctorImportDataService {
     private DoctorBasicMaterialDao doctorBasicMaterialDao;
     @Autowired
     private DoctorMoveDataService doctorMoveDataService;
-    @Autowired
-    private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
-    @Autowired
-    private DoctorPigSnapshotDao doctorPigSnapshotDao;
     @Autowired
     private DoctorFarmExportDao doctorFarmExportDao;
 
@@ -792,16 +782,6 @@ public class DoctorImportDataService {
             DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(boar.getId());
             boarTrack.setCurrentEventId(notNull(lastEvent) ? lastEvent.getId() : 0L);
             doctorPigTrackDao.create(boarTrack);
-
-            //创建镜像
-            DoctorPigSnapshot pigSnapshot = DoctorPigSnapshot.builder()
-                    .pigId(boar.getId())
-                    .fromEventId(0L)
-                    .toEventId(boarTrack.getCurrentEventId())
-                    .toPigInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(new DoctorPigSnapShotInfo(boar, boarTrack)))
-                    .build();
-            doctorPigSnapshotDao.create(pigSnapshot);
-
         }
     }
 
@@ -899,18 +879,6 @@ public class DoctorImportDataService {
             //groupTrack关联最新事件
             groupTrack.setRelEventId(moveInEvent.getId());
             doctorGroupTrackDao.update(groupTrack);
-
-            //创建镜像
-            DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-            groupSnapshot.setFromEventId(0L);
-            groupSnapshot.setToEventId(moveInEvent.getId());
-            groupSnapshot.setGroupId(group.getId());
-            DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder()
-                    .group(group)
-                    .groupTrack(groupTrack)
-                    .build();
-            groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
-            doctorGroupSnapshotDao.create(groupSnapshot);
         }
     }
 
@@ -1016,18 +984,6 @@ public class DoctorImportDataService {
             //groupTrack关联最新事件
             groupTrack.setRelEventId(moveInEvent.getId());
             doctorGroupTrackDao.update(groupTrack);
-
-            //创建镜像
-            DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-            groupSnapshot.setFromEventId(0L);
-            groupSnapshot.setToEventId(moveInEvent.getId());
-            groupSnapshot.setGroupId(group.getId());
-            DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder()
-                    .group(group)
-                    .groupTrack(groupTrack)
-                    .build();
-            groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
-            doctorGroupSnapshotDao.create(groupSnapshot);
 
             // 把 产房仔猪群 的groupId 存入相应猪舍的所有母猪
             List<DoctorPigTrack> feedTracks = feedMap.get(group.getInitBarnId());
@@ -1163,15 +1119,6 @@ public class DoctorImportDataService {
                 throw new JsonResponseException("根据猪舍名获取猪舍失败,猪舍名:" + last.getBarnName());
             }
             DoctorPigTrack track = getSowTrack(sow, last, parityMap, barn);
-
-            //创建镜像
-            DoctorPigSnapshot pigSnapshot = DoctorPigSnapshot.builder()
-                    .pigId(sow.getId())
-                    .fromEventId(0L)
-                    .toEventId(track.getCurrentEventId())
-                    .toPigInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(new DoctorPigSnapShotInfo(sow, track)))
-                    .build();
-            doctorPigSnapshotDao.create(pigSnapshot);
 
             if (Objects.equals(track.getStatus(), PigStatus.FEED.getKey())) {
                 feedSowTrack.add(track);
@@ -1942,21 +1889,6 @@ public class DoctorImportDataService {
     }
 
     /**
-     * 猪群生成镜像(修复数据)
-     */
-    @Transactional
-    public void generateGroupSnapshot() {
-        //1.没有镜像猪群,直接生成镜像
-        List<Long> groupIdList = doctorGroupSnapshotDao.queryNotSnapshotGroupId();
-        groupIdList.forEach(this::createNotGroupSnapshot);
-
-        //2.from_event_id 是空的
-        List<DoctorGroupSnapshot> doctorGroupSnapshots = doctorGroupSnapshotDao.queryByFromEventIdIsNull();
-        doctorGroupSnapshots.forEach(this::createNullGroupSnapShot);
-
-    }
-
-    /**
      * 生成镜像
      * @param groupId
      */
@@ -1969,98 +1901,6 @@ public class DoctorImportDataService {
         }
         DoctorGroup group = doctorGroupDao.findById(groupId);
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
-
-        DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-        groupSnapshot.setGroupId(groupId);
-        groupSnapshot.setFromEventId(0L);
-        groupSnapshot.setToEventId(lastEvent.getId());
-        DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder().group(group).groupTrack(groupTrack).build();
-        groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
-        doctorGroupSnapshotDao.create(groupSnapshot);
-    }
-
-    private void createNullGroupSnapShot(DoctorGroupSnapshot snapshot) {
-        Long groupId = snapshot.getGroupId();
-        DoctorGroupEvent groupEvent = doctorGroupEventDao.findInitGroupEvent(groupId);
-        if (isNull(groupEvent) || !Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
-            log.info("没有初始事件,或初始事件不是转入事件,猪群id:" + groupId);
-            return;
-        }
-        DoctorGroup group = doctorGroupDao.findById(groupId);
-        DoctorGroupTrack currentTrack  = doctorGroupTrackDao.findByGroupId(groupId);
-
-        DoctorGroupTrack groupTrack = new DoctorGroupTrack();
-        groupTrack.setGroupId(groupId);
-
-        groupTrack.setSex(currentTrack.getSex());
-        groupTrack.setQuantity(groupEvent.getQuantity());
-        groupTrack.setBoarQty(0);
-        groupTrack.setSowQty(MoreObjects.firstNonNull(groupTrack.getQuantity(), 0) - groupTrack.getBoarQty());
-
-        //excel日龄是转入时的日龄，所以要重新算一发
-        groupTrack.setAvgDayAge(groupEvent.getAvgDayAge());
-        groupTrack.setBirthDate(new DateTime(groupEvent.getEventAt()).minusDays(groupTrack.getAvgDayAge()).toDate());
-
-        Double avgWeight = groupEvent.getAvgWeight();
-
-        groupTrack.setBirthWeight(avgWeight * groupTrack.getQuantity());
-
-        //产房仔猪的批次总结字段
-        if (PigType.FARROW_TYPES.contains(group.getPigType())) {
-            groupTrack.setWeanWeight(groupTrack.getBirthWeight());
-            groupTrack.setNest(0);
-            groupTrack.setLiveQty(groupTrack.getQuantity());
-            groupTrack.setHealthyQty(groupTrack.getQuantity());
-            groupTrack.setWeakQty(0);
-            groupTrack.setUnweanQty(0);
-            groupTrack.setUnqQty(0);
-            groupTrack.setWeanQty(groupTrack.getQuantity());    //默认全部断奶
-            groupTrack.setQuaQty(groupTrack.getQuantity());
-        }
-        groupTrack.setRelEventId(groupEvent.getId());
-
-        DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-        groupSnapshot.setGroupId(groupId);
-        groupSnapshot.setFromEventId(0L);
-        groupSnapshot.setToEventId(groupEvent.getId());
-        DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder().group(group).groupTrack(groupTrack).build();
-        groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
-        doctorGroupSnapshotDao.create(groupSnapshot);
-
-        DoctorGroupSnapshot updateSnapshot = new DoctorGroupSnapshot();
-        updateSnapshot.setId(snapshot.getId());
-        updateSnapshot.setFromEventId(groupEvent.getId());
-        doctorGroupSnapshotDao.update(updateSnapshot);
-    }
-
-    /**
-     * 生成猪镜像(修复数据)
-     */
-    @Transactional
-    public void generatePigSnapshot() {
-        List<Long> pigIdList = doctorPigSnapshotDao.queryNotSnapshotPigId();
-        if (!pigIdList.isEmpty()) {
-            pigIdList.forEach(this::notExistPigSnapshot);
-        }
-    }
-
-    /**
-     * 猪不存在镜像时生成镜像
-     * @param pigId 猪id
-     */
-    private void notExistPigSnapshot(Long pigId) {
-        DoctorPigTrack currentTrack = doctorPigTrackDao.findByPigId(pigId);
-        DoctorPig pig = doctorPigDao.findById(pigId);
-
-        DoctorPigSnapShotInfo info = DoctorPigSnapShotInfo.builder()
-                .pig(pig).pigTrack(currentTrack).build();
-        DoctorPigSnapshot snapshot = DoctorPigSnapshot.builder()
-                .pigId(pigId)
-                .fromEventId(0L)
-                .toEventId(currentTrack.getCurrentEventId())
-                .toPigInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info))
-                .build();
-        doctorPigSnapshotDao.create(snapshot);
     }
 
     /**

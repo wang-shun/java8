@@ -6,13 +6,24 @@ import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
-import io.terminus.doctor.event.dao.*;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.enums.*;
+import io.terminus.doctor.event.enums.EventStatus;
+import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.group.DoctorGroupEventHandlers;
 import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.model.DoctorEventModifyLog;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
+import io.terminus.doctor.event.model.DoctorEventRelation;
+import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,7 +49,6 @@ public class DoctorEditGroupEventManager {
     private DoctorPigEventDao doctorPigEventDao;
     private DoctorEntryHandler doctorEntryHandler;
     private DoctorEventRelationDao doctorEventRelationDao;
-    private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private DoctorGroupDao doctorGroupDao;
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
     private static JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
@@ -50,7 +60,6 @@ public class DoctorEditGroupEventManager {
                                        DoctorPigEventDao doctorPigEventDao,
                                        DoctorEntryHandler doctorEntryHandler,
                                        DoctorEventRelationDao doctorEventRelationDao,
-                                       DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                        DoctorGroupDao doctorGroupDao,
                                        DoctorEventModifyLogDao doctorEventModifyLogDao){
         this.doctorGroupEventHandlers = doctorGroupEventHandlers;
@@ -59,7 +68,6 @@ public class DoctorEditGroupEventManager {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorEntryHandler = doctorEntryHandler;
         this.doctorEventRelationDao= doctorEventRelationDao;
-        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorEventModifyLogDao = doctorEventModifyLogDao;
     }
@@ -104,7 +112,6 @@ public class DoctorEditGroupEventManager {
                     return doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent2.getEventAt());
                 }
         ).collect(Collectors.toList());
-        doctorGroupSnapshotDao.deleteByGroupId(groupId);
 
         Long fromEventId = 0L;
         for(DoctorGroupEvent doctorGroupEvent: groupEvents) {
@@ -141,18 +148,6 @@ public class DoctorEditGroupEventManager {
     }
 
     private void createSnapshots(Long fromEventId, DoctorGroupEvent doctorGroupEvent, DoctorGroupTrack newTrack) {
-        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(doctorGroupEvent.getId());
-        if(!Arguments.isNull(snapshot)){
-            doctorGroupSnapshotDao.delete(snapshot.getId());
-        }
-        DoctorGroupSnapshot newSnapshot = new DoctorGroupSnapshot();
-        newSnapshot.setGroupId(doctorGroupEvent.getGroupId());
-        newSnapshot.setFromEventId(fromEventId);
-        newSnapshot.setToEventId(doctorGroupEvent.getId());
-        DoctorGroupSnapShotInfo toInfo = DoctorGroupSnapShotInfo.builder().group(doctorGroupDao.findById(doctorGroupEvent.getGroupId()))
-                .groupTrack(newTrack).build();
-        newSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(toInfo));
-        doctorGroupSnapshotDao.create(newSnapshot);
     }
 
     public void closeGroupEvent(DoctorGroupEvent doctorGroupEvent) {

@@ -14,7 +14,6 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
@@ -54,7 +53,6 @@ public class DoctorGroupManager {
 
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
-    private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupReadService doctorGroupReadService;
     private final CoreEventDispatcher coreEventDispatcher;
@@ -63,14 +61,12 @@ public class DoctorGroupManager {
     @Autowired
     public DoctorGroupManager(DoctorGroupDao doctorGroupDao,
                               DoctorGroupEventDao doctorGroupEventDao,
-                              DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                               DoctorGroupTrackDao doctorGroupTrackDao,
                               DoctorGroupReadService doctorGroupReadService,
                               CoreEventDispatcher coreEventDispatcher,
                               DoctorBarnDao doctorBarnDao) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
-        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupReadService = doctorGroupReadService;
         this.coreEventDispatcher = coreEventDispatcher;

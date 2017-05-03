@@ -8,11 +8,9 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
@@ -33,9 +31,7 @@ import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorWeanGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -69,8 +65,6 @@ public class DoctorGroupEventManager {
     private DoctorGroupEventDao doctorGroupEventDao;
     @Autowired
     private DoctorRevertLogDao doctorRevertLogDao;
-    @Autowired
-    private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     @Autowired
     private DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
     @Autowired
@@ -167,21 +161,8 @@ public class DoctorGroupEventManager {
         log.info("rollback group event starting, group event id:{}", groupEvent.getId());
         //校验能否回滚
         checkCanRollback(groupEvent);
-        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
-
-
-
-        DoctorGroupSnapshot oldSnapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(snapshot.getFromEventId());
-        DoctorGroupSnapShotInfo info = JSON_MAPPER.fromJson(oldSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
-
-        //记录回滚日志
-        createRevertLog(snapshot, oldSnapshot, reverterId, reverterName);
-
         //删除此事件 -> 回滚猪群跟踪 -> 回滚猪群 -> 删除镜像
         doctorGroupEventDao.delete(groupEvent.getId());
-        doctorGroupTrackDao.update(info.getGroupTrack());
-        doctorGroupDao.update(info.getGroup());
-        doctorGroupSnapshotDao.delete(snapshot.getId());
         log.info("rollback group event ending, group event id:{}", groupEvent.getId());
     }
 
@@ -222,17 +203,6 @@ public class DoctorGroupEventManager {
             log.error("new group event can not rollback, event:{}", event);
             throw new InvalidException("group.event.new.not.rollback", event.getId());
         }
-    }
-
-    //记录回滚日志
-    private void createRevertLog(DoctorGroupSnapshot snapshot, DoctorGroupSnapshot oldSnapshot, Long reverterId, String reverterName) {
-        DoctorRevertLog revertLog = new DoctorRevertLog();
-        revertLog.setType(DoctorRevertLog.Type.GROUP.getValue());
-        revertLog.setFromInfo(snapshot.getToInfo());
-        revertLog.setToInfo(oldSnapshot.getToInfo());
-        revertLog.setReverterId(reverterId);
-        revertLog.setReverterName(reverterName);
-        doctorRevertLogDao.create(revertLog);
     }
 
     /**

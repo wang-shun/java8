@@ -1,11 +1,8 @@
 package io.terminus.doctor.event.service;
 
-import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.test.BaseServiceTest;
@@ -28,9 +25,6 @@ public class DoctorPigEventWriteServiceTest extends BaseServiceTest{
 
     @Autowired
     private DoctorPigTrackDao doctorPigTrackDao;
-
-    @Autowired
-    private DoctorPigSnapshotDao doctorPigSnapshotDao;
 
     @Autowired
     private DoctorPigDao doctorPigDao;

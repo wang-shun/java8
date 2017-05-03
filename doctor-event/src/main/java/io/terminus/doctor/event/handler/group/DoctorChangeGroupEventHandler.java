@@ -9,7 +9,6 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -47,12 +46,11 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
     @Autowired
-    public DoctorChangeGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                         DoctorGroupTrackDao doctorGroupTrackDao,
+    public DoctorChangeGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao,
                                          DoctorGroupEventDao doctorGroupEventDao,
                                          DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
                                          DoctorBarnDao doctorBarnDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
+        super(doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
@@ -124,9 +122,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         updateGroupTrack(groupTrack, event);
 
         updateDailyForNew(event);
-
-        //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.CHANGE);
 
         //5.判断变动数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, change.getQuantity())) {

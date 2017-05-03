@@ -14,9 +14,9 @@ mysql_host_to = "127.0.0.1"
 mysql_user_to = "root"
 mysql_password_to = "anywhere"
 
-db_from = torndb.Connection(host=mysql_host_from, database="pig_doctor", user=mysql_user_from,
+db_from = torndb.Connection(host=mysql_host_from, database="doctor_modify", user=mysql_user_from,
                             password=mysql_password_from)
-db_to = torndb.Connection(host=mysql_host_to, database="pig_doctor2", user=mysql_user_to,
+db_to = torndb.Connection(host=mysql_host_to, database="doctor_modify2", user=mysql_user_to,
                           password=mysql_password_to)
 
 

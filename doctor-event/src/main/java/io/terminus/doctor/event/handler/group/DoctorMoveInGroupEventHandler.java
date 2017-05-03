@@ -9,7 +9,6 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -49,11 +48,10 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
     private final DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired
-    public DoctorMoveInGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                         DoctorGroupTrackDao doctorGroupTrackDao,
+    public DoctorMoveInGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao,
                                          DoctorGroupEventDao doctorGroupEventDao,
                                          DoctorBarnDao doctorBarnDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
+        super(doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
@@ -94,11 +92,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         updateGroupTrack(groupTrack, event);
 
         updateDailyForNew(event);
-        //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.MOVE_IN);
-
-        //发布统计事件
-        //publistGroupAndBarn(event);
     }
 
     @Override

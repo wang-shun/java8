@@ -10,7 +10,7 @@ mysql_host_from = '127.0.0.1'
 mysql_user_from = "root"
 mysql_password_from = "anywhere"
 
-db_from = torndb.Connection(host=mysql_host_from, database="pig_doctor", user=mysql_user_from,
+db_from = torndb.Connection(host=mysql_host_from, database="doctor_modify", user=mysql_user_from,
                             password=mysql_password_from)
 
 def json_serial(obj):

@@ -7,7 +7,6 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -45,12 +44,11 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
     @Autowired
-    public DoctorTurnSeedGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                           DoctorGroupEventDao doctorGroupEventDao,
+    public DoctorTurnSeedGroupEventHandler(DoctorGroupEventDao doctorGroupEventDao,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
                                            DoctorBarnDao doctorBarnDao,
                                            DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
+        super(doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
@@ -141,24 +139,15 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         updateGroupTrack(groupTrack, event);
 
         updateDailyForNew(event);
-        //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.TURN_SEED);
 
         //5.判断猪群数量, 如果=0 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(groupTrack.getQuantity(), 0)) {
             doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, turnSeed, event.getEventAt(), turnSeed.getFcrFeed());
 
-//            Long toGroupEventId = doctorEventRelationDao.findByOriginAndType(event.getId(), DoctorEventRelation.TargetType.GROUP.getValue()).getTriggerEventId();
-//            DoctorGroupEvent closeEvent = doctorGroupEventDao.findById(toGroupEventId);
-//            turnSeed.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
 
         //6.判断公母猪, 触发进场事件
         doctorCommonGroupEventHandler.autoPigEntryEvent(eventInfoList, sex, turnSeed, group, toBarn);
-
-
-        //发布统计事件
-        //publistGroupAndBarn(event);
     }
 
     @Override

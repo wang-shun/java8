@@ -328,24 +328,6 @@ public class DoctorImportDataController {
     }
 
     /**
-     * 没有猪镜像的生成镜像
-     * @param type 1.猪,2.猪群
-     */
-    @RequestMapping(value = "/generateSnapshot", method = RequestMethod.GET)
-    public Boolean generateSnapshot(@RequestParam Integer type) {
-        log.info("generateSnapshot.starting, type:{}", type);
-        if (type == 1) {
-            doctorImportDataService.generatePigSnapshot();
-        } else if (type == 2) {
-            doctorImportDataService.generateGroupSnapshot();
-        } else {
-            throw new JsonResponseException("类型错误,type:" + type);
-        }
-        log.info("generateSnapshot.ending");
-        return true;
-    }
-
-    /**
      * 修改猪场名
      * @param farmId 猪场id
      * @param farmName 新猪场名

@@ -15,7 +15,6 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -36,6 +35,7 @@ import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -278,17 +278,6 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * 查询猪群镜像信息(猪群, 猪群跟踪, 最新event)
-     *
-     * @param groupId 猪群id
-     * @return 猪群镜像
-     */
-    @RequestMapping(value = "/snapshot", method = RequestMethod.GET)
-    public DoctorGroupSnapShotInfo findGroupSnapShotByGroupId(@RequestParam("groupId") Long groupId) {
-        return RespHelper.or500(doctorGroupReadService.findGroupSnapShotInfoByGroupId(groupId));
-    }
-
-    /**
      * 查询已建群的猪群
      *
      * @param farmId 猪场id
@@ -393,6 +382,9 @@ public class DoctorGroupEvents {
         if (params.get("eventTypes") != null) {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
+        }
+        if (Objects.isNull(params.get("endDate"))) {
+            params.put("endDate", new DateTime(params.get("endDate")).withTimeAtStartOfDay().plusSeconds(86399).toDate());
         }
         return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize));
     }

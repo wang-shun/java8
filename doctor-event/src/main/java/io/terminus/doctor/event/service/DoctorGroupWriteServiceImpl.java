@@ -9,7 +9,6 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -40,8 +39,6 @@ import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,8 +72,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     private DoctorGroupEventManager doctorGroupEventManager;
     @Autowired
     private DoctorGroupEventDao doctorGroupEventDao;
-    @Autowired
-    private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     @Autowired
     private CoreEventDispatcher coreEventDispatcher;
     @Autowired(required = false)
@@ -348,50 +343,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("incr day age failed, cause:{}", Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("incr.group.dayAge.fail");
-        }
-    }
-
-    @Override
-    public RespWithEx<Long> createGroup(DoctorGroup group) {
-        try {
-            doctorGroupDao.create(group);
-            return RespWithEx.ok(group.getId());
-        } catch (Exception e) {
-            log.error("create group failed, group:{}, cause:{}", group, Throwables.getStackTraceAsString(e));
-            return RespWithEx.fail("group.create.fail");
-        }
-    }
-
-    @Override
-    public RespWithEx<Long> createGroupTrack(DoctorGroupTrack groupTrack) {
-        try {
-            doctorGroupTrackDao.create(groupTrack);
-            return RespWithEx.ok(groupTrack.getId());
-        } catch (Exception e) {
-            log.error("create groupTrack failed, groupTrack:{}, cause:{}", groupTrack, Throwables.getStackTraceAsString(e));
-            return RespWithEx.fail("groupTrack.create.fail");
-        }
-    }
-
-    @Override
-    public RespWithEx<Long> createGroupEvent(DoctorGroupEvent groupEvent) {
-        try {
-            doctorGroupEventDao.create(groupEvent);
-            return RespWithEx.ok(groupEvent.getId());
-        } catch (Exception e) {
-            log.error("create groupEvent failed, groupEvent:{}, cause:{}", groupEvent, Throwables.getStackTraceAsString(e));
-            return RespWithEx.fail("groupEvent.create.fail");
-        }
-    }
-
-    @Override
-    public RespWithEx<Long> createGroupSnapShot(DoctorGroupSnapshot groupSnapshot) {
-        try {
-            doctorGroupSnapshotDao.create(groupSnapshot);
-            return RespWithEx.ok(groupSnapshot.getId());
-        } catch (Exception e) {
-            log.error("create groupSnapshot failed, groupSnapshot:{}, cause:{}", groupSnapshot, Throwables.getStackTraceAsString(e));
-            return RespWithEx.fail("groupSnapshot.create.fail");
         }
     }
 

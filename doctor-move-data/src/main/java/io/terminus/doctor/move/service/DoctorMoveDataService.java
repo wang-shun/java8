@@ -27,17 +27,13 @@ import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
-import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
@@ -87,11 +83,9 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryWriteService;
@@ -106,7 +100,6 @@ import io.terminus.doctor.move.model.View_EventListGain;
 import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_SowCardList;
-import io.terminus.doctor.move.util.JsonFormatUtils;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
@@ -165,8 +158,6 @@ public class DoctorMoveDataService {
     private final DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
     private final DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService;
     private final DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
-    private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
-    private final DoctorPigSnapshotDao doctorPigSnapshotDao;
     private final UserWriteService<User> userWriteService;
     private final UserDao userDao;
     @Autowired
@@ -199,8 +190,6 @@ public class DoctorMoveDataService {
                                  DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService,
                                  DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService,
                                  DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService,
-                                 DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                 DoctorPigSnapshotDao doctorPigSnapshotDao,
                                  UserWriteService userWriteService,
                                  UserDao userDao) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
@@ -217,8 +206,6 @@ public class DoctorMoveDataService {
         this.doctorGroupBatchSummaryReadService = doctorGroupBatchSummaryReadService;
         this.doctorGroupBatchSummaryWriteService = doctorGroupBatchSummaryWriteService;
         this.doctorMaterialConsumeProviderReadService = doctorMaterialConsumeProviderReadService;
-        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
-        this.doctorPigSnapshotDao = doctorPigSnapshotDao;
         this.userWriteService = userWriteService;
         this.userDao = userDao;
     }
@@ -625,17 +612,6 @@ public class DoctorMoveDataService {
             groupTrack.setRelEventId(groupEvent.getId());
             doctorGroupTrackDao.update(groupTrack);
 
-            //创建镜像
-            DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-            groupSnapshot.setFromEventId(0L);
-            groupSnapshot.setToEventId(groupEvent.getId());
-            groupSnapshot.setGroupId(group.getId());
-            DoctorGroupSnapShotInfo snapShotInfo = DoctorGroupSnapShotInfo.builder()
-                    .group(group)
-                    .groupTrack(groupTrack)
-                    .build();
-            groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(snapShotInfo));
-            doctorGroupSnapshotDao.create(groupSnapshot);
         });
 
         //批次总结
@@ -724,17 +700,6 @@ public class DoctorMoveDataService {
         if (!sowTracks.isEmpty()) {
             doctorPigTrackDao.creates(sowTracks);
         }
-
-        sowTracks.forEach(sowTrack -> {
-            DoctorPig sow = doctorPigDao.findById(sowTrack.getPigId());
-            DoctorPigSnapshot pigSnapshot = DoctorPigSnapshot.builder()
-                    .pigId(sow.getId())
-                    .fromEventId(0L)
-                    .toEventId(sowTrack.getCurrentEventId())
-                    .toPigInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(new DoctorPigSnapShotInfo(sow, sowTrack)))
-                    .build();
-            doctorPigSnapshotDao.create(pigSnapshot);
-        });
 
         //4. 更新公猪的全部配种次数
 
@@ -1643,18 +1608,6 @@ public class DoctorMoveDataService {
         if (!boarTracks.isEmpty()) {
             doctorPigTrackDao.creates(boarTracks);
         }
-
-        boarTracks.forEach(boarTrack -> {
-            //创建镜像
-            DoctorPig boar = doctorPigDao.findById(boarTrack.getPigId());
-            DoctorPigSnapshot pigSnapshot = DoctorPigSnapshot.builder()
-                    .pigId(boar.getId())
-                    .fromEventId(0L)
-                    .toEventId(boarTrack.getCurrentEventId())
-                    .toPigInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(new DoctorPigSnapShotInfo(boar, boarTrack)))
-                    .build();
-            doctorPigSnapshotDao.create(pigSnapshot);
-        });
     }
 
     //更新猪的relEventId, 后面的事件存一下前面事件的id
@@ -2743,47 +2696,6 @@ public class DoctorMoveDataService {
                 break;
             }
         }
-    }
-
-
-    /**
-     * 刷新groupSnapshot的时间格式
-     * @param farmId
-     */
-    public void flushGroupSnapshotsToInfoDateFormat(Long farmId) {
-        List<DoctorGroup> groupList = doctorGroupDao.findByFarmId(farmId);
-        groupList.forEach(group -> {
-            List<DoctorGroupSnapshot> snapshots = doctorGroupSnapshotDao.findByGroupId(group.getId());
-            snapshots.forEach(doctorGroupSnapshot -> {
-                DoctorGroupSnapShotInfo info = JsonFormatUtils.JSON_NON_EMPTY_MAPPER.fromJson(doctorGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
-                String jsonInfo = ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info);
-                doctorGroupSnapshot.setToInfo(jsonInfo);
-            });
-            if(!Arguments.isNullOrEmpty(snapshots)){
-                doctorGroupSnapshotDao.updates(snapshots);
-            }
-        });
-    }
-
-
-    /**
-     * 刷新pigSnapshots时间格式
-     * @param farmId
-     */
-    public void flushPigSnapshotsToInfoDateFormat(Long farmId) {
-        List<DoctorPig> pigList = doctorPigDao.findPigsByFarmId(farmId);
-        pigList.forEach(pig -> {
-            List<DoctorPigSnapshot> snapshots = doctorPigSnapshotDao.findByPigId(pig.getId());
-            snapshots.forEach(doctorPigSnapshot -> {
-                DoctorPigSnapShotInfo info = JsonFormatUtils.JSON_NON_EMPTY_MAPPER.fromJson(doctorPigSnapshot.getToPigInfo(), DoctorPigSnapShotInfo.class);
-                String jsonInfo = ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info);
-                doctorPigSnapshot.setToPigInfo(jsonInfo);
-                doctorPigSnapshotDao.update(doctorPigSnapshot);
-            });
-            if(!Arguments.isNullOrEmpty(snapshots)){
-                doctorPigSnapshotDao.updates(snapshots);
-            }
-        });
     }
 
     /**

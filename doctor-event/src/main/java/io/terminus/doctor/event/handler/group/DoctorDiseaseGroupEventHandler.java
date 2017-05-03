@@ -3,7 +3,6 @@ package io.terminus.doctor.event.handler.group;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -33,11 +32,10 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
     private final DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired
-    public DoctorDiseaseGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                          DoctorGroupTrackDao doctorGroupTrackDao,
+    public DoctorDiseaseGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao,
                                           DoctorGroupEventDao doctorGroupEventDao,
                                           DoctorBarnDao doctorBarnDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
+        super(doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
@@ -85,12 +83,5 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         event.setExtraMap(disease);
         doctorGroupEventDao.create(event);
 
-        //疾病事件不更新track,不增加snapshot
-
-//        //3.更新猪群跟踪
-//        updateGroupTrack(groupTrack, event);
-
-        //4.创建镜像
-//        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.DISEASE);
     }
 }

@@ -7,16 +7,13 @@ import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
-import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
@@ -25,9 +22,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorEventRelation;
-import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +50,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     protected  DoctorPigEventDao doctorPigEventDao;
     @Autowired
     protected  DoctorPigTrackDao doctorPigTrackDao;
-    @Autowired
-    protected  DoctorPigSnapshotDao doctorPigSnapshotDao;
     @Autowired
     protected  DoctorRevertLogDao doctorRevertLogDao;
     @Autowired
@@ -221,27 +214,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         return fromTrack;
     }
 
-    /**
-     *  创建猪跟踪和镜像表
-     *  @param toTrack 事件发生导致track
-     *  @param executeEvent 发生事件
-     *  @param lastEventId 上一次事件id
-     *
-     */
-    public void createPigSnapshot(DoctorPigTrack toTrack, DoctorPigEvent executeEvent, Long lastEventId) {
-        DoctorPig snapshotPig = doctorPigDao.findById(toTrack.getPigId());
-        expectTrue(notNull(snapshotPig), "pig.not.null", toTrack.getPigId());
-
-        //创建猪镜像
-        DoctorPigSnapshot snapshot = DoctorPigSnapshot.builder()
-                .pigId(snapshotPig.getId())
-                .fromEventId(lastEventId)
-                .toEventId(executeEvent.getId())
-                .toPigInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(
-                        DoctorPigSnapShotInfo.builder().pig(snapshotPig).pigTrack(toTrack).build()))
-                .build();
-        doctorPigSnapshotDao.create(snapshot);
-    }
 
     /**
      * 事件的创建后的补充和特殊处理

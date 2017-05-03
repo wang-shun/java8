@@ -11,7 +11,6 @@ import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupElicitRecordDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -44,8 +43,6 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
     private final DoctorGroupReadService doctorGroupReadService;
 
-    private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
-
     private final DoctorEditGroupEventManager doctorEditGroupEventManager;
 
     private final DoctorGroupTrackDao doctorGroupTrackDao;
@@ -64,7 +61,6 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
     @Autowired
     public DoctorEditGroupEventServiceImpl(DoctorGroupReadService doctorGroupReadService,
-                                           DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                            DoctorEditGroupEventManager doctorEditGroupEventManager,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
                                            DoctorGroupWriteService doctorGroupWriteService,
@@ -74,7 +70,6 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
                                            DoctorGroupElicitRecordDao doctorGroupElicitRecordDao,
                                            DoctorMessageSourceHelper messageSourceHelper){
         this.doctorGroupReadService = doctorGroupReadService;
-        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorEditGroupEventManager = doctorEditGroupEventManager;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupWriteService = doctorGroupWriteService;

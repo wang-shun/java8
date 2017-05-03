@@ -9,7 +9,6 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -45,12 +44,11 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
     private Publisher publisher;
 
     @Autowired
-    public DoctorCloseGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                        DoctorGroupTrackDao doctorGroupTrackDao,
+    public DoctorCloseGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao,
                                         DoctorGroupDao doctorGroupDao,
                                         DoctorGroupEventDao doctorGroupEventDao,
                                         DoctorBarnDao doctorBarnDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
+        super(doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
@@ -84,12 +82,6 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         group.setStatus(DoctorGroup.Status.CLOSED.getValue());
         group.setCloseAt(event.getEventAt());
         doctorGroupDao.update(group);
-
-        //5.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.CLOSE);
-
-        //发布统计事件
-        //publistGroupAndBarn(event);
 
         //发布zk事件
         try{
