@@ -159,10 +159,7 @@ public class DoctorDailyGroupWriteServiceImpl implements DoctorDailyGroupWriteSe
         doctorDailyGroup.setType(group.getPigType());
         doctorDailyGroup.setSumAt(startAt);
         doctorDailyGroup.setStart(doctorKpiDao.realTimeLivetockGroup(groupId, new DateTime(startAt).minusDays(1).toDate()));
-        if(Objects.equals(PigType.DELIVER_SOW.getValue(), group.getPigType())){
-            doctorDailyGroup.setUnweanCount(doctorKpiDao.getGroupUnWean(groupId, endAt));
-            doctorDailyGroup.setWeanCount(doctorKpiDao.getGroupWean(groupId, endAt));
-        }
+
         doctorDailyGroup.setInnerIn(doctorKpiDao.getGroupInnerIn(groupId, startAt, endAt));
         doctorDailyGroup.setOuterIn(doctorKpiDao.getGroupOuterIn(groupId, startAt, endAt));
         doctorDailyGroup.setSale(doctorKpiDao.getGroupSale(groupId, startAt, endAt));
@@ -171,11 +168,25 @@ public class DoctorDailyGroupWriteServiceImpl implements DoctorDailyGroupWriteSe
         doctorDailyGroup.setOtherChange(doctorKpiDao.getGroupOtherChange(groupId, startAt, endAt));
         doctorDailyGroup.setChgFarm(doctorKpiDao.getGroupChgFarm(groupId, startAt, endAt));
         doctorDailyGroup.setInnerOut(doctorKpiDao.getGroupInnerOut(groupId, startAt, endAt));
-        doctorDailyGroup.setOuterOut(doctorKpiDao.getGroupOuterOut(groupId, startAt, endAt));
+        doctorDailyGroup.setToNursery(0);
+        doctorDailyGroup.setToFatten(0);
+        doctorDailyGroup.setToHoubei(0);
+        doctorDailyGroup.setTurnSeed(0);
+        if(Objects.equals(PigType.DELIVER_SOW.getValue(), group.getPigType())){
+            doctorDailyGroup.setUnweanCount(doctorKpiDao.getGroupUnWean(groupId, endAt));
+            doctorDailyGroup.setWeanCount(doctorKpiDao.getGroupWean(groupId, endAt));
+            doctorDailyGroup.setToNursery(doctorKpiDao.getGroupOuterOut(groupId, startAt, endAt));
+        }
+        if(Objects.equals(PigType.NURSERY_PIGLET.getValue(), group.getPigType())){
+            doctorDailyGroup.setToFatten(doctorKpiDao.getNurSeryOuterOut(groupId, PigType.FATTEN_PIG.getValue(), startAt, endAt));
+            doctorDailyGroup.setToHoubei(doctorKpiDao.getNurSeryOuterOut(groupId, PigType.RESERVE.getValue(), startAt, endAt));
+        }
+        if(Objects.equals(PigType.FATTEN_PIG.getValue(), group.getPigType())){
+            doctorDailyGroup.setToHoubei(doctorKpiDao.getGroupOuterOut(groupId, startAt, endAt));
+        }
         if(Objects.equals(PigType.RESERVE.getValue(), group.getPigType())){
+            doctorDailyGroup.setToFatten(doctorKpiDao.getGroupOuterOut(groupId, startAt, endAt));
             doctorDailyGroup.setTurnSeed(doctorKpiDao.getGroupTrunSeed(groupId, startAt, endAt));
-        }else {
-            doctorDailyGroup.setTurnSeed(0);
         }
         doctorDailyGroup.setEnd(doctorKpiDao.realTimeLivetockGroup(groupId, startAt));
         return doctorDailyGroup;

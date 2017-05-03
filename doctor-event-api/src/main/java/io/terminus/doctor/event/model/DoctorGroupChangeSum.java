@@ -62,7 +62,7 @@ public class DoctorGroupChangeSum implements Serializable{
     /**
      * 不同类型猪群转群,转种猪
      */
-    private Integer farrowOuterOut;
+    private Integer farrowToNursery;
 
     /**
      * 期末
@@ -115,9 +115,14 @@ public class DoctorGroupChangeSum implements Serializable{
     private Integer nurseryInnerOut;
 
     /**
-     * 不同类型猪群转群,转种猪
+     * 保育转育肥
      */
-    private Integer nurseryOuterOut;
+    private Integer nurseryToFatten;
+
+    /**
+     * 保育转后备
+     */
+    private Integer nurseryToHoubei;
 
     /**
      * 期末
@@ -170,9 +175,9 @@ public class DoctorGroupChangeSum implements Serializable{
     private Integer fattenInnerOut;
 
     /**
-     * 不同类型猪群转群,转种猪
+     * 育肥转后备
      */
-    private Integer fattenOuterOut;
+    private Integer fattenToHoubei;
 
     /**
      * 期末
@@ -225,9 +230,9 @@ public class DoctorGroupChangeSum implements Serializable{
     private Integer houbeiInnerOut;
 
     /**
-     * 不同类型猪群转群,转种猪
+     * 后备转育肥
      */
-    private Integer houbeiOuterOut;
+    private Integer houbeiToFatten;
 
     /**
      * 转种猪

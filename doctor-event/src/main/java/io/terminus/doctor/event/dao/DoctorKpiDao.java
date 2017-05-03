@@ -1129,4 +1129,16 @@ public class DoctorKpiDao {
     public Integer getSowCfChgFarm(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne(sqlId("getSowCfChgFarm"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
+
+    /**
+     * 保育转育肥、转后备
+     * @param groupId
+     * @param pigType
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public Integer getNurSeryOuterOut(Long groupId, Integer pigType, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getNurseryOuterOutByType"), ImmutableMap.of("groupId", groupId, "pigType", pigType, "startAt", startAt, "endAt", endAt));
+    }
 }

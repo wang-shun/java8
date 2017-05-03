@@ -91,11 +91,21 @@ public class DoctorDailyGroup implements Serializable {
      * 同类型猪群转群，不计入该类型猪	群减少
      */
     private Integer innerOut;
-    
+
     /**
-     * 不同类型猪群转群,转种猪
+     * 转保育
      */
-    private Integer outerOut;
+    private Integer toNursery;
+
+    /**
+     * 转育肥
+     */
+    private Integer toFatten;
+
+    /**
+     * 转后备
+     */
+    private Integer toHoubei;
 
     /**
      * 转种猪

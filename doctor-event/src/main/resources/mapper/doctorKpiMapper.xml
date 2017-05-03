@@ -1978,6 +1978,17 @@
         <include refid="groupCriteria"/>
     </select>
 
+    <select id="getNurseryOuterOutByType" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 4
+        and trans_group_type = 1
+        and other_barn_type = #{pigType}
+        <include refid="groupCriteria"/>
+    </select>
+
     <select id="getGroupTurnSeed" parameterType="map" resultType="int">
         select
         ifnull(count(1), 0)
