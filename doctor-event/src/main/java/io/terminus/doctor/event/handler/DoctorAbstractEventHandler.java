@@ -321,8 +321,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
      * @param barnName 猪舍名
      * @return 猪群号
      */
-    protected String grateGroupCode(String barnName) {
+    protected String grateGroupCode(String barnName, Date eventAt) {
         expectTrue(notEmpty(barnName), "generate.code.barn.name.not.null");
-        return barnName + "(" +DateUtil.toDateString(new Date()) + ")";
+        return barnName + "(" +DateUtil.toDateString(eventAt) + ")";
     }
 }

@@ -152,7 +152,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
             input.setToGroupCode(toGroup.getGroupCode());
         } else {
             input.setIsCreateGroup(IsOrNot.YES.getValue());
-            input.setToGroupCode(grateGroupCode(doctorToBarn.getName()));
+            input.setToGroupCode(grateGroupCode(doctorToBarn.getName(), chgLocationDto.eventAt()));
         }
 
         DoctorGroup group = doctorGroupDao.findById(pigTrack.getGroupId());

@@ -428,14 +428,14 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
         if (Objects.equals(oldEventAt, newEventAt)) {
             dailyGroupList.stream()
-                    .filter(dailyGroup -> !oldEventAt.before(dailyGroup.getSumAt()))
+                    .filter(dailyGroup -> !oldEventAt.after(dailyGroup.getSumAt()))
                     .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.plusInt(dailyGroup.getEnd(), changeCount)));
         } else {
             dailyGroupList.stream()
-                    .filter(dailyGroup -> !oldEventAt.before(dailyGroup.getSumAt()))
+                    .filter(dailyGroup -> !oldEventAt.after(dailyGroup.getSumAt()))
                     .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.plusInt(dailyGroup.getEnd(), oldQuantity)));
             dailyGroupList.stream()
-                    .filter(dailyGroup -> !newEventAt.before(dailyGroup.getSumAt()))
+                    .filter(dailyGroup -> !newEventAt.after(dailyGroup.getSumAt()))
                     .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.plusInt(dailyGroup.getEnd(), newQuantity)));
         }
         for (DoctorDailyGroup dailyGroup : dailyGroupList) {

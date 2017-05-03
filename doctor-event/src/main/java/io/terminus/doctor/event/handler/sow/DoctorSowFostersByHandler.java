@@ -107,7 +107,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
             input.setToGroupId(toGroup.getId());
         } else {
             input.setIsCreateGroup(IsOrNot.YES.getValue());
-            input.setToGroupCode(grateGroupCode(pigTrack.getCurrentBarnName()));
+            input.setToGroupCode(grateGroupCode(pigTrack.getCurrentBarnName(), fosterByDto.eventAt()));
         }
 
         //来源猪舍的信息，转群事件应该是来源猪群触发
