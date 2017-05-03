@@ -1,7 +1,6 @@
 package io.terminus.doctor.move.controller.material;
 
 import com.google.common.base.Throwables;
-import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.service.DoctorGroupMaterialWriteServer;
@@ -28,25 +27,26 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DoctorGroupMaterialJobs {
 
-    @RpcConsumer
+    @Autowired
     private DoctorGroupMaterialWriteServer doctorGroupMaterialWriteServer;
-    @RpcConsumer
+    @Autowired
     private DoctorFarmReadService doctorFarmReadService;
-    @RpcConsumer
+    @Autowired
     private DoctorMaterialManage doctorMaterialManage;
-    private final HostLeader hostLeader;
     @Autowired
     public DoctorGroupMaterialJobs(HostLeader hostLeader) {
         this.hostLeader = hostLeader;
     }
 
+    private final HostLeader hostLeader;
+
     private final static Integer GROUP = 0;
+
     @Scheduled(cron = "0 3 1 * * ?")
-//    @Scheduled(cron = "0 */1 * * * ?")
-        @RequestMapping(value = "/group", method = RequestMethod.GET)
+    @RequestMapping(value = "/group", method = RequestMethod.GET)
     public void groupMaterialReport() {
         try {
-            if(!hostLeader.isLeader()) {
+            if (!hostLeader.isLeader()) {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
                 return;
             }

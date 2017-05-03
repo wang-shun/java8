@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.editHandler.group;
 
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
@@ -31,6 +32,11 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
     private DoctorModifyGroupNewEventHandler modifyGroupNewEventHandler;
     @Autowired
     private DoctorModifyGroupCloseEventHandler modifyGroupCloseEventHandler;
+
+    @Override
+    protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        throw new InvalidException("chg.farm.not.allow.modify");
+    }
 
     @Override
     public DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {

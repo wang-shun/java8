@@ -2,12 +2,10 @@ package io.terminus.doctor.move.controller.material;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.basic.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.basic.service.DoctorMaterialInWareHouseReadService;
-import io.terminus.doctor.basic.service.DoctorMaterialPriceInWareHouseReadService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -18,6 +16,7 @@ import io.terminus.doctor.event.service.DoctorGroupMaterialWriteServer;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.move.dto.DoctorGroupEventTime;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -36,15 +35,15 @@ import static java.util.Objects.isNull;
 @Slf4j
 public class DoctorMaterialManage {
 
-    @RpcConsumer
+    @Autowired
     private DoctorMaterialConsumeProviderReadService materialConsumeProviderReadService;
-    @RpcConsumer
+    @Autowired
     private DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService;
-    @RpcConsumer
+    @Autowired
     private DoctorGroupReadService doctorGroupReadService;
-    @RpcConsumer
+    @Autowired
     private DoctorBarnReadService doctorBarnReadService;
-    @RpcConsumer
+    @Autowired
     private DoctorGroupMaterialWriteServer doctorGroupMaterialWriteServer;
 
 

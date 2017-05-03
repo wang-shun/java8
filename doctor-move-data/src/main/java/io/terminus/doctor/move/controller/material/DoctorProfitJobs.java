@@ -1,7 +1,6 @@
 package io.terminus.doctor.move.controller.material;
 
 import com.google.common.base.Throwables;
-import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -31,9 +30,9 @@ public class DoctorProfitJobs {
 
     private final HostLeader hostLeader;
 
-    @RpcConsumer
+    @Autowired
     private DoctorFarmReadService doctorFarmReadService;
-    @RpcConsumer
+    @Autowired
     private DoctorGroupProfitManage doctorGroupProfitManage;
 
     @Autowired
@@ -46,7 +45,6 @@ public class DoctorProfitJobs {
      * 每天凌晨1点统计昨天的数据
      */
     @Scheduled(cron = "0 4 1 * * ?")
-//    @Scheduled(cron = "0 */1 * * * ?")
     @RequestMapping(value = "/profit", method = RequestMethod.GET)
     public void profitReport() {
 

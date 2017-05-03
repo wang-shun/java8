@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.editHandler.pig;
 
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
@@ -26,6 +27,11 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
     private DoctorModifyPigRemoveEventHandler modifyPigRemoveEventHandler;
     @Autowired
     private DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler;
+
+    @Override
+    protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        throw new InvalidException("chg.farm.not.allow.modify");
+    }
 
     @Override
     protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
