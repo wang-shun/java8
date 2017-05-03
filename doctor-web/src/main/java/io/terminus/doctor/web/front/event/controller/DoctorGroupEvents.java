@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
@@ -198,12 +199,16 @@ public class DoctorGroupEvents {
      * @return 猪群号
      */
     @RequestMapping(value = "/pigCode", method = RequestMethod.GET)
-    public String generateGroupCodeByPigId(@RequestParam(value = "pigId", required = false) Long pigId) {
+    public String generateGroupCodeByPigId(@RequestParam(value = "pigId", required = false) Long pigId, @RequestParam String eventAt) {
         if (pigId == null) {
             return null;
         }
         DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
-        return doctorGroupWebService.generateGroupCode(pigTrack.getCurrentBarnId()).getResult();
+        List<DoctorGroup> groupList = RespHelper.or500(doctorGroupReadService.findGroupByCurrentBarnId(pigTrack.getCurrentBarnId()));
+        if (Arguments.isNullOrEmpty(groupList)) {
+            return pigTrack.getCurrentBarnName() + "(" + eventAt + ")";
+        }
+        return groupList.get(0).getCurrentBarnName();
     }
 
     /**
