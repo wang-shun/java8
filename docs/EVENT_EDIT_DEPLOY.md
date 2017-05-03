@@ -41,15 +41,17 @@ select id from doctor_groups
 );
 
 -- 删除猪事件、猪群事件快照表
-truncate doctor_group_snapshots;
-truncate doctor_pig_snapshots;
--- 清空日报、周报、月报
-truncate doctor_daily_reports;
-truncate doctor_monthly_reports;
-truncate doctor_weekly_reports;
+drop table if exists doctor_group_snapshots;
+drop table if exists doctor_pig_snapshots;
+drop table if exists doctor_event_relations;
+-- 删除日报、周报、月报
+drop table if exists doctor_daily_reports;
+drop table if exists doctor_monthly_reports;
+drop table if exists doctor_weekly_reports;-- 清空消息
 -- 清空消息
 truncate doctor_message_user;
 truncate doctor_messages;
+
 -- 删除工作流相关的表
 drop table if exists workflow_definition_node_events;
 drop table if exists workflow_definition_nodes;
