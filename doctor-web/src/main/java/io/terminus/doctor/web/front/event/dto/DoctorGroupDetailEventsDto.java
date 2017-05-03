@@ -36,6 +36,4 @@ public class DoctorGroupDetailEventsDto implements Serializable {
      * 猪群事件s
      */
     private List<DoctorGroupEvent> groupEvents;
-
-    private Long canRollback;
 }

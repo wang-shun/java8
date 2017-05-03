@@ -1,11 +1,10 @@
 package io.terminus.doctor.event.dto.report.daily;
 
-import com.google.common.collect.Maps;
+import io.terminus.doctor.event.model.DoctorGroupChangeSum;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
 
 /**
  * Desc: 日报统计dto
@@ -17,60 +16,11 @@ import java.util.Map;
 public class DoctorDailyReportDto implements Serializable {
     private static final long serialVersionUID = -1731172501153113322L;
 
-    /**
-     * 妊娠检查日报
-     */
-    private DoctorCheckPregDailyReport checkPreg = new DoctorCheckPregDailyReport();
+    DoctorDailyReport dailyReport;  //猪日报
 
-    /**
-     * 死淘日报
-     */
-    private DoctorDeadDailyReport dead = new DoctorDeadDailyReport();
+    DoctorGroupChangeSum groupChangeSum; //猪群日存栏变化
 
-    /**
-     * 分娩日报
-     */
-    private DoctorDeliverDailyReport deliver = new DoctorDeliverDailyReport();
-
-    /**
-     * 存栏日报
-     */
-    private DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
-
-    /**
-     * 配种日报
-     */
-    private DoctorMatingDailyReport mating = new DoctorMatingDailyReport();
-
-    /**
-     * 销售日报
-     */
-    private DoctorSaleDailyReport sale = new DoctorSaleDailyReport();
-
-    /**
-     * 断奶仔猪日报
-     */
-    private DoctorWeanDailyReport wean = new DoctorWeanDailyReport();
-
-    /**
-     * 每个猪群的存栏
-     */
-    private Map<Long, Integer> groupCountMap = Maps.newHashMap();
-
-    /**
-     * 母猪存栏
-     */
-    private int sowCount;
-
-    /**
-     * 猪场id
-     */
-    private Long farmId;
-
-    /**
-     * 统计时间
-     */
-    private Date sumAt;
+    private Integer FattenWillOut;   //待出栏育肥数
 
     /**
      * 是否失败, true 失败

@@ -6,14 +6,7 @@ import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
-import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
-import io.terminus.doctor.event.dto.report.daily.DoctorDeadDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorDeliverDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorSaleDailyReport;
-import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
+import io.terminus.doctor.event.dto.report.daily.*;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -57,15 +50,17 @@ public class DoctorDailyReportCache {
      * @return  日报
      */
     public DoctorDailyReport getDailyReport(Long farmId, Date date) {
-        return doctorDailyReportDao.findByFarmIdAndSumAt(farmId, Dates.startOfDay(date));
+//        return doctorDailyReportDao.findByFarmIdAndSumAt(farmId, Dates.startOfDay(date));
+        return null;
     }
 
     public DoctorDailyReportDto getDailyReportDto(Long farmId, Date date) {
-        DoctorDailyReport report = getDailyReport(farmId, date);
-        if (report == null || report.getReportData() == null) {
-            return null;
-        }
-        return report.getReportData();
+//        DoctorDailyReport report = getDailyReport(farmId, date);
+//        if (report == null || report.getReportData() == null) {
+//            return null;
+//        }
+//        return report.getReportData();
+        return null;
     }
 
     /**
@@ -73,7 +68,7 @@ public class DoctorDailyReportCache {
      */
     public void putDailyReportToMySQL(Long farmId, Date date, DoctorDailyReportDto reportDto) {
         saveEventAtWhenLiveStock(farmId, date);
-        doctorDailyReportDao.updateByFarmIdAndSumAt(makeDailyReport(farmId, date, reportDto));
+//        doctorDailyReportDao.updateByFarmIdAndSumAt(makeDailyReport(farmId, date, reportDto));
     }
 
     //每次创建今天之前的事件，需要记录事件时间，晚上的job会扫到这个时间，然后刷一遍日报
@@ -154,29 +149,84 @@ public class DoctorDailyReportCache {
         wean.setFarrowSale(doctorKpiDao.getFarrowSaleCount(farmId, startAt, endAt));
 
         //个体管理母猪总存栏
-        report.setSowCount(doctorKpiDao.realTimeLiveStockSow(farmId, startAt));
+//        report.setSowCount(doctorKpiDao.realTimeLiveStockSow(farmId, startAt));
 
         //存栏
         DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
         liveStock.setHoubeiBoar(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId, startAt));
         liveStock.setHoubeiSow(doctorKpiDao.realTimeLiveStockHoubeiSow(farmId, startAt));  //后备母猪
         liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));    //产房母猪
-        liveStock.setPeihuaiSow(report.getSowCount() - liveStock.getBuruSow());            //配怀 = 总存栏 - 产房母猪
+//        liveStock.setPeihuaiSow(report.getSowCount() - liveStock.getBuruSow());            //配怀 = 总存栏 - 产房母猪
         liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
         liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
         liveStock.setFarrow(doctorKpiDao.realTimeLiveStockFarrow(farmId, startAt));
         liveStock.setNursery(doctorKpiDao.realTimeLiveStockNursery(farmId, startAt));
         liveStock.setFatten(doctorKpiDao.realTimeLiveStockFatten(farmId, startAt));
 
-        report.setCheckPreg(checkPreg);
-        report.setDead(dead);
-        report.setDeliver(deliver);
-        report.setMating(mating);
-        report.setSale(sale);
-        report.setWean(wean);
-        report.setLiveStock(liveStock);
-        report.setFarmId(farmId);
-        report.setSumAt(startAt);
+        //后备猪
+        DoctorHoubeiReport houbei = new DoctorHoubeiReport();
+        houbei.setHoubeiCount(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId,startAt));
+        houbei.setHoubeiIn(doctorKpiDao.getMonthlyLiveStockChangeIn(farmId,startAt,endAt).getPeiHuaiBegin());
+        houbei.setChangeSeed(doctorKpiDao.getMonthlyLiveStockChangeToSeed(farmId,startAt,endAt));
+        houbei.setDead(doctorKpiDao.getDeadHoubei(farmId,startAt,endAt));
+        houbei.setSales(doctorKpiDao.getSaleHoubei(farmId,startAt,endAt));
+        houbei.setEliminate(doctorKpiDao.getWeedOutHoubei(farmId,startAt,endAt));
+        houbei.setChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupHoubeiNumber(farmId,startAt,endAt));
+        houbei.setOther(doctorKpiDao.getMonthlyLiveStockChangeGroupHoubeiOtherNumber(farmId,startAt,endAt));
+        houbei.setMaterial(doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId,startAt,endAt).getHoubeiFeedCount());
+        houbei.setMedicinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiDrugAmount());
+        houbei.setConsumablesPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiConsumerAmount());
+        houbei.setVaccinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiVaccineAmount());
+        houbei.setMaterialPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getHoubeiFeedAmount());
+
+        //育肥猪
+        DoctorFatteningReport fattening = new DoctorFatteningReport();
+        fattening.setFattenCount(doctorKpiDao.realTimeLiveStockFatten(farmId,startAt));
+        fattening.setFattenIn(doctorKpiDao.getMonthlyLiveStockChangeIn(farmId,startAt,endAt).getFattenIn());
+        fattening.setDead(doctorKpiDao.getDeadFatten(farmId,startAt,endAt));
+        fattening.setEliminate(doctorKpiDao.getWeedOutFatten(farmId,startAt,endAt));
+        fattening.setSales(doctorKpiDao.getSaleFatten(farmId,startAt,endAt));
+        fattening.setChangeHoubei(doctorKpiDao.getMonthlyLiveStockChangeToHoubei(farmId,startAt,endAt));
+        fattening.setChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupFattenNumber(farmId,startAt,endAt));
+        fattening.setOther(doctorKpiDao.getMonthlyLiveStockChangeGroupFattenOtherNumber(farmId,startAt,endAt));
+        fattening.setMaterial(doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId,startAt,endAt).getFarrowFeedCount());
+        fattening.setMedicinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getFattenDrugAmount());
+        fattening.setConsumablesPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getFattenConsumerAmount());
+        fattening.setVaccinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getFattenVaccineAmount());
+        fattening.setMaterialPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getFattenFeedAmount());
+
+        //保育猪
+        DoctorNurseryReport nursery = new DoctorNurseryReport();
+        nursery.setNursery(doctorKpiDao.realTimeLiveStockNursery(farmId,startAt));
+        nursery.setNurseryIn(doctorKpiDao.getMonthlyLiveStockChangeIn(farmId,startAt,endAt).getNurseryIn());
+        nursery.setDead(doctorKpiDao.getDeadNursery(farmId,startAt,endAt));
+        nursery.setEliminate(doctorKpiDao.getWeedOutNursery(farmId,startAt,endAt));
+        nursery.setSales(doctorKpiDao.getSaleNursery(farmId,startAt,endAt));
+        nursery.setChangeFattening(doctorKpiDao.getMonthlyLiveStockChangeToFatten(farmId,startAt,endAt));
+        nursery.setChangeFarm(doctorKpiDao.getMonthlyLiveStockChangeGroupNuseryNumber(farmId,startAt,endAt));
+        nursery.setOther(doctorKpiDao.getMonthlyLiveStockChangeGroupNuseryOtherNumber(farmId,startAt,endAt));
+        nursery.setMaterial(doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId,startAt,endAt).getNurseryFeedCount());
+        nursery.setMedicinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryDrugAmount());
+        nursery.setConsumablesPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryConsumerAmount());
+        nursery.setVaccinePrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryVaccineAmount());
+        nursery.setMaterialPrice(doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId,startAt,endAt).getNurseryFeedAmount());
+
+
+
+//        report.setCheckPreg(checkPreg);
+//        report.setDead(dead);
+//        report.setDeliver(deliver);
+//        report.setMating(mating);
+//        report.setSale(sale);
+//
+//        report.setHoubei(houbei);
+//        report.setNursery(nursery);
+//        report.setFattening(fattening);
+//
+//        report.setWean(wean);
+//        report.setLiveStock(liveStock);
+//        report.setFarmId(farmId);
+//        report.setSumAt(startAt);
         return report;
     }
 
@@ -190,24 +240,24 @@ public class DoctorDailyReportCache {
     //日报是否已被全量更新
     public boolean reportIsFullInit(Long farmId, Date date) {
         DoctorDailyReport report = this.getDailyReport(farmId, date);
-        if (report == null || report.getReportData() == null) {
-            DoctorDailyReportDto reportDto = this.initDailyReportByFarmIdAndDate(farmId, date);
-            doctorDailyReportDao.create(makeDailyReport(farmId, date, reportDto));
-            return true;
-        }
+//        if (report == null || report.getReportData() == null) {
+//            DoctorDailyReportDto reportDto = this.initDailyReportByFarmIdAndDate(farmId, date);
+//            doctorDailyReportDao.create(makeDailyReport(farmId, date, reportDto));
+//            return true;
+//        }
         return false;
     }
 
     //拼装dailReport
     private DoctorDailyReport makeDailyReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
         DoctorDailyReport report = new DoctorDailyReport();
-        report.setFarmId(farmId);
-        report.setSumAt(Dates.startOfDay(date));
-        report.setSowCount(reportDto.getSowCount());
-        report.setFarrowCount(reportDto.getLiveStock().getFarrow());
-        report.setNurseryCount(reportDto.getLiveStock().getNursery());
-        report.setFattenCount(reportDto.getLiveStock().getFatten());
-        report.setReportData(reportDto);
+//        report.setFarmId(farmId);
+//        report.setSumAt(Dates.startOfDay(date));
+//        report.setSowCount(reportDto.getSowCount());
+//        report.setFarrowCount(reportDto.getLiveStock().getFarrow());
+//        report.setNurseryCount(reportDto.getLiveStock().getNursery());
+//        report.setFattenCount(reportDto.getLiveStock().getFatten());
+//        report.setReportData(reportDto);
         return report;
     }
 }

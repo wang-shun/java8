@@ -42,6 +42,16 @@ public class DoctorWeanGroupInput extends BaseGroupInput implements Serializable
 
     private Long groupId; //关联的猪群
 
+    /**
+     * 触发猪群转群的母猪id
+     */
+    private Long sowId;
+
+    /**
+     * 触发猪群转群的母猪号
+     */
+    private String sowCode;
+
     @Override
     public Map<String, String> descMap() {
         Map<String, String> descMap = new HashMap<>();

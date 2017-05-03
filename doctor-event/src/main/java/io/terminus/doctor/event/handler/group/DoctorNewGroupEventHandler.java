@@ -2,7 +2,6 @@ package io.terminus.doctor.event.handler.group;
 
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -26,8 +24,8 @@ import java.util.Map;
 public class DoctorNewGroupEventHandler extends DoctorAbstractGroupEventHandler{
 
     @Autowired
-    public DoctorNewGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao, DoctorGroupTrackDao doctorGroupTrackDao, DoctorGroupEventDao doctorGroupEventDao, DoctorBarnDao doctorBarnDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
+    public DoctorNewGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao, DoctorGroupEventDao doctorGroupEventDao, DoctorBarnDao doctorBarnDao) {
+        super(doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
     }
 
     @Override

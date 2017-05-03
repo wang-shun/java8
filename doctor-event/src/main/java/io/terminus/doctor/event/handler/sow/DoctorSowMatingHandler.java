@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigMatingEventHandler;
 import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -14,6 +15,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -36,6 +38,9 @@ import static java.util.Objects.isNull;
 @Component
 @Slf4j
 public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
+
+    @Autowired
+    private DoctorModifyPigMatingEventHandler doctorModifyPigMatingEventHandler;
 
     // 默认114 天 预产日期
     public static final Integer MATING_PREG_DAYS = 114;
@@ -99,9 +104,10 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorMatingDto matingDto = (DoctorMatingDto) inputDto;
+        doctorPigEvent.setJudgePregDate(matingDto.getJudgePregDate());
+        doctorPigEvent.setMateType(matingDto.getMatingType());
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
         doctorPigEvent.setBoarCode(matingDto.getMatingBoarPigCode());
-        doctorPigEvent.setMattingDate(generateEventAt(matingDto.getMatingDate()));
         //  校验断奶后, 第一次配种, 增加胎次
         Map<String, Object> trackExtraMap = doctorPigTrack.getExtraMap();
         if (!isNull(trackExtraMap) &&
@@ -146,6 +152,11 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         return doctorPigEvent;
     }
 
+    @Override
+    protected void updateDailyForNew(DoctorPigEvent newPigEvent) {
+        BasePigEventInputDto inputDto = JSON_MAPPER.fromJson(newPigEvent.getExtra(), DoctorMatingDto.class);
+        doctorModifyPigMatingEventHandler.updateDailyOfNew(newPigEvent, inputDto);
+    }
 
     //找出 maxDate(此事件配种日期) 之前的第一个妊娠检查事件, 根据妊检结果判定此次配种类型
     public static DoctorMatingType getPigMateType(List<DoctorPigEvent> events, Date maxDate) {

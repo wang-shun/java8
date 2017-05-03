@@ -7,6 +7,7 @@
 
 <mapper namespace="DoctorPigEvent">
 
+
     <resultMap id="DoctorPigEventMap" type="DoctorPigEvent">
         <id column="id" property="id"/>
         <result column="org_id" property="orgId"/>
@@ -23,6 +24,7 @@
         <result column="desc" property="desc"/>
         <result column="barn_id" property="barnId"/>
         <result column="barn_name" property="barnName"/>
+        <result column="barn_type" property="barnType"/>
         <result column="rel_event_id" property="relEventId"/>
         <result column="rel_group_event_id" property="relGroupEventId"/>
         <result column="rel_pig_event_id" property="relPigEventId"/>
@@ -63,11 +65,27 @@
         <result column="abortion_date" property="abortionDate"/>
         <result column="partwean_date" property="partweanDate"/>
         <result column="doctor_mate_type" property="doctorMateType"/>
+        <result column="mate_type" property="mateType"/>
         <result column="boar_code" property="boarCode"/>
         <result column="out_id" property="outId"/>
         <result column="status" property="status"/>
         <result column="event_source" property="eventSource"/>
         <result column="extra" property="extra"/>
+        <result column="source" property="source"/>
+        <result column="breed_id" property="breedId"/>
+        <result column="breed_name" property="breedName"/>
+        <result column="breed_type_id" property="breedTypeId"/>
+        <result column="breed_type_name" property="breedTypeName"/>
+        <result column="boar_type" property="boarType"/>
+        <result column="judge_preg_date" property="judgePregDate"/>
+        <result column="quantity" property="quantity"/>
+        <result column="weight" property="weight"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="customer_name" property="customerName"/>
+        <result column="basic_id" property="basicId"/>
+        <result column="basic_name" property="basicName"/>
+        <result column="vaccination_id" property="vaccinationId"/>
+        <result column="vaccination_name" property="vaccinationName"/>
         <result column="remark" property="remark"/>
         <result column="operator_id" property="operatorId"/>
         <result column="operator_name" property="operatorName"/>
@@ -101,6 +119,7 @@
         `desc`,
         barn_id,
         barn_name,
+        barn_type,
         rel_event_id,
         rel_group_event_id,
         rel_pig_event_id,
@@ -141,11 +160,27 @@
         abortion_date,
         partwean_date,
         doctor_mate_type,
+        mate_type,
         boar_code,
         out_id,
         status,
         event_source,
         extra,
+        source,
+        breed_id,
+        breed_name,
+        breed_type_id,
+        breed_type_name,
+        boar_type,
+        judge_preg_date,
+        quantity,
+        weight,
+        customer_id,
+        customer_name,
+        basic_id,
+        basic_name,
+        vaccination_id,
+        vaccination_name,
         remark,
         operator_id,
         operator_name,
@@ -173,6 +208,7 @@
         #{desc},
         #{barnId},
         #{barnName},
+        #{barnType},
         #{relEventId},
         #{relGroupEventId},
         #{relPigEventId},
@@ -213,11 +249,27 @@
         #{abortionDate},
         #{partweanDate},
         #{doctorMateType},
+        #{mateType},
         #{boarCode},
         #{outId},
         #{status},
         #{eventSource},
         #{extra},
+        #{source},
+        #{breedId},
+        #{breedName},
+        #{breedTypeId},
+        #{breedTypeName},
+        #{boarType},
+        #{judgePregDate},
+        #{quantity},
+        #{weight},
+        #{customerId},
+        #{customerName},
+        #{basicId},
+        #{basicName},
+        #{vaccinationId},
+        #{vaccinationName},
         #{remark},
         #{operatorId},
         #{operatorName},
@@ -247,6 +299,7 @@
         <if test="desc != null">AND `desc` = #{desc}</if>
         <if test="barnId != null">AND barn_id = #{barnId}</if>
         <if test="barnName != null">AND barn_name = #{barnName}</if>
+        <if test="barnType != null">AND barn_Type = #{barnType}</if>
         <if test="relEventId != null">AND rel_event_id = #{relEventId}</if>
         <if test="relGroupEventId != null">AND rel_group_event_id = #{relGroupEventId}</if>
         <if test="relPigEventId != null">AND rel_pig_event_id = #{relPigEventId}</if>
@@ -287,9 +340,25 @@
         <if test="abortionDate != null">AND abortion_date = #{abortionDate}</if>
         <if test="partweanDate != null">AND partwean_date = #{partweanDate}</if>
         <if test="doctorMateType != null">AND doctor_mate_type = #{doctorMateType}</if>
+        <if test="mateType != null">AND mate_type = #{mateType}</if>
         <if test="boarCode != null">AND boar_code = #{boarCode}</if>
         <if test="outId != null">AND out_id = #{outId}</if>
         <if test="extra != null">AND extra = #{extra}</if>
+        <if test="source != null">AND source = #{source}</if>
+        <if test="breedId != null">AND breed_id = #{breedId}</if>
+        <if test="breedName != null">AND breed_name = #{breedName}</if>
+        <if test="breedTypeId != null">AND breed_type_id = #{breedTypeId}</if>
+        <if test="breedTypeName != null">AND breed_type_name = #{breedTypeName}</if>
+        <if test="boarType != null">AND boar_type = #{boarType}</if>
+        <if test="judgePregDate != null">AND judge_preg_date = #{judgePregDate}</if>
+        <if test="quantity != null">AND quantity = #{quantity}</if>
+        <if test="weight != null">AND weight = #{weight}</if>
+        <if test="customerId != null">AND customer_id = #{customerId}</if>
+        <if test="customerName != null">AND customer_name = #{customerName}</if>
+        <if test="basicId != null">AND basic_id = #{basicId}</if>
+        <if test="basicName != null">AND basic_name = #{basicName}</if>
+        <if test="vaccinationId != null">AND vaccination_id = #{vaccinationId}</if>
+        <if test="vaccinationName != null">AND vaccination_name = #{vaccinationName}</if>
         <if test="eventSource != null">AND event_source = #{eventSource}</if>
         <if test="remark != null">AND remark = #{remark}</if>
         <if test="operatorId != null">AND operator_id = #{operatorId}</if>
@@ -302,6 +371,12 @@
             AND `type` IN
             <foreach collection="types" item="i" open="(" close=")" separator=",">
                 #{i}
+            </foreach>
+        </if>
+        <if test="barnTypes != null &amp;&amp; barnTypes.size() > 0">
+            AND `barn_type` IN
+            <foreach collection="barnTypes" item="barnType" open="(" close=")" separator=",">
+                #{barnType}
             </foreach>
         </if>
         <if test="createdAtStart != null">AND created_at &gt;= #{createdAtStart}</if>
@@ -337,6 +412,7 @@
             #{item.desc},
             #{item.barnId},
             #{item.barnName},
+            #{item.barnType},
             #{item.relEventId},
             #{item.relGroupEventId},
             #{item.relPigEventId},
@@ -377,11 +453,27 @@
             #{item.abortionDate},
             #{item.partweanDate},
             #{item.doctorMateType},
+            #{item.mateType},
             #{item.boarCode},
             #{item.outId},
             #{item.status},
             #{item.eventSource},
             #{item.extra},
+            #{item.source},
+            #{item.breedId},
+            #{item.breedName},
+            #{item.breedTypeId},
+            #{item.breedTypeName},
+            #{item.boarType},
+            #{item.judgePregDate},
+            #{item.quantity},
+            #{item.weight},
+            #{item.customerId},
+            #{item.customerName},
+            #{item.basicId},
+            #{item.basicName},
+            #{item.vaccinationId},
+            #{item.vaccinationName},
             #{item.remark},
             #{item.operatorId},
             #{item.operatorName},
@@ -595,6 +687,7 @@
             <if test="desc != null">`desc` = #{desc},</if>
             <if test="barnId != null">barn_id = #{barnId},</if>
             <if test="barnName != null">barn_name = #{barnName},</if>
+            <if test="barnType != null">barn_type = #{barnType},</if>
             <if test="relEventId != null">rel_event_id = #{relEventId},</if>
             <if test="relGroupEventId != null">rel_group_event_id = #{relGroupEventId},</if>
             <if test="relPigEventId != null">rel_pig_event_id = #{relPigEventId},</if>
@@ -635,10 +728,26 @@
             <if test="abortionDate != null">abortion_date = #{abortionDate},</if>
             <if test="partweanDate != null">partwean_date = #{partweanDate},</if>
             <if test="doctorMateType != null">doctor_mate_type = #{doctorMateType},</if>
+            <if test="mateType != null">mate_type = #{mateType},</if>
             <if test="boarCode != null">boar_code = #{boarCode},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="status != null">status = #{status},</if>
             <if test="eventSource != null">event_source = #{eventSource},</if>
+            <if test="source != null">source = #{source},</if>
+            <if test="breedId != null">breed_id = #{breedId},</if>
+            <if test="breedName != null">breed_name = #{breedName},</if>
+            <if test="breedTypeId != null">breed_type_id = #{breedTypeId},</if>
+            <if test="breedTypeName != null">breed_type_name = #{breedTypeName},</if>
+            <if test="boarType != null">boar_type = #{boarType},</if>
+            <if test="judgePregDate != null">judge_preg_date = #{judgePregDate},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="weight != null">weight = #{weight},</if>
+            <if test="customerId != null">customer_id = #{customerId},</if>
+            <if test="customerName != null">customer_name = #{customerName},</if>
+            <if test="basicId != null">basic_id = #{basicId},</if>
+            <if test="basicName != null">basic_name = #{basicName},</if>
+            <if test="vaccinationId != null">vaccination_id = #{vaccinationId},</if>
+            <if test="vaccinationName != null">vaccination_name = #{vaccinationName},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="operatorId != null">operator_id = #{operatorId},</if>
@@ -752,6 +861,7 @@
                 `desc` = #{item.desc},
                 barn_id = #{item.barnId},
                 barn_name = #{item.barnName},
+                barn_type = #{item.barnType},
                 rel_event_id = #{item.relEventId},
                 rel_group_event_id = #{item.relGroupEventId},
                 rel_pig_event_id = #{item.relPigEventId},
@@ -792,11 +902,27 @@
                 abortion_date = #{item.abortionDate},
                 partwean_date = #{item.partweanDate},
                 doctor_mate_type = #{item.doctorMateType},
+                mate_type = #{item.mateType},
                 boar_code = #{item.boarCode},
                 out_id = #{item.outId},
                 status = #{item.status},
                 event_source = #{item.eventSource},
                 extra = #{item.extra},
+                source = #{item.source},
+                breed_id = #{item.breedId},
+                breed_name = #{item.breedName},
+                breed_type_id = #{item.breedTypeId},
+                breed_type_name = #{item.breedTypeName},
+                boar_type = #{item.boarType},
+                judge_preg_date = #{item.judgePregDate},
+                quantity = #{item.quantity},
+                weight = #{item.weight},
+                customer_id = #{item.customerId},
+                customer_name = #{item.customerName},
+                basic_id = #{item.basicId},
+                basic_name = #{item.basicName},
+                vaccination_id = #{item.vaccinationId},
+                vaccination_name = #{item.vaccinationName},
                 remark = #{item.remark},
                 operator_id = #{item.operatorId},
                 operator_name = #{item.operatorName},
@@ -962,11 +1088,12 @@
         WHERE id = #{id}
     </select>
 
-    <select id="findLastEventExcludeTypes" parameterType="map" resultMap="DoctorPigEventMap" >
+    <select id="findLastManualEventExcludeTypes" parameterType="map" resultMap="DoctorPigEventMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE status = 1
         AND pig_id = #{pigId}
+        AND is_auto = 0
         <if test="types != null &amp;&amp; types.size() > 0">
             AND `type` NOT IN
             <foreach collection="types" item="i" open="(" close=")" separator=",">
@@ -1022,4 +1149,275 @@
         AND is_auto = 1
         AND extra is NULL
     </select>
+
+    <select id="countNpdWeanEvent" parameterType="map" resultType="long">
+        SELECT ifnull(count( * ), 0)
+        FROM (
+        SELECT pig_id
+        FROM <include refid="tb"/>
+        WHERE
+        1 = 1
+        <include refid="criteria"/>
+        AND kind = 1
+        GROUP BY pig_id
+        ) number , `doctor_pig_tracks` tracks
+        WHERE number.pig_id = tracks.`pig_id`
+        <if test="barnId != null">AND tracks.current_barn_id = #{barnId}</if>
+        <if test="barnName != null">AND tracks.current_barn_name = #{barnName}</if>
+
+    </select>
+
+    <select id="sumPngWeanEvent" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorNpdExportDto" >
+
+        select dd.pig_id as pigId,dd.pig_code as pigCode,tracks.current_barn_name as barnName,dd.dpnpd,dd.pfnpd,dd.plnpd,dd.ptnpd,dd.jpnpd,dd.npd
+        from (
+        SELECT	pig_id,
+        pig_code,
+        sum(dp_npd) as dpnpd,
+        sum(pf_npd) as pfnpd,
+        sum(pl_npd) as plnpd,
+        sum(ps_npd) as psnpd,
+        sum(pt_npd) as ptnpd,
+        sum(jp_npd) as jpnpd,
+        sum(npd) as npd
+        FROM `doctor_pig_events`
+        WHERE
+        kind = 1
+        <if test="orgId != null">AND org_id = #{orgId}</if>
+        <if test="orgName != null">AND org_name = #{orgName}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="farmName != null">AND farm_name = #{farmName}</if>
+        <if test="pigId != null">AND pig_id = #{pigId}</if>
+        <if test="pigCode != null">AND pig_code = #{pigCode}</if>
+        <if test="isAuto != null">AND is_auto = #{isAuto}</if>
+        <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+        <if test="type != null">AND type = #{type}</if>
+        GROUP BY pig_id,pig_code
+        ) dd , `doctor_pig_tracks` tracks
+        WHERE
+        dd.pig_id = tracks.`pig_id`
+        <if test="barnId != null">AND tracks.current_barn_id = #{barnId}</if>
+        <if test="barnName != null">AND tracks.current_barn_name = #{barnName}</if>
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="countSales" parameterType="map" resultType="long">
+        SELECT count(*)
+        FROM v_doctor_sales
+        WHERE 1 = 1
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="batch != null">AND batch_no = #{batch}</if>
+        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="barnName != null">AND barn_name = #{barnName}</if>
+        <if test="pigTypeId != null">AND pig_type = #{pigTypeId}</if>
+        <if test="client != null">AND customer_id = #{client}</if>
+        <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+    </select>
+
+    <select id="findSalesEvent" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
+        SELECT
+        batch_no AS batch,
+        barn_name AS barnName,
+        event_at AS salesDate,
+        quantity AS pigNumber,
+        pig_type_name AS pigTypeName,
+        weight AS pigWeight,
+        price AS pigPrice,
+        day_age AS ages,
+        amount AS pigAmount,
+        customer_name AS client
+        FROM v_doctor_sales
+        WHERE 1 =1
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="batch != null">AND batch_no = #{batch}</if>
+        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="barnName != null">AND barn_name = #{barnName}</if>
+        <if test="pigTypeId != null">AND pig_type = #{pigTypeId}</if>
+        <if test="client != null">AND customer_id = #{client}</if>
+        <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="getFarrowEventByParity" parameterType="map" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        status = 1
+        AND type = 15
+        AND pig_id = #{pigId}
+        AND parity = #{parity}
+    </select>
+
+    <select id="getLastStatusEventBeforeEventAt" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        status = 1
+        AND pig_id = #{pigId}
+        AND event_at &lt;= date_format(#{eventAt}, '%Y-%m-%d')
+        AND type in (6, 7, 9, 11, 14, 15, 16)
+        ORDER BY event_at desc , id DESC
+        limit 1
+    </select>
+
+    <select id="getFirstMateEvent" parameterType="map" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        status = 1
+        AND pig_id = #{pigId}
+        AND event_at &lt;= date_format(#{eventAt}, '%Y-%m-%d')
+        AND current_mating_count = 1
+        ORDER BY event_at DESC, id DESC
+        limit 1
+    </select>
+    
+    <select id="sumProFitPigType" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorProfitExportDto">
+        SELECT
+        pig_type AS pigType,
+        pig_type_name AS pigTypeName,
+        barn_id AS barnId,
+        amount as amount
+        FROM v_doctor_sales
+        WHERE 1 = 1
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="pigTypeId != null">AND pig_type = #{pigTypeId}</if>
+        <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+    </select>
+
+    <select id="getLastStatusEventBeforeEventAtExcludeId" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        status = 1
+        AND id &lt; #{id}
+        AND pig_id = #{pigId}
+        AND event_at &lt;= date_format(#{eventAt}, '%Y-%m-%d')
+        AND type not in (3,4,5,8)
+        ORDER BY id DESC
+        limit 1
+    </select>
+
+    <select id="getLastEventBeforeRemove" resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        status = 1
+        AND id &lt; #{id}
+        AND pig_id = #{pigId}
+        ORDER BY event_at DESC, id DESC
+        limit 1
+    </select>
+
+    <delete id="deleteByChgFarm" parameterType="long" >
+        DELETE FROM <include refid="tb"/>
+        WHERE
+        pig_id = #{pigId}
+        AND event_source = 5
+    </delete>
+
+    <update id="updateIncludeNull" parameterType="DoctorPigEvent">
+        update
+        <include refid="tb"/>
+        <set>
+            org_id = #{orgId},
+            org_name = #{orgName},
+            farm_id = #{farmId},
+            farm_name = #{farmName},
+            pig_id = #{pigId},
+            pig_code = #{pigCode},
+            is_auto = #{isAuto},
+            event_at = #{eventAt},
+            `type` = #{type},
+            kind = #{kind},
+            `name` = #{name},
+            `desc` = #{desc},
+            barn_id = #{barnId},
+            barn_name = #{barnName},
+            barn_type = #{barnType},
+            rel_event_id = #{relEventId},
+            rel_group_event_id = #{relGroupEventId},
+            rel_pig_event_id = #{relPigEventId},
+            change_type_id = #{changeTypeId},
+            price = #{price},
+            amount = #{amount},
+            pig_status_before = #{pigStatusBefore},
+            pig_status_after = #{pigStatusAfter},
+            parity = #{parity},
+            is_impregnation = #{isImpregnation},
+            is_delivery = #{isDelivery},
+            preg_days = #{pregDays},
+            feed_days = #{feedDays},
+            preg_check_result = #{pregCheckResult},
+            dp_npd = #{dpnpd},
+            pf_npd = #{pfnpd},
+            pl_npd = #{plnpd},
+            ps_npd = #{psnpd},
+            py_npd = #{pynpd},
+            pt_npd = #{ptnpd},
+            jp_npd = #{jpnpd},
+            npd = #{npd},
+            group_id = #{groupId},
+            farrow_weight = #{farrowWeight},
+            <if test="liveCount == null"> live_count = 0,</if>
+            <if test="liveCount != null"> live_count = #{liveCount},</if>
+            <if test="healthCount == null"> health_count = 0,</if>
+            <if test="healthCount != null"> health_count = #{healthCount},</if>
+            <if test="weakCount == null"> weak_count = 0,</if>
+            <if test="weakCount != null"> weak_count = #{weakCount},</if>
+            <if test="mnyCount == null"> mny_count = 0,</if>
+            <if test="mnyCount != null"> mny_count = #{mnyCount},</if>
+            <if test="jxCount == null"> jx_count = 0,</if>
+            <if test="jxCount != null"> jx_count = #{jxCount},</if>
+            <if test="deadCount == null"> dead_count = 0,</if>
+            <if test="deadCount != null"> dead_count = #{deadCount},</if>
+            <if test="blackCount == null"> black_count = 0,</if>
+            <if test="blackCount != null"> black_count = #{blackCount},</if>
+            <if test="weanCount == null"> wean_count = 0,</if>
+            <if test="weanCount != null"> wean_count = #{weanCount},</if>
+            wean_avg_weight = #{weanAvgWeight},
+            current_mating_count = #{currentMatingCount},
+            check_date = #{checkDate},
+            matting_date = #{mattingDate},
+            farrowing_date = #{farrowingDate},
+            abortion_date = #{abortionDate},
+            partwean_date = #{partweanDate},
+            doctor_mate_type = #{doctorMateType},
+            mate_type = #{mateType},
+            boar_code = #{boarCode},
+            out_id = #{outId},
+            status = #{status},
+            event_source = #{eventSource},
+            extra = #{extra},
+            source = #{source},
+            breed_id = #{breedId},
+            breed_name = #{breedName},
+            breed_type_id = #{breedTypeId},
+            breed_type_name = #{breedTypeName},
+            boar_type = #{boarType},
+            judge_preg_date = #{judgePregDate},
+            quantity = #{quantity},
+            weight = #{weight},
+            customer_id = #{customerId},
+            customer_name = #{customerName},
+            basic_id = #{basicId},
+            basic_name = #{basicName},
+            vaccination_id = #{vaccinationId},
+            vaccination_name = #{vaccinationName},
+            remark = #{remark},
+            operator_id = #{operatorId},
+            operator_name = #{operatorName},
+            creator_id = #{creatorId},
+            creator_name = #{creatorName},
+            updator_id = #{updatorId},
+            updator_name = #{updatorName},
+            created_at = #{createdAt},
+            updated_at = now()
+        </set>
+        where id = #{id}
+    </update>
 </mapper>

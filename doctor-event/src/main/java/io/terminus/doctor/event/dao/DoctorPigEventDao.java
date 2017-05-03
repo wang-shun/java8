@@ -2,14 +2,19 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
+import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.event.dto.DoctorNpdExportDto;
+import io.terminus.doctor.event.dto.DoctorPigSalesExportDto;
+import io.terminus.doctor.event.dto.DoctorProfitExportDto;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -369,8 +374,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     /**
      * 查询最新影响事件不包含某些事件类型的最新事件
      */
-    public DoctorPigEvent findLastEventExcludeTypes(Long pigId, List<Integer> types) {
-        return getSqlSession().selectOne(sqlId("findLastEventExcludeTypes"), ImmutableMap.of("pigId", pigId, "types", types));
+    public DoctorPigEvent findLastManualEventExcludeTypes(Long pigId, List<Integer> types) {
+        return getSqlSession().selectOne(sqlId("findLastManualEventExcludeTypes"), ImmutableMap.of("pigId", pigId, "types", types));
     }
 
     /*
@@ -414,5 +419,134 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      */
     public List<DoctorPigEvent> queryTriggerWeanEvent() {
         return getSqlSession().selectList(sqlId("queryTriggerWeanEvent"));
+    }
+
+    /**
+     * 计算npd的数量用于计算分页数据
+     * @param maps
+     * @return
+     */
+    public Long countNpdWeanEvent(Map<String, Object> maps) {
+        return getSqlSession().selectOne(sqlId("countNpdWeanEvent"), maps);
+    }
+
+    /**
+     * npd的计算
+     * @param maps
+     * @param offset
+     * @param limit
+     * @return
+     */
+    public Paging<DoctorNpdExportDto> sumNpdWeanEvent(Map<String, Object> maps, Integer offset, Integer limit) {
+        maps.put("offset", offset);
+        maps.put("limit", limit);
+
+        maps = ImmutableMap.copyOf(Params.filterNullOrEmpty(maps));
+        long total = countNpdWeanEvent(maps);
+        if (total <= 0){
+            return new Paging<>(0L, Collections.<DoctorNpdExportDto>emptyList());
+        }
+        List<DoctorNpdExportDto> doctorNpdExportDtos = getSqlSession().selectList(sqlId("sumPngWeanEvent"), maps);
+        return new Paging<>(total, doctorNpdExportDtos);
+    }
+
+
+    public Long countSaleEvent(Map<String, Object> maps) {
+        return getSqlSession().selectOne(sqlId("countSales"), maps);
+    }
+    /**
+     * 销售情况
+     * @param maps
+     * @param offset
+     * @param limit
+     * @return
+     */
+    public Paging<DoctorPigSalesExportDto> findSalesEvent(Map<String, Object> maps, Integer offset, Integer limit) {
+        maps.put("offset", offset);
+        maps.put("limit", limit);
+        long total = countSaleEvent(maps);
+        if (total <= 0) {
+            return new Paging<>(0L, Collections.<DoctorPigSalesExportDto>emptyList());
+        }
+        List<DoctorPigSalesExportDto> doctorPigSalesExportDtos = getSqlSession().selectList(sqlId("findSalesEvent"), maps);
+        return new Paging<>(total, doctorPigSalesExportDtos);
+    }
+
+    /**
+     * 获取猪某一胎次下的分娩事件
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @return 分娩事件
+     */
+    public DoctorPigEvent getFarrowEventByParity(Long pigId, Integer parity) {
+        return getSqlSession().selectOne(sqlId("getFarrowEventByParity"), ImmutableMap.of("pigId", pigId, "parity", parity));
+    }
+
+    /**
+     * 获取某时间前的影响状态的最近的事件
+     * @param pigId 猪id
+     * @param eventAt 时间
+     * @return 事件
+     */
+    public DoctorPigEvent getLastStatusEventBeforeEventAt(Long pigId, Date eventAt){
+        return getSqlSession().selectOne(sqlId("getLastStatusEventBeforeEventAt"), ImmutableMap.of("pigId", pigId, "eventAt",eventAt));
+    }
+
+    /**
+     * 获取某时间前的包括制定id的影响状态的最近的事件
+     * @param pigId 猪id
+     * @param eventAt 时间
+     * @param id 不包括的事件id
+     * @return 事件
+     */
+    public DoctorPigEvent getLastStatusEventBeforeEventAtExcludeId(Long pigId, Date eventAt, Long id){
+        return getSqlSession().selectOne(sqlId("getLastStatusEventBeforeEventAtExcludeId"), ImmutableMap.of("pigId", pigId, "eventAt",eventAt, "id", id));
+    }
+
+    /**
+     * 获取时间前的初配事件
+     * @param pigId 猪id
+     * @param eventAt 时间
+     * @return 初配事件
+     */
+    public DoctorPigEvent getFirstMateEvent(Long pigId, Date eventAt) {
+        return getSqlSession().selectOne(sqlId("getFirstMateEvent"), ImmutableMap.of("pigId", pigId, "eventAt", eventAt));
+    }
+
+    /**
+     * 猪的不同种类进行金额的统计
+     * 利润情况
+     * @param maps
+     * @return
+     */
+    public List<DoctorProfitExportDto> sumProfitPigType(Map<String, Object> maps) {
+        maps = Params.filterNullOrEmpty(maps);
+        return getSqlSession().selectList(sqlId("sumProFitPigType"), maps);
+    }
+
+    /**
+     * 删除猪转场触发的事件
+     */
+    public void deleteByChgFarm(Long pigId) {
+        getSqlSession().delete(sqlId("deleteByChgFarm"), pigId);
+     }
+
+    /**
+     * 获取离场前的最新事件
+     * @param pigId 猪id
+     * @param id 离场事件id
+     * @return 离场前的最新事件
+     */
+    public DoctorPigEvent getLastEventBeforeRemove(Long pigId, Long id) {
+        return getSqlSession().selectOne(sqlId("getLastEventBeforeRemove"), ImmutableMap.of("pigId", pigId, "id", id));
+    }
+
+    /**
+     * 更新事件包括字段为null
+     * @param pigEvent 猪事件
+     * @return 更新是否成功
+     */
+    public Boolean updateIncludeNull(DoctorPigEvent pigEvent) {
+        return getSqlSession().update(sqlId("updateIncludeNull"), pigEvent) == 1;
     }
 }

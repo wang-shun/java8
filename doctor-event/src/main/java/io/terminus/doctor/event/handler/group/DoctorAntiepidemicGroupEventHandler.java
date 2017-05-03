@@ -1,13 +1,10 @@
 package io.terminus.doctor.event.handler.group;
 
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -34,11 +31,10 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
     private final DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired
-    public DoctorAntiepidemicGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                               DoctorGroupTrackDao doctorGroupTrackDao,
+    public DoctorAntiepidemicGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao,
                                                DoctorGroupEventDao doctorGroupEventDao,
                                                DoctorBarnDao doctorBarnDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
+        super(doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
@@ -47,15 +43,21 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
         input.setEventType(GroupEventType.ANTIEPIDEMIC.getValue());
         DoctorAntiepidemicGroupInput antiepidemic = (DoctorAntiepidemicGroupInput) input;
         checkQuantity(groupTrack.getQuantity(), antiepidemic.getQuantity());
-        //1.转换下防疫信息
-        DoctorAntiepidemicGroupEvent antiEvent = BeanMapper.map(antiepidemic, DoctorAntiepidemicGroupEvent.class);
 
         //2.创建防疫事件
-        DoctorGroupEvent<DoctorAntiepidemicGroupEvent> event = dozerGroupEvent(group, GroupEventType.ANTIEPIDEMIC, antiepidemic);
+        DoctorGroupEvent<DoctorAntiepidemicGroupInput> event = dozerGroupEvent(group, GroupEventType.ANTIEPIDEMIC, antiepidemic);
 
+        event.setBasicId(antiepidemic.getVaccinItemId());
+        event.setBasicName(antiepidemic.getVaccinItemName());
+        event.setVaccinationId(antiepidemic.getVaccinId());
+        event.setVaccinationName(antiepidemic.getVaccinName());
+        event.setVaccinResult(antiepidemic.getVaccinResult());
         event.setQuantity(antiepidemic.getQuantity());
-        event.setExtraMap(antiEvent);
+        event.setExtraMap(antiepidemic);
         event.setEventSource(SourceType.INPUT.getValue());
+        event.setOperatorId(antiepidemic.getVaccinStaffId());
+        event.setOperatorName(antiepidemic.getVaccinStaffName());
+
         return event;
     }
 

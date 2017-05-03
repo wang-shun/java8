@@ -36,7 +36,7 @@ public class DoctorGroupDayAgeJobs {
      * 猪群日龄计算job
      * 每天凌晨3点统计一次
      */
-    @Scheduled(cron = "0 0 3 * * ?")
+//    @Scheduled(cron = "0 0 3 * * ?")
     @RequestMapping(value = "/dayAge", method = RequestMethod.GET)
     public void incrDayAge() {
         try {

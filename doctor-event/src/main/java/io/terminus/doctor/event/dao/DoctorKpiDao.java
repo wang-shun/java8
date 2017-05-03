@@ -70,6 +70,13 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 分娩初生重总重
+     */
+    public double getFarrowWeight(Long farmId, Date startAt, Date endAt) {
+        return EventUtil.get2(this.sqlSession.selectOne(sqlId("farrowWeight"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt)));
+    }
+
+    /**
      * 产活仔数
      */
     public int getDeliveryLive(Long farmId, Date startAt, Date endAt) {
@@ -217,6 +224,50 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 育肥猪转后备猪
+     */
+    public int getMonthlyLiveStockChangeToHoubei(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeToHoubei"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+    /**
+     * 保育猪转场
+     */
+    public int getMonthlyLiveStockChangeGroupNuseryNumber(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeGroupNuseryNumber"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+    /**
+     * 育肥转场
+     */
+    public int getMonthlyLiveStockChangeGroupFattenNumber(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeGroupFattenNumber"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+    /**
+     * 后备转场
+     */
+    public int getMonthlyLiveStockChangeGroupHoubeiNumber(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeGroupHoubeiNumber"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 保育猪转场
+     */
+    public int getMonthlyLiveStockChangeGroupNuseryOtherNumber(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeGroupNuseryOtherNumber"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+    /**
+     * 育肥转场
+     */
+    public int getMonthlyLiveStockChangeGroupFattenOtherNumber(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeGroupFattenOtherNumber"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+    /**
+     * 后备转场
+     */
+    public int getMonthlyLiveStockChangeGroupHoubeiOtherNumber(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMonthlyLiveStockChangeGroupHoubeiOtherNumber"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 销售情况: 母猪
      */
     public int getSaleSow(Long farmId, Date startAt, Date endAt) {
@@ -249,6 +300,34 @@ public class DoctorKpiDao {
      */
     public int getSaleHoubei(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne(sqlId("getSaleHoubei"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 进场情况: 母猪
+     */
+    public int getInSow(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getInSow"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 其他数量减少情况: 母猪
+     */
+    public int getOtherOutSow(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getOtherOutSow"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 进场情况: 公猪
+     */
+    public int getInBoar(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getInBoar"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 其他数量减少情况: 公猪
+     */
+    public int getOtherOutBoar(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getOtherOutBoar"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
@@ -563,6 +642,16 @@ public class DoctorKpiDao {
     }
 
     /**
+     *
+     * @param farmId
+     * @param date
+     * @return
+     */
+    public int realTimeLiveStockPHSow(Long farmId, Date date) {
+        return sqlSession.selectOne(sqlId("realTimeLiveStockPHSow"), ImmutableMap.of("farmId", farmId, "date", date));
+    }
+
+    /**
      * 猪群销售: 基础价格10kg的均价
      */
     public long getGroupSaleBasePrice10(Long farmId, Date startAt, Date endAt) {
@@ -777,6 +866,200 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 猪群实时存栏
+     * @param groupId
+     * @param date
+     * @return
+     */
+    public int realTimeLivetockGroup(Long groupId, Date date){
+        return sqlSession.selectOne(sqlId("realTimeLivetockGroup"), ImmutableMap.of("groupId", groupId, "date", date));
+    }
+
+    /**
+     * 具体某个猪群内部转入
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupInnerIn(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupInnerIn"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群外部转入
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupOuterIn(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupOuterIn"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群销售
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupSale(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupSale"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群死淘
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupDead(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupDead"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群死淘
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupWeedOut(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupWeedOut"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群其他变动
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupOtherChange(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupOtherChange"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群转场
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupChgFarm(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupChgFarm"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群内转
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupInnerOut(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupInnerOut"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群外传
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupOuterOut(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupOuterOut"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群外传
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getGroupTrunSeed(Long groupId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getGroupTurnSeed"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 具体某个猪群断奶数量
+     * @param groupId
+     * @param date
+     * @return
+     */
+    public int getGroupWean(Long groupId, Date date){
+        return sqlSession.selectOne(sqlId("getGroupWean"), ImmutableMap.of("groupId", groupId, "date", date));
+    }
+
+    /**
+     * 具体某个猪群未断奶数量
+     * @param groupId
+     * @param date
+     * @return
+     */
+    public int getGroupUnWean(Long groupId, Date date){
+        return sqlSession.selectOne(sqlId("getGroupUnWean"), ImmutableMap.of("groupId", groupId, "date", date));
+    }
+
+    /**
+     * 配怀母猪进场
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getSowPhInFarm(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getSowPhInFarm"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配怀母猪死亡
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getSowPhDead(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getSowPhDead"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配怀母猪淘汰
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getSowPhWeedOut(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getSowPhWeedOut"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产房母猪死亡
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getSowCfDead(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getSowCfDead"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产房母猪淘汰
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getSowCfWeedOut(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSowCfWeedOut"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+    /**
      * @param barnId
      * @param date
      * @param index
@@ -797,5 +1080,65 @@ public class DoctorKpiDao {
 
     public Integer getOutTrasGroup(Long barnId,Date date, Integer index) {
         return sqlSession.selectOne(sqlId("getOutTrasGroup"), ImmutableMap.of("barnId", barnId, "date", date, "index", index));
+    }
+
+    public Integer getPigChgFarm(Long farmId, Integer type, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getPigChgFarm"), ImmutableMap.of("farmId", farmId, "type", type, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产房母猪销售
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public Integer getSowCfSale(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSowCfSale"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配怀母猪销售
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public Integer getSowPhSale(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSowPhSale"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产房母猪其他离场
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public Integer getSowCfOtherOut(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSowCfOtherOut"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产房母猪转场
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public Integer getSowCfChgFarm(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSowCfChgFarm"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 保育转育肥、转后备
+     * @param groupId
+     * @param pigType
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public Integer getNurSeryOuterOut(Long groupId, Integer pigType, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getNurseryOuterOutByType"), ImmutableMap.of("groupId", groupId, "pigType", pigType, "startAt", startAt, "endAt", endAt));
     }
 }

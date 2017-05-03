@@ -9,6 +9,7 @@
         <id column="id" property="id"/>
         <result column="farm_id" property="farmId"/>
         <result column="boar_code" property="boarCode"/>
+        <result column="boar_type" property="boarType"/>
         <result column="pz_count" property="pzCount"/>
         <result column="spmz_count" property="spmzCount"/>
         <result column="st_count" property="stCount"/>
@@ -34,7 +35,8 @@
     <sql id="cols_exclude_id">
         farm_id, 
         boar_code, 
-        pz_count, 
+        boar_type,
+        pz_count,
         spmz_count, 
         st_count, 
         cmz_count, 
@@ -51,7 +53,8 @@
     <sql id="vals">
         #{farmId}, 
         #{boarCode}, 
-        #{pzCount}, 
+        #{boarType},
+        #{pzCount},
         #{spmzCount}, 
         #{stCount}, 
         #{cmzCount}, 
@@ -162,6 +165,7 @@
             (
             #{item.farmId},
             #{item.boarCode},
+            #{item.boarType},
             #{item.pzCount},
             #{item.spmzCount},
             #{item.stCount},
@@ -195,6 +199,7 @@
         select
         t11.farm_id as farmId,
         t11.boar_code as boarCode,
+        case t16.boar_type when 1 then '活公猪' when 2 then '冷冻精液' when 3 then '新鲜精液' end  as boarType,
         ifnull(t11.pzCount, 0) as pzCount,
         ifnull(t12.spmzCount, 0) as spmzCount,
         ifnull(t13.stCount, 0) as stCount,
@@ -259,6 +264,7 @@
         where t2.type = 15
         group by t1.farm_id, t1.boar_code
         ) t15 on t11.farm_id = t15.farm_id and t11.boar_code = t15.boar_code
+        left join doctor_pigs t16 on t11.farm_id = t16.farm_id and t11.boar_code = t16.pig_code
     </select>
 
 </mapper>

@@ -6,12 +6,24 @@ import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
-import io.terminus.doctor.event.dao.*;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
-import io.terminus.doctor.event.enums.*;
+import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
+import io.terminus.doctor.event.dao.DoctorEventRelationDao;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.enums.EventStatus;
+import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.group.DoctorGroupEventHandlers;
 import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.model.DoctorEventModifyLog;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
+import io.terminus.doctor.event.model.DoctorEventRelation;
+import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,8 +49,8 @@ public class DoctorEditGroupEventManager {
     private DoctorPigEventDao doctorPigEventDao;
     private DoctorEntryHandler doctorEntryHandler;
     private DoctorEventRelationDao doctorEventRelationDao;
-    private DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private DoctorGroupDao doctorGroupDao;
+    private DoctorEventModifyLogDao doctorEventModifyLogDao;
     private static JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     @Autowired
@@ -48,16 +60,16 @@ public class DoctorEditGroupEventManager {
                                        DoctorPigEventDao doctorPigEventDao,
                                        DoctorEntryHandler doctorEntryHandler,
                                        DoctorEventRelationDao doctorEventRelationDao,
-                                       DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                       DoctorGroupDao doctorGroupDao){
+                                       DoctorGroupDao doctorGroupDao,
+                                       DoctorEventModifyLogDao doctorEventModifyLogDao){
         this.doctorGroupEventHandlers = doctorGroupEventHandlers;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorEntryHandler = doctorEntryHandler;
         this.doctorEventRelationDao= doctorEventRelationDao;
-        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupDao = doctorGroupDao;
+        this.doctorEventModifyLogDao = doctorEventModifyLogDao;
     }
 
     @Transactional
@@ -100,7 +112,6 @@ public class DoctorEditGroupEventManager {
                     return doctorGroupEvent1.getEventAt().compareTo(doctorGroupEvent2.getEventAt());
                 }
         ).collect(Collectors.toList());
-        doctorGroupSnapshotDao.deleteByGroupId(groupId);
 
         Long fromEventId = 0L;
         for(DoctorGroupEvent doctorGroupEvent: groupEvents) {
@@ -137,18 +148,6 @@ public class DoctorEditGroupEventManager {
     }
 
     private void createSnapshots(Long fromEventId, DoctorGroupEvent doctorGroupEvent, DoctorGroupTrack newTrack) {
-        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(doctorGroupEvent.getId());
-        if(!Arguments.isNull(snapshot)){
-            doctorGroupSnapshotDao.delete(snapshot.getId());
-        }
-        DoctorGroupSnapshot newSnapshot = new DoctorGroupSnapshot();
-        newSnapshot.setGroupId(doctorGroupEvent.getGroupId());
-        newSnapshot.setFromEventId(fromEventId);
-        newSnapshot.setToEventId(doctorGroupEvent.getId());
-        DoctorGroupSnapShotInfo toInfo = DoctorGroupSnapShotInfo.builder().group(doctorGroupDao.findById(doctorGroupEvent.getGroupId()))
-                .groupTrack(newTrack).build();
-        newSnapshot.setToInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(toInfo));
-        doctorGroupSnapshotDao.create(newSnapshot);
     }
 
     public void closeGroupEvent(DoctorGroupEvent doctorGroupEvent) {
@@ -165,21 +164,54 @@ public class DoctorEditGroupEventManager {
     }
 
     @Transactional
-    public void elicitDoctorGroupTrackRebuildOne(DoctorGroupEvent newEvent) {
+    public List<DoctorEventInfo> elicitDoctorGroupTrackRebuildOne(DoctorGroupEvent newEvent, Long modifyRequestId) {
         DoctorGroupEvent oldEvent = doctorGroupEventDao.findById(newEvent.getId());
         if(Objects.equals(EventStatus.INVALID.getValue(), oldEvent.getStatus()) || Objects.equals(EventStatus.HANDLING.getValue(), oldEvent.getStatus())){
             log.error("event has been handled, eventId: {}", oldEvent.getId());
             throw new InvalidException("event.has.been.handled", oldEvent.getId());
         }
-        DoctorGroupEvent updateEvent = new DoctorGroupEvent();
-        updateEvent.setId(oldEvent.getId());
-        updateEvent.setStatus(EventStatus.INVALID.getValue());
-        doctorGroupEventDao.update(updateEvent);
-        doctorGroupEventDao.create(newEvent);
-        updateRelation(oldEvent, newEvent); //更新事件关联关系
+        DoctorEventModifyLog modifyLog = new DoctorEventModifyLog();
+        modifyLog.setFarmId(newEvent.getFarmId());
+        modifyLog.setBusinessId(newEvent.getGroupId());
+        modifyLog.setBusinessCode(newEvent.getGroupCode());
+        modifyLog.setType(DoctorEventModifyRequest.TYPE.GROUP.getValue());
+        modifyLog.setFromEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(oldEvent));
+        modifyLog.setToEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(newEvent));
+        modifyLog.setModifyRequestId(modifyRequestId);
+        doctorEventModifyLogDao.create(modifyLog);
+
+//        DoctorGroupEvent updateEvent = new DoctorGroupEvent();
+//        updateEvent.setId(oldEvent.getId());
+//        updateEvent.setStatus(EventStatus.INVALID.getValue());
+//        doctorGroupEventDao.update(updateEvent);
+        doctorGroupEventDao.update(newEvent);
+//        updateRelation(oldEvent, newEvent); //更新事件关联关系
         reElicitGroupEventByGroupId(newEvent.getGroupId());
+
+        if (Objects.equals(Dates.startOfDay(newEvent.getEventAt()), Dates.startOfDay(oldEvent.getEventAt()))) {
+            return Lists.newArrayList(buildGroupEventInfo(newEvent));
+        } else {
+            return Lists.newArrayList(buildGroupEventInfo(oldEvent), buildGroupEventInfo(newEvent));
+        }
     }
 
+    /**
+     * 构建事件信息
+     * @param groupEvent 事件
+     * @return 事件信息
+     */
+    private DoctorEventInfo buildGroupEventInfo(DoctorGroupEvent groupEvent) {
+        return DoctorEventInfo.builder()
+                .orgId(groupEvent.getOrgId())
+                .farmId(groupEvent.getFarmId())
+                .businessId(groupEvent.getGroupId())
+                .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
+                .eventId(groupEvent.getId())
+                .eventType(groupEvent.getType())
+                .eventAt(groupEvent.getEventAt())
+                .pigType(groupEvent.getPigType())
+                .build();
+    }
     /**
      * 更新事件关联关系
      * @param oldEvent

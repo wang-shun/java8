@@ -1,13 +1,13 @@
 package io.terminus.doctor.event.handler.sow;
 
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
-import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPigletsChgEventHandler;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -40,6 +40,23 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
 
     @Autowired
     private DoctorSowWeanHandler doctorSowWeanHandler;
+    @Autowired
+    private DoctorModifyPigPigletsChgEventHandler doctorModifyPigPigletsChgEventHandler;
+
+    @Override
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        DoctorPigletsChgDto pigletsChgDto = (DoctorPigletsChgDto) inputDto;
+        doctorPigEvent.setQuantity(pigletsChgDto.getPigletsCount());
+        doctorPigEvent.setWeight(pigletsChgDto.getPigletsWeight());
+        doctorPigEvent.setPrice(pigletsChgDto.getPigletsPrice());
+        Double amount = doctorPigEvent.getPrice() * doctorPigEvent.getWeight();
+        doctorPigEvent.setAmount(amount.longValue());
+        doctorPigEvent.setCustomerId(pigletsChgDto.getPigletsCustomerId());
+        doctorPigEvent.setCustomerName(pigletsChgDto.getPigletsCustomerName());
+        doctorPigEvent.setChangeTypeId(pigletsChgDto.getPigletsChangeType());
+        return doctorPigEvent;
+    }
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -103,30 +120,6 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
 
     @Override
     public BaseGroupInput buildTriggerGroupEventInput(DoctorPigEvent pigEvent) {
-        DoctorPigletsChgDto dto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorPigletsChgDto.class);
-        DoctorChangeGroupInput doctorChangeGroupInput = new DoctorChangeGroupInput();
-        doctorChangeGroupInput.setSowCode(pigEvent.getPigCode());
-        doctorChangeGroupInput.setEventType(GroupEventType.CHANGE.getValue());
-        doctorChangeGroupInput.setEventAt(DateUtil.toDateString(dto.getPigletsChangeDate()));
-        doctorChangeGroupInput.setChangeTypeId(dto.getPigletsChangeType());             //变动类型id
-        doctorChangeGroupInput.setChangeTypeName(dto.getPigletsChangeTypeName());       //变动类型名称
-        doctorChangeGroupInput.setChangeReasonId(dto.getPigletsChangeReason());         //变动原因id
-        doctorChangeGroupInput.setChangeReasonName(dto.getPigletsChangeReasonName());   //变动原因名称
-        doctorChangeGroupInput.setQuantity(dto.getPigletsCount());                      //变动仔猪数量
-        doctorChangeGroupInput.setSowQty(dto.getSowPigletsCount());
-        doctorChangeGroupInput.setBoarQty(dto.getBoarPigletsCount());
-        doctorChangeGroupInput.setWeight(dto.getPigletsWeight());
-        doctorChangeGroupInput.setPrice(dto.getPigletsPrice());                             //单价
-        if (dto.getPigletsPrice() != null) {
-            doctorChangeGroupInput.setAmount(dto.getPigletsPrice() * dto.getPigletsCount());    //总额
-        }
-        doctorChangeGroupInput.setCustomerId(dto.getPigletsCustomerId());
-        doctorChangeGroupInput.setRemark(dto.getPigletsMark());
-        doctorChangeGroupInput.setIsAuto(IsOrNot.YES.getValue());           //自动生成事件标识
-        doctorChangeGroupInput.setCreatorId(pigEvent.getOperatorId());
-        doctorChangeGroupInput.setCreatorName(pigEvent.getOperatorName());
-        doctorChangeGroupInput.setRelPigEventId(pigEvent.getId());        //猪事件id
-        doctorChangeGroupInput.setSowEvent(true);   //母猪触发的变动事件
-        return doctorChangeGroupInput;
+        return doctorModifyPigPigletsChgEventHandler.buildTriggerGroupEventInput(pigEvent);
     }
 }

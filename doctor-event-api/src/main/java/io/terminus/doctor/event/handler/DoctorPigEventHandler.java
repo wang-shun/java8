@@ -32,15 +32,6 @@ public interface DoctorPigEventHandler {
     DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack);
 
     /**
-     *  创建猪跟踪和镜像表
-     *  @param toTrack 事件发生导致track
-     *  @param executeEvent 发生事件
-     *  @param lastEventId 上一次事件id
-     *
-     */
-    void createPigSnapshot(DoctorPigTrack toTrack, DoctorPigEvent executeEvent, Long lastEventId);
-
-    /**
      * 校验输入数据
      * @param executeEvent 需要执行的事件
      * @param fromTrack 原状态

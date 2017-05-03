@@ -89,6 +89,13 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     }
 
     /**
+     * 查询最新影响事件不包含某些事件类型的事件
+     */
+    public List<DoctorGroupEvent> findEventIncludeTypes(Long groupId, List<Integer> types) {
+        return getSqlSession().selectList(sqlId("findEventIncludeTypes"), ImmutableMap.of("groupId", groupId, "types", types));
+    }
+
+    /**
      * 查询最新手动猪群事件
      */
     public DoctorGroupEvent findLastManualEventByGroupId(Long groupId) {
@@ -98,6 +105,7 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     /**
      * 根据关联猪群事件id查询（只有自动生成的事件才有关联id！）
      * @param relGroupEventId 关联事件id
+     * @param type 事件类型
      * @return 关联的事件
      */
     public DoctorGroupEvent findByRelGroupEventIdAndType(Long relGroupEventId, Integer type) {
@@ -111,6 +119,16 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      */
     public DoctorGroupEvent findByRelPigEventId(Long relPigEventId) {
         return getSqlSession().selectOne(sqlId("findByRelPigEventId"), relPigEventId);
+    }
+
+    /**
+     * 根据关联猪事件id查询（只有自动生成的事件才有关联id！）
+     * @param relPigEventId 关联事件id
+     * @param type 事件类型
+     * @return 关联的事件
+     */
+    public DoctorGroupEvent findByRelPigEventIdAndType(Long relPigEventId, Integer type) {
+        return getSqlSession().selectOne(sqlId("findByRelPigEventIdAndType"), ImmutableMap.of("relPigEventId", relPigEventId, "type", type));
     }
 
     /**
@@ -205,6 +223,10 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
         return getSqlSession().selectOne(sqlId("findNewGroupByGroupId"), groupId);
     }
 
+    public DoctorGroupEvent findCloseGroupByGroupId(Long groupId) {
+        return getSqlSession().selectOne(sqlId("findCloseGroupByGroupId"), groupId);
+    }
+
     /**
      * 获取猪群当前数量
      * @param groupId 猪群id
@@ -212,5 +234,14 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      */
     public Integer getEventCount(Long groupId) {
         return getSqlSession().selectOne(sqlId("getEventCount"), groupId);
+    }
+
+    /**
+     * 更新事件包括字段为null
+     * @param groupEvent 猪群事件
+     * @return 更新是否成功
+     */
+    public Boolean updateIncludeNull(DoctorGroupEvent groupEvent) {
+        return getSqlSession().update(sqlId("updateIncludeNull"), groupEvent) == 1;
     }
 }

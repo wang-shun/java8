@@ -11,15 +11,11 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInputInfo;
 import io.terminus.doctor.event.enums.EventStatus;
@@ -29,7 +25,6 @@ import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +53,6 @@ public class DoctorGroupManager {
 
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
-    private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupReadService doctorGroupReadService;
     private final CoreEventDispatcher coreEventDispatcher;
@@ -67,14 +61,12 @@ public class DoctorGroupManager {
     @Autowired
     public DoctorGroupManager(DoctorGroupDao doctorGroupDao,
                               DoctorGroupEventDao doctorGroupEventDao,
-                              DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                               DoctorGroupTrackDao doctorGroupTrackDao,
                               DoctorGroupReadService doctorGroupReadService,
                               CoreEventDispatcher coreEventDispatcher,
                               DoctorBarnDao doctorBarnDao) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
-        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupReadService = doctorGroupReadService;
         this.coreEventDispatcher = coreEventDispatcher;
@@ -100,8 +92,10 @@ public class DoctorGroupManager {
         Long groupId = group.getId();
 
         //2. 创建新建猪群事件
-        DoctorGroupEvent<DoctorNewGroupEvent> groupEvent = getNewGroupEvent(group, newGroupInput);
+        DoctorGroupEvent groupEvent = getNewGroupEvent(group, newGroupInput);
         groupEvent.setEventSource(SourceType.INPUT.getValue());
+        groupEvent.setSowId(newGroupInput.getSowId());
+        groupEvent.setSowCode(newGroupInput.getSowCode());
         doctorGroupEventDao.create(groupEvent);
 
         //3. 创建猪群跟踪
@@ -131,17 +125,17 @@ public class DoctorGroupManager {
         doctorGroupTrackDao.create(groupTrack);
 
         //4. 创建猪群镜像
-        DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-        DoctorGroupEvent shotEvent = BeanMapper.map(groupEvent, DoctorGroupEvent.class);
-        shotEvent.setExtraMap(null);
-        groupSnapshot.setGroupId(groupEvent.getGroupId());
-        groupSnapshot.setFromEventId(0L);
-        groupSnapshot.setToEventId(groupEvent.getId());
-        groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
-                .group(group)
-                .groupTrack(groupTrack)
-                .build()));
-        doctorGroupSnapshotDao.create(groupSnapshot);
+//        DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
+//        DoctorGroupEvent shotEvent = BeanMapper.map(groupEvent, DoctorGroupEvent.class);
+//        shotEvent.setExtraMap(null);
+//        groupSnapshot.setGroupId(groupEvent.getGroupId());
+//        groupSnapshot.setFromEventId(0L);
+//        groupSnapshot.setToEventId(groupEvent.getId());
+//        groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
+//                .group(group)
+//                .groupTrack(groupTrack)
+//                .build()));
+//        doctorGroupSnapshotDao.create(groupSnapshot);
 
         DoctorEventInfo eventInfo = DoctorEventInfo.builder()
                 .orgId(group.getOrgId())
@@ -213,8 +207,8 @@ public class DoctorGroupManager {
     }
 
     //构造新建猪群事件
-    private DoctorGroupEvent<DoctorNewGroupEvent> getNewGroupEvent(DoctorGroup group, DoctorNewGroupInput newGroupInput) {
-        DoctorGroupEvent<DoctorNewGroupEvent> groupEvent = new DoctorGroupEvent<>();
+    private DoctorGroupEvent<DoctorNewGroupInput> getNewGroupEvent(DoctorGroup group, DoctorNewGroupInput newGroupInput) {
+        DoctorGroupEvent<DoctorNewGroupInput> groupEvent = new DoctorGroupEvent<>();
 
         groupEvent.setGroupId(group.getId());   //关联猪群id
         groupEvent.setRelGroupEventId(newGroupInput.getRelGroupEventId()); //关联猪群事件id
@@ -241,9 +235,8 @@ public class DoctorGroupManager {
         groupEvent.setCreatorName(group.getCreatorName());
         groupEvent.setRemark(group.getRemark());
 
-        DoctorNewGroupEvent newGroupEvent = new DoctorNewGroupEvent();
-        newGroupEvent.setSource(newGroupInput.getSource());
-        groupEvent.setExtraMap(newGroupEvent);
+        newGroupInput.setSource(newGroupInput.getSource());
+        groupEvent.setExtraMap(newGroupInput);
         groupEvent.setStatus(EventStatus.VALID.getValue());
         return groupEvent;
     }

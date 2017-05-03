@@ -2,16 +2,12 @@ package io.terminus.doctor.event.manager;
 
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
-import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorMessageDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
-import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.msg.DoctorMessageSearchDto;
 import io.terminus.doctor.event.model.DoctorMessage;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,9 +28,6 @@ public class DoctorPigManager {
 
     private final DoctorPigDao doctorPigDao;
     private final DoctorPigEventDao doctorPigEventDao;
-
-    @Autowired
-    private DoctorPigSnapshotDao doctorPigSnapshotDao;
 
     @Autowired
     private DoctorMessageDao doctorMessageDao;
@@ -66,16 +59,6 @@ public class DoctorPigManager {
         updatePig.setPigCode(pigCode);
         doctorPigDao.update(updatePig);
         doctorPigEventDao.updatePigCode(pigId, pigCode);
-
-        List<DoctorPigSnapshot> snapshots = doctorPigSnapshotDao.findByPigId(pigId);
-        snapshots.forEach(snapshot -> {
-            DoctorPigSnapShotInfo info = MAPPER.fromJson(snapshot.getToPigInfo(), DoctorPigSnapShotInfo.class);
-            info.getPig().setPigCode(pigCode);
-            //info.getPigEvent().setPigCode(pigCode);
-            snapshot.setToPigInfo(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(info));
-            doctorPigSnapshotDao.update(snapshot);
-        });
-
         //更新消息
         DoctorMessageSearchDto msgSearch = new DoctorMessageSearchDto();
         msgSearch.setBusinessId(pigId);

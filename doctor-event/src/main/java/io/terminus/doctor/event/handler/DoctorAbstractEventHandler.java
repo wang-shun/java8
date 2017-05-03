@@ -7,16 +7,13 @@ import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
-import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
@@ -25,9 +22,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorEventRelation;
-import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +35,7 @@ import java.util.Objects;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
+import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
 
 /**
  * Created by xjn.
@@ -55,8 +51,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     @Autowired
     protected  DoctorPigTrackDao doctorPigTrackDao;
     @Autowired
-    protected  DoctorPigSnapshotDao doctorPigSnapshotDao;
-    @Autowired
     protected  DoctorRevertLogDao doctorRevertLogDao;
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
@@ -65,7 +59,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
-    public static final List<Integer> IGNORE_EVENT = Lists.newArrayList(PigEvent.VACCINATION.getKey(), PigEvent.DISEASE.getKey(), PigEvent.SEMEN.getKey());
+    public static final List<Integer> IGNORE_EVENT = Lists.newArrayList(PigEvent.CONDITION.getKey(),
+            PigEvent.VACCINATION.getKey(), PigEvent.DISEASE.getKey(), PigEvent.SEMEN.getKey());
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -75,34 +70,37 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+
         //上一个事件
         Long currentEventId = fromTrack.getCurrentEventId();
         //原事件id,编辑可用
         Long oldEventId = executeEvent.getId();
 
-        //1.创建事件
+        //2.创建事件
         executeEvent.setPigStatusBefore(fromTrack.getStatus());
         executeEvent.setParity(fromTrack.getCurrentParity());
-
         doctorPigEventDao.create(executeEvent);
 
-        //如果是自动事件,或者编辑事件则创建关联关系
+        //3.如果是自动事件,或者编辑事件则创建关联关系
         if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.YES.getValue())
                 || Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
             createEventRelation(executeEvent, oldEventId);
         }
 
-        //事件是否需要更新track和生成镜像
+        //4。事件是否需要更新track和生成镜像
         DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
         if (!IGNORE_EVENT.contains(executeEvent.getType())) {
             //2.更新track
             doctorPigTrackDao.update(toTrack);
         }
 
-        //4.特殊处理
+        //5.特殊处理
         specialHandle(executeEvent, toTrack);
 
-        //5.记录发生的事件信息
+        //6.更新日记录
+        updateDailyForNew(executeEvent);
+
+        //7.记录发生的事件信息
         DoctorBarn doctorBarn = doctorBarnDao.findById(toTrack.getCurrentBarnId());
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(executeEvent.getOrgId())
@@ -123,14 +121,9 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
 
-        //6.触发事件
+        //8.触发事件
         if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
             triggerEvent(doctorEventInfoList, executeEvent, toTrack);
-        }
-
-        if (!IGNORE_EVENT.contains(executeEvent.getType())) {
-            //创建镜像
-            createPigSnapshot(toTrack, executeEvent, currentEventId);
         }
     }
 
@@ -152,22 +145,15 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
                 .pigId(inputDto.getPigId()).pigCode(inputDto.getPigCode())
                 .eventAt(generateEventAt(inputDto.eventAt())).type(inputDto.getEventType())
-                .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName())
+                .barnId(inputDto.getBarnId()).barnName(inputDto.getBarnName()).barnType(inputDto.getBarnType())
                 .kind(inputDto.getPigType()).relPigEventId(inputDto.getRelPigEventId()).relGroupEventId(inputDto.getRelGroupEventId())
-                .name(inputDto.getEventName()).desc(basic.generateEventDescFromExtra(inputDto))
+                .name(inputDto.getEventName()).desc(generateEventDescFromExtra(inputDto))
                 .operatorId(MoreObjects.firstNonNull(inputDto.getOperatorId(), basic.getStaffId()))
                 .operatorName(StringUtils.hasText(inputDto.getOperatorName()) ? inputDto.getOperatorName() : basic.getStaffName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .isAuto(MoreObjects.firstNonNull(inputDto.getIsAuto(), IsOrNot.NO.getValue()))
                 .status(EventStatus.VALID.getValue()).eventSource(SourceType.INPUT.getValue()).isModify(IsOrNot.NO.getValue())
-                .npd(0)
-                .dpnpd(0)
-                .pfnpd(0)
-                .plnpd(0)
-                .psnpd(0)
-                .pynpd(0)
-                .ptnpd(0)
-                .jpnpd(0)
+                .npd(0).dpnpd(0).pfnpd(0).plnpd(0).psnpd(0).pynpd(0).ptnpd(0).jpnpd(0)
                 .build();
         doctorPigEvent.setRemark(inputDto.changeRemark());
         doctorPigEvent.setExtraMap(inputDto.toMap());
@@ -228,27 +214,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         return fromTrack;
     }
 
-    /**
-     *  创建猪跟踪和镜像表
-     *  @param toTrack 事件发生导致track
-     *  @param executeEvent 发生事件
-     *  @param lastEventId 上一次事件id
-     *
-     */
-    public void createPigSnapshot(DoctorPigTrack toTrack, DoctorPigEvent executeEvent, Long lastEventId) {
-        DoctorPig snapshotPig = doctorPigDao.findById(toTrack.getPigId());
-        expectTrue(notNull(snapshotPig), "pig.not.null", toTrack.getPigId());
-
-        //创建猪镜像
-        DoctorPigSnapshot snapshot = DoctorPigSnapshot.builder()
-                .pigId(snapshotPig.getId())
-                .fromEventId(lastEventId)
-                .toEventId(executeEvent.getId())
-                .toPigInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(
-                        DoctorPigSnapShotInfo.builder().pig(snapshotPig).pigTrack(toTrack).build()))
-                .build();
-        doctorPigSnapshotDao.create(snapshot);
-    }
 
     /**
      * 事件的创建后的补充和特殊处理
@@ -259,6 +224,12 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         executeEvent.setPigStatusAfter(toTrack.getStatus());
         doctorPigEventDao.update(executeEvent);
     }
+
+    /**
+     * 更新日记录表
+     * @param newPigEvent 猪事件
+     */
+    protected void updateDailyForNew(DoctorPigEvent newPigEvent){}
 
     /**
      * 触发事件, 触发其他事件时需要实现此方法
@@ -322,8 +293,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
      * @param barnName 猪舍名
      * @return 猪群号
      */
-    protected String grateGroupCode(String barnName) {
+    protected String grateGroupCode(String barnName, Date eventAt) {
         expectTrue(notEmpty(barnName), "generate.code.barn.name.not.null");
-        return barnName + "(" +DateUtil.toDateString(new Date()) + ")";
+        return barnName + "(" +DateUtil.toDateString(eventAt) + ")";
     }
 }

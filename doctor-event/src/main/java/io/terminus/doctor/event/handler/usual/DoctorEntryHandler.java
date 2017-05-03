@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEntryEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
@@ -42,6 +43,8 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
 
     @Autowired
     private  DoctorPigInfoCache doctorPigInfoCache;
+    @Autowired
+    private DoctorModifyPigEntryEventHandler doctorModifyPigEntryEventHandler;
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -63,7 +66,6 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         if (Objects.equals(executeEvent.getIsAuto(), IsOrNot.YES.getValue())) {
             createEventRelation(executeEvent, oldEventId);
         }
-
         //2.创建或更新track
         DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
         if (Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
@@ -72,12 +74,11 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         } else {
             doctorPigTrackDao.create(toTrack);
         }
-        //3.创建镜像
-        createPigSnapshot(toTrack, executeEvent, 0L);
-
-        //4.特殊处理
+        //3.特殊处理
         specialHandle(executeEvent, toTrack);
-
+        //4.创建镜像
+//        createPigSnapshot(toTrack, executeEvent, 0L);
+        updateDailyForNew(executeEvent);
         //5.记录发生的事件信息
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(executeEvent.getOrgId())
@@ -174,6 +175,12 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         farmEntryDto.setPigId(doctorPig.getId());
         DoctorPigEvent doctorPigEvent =  super.buildPigEvent(basic, farmEntryDto);
         doctorPigEvent.setParity(farmEntryDto.getParity());
+        doctorPigEvent.setSource(farmEntryDto.getSource());
+        doctorPigEvent.setBoarType(farmEntryDto.getBoarType());
+        doctorPigEvent.setBreedId(farmEntryDto.getBreed());
+        doctorPigEvent.setBreedName(farmEntryDto.getBreedName());
+        doctorPigEvent.setBreedTypeId(farmEntryDto.getBreedType());
+        doctorPigEvent.setBreedTypeName(farmEntryDto.getBreedTypeName());
         return doctorPigEvent;
     }
 
@@ -217,5 +224,11 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
     protected void specialHandle(DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
         super.specialHandle(executeEvent, toTrack);
         doctorPigInfoCache.addPigCodeToFarm(executeEvent.getFarmId(), executeEvent.getPigCode());
+    }
+
+    @Override
+    protected void updateDailyForNew(DoctorPigEvent newPigEvent) {
+        BasePigEventInputDto inputDto = JSON_MAPPER.fromJson(newPigEvent.getExtra(), DoctorFarmEntryDto.class);
+        doctorModifyPigEntryEventHandler.updateDailyOfNew(newPigEvent, inputDto);
     }
 }

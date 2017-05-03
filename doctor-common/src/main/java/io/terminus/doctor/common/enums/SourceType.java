@@ -15,7 +15,8 @@ public enum SourceType {
     INPUT(1, "软件录入"),
     IMPORT(2, "导入数据"),
     MOVE(3, "迁移数据"),
-    ADD(4, "补录事件");
+    ADD(4, "补录事件"),
+    TRANS_FARM(5,"转场复制的事件");
 
     @Getter
     private Integer value;

@@ -13,7 +13,7 @@ public class DoctorMoveInGroupExportDto extends DoctorGroupEvent{
 
     /**
      * 猪群转移类型
-     * @see io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent.InType
+     * @see io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupInput.InType
      */
     private Integer inType;
 

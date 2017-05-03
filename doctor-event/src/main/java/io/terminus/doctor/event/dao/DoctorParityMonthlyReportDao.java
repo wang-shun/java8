@@ -3,7 +3,9 @@ package io.terminus.doctor.event.dao;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.model.DoctorParityMonthlyReport;
+import org.joda.time.DateTime;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -43,6 +45,10 @@ public class DoctorParityMonthlyReportDao extends MyBatisDao<DoctorParityMonthly
     public List<DoctorParityMonthlyReport> constructDoctorParityMonthlyReports(Long farmId, Integer parityStart, Integer parityEnd, Date startAt, Date endAt){
         return getSqlSession().selectList(sqlId("constructDoctorParityMonthlyReportsWithParity"), MapBuilder.<String, Object>of().put("farmId", farmId).put("parityStart", parityStart)
                 .put("parityEnd", parityEnd).put("startAt", startAt).put("endAt", endAt).map());
+    }
+
+    public List<DoctorParityMonthlyReport> findDoctorParityMonthlyReports(Long farmId, Date sumAt){
+        return findDoctorParityMonthlyReports(farmId, new DateTime(sumAt).toString(DateUtil.YYYYMM));
     }
 
     public List<DoctorParityMonthlyReport> findDoctorParityMonthlyReports(Long farmId, String sumAt){

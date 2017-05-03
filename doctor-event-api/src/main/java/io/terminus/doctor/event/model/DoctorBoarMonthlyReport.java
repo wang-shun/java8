@@ -26,6 +26,8 @@ public class DoctorBoarMonthlyReport implements Serializable {
      * 公猪号
      */
     private String boarCode;
+
+    private String boarType;
     
     /**
      * 配种次数

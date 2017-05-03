@@ -11,6 +11,7 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgLocationEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
@@ -56,6 +57,8 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     private DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired
     private DoctorTransGroupEventHandler transGroupEventHandler;
+    @Autowired
+    private DoctorModifyPigChgLocationEventHandler modifyPigChgLocationEventHandler;
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -79,6 +82,8 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
             doctorPigEvent.setType(PigEvent.TO_MATING.getKey());
             doctorPigEvent.setName(PigEvent.TO_MATING.getName());
         }
+        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+        doctorPigEvent.setGroupId(pigTrack.getGroupId());
         return doctorPigEvent;
     }
 
@@ -124,11 +129,18 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         }
     }
 
+    @Override
+    protected void updateDailyForNew(DoctorPigEvent newPigEvent) {
+        BasePigEventInputDto inputDto = JSON_MAPPER.fromJson(newPigEvent.getExtra(), DoctorChgLocationDto.class);
+        modifyPigChgLocationEventHandler.updateDailyOfNew(newPigEvent, inputDto);
+    }
+
     //未断奶仔猪转群
     private Long pigletTrans(List<DoctorEventInfo> eventInfoList,DoctorPigEvent executeEvent, DoctorPigTrack pigTrack, DoctorChgLocationDto chgLocationDto, DoctorBarn doctorToBarn) {
         expectTrue(notNull(pigTrack.getGroupId()), "farrow.groupId.not.null", pigTrack.getPigId());
         //未断奶仔猪id
         DoctorTransGroupInput input = new DoctorTransGroupInput();
+        input.setSowId(chgLocationDto.getPigId());
         input.setSowCode(chgLocationDto.getPigCode());
         input.setToBarnId(doctorToBarn.getId());
         input.setToBarnName(doctorToBarn.getName());
@@ -140,7 +152,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
             input.setToGroupCode(toGroup.getGroupCode());
         } else {
             input.setIsCreateGroup(IsOrNot.YES.getValue());
-            input.setToGroupCode(grateGroupCode(doctorToBarn.getName()));
+            input.setToGroupCode(grateGroupCode(doctorToBarn.getName(), chgLocationDto.eventAt()));
         }
 
         DoctorGroup group = doctorGroupDao.findById(pigTrack.getGroupId());

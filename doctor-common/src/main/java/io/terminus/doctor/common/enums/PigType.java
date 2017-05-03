@@ -15,13 +15,13 @@ import java.util.List;
 
 public enum PigType {
 
-    NURSERY_PIGLET(2, "保育猪", "商品猪", 5),
-    FATTEN_PIG(3, "育肥猪", "商品猪", 6),
-    RESERVE(4, "后备猪", "种猪", 1),
-    MATE_SOW(5, "配种母猪", "种母猪", 2),
-    PREG_SOW(6, "妊娠母猪", "种母猪", 3),
-    DELIVER_SOW(7, "分娩母猪", "种母猪", 4),
-    BOAR(9, "种公猪", "种公猪", 7);
+    NURSERY_PIGLET(2, "保育猪", "商品猪", "保育猪", 5),
+    FATTEN_PIG(3, "育肥猪", "商品猪",  "育肥猪",6),
+    RESERVE(4, "后备猪", "种猪", "后备猪",1),
+    MATE_SOW(5, "配种母猪", "种母猪", "配怀母猪", 2),
+    PREG_SOW(6, "妊娠母猪", "种母猪", "配怀母猪", 3),
+    DELIVER_SOW(7, "分娩母猪", "种母猪", "产房仔猪",4),
+    BOAR(9, "种公猪", "种公猪", "",  7);
 
     @Getter
     private final int value;
@@ -30,12 +30,15 @@ public enum PigType {
     @Getter
     private final String type;
     @Getter
+    private final String name;
+    @Getter
     private final int order;
 
-    PigType(int value, String desc, String type, int order) {
+    PigType(int value, String desc, String type, String name, int order) {
         this.value = value;
         this.desc = desc;
         this.type = type;
+        this.name = name;
         this.order =order;
     }
 

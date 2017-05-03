@@ -549,4 +549,11 @@ public class DoctorBarns {
         List<Integer> barnType = Lists.newArrayList(PigType.MATING_FARROW_TYPES);
         return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, barnType, null, null, null));
     }
+    /**
+     * 获取所有猪舍
+     */
+    @RequestMapping(value = "/all", method = RequestMethod.GET)
+    public List<DoctorBarn> findAllBarn(@RequestParam Long farmId) {
+        return RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId));
+    }
 }

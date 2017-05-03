@@ -2,12 +2,10 @@ package io.terminus.doctor.event.manager;
 
 import io.terminus.doctor.event.dao.DoctorBoarMonthlyReportDao;
 import io.terminus.doctor.event.model.DoctorBoarMonthlyReport;
-import io.terminus.doctor.event.model.DoctorMonthlyReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 /**

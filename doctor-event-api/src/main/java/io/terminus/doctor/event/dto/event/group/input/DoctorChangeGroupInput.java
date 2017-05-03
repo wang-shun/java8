@@ -66,7 +66,7 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
     /**
      * 品种id
      */
-    private Integer breedId;
+    private Long breedId;
 
     private String breedName;
 
@@ -102,6 +102,11 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
      */
    // @Min(value = 0L, message = "price.gt.0")
     private Long overPrice;
+
+    /**
+     * 触发猪群变动的母猪号
+     */
+    private Long sowId;
 
     /**
      * 触发猪群变动的母猪号

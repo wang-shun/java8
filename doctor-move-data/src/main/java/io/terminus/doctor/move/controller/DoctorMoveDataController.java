@@ -1,6 +1,7 @@
 package io.terminus.doctor.move.controller;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
@@ -14,15 +15,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
-import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
-import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
-import io.terminus.doctor.event.service.DoctorEditGroupEventService;
-import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
-import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
-import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.move.service.DoctorImportDataService;
@@ -92,6 +85,7 @@ public class DoctorMoveDataController {
     private final DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
     private final DoctorEditGroupEventService doctorEditGroupEventService;
     private final DoctorGroupReadService doctorGroupReadService;
+    private final DoctorDailyGroupWriteService doctorDailyGroupWriteService;
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
                                     WareHouseInitService wareHouseInitService,
@@ -110,7 +104,8 @@ public class DoctorMoveDataController {
                                     DoctorPigWriteService doctorPigWriteService,
                                     DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService,
                                     DoctorEditGroupEventService doctorEditGroupEventService,
-                                    DoctorGroupReadService doctorGroupReadService) {
+                                    DoctorGroupReadService doctorGroupReadService,
+                                    DoctorDailyGroupWriteService doctorDailyGroupWriteService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -129,6 +124,7 @@ public class DoctorMoveDataController {
         this.doctorEventModifyRequestWriteService = doctorEventModifyRequestWriteService;
         this.doctorEditGroupEventService = doctorEditGroupEventService;
         this.doctorGroupReadService = doctorGroupReadService;
+        this.doctorDailyGroupWriteService = doctorDailyGroupWriteService;
     }
 
     /**
@@ -315,15 +311,9 @@ public class DoctorMoveDataController {
         doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
         log.warn("move daily end");
 
-        //7.迁移猪场周报
-        log.warn("move weekly start, moveId:{}", moveId);
-        doctorMoveReportService.moveWeeklyReport(farm.getId(), monthIndex == null ? null : monthIndex * 4);
-        log.warn("move weekly end");
-
-
         //7.迁移猪场月报
         log.warn("move monthly start, moveId:{}", moveId);
-        doctorMoveReportService.moveMonthlyReport(farm.getId(), monthIndex);
+        doctorMoveReportService.moveDoctorRangeReport(farm.getId(), monthIndex);
         log.warn("move monthly end");
 
         //8.迁移猪场胎次分析月报
@@ -585,37 +575,32 @@ public class DoctorMoveDataController {
     }
 
     /**
-     * 迁移从since开始的日报, only = true, 只迁移 since 这一天的数据, 如果farmId=null, 则全部猪场
+     * 迁移从from到to的日报, 如果farmId=null, 则全部猪场
      */
     @RequestMapping(value = "/daily/since", method = RequestMethod.GET)
-    public Boolean moveDailyReport(@RequestParam(value = "farmId", required = false) Long farmId,
-                                   @RequestParam("since") String since,
-                                   @RequestParam(value = "only", defaultValue = "false") boolean only) {
+    public Boolean moveDailyReport(@RequestParam(required = false) Long farmId,
+                                   @RequestParam(required = false) String from,
+                                   @RequestParam(required = false) String to) {
         try {
-            log.warn("move daily report since start, farmId:{}, since:{}, only:{}", farmId, since, only);
-
-            Date startAt = DateUtil.toDate(since);
-            if (startAt == null || startAt.after(new Date())) {
+            log.warn("move daily report since start, farmId:{}, from:{}, to:{}", farmId, from, to);
+            Date startAt = Strings.isNullOrEmpty(from) ? new Date() : DateUtil.toDate(from);
+            Date endAt = Strings.isNullOrEmpty(to) ? new Date() : DateUtil.toDate(to);
+            if (startAt.after(new Date())) {
                 return false;
             }
             if (farmId == null) {
-                if (only) {
-                    doctorDailyReportWriteService.createDailyReports(getAllFarmIds(), startAt);
-                } else {
-                    getAllFarmIds().forEach(fid -> doctorDailyReportWriteService.createDailyReports(startAt, new Date(), fid));
-                }
+                List<Long> farmIds = getAllFarmIds();
+                farmIds.forEach(fid -> {
+                    doctorDailyReportWriteService.createDailyReports(fid, startAt, endAt);
+                });
             } else {
-                if (only) {
-                    doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), startAt);
-                } else {
-                    doctorDailyReportWriteService.createDailyReports(startAt, new Date(), farmId);
-                }
+                doctorDailyReportWriteService.createDailyReports(farmId, startAt, endAt);
             }
             log.warn("move daily report since end");
             return true;
         } catch (Exception e) {
-            log.error("move daily report since failed, farmId:{}, since:{}, only:{}, cause:{}",
-                    farmId, since, only, Throwables.getStackTraceAsString(e));
+            log.error("move daily report since failed, farmId:{}, from:{}, to:{}, cause:{}",
+                    farmId, from, to, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
@@ -624,42 +609,32 @@ public class DoctorMoveDataController {
      * 月报/周报
      */
     @RequestMapping(value = "/monthly/since", method = RequestMethod.GET)
-    public Boolean moveMonthlyReport(@RequestParam(value = "farmId", required = false) Long farmId,
-                                     @RequestParam("since") String since,
-                                     @RequestParam(value = "only", defaultValue = "false") boolean only) {
+    public Boolean moveDoctorRangeReport(@RequestParam(value = "farmId", required = false) Long farmId,
+                                     @RequestParam("since") String since) {
         try {
-            log.warn("move monthly report since start, farmId:{}, since:{}, only:{}", farmId, since, only);
+            log.warn("move monthly report since start, farmId:{}, since:{}", farmId, since);
 
             Date startAt = DateUtil.toDate(since);
             if (startAt == null || startAt.after(new Date())) {
                 return false;
             }
-            int index;
-            if (only) {
-                index = 1;
-            } else {
-                index = DateUtil.getDeltaMonthsAbs(startAt, new Date()) + 1;
-            }
-
+            Integer index = DateUtil.getDeltaMonthsAbs(startAt, new Date()) + 1;
             if (farmId == null) {
                 List<Long> farmIds = getAllFarmIds();
                 farmIds.forEach(fid -> {
-                    doctorMoveReportService.moveMonthlyReport(fid, index);
-                    doctorMoveReportService.moveWeeklyReport(fid, index);
-                    // 周数用月数*5
-                    doctorMoveReportService.moveParityMonthlyReport(fid, index * 5);
+                    doctorMoveReportService.moveDoctorRangeReport(fid, index);
+                    doctorMoveReportService.moveParityMonthlyReport(fid, index);
                     doctorMoveReportService.moveBoarMonthlyReport(fid, index);
                 });
             } else {
-                doctorMoveReportService.moveMonthlyReport(farmId, index);
-                doctorMoveReportService.moveWeeklyReport(farmId, index * 5);
+                doctorMoveReportService.moveDoctorRangeReport(farmId, index);
                 doctorMoveReportService.moveParityMonthlyReport(farmId, index);
                 doctorMoveReportService.moveBoarMonthlyReport(farmId, index);
             }
             log.warn("move monthly report since end");
             return true;
         } catch (Exception e) {
-            log.error("move monthly report since failed, farmId:{}, since:{}, only:{}", farmId, since, only, Throwables.getStackTraceAsString(e));
+            log.error("move monthly report since failed, farmId:{}, since:{}, only:{}", farmId, since, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
@@ -668,11 +643,11 @@ public class DoctorMoveDataController {
      * 月报
      */
     @RequestMapping(value = "/monthly/date", method = RequestMethod.GET)
-    public Boolean moveMonthlyReport(@RequestParam("farmId") Long farmId,
+    public Boolean moveDoctorRangeReportOnlyOne(@RequestParam("farmId") Long farmId,
                                      @RequestParam("date") String date) {
         try {
             log.warn("move monthly report date start, farmId:{}, date:{}", farmId, date);
-            doctorCommonReportWriteService.createMonthlyReport(farmId, DateUtil.toDate(date));
+            doctorMoveReportService.moveDoctorRangeReport(farmId, DateUtil.toDate(date));
             log.warn("move monthly report date end");
             
             return true;
@@ -1081,7 +1056,6 @@ public class DoctorMoveDataController {
     }
 
     /**
-<<<<<<< HEAD
      * 推演track
      * @param pigId 猪id
      * @return
@@ -1200,10 +1174,6 @@ public class DoctorMoveDataController {
             } else {
                 farmIds.add(farmId);
             }
-            farmIds.forEach(id -> {
-                log.warn("{} flush farm {} group dateformat start", DateUtil.toDateTimeString(new Date()), id);
-                doctorMoveDataService.flushGroupSnapshotsToInfoDateFormat(id);
-            });
         } catch (Exception e) {
             log.error("flush group dateformat failed, cause: {}", Throwables.getStackTraceAsString(e));
             return false;
@@ -1211,6 +1181,25 @@ public class DoctorMoveDataController {
         log.warn("{} flush group dateformat end", DateUtil.toDateTimeString(new Date()));
         return true;
     }
+
+    @RequestMapping(value = "/pig/snapshots")
+    public Boolean flushPigDateFormat(@RequestParam(required = false) Long farmId) {
+        log.warn("{} flush pig dateformat start", DateUtil.toDateTimeString(new Date()));
+        List<Long> farmIds = Lists.newArrayList();
+        try {
+            if (Arguments.isNull(farmId)) {
+                farmIds = getAllFarmIds();
+            } else {
+                farmIds.add(farmId);
+            }
+        } catch (Exception e) {
+            log.error("flush pig dateformat failed, cause: {}", Throwables.getStackTraceAsString(e));
+            return false;
+        }
+        log.warn("{} flush pig dateformat end", DateUtil.toDateTimeString(new Date()));
+        return true;
+    }
+
     /**
      * 更新用户名
      * @param userId 用户id
@@ -1265,5 +1254,33 @@ public class DoctorMoveDataController {
     public Boolean updatePermissionBarn(@RequestParam Long farmId){
         userInitService.updatePermissionBarn(farmId);
         return true;
+    }
+
+    @RequestMapping(value = "/group/daily", method = RequestMethod.GET)
+    public Boolean flushGroupDailyHistorty(@RequestParam(required = false) Long farmId,
+                                           @RequestParam(required = false) String from,
+                                           @RequestParam(required = false) String to){
+        try {
+            log.warn("flush  gropu daily start, farmId:{}, from:{}, to:{}", farmId, from, to);
+
+            Date startAt = Strings.isNullOrEmpty(from) ? new Date() : DateUtil.toDate(from);
+            Date endAt = Strings.isNullOrEmpty(to) ? new Date() : DateUtil.toDate(to);
+            if (startAt.after(new Date())) {
+                return false;
+            }
+            if (farmId == null) {
+                List<Long> farmIds = getAllFarmIds();
+                farmIds.forEach(fid -> {
+                    doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, startAt, endAt);;
+                });
+            } else {
+                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, startAt, endAt);;
+            }
+            log.warn("flush  gropu daily start, farmId:{}, from:{}, to:{}", farmId, from, to);
+            return true;
+        } catch (Exception e) {
+            log.error("flush gropu daily  since failed, farmId:{}, from:{}, to:{}, cause: {}", farmId, from, to, Throwables.getStackTraceAsString(e));
+            return false;
+        }
     }
 }

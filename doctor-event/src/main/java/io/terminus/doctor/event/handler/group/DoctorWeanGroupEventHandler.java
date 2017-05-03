@@ -1,16 +1,13 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.Arguments;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorWeanGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorWeanGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -37,8 +34,8 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
     private final DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired
-    public DoctorWeanGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao, DoctorGroupTrackDao doctorGroupTrackDao, DoctorGroupEventDao doctorGroupEventDao, DoctorBarnDao doctorBarnDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
+    public DoctorWeanGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao, DoctorGroupEventDao doctorGroupEventDao, DoctorBarnDao doctorBarnDao) {
+        super(doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
@@ -47,21 +44,18 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         input.setEventType(GroupEventType.WEAN.getValue());
         DoctorWeanGroupInput weanInput = (DoctorWeanGroupInput) input;
 
-        //1.转换转入猪群事件
-        DoctorWeanGroupEvent weanGroupEvent = BeanMapper.map(weanInput, DoctorWeanGroupEvent.class);
-
         //2.创建猪群断奶事件
-        DoctorGroupEvent<DoctorWeanGroupEvent> event = dozerGroupEvent(group, GroupEventType.WEAN, weanInput);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.WEAN, weanInput);
         event.setQuantity(weanInput.getPartWeanPigletsCount());
         event.setAvgWeight(weanInput.getPartWeanAvgWeight());
-        event.setExtraMap(weanGroupEvent);
+        event.setExtraMap(weanInput);
         event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 
     @Override
     public DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track) {
-        DoctorWeanGroupEvent weanGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorWeanGroupEvent.class);
+        DoctorWeanGroupInput weanGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorWeanGroupInput.class);
         if(Arguments.isNull(weanGroupEvent)){
             log.error("parse doctorTransGroupEvent faild, doctorGroupEvent = {}", event);
             throw new InvalidException("wean.group.event.info.broken", event.getId());
@@ -81,15 +75,15 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         DoctorWeanGroupInput weanInput = (DoctorWeanGroupInput) input;
 
         //1.转换转入猪群事件
-        DoctorWeanGroupEvent weanGroupEvent = BeanMapper.map(weanInput, DoctorWeanGroupEvent.class);
 
         //2.创建猪群断奶事件
-        DoctorGroupEvent<DoctorWeanGroupEvent> event = dozerGroupEvent(group, GroupEventType.WEAN, weanInput);
+        DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.WEAN, weanInput);
         event.setQuantity(weanInput.getPartWeanPigletsCount());
         event.setAvgWeight(weanInput.getPartWeanAvgWeight());
+        event.setSowId(weanInput.getSowId());
+        event.setSowCode(weanInput.getSowCode());
 
-
-        event.setExtraMap(weanGroupEvent);
+        event.setExtraMap(weanInput);
         doctorGroupEventDao.create(event);
 
         //创建关联关系
@@ -103,9 +97,6 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         groupTrack.setWeanWeight(EventUtil.plusDouble(groupTrack.getWeanWeight(), weanInput.getPartWeanAvgWeight() * weanInput.getPartWeanPigletsCount()));
 
         updateGroupTrack(groupTrack, event);
-
-        //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, groupTrack), GroupEventType.MOVE_IN);
 
     }
 

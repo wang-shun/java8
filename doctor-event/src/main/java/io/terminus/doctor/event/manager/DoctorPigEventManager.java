@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.manager;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Arguments;
@@ -16,6 +15,8 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -48,8 +49,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.notEmpty;
-
 /**
  * Created by xjn.
  * Date:2017-01-19
@@ -69,6 +68,8 @@ public class DoctorPigEventManager {
     private DoctorPigDao doctorPigDao;
     @Autowired
     private DoctorEventRelationDao doctorEventRelationDao;
+    @Autowired
+    private DoctorModifyPigEventHandlers modifyPigEventHandlers;
 
     /**
      * 事件处理
@@ -114,17 +115,6 @@ public class DoctorPigEventManager {
     public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         DoctorPigEventHandler handler = getHandler(executeEvent.getType());
         return handler.buildPigTrack(executeEvent, fromTrack);
-    }
-
-    /**
-     *  创建猪跟踪和镜像表
-     *  @param toTrack 事件发生导致track
-     *  @param executeEvent 发生事件
-     *  @param lastEventId 上一次事件id
-     *
-     */
-    public void createPigSnapshot(DoctorPigTrack toTrack, DoctorPigEvent executeEvent, Long lastEventId){
-        getHandler(executeEvent.getType()).createPigSnapshot(toTrack, executeEvent, lastEventId);
     }
 
     @Transactional
@@ -202,6 +192,23 @@ public class DoctorPigEventManager {
     }
 
     /**
+     * 猪事件编辑处理
+     * @param inputDto 编辑输入
+     * @param eventId 事件id
+     * @param eventType 事件输入
+     */
+    @Transactional
+    public void modifyPigEventHandle(BasePigEventInputDto inputDto, Long eventId, Integer eventType) {
+        DoctorPigEvent oldPigEvent = doctorPigEventDao.findById(eventId);
+        DoctorModifyPigEventHandler handler = modifyPigEventHandlers.getModifyPigEventHandlerMap().get(eventType);
+        if (!handler.canModify(oldPigEvent)) {
+            throw new InvalidException("event.not.modify");
+        }
+        handler.modifyHandle(oldPigEvent, inputDto);
+
+    }
+
+    /**
      * 根据事件类型获取时间处理器
      * @param eventType 事件类型
      * @return 事件处理器
@@ -214,14 +221,14 @@ public class DoctorPigEventManager {
      * 校验携带数据正确性，发布事件
      */
     public static void  checkAndPublishEvent(List<DoctorEventInfo> dtos, CoreEventDispatcher coreEventDispatcher, Publisher publisher) {
-        try {
-            if (notEmpty(dtos)) {
-                //checkFarmIdAndEventAt(dtos);
-                publishPigEvent(dtos, coreEventDispatcher, publisher);
-            }
-        } catch (Exception e) {
-            log.error("publish event failed, dtos:{}, cause: {}", dtos, Throwables.getStackTraceAsString(e));
-        }
+//        try {
+//            if (notEmpty(dtos)) {
+//                //checkFarmIdAndEventAt(dtos);
+//                publishPigEvent(dtos, coreEventDispatcher, publisher);
+//            }
+//        } catch (Exception e) {
+//            log.error("publish event failed, dtos:{}, cause: {}", dtos, Throwables.getStackTraceAsString(e));
+//        }
     }
 
     //发布事件, 用于更新创建操作

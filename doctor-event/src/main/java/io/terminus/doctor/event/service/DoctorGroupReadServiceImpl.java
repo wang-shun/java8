@@ -18,18 +18,15 @@ import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupJoinDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.dto.search.DoctorGroupCountDto;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -63,21 +60,19 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
-    private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupJoinDao doctorGroupJoinDao;
 
     @Autowired
-    private DoctorRollbackHandlerChain doctorRollbackHandlerChain;
+    private DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers;
 
     @Autowired
     public DoctorGroupReadServiceImpl(DoctorGroupDao doctorGroupDao,
                                       DoctorGroupEventDao doctorGroupEventDao,
                                       DoctorGroupTrackDao doctorGroupTrackDao,
-                                      DoctorGroupSnapshotDao doctorGroupSnapshotDao, DoctorGroupJoinDao doctorGroupJoinDao) {
+                                      DoctorGroupJoinDao doctorGroupJoinDao) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
-        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupJoinDao = doctorGroupJoinDao;
     }
 
@@ -123,29 +118,6 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         }
     }
 
-    @Override
-    public Response<DoctorGroupSnapShotInfo> findGroupSnapShotInfoByGroupId(Long groupId) {
-        try {
-            DoctorGroup group = checkGroupExist(groupId);
-            DoctorGroupTrack groupTrack = checkGroupTrackExist(groupId);
-            return Response.ok(new DoctorGroupSnapShotInfo(group, groupTrack));
-        } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
-        } catch (Exception e) {
-            log.error("find group snapshot by groupId failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
-            return Response.fail("group.find.fail");
-        }
-    }
-
-    @Override
-    public Response<DoctorGroupSnapshot> findGroupSnapShotByToEventId(Long toEventId) {
-        try {
-            return Response.ok(doctorGroupSnapshotDao.findGroupSnapshotByToEventId(toEventId));
-        } catch (Exception e) {
-            log.error("find group snapshot by toEventId failed, toEventId:{}, cause:{}", toEventId, Throwables.getStackTraceAsString(e));
-            return Response.fail("group.snapshot.find.fail");
-        }
-    }
 
     @Override
     public Response<Paging<DoctorGroupDetail>> pagingGroup(DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size) {
@@ -392,7 +364,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             if (groupEvent == null) {
                 return RespWithEx.ok(null);
             }
-            if (doctorRollbackHandlerChain.getRollbackGroupEventHandlers().get(groupEvent.getType()).canRollback(groupEvent)) {
+            if (doctorModifyGroupEventHandlers.getModifyGroupEventHandlerMap().get(groupEvent.getType()).canRollback(groupEvent)) {
                 return RespWithEx.ok(groupEvent);
             }
             return RespWithEx.ok(null);
@@ -408,7 +380,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     public RespWithEx<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId) {
         try {
             DoctorGroupEvent groupEvent = doctorGroupEventDao.findById(eventId);
-            if (doctorRollbackHandlerChain.getRollbackGroupEventHandlers().get(groupEvent.getType()).canRollback(groupEvent)) {
+            if (doctorModifyGroupEventHandlers.getModifyGroupEventHandlerMap().get(groupEvent.getType()).canRollback(groupEvent)) {
                 return RespWithEx.ok(Boolean.TRUE);
             }
             return RespWithEx.ok(Boolean.FALSE);
@@ -501,6 +473,26 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("get group count failed, farmId:{}, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("get.group.count.failed");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorGroup>> findGroupIds(Long farmId, Date startAt, Date endAt) {
+        try {
+            return Response.ok(doctorGroupDao.findGroupId(farmId, startAt, endAt));
+        }catch (Exception e) {
+            log.error("find.groupId.fail, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.groupId.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorGroup>> findGroupId(Long farmId, Long barnId) {
+        try {
+            return Response.ok(doctorGroupDao.findGroupIdByBranId(farmId, barnId));
+        } catch (Exception e) {
+            log.error("find.groupId.fail, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.groupIdByBarnId.fail");
         }
     }
 

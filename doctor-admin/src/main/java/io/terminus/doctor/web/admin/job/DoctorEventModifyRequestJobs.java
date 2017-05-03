@@ -34,7 +34,7 @@ public class DoctorEventModifyRequestJobs {
      * 处理事件编辑前请求job 、
      * 每五分钟执行一次
      */
-    @Scheduled(cron = "0 */5 * * * ?")
+//    @Scheduled(cron = "0 */5 * * * ?")
     @RequestMapping(value = "/handle", method = RequestMethod.GET)
     public void modifyRequestHandle() {
         log.info("modifyRequestHandle, starting");

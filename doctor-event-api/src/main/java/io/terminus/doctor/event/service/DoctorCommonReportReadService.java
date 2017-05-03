@@ -1,9 +1,10 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
-import io.terminus.doctor.event.model.DoctorMonthlyReport;
+import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
@@ -51,7 +52,7 @@ public interface DoctorCommonReportReadService {
      * @param sumAt 统计时间
      * @return
      */
-    Response<List<DoctorMonthlyReport>> findMonthlyReports(@NotNull(message = "date.not.null") String sumAt);
+    Response<List<DoctorCommonReportDto>> findMonthlyReports(@NotNull(message = "date.not.null") String sumAt);
 
     /**
      * 根据日期获取当时猪群的情况
@@ -59,4 +60,18 @@ public interface DoctorCommonReportReadService {
     Response<List<DoctorGroupLiveStockDetailDto>> findEveryGroupInfo(@NotNull(message = "date.not.null") String sumAt);
 
     Response<Map<String, Integer>> findBarnLiveStock(Long barnId, Date date, Integer index);
+
+    /**
+     * 查询猪场当前存栏
+     * @param farmId 猪场id
+     * @return 存栏
+     */
+    Response<DoctorFarmLiveStockDto> findFarmCurrentLiveStock(Long farmId);
+
+    /**
+     * 查询过个猪场的存栏
+     * @param farmIdList 猪场id列表
+     * @return
+     */
+    Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList);
 }

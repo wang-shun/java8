@@ -27,7 +27,7 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
 
     /**
      * 猪群转移类型
-     * @see io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent.InType
+     * @see io.terminus.doctor.event.enums.InType
      */
     @NotNull(message = "inType.not.null")
     private Integer inType;
@@ -65,6 +65,8 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     private Long fromBarnId;
 
     private String fromBarnName;
+
+    private Integer fromBarnType;
 
     /**
      * 来源猪群id
@@ -113,6 +115,11 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
      * 弱仔数
      */
     private Integer weakQty;
+
+    /**
+     * 触发转入事件的母猪id
+     */
+    private Long sowId;
 
     /**
      * 触发转入事件的母猪号

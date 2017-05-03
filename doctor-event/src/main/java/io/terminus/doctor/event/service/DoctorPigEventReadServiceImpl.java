@@ -13,19 +13,23 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.DoctorNpdExportDto;
+import io.terminus.doctor.event.dto.DoctorPigSalesExportDto;
+import io.terminus.doctor.event.dto.DoctorProfitExportDto;
 import io.terminus.doctor.event.dto.DoctorSowParityAvgDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.dto.DoctorSuggestPig;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
+import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
-import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -68,7 +72,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     private DoctorPigEventManager pigEventManager;
 
     @Autowired
-    private DoctorRollbackHandlerChain doctorRollbackHandlerChain;
+    private DoctorModifyPigEventHandlers doctorModifyPigEventHandlers;
 
     @Autowired
     private DoctorBarnDao doctorBarnDao;
@@ -280,7 +284,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             if (pigEvent == null) {
                 return RespWithEx.ok(null);
             }
-            DoctorRollbackPigEventHandler handler = doctorRollbackHandlerChain.getRollbackPigEventHandlers().get(pigEvent.getType(), pigEvent.getKind());
+            DoctorModifyPigEventHandler handler = doctorModifyPigEventHandlers.getModifyPigEventHandlerMap().get(pigEvent.getType());
             if (handler.canRollback(pigEvent)) {
                 return RespWithEx.ok(pigEvent);
             }
@@ -297,7 +301,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     public RespWithEx<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId) {
         try {
             DoctorPigEvent pigEvent = doctorPigEventDao.findById(eventId);
-            DoctorRollbackPigEventHandler handler = doctorRollbackHandlerChain.getRollbackPigEventHandlers().get(pigEvent.getType(), pigEvent.getKind());
+            DoctorModifyPigEventHandler handler = doctorModifyPigEventHandlers.getModifyPigEventHandlerMap().get(pigEvent.getType());
             if (handler.canRollback(pigEvent)) {
                 return RespWithEx.ok(Boolean.TRUE);
             }
@@ -367,6 +371,39 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         } catch (Exception e) {
             log.error("find.pigIds.by.event, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find pigIds by type failed");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorNpdExportDto>> pagingFindNpd(Map<String, Object> map, Integer offset, Integer limit) {
+        try {
+            PageInfo pageInfo = new PageInfo(offset, limit);
+            return Response.ok(doctorPigEventDao.sumNpdWeanEvent(map, pageInfo.getOffset(), pageInfo.getLimit()));
+        }catch (Exception e) {
+            log.error("find.npd.event, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find npd event fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorPigSalesExportDto>> pagingFindSales(Map<String, Object> map, Integer offset, Integer limit) {
+        try {
+            PageInfo pageInfo = new PageInfo(offset, limit);
+            return Response.ok(doctorPigEventDao.findSalesEvent(map, pageInfo.getOffset(), pageInfo.getLimit()));
+        }catch (Exception e) {
+            log.error("find.sales.event, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find sales fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorProfitExportDto>> sumProfitAmount(Map<String, Object> map) {
+        try {
+            map = Params.filterNullOrEmpty(map);
+            return Response.ok(doctorPigEventDao.sumProfitPigType(map));
+        }catch (Exception e) {
+            log.error("find.sum.profit.amount, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find sum profit amount");
         }
     }
 }

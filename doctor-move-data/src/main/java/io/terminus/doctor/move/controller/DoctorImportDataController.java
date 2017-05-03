@@ -187,9 +187,8 @@ public class DoctorImportDataController {
         DateTime end = DateTime.now().withTimeAtStartOfDay(); //昨天开始时间
         DateTime begin = end.minusYears(1);
         new Thread(() -> {
-            doctorDailyReportWriteService.createDailyReports(begin.toDate(), end.toDate(), farmId);
-            doctorMoveReportService.moveMonthlyReport(farmId, 12);
-            doctorMoveReportService.moveWeeklyReport(farmId, 50);
+            doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
+            doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
             doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
             doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
         }).start();
@@ -326,24 +325,6 @@ public class DoctorImportDataController {
             log.error("flushBoarType failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
-    }
-
-    /**
-     * 没有猪镜像的生成镜像
-     * @param type 1.猪,2.猪群
-     */
-    @RequestMapping(value = "/generateSnapshot", method = RequestMethod.GET)
-    public Boolean generateSnapshot(@RequestParam Integer type) {
-        log.info("generateSnapshot.starting, type:{}", type);
-        if (type == 1) {
-            doctorImportDataService.generatePigSnapshot();
-        } else if (type == 2) {
-            doctorImportDataService.generateGroupSnapshot();
-        } else {
-            throw new JsonResponseException("类型错误,type:" + type);
-        }
-        log.info("generateSnapshot.ending");
-        return true;
     }
 
     /**

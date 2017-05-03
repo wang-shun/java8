@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
@@ -9,33 +8,28 @@ import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
-import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.event.DoctorGroupEventListener;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
-import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.Valid;
@@ -60,7 +54,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
 
 
-    protected final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorBarnDao doctorBarnDao;
@@ -74,11 +67,9 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private DoctorGroupEventListener doctorGroupEventListener;
 
     @Autowired
-    public DoctorAbstractGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                           DoctorGroupTrackDao doctorGroupTrackDao,
+    public DoctorAbstractGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao,
                                            DoctorGroupEventDao doctorGroupEventDao,
                                            DoctorBarnDao doctorBarnDao) {
-        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorBarnDao = doctorBarnDao;
@@ -112,6 +103,13 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         track.setRelEventId(event.getId());
         return track;
     }
+
+
+    /**
+     * 更新日记录表
+     * @param newGroupEvent 猪事件
+     */
+    protected void updateDailyForNew(DoctorGroupEvent newGroupEvent){}
 
     protected void updateAvgDayAge(DoctorGroupEvent event, DoctorGroupTrack track) {
         track.setAvgDayAge(DateUtil.getDeltaDaysAbs(event.getEventAt(), MoreObjects.firstNonNull(track.getBirthDate(), event.getEventAt())));
@@ -165,6 +163,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setIsAuto(baseInput.getIsAuto());
         event.setCreatorId(baseInput.getCreatorId());   //创建人
         event.setCreatorName(baseInput.getCreatorName());
+        event.setOperatorId(baseInput.getCreatorId());
+        event.setOperatorName(baseInput.getCreatorName());
         event.setDesc(baseInput.generateEventDesc());
         event.setRemark(baseInput.getRemark());
         event.setRelGroupEventId(baseInput.getRelGroupEventId());
@@ -185,7 +185,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         groupTrack.setUpdatorId(event.getCreatorId());
         groupTrack.setUpdatorName(event.getCreatorName());
         groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
-        groupTrack.setBirthDate(DateTime.now().plusDays(1 - groupTrack.getAvgDayAge()).toDate());
         doctorGroupTrackDao.update(groupTrack);
     }
 
@@ -202,20 +201,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 BeanMapper.map(groupTrack, DoctorGroupTrack.class));
     }
 
-    //创建猪群镜像信息
-    protected DoctorGroupSnapshot createGroupSnapShot(DoctorGroupSnapShotInfo oldShot, DoctorGroupSnapShotInfo newShot, GroupEventType eventType) {
-        DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-        //录入前的数据
-        groupSnapshot.setGroupId(newShot.getGroup().getId());
-        groupSnapshot.setFromEventId(oldShot.getGroupTrack().getRelEventId());
-        groupSnapshot.setToEventId(newShot.getGroupTrack().getRelEventId());
-        groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
-                .group(newShot.getGroup())
-                .groupTrack(newShot.getGroupTrack())
-                .build()));
-        doctorGroupSnapshotDao.create(groupSnapshot);
-        return groupSnapshot;
-    }
 
     //校验数量
     protected static void checkQuantity(Integer max, Integer actual) {
@@ -231,15 +216,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             log.error("allQty:{}, boarQty:{}, sowQty:{}", all, boar, sow);
             throw new InvalidException("quantity.not.equal", all, boar + sow);
         }
-    }
-
-    //发布猪群猪舍事件(不发统计事件了，事务里套事务，事件区分不开，改成同步统计)
-    protected void publistGroupAndBarn(DoctorGroupEvent event) {
-        doctorGroupEventListener.handleGroupEvent(ListenedGroupEvent.builder()
-                .orgId(event.getOrgId())
-                .farmId(event.getFarmId())
-                .groups(Lists.newArrayList(getPublishGroup(event)))
-                .build());
     }
 
     private static DoctorGroupPublishDto getPublishGroup(DoctorGroupEvent event) {
@@ -344,7 +320,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //判断内转还是外转
     protected static DoctorGroupEvent.TransGroupType getTransType(Integer inType, Integer pigType, DoctorBarn toBarn) {
-        if (inType != null && !Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
+        if (inType != null && !Objects.equals(inType, InType.GROUP.getValue())) {
             return DoctorGroupEvent.TransGroupType.OUT;
         }
         return Objects.equals(pigType, toBarn.getPigType()) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarn.getPigType())) ?

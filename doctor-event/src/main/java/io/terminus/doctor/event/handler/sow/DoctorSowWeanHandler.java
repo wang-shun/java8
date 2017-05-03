@@ -3,7 +3,6 @@ package io.terminus.doctor.event.handler.sow;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.exception.InvalidException;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -13,6 +12,7 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorWeanGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigWeanEventHandler;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
@@ -24,8 +24,6 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,6 +52,8 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     private DoctorBarnDao doctorBarnDao;
     @Autowired
     private DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
+    @Autowired
+    private DoctorModifyPigWeanEventHandler doctorModifyPigWeanEventHandler;
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -74,17 +74,10 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorWeanDto weanDto = (DoctorWeanDto) inputDto;
-        DoctorPigEvent lastFarrow = doctorPigEventDao.queryLastFarrowing(weanDto.getPigId());
-        expectTrue(notNull(lastFarrow), "last.farrow.not.null", inputDto.getPigId());
-        //分娩时间
-        DateTime farrowingDate = new DateTime(lastFarrow.getEventAt());
-
-        //断奶时间
-        DateTime partWeanDate = new DateTime(weanDto.eventAt());
-        doctorPigEvent.setPartweanDate(partWeanDate.toDate());
+        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
 
         //哺乳天数
-        doctorPigEvent.setFeedDays(Math.abs(Days.daysBetween(farrowingDate, partWeanDate).getDays()));
+        doctorPigEvent.setFeedDays(doctorModifyPigWeanEventHandler.getWeanAvgAge(pigTrack.getPigId(), pigTrack.getCurrentParity(), weanDto.eventAt()));
 
         //断奶只数和断奶均重
         doctorPigEvent.setWeanCount(weanDto.getPartWeanPigletsCount());
@@ -97,7 +90,6 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setHealthCount(quaQty);    //额 这个字段存一下合格数吧
         doctorPigEvent.setWeakCount(doctorPigEvent.getWeanCount() - quaQty);
 
-        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
         expectTrue(notNull(pigTrack), "pig.track.not.null", inputDto.getPigId());
         expectTrue(notNull(pigTrack.getGroupId()), "farrow.groupId.not.null", weanDto.getPigId());
         doctorPigEvent.setGroupId(pigTrack.getGroupId());   //必须设置下断奶的groupId
@@ -142,6 +134,12 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
     }
 
     @Override
+    protected void updateDailyForNew(DoctorPigEvent newPigEvent) {
+        BasePigEventInputDto inputDto = JSON_MAPPER.fromJson(newPigEvent.getExtra(), DoctorWeanDto.class);
+        doctorModifyPigWeanEventHandler.updateDailyOfNew(newPigEvent, inputDto);
+    }
+
+    @Override
     protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack) {
         DoctorWeanDto partWeanDto = JSON_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorWeanDto.class);
         //触发猪群断奶事件
@@ -157,7 +155,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
                     .chgLocationToBarnId(partWeanDto.getChgLocationToBarnId())
                     .chgLocationToBarnName(doctorBarn.getName())
                     .build();
-            buildAutoEventCommonInfo(partWeanDto, chgLocationDto, PigEvent.CHG_LOCATION, doctorPigEvent.getId());
+            buildAutoEventCommonInfo(partWeanDto, chgLocationDto, PigEvent.TO_MATING, doctorPigEvent.getId());
             //构建basic
             DoctorBasicInputInfoDto basic = DoctorBasicInputInfoDto.builder()
                     .orgId(doctorPigEvent.getOrgId())
@@ -176,20 +174,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
 
     @Override
     public BaseGroupInput buildTriggerGroupEventInput(DoctorPigEvent pigEvent) {
-        DoctorWeanDto partWeanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorWeanDto.class);
-        DoctorWeanGroupInput input = new DoctorWeanGroupInput();
-        input.setPartWeanDate(pigEvent.getEventAt());
-        input.setPartWeanPigletsCount(partWeanDto.getPartWeanPigletsCount());
-        input.setPartWeanAvgWeight(partWeanDto.getPartWeanAvgWeight());
-        input.setQualifiedCount(partWeanDto.getQualifiedCount());
-        input.setNotQualifiedCount(partWeanDto.getNotQualifiedCount());
-        input.setGroupId(pigEvent.getGroupId());
-        input.setEventAt(DateUtil.toDateString(pigEvent.getEventAt()));
-        input.setIsAuto(1);
-        input.setCreatorId(pigEvent.getCreatorId());
-        input.setCreatorName(pigEvent.getCreatorName());
-        input.setRelPigEventId(pigEvent.getId());
-        return input;
+        return doctorModifyPigWeanEventHandler.buildTriggerGroupEventInput(pigEvent);
     }
 
 
