@@ -321,6 +321,11 @@ public class DoctorEventChangeDto {
     private Integer transGroupType;
 
     /**
+     * 转移类型(更新报表参数)
+     */
+    private Integer transBarnType;
+
+    /**
      * 转入猪舍
      */
     private Long toBarnId;
