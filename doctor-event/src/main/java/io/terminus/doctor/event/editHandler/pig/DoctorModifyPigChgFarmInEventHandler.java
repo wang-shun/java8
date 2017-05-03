@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.getAfterDay;
 
 /**
@@ -35,6 +36,12 @@ public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPi
         //4.更新记录表
         updateDailyOfDelete(deletePigEvent);
 
+    }
+
+    @Override
+    protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
+        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(deletePigEvent.getPigId());
+        return notNull(lastEvent) && Objects.equals(deletePigEvent.getId(), lastEvent.getId()) ;
     }
 
     @Override

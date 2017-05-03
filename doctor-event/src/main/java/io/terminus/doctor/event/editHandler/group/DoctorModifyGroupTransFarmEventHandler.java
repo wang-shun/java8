@@ -4,13 +4,17 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
-import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,22 +25,12 @@ import java.util.Date;
 public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModifyGroupEventHandler{
 
 
-    @Override
-    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
-        return false;
-    }
-
-    @Override
-    public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
-        DoctorTransFarmGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorTransFarmGroupInput.class);
-        DoctorTransFarmGroupInput newInput = (DoctorTransFarmGroupInput) input;
-        DoctorEventChangeDto changeDto = DoctorEventChangeDto.builder()
-                .oldEventAt(DateTime.parse(oldInput.getEventAt()).toDate())
-                .newEventAt(DateTime.parse(newInput.getEventAt()).toDate())
-                .quantityChange(EventUtil.minusInt(newInput.getQuantity(), oldInput.getQuantity()))
-                .build();
-        return changeDto;
-    }
+    @Autowired
+    private DoctorModifyGroupMoveInEventHandler modifyGroupMoveInEventHandler;
+    @Autowired
+    private DoctorModifyGroupNewEventHandler modifyGroupNewEventHandler;
+    @Autowired
+    private DoctorModifyGroupCloseEventHandler modifyGroupCloseEventHandler;
 
     @Override
     public DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
@@ -46,6 +40,47 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
         newGroupEvent.setWeight(newInput.getWeight());
         newGroupEvent.setAvgWeight(EventUtil.getAvgWeight(newGroupEvent.getWeight(), newGroupEvent.getQuantity()));
         return newGroupEvent;
+    }
+
+    @Override
+    protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
+        //1.转入回滚
+        DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.MOVE_IN.getValue());
+        modifyGroupMoveInEventHandler.rollbackHandle(moveInEvent, operatorId, operatorName);
+
+        //2.新建回滚
+        DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.NEW.getValue());
+        if (notNull(newCreateEvent)) {
+            modifyGroupNewEventHandler.rollbackHandle(newCreateEvent, operatorId, operatorName);
+        }
+
+        //3.关闭回滚
+        DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.CLOSE.getValue());
+        if (notNull(closeEvent)) {
+            modifyGroupCloseEventHandler.rollbackHandle(closeEvent, operatorId, operatorName);
+        }
+    }
+
+    @Override
+    protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {
+        oldGroupTrack.setQuantity(EventUtil.plusInt(oldGroupTrack.getQuantity(), deleteGroupEvent.getQuantity()));
+        return oldGroupTrack;
+    }
+
+    @Override
+    protected void updateDailyForDelete(DoctorGroupEvent deleteGroupEvent) {
+        updateDailyOfDelete(deleteGroupEvent);
+    }
+
+    @Override
+    public void updateDailyOfDelete(DoctorGroupEvent oldGroupEvent) {
+        DoctorTransFarmGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorTransFarmGroupInput.class);
+        DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
+                .quantityChange(EventUtil.minusInt(0, oldInput.getQuantity()))
+                .build();
+        DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
+        doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
+        updateDailyGroupLiveStock(oldGroupEvent.getGroupId(), getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
     }
 
     @Override
@@ -62,7 +97,7 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
 
     @Override
     protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
-        oldDailyGroup.setChgFarm(EventUtil.plusInt(oldDailyGroup.getOuterOut(), changeDto.getQuantityChange()));
+        oldDailyGroup.setChgFarm(EventUtil.plusInt(oldDailyGroup.getChgFarm(), changeDto.getQuantityChange()));
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
         return oldDailyGroup;
     }

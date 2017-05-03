@@ -164,7 +164,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
 
     @Override
     public void updateDailyOfDelete(DoctorGroupEvent oldGroupEvent) {
-        DoctorMoveInGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorMoveInGroupInput.class);
+        DoctorTransGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorTransGroupInput.class);
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .quantityChange(EventUtil.minusInt(0, oldInput.getQuantity()))
                 .isSowTrigger(notNull(oldGroupEvent.getSowId()))

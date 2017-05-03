@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.getAfterDay;
 
 /**
@@ -25,6 +26,15 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
     private DoctorModifyPigRemoveEventHandler modifyPigRemoveEventHandler;
     @Autowired
     private DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler;
+
+    @Override
+    protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
+        DoctorPigEvent chgFarmInEvent = doctorPigEventDao.findByRelPigEventId(deletePigEvent.getId());
+        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(deletePigEvent.getPigId());
+        return notNull(lastEvent)
+                && Objects.equals(deletePigEvent.getId(), lastEvent.getId())
+                && modifyPigChgFarmInEventHandler.rollbackHandleCheck(chgFarmInEvent);
+    }
 
     @Override
     protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
