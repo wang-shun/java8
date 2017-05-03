@@ -11,7 +11,6 @@ import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
@@ -55,7 +54,6 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
         DoctorTransFarmGroupInput newInput = (DoctorTransFarmGroupInput) input;
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .quantityChange(newInput.getQuantity())
-                .transGroupType(newGroupEvent.getTransGroupType())
                 .build();
         DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
         doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
@@ -64,11 +62,7 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
 
     @Override
     protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
-        if (Objects.equals(changeDto.getTransGroupType(), DoctorGroupEvent.TransGroupType.OUT.getValue())) {
-            oldDailyGroup.setOuterOut(EventUtil.plusInt(oldDailyGroup.getOuterOut(), changeDto.getQuantityChange()));
-        } else {
-            oldDailyGroup.setInnerOut(EventUtil.plusInt(oldDailyGroup.getInnerOut(), changeDto.getQuantityChange()));
-        }
+        oldDailyGroup.setChgFarm(EventUtil.plusInt(oldDailyGroup.getOuterOut(), changeDto.getQuantityChange()));
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
         return oldDailyGroup;
     }

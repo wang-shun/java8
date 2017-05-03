@@ -239,6 +239,7 @@
         sum(case when type = 7  then `other_change` else 0 END) as farrowOtherChange,
         sum(case when type = 7  then `inner_out` else 0 END) as farrowInnerOut,
         sum(case when type = 7  then `outer_out` else 0 END) as farrowOuterOut,
+        sum(case when type = 7  then `chg_farm` else 0 END) as farrowChgFarm,
         sum(case when type = 7 and sum_at = #{endAt} then `end` else 0 END) as farrowEnd,
 
         sum(case when type = 2 and sum_at = #{startAt} then `start` else 0 END) as nurseryStart,
@@ -250,6 +251,7 @@
         sum(case when type = 2  then `other_change` else 0 END) as nurseryOtherChange,
         sum(case when type = 2  then `inner_out` else 0 END) as nurseryInnerOut,
         sum(case when type = 2  then `outer_out` else 0 END) as nurseryOuterOut,
+        sum(case when type = 2  then `chg_farm` else 0 END) as nurseryChgFarm,
         sum(case when type = 2 and sum_at = #{endAt} then `end` else 0 END) as nurseryEnd,
 
         sum(case when type = 3 and sum_at = #{startAt} then `start` else 0 END) as fattenStart,
@@ -261,6 +263,7 @@
         sum(case when type = 3  then `other_change` else 0 END) as fattenOtherChange,
         sum(case when type = 3  then `inner_out` else 0 END) as fattenInnerOut,
         sum(case when type = 3  then `outer_out` else 0 END) as fattenOuterOut,
+        sum(case when type = 3  then `chg_farm` else 0 END) as fattenChgFarm,
         sum(case when type = 3 and sum_at = #{endAt} then `end` else 0 END) as fattenEnd,
 
         sum(case when type = 4 and sum_at = #{startAt} then `start` else 0 END) as houbeiStart,
@@ -273,6 +276,7 @@
         sum(case when type = 4  then `inner_out` else 0 END) as houbeiInnerOut,
         sum(case when type = 4  then `outer_out` else 0 END) as houbeiOuterOut,
         sum(case when type = 4  then `turn_seed` else 0 END) as houbeiTurnSeed,
+        sum(case when type = 4  then `chg_farm` else 0 END) as houbeiChgFarm,
         sum(case when type = 4 and sum_at = #{endAt} then `end` else 0 END) as houbeiEnd
         from doctor_daily_groups
         where farm_id = #{farmId}
