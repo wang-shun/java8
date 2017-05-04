@@ -52,4 +52,13 @@ public interface DoctorRangeReportWriteService {
      * @return
      */
     Response<Boolean> flushDoctorRangeReports(Long farmId, Date date);
+
+    /**
+     * 更新某一段时间的周报、月报存栏结构
+     * @param fid
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    Response<Boolean> updateStructureReport(Long fid, Date startAt, Date endAt);
 }
