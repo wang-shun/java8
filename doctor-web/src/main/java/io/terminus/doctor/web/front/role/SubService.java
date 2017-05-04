@@ -161,7 +161,9 @@ public class SubService {
                 subUser.setMobile(sub.getContact());
             }
 
-            this.updateSubStaffStatus(sub.getFarmIds(), subUser, io.terminus.doctor.user.model.Sub.Status.from(sub.getStatus()));
+            //// TODO: 17/5/4 staff表已经不使用了
+//            this.updateSubStaffStatus(sub.getFarmIds(), subUser, io.terminus.doctor.user.model.Sub.Status.from(sub.getStatus()));
+
             // TODO: 自定义角色冗余进 user 表
             List<String> roles = Lists.newArrayList("SUB");
             if (sub.getRoleId() != null) {
