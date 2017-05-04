@@ -1271,10 +1271,10 @@ public class DoctorMoveDataController {
             if (farmId == null) {
                 List<Long> farmIds = getAllFarmIds();
                 farmIds.forEach(fid -> {
-                    doctorDailyGroupWriteService.createDailyGroupsByDateRange(fid, startAt, endAt);;
+                    doctorDailyGroupWriteService.createDailyGroupsByDateRange(fid, startAt, endAt);
                 });
             } else {
-                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, startAt, endAt);;
+                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, startAt, endAt);
             }
             log.warn("flush  gropu daily start, farmId:{}, from:{}, to:{}", farmId, from, to);
             return true;

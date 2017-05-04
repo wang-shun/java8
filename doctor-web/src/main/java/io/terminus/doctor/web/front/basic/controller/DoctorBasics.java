@@ -91,7 +91,7 @@ public class DoctorBasics {
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public List<DoctorBasic> findAllBasics() {
-        return RespHelper.or500(doctorBasicReadService.findAllBasics());
+        return RespHelper.or500(doctorBasicReadService.findAllValidBasics());
     }
 
     /************************** 猪群变动相关 **************************/

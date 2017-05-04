@@ -52,7 +52,7 @@ public class DoctorInitFarmService {
             //初始化基础数据
             DoctorFarmBasic doctorFarmBasic = new DoctorFarmBasic();
             doctorFarmBasic.setFarmId(farm.getId());
-            List<DoctorBasic> basicList = RespHelper.orServEx(doctorBasicReadService.findAllBasics());
+            List<DoctorBasic> basicList = RespHelper.orServEx(doctorBasicReadService.findAllValidBasics());
             List<DoctorChangeReason> reasonList = RespHelper.orServEx(doctorBasicReadService.findAllChangeReasons());
             List<DoctorBasicMaterial> materialList = RespHelper.orServEx(doctorBasicMaterialReadService.findAllBasicMaterials());
             String basicIds = basicList.stream().map(doctorBasic -> String.valueOf(doctorBasic.getId())).collect(Collectors.joining(","));
