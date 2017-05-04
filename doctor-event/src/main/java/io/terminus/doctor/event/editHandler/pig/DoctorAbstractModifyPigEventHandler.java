@@ -112,7 +112,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     @Override
     public Boolean canRollback(DoctorPigEvent deletePigEvent) {
-        return !Objects.equals(deletePigEvent.getEventSource(), SourceType.TRANS_FARM.getValue())
+        return  !Objects.equals(deletePigEvent.getEventSource(), SourceType.TRANS_FARM.getValue())
                 && isLastManualEvent(deletePigEvent)
                 && rollbackHandleCheck(deletePigEvent);
     }
@@ -380,6 +380,6 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
             return true;
         }
         DoctorPigEvent lastEvent = doctorPigEventDao.findLastManualEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
-        return Objects.equals(pigEvent.getId(), lastEvent.getId());
+        return notNull(lastEvent) && Objects.equals(pigEvent.getId(), lastEvent.getId());
     }
 }

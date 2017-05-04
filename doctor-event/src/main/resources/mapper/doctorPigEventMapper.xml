@@ -1093,7 +1093,7 @@
         FROM <include refid="tb" />
         WHERE status = 1
         AND pig_id = #{pigId}
-        AND is_auto = 0
+        AND is_auto != 1
         <if test="types != null &amp;&amp; types.size() > 0">
             AND `type` NOT IN
             <foreach collection="types" item="i" open="(" close=")" separator=",">
