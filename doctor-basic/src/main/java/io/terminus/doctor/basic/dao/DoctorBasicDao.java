@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import org.springframework.stereotype.Repository;
@@ -23,4 +24,7 @@ public class DoctorBasicDao extends MyBatisDao<DoctorBasic> {
         return getSqlSession().selectList(sqlId("findValidByType"), type);
     }
 
+    public List<DoctorBasic> findAllValidBasics() {
+        return getSqlSession().selectList(sqlId("list"), ImmutableMap.of("isValid", 1));
+    }
 }
