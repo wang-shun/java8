@@ -2466,6 +2466,9 @@ public class DoctorMoveDataService {
                         doctorPigEvent1.setBoarCode(boarCode);
                         statusBefore = statusAfter;
                     });
+            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+            doctorPigTrack.setCurrentParity(parity);
+            doctorPigTrackDao.update(doctorPigTrack);
             Boolean result = doctorPigEventDao.updates(lists);
             if (!result) {
                 log.info("update parity boarCode fail: {}", lists);
