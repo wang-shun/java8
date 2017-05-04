@@ -7,7 +7,6 @@ import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupElicitRecordDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -51,8 +50,6 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
 
     private final DoctorGroupEventDao doctorGroupEventDao;
 
-    private final DoctorEventRelationDao doctorEventRelationDao;
-
     private final DoctorGroupDao doctorGroupDao;
 
     private final DoctorGroupElicitRecordDao doctorGroupElicitRecordDao;
@@ -65,7 +62,6 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
                                            DoctorGroupTrackDao doctorGroupTrackDao,
                                            DoctorGroupWriteService doctorGroupWriteService,
                                            DoctorGroupEventDao doctorGroupEventDao,
-                                           DoctorEventRelationDao doctorEventRelationDao,
                                            DoctorGroupDao doctorGroupDao,
                                            DoctorGroupElicitRecordDao doctorGroupElicitRecordDao,
                                            DoctorMessageSourceHelper messageSourceHelper){
@@ -74,7 +70,6 @@ public class DoctorEditGroupEventServiceImpl implements DoctorEditGroupEventServ
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorGroupEventDao = doctorGroupEventDao;
-        this.doctorEventRelationDao = doctorEventRelationDao;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupElicitRecordDao = doctorGroupElicitRecordDao;
         this.messageSourceHelper = messageSourceHelper;

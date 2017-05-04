@@ -63,8 +63,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         doctorGroupEventDao.create(event);
 
-        //创建关联关系
-        createEventRelation(event);
 
         input.setEventType(GroupEventType.MOVE_IN.getValue());
         DoctorMoveInGroupInput moveIn = (DoctorMoveInGroupInput) input;

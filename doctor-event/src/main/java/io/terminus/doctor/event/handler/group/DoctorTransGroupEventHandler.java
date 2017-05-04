@@ -193,9 +193,6 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setExtraMap(transGroup);
         doctorGroupEventDao.create(event);
 
-        //创建关联关系
-        createEventRelation(event);
-
         transGroup.setRelGroupEventId(event.getId());
 
         Integer oldQuantity = groupTrack.getQuantity();

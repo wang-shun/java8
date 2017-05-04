@@ -8,7 +8,6 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.Checks;
-import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
@@ -31,7 +30,6 @@ import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.DoctorPigsByEventSelector;
-import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -65,8 +63,6 @@ public class DoctorPigEventManager {
     private DoctorPigEventDao doctorPigEventDao;
     @Autowired
     private DoctorPigDao doctorPigDao;
-    @Autowired
-    private DoctorEventRelationDao doctorEventRelationDao;
     @Autowired
     private DoctorModifyPigEventHandlers modifyPigEventHandlers;
 
@@ -146,14 +142,6 @@ public class DoctorPigEventManager {
         doctorPigTrackDao.update(fromTrack);
         //4.还原猪
         doctorPigDao.update(oldPig);
-        //5.还原之前的关联关系
-        if (!Arguments.isNullOrEmpty(pigNewEventIdList)) {
-            doctorEventRelationDao.updatePigEventStatus(pigNewEventIdList, DoctorEventRelation.Status.INVALID.getValue());
-            List<Long> pigCreateOldEventIdList = doctorEventInfoList.stream()
-                    .filter(doctorEventInfo -> Objects.equals(doctorEventInfo.getBusinessType(), DoctorEventInfo.Business_Type.PIG.getValue()))
-                    .map(DoctorEventInfo::getOldEventId).collect(Collectors.toList());
-            doctorEventRelationDao.updatePigEventStatusUnderHandling(pigCreateOldEventIdList, DoctorEventRelation.Status.VALID.getValue());
-        }
         log.info("rollback.modify.failed, ending");
     }
 

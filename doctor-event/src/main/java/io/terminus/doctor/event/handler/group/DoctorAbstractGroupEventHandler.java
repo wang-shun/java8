@@ -9,7 +9,6 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -25,7 +24,6 @@ import io.terminus.doctor.event.event.DoctorGroupEventListener;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorEventRelation;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -57,8 +55,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorBarnDao doctorBarnDao;
-    @Autowired
-    protected DoctorEventRelationDao doctorEventRelationDao;
 
     @Autowired
     private DoctorGroupDao doctorGroupDao;
@@ -116,24 +112,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     protected abstract DoctorGroupTrack updateTrackOtherInfo(DoctorGroupEvent event, DoctorGroupTrack track);
-
-    /**
-     * 创建事件的关联关系
-     * @param groupEvent 触发事件
-     */
-    protected void createEventRelation(DoctorGroupEvent groupEvent) {
-        if (Objects.equals(groupEvent.getIsAuto(), IsOrNot.NO.getValue())) {
-            return;
-        }
-        DoctorEventRelation eventRelation = DoctorEventRelation.builder()
-                .originGroupEventId(groupEvent.getRelGroupEventId())
-                .originPigEventId(groupEvent.getRelPigEventId())
-                .triggerGroupEventId(groupEvent.getId())
-                .status(DoctorEventRelation.Status.VALID.getValue())
-                .build();
-        doctorEventRelationDao.create(eventRelation);
-
-    }
 
     /**
      * 处理事件的抽象方法, 由继承的子类去实现
