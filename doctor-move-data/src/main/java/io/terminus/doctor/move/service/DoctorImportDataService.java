@@ -910,6 +910,8 @@ public class DoctorImportDataService {
         event.setEventSource(SourceType.IMPORT.getValue());
         if (isSowEvent) {
             event.setRelPigEventId(-1L);
+            event.setSowId(-1L);
+            event.setSowCode("-1");
         } else {
             event.setRelGroupEventId(-1L);
         }
