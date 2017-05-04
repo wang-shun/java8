@@ -120,6 +120,7 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
 
     @Override
     public Response<Boolean> updateStructureReport(Long farmId, Date startAt, Date endAt) {
+        log.info("update structure report farmId: {}, startAt: {}, endAt: {}, now: {}", farmId, DateUtil.toDateString(startAt), DateUtil.toDateString(endAt), DateUtil.toDateString(new Date()));
         try{
         startAt = DateUtil.monthStart(startAt);
             do {
