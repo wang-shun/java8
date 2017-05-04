@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.stereotype.Component;
 
@@ -24,16 +25,20 @@ public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPi
     @Override
     public void rollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
 
-        //1.删除转场转入校验
-        rollbackHandleCheck(deletePigEvent);
-
-        //2.删除转场触发的事件
+        //1.删除转场触发的事件
         doctorPigEventDao.deleteByChgFarm(deletePigEvent.getPigId());
 
-        //3.转场转入事件
+        //2.转场转入事件
         doctorPigEventDao.delete(deletePigEvent.getId());
 
-        //4.更新记录表
+        //3.删除猪
+        doctorPigDao.delete(deletePigEvent.getPigId());
+
+        //4.删除猪track
+        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(deletePigEvent.getPigId());
+        doctorPigTrackDao.delete(pigTrack.getId());
+
+        //5.更新记录表
         updateDailyOfDelete(deletePigEvent);
 
     }

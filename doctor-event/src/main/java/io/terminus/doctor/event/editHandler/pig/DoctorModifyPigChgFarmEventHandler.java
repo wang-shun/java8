@@ -59,6 +59,11 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
     }
 
     @Override
+    protected void updateDailyForDelete(DoctorPigEvent deletePigEvent) {
+        updateDailyOfDelete(deletePigEvent);
+    }
+
+    @Override
     public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
         DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
