@@ -28,6 +28,12 @@ public interface DoctorBasicReadService {
     Response<List<DoctorBasic>> findAllBasics();
 
     /**
+     * 查询全部使用状态的基础数据表
+     * @return 基础数据表
+     */
+    Response<List<DoctorBasic>> findAllValidBasics();
+
+    /**
      * 根据id查询基础数据表
      * @param basicId 主键id
      * @return 基础数据表
