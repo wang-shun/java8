@@ -82,10 +82,8 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     @Min(value = 1L, message = "quantity.not.lt.1")
     private Integer quantity;
 
-    @NotNull(message = "boarQty.not.null")
     private Integer boarQty;
 
-    @NotNull(message = "boarQty.not.null")
     private Integer sowQty;
 
     /**
