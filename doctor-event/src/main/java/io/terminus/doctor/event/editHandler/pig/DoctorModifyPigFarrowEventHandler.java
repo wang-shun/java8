@@ -218,14 +218,11 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         input.setSource(PigSource.LOCAL.getKey());
 
         Integer farrowingLiveCount = MoreObjects.firstNonNull(farrowingDto.getFarrowingLiveCount(), 0);
-        Integer sowCount = MoreObjects.firstNonNull(farrowingDto.getLiveSowCount(), 0);
-        Integer boarCount = MoreObjects.firstNonNull(farrowingDto.getLiveBoarCount(), 0);
-        if (sowCount == 0 && boarCount == 0) sowCount = farrowingLiveCount;
 
         input.setSex(DoctorGroupTrack.Sex.MIX.getValue());
         input.setQuantity(farrowingLiveCount);
-        input.setSowQty(sowCount);
-        input.setBoarQty(boarCount);
+        input.setSowQty(farrowingDto.getLiveSowCount());
+        input.setBoarQty(farrowingDto.getLiveBoarCount());
         input.setAvgDayAge(1);
         input.setAvgWeight(farrowingLiveCount == 0 ? 0d : Double.parseDouble(String.format("%.2f", farrowingDto.getBirthNestAvg() / farrowingLiveCount)));
         input.setEventAt(DateUtil.toDateString(pigEvent.getEventAt()));
