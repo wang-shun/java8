@@ -170,9 +170,23 @@
         </where>
     </select>
 
+    <delete id="deleteByFarmId" parameterType="long">
+        DELETE
+        FROM
+        <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+    </delete>
+
     <update id="updateRoleName" parameterType="map">
         update <include refid="tb"/>
         set role_name = #{roleName}
         where role_id = #{roleId}
     </update>
+
+    <delete id="delete" parameterType="long" >
+        DELETE
+        FROM <include refid="tb"/>
+        WHERE
+        id = #{id}
+    </delete>
 </mapper>
