@@ -98,8 +98,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         input.setEventType(GroupEventType.MOVE_IN.getValue());
         DoctorMoveInGroupInput moveIn = (DoctorMoveInGroupInput) input;
 
-        checkQuantityEqual(moveIn.getQuantity(), moveIn.getBoarQty(), moveIn.getSowQty());
-
         //1.转换转入猪群事件
         checkBreed(group.getBreedId(), moveIn.getBreedId());
 
@@ -151,12 +149,8 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
         //1.更新猪群跟踪
         track.setQuantity(EventUtil.plusInt(track.getQuantity(), event.getQuantity()));
-        if(!Arguments.isNull(track.getBoarQty()) || !Arguments.isNull(doctorMoveInGroupEvent.getBoarQty())){
-            track.setBoarQty(EventUtil.plusInt(track.getBoarQty(), doctorMoveInGroupEvent.getBoarQty()));
-        }
-        if(!Arguments.isNull(track.getSowQty()) || !Arguments.isNull(doctorMoveInGroupEvent.getSowQty())){
-            track.setSowQty(EventUtil.plusInt(track.getSowQty(),  doctorMoveInGroupEvent.getSowQty()));
-        }
+        track.setBoarQty(getBoarQty(track, doctorMoveInGroupEvent.getBoarQty()));
+        track.setSowQty(getSowQty(track,  doctorMoveInGroupEvent.getSowQty()));
 
         //空降产房仔猪，断奶统计要重新计算
         if (doctorMoveInGroupEvent.getFromBarnId() == null && Objects.equals(event.getPigType(), PigType.DELIVER_SOW.getValue())) {

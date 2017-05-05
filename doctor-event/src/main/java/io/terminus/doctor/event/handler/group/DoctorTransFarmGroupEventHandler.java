@@ -120,7 +120,6 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         checkCanTransGroup(transFarm.getToGroupId(), transFarm.getToBarnId(), transFarm.getIsCreateGroup());
         checkFarrowGroupUnique(transFarm.getIsCreateGroup(), transFarm.getToBarnId());
         checkQuantity(groupTrack.getQuantity(), transFarm.getQuantity());
-        checkQuantityEqual(transFarm.getQuantity(), transFarm.getBoarQty(), transFarm.getSowQty());
 
         //转入猪舍
         DoctorBarn toBarn = getBarn(transFarm.getToBarnId());
@@ -152,10 +151,8 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         groupTrack.setQuantity(EventUtil.minusQuantity(groupTrack.getQuantity(), transFarm.getQuantity()));
 
         //如果公猪数量 lt 0 按 0 计算
-        Integer boarQty = EventUtil.minusQuantity(groupTrack.getBoarQty(), transFarm.getBoarQty());
-        boarQty = boarQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : boarQty;
-        groupTrack.setBoarQty(boarQty < 0 ? 0 : boarQty);
-        groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
+        groupTrack.setBoarQty(getBoarQty(groupTrack, EventUtil.minusInt(0, transFarm.getBoarQty())));
+        groupTrack.setSowQty(getSowQty(groupTrack, EventUtil.minusInt(0, transFarm.getSowQty())));
 
         updateGroupTrack(groupTrack, event);
 
