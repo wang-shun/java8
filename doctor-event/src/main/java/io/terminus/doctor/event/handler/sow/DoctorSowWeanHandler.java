@@ -77,7 +77,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
 
         //哺乳天数
-        doctorPigEvent.setFeedDays(doctorModifyPigWeanEventHandler.getWeanAvgAge(pigTrack.getPigId(), pigTrack.getCurrentParity(), weanDto.eventAt()));
+        doctorPigEvent.setFeedDays(doctorModifyPigWeanEventHandler.getWeanAvgAge(pigTrack.getPigId(), doctorPigEventDao.findLastParity(pigTrack.getPigId()), weanDto.eventAt()));
 
         //断奶只数和断奶均重
         doctorPigEvent.setWeanCount(weanDto.getPartWeanPigletsCount());

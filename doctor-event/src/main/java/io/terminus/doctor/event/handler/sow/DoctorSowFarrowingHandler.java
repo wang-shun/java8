@@ -65,7 +65,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         DateTime farrowingDate = new DateTime(farrowingDto.eventAt());
         doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
         //计算孕期
-        doctorPigEvent.setPregDays(doctorModifyPigFarrowEventHandler.getPregDays(doctorPigEvent.getPigId(), doctorPigTrack.getCurrentParity(), farrowingDto.eventAt()));
+        doctorPigEvent.setPregDays(doctorModifyPigFarrowEventHandler.getPregDays(doctorPigEvent.getPigId(),
+                doctorPigEventDao.findLastParity(doctorPigTrack.getPigId()), farrowingDto.eventAt()));
 
         //分娩窝重
         doctorPigEvent.setFarrowWeight(farrowingDto.getBirthNestAvg());
@@ -115,7 +116,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
     protected void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack) {
         super.specialHandle(doctorPigEvent, doctorPigTrack);
         //对应的最近一次的 周期配种的初陪 的 isDelivery 字段变成true
-        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(),
+                doctorPigEventDao.findLastParity(doctorPigTrack.getPigId()));
         expectTrue(notNull(firstMate), "first.mate.not.null", doctorPigTrack.getPigId());
         firstMate.setIsDelivery(1);
         doctorPigEventDao.update(firstMate);

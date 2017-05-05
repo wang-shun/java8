@@ -1420,4 +1420,10 @@
         </set>
         where id = #{id}
     </update>
+
+    <select id="findLastParity" parameterType="long" resultType="int" >
+        SELECT max(parity)
+        FROM <include refid="tb"/>
+        where pig_id = #{pigId}
+    </select>
 </mapper>

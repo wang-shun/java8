@@ -88,7 +88,6 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
 
     @Override
     public void specialHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack) {
-        doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
         doctorPigEvent.setCurrentMatingCount(doctorPigTrack.getCurrentMatingCount());
         super.specialHandle(doctorPigEvent, doctorPigTrack);
 
@@ -113,6 +112,8 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         if (!isNull(trackExtraMap) &&
                 trackExtraMap.containsKey("hasWeanToMating")
                 && Boolean.valueOf(trackExtraMap.get("hasWeanToMating").toString())) {
+
+            doctorPigEvent.setParity(doctorPigEventDao.findLastParity(doctorPigTrack.getPigId()) + 1);
 
             //这里说明是断奶后的第一次配种,这个地方统计 dpNPD （断奶到配种的非生产天数）
             DateTime partWeanDate = new DateTime(doctorPigEvent.getMattingDate());

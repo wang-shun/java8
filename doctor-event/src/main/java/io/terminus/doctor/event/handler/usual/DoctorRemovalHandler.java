@@ -87,7 +87,8 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
 
         if (Objects.equals(removalDto.getChgTypeId(), DoctorBasicEnums.DEAD.getId()) || Objects.equals(removalDto.getChgTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
             //如果是死亡 或者淘汰,查找最近一次配种事件
-            DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+            DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(),
+                    doctorPigEventDao.findLastParity(doctorPigTrack.getPigId()));
             if (lastMate == null) {
                 return doctorPigEvent;
             }
