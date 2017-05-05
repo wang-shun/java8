@@ -156,6 +156,8 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         checkCanTransBarn(group.getPigType(), transGroup.getToBarnId());
         checkCanTransGroup(transGroup.getToGroupId(), transGroup.getToBarnId(), transGroup.getIsCreateGroup());
         checkFarrowGroupUnique(transGroup.getIsCreateGroup(), transGroup.getToBarnId());
+        checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
+
         if (transGroup.isSowEvent()) {
             checkQuantity(MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0), transGroup.getQuantity());
         } else {

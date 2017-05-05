@@ -191,11 +191,10 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //校验 公 + 母 = 总和
     protected static void checkQuantityEqual(Integer all, Integer boar, Integer sow) {
-        // TODO: 17/5/5 逻辑变动,不校验了
-//        if (all != (boar + sow)) {
-//            log.error("allQty:{}, boarQty:{}, sowQty:{}", all, boar, sow);
-//            throw new InvalidException("quantity.not.equal", all, boar + sow);
-//        }
+        if (EventUtil.plusInt(boar, sow) > all) {
+            log.error("allQty:{}, boarQty:{}, sowQty:{}", all, boar, sow);
+            throw new InvalidException("quantity.not.equal", all, boar + sow);
+        }
     }
 
     private static DoctorGroupPublishDto getPublishGroup(DoctorGroupEvent event) {

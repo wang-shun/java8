@@ -64,6 +64,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         doctorModifyGroupChangeEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(), DateUtil.toDate(change.getEventAt()), -change.getQuantity());
 
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
+        checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
 
         //非母猪触发事件
         if (!input.isSowEvent()) {

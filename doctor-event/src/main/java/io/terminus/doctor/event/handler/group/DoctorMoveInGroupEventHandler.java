@@ -100,6 +100,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         //1.转换转入猪群事件
         checkBreed(group.getBreedId(), moveIn.getBreedId());
+        checkQuantityEqual(moveIn.getQuantity(), moveIn.getBoarQty(), moveIn.getSowQty());
 
         //2.创建转入猪群事件
         DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.MOVE_IN, moveIn);
