@@ -30,5 +30,5 @@ public class DoctorSowParityAvgDto implements Serializable{
 
     private double avgDeadCount;  //平均死亡数量
 
-    private double avgMujiCount;  //平均畸形数量
+    private double avgMujiCount;  //平均木畸黑数量
 }

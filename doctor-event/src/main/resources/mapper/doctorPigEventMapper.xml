@@ -1034,7 +1034,7 @@
         ifnull(round(AVG (health_count), 2), 0) avgHealthCount,
         ifnull(round(AVG (weak_count), 2), 0) avgWeakCount,
         ifnull(round(AVG (dead_count), 2), 0) avgDeadCount,
-        ifnull(round(AVG (mny_count), 2), 0) avgMujiCount
+        ifnull(round(AVG (mny_count+jx_count+black_count), 2), 0) avgMujiCount
         FROM <include refid="tb"/>
         WHERE pig_id = #{pigId} AND status = 1
     </select>
