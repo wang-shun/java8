@@ -12,9 +12,11 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInputInfo;
@@ -23,11 +25,13 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +61,10 @@ public class DoctorGroupManager {
     private final DoctorGroupReadService doctorGroupReadService;
     private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorBarnDao doctorBarnDao;
+    @Autowired
+    private DoctorKpiDao doctorKpiDao;
+    @Autowired
+    private DoctorDailyGroupDao doctorDailyGroupDao;
 
     @Autowired
     public DoctorGroupManager(DoctorGroupDao doctorGroupDao,
@@ -149,6 +157,7 @@ public class DoctorGroupManager {
         eventInfoList.add(eventInfo);
         //发布统计事件
         //publistGroupAndBarn(groupEvent);
+        autoDailyGroup(groupEvent.getFarmId(), groupEvent.getGroupId(), group.getPigType(), groupEvent.getEventAt());
         return groupId;
     }
 
@@ -276,5 +285,24 @@ public class DoctorGroupManager {
             }
         }
         return null;
+    }
+
+    /**
+     * 自动补全dailyGroup
+     * @param farmId 猪场id
+     * @param eventAt 事件时间
+     */
+    protected void autoDailyGroup(Long farmId, Long groupId, Integer pigType, Date eventAt) {
+        while (!eventAt.after(new Date())) {
+            DoctorDailyGroup doctorDailyGroup = new DoctorDailyGroup();
+            doctorDailyGroup.setStart(0);
+            doctorDailyGroup.setEnd(0);
+            doctorDailyGroup.setSumAt(eventAt);
+            doctorDailyGroup.setGroupId(groupId);
+            doctorDailyGroup.setFarmId(farmId);
+            doctorDailyGroup.setType(pigType);
+            doctorDailyGroupDao.create(doctorDailyGroup);
+            eventAt = new DateTime(eventAt).plusDays(1).toDate();
+        }
     }
 }
