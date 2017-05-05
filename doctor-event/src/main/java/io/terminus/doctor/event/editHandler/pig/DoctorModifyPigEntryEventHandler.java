@@ -69,12 +69,6 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
     }
 
     @Override
-    public DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto) {
-        oldPigTrack.setCurrentParity(changeDto.getPigParity());
-        return oldPigTrack;
-    }
-
-    @Override
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
         if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())
                 && Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())) {

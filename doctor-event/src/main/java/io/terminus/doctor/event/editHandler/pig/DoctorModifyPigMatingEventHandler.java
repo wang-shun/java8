@@ -91,7 +91,6 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
 
         //之前,事件断奶
         oldPigTrack.setStatus(PigStatus.Wean.getKey());
-        oldPigTrack.setCurrentParity(EventUtil.minusInt(oldPigTrack.getCurrentParity(), 1));
         extra.put("hasWeanToMating", true);
         oldPigTrack.setExtraMap(extra);
         return oldPigTrack;

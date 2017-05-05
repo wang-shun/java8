@@ -78,7 +78,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
         //2.创建事件
         executeEvent.setPigStatusBefore(fromTrack.getStatus());
-        executeEvent.setParity(fromTrack.getCurrentParity());
         doctorPigEventDao.create(executeEvent);
 
         //3.如果是自动事件,或者编辑事件则创建关联关系
@@ -157,6 +156,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .build();
         doctorPigEvent.setRemark(inputDto.changeRemark());
         doctorPigEvent.setExtraMap(inputDto.toMap());
+        doctorPigEvent.setParity(doctorPigEventDao.findLastParity(inputDto.getPigId()));
+
         return doctorPigEvent;
     }
 

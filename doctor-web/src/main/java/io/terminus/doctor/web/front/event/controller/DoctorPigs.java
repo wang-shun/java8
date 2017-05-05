@@ -32,6 +32,7 @@ import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorMessageReadService;
 import io.terminus.doctor.event.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
@@ -85,6 +86,8 @@ public class DoctorPigs {
     private DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService;
     @RpcConsumer
     private DoctorBarnReadService doctorBarnReadService;
+    @RpcConsumer
+    private DoctorPigEventReadService doctorPigEventReadService;
 
     @Autowired
     public DoctorPigs(DoctorPigReadService doctorPigReadService,
@@ -197,7 +200,8 @@ public class DoctorPigs {
                     .barnCode(dto.getDoctorPigTrack().getCurrentBarnName())
                     .pigStatus(dto.getDoctorPigTrack().getStatus())
                     .dayAge(Days.daysBetween(new DateTime(dto.getDoctorPig().getBirthDate()), DateTime.now()).getDays() + 1)
-                    .parity(dto.getDoctorPigTrack().getCurrentParity()).entryDate(dto.getDoctorPig().getInFarmDate())
+                    .parity(RespHelper.or500(doctorPigEventReadService.findLastParity(dto.getDoctorPig().getId())))
+                    .entryDate(dto.getDoctorPig().getInFarmDate())
                     .birthDate(dto.getDoctorPig().getBirthDate())
                     .doctorPigEvents(dto.getDoctorPigEvents())
                     .pregCheckResult(pregCheckResult)

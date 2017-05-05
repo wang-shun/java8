@@ -406,4 +406,14 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("find sum profit amount");
         }
     }
+
+    @Override
+    public Response<Integer> findLastParity(Long pigId) {
+        try {
+            return Response.ok(doctorPigEventDao.findLastParity(pigId));
+        } catch (Exception e) {
+            log.error("find last parity failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.last.parity.failed");
+        }
+    }
 }

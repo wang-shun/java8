@@ -549,4 +549,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public Boolean updateIncludeNull(DoctorPigEvent pigEvent) {
         return getSqlSession().update(sqlId("updateIncludeNull"), pigEvent) == 1;
     }
+
+    /**
+     * 获取最新的胎次
+     * @param pigId 猪id
+     * @return 最新胎次
+     */
+    public Integer findLastParity(Long pigId) {
+        return getSqlSession().selectOne(sqlId("findLastParity"), pigId);
+    }
 }

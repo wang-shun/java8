@@ -202,4 +202,11 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<List<DoctorProfitExportDto>> sumProfitAmount(Map<String, Object> map);
+
+    /**
+     * 获取最新的胎次
+     * @param pigId 猪id
+     * @return 最新胎次
+     */
+    Response<Integer> findLastParity(Long pigId);
 }

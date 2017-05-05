@@ -71,7 +71,9 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setCheckDate(checkDate.toDate());
 
         //查找最近一次配种事件
-        DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+        DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(),
+                doctorPigEventDao.findLastParity(doctorPigTrack.getPigId()));
+
         expectTrue(notNull(lastMate), "preg.last.mate.not.null", inputDto.getPigId());
         if (!Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
             DateTime mattingDate = new DateTime(lastMate.getEventAt());
@@ -113,7 +115,9 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
         super.specialHandle(doctorPigEvent, doctorPigTrack);
         if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Pregnancy.getKey())) {
             //对应的最近一次的 周期配种的初陪 的 isImpregnation 字段变成true
-            DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+            DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId()
+                    , doctorPigEventDao.findLastParity(doctorPigTrack.getPigId()));
+
             expectTrue(notNull(firstMate), "first.mate.not.null", doctorPigEvent.getPigId());
             firstMate.setIsImpregnation(1);
             doctorPigEventDao.update(firstMate);
