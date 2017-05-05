@@ -79,7 +79,6 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         checkCanTransGroup(transGroup.getToGroupId(), transGroup.getToBarnId(), transGroup.getIsCreateGroup());
         checkFarrowGroupUnique(transGroup.getIsCreateGroup(), transGroup.getToBarnId());
         checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
-        checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
         Double realWeight = transGroup.getAvgWeight() * transGroup.getQuantity();   //后台计算的总重
 
         //转入猪舍
@@ -157,12 +156,13 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         checkCanTransBarn(group.getPigType(), transGroup.getToBarnId());
         checkCanTransGroup(transGroup.getToGroupId(), transGroup.getToBarnId(), transGroup.getIsCreateGroup());
         checkFarrowGroupUnique(transGroup.getIsCreateGroup(), transGroup.getToBarnId());
+        checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
+
         if (transGroup.isSowEvent()) {
             checkQuantity(MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0), transGroup.getQuantity());
         } else {
             checkQuantity(groupTrack.getQuantity() - MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0), transGroup.getQuantity());
         }
-        checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
         Double realWeight = transGroup.getAvgWeight() * transGroup.getQuantity();   //后台计算的总重
         //checkDayAge(groupTrack.getAvgDayAge(), transGroup);
 
@@ -201,10 +201,9 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         groupTrack.setQuantity(EventUtil.minusQuantity(groupTrack.getQuantity(), transGroup.getQuantity()));
 
         //如果公猪数量 lt 0 按 0 计算
-        Integer boarQty = EventUtil.minusQuantity(groupTrack.getBoarQty(), transGroup.getBoarQty());
-        boarQty = boarQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : boarQty;
-        groupTrack.setBoarQty(boarQty < 0 ? 0 : boarQty);
-        groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
+        groupTrack.setBoarQty(getBoarQty(groupTrack, EventUtil.minusInt(0, transGroup.getBoarQty())));
+        //母猪数量
+        groupTrack.setSowQty(getSowQty(groupTrack, EventUtil.minusInt(0, transGroup.getSowQty())));
 
         //如果是母猪触发的转群事件，窝数-1，活仔，健仔数累减
         if (transGroup.isSowEvent()) {

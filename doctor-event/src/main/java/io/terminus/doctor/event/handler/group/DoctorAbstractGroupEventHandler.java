@@ -27,6 +27,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -190,7 +191,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //校验 公 + 母 = 总和
     protected static void checkQuantityEqual(Integer all, Integer boar, Integer sow) {
-        if (all != (boar + sow)) {
+        if (EventUtil.plusInt(boar, sow) > all) {
             log.error("allQty:{}, boarQty:{}, sowQty:{}", all, boar, sow);
             throw new InvalidException("quantity.not.equal", all, boar + sow);
         }
@@ -343,6 +344,31 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             }
         }
         return false;
+    }
+
+
+    /**
+     * 获取母猪数量
+     * @param groupTrack
+     * @param sowQtyIn
+     * @return
+     */
+    protected Integer getSowQty(DoctorGroupTrack groupTrack, Integer sowQtyIn) {
+        Integer sowQty = EventUtil.plusInt(groupTrack.getSowQty(), sowQtyIn);
+        sowQty = sowQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : sowQty;
+        return sowQty < 0 ? 0 : sowQty;
+    }
+
+    /**
+     * 获取母猪数量
+     * @param groupTrack
+     * @param boarQtyIn 转入数量
+     * @return
+     */
+    protected Integer getBoarQty(DoctorGroupTrack groupTrack, Integer boarQtyIn) {
+        Integer boarQty = EventUtil.plusInt(groupTrack.getBoarQty(), boarQtyIn);
+        boarQty = boarQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : boarQty;
+        return boarQty < 0 ? 0 : boarQty;
     }
 
 }

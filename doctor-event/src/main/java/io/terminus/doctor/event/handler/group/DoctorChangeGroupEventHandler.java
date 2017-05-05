@@ -105,10 +105,8 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         groupTrack.setQuantity(EventUtil.minusQuantity(groupTrack.getQuantity(), change.getQuantity()));
 
         //如果公猪数量 lt 0 按 0 计算
-        Integer boarQty = EventUtil.minusQuantity(groupTrack.getBoarQty(), change.getBoarQty());
-        boarQty = boarQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : boarQty;
-        groupTrack.setBoarQty(boarQty < 0 ? 0 : boarQty);
-        groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
+        groupTrack.setBoarQty(getBoarQty(groupTrack, EventUtil.minusInt(0, change.getBoarQty())));
+        groupTrack.setSowQty(getSowQty(groupTrack, EventUtil.minusInt(0, change.getSowQty())));
 
         //母猪触发的变动，要减掉未断奶数
         if (change.isSowEvent()) {
