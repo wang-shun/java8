@@ -219,7 +219,7 @@
             #{item.sowId},
             #{item.sowCode},
             #{item.customerId},
-            #{item.customerCode},
+            #{item.customerName},
             #{item.basicId},
             #{item.basicName},
             #{item.vaccinResult},
