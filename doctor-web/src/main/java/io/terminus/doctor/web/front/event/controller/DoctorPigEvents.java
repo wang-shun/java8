@@ -466,4 +466,16 @@ public class DoctorPigEvents {
         pigEventCriteria.put("endDate", endDate);
         return RespHelper.or500(doctorPigEventReadService.pagingFindSales(pigEventCriteria, pageNo, pageSize));
     }
+
+    /**
+     * 获取某一头某一胎次下未断奶数量
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @return 未断奶数
+     */
+    @RequestMapping(value = "/findUnWeanCount", method = RequestMethod.GET)
+    @ResponseBody
+    public Integer findUnWeanCount(@RequestParam Long pigId, @RequestParam Integer parity) {
+        return RespHelper.or500(doctorPigEventReadService.findUnWeanCountByParity(pigId, parity));
+    }
 }

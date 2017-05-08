@@ -416,4 +416,15 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("find.last.parity.failed");
         }
     }
+
+    @Override
+    public Response<Integer> findUnWeanCountByParity(Long pigId, Integer parity) {
+        try {
+            return Response.ok(doctorPigEventDao.findUnWeanCountByParity(pigId, parity));
+        } catch (Exception e) {
+            log.error("find unwean count by parity failed, pigId:{}, parity:{}, cause:{}",
+                    pigId, parity, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.unwean.count.by.parity.failed");
+        }
+    }
 }

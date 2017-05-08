@@ -560,6 +560,15 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+     * 获取某一头某一胎次下未断奶数量
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @return 未断奶数
+     */
+    public Integer findUnWeanCountByParity(Long pigId, Integer parity) {
+        return getSqlSession().selectOne(sqlId("findUnWeanCountByParity"), ImmutableMap.of("pigId", pigId, "parity", parity));
+    }
+    /**
      * 获取最新的去除(事件类型:3,4,5,8)
      * @param pigId 猪id
      * @return 事件
