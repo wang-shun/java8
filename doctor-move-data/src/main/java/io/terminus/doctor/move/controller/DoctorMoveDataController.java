@@ -306,23 +306,24 @@ public class DoctorMoveDataController {
         doctorMoveDataService.updateBuruTrack(farm);
         log.warn("updateBuruSowTrack end");
 
-        //首页统计
-        movePigTypeStatistic(farm);
-
-        //6.迁移猪场日报
-        log.warn("move daily start, moveId:{}", moveId);
-        doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
-        log.warn("move daily end");
-
-        //7.迁移猪场月报
-        log.warn("move monthly start, moveId:{}", moveId);
-        doctorMoveReportService.moveDoctorRangeReport(farm.getId(), monthIndex);
-        log.warn("move monthly end");
-
-        //8.迁移猪场胎次分析月报
-        log.warn("move parity monthly start, moveId:{}", moveId);
-        doctorMoveReportService.moveParityMonthlyReport(farm.getId(), monthIndex);
-        log.warn("move parity monthly end");
+        // TODO: 17/5/8 暂时改为迁移后手动刷新报表
+//        //首页统计
+//        movePigTypeStatistic(farm);
+//
+//        //6.迁移猪场日报
+//        log.warn("move daily start, moveId:{}", moveId);
+//        doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
+//        log.warn("move daily end");
+//
+//        //7.迁移猪场月报
+//        log.warn("move monthly start, moveId:{}", moveId);
+//        doctorMoveReportService.moveDoctorRangeReport(farm.getId(), monthIndex);
+//        log.warn("move monthly end");
+//
+//        //8.迁移猪场胎次分析月报
+//        log.warn("move parity monthly start, moveId:{}", moveId);
+//        doctorMoveReportService.moveParityMonthlyReport(farm.getId(), monthIndex);
+//        log.warn("move parity monthly end");
 
         //迁移仓库/物料
         log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
