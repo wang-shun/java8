@@ -140,6 +140,7 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
 
     @Override
     protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+        oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
         oldDailyGroup.setTurnSeed(EventUtil.plusInt(oldDailyGroup.getTurnSeed(), changeDto.getQuantityChange()));
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
         return oldDailyGroup;

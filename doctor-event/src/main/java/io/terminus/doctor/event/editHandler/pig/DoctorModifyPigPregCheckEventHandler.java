@@ -152,6 +152,7 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
 
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+        oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
         PregCheckResult checkResult = PregCheckResult.from(changeDto.getPregCheckResult());
         Checks.expectTrue(notNull(checkResult), "preg.check.result.error", changeDto.getPregCheckResult());
         switch (checkResult) {

@@ -150,6 +150,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
 
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+        oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
         oldDailyPig.setWeanDayAge(EventUtil.getAvgDayAge(oldDailyPig.getWeanDayAge(), oldDailyPig.getWeanCount(), changeDto.getWeanDayAge().doubleValue(), changeDto.getWeanCountChange()));
         oldDailyPig.setWeanAvgWeight(EventUtil.getAvgWeight(oldDailyPig.getWeanAvgWeight(), oldDailyPig.getWeanCount(), changeDto.getWeanAvgWeight(), changeDto.getWeanCountChange()));
         oldDailyPig.setWeanNest(EventUtil.plusInt(oldDailyPig.getWeanNest(), changeDto.getWeanNestChange()));

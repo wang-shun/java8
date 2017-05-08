@@ -209,4 +209,12 @@ public interface DoctorPigEventReadService {
      * @return 最新胎次
      */
     Response<Integer> findLastParity(Long pigId);
+
+    /**
+     * 获取某一头某一胎次下未断奶数量
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @return 未断奶数
+     */
+    Response<Integer> findUnWeanCountByParity(Long pigId, Integer parity);
 }

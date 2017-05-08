@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.validEventAt;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
@@ -217,7 +218,9 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @param changeDto 变化量
      * @return 新记录
      */
-    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto){return oldDailyPig;}
+    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto){
+        return expectNotNull(oldDailyPig, "daily.pig.not.null");
+    }
 
     /**
      * 触发事件的处理(编辑)
