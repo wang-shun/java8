@@ -60,7 +60,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
-        DoctorPigEvent lastEvent = doctorPigEventDao.findById(fromTrack.getCurrentEventId());
+        DoctorPigEvent lastEvent = doctorPigEventDao.getLastStatusEvent(executeEvent.getPigId());
         checkEventAt(executeEvent, lastEvent);
     }
 
