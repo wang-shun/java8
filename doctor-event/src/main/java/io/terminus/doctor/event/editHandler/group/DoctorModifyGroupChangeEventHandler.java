@@ -175,6 +175,7 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
 
     @Override
     protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+        oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
         updateChange(oldDailyGroup, changeDto.getQuantityChange(), changeDto.getChangeTypeId());
         if (changeDto.getIsSowTrigger()) {
             oldDailyGroup.setUnweanCount(EventUtil.minusInt(oldDailyGroup.getUnweanCount(), changeDto.getQuantityChange()));

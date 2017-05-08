@@ -165,6 +165,7 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
 
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+        oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
         if (Objects.equals(changeDto.getChgLocationType(), PigEvent.TO_MATING.getKey())) {
             oldDailyPig.setSowPh(EventUtil.plusInt(oldDailyPig.getSowPh(), changeDto.getChgLocationChangeCount()));
             oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getChgLocationChangeCount()));

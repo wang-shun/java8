@@ -167,6 +167,8 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
      */
     @Override
     protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+        oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
+
         if (Objects.equals(changeDto.getTransGroupType(), DoctorGroupEvent.TransGroupType.OUT.getValue())) {
             oldDailyGroup.setOuterIn(EventUtil.plusInt(oldDailyGroup.getOuterIn(), changeDto.getQuantityChange()));
         } else {

@@ -37,6 +37,7 @@ import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
@@ -302,7 +303,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @return 新猪群记录
      */
     protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
-        return null;
+        return expectNotNull(oldDailyGroup, "daily.group.not.null");
     }
 
     /**

@@ -109,6 +109,7 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
 
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+        oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
         //公猪
         if (Objects.equals(changeDto.getPigSex(), DoctorPig.PigSex.BOAR.getKey())) {
             oldDailyPig.setBoarChgFarm(EventUtil.plusInt(oldDailyPig.getBoarChgFarm(), changeDto.getRemoveCountChange()));
