@@ -1421,9 +1421,21 @@
         where id = #{id}
     </update>
 
-    <select id="findLastParity" parameterType="long" resultType="int" >
+    <select id="findLastParity" parameterType="long" resultType="int">
         SELECT max(parity)
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         where pig_id = #{pigId}
+    </select>
+
+    <select id="findUnWeanCountByParity" parameterType="map" resultType="int">
+        select sum(
+        case when type = 15 then live_count else 0 end -
+        case when type in (17,18) then quantity else 0 end +
+        case when type = 19 then quantity else 0 end
+        )
+        from doctor_pig_events
+        where pig_id  = #{pigId}
+        and parity = #{parity};
     </select>
 </mapper>

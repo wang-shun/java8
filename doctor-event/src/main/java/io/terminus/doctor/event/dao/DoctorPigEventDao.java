@@ -558,4 +558,14 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public Integer findLastParity(Long pigId) {
         return getSqlSession().selectOne(sqlId("findLastParity"), pigId);
     }
+
+    /**
+     * 获取某一头某一胎次下未断奶数量
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @return 未断奶数
+     */
+    public Integer findUnWeanCountByParity(Long pigId, Integer parity) {
+        return getSqlSession().selectOne(sqlId("findUnWeanCountByParity"), ImmutableMap.of("pigId", pigId, "parity", parity));
+    }
 }
