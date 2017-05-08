@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -50,8 +51,9 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setQuantity(pigletsChgDto.getPigletsCount());
         doctorPigEvent.setWeight(pigletsChgDto.getPigletsWeight());
         doctorPigEvent.setPrice(pigletsChgDto.getPigletsPrice());
-        Double amount = doctorPigEvent.getPrice() * doctorPigEvent.getWeight();
-        doctorPigEvent.setAmount(amount.longValue());
+        Long amount = MoreObjects.firstNonNull(doctorPigEvent.getPrice(), 0).longValue()
+                * MoreObjects.firstNonNull(doctorPigEvent.getWeight(), 0).longValue();
+        doctorPigEvent.setAmount(amount);
         doctorPigEvent.setCustomerId(pigletsChgDto.getPigletsCustomerId());
         doctorPigEvent.setCustomerName(pigletsChgDto.getPigletsCustomerName());
         doctorPigEvent.setChangeTypeId(pigletsChgDto.getPigletsChangeType());

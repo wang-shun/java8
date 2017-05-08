@@ -130,4 +130,11 @@
             rel_farm_id = #{farmId}
         </where>
     </select>
+
+    <delete id="delete" parameterType="long" >
+        DELETE
+        FROM <include refid="tb"/>
+        WHERE
+        id = #{id}
+    </delete>
 </mapper>

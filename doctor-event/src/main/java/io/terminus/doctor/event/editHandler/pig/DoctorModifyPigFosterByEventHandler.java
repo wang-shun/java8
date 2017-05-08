@@ -12,6 +12,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class DoctorModifyPigFosterByEventHandler extends DoctorAbstractModifyPigEventHandler {
     @Override
+    protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
+        return false;
+    }
+
+    @Override
     public DoctorPigEvent buildNewEvent(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         DoctorPigEvent newEvent = super.buildNewEvent(oldPigEvent, inputDto);
         DoctorFosterByDto newDto = (DoctorFosterByDto) inputDto;

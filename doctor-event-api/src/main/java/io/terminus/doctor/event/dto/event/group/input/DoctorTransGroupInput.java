@@ -71,10 +71,8 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
     @NotNull(message = "quantity.not.null")
     private Integer quantity;
 
-    @NotNull(message = "boarQty.not.null")
     private Integer boarQty;
 
-    @NotNull(message = "sowQty.not.null")
     private Integer sowQty;
 
     /**

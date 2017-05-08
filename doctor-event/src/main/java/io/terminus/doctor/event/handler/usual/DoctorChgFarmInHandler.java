@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler.getStatus;
 
 /**
@@ -36,6 +38,8 @@ public class DoctorChgFarmInHandler extends DoctorAbstractEventHandler {
         DoctorBarn toBarn = doctorBarnDao.findById(chgFarmDto.getToBarnId());
 
         //1.新建pig
+        expectTrue(isNull(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(chgFarmDto.getToFarmId(), oldPig.getPigCode(), oldPig.getPigType())), "pigCode.have.existed");
+
         newPig.setFarmId(chgFarmDto.getToFarmId());
         newPig.setFarmName(chgFarmDto.getToFarmName());
         newPig.setIsRemoval(IsOrNot.NO.getValue());
@@ -80,6 +84,6 @@ public class DoctorChgFarmInHandler extends DoctorAbstractEventHandler {
         doctorPigTrackDao.create(newTrack);
 
         //4.更新日记录
-            modifyPigChgFarmInEventHandler.updateDailyOfNew(chgFarmIn, chgFarmDto);
+        modifyPigChgFarmInEventHandler.updateDailyOfNew(chgFarmIn, chgFarmDto);
     }
 }

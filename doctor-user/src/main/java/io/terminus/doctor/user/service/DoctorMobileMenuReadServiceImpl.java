@@ -37,7 +37,7 @@ public class DoctorMobileMenuReadServiceImpl implements DoctorMobileMenuReadServ
 
     //下面的几个是首页左侧菜单
     private final DoctorMenuDto userInfo;
-    private final DoctorMenuDto staffManage;
+//    private final DoctorMenuDto staffManage;
     private final DoctorMenuDto farmManageMultiple;
 
     @Autowired
@@ -52,7 +52,7 @@ public class DoctorMobileMenuReadServiceImpl implements DoctorMobileMenuReadServ
         this.primaryUserReadService = primaryUserReadService;
 
         userInfo = DoctorMenuDto.builder().name("个人信息").url(url+"/user-center").iconClass("user_info_icon").level(1).build();
-        staffManage = DoctorMenuDto.builder().name("员工管理").url(url+"/authority/manage-select").iconClass("personnel_manager_icon").level(1).build();
+//        staffManage = DoctorMenuDto.builder().name("员工管理").url(url+"/authority/manage-select").iconClass("personnel_manager_icon").level(1).build();
         farmManageMultiple = DoctorMenuDto.builder().name("猪场管理").url("pigdoctor://company?homepage_type=1").iconClass("pig_farm_manager_icon").level(1).build();
     }
 
@@ -69,7 +69,7 @@ public class DoctorMobileMenuReadServiceImpl implements DoctorMobileMenuReadServ
                 //如果已开通猪场软件
                 if(Objects.equals(DoctorServiceStatus.Status.OPENED.value(), serviceStatus.getPigdoctorStatus())){
                     //添加菜单"员工管理"
-                    menus.add(staffManage);
+//                    menus.add(staffManage);
                     //添加猪场管理菜单
                     this.addFarmManageMenu(menus, userId);
                 }

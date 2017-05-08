@@ -86,6 +86,7 @@ public class DoctorMoveDataController {
     private final DoctorEditGroupEventService doctorEditGroupEventService;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorDailyGroupWriteService doctorDailyGroupWriteService;
+    private final DoctorRangeReportWriteService doctorRangeReportWriteService;
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
                                     WareHouseInitService wareHouseInitService,
@@ -105,7 +106,8 @@ public class DoctorMoveDataController {
                                     DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService,
                                     DoctorEditGroupEventService doctorEditGroupEventService,
                                     DoctorGroupReadService doctorGroupReadService,
-                                    DoctorDailyGroupWriteService doctorDailyGroupWriteService) {
+                                    DoctorDailyGroupWriteService doctorDailyGroupWriteService,
+                                    DoctorRangeReportWriteService doctorRangeReportWriteService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -125,6 +127,7 @@ public class DoctorMoveDataController {
         this.doctorEditGroupEventService = doctorEditGroupEventService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorDailyGroupWriteService = doctorDailyGroupWriteService;
+        this.doctorRangeReportWriteService = doctorRangeReportWriteService;
     }
 
     /**
@@ -653,6 +656,38 @@ public class DoctorMoveDataController {
             return true;
         } catch (Exception e) {
             log.error("move monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 月报/周报
+     */
+    @RequestMapping(value = "/monthly/structure", method = RequestMethod.GET)
+    public Boolean updateMonthlyStructureReport(@RequestParam(value = "farmId", required = false) Long farmId,
+                                         @RequestParam String from,
+                                         @RequestParam(required = false) String to) {
+        try {
+            log.warn("move monthly report since start, farmId:{}, from:{}, to:{}", farmId, from, to);
+
+            Date startAt = DateUtil.toDate(from);
+            Date endAt = DateUtil.toDate(to);
+            if (startAt == null || startAt.after(new Date()) || startAt.after(endAt)) {
+                return false;
+            }
+
+            if (farmId == null) {
+                List<Long> farmIds = getAllFarmIds();
+                farmIds.forEach(fid -> {
+                    doctorRangeReportWriteService.updateStructureReport(fid, startAt, endAt);
+                });
+            } else {
+                doctorRangeReportWriteService.updateStructureReport(farmId, startAt, endAt);
+            }
+            log.warn("move monthly report since end");
+            return true;
+        } catch (Exception e) {
+            log.error("move monthly report since failed, farmId:{}, from:{}, to:{}, cause: {}", farmId, from, to, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

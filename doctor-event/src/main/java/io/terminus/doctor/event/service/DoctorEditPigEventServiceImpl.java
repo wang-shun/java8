@@ -11,7 +11,6 @@ import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyRequestDao;
-import io.terminus.doctor.event.dao.DoctorEventRelationDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -68,8 +67,6 @@ public class DoctorEditPigEventServiceImpl implements DoctorEditPigEventService 
     private DoctorGroupDao doctorGroupDao;
     @Autowired
     private DoctorBarnDao doctorBarnDao;
-    @Autowired
-    private DoctorEventRelationDao doctorEventRelationDao;
     @Autowired
     private DoctorEditGroupEventService doctorEditGroupEventService;
     @Autowired

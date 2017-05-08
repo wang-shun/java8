@@ -2466,6 +2466,9 @@ public class DoctorMoveDataService {
                         doctorPigEvent1.setBoarCode(boarCode);
                         statusBefore = statusAfter;
                     });
+            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+            doctorPigTrack.setCurrentParity(parity);
+            doctorPigTrackDao.update(doctorPigTrack);
             Boolean result = doctorPigEventDao.updates(lists);
             if (!result) {
                 log.info("update parity boarCode fail: {}", lists);
@@ -2723,10 +2726,16 @@ public class DoctorMoveDataService {
         //2.删除猪场主账户以及员工的权限
         List<Long> userIdList = Lists.newArrayList();
         userIdList.addAll(subDao.findSubsByFarmId(farmId).stream().map(Sub::getUserId).collect(Collectors.toList()));
+
+        //删除猪场下的子账号
+        subDao.deleteByFarmId(farmId);
+
         PrimaryUser primaryUser = primaryUserDao.findPrimaryByFarmId(farmId);
         if (notNull(primaryUser)) {
-            userIdList.add(primaryUserDao.findPrimaryByFarmId(farmId).getUserId());
+            userIdList.add(primaryUser.getUserId());
+            primaryUserDao.delete(primaryUser.getId());
         }
+
         if (!userIdList.isEmpty()) {
             doctorUserDataPermissionDao.deletesByUserIds(userIdList);
         }

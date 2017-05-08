@@ -127,7 +127,7 @@
             <if test="type != null">type = #{type},</if>
             <if test="sumAt != null">sum_at = #{sumAt},</if>
             <if test="sumFrom != null">sum_from = #{sumFrom},</if>
-            <if test="sumTo != null">sum_to = #{sumFrom},</if>
+            <if test="sumTo != null">sum_to = #{sumTo},</if>
             <if test="mateEstimatePregRate != null">mate_estimate_preg_rate = #{mateEstimatePregRate},</if>
             <if test="mateRealPregRate != null">mate_real_preg_rate = #{mateRealPregRate},</if>
             <if test="mateEstimateFarrowingRate != null">mate_estimate_farrowing_rate = #{mateEstimateFarrowingRate},</if>

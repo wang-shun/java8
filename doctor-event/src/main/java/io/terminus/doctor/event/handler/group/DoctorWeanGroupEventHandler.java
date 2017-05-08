@@ -86,9 +86,6 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         event.setExtraMap(weanInput);
         doctorGroupEventDao.create(event);
 
-        //创建关联关系
-        createEventRelation(event);
-
         //3.更新猪群跟踪
         groupTrack.setUnqQty(EventUtil.plusInt(groupTrack.getUnqQty(), weanInput.getNotQualifiedCount()));
         groupTrack.setQuaQty(EventUtil.minusInt(groupTrack.getQuantity(), groupTrack.getUnqQty()));

@@ -95,6 +95,7 @@ import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.PrimaryUser;
+import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
@@ -469,41 +470,9 @@ public class DoctorImportDataService {
         }
 
         // 主账号
-        User user;
-        Long userId;
-        Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
-        if(result.isSuccess() && result.getResult() != null){
-            log.warn("primary user has existed, mobile={}", mobile);
-            user = result.getResult();
-            DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(user.getId());
-            if (notNull(permission)) {
-                throw new JsonResponseException("user.has.related.farm");
-            }
-            //更新用户信息
-            user.setPassword(EncryptUtil.encrypt("123456"));
-            user.setName(loginName);
-            user.setStatus(UserStatus.NORMAL.value());
-            user.setType(UserType.FARM_ADMIN_PRIMARY.value());
-            user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
-            Map<String, String> userExtraMap = Maps.newHashMap();
-            userExtraMap.put("realName", realName);
-            user.setExtra(userExtraMap);
-            userWriteService.update(user);
-            userId = user.getId();
-        }else{
-            user = new User();
-            user.setMobile(mobile);
-            user.setPassword("123456");
-            user.setName(loginName);
-            user.setStatus(UserStatus.NORMAL.value());
-            user.setType(UserType.FARM_ADMIN_PRIMARY.value());
-            user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
-            Map<String, String> userExtraMap = Maps.newHashMap();
-            userExtraMap.put("realName", realName);
-            user.setExtra(userExtraMap);
-            userId = RespHelper.or500(userWriteService.create(user));
-            user.setId(userId);
-        }
+        User user = getUser(mobile, loginName, realName);
+        Long userId = user.getId();
+
         // 把真实姓名存进 user profile
         UserProfile userProfile = userProfileDao.findByUserId(userId);
         userProfile.setRealName(realName);
@@ -535,11 +504,6 @@ public class DoctorImportDataService {
         //集团账号的数据权限
         createOrUpdateMultiPermission(companyMobile, org.getId(), farm.getId());
 
-        if(doctorStaffDao.findByFarmIdAndUserId(farm.getId(), userId) == null){
-            // 主账号的staff
-            //this.createStaff(user, farm);
-        }
-
         DoctorServiceStatus serviceStatus = doctorServiceStatusDao.findByUserId(userId);
         if(serviceStatus == null){
             //初始化服务状态
@@ -560,6 +524,65 @@ public class DoctorImportDataService {
         }
 
         return new Object[]{user, farm};
+    }
+
+
+    private User getUser(String mobile, String loginName, String realName) {
+        User user;
+        Long userId;
+        Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
+        if(result.isSuccess() && result.getResult() != null){
+            log.warn("primary user has existed, mobile={}", mobile);
+            user = result.getResult();
+            DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(user.getId());
+            if (notNull(permission)) {
+                throw new JsonResponseException("user.has.related.farm");
+            }
+            //更新用户信息
+            user.setPassword(EncryptUtil.encrypt("123456"));
+            user.setName(loginName);
+            user.setStatus(UserStatus.NORMAL.value());
+            user.setType(UserType.FARM_ADMIN_PRIMARY.value());
+            user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
+            Map<String, String> userExtraMap = Maps.newHashMap();
+            userExtraMap.put("realName", realName);
+            user.setExtra(userExtraMap);
+            userWriteService.update(user);
+            userId = user.getId();
+
+            //如果primaryUser不存在新建
+            PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
+            if (isNull(primaryUser)) {
+                //猪场管理员
+                primaryUser = new PrimaryUser();
+                primaryUser.setUserId(userId);
+                //暂时暂定手机号
+                primaryUser.setUserName(user.getMobile());
+                primaryUser.setRealName(realName);
+                primaryUser.setStatus(UserStatus.NORMAL.value());
+                primaryUserDao.create(primaryUser);
+            }
+
+            //如果原始子账号删除
+            Sub sub = subDao.findByUserId(userId);
+            if (notNull(sub)) {
+                subDao.delete(sub.getId());
+            }
+
+        }else{
+            user = new User();
+            user.setMobile(mobile);
+            user.setPassword("123456");
+            user.setName(loginName);
+            user.setStatus(UserStatus.NORMAL.value());
+            user.setType(UserType.FARM_ADMIN_PRIMARY.value());
+            user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
+            Map<String, String> userExtraMap = Maps.newHashMap();
+            userExtraMap.put("realName", realName);
+            user.setExtra(userExtraMap);
+            userWriteService.create(user);
+        }
+        return user;
     }
 
     //admin的数据权限
