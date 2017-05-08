@@ -193,7 +193,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     protected static void checkQuantityEqual(Integer all, Integer boar, Integer sow) {
         if (EventUtil.plusInt(boar, sow) > all) {
             log.error("allQty:{}, boarQty:{}, sowQty:{}", all, boar, sow);
-            throw new InvalidException("quantity.not.equal", all, boar + sow);
+            throw new InvalidException("boarQty.and.sowQty.over.allQty", all, boar + sow);
         }
     }
 
