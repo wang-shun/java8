@@ -324,11 +324,12 @@ public class DoctorMoveDataController {
 //        log.warn("move parity monthly start, moveId:{}", moveId);
 //        doctorMoveReportService.moveParityMonthlyReport(farm.getId(), monthIndex);
 //        log.warn("move parity monthly end");
-
-        //迁移仓库/物料
-        log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
-        wareHouseInitService.init(mobile, moveId, farm);
-        log.warn("move warehouse end");
+        
+        //// TODO: 17/5/8 也暂时注释吧 手动迁移 
+//        //迁移仓库/物料
+//        log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
+//        wareHouseInitService.init(mobile, moveId, farm);
+//        log.warn("move warehouse end");
 
         //迁移仓库/物料
         log.warn("move farmBasic start, mobile:{}, moveId:{}", mobile, moveId);

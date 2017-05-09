@@ -1308,6 +1308,9 @@ public class DoctorImportDataService {
         event.setBarnId(sow.getInitBarnId());
         event.setBarnName(sow.getInitBarnName());
         DoctorBarn doctorBarn = doctorBarnDao.findById(sow.getInitBarnId());
+        if (isNull(doctorBarn)) {
+            throw new JsonResponseException("猪舍:" + event.getBarnName() + ",不存在");
+        }
         event.setBarnType(doctorBarn.getPigType());
         event.setRemark(info.getRemark());
         event.setStatus(EventStatus.VALID.getValue());
