@@ -8,6 +8,7 @@ import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.service.DoctorDailyGroupWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.service.DoctorGroupBatchFlushService;
@@ -67,6 +68,8 @@ public class DoctorImportDataController {
     private DoctorGroupBatchFlushService doctorGroupBatchFlushService;
     @Autowired
     private DoctorMoveDataService doctorMoveDataService;
+    @Autowired
+    private DoctorDailyGroupWriteService doctorDailyGroupWriteService;
 
     @PostConstruct
     public void init () throws Exception{
@@ -188,6 +191,7 @@ public class DoctorImportDataController {
         DateTime begin = end.minusYears(1);
         new Thread(() -> {
             doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
+            doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, begin.toDate(), end.toDate());
             doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
             doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
             doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
