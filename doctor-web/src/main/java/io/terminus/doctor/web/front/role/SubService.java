@@ -161,8 +161,7 @@ public class SubService {
                 subUser.setMobile(sub.getContact());
             }
 
-            //// TODO: 17/5/4 staff表已经不使用了
-//            this.updateSubStaffStatus(sub.getFarmIds(), subUser, io.terminus.doctor.user.model.Sub.Status.from(sub.getStatus()));
+            this.updateSubStaffStatus(sub.getFarmIds(), subUser, io.terminus.doctor.user.model.Sub.Status.from(sub.getStatus()));
 
             // TODO: 自定义角色冗余进 user 表
             List<String> roles = Lists.newArrayList("SUB");
@@ -194,10 +193,12 @@ public class SubService {
 
         if(Objects.equals(status.value(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())){
             subUser.setStatus(UserStatus.NORMAL.value());
-            updateStaffStatus(farmIds, subUser.getId(), DoctorStaff.Status.PRESENT);
+            //// TODO: 17/5/4 staff表已经不使用了
+//            updateStaffStatus(farmIds, subUser.getId(), DoctorStaff.Status.PRESENT);
         }else if(Objects.equals(status.value(), io.terminus.doctor.user.model.Sub.Status.ABSENT.value())){
             subUser.setStatus(UserStatus.LOCKED.value());
-            updateStaffStatus(farmIds, subUser.getId(), DoctorStaff.Status.ABSENT);
+            //// TODO: 17/5/4 staff表已经不使用了
+//            updateStaffStatus(farmIds, subUser.getId(), DoctorStaff.Status.ABSENT);
         }else{
             throw new ServiceException("sub.user.status.error");
         }

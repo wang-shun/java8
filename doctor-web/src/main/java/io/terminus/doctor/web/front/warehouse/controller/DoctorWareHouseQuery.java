@@ -9,6 +9,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.dto.BarnConsumeMaterialReport;
 import io.terminus.doctor.basic.dto.DoctorWareHouseDto;
@@ -330,6 +331,7 @@ public class DoctorWareHouseQuery {
         if(!Strings.isNullOrEmpty(eventTypes)){
             types = Splitters.splitToInteger(eventTypes, Splitters.UNDERSCORE);
         }
+        endAt = DateUtil.toDateString(Dates.endOfDay(DateUtil.toDate(endAt)));
         Response<Paging<DoctorMaterialConsumeProvider>> pagingResponse = doctorMaterialConsumeProviderReadService.page(farmId, warehouseId, materialId, eventType, types,
                 materilaType, staffId, startAt, endAt, pageNo, size);
         if (!pagingResponse.isSuccess()) {
