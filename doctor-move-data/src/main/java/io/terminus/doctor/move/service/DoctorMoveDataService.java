@@ -2366,8 +2366,8 @@ public class DoctorMoveDataService {
             List<DoctorPigEvent> lists = doctorPigEventDao.queryAllEventsByPigIdForASC(doctorPigEvent.getPigId());
             parity = 1;
             boarCode = null;
-            statusBefore = null;
-            statusAfter = PigStatus.Entry.getKey();
+            statusBefore = PigStatus.Entry.getKey();
+            statusAfter = null;
             quantity = 1000; //一个胎次中分娩的活仔数, 默认1000,为了与quantityChange 不相等
             quantityChange = 0; //在一个胎次中仔猪变化的数量
             isWeanToMate = false; //判断是否是断奶到配种,断奶到配种才+1
@@ -2394,6 +2394,9 @@ public class DoctorMoveDataService {
                                 isWeanToMate = false;
                                 break;
                             case 10:
+                                if (Arguments.isNull(statusBefore)) {
+                                    break;
+                                }
                                 if (statusBefore.equals(PigStatus.Wean.getKey())) {
                                     statusAfter = PigStatus.Mate.getKey();
                                 } else if (statusBefore.equals(PigStatus.KongHuai.getKey())) {
