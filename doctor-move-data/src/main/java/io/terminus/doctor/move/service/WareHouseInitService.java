@@ -114,7 +114,7 @@ public class WareHouseInitService {
         //子账号
         List<Sub> subs = subDao.findByConditions(ImmutableMap.of("parentUserId", userId), null);
         //子账号map, key = realName, value = Sub
-        Map<String, Sub> subMap = subs.stream().collect(Collectors.toMap(Sub::getRealName, v -> v));
+        Map<String, Sub> subMap = subs.stream().distinct().collect(Collectors.toMap(Sub::getRealName, v -> v));
 
         // key = realName, value = userId
         Map<String, Long> staffMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
