@@ -35,14 +35,16 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
     private final SubDao subDao;
     private final SubRoleDao subRoleDao;
     private final OperatorRoleDao operatorRoleDao;
+    private final PigScoreApplyDao pigScoreApplyDao;
     @Autowired
-    public DoctorUserRoleLoaderReadServiceImpl(UserDao userDao, SellerDao sellerDao,  OperatorDao operatorDao, SubDao subDao, SubRoleDao subRoleDao, OperatorRoleDao operatorRoleDao) {
+    public DoctorUserRoleLoaderReadServiceImpl(UserDao userDao, SellerDao sellerDao,  OperatorDao operatorDao, SubDao subDao, SubRoleDao subRoleDao, OperatorRoleDao operatorRoleDao, PigScoreApplyDao pigScoreApplyDa) {
         this.userDao = userDao;
         this.sellerDao = sellerDao;
         this.operatorDao = operatorDao;
         this.subDao = subDao;
         this.subRoleDao = subRoleDao;
         this.operatorRoleDao = operatorRoleDao;
+        this.pigScoreApplyDao = pigScoreApplyDa;
     }
 
     @Override
@@ -63,6 +65,7 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
             forNormal(user, roleContent);
             forPrimary(user, roleContent);
             forSub(user, roleContent);
+            forPigScore(user, roleContent);
             return Response.ok(roleContent);
         } catch (Exception e) {
             log.error("hard load roles failed, userId={}, cause:{}", userId, Throwables.getStackTraceAsString(e));
@@ -140,6 +143,36 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
         if (seller != null) {
             if (seller.isActive() && seller.getShopId() != null) {
                 roleContent.setRoles(Lists.newArrayList(DoctorRole.createStatic("SELLER")));
+            }
+        }
+    }
+
+    protected void forPigScore(User user, DoctorRoleContent roleContent){
+        if (user == null) {
+            return;
+        }
+
+        User u = userDao.findById(user.getId());
+
+        if(u.getExtra() == null || u.getExtra().isEmpty()){
+            return;
+        }
+        Long farmId = null;
+        if(u.getExtra().containsKey("farmId")){
+            farmId = Long.parseLong(u.getExtra().get("farmId"));
+        }
+        if(farmId == null){
+            return;
+        }
+        PigScoreApply apply = pigScoreApplyDao.findByFarmIdAndUserId(farmId, user.getId());
+        if (apply != null) {
+            if (apply.getStatus() == 1) {
+                List<DoctorRole> roles= roleContent.getRoles();
+                if(roles == null){
+                    roles = Lists.newArrayList();
+                }
+                roles.add(DoctorRole.createStatic("PIGSCORE"));
+                roleContent.setRoles(roles);
             }
         }
     }
