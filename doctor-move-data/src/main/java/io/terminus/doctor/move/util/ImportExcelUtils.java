@@ -24,7 +24,7 @@ public class ImportExcelUtils {
         Cell cell = row.getCell(col);
         if (cell == null) return null;
         cell.setCellType(Cell.CELL_TYPE_STRING);
-        return cell.getStringCellValue();
+        return cell.getStringCellValue().trim();
     }
 
     public static String getStringOrThrow(Row row, int col) {
@@ -33,7 +33,7 @@ public class ImportExcelUtils {
             throw new IllegalStateException("页名: "+ row.getSheet().getSheetName() + "行号 " + (row.getRowNum() + 1) + "列号 " + (col + 1) + " 不存在");
         }
         cell.setCellType(Cell.CELL_TYPE_STRING);
-        String value = cell.getStringCellValue();
+        String value = cell.getStringCellValue().trim();
         if(StringUtils.isBlank(value)){
             throw new IllegalStateException("页名: "+ row.getSheet().getSheetName() + "行号 " + (row.getRowNum() + 1) + "列号 " + (col + 1) + " 为空");
         }
