@@ -5,7 +5,6 @@ import configuration.front.FrontWebConfiguration;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;

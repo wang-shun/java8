@@ -8,7 +8,6 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
@@ -111,7 +110,6 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
 
         input.setEventType(GroupEventType.TRANS_FARM.getValue());
 
-        DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTransFarmGroupInput transFarm = (DoctorTransFarmGroupInput) input;
         doctorModifyGroupTransFarmEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(), DateUtil.toDate(transFarm.getEventAt()), -transFarm.getQuantity());
 
