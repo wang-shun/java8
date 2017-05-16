@@ -280,8 +280,9 @@ public class DoctorPigEventManager {
                                 .eventId(doctorEventInfo.getEventId())
                                 .eventType(doctorEventInfo.getEventType())
                                 .build();
-                        if (Objects.equals(doctorEventInfo.getEventType(), PigEvent.PREG_CHECK.getKey()) && !Objects.equals(doctorEventInfo.getPregCheckResult(), PregCheckResult.YANG.getKey())) {
-                            msgPigPublishDto.setEventType(PigEvent.CONDITION.getKey());
+                        if (Objects.equals(doctorEventInfo.getEventType(), PigEvent.PREG_CHECK.getKey())
+                                && !Objects.equals(doctorEventInfo.getPregCheckResult(), PregCheckResult.YANG.getKey())) {
+                            msgPigPublishDto.setEventType(PigEvent.TO_FARROWING.getKey());
                         }
                         return msgPigPublishDto;
                     }).collect(Collectors.toList());
