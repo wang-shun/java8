@@ -3,6 +3,7 @@ package io.terminus.doctor.move.service;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
@@ -114,7 +115,9 @@ public class WareHouseInitService {
         //子账号
         List<Sub> subs = subDao.findByConditions(ImmutableMap.of("parentUserId", userId), null);
         //子账号map, key = realName, value = Sub
-        Map<String, Sub> subMap = subs.stream().collect(Collectors.toMap(Sub::getRealName, v -> v));
+
+        Map<String, Sub> subMap = Maps.newConcurrentMap();
+        subs.forEach(sub -> subMap.put(sub.getRealName(), sub));
 
         // key = realName, value = userId
         Map<String, Long> staffMap = doctorMoveBasicService.getSubMap(farm.getOrgId());

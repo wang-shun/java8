@@ -2,7 +2,6 @@ package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
 import io.terminus.common.exception.ServiceException;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -12,7 +11,6 @@ import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
@@ -166,20 +164,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
         doctorGroupTrackDao.update(groupTrack);
     }
-
-    //获取旧镜像
-    protected DoctorGroupSnapShotInfo getOldSnapShotInfo(DoctorGroup group, DoctorGroupTrack groupTrack) {
-//        DoctorGroupEvent event = doctorGroupEventDao.findById(groupTrack.getRelEventId());
-//        if (event == null) {
-//            log.warn("this group has no relEventId, groupId:{}", group.getId());
-//            event = new DoctorGroupEvent();
-//        }
-        return new DoctorGroupSnapShotInfo(
-                BeanMapper.map(group, DoctorGroup.class),
-//                BeanMapper.map(event, DoctorGroupEvent.class),
-                BeanMapper.map(groupTrack, DoctorGroupTrack.class));
-    }
-
 
     //校验数量
     protected static void checkQuantity(Integer max, Integer actual) {
