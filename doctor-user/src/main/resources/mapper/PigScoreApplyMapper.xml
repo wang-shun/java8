@@ -61,8 +61,7 @@
     <select id="findByFarmIdAndUserId" parameterType="map" resultMap="PigScoreApplyMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE farm_id = #{farmId}
-        AND user_id = #{userId}
+        WHERE farm_id = #{farmId} AND org_id = #{orgId} AND user_id = #{userId}
         limit 1
     </select>
 

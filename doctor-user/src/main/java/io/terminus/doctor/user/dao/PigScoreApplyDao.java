@@ -13,8 +13,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class PigScoreApplyDao extends MyBatisDao<PigScoreApply> {
 
-    public PigScoreApply findByFarmIdAndUserId(Long farmId, Long userId){
-        return sqlSession.selectOne(sqlId("findByFarmIdAndUserId"), ImmutableMap.of("farmId", farmId, "userId", userId));
+    public PigScoreApply findByFarmIdAndUserId(Long orgId, Long farmId, Long userId){
+        return sqlSession.selectOne(sqlId("findByFarmIdAndUserId"), ImmutableMap.of("orgId", orgId, "farmId", farmId, "userId", userId));
     }
 
 }
