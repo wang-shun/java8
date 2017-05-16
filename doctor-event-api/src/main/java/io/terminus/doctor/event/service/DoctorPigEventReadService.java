@@ -217,4 +217,11 @@ public interface DoctorPigEventReadService {
      * @return 未断奶数
      */
     Response<Integer> findUnWeanCountByParity(Long pigId, Integer parity);
+
+    /**
+     * 获取最近一次的初配事件
+     * @param pigId 猪id
+     * @return 初配事件
+     */
+    Response<DoctorPigEvent> findLastFirstMateEvent(Long pigId);
 }

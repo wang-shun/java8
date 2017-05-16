@@ -298,19 +298,19 @@ public abstract class AbstractJobProducer {
      */
     protected DoctorPigEvent getMatingPigEvent(DoctorPigInfoDto pigDto) {
         try {
-            List<DoctorPigEvent> eventList = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() != null).sorted(this::pigEventCompare).collect(Collectors.toList());
-            DoctorPigEvent doctorPigEvent = null;
-            Boolean flag = false;
-            for (DoctorPigEvent event : eventList) {
-                if (flag && !Objects.equals(event.getType(), PigEvent.MATING.getKey())) {
-                    break;
-                }
-                if (Objects.equals(event.getType(), PigEvent.MATING.getKey())) {
-                    flag = true;
-                    doctorPigEvent = event;
-                }
-            }
-            return doctorPigEvent;
+//            List<DoctorPigEvent> eventList = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() != null).sorted(this::pigEventCompare).collect(Collectors.toList());
+//            DoctorPigEvent doctorPigEvent = null;
+//            Boolean flag = false;
+//            for (DoctorPigEvent event : eventList) {
+//                if (flag && !Objects.equals(event.getType(), PigEvent.MATING.getKey())) {
+//                    break;
+//                }
+//                if (Objects.equals(event.getType(), PigEvent.MATING.getKey())) {
+//                    flag = true;
+//                    doctorPigEvent = event;
+//                }
+//            }
+            return RespHelper.orServEx(doctorPigEventReadService.findLastFirstMateEvent(pigDto.getPigId()));
         } catch (Exception e) {
             log.error("get mating date fail");
         }
