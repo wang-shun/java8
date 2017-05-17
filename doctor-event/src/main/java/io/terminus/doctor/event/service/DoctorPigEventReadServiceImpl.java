@@ -427,4 +427,14 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("find.unwean.count.by.parity.failed");
         }
     }
+
+    @Override
+    public Response<DoctorPigEvent> findLastFirstMateEvent(Long pigId) {
+        try {
+            return Response.ok(doctorPigEventDao.getFirstMateEvent(pigId, new Date()));
+        } catch (Exception e) {
+            log.error("find last first mate event failed, pidId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.last.first.mate.event.failed");
+        }
+    }
 }

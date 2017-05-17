@@ -10,7 +10,6 @@ import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -61,7 +60,6 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         //校验能否关闭
         checkCanClose(groupTrack);
 
-        DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorCloseGroupInput close = (DoctorCloseGroupInput) input;
 
         //1.转换下信息

@@ -10,6 +10,8 @@ import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.common.utils.UserRoleUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.service.DoctorMessageRuleWriteService;
@@ -44,6 +46,7 @@ import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
 import io.terminus.parana.common.utils.EncryptUtil;
+import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.address.model.Address;
 import io.terminus.parana.user.impl.address.dao.AddressDao;
@@ -168,7 +171,19 @@ public class UserInitService {
                 Map<String, String> userExtraMap = Maps.newHashMap();
                 userExtraMap.put("realName", farmInfo.getRealName());
                 primaryUser.setExtra(userExtraMap);
+
+                PrimaryUser primary = primaryUserDao.findByUserId(primaryUser.getId());
+                if (notNull(primary)) {
+                    primaryUserDao.delete(primary.getId());
+                }
+                Sub sub = subDao.findByUserId(primaryUser.getId());
+                if (notNull(sub)) {
+                    subDao.delete(sub.getId());
+                }
+                createPrimaryUser(primaryUser);
+
                 userWriteService.update(primaryUser);
+
             } else {
                 primaryUser = this.registerByMobile(farmInfo.getMobile(), "123456", farmInfo.getLoginName(), farmInfo.getRealName());
             }
@@ -240,6 +255,21 @@ public class UserInitService {
         }
         log.info("===farmList:{}", farmList);
         return farmList;
+    }
+
+    private void createPrimaryUser (User user) {
+        //猪场管理员
+        PrimaryUser primaryUser = new PrimaryUser();
+        primaryUser.setUserId(user.getId());
+        //暂时暂定手机号
+        primaryUser.setUserName(user.getMobile());
+        String realName = user.getName();
+        if (notNull(user.getExtra()) && user.getExtra().containsKey("realName")) {
+            realName = Params.get(user.getExtra(), "realName");
+        }
+        primaryUser.setRealName(realName);
+        primaryUser.setStatus(UserStatus.NORMAL.value());
+        primaryUserDao.create(primaryUser);
     }
 
     public List<View_FarmMember> getFarmMember(Long datasourceId) {
@@ -439,18 +469,40 @@ public class UserInitService {
                 .map());
         log.info("subUser:{}", subUser);
         if(notNull(subUser.getId())) {
+            // 设置下子账号的状态和关联猪场
+            PrimaryUser primary = primaryUserDao.findByUserId(subUser.getId());
+            if (notNull(primary)) {
+                primaryUserDao.delete(primary.getId());
+            }
+            Sub sub = subDao.findByUserId(subUser.getId());
+            if (notNull(sub)) {
+                subDao.delete(sub.getId());
+            }
+
+            Long roleId = null;
+            for (String role : Iters.nullToEmpty(subUser.getRoles())) {
+                List<String> richRole = UserRoleUtil.roleConsFrom(role);
+                if (richRole.get(0).equalsIgnoreCase("SUB") && richRole.size() > 1) {
+                    roleId = Long.parseLong(UserRoleUtil.roleConsFrom(richRole.get(1)).get(1));
+                }
+            }
+            SubRole subRole = subRoleDao.findById(roleId);
+            sub = new Sub();
+            sub.setUserId(subUser.getId());
+            sub.setUserName(subUser.getName());
+            sub.setRealName(Params.get(subUser.getExtra(), "realName"));
+            sub.setRoleId(roleId);
+            sub.setRoleName(subRole.getName());
+            sub.setParentUserId(Long.valueOf(Params.get(subUser.getExtra(), "pid")));
+            sub.setContact(Params.get(subUser.getExtra(), "contact"));
+            sub.setStatus(UserStatus.NORMAL.value());
+            subDao.create(sub);
+
             userWriteService.update(subUser);
         } else {
             userWriteService.create(subUser);
         }
         Long subUserId = subUser.getId();
-        // 设置下子账号的状态和关联猪场
-        Sub sub = subDao.findByUserId(subUserId);
-        sub.setFarmId(farmId);
-        if(Objects.equals(member.getIsStopUse(), "true")){
-            sub.setStatus(Sub.Status.ABSENT.value());
-        }
-        subDao.update(sub);
 
         //现在是数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();

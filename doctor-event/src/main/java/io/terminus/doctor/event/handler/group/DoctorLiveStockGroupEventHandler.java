@@ -4,7 +4,6 @@ import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorLiveStockGroupInput;
@@ -68,7 +67,6 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.LIVE_STOCK.getValue());
 
-        DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorLiveStockGroupInput liveStock = (DoctorLiveStockGroupInput) input;
 
         //2.创建猪只存栏事件

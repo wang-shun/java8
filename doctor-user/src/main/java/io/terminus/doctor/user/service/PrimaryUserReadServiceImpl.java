@@ -40,7 +40,7 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
     @Override
     public Response<Optional<Sub>> findSubSellerByParentUserIdAndUserId(Long parentUserId, Long userId) {
         try {
-            Sub sub = subDao.findByParentUserIdAndUserId(parentUserId, userId);
+            Sub sub = subDao.findByUserId(userId);
             return Response.ok(Optional.fromNullable(sub));
         } catch (Exception e) {
             log.error("find sub seller by parentUserId={} and userId={} failed, cause:{}",

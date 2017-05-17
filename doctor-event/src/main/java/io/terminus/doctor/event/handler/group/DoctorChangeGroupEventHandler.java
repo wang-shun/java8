@@ -10,7 +10,6 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
@@ -58,7 +57,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     @Override
     protected <I extends BaseGroupInput> void handleEvent(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         input.setEventType(GroupEventType.CHANGE.getValue());
-        DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
 
         doctorModifyGroupChangeEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(), DateUtil.toDate(change.getEventAt()), -change.getQuantity());
