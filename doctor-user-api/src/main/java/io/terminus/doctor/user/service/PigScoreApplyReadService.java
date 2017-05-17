@@ -37,5 +37,5 @@ public interface PigScoreApplyReadService {
     */
     Response<List<PigScoreApply>> list(Map<String, Object> criteria);
 
-    Response<PigScoreApply> findByFarmIdAndUserId(Long farmId, Long userId);
+    Response<PigScoreApply> findByFarmIdAndUserId(Long orgId, Long farmId, Long userId);
 }
