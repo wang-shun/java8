@@ -216,13 +216,6 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
-     * 获取初次配种时间(公猪)
-     */
-    public DoctorPigEvent getFirstMatingTime(Map<String, Object> criteria) {
-        return this.getSqlSession().selectOne(sqlId("getFirstMatingTime"), criteria);
-    }
-
-    /**
      * 查找一只猪(在指定时间之后)的第一个事件
      * @param pigId 猪id, 不可为空
      * @param fromDate 可为空
