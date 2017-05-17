@@ -187,15 +187,19 @@ public class DoctorImportDataController {
 
     //生成一年的报表
     private void generateReport(Long farmId){
-        DateTime end = DateTime.now().withTimeAtStartOfDay(); //昨天开始时间
-        DateTime begin = end.minusYears(1);
-        new Thread(() -> {
-            doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
-            doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, begin.toDate(), end.toDate());
-            doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
-            doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
-            doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
-        }).start();
+        try {
+            DateTime end = DateTime.now().withTimeAtStartOfDay(); //昨天开始时间
+            DateTime begin = end.minusYears(1);
+            new Thread(() -> {
+                doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
+                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, begin.toDate(), end.toDate());
+                doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
+                doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
+                doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
+            }).start();
+        } catch (Exception e) {
+            log.error("generate report error. farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+        }
     }
 
     @RequestMapping(value = "/importByHttpUrl", method = RequestMethod.GET)
