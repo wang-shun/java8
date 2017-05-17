@@ -154,16 +154,13 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
 
         User u = userDao.findById(user.getId());
 
-        if(u.getExtra() == null || u.getExtra().isEmpty()){
+        Map<String, String> extra = u.getExtra();
+        Long farmId, orgId;
+        if(extra != null &&  extra.containsKey("farmId") && extra.containsKey("orgId")){
+            farmId = Long.parseLong(extra.get("farmId"));
+            orgId = Long.parseLong(extra.get("orgId"));
+        }else{
             return;
-        }
-        Long farmId = null;
-        Long orgId = null;
-        if(u.getExtra().containsKey("farmId")){
-            farmId = Long.parseLong(u.getExtra().get("farmId"));
-        }
-        if(u.getExtra().containsKey("orgId")){
-            orgId = Long.parseLong(u.getExtra().get("orgId"));
         }
         if(farmId == null|| orgId == null){
             return;
