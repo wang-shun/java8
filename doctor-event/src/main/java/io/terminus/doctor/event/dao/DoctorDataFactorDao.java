@@ -14,6 +14,6 @@ public class DoctorDataFactorDao extends MyBatisDao<DoctorDataFactor> {
 
 
     public Integer deleteAll(Integer type){
-        return sqlSession.delete(sqlId("deleteAll"), type);
+        return sqlSession.update(sqlId("deleteAll"), type);
     }
 }

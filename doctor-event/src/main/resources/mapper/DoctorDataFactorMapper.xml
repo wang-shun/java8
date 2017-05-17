@@ -133,9 +133,9 @@
         ORDER BY `id` DESC
     </select>
 
-
     <delete id="deleteAll" parameterType="int">
-        DELETE FROM <include refid="tb"/>
+        UPDATE <include refid="tb"/>
+        SET `is_delete` = 1
         WHERE `type` = #{type}
     </delete>
 

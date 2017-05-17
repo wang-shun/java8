@@ -151,10 +151,8 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
             return;
         }
         PigScoreApply apply = pigScoreApplyDao.findByFarmIdAndUserId(orgId, farmId, user.getId());
-        if (apply != null) {
-            if (apply.getStatus() == 1) {
-                mutableRoles.add("PIGSCORE");
-            }
+        if (apply != null && apply.getStatus() == 1) {
+            mutableRoles.add("PIGSCORE");
         }
     }
 

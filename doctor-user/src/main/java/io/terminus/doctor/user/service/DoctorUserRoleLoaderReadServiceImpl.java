@@ -158,22 +158,24 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
             return;
         }
         Long farmId = null;
+        Long orgId = null;
         if(u.getExtra().containsKey("farmId")){
             farmId = Long.parseLong(u.getExtra().get("farmId"));
         }
-        if(farmId == null){
+        if(u.getExtra().containsKey("orgId")){
+            orgId = Long.parseLong(u.getExtra().get("orgId"));
+        }
+        if(farmId == null|| orgId == null){
             return;
         }
-        PigScoreApply apply = pigScoreApplyDao.findByFarmIdAndUserId(farmId, user.getId());
-        if (apply != null) {
-            if (apply.getStatus() == 1) {
-                List<DoctorRole> roles= roleContent.getRoles();
-                if(roles == null){
-                    roles = Lists.newArrayList();
-                }
-                roles.add(DoctorRole.createStatic("PIGSCORE"));
-                roleContent.setRoles(roles);
+        PigScoreApply apply = pigScoreApplyDao.findByFarmIdAndUserId(orgId, farmId, user.getId());
+        if (apply != null && apply.getStatus().equals(1)) {
+            List<DoctorRole> roles= roleContent.getRoles();
+            if(roles == null){
+                roles = Lists.newArrayList();
             }
+            roles.add(DoctorRole.createStatic("PIGSCORE"));
+            roleContent.setRoles(roles);
         }
     }
 }
