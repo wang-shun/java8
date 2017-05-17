@@ -140,17 +140,19 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
             return;
         }
         Long farmId = null;
+        Long orgId = null;
         if(u.getExtra().containsKey("farmId")){
             farmId = Long.parseLong(u.getExtra().get("farmId"));
         }
-        if(farmId == null){
+        if(u.getExtra().containsKey("orgId")){
+            orgId = Long.parseLong(u.getExtra().get("orgId"));
+        }
+        if(farmId == null|| orgId == null){
             return;
         }
-        PigScoreApply apply = pigScoreApplyDao.findByFarmIdAndUserId(farmId, user.getId());
-        if (apply != null) {
-            if (apply.getStatus() == 1) {
-                mutableRoles.add("PIGSCORE");
-            }
+        PigScoreApply apply = pigScoreApplyDao.findByFarmIdAndUserId(orgId, farmId, user.getId());
+        if (apply != null && apply.getStatus() == 1) {
+            mutableRoles.add("PIGSCORE");
         }
     }
 

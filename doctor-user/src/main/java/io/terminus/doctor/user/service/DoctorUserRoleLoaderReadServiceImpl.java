@@ -154,26 +154,25 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
 
         User u = userDao.findById(user.getId());
 
-        if(u.getExtra() == null || u.getExtra().isEmpty()){
+        Map<String, String> extra = u.getExtra();
+        Long farmId, orgId;
+        if(extra != null &&  extra.containsKey("farmId") && extra.containsKey("orgId")){
+            farmId = Long.parseLong(extra.get("farmId"));
+            orgId = Long.parseLong(extra.get("orgId"));
+        }else{
             return;
         }
-        Long farmId = null;
-        if(u.getExtra().containsKey("farmId")){
-            farmId = Long.parseLong(u.getExtra().get("farmId"));
-        }
-        if(farmId == null){
+        if(farmId == null|| orgId == null){
             return;
         }
-        PigScoreApply apply = pigScoreApplyDao.findByFarmIdAndUserId(farmId, user.getId());
-        if (apply != null) {
-            if (apply.getStatus() == 1) {
-                List<DoctorRole> roles= roleContent.getRoles();
-                if(roles == null){
-                    roles = Lists.newArrayList();
-                }
-                roles.add(DoctorRole.createStatic("PIGSCORE"));
-                roleContent.setRoles(roles);
+        PigScoreApply apply = pigScoreApplyDao.findByFarmIdAndUserId(orgId, farmId, user.getId());
+        if (apply != null && apply.getStatus().equals(1)) {
+            List<DoctorRole> roles= roleContent.getRoles();
+            if(roles == null){
+                roles = Lists.newArrayList();
             }
+            roles.add(DoctorRole.createStatic("PIGSCORE"));
+            roleContent.setRoles(roles);
         }
     }
 }

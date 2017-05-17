@@ -74,7 +74,7 @@ public class PigScoreApplys {
         apply.setFarmName(farmResp.getResult().getName());
 
         // 判断是否存在申请记录
-        Response<PigScoreApply> applyResp = pigScoreApplyReadService.findByFarmIdAndUserId(apply.getFarmId(), apply.getUserId());
+        Response<PigScoreApply> applyResp = pigScoreApplyReadService.findByFarmIdAndUserId(apply.getOrgId(), apply.getFarmId(), apply.getUserId());
         if (!applyResp.isSuccess()) {
             throw new JsonResponseException(500, applyResp.getError());
         }
