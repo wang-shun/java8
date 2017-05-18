@@ -4,9 +4,11 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.model.PigScoreApply;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.PigScoreApplyReadService;
 import io.terminus.doctor.user.service.PigScoreApplyWriteService;
 import io.terminus.pampas.common.UserUtil;
@@ -34,6 +36,8 @@ public class PigScoreApplys {
     private PigScoreApplyReadService pigScoreApplyReadService;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
+    @RpcConsumer
+    private DoctorOrgReadService doctorOrgReadService;
 
     /**
      * 创建申请
@@ -65,13 +69,21 @@ public class PigScoreApplys {
         // 查询猪场详情
         Response<DoctorFarm> farmResp = doctorFarmReadService.findFarmById(apply.getFarmId());
         if (!farmResp.isSuccess()) {
-            throw new JsonResponseException(500, farmResp.getError());
+            throw new JsonResponseException(farmResp.getError());
         }
         if (farmResp.getResult() == null) {
-            throw new JsonResponseException(500, "farm.not.exist");
+            throw new JsonResponseException("farm.not.exist");
         }
-        apply.setOrgName(farmResp.getResult().getOrgName());
         apply.setFarmName(farmResp.getResult().getName());
+
+        Response<DoctorOrg> orgResp = doctorOrgReadService.findOrgById(apply.getOrgId());
+        if (!orgResp.isSuccess()) {
+            throw new JsonResponseException(orgResp.getError());
+        }
+        if (orgResp.getResult() == null) {
+            throw new JsonResponseException("org.not.exist");
+        }
+        apply.setOrgName(orgResp.getResult().getName());
 
         // 判断是否存在申请记录
         Response<PigScoreApply> applyResp = pigScoreApplyReadService.findByFarmIdAndUserId(apply.getOrgId(), apply.getFarmId(), apply.getUserId());
