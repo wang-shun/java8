@@ -426,8 +426,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
         if (doctorPigTrack.getCurrentMatingCount() > 0) {
             DoctorPigEvent doctorPigEvent = doctorPigEventDao.getFirstMateEvent(doctorPigTrack.getPigId(), new Date());
-            matingDate = new DateTime(doctorPigEvent.getEventAt());
-            return Response.ok(matingDate.plusDays(114).toDate());
+            return Response.ok(doctorPigEvent.getEventAt());
         } else {
             return Response.ok(null);
         }
