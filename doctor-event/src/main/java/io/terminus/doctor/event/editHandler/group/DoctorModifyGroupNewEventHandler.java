@@ -17,7 +17,7 @@ import java.util.List;
 public class DoctorModifyGroupNewEventHandler extends DoctorAbstractModifyGroupEventHandler{
 
     @Override
-    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+    public Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
         List<DoctorGroupEvent> list = doctorGroupEventDao.findByGroupId(deleteGroupEvent.getGroupId());
         return list.size() == 1;
     }
