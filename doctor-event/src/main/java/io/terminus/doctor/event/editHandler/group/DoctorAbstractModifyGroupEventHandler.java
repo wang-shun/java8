@@ -252,7 +252,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * 删除事件校验的具体实现(删除)
      * @param deleteGroupEvent 删除事件
      */
-    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+    public Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
         return true;
     }
 
