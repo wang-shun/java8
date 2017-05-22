@@ -67,6 +67,11 @@ public class SubDao extends MyBatisDao<Sub> {
         return getSqlSession().selectList(sqlId("findSubsByFarmId"), farmId);
     }
 
+
+    public List<Sub> findSubsByFarmIdAndStatus(Long farmId, Integer status) {
+        return getSqlSession().selectList(sqlId("findSubsByFarmIdAndStatus"), ImmutableMap.of("farmId", farmId, "status", status));
+    }
+
     /**
      * 删除猪场下的子账号
      * @param farmId 猪场id

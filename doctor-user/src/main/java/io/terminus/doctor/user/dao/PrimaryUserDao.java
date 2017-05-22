@@ -1,5 +1,6 @@
 package io.terminus.doctor.user.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.user.model.PrimaryUser;
 import org.springframework.stereotype.Repository;
@@ -21,5 +22,9 @@ public class PrimaryUserDao extends MyBatisDao<PrimaryUser> {
      */
     public PrimaryUser findPrimaryByFarmId(Long farmId) {
         return getSqlSession().selectOne(sqlId("findPrimaryByFarmId"), farmId);
+    }
+
+    public PrimaryUser findPrimaryByFarmIdAndStatus(Long farmId, Integer status ) {
+        return getSqlSession().selectOne(sqlId("findPrimaryByFarmIdAndStatus"), ImmutableMap.of("farmId", farmId, "status", status));
     }
 }

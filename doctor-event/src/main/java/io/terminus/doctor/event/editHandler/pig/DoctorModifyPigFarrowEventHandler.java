@@ -127,6 +127,19 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
     }
 
     @Override
+    protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
+        DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.MOVE_IN.getValue());
+        Boolean isRollback = modifyGroupMoveInEventHandler.rollbackHandleCheck(moveInEvent);
+
+        DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.NEW.getValue());
+        if (notNull(newCreateEvent)) {
+            isRollback &= modifyGroupNewEventHandler.rollbackHandleCheck(newCreateEvent);
+        }
+
+        return isRollback;
+    }
+
+    @Override
     protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
         //1.转入回滚
         DoctorGroupEvent deleteGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.MOVE_IN.getValue());

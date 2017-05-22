@@ -189,4 +189,13 @@
         WHERE
         id = #{id}
     </delete>
+
+    <select id="findSubsByFarmIdAndStatus" parameterType="map" resultMap="SubMap" >
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            farm_id = #{farmId}
+            AND status = #{status}
+        </where>
+    </select>
 </mapper>

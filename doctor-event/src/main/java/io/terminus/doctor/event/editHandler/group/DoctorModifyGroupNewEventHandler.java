@@ -8,6 +8,7 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by xjn on 17/4/22.
@@ -17,9 +18,16 @@ import java.util.List;
 public class DoctorModifyGroupNewEventHandler extends DoctorAbstractModifyGroupEventHandler{
 
     @Override
-    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+    public Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
         List<DoctorGroupEvent> list = doctorGroupEventDao.findByGroupId(deleteGroupEvent.getGroupId());
-        return list.size() == 1;
+        if(list.size() > 2) {
+            return false;
+        }
+        if (list.size() == 2) {
+            return Objects.equals(list.get(0).getRelGroupEventId(), list.get(1).getRelGroupEventId())
+                    || Objects.equals(list.get(0).getRelPigEventId(), list.get(1).getRelPigEventId());
+        }
+        return true;
     }
 
     @Override
