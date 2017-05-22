@@ -131,6 +131,17 @@
         </where>
     </select>
 
+    <select id="findPrimaryByFarmIdAndStatus" parameterType="map" resultMap="PrimaryUserMap">
+        SELECT id,
+        <include refid="cols_exclude_id"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            rel_farm_id = #{farmId}
+            AND status = #{status}
+        </where>
+    </select>
+
     <delete id="delete" parameterType="long" >
         DELETE
         FROM <include refid="tb"/>

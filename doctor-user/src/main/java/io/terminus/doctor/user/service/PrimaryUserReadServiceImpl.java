@@ -149,6 +149,17 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
     }
 
     @Override
+    public Response<List<Sub>> findSubsByFarmIdAndStatus(@NotNull(message = "farm.id.not.null") Long farmId, Integer status) {
+        try {
+            return Response.ok(subDao.findSubsByFarmIdAndStatus(farmId, status));
+        } catch (Exception e) {
+            log.error("find subs by farmId and status failed, farmId:{}, status:{}, cause:{}",
+                    farmId, status, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.subs.by.farmId.and.status");
+        }
+    }
+
+    @Override
     public Response<PrimaryUser> findPrimaryByFarmId(@NotNull(message = "farm.id.not.null") Long farmId) {
         try {
             return Response.ok(primaryUserDao.findPrimaryByFarmId(farmId));
@@ -157,4 +168,16 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
             return Response.fail("find.primary.by.farmId.failed");
         }
     }
+
+    @Override
+    public Response<PrimaryUser> findPrimaryByFarmIdAndStatus(@NotNull(message = "farm.id.not.null") Long farmId, Integer status) {
+        try {
+            return Response.ok(primaryUserDao.findPrimaryByFarmIdAndStatus(farmId, status));
+        } catch (Exception e) {
+            log.error("find primary by farmId and status failed, farmId:{}, status:{}, cause:{}"
+                    , farmId, status, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.primary.by.farmId.and.status.failed");
+        }
+    }
+
 }

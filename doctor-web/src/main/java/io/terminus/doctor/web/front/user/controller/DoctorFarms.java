@@ -5,6 +5,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
@@ -151,7 +152,7 @@ public class DoctorFarms {
      * @return 员工列表
      */
     private List<FarmStaff> transformStaffs(Long farmId) {
-        List<Sub> subList = RespHelper.or500(primaryUserReadService.findSubsByFarmId(farmId));
+        List<Sub> subList = RespHelper.or500(primaryUserReadService.findSubsByFarmIdAndStatus(farmId, Sub.Status.ACTIVE.value()));
         List<FarmStaff> staffList = Lists.newArrayList();
         if (!Arguments.isNullOrEmpty(subList)) {
             staffList.addAll(subList.stream().map(sub -> {
@@ -163,7 +164,7 @@ public class DoctorFarms {
                 return farmStaff;
             }).collect(Collectors.toList()));
         }
-        PrimaryUser primaryUser = RespHelper.or500(primaryUserReadService.findPrimaryByFarmId(farmId));
+        PrimaryUser primaryUser = RespHelper.or500(primaryUserReadService.findPrimaryByFarmIdAndStatus(farmId, UserStatus.NORMAL.value()));
         if(primaryUser !=null){
             FarmStaff farmStaff = new FarmStaff();
             farmStaff.setFarmId(primaryUser.getRelFarmId());
