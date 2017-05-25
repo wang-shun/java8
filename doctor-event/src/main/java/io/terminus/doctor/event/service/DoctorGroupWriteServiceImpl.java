@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespWithEx;
@@ -354,6 +355,18 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("update group event failed, cause by {}", Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("update.group.event.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> updateCurrentBarnName(Long currentBarnId, String currentBarnName) {
+        try {
+            return Response.ok(doctorGroupDao.updateCurrentBarnName(currentBarnId, currentBarnName));
+
+        } catch (Exception e) {
+            log.error("update current barn name failed, currentBarnId:{}, currentBarnName:{}, cause:{}",
+                    currentBarnId, currentBarnName, Throwables.getStackTraceAsString(e));
+            return Response.fail("update.current.barn.name.failed");
         }
     }
 }

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.Dates;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import org.springframework.stereotype.Repository;
@@ -110,5 +109,15 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
      */
     public List<DoctorGroup> findByFarmIdAndDate(Long farmId, Date date) {
         return getSqlSession().selectList(sqlId("findByFarmIdAndDate"), ImmutableMap.of("farmId", farmId, "openAt", Dates.endOfDay(date), "colseAt", Dates.startOfDay(date)));
+    }
+
+    /**
+     * 更新当前猪舍下的猪群的当前猪舍名
+     * @param currentBarnId 当前猪舍id
+     * @param currentBarnName 新猪舍名
+     * @return
+     */
+    public Boolean updateCurrentBarnName(Long currentBarnId, String currentBarnName) {
+        return getSqlSession().update(sqlId("updateCurrentBarnName"), ImmutableMap.of("currentBarnId", currentBarnId, "currentBarnName", currentBarnName)) == 1;
     }
 }
