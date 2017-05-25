@@ -363,4 +363,10 @@
         pig_code ASC
         limit 20;
     </select>
+
+    <update id="updateCurrentBarnName" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        SET current_barn_name = #{currentBarnName}
+        WHERE current_barn_id = #{currentBarnId}
+    </update>
 </mapper>

@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.event.controller;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
@@ -26,8 +27,10 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorBarnWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -79,6 +82,11 @@ public class DoctorBarns {
     private final DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService;
     private final PrimaryUserReadService primaryUserReadService;
     private final SubRoleReadService subRoleReadService;
+
+    @RpcConsumer
+    private DoctorGroupWriteService doctorGroupWriteService;
+    @RpcConsumer
+    private DoctorPigWriteService doctorPigWriteService;
 
     @Autowired
     public DoctorBarns(DoctorBarnReadService doctorBarnReadService,
@@ -360,6 +368,12 @@ public class DoctorBarns {
                 });
             }
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
+
+            //修改猪舍名称
+            if (!Objects.equals(barn.getName(), oldBarn.getName())) {
+                RespHelper.or500(doctorGroupWriteService.updateCurrentBarnName(barn.getId(), barn.getName()));
+                RespHelper.or500(doctorPigWriteService.updateCurrentBarnName(barn.getId(), barn.getName()));
+            }
         }
         return barnId;
     }
@@ -493,7 +507,9 @@ public class DoctorBarns {
                 throw new JsonResponseException("barn.name.not.null");
             }
             barn.setName(barnName);
-            return RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
+            RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
+            RespHelper.or500(doctorGroupWriteService.updateCurrentBarnName(barnId, barnName));
+            return RespHelper.or500(doctorPigWriteService.updateCurrentBarnName(barnId, barnName));
         }else{
             throw new JsonResponseException("barn.has.event.forbid.update.name");
         }

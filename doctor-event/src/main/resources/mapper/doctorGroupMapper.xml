@@ -306,4 +306,10 @@
         WHERE 1 = 1
         <include refid="criteria"/>
     </select>
+
+    <update id="updateCurrentBarnName" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        SET current_barn_name = #{currentBarnName}
+        WHERE current_barn_id = #{currentBarnId}
+    </update>
 </mapper>
