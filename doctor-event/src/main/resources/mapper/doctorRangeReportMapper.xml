@@ -24,6 +24,8 @@
         <result column="npd" property="npd"/>
         <result column="psy" property="psy"/>
         <result column="mate_in_seven" property="mateInSeven"/>
+        <result column="nursery_feed_conversion" property="nurseryFeedConversion"/>
+        <result column="fatten_feed_conversion" property="fattenFeedConversion"/>
         <result column="extra" property="extra"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
@@ -56,6 +58,8 @@
         npd, 
         psy, 
         mate_in_seven,
+        nursery_feed_conversion,
+        fatten_feed_conversion,
         extra,
         created_at, 
         updated_at
@@ -80,6 +84,8 @@
         #{npd}, 
         #{psy}, 
         #{mateInSeven}, 
+        #{nurseryFeedConversion},
+        #{fattenFeedConversion},
         #{extra},
         now(),
         now()
@@ -141,7 +147,8 @@
             <if test="psy != null">psy = #{psy},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="mateInSeven != null">mate_in_seven = #{mateInSeven},</if>
-            
+            <if test="nurseryFeedConversion != null">nursery_feed_conversion = #{nurseryFeedConversion},</if>
+
             
             
             updated_at=now()

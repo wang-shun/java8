@@ -242,6 +242,9 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
         doctorRangeReport.setDeadNurseryRate(doctorKpiDao.getDeadNurseryRate(farmId, startAt, endAt));  //保育死淘率
         doctorRangeReport.setDeadFattenRate(doctorKpiDao.getDeadFattenRate(farmId, startAt, endAt));    //育肥死淘率
 
+        doctorRangeReport.setNurseryFeedConversion(doctorKpiDao.getNurserFeedConversion(farmId, startAt, endAt));
+        doctorRangeReport.setFattenFeedConversion(doctorKpiDao.getFattenFeedConversion(farmId, startAt, endAt));
+
         return getStructureReport(doctorRangeReport);
     }
 
