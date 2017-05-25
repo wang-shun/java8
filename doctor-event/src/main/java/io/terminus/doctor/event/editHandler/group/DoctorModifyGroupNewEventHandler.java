@@ -3,6 +3,8 @@ package io.terminus.doctor.event.editHandler.group;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.springframework.stereotype.Component;
@@ -24,8 +26,11 @@ public class DoctorModifyGroupNewEventHandler extends DoctorAbstractModifyGroupE
             return false;
         }
         if (list.size() == 2) {
-            return Objects.equals(list.get(0).getRelGroupEventId(), list.get(1).getRelGroupEventId())
-                    || Objects.equals(list.get(0).getRelPigEventId(), list.get(1).getRelPigEventId());
+            DoctorGroupEvent newEvent = Objects.equals(list.get(0).getType(), GroupEventType.NEW.getValue())
+                    ? list.get(0) : list.get(1);
+
+            return Objects.equals(newEvent.getIsAuto(), IsOrNot.YES.getValue()) && (Objects.equals(list.get(0).getRelGroupEventId(), list.get(1).getRelGroupEventId())
+                    || Objects.equals(list.get(0).getRelPigEventId(), list.get(1).getRelPigEventId()));
         }
         return true;
     }
