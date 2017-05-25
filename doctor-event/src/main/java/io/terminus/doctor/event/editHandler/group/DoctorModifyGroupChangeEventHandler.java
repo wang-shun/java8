@@ -124,6 +124,16 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
     }
 
     @Override
+    public Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+        //关闭事件回滚
+        DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.CLOSE.getValue());
+        if (notNull(closeEvent)) {
+            return modifyGroupCloseEventHandler.rollbackHandleCheck(closeEvent);
+        }
+        return true;
+    }
+
+    @Override
     protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
         DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.CLOSE.getValue());
         if (notNull(closeEvent)) {
