@@ -58,6 +58,12 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
             isRollback &= modifyGroupNewEventHandler.rollbackHandleCheck(newCreateEvent);
         }
 
+        //关闭事件回滚
+        DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.CLOSE.getValue());
+        if (notNull(closeEvent)) {
+            isRollback &= modifyGroupCloseEventHandler.rollbackHandleCheck(closeEvent);
+        }
+
         return isRollback;
     }
 
