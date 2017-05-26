@@ -59,11 +59,11 @@ public class PigScoreApplyReadServiceImpl implements PigScoreApplyReadService {
     }
 
     @Override
-    public Response<PigScoreApply> findByFarmIdAndUserId(Long orgId, Long farmId, Long userId) {
+    public Response<PigScoreApply> findByOrgAndFarmId(Long orgId, Long farmId) {
         try{
-            return Response.ok(pigScoreApplyDao.findByFarmIdAndUserId(orgId, farmId, userId));
+            return Response.ok(pigScoreApplyDao.findByOrgAndFarmId(orgId, farmId));
         }catch (Exception e){
-            log.error("failed to find pig score apply by orgId:{} farmId:{} userId:{}, cause:{}", orgId, farmId, userId, Throwables.getStackTraceAsString(e));
+            log.error("failed to find pig score apply by orgId:{} farmId:{}, cause:{}", orgId, farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("find.apply.fail");
         }
     }
