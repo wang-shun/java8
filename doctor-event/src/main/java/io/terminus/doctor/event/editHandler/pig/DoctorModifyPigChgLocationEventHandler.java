@@ -79,6 +79,15 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
     }
 
     @Override
+    protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
+        DoctorGroupEvent transGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.TRANS_GROUP.getValue());
+        if (notNull(transGroupEvent)) {
+            return doctorModifyGroupTransGroupEventHandler.rollbackHandleCheck(transGroupEvent);
+        }
+        return true;
+    }
+
+    @Override
     protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
         DoctorGroupEvent transGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.TRANS_GROUP.getValue());
         if (notNull(transGroupEvent)) {

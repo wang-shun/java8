@@ -112,7 +112,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
     }
 
     @Override
-    protected Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+    public Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
         return validGroupLiveStockForDelete(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), -deleteGroupEvent.getQuantity());
     }
 

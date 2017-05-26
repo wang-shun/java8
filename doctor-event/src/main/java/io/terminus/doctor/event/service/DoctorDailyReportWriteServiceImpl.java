@@ -69,7 +69,7 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
 
     @Override
     public Response<Boolean> generateYesterdayAndTodayReports(List<Long> farmIds) {
-        Date today = new Date();
+        Date today = Dates.startOfDay(new Date());
         Date yesterday = new DateTime(today).minusDays(1).toDate();
         farmIds.forEach(farmId -> {
             log.info("create daily report start, farmId: {}, date: {}, now: {}", farmId, DateUtil.toDateString(today), DateUtil.toDateTimeString(new Date()));

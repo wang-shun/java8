@@ -72,7 +72,7 @@ public class DoctorPigManager {
 
     private void checkCanUpdate(Long pigId, String newCode) {
         if (!StringUtils.hasText(newCode)) {
-            throw new ServiceException("pigCode.not.empty");
+            throw new ServiceException("pig.code.not.empty");
         }
         DoctorPig pig = doctorPigDao.findById(pigId);
         if (pig == null) {

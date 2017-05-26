@@ -148,4 +148,16 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
     public List<DoctorSuggestPig> suggestPigs(DoctorSuggestPigSearch suggestPigSearch) {
         return getSqlSession().selectList(sqlId("suggestPigs"), suggestPigSearch);
     }
+
+
+    /**
+     * 更新当前猪舍下猪的猪舍名
+     * @param currentBarnId 当前猪舍id
+     * @param currentBarnName 新猪舍名
+     * @return
+     */
+    public Boolean updateCurrentBarnName(Long currentBarnId, String currentBarnName){
+        return getSqlSession().update(sqlId("updateCurrentBarnName"),
+                ImmutableMap.of("currentBarnId", currentBarnId, "currentBarnName", currentBarnName)) == 1;
+    }
 }

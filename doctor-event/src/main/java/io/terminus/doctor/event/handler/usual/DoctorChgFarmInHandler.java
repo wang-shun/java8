@@ -75,6 +75,7 @@ public class DoctorChgFarmInHandler extends DoctorAbstractEventHandler {
 
         //2.新建track
         DoctorPigTrack newTrack = BeanMapper.map(oldTrack, DoctorPigTrack.class);
+        newTrack.setFarmId(chgFarmDto.getToFarmId());
         newTrack.setPigId(newPig.getId());
         newTrack.setStatus(getStatus(beforeStatusEvent));
         newTrack.setIsRemoval(IsOrNot.NO.getValue());

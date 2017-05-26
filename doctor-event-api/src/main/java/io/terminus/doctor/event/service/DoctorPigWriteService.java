@@ -17,4 +17,12 @@ public interface DoctorPigWriteService {
      * 批量修改猪的耳号
      */
     Response<Boolean> updatePigCodes(List<DoctorPig> pigs);
+
+    /**
+     * 更新当前猪舍下猪的猪舍名
+     * @param currentBarnId 当前猪舍id
+     * @param currentBarnName 新猪舍名
+     * @return
+     */
+    Response<Boolean> updateCurrentBarnName(Long currentBarnId, String currentBarnName);
 }

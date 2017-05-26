@@ -49,6 +49,25 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
     }
 
     @Override
+    public Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+        DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.MOVE_IN.getValue());
+        Boolean isRollback = modifyGroupMoveInEventHandler.rollbackHandleCheck(moveInEvent);
+
+        DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.NEW.getValue());
+        if (notNull(newCreateEvent)) {
+            isRollback &= modifyGroupNewEventHandler.rollbackHandleCheck(newCreateEvent);
+        }
+
+        //关闭事件回滚
+        DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.CLOSE.getValue());
+        if (notNull(closeEvent)) {
+            isRollback &= modifyGroupCloseEventHandler.rollbackHandleCheck(closeEvent);
+        }
+
+        return isRollback;
+    }
+
+    @Override
     protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
         //1.转入回滚
         DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.MOVE_IN.getValue());
