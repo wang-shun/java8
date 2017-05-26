@@ -3,7 +3,6 @@ package io.terminus.doctor.event.editHandler.pig;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -54,6 +53,11 @@ public class DoctorModifyPigFosterEventHandler extends DoctorAbstractModifyPigEv
     @Override
     protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent) {
         super.triggerEventModifyHandle(newPigEvent);
+    }
+
+    @Override
+    protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
+        return false;
     }
 
     @Override

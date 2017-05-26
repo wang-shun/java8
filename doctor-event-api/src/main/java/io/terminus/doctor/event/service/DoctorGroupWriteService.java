@@ -147,4 +147,12 @@ public interface DoctorGroupWriteService {
      * @return
      */
     RespWithEx<Boolean> batchGroupEventHandle(List<DoctorGroupInputInfo> inputInfoList, Integer eventType);
+
+    /**
+     * 更新猪舍下所有猪群的猪舍名
+     * @param currentBarnId 当前猪舍
+     * @param currentBarnName 新猪舍名
+     * @return
+     */
+    Response<Boolean> updateCurrentBarnName(Long currentBarnId, String currentBarnName);
 }

@@ -105,7 +105,6 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
 
     private void assertEvent(Long groupId, Integer eventType, ResponseEntity<Boolean> result) {
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
-        DoctorGroupSnapShotInfo diseaseSnapShot = findGroupSnapShotByGroupId(groupId);
 //        assertThat(diseaseSnapShot.getGroupEvent().getType(), is(eventType));
     }
 
@@ -166,23 +165,6 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
         log.info("pagingGroupEventTest result:{}", result.getBody().getData());
     }
 
-    /**
-     * 查询猪群镜像信息(猪群, 猪群跟踪, 最新event)
-     * @see DoctorGroupEvents#findGroupSnapShotByGroupId(java.lang.Long)
-     */
-    @Test
-    public void findGroupSnapShotByGroupIdTest() {
-        DoctorGroupSnapShotInfo snapshot = findGroupSnapShotByGroupId(5L);
-        assertNotNull(snapshot);
-        log.info("findGroupSnapShotByGroupIdTest result:{}", snapshot);
-    }
-
-    private DoctorGroupSnapShotInfo findGroupSnapShotByGroupId(Long groupId) {
-        String url = "/api/doctor/events/group/snapshot";
-        ResponseEntity<DoctorGroupSnapShotInfo> result = getForEntity(url, ImmutableMap.of("groupId", groupId), DoctorGroupSnapShotInfo.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.OK));
-        return result.getBody();
-    }
 
     //新建猪群
     private DoctorNewGroupInput mockNewGroupInput() {

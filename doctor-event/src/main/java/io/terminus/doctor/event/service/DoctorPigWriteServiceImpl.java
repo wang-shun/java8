@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -49,14 +50,28 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
 
     @Override
     public Response<Boolean> updatePigCodes(List<DoctorPig> pigs) {
-        try{
+        try {
             if (!notEmpty(pigs)) {
                 return Response.ok(Boolean.TRUE);
             }
             return Response.ok(doctorPigManager.updatePigCodes(pigs));
+        } catch (ServiceException e) {
+            log.error("update pig code failed, pigs:{}, cause:{}", pigs, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
         }catch(Exception e){
             log.error("update pig code failed, pigs:{}, cause:{}", pigs, Throwables.getStackTraceAsString(e));
             return Response.fail("update.pig.code.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> updateCurrentBarnName(Long currentBarnId, String currentBarnName) {
+        try {
+            return Response.ok(doctorPigTrackDao.updateCurrentBarnName(currentBarnId, currentBarnName));
+        } catch (Exception e) {
+            log.error("update current barn name failed, currentBarnId:{}, currentBarnName:{}, cause:{}",
+                    currentBarnId, currentBarnName, Throwables.getStackTraceAsString(e));
+            return Response.fail("update.current.barn.name.failed");
         }
     }
 }

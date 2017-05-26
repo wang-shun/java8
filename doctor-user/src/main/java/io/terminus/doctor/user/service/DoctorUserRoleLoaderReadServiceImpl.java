@@ -66,12 +66,26 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
             forPrimary(user, roleContent);
             forSub(user, roleContent);
             forPigScore(user, roleContent);
+            forSubNoRole(roleContent);
             return Response.ok(roleContent);
         } catch (Exception e) {
             log.error("hard load roles failed, userId={}, cause:{}", userId, Throwables.getStackTraceAsString(e));
             return Response.fail("user.role.load.fail");
         }
     }
+
+    /**
+     * 子账号,没有静态角色,页面使用hasRole报错
+     * @param roleContent
+     */
+    private void forSubNoRole(DoctorRoleContent roleContent) {
+        List<DoctorRole> roles= roleContent.getRoles();
+        if(roles == null){
+            roles = Lists.newArrayList(DoctorRole.createStatic("LOGIN"));
+            roleContent.setRoles(roles);
+        }
+    }
+
     protected void forAdmin(User user, DoctorRoleContent roleContent) {
         if (user == null || !isAdmin(user.getType())) {
             return;

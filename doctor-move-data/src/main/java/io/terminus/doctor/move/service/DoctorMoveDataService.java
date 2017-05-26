@@ -2426,9 +2426,6 @@ public class DoctorMoveDataService {
                                     }
                                 }
                                 break;
-                            case 12:
-                                statusAfter = PigStatus.Mate.getKey();
-                                break;
                             case 14:
                                 statusAfter = PigStatus.Farrow.getKey();
                                 break;

@@ -425,10 +425,8 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         }
 
         if (doctorPigTrack.getCurrentMatingCount() > 0) {
-            Map<String, Object> criteria = ImmutableMap.of("pigId", pigId, "farmId", farmId, "count", doctorPigTrack.getCurrentMatingCount()-1, "type", PigEvent.MATING.getKey(), "kind", DoctorPig.PigSex.SOW.getKey());
-            DoctorPigEvent doctorPigEvent = doctorPigEventDao.getFirstMatingTime(criteria);
-            matingDate = new DateTime(doctorPigEvent.getEventAt());
-            return Response.ok(matingDate.plusDays(114).toDate());
+            DoctorPigEvent doctorPigEvent = doctorPigEventDao.getFirstMateEvent(doctorPigTrack.getPigId(), new Date());
+            return Response.ok(doctorPigEvent.getEventAt());
         } else {
             return Response.ok(null);
         }

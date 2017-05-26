@@ -94,10 +94,20 @@ public interface PrimaryUserReadService {
     Response<List<Sub>> findSubsByFarmId(@NotNull(message = "farm.id.not.null") Long farmId);
 
     /**
+     * 根据猪场id和员工状态查询
+     * @param farmId 猪场id
+     * @param status 员工状态
+     * @return 员工列表
+     */
+    Response<List<Sub>> findSubsByFarmIdAndStatus(@NotNull(message = "farm.id.not.null") Long farmId, Integer status);
+
+    /**
      * 获取关联猪场主账号列表
      * @param farmId 猪场id
      * @return 主账号
      */
     Response<PrimaryUser> findPrimaryByFarmId(@NotNull(message = "farm.id.not.null") Long farmId);
+
+    Response<PrimaryUser> findPrimaryByFarmIdAndStatus(@NotNull(message = "farm.id.not.null") Long farmId, Integer status);
 
 }
