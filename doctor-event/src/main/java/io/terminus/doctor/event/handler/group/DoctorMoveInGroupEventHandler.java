@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -114,7 +115,9 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         if (moveIn.getFromBarnId() != null) {
             DoctorBarn fromBarn = getBarnById(moveIn.getFromBarnId());
             moveIn.setFromBarnType(fromBarn.getPigType());
-            event.setTransGroupType(getTransType(moveIn.getInType(), group.getPigType(), fromBarn).getValue());   //区别内转还是外转
+            if (!Objects.equals(moveIn.getSource(), PigSource.OUTER.getKey())) {
+                event.setTransGroupType(getTransType(moveIn.getInType(), group.getPigType(), fromBarn).getValue());   //区别内转还是外转
+            }
             event.setOtherBarnId(moveIn.getFromBarnId());  //来源猪舍id
             event.setOtherBarnType(fromBarn.getPigType());   //来源猪舍类型
         }

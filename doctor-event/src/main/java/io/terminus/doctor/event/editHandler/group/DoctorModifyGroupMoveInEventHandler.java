@@ -136,7 +136,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         DoctorMoveInGroupInput input1 = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorMoveInGroupInput.class);
                DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .quantityChange(EventUtil.minusInt(0, input1.getQuantity()))
-                .transGroupType(getTransGroupType(oldGroupEvent))
+                .transGroupType(oldGroupEvent.getTransGroupType())
                 .isSowTrigger(notNull(oldGroupEvent.getSowId()))
                 .build();
         DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
@@ -150,7 +150,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         DoctorMoveInGroupInput input2 = (DoctorMoveInGroupInput) input;
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .quantityChange(input2.getQuantity())
-                .transGroupType(getTransGroupType(newGroupEvent))
+                .transGroupType(newGroupEvent.getTransGroupType())
                 .isSowTrigger(notNull(newGroupEvent.getSowId()))
                 .build();
         DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
