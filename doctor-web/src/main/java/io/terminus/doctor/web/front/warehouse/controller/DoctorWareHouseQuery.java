@@ -378,7 +378,7 @@ public class DoctorWareHouseQuery {
         }
         List<DoctorWareHouseEventData> dataList = pagingResponse.getResult().getData().stream().map(provide ->{
             DoctorWareHouseEventData data = BeanMapper.map(provide, DoctorWareHouseEventData.class);
-            Response<DoctorBasicMaterial> basicMaterialResponse = doctorBasicMaterialReadService.findBasicMaterialById(provide.getMaterialId());
+            Response<DoctorMaterialInWareHouse> basicMaterialResponse = doctorMaterialInWareHouseReadService.findMaterialUnits(provide.getFarmId(), provide.getMaterialId(), provide.getWareHouseId());
             if (basicMaterialResponse.isSuccess()) {
                 data.setUnitName(basicMaterialResponse.getResult().getUnitName());
             }
