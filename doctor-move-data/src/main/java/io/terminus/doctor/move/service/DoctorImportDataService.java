@@ -363,7 +363,6 @@ public class DoctorImportDataService {
                             .put("contact", contact)
                             .put("realName", realName)
                             .map());
-                    userWriteService.update(subUser);
 
                     Sub sub = new Sub();
                     sub.setUserId(subUser.getId());
@@ -375,6 +374,8 @@ public class DoctorImportDataService {
                     sub.setContact(Params.get(subUser.getExtra(), "contact"));
                     sub.setStatus(UserStatus.NORMAL.value());
                     subDao.create(sub);
+
+                    userWriteService.update(subUser);
 
                     subUserId = subUser.getId();
                 } else {
