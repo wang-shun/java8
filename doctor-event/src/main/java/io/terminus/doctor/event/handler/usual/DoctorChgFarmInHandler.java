@@ -2,11 +2,13 @@ package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmInEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler.getStatus;
 
@@ -78,6 +81,12 @@ public class DoctorChgFarmInHandler extends DoctorAbstractEventHandler {
         newTrack.setFarmId(chgFarmDto.getToFarmId());
         newTrack.setPigId(newPig.getId());
         newTrack.setStatus(getStatus(beforeStatusEvent));
+
+        DoctorBarn fromBarn = doctorBarnDao.findById(chgFarmDto.getFromBarnId());
+        if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(toBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
+            newTrack.setStatus(PigStatus.Farrow.getKey());
+        }
+
         newTrack.setIsRemoval(IsOrNot.NO.getValue());
         newTrack.setCurrentBarnId(toBarn.getId());
         newTrack.setCurrentBarnName(toBarn.getName());
