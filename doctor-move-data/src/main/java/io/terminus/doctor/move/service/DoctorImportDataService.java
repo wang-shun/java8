@@ -32,6 +32,7 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
@@ -337,8 +338,13 @@ public class DoctorImportDataService {
                     subUser.setType(UserType.FARM_SUB.value());
                     subUser.setStatus(UserStatus.NORMAL.value());
 
-                    if (existRole.get(roleName) == null) {
-                        SubRole subRole = new SubRole();
+                    Long roleId = existRole.get(roleName);
+
+                    SubRole subRole;
+                    if (notNull(roleId)) {
+                        subRole = subRoleDao.findById(roleId);
+                    } else {
+                        subRole = new SubRole();
                         subRole.setName(roleName);
                         subRole.setUserId(primaryUser.getId());
                         subRole.setFarmId(farm.getId());
@@ -358,12 +364,24 @@ public class DoctorImportDataService {
                             .put("realName", realName)
                             .map());
                     userWriteService.update(subUser);
+
+                    Sub sub = new Sub();
+                    sub.setUserId(subUser.getId());
+                    sub.setUserName(subUser.getName());
+                    sub.setRealName(Params.get(subUser.getExtra(), "realName"));
+                    sub.setRoleId(subRole.getId());
+                    sub.setRoleName(subRole.getName());
+                    sub.setParentUserId(Long.valueOf(Params.get(subUser.getExtra(), "pid")));
+                    sub.setContact(Params.get(subUser.getExtra(), "contact"));
+                    sub.setStatus(UserStatus.NORMAL.value());
+                    subDao.create(sub);
+
                     subUserId = subUser.getId();
                 } else {
                     subUser = new User();
                     subUser.setName(loginName + "@" + farm.getFarmCode());
                     subUser.setMobile(contact);
-                        subUser.setPassword("123456");
+                    subUser.setPassword("123456");
                     subUser.setType(UserType.FARM_SUB.value());
                     subUser.setStatus(UserStatus.NORMAL.value());
 
