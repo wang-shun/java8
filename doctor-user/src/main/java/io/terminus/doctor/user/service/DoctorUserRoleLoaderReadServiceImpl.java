@@ -162,31 +162,31 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
     }
 
     protected void forPigScore(User user, DoctorRoleContent roleContent){
-        if (user == null) {
+        List<DoctorRole> roles= roleContent.getRoles();
+        if(user == null || roles == null || roles.isEmpty()){
             return;
         }
 
         User u = userDao.findById(user.getId());
-
         Map<String, String> extra = u.getExtra();
-        Long farmId, orgId;
-        if(extra != null &&  extra.containsKey("farmId") && extra.containsKey("orgId")){
-            farmId = Long.parseLong(extra.get("farmId"));
-            orgId = Long.parseLong(extra.get("orgId"));
-        }else{
-            return;
-        }
-        if(farmId == null|| orgId == null){
-            return;
-        }
-        PigScoreApply apply = pigScoreApplyDao.findByFarmIdAndUserId(orgId, farmId, user.getId());
-        if (apply != null && apply.getStatus().equals(1)) {
-            List<DoctorRole> roles= roleContent.getRoles();
-            if(roles == null){
-                roles = Lists.newArrayList();
+        try {
+            if (extra != null && extra.containsKey("farmId") && extra.containsKey("orgId")) {
+                Long farmId = Long.parseLong(extra.get("farmId"));
+                Long orgId = Long.parseLong(extra.get("orgId"));
+                // 查询申请记录
+                PigScoreApply apply = pigScoreApplyDao.findByOrgAndFarmId(orgId, farmId);
+                // 有申请记录、状态有效、是猪场管理员
+                if (apply != null && apply.getStatus().equals(1)) {
+                    for(DoctorRole role: roles){
+                        if("PRIMARY".equals(role.getBase())){
+                            roles.add(DoctorRole.createStatic("PIGSCORE"));
+                            roleContent.setRoles(roles);
+                        }
+                    }
+                }
             }
-            roles.add(DoctorRole.createStatic("PIGSCORE"));
-            roleContent.setRoles(roles);
+        }catch (NumberFormatException nfe){
+            log.error("failed to parse farmId:{} or orgId:{} to Long", extra.get("farmId"), extra.get("orgId"));
         }
     }
 }

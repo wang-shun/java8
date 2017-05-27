@@ -58,10 +58,11 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findByFarmIdAndUserId" parameterType="map" resultMap="PigScoreApplyMap" >
+    <select id="findByOrgAndFarmId" parameterType="map" resultMap="PigScoreApplyMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE farm_id = #{farmId} AND org_id = #{orgId} AND user_id = #{userId}
+        WHERE farm_id = #{farmId} AND org_id = #{orgId}
+        order BY `id` desc
         limit 1
     </select>
 

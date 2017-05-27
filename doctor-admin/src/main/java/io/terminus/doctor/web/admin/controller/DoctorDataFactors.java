@@ -56,6 +56,7 @@ public class DoctorDataFactors {
     @RequestMapping(value = "/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<DoctorDataFactor> listDoctorDataFactor() {
         Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("isDelete", 0);
         Response<List<DoctorDataFactor>> result =  doctorDataFactorReadService.list(criteria);
         if(!result.isSuccess()){
             throw new JsonResponseException(result.getError());
@@ -66,6 +67,7 @@ public class DoctorDataFactors {
     @RequestMapping(value = "/map-list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<Integer, List<DataFactorDto>> mapListDoctorDataFactor() {
         Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("isDelete", 0);
         Response<List<DoctorDataFactor>> result =  doctorDataFactorReadService.list(criteria);
         if(!result.isSuccess()){
             throw new JsonResponseException(result.getError());
@@ -123,12 +125,12 @@ public class DoctorDataFactors {
         List<DoctorDataFactor> factors = Lists.newArrayList();
         for(DataFactorDto dto: datas.getDatas()){
             DoctorDataFactor factor = new DoctorDataFactor();
-
             factor.setType(dto.getType());
             factor.setTypeName(dto.getTypeName());
             factor.setSubType(dto.getSubType());
             factor.setSubTypeName(dto.getSubTypeName());
             factor.setFactor(dto.getFactor());
+            factor.setIsDelete(0);
             if("MIN".equals(dto.getRangeFrom())){
                 factor.setRangeFrom(-Double.MAX_VALUE);
             }else{
