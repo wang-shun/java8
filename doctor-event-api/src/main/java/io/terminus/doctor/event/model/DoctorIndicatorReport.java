@@ -72,4 +72,14 @@ public class DoctorIndicatorReport implements Serializable{
      * 断奶七天配种率
      */
     private Double mateInSeven;
+
+    /**
+     * 保育料肉比
+     */
+    private Double nurseryFeedConversion;
+
+    /**
+     * 育肥料肉比
+     */
+    private Double fattenFeedConversion;
 }
