@@ -2,10 +2,10 @@ package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sun.org.apache.xpath.internal.Arg;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -125,8 +126,19 @@ public class DoctorSearches {
     }
 
     @RequestMapping(value = "/suggest/event", method = RequestMethod.GET)
-    public List<DoctorSuggestPig> suggestPigsByEvent(@RequestParam Long farmId, @RequestParam Integer eventType, @RequestParam(required = false) String pigCode, @RequestParam Integer sex) {
-        return RespHelper.or500(doctorPigEventReadService.suggestPigsByEvent(eventType, farmId, pigCode, sex));
+    public List<DoctorSuggestPig> suggestPigsByEvent(@RequestParam Long farmId,
+                                                     @RequestParam Integer eventType,
+                                                     @RequestParam(required = false) String pigCode,
+                                                     @RequestParam Integer sex) {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        log.info("suggestPigsByEvent: -> starting......");
+
+        List<DoctorSuggestPig> list = RespHelper.or500(doctorPigEventReadService.suggestPigsByEvent(eventType, farmId, pigCode, sex));
+
+        log.info("suggestPigsByEvent-> 结束, 耗时 {}:ms end......", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+        return list;
+
     }
     /**
      * 母猪搜索方法
