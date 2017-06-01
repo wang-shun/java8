@@ -2,7 +2,6 @@ package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -62,7 +61,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -130,15 +128,7 @@ public class DoctorSearches {
                                                      @RequestParam Integer eventType,
                                                      @RequestParam(required = false) String pigCode,
                                                      @RequestParam Integer sex) {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-
-        log.info("suggestPigsByEvent: -> starting......");
-
-        List<DoctorSuggestPig> list = RespHelper.or500(doctorPigEventReadService.suggestPigsByEvent(eventType, farmId, pigCode, sex));
-
-        log.info("suggestPigsByEvent-> 结束, 耗时 {}:ms end......", stopwatch.elapsed(TimeUnit.MILLISECONDS));
-        return list;
-
+        return RespHelper.or500(doctorPigEventReadService.suggestPigsByEvent(eventType, farmId, pigCode, sex));
     }
     /**
      * 母猪搜索方法
