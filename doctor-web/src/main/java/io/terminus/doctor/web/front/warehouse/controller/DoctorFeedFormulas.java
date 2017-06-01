@@ -102,6 +102,15 @@ public class DoctorFeedFormulas {
     }
 
     /**
+     * 获取配方信息
+     * @return
+     */
+    @RequestMapping(value = "/rules/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public FeedFormula updateMaterialRules(@PathVariable Long id){
+        return RespHelper.or500(feedFormulaReadService.findFeedFormulaById(id));
+    }
+
+    /**
      * 录入对应的物料生产规则信息
      * @param dto
      * @return
