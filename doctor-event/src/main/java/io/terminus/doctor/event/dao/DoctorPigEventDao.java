@@ -573,10 +573,24 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
     /**
      * 获取最新的去除(事件类型:3,4,5,8)
+     * @see PigEvent
      * @param pigId 猪id
      * @return 事件
      */
     public DoctorPigEvent getLastStatusEvent(Long pigId) {
         return getSqlSession().selectOne(sqlId("getLastStatusEvent"), pigId);
+    }
+
+    /**
+     * 获取某猪某胎次下,妊娠检查时间前最近的初配事件
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @param id 妊娠检查事件id
+     *
+     * @return 初配事件
+     */
+    public DoctorPigEvent getFirstMatingBeforePregCheck(Long pigId, Integer parity, Long id) {
+        return getSqlSession().selectOne(sqlId("getFirstMatingBeforePregCheck"),
+                ImmutableMap.of("pigId", pigId, "parity", parity, "id", id));
     }
 }

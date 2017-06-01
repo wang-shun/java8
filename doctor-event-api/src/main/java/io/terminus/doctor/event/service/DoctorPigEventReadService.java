@@ -224,4 +224,14 @@ public interface DoctorPigEventReadService {
      * @return 初配事件
      */
     Response<DoctorPigEvent> findLastFirstMateEvent(Long pigId);
+
+    /**
+     * 获取某猪某胎次下,妊娠检查时间前最近的初配事件
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @param id 妊娠检查事件id
+     *
+     * @return 初配事件
+     */
+    Response<DoctorPigEvent> findFirstMatingBeforePregCheck(Long pigId, Integer parity, Long id);
 }
