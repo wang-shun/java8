@@ -476,6 +476,16 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+     * 获取猪某一胎次下的断奶事件
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @return 断奶事件
+     */
+    public DoctorPigEvent getWeanEventByParity(Long pigId, Integer parity) {
+        return getSqlSession().selectOne(sqlId("getWeanEventByParity"), ImmutableMap.of("pigId", pigId, "parity", parity));
+    }
+
+    /**
      * 获取某时间前的影响状态的最近的事件
      * @param pigId 猪id
      * @param eventAt 时间
