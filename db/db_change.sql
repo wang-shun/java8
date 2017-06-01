@@ -1237,3 +1237,7 @@ alter table doctor_boar_monthly_reports add column `boar_type` varchar(32) defau
 -- 2017-05-27
 alter table doctor_range_reports add column `fatten_feed_conversion` double default null comment '育肥料肉比' after `mate_in_seven`;
 alter table doctor_range_reports add column `nursery_feed_conversion` double default null comment '育肥料肉比' after `mate_in_seven`;
+
+
+-- 2017-06-01
+alter table doctor_feed_formulas drop index feed_id ;
