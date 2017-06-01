@@ -163,10 +163,11 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
 
     protected void forPigScore(User user, DoctorRoleContent roleContent){
         List<DoctorRole> roles= roleContent.getRoles();
+
         if(user == null || roles == null || roles.isEmpty()){
             return;
         }
-
+        List<DoctorRole> newroles = Lists.newArrayList(roles);
         User u = userDao.findById(user.getId());
         Map<String, String> extra = u.getExtra();
         try {
@@ -179,10 +180,10 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
                 if (apply != null && apply.getStatus().equals(1)) {
                     for(DoctorRole role: roles){
                         if("PRIMARY".equals(role.getBase())){
-                            roles.add(DoctorRole.createStatic("PIGSCORE"));
-                            roleContent.setRoles(roles);
+                            newroles.add(DoctorRole.createStatic("PIGSCORE"));
                         }
                     }
+                    roleContent.setRoles(newroles);
                 }
             }
         }catch (NumberFormatException nfe){
