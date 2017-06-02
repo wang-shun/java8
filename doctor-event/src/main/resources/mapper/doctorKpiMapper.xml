@@ -1722,7 +1722,10 @@
               t11.counts - ifnull(t12.inCounts, 0) + ifnull(t12.outCounts, 0) as count
         from(
         SELECT t1.id as breed_id, t1.name as breed_name, ifnull(t2.counts, 0) as counts
-          FROM doctor_basics t1
+          FROM (
+          select * from doctor_basics
+          where find_in_set(id, (select `basic_ids` from doctor_farm_basics where farm_id = #{farmId}))
+          ) t1
           left join  (
           select breed_id,breed_name, count(1) as counts
           from doctor_pigs
