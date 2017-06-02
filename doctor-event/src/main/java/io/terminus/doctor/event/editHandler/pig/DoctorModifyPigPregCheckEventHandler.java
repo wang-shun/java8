@@ -3,10 +3,10 @@ package io.terminus.doctor.event.editHandler.pig;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.exception.InvalidException;
-import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by xjn on 17/4/19.
@@ -125,6 +126,20 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
     }
 
     @Override
+    protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
+
+        //删除妊娠检查阳性事件,还原本胎次下最近的初配事件IsImpregnation字段
+        if (Objects.equals(deletePigEvent.getPregCheckResult(), PregCheckResult.YANG.getKey())) {
+            DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(deletePigEvent.getPigId()
+                    , doctorPigEventDao.findLastParity(deletePigEvent.getPigId()));
+
+            expectTrue(notNull(firstMate), "first.mate.not.null", deletePigEvent.getPigId());
+            firstMate.setIsImpregnation(IsOrNot.NO.getValue());
+            doctorPigEventDao.update(firstMate);
+        }
+    }
+
+    @Override
     protected void updateDailyForDelete(DoctorPigEvent deletePigEvent) {
         updateDailyOfDelete(deletePigEvent);
     }
@@ -154,7 +169,7 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
         PregCheckResult checkResult = PregCheckResult.from(changeDto.getPregCheckResult());
-        Checks.expectTrue(notNull(checkResult), "preg.check.result.error", changeDto.getPregCheckResult());
+        expectTrue(notNull(checkResult), "preg.check.result.error", changeDto.getPregCheckResult());
         switch (checkResult) {
             case YANG :
                 oldDailyPig.setPregPositive(EventUtil.plusInt(oldDailyPig.getPregPositive(), changeDto.getPregCheckResultCountChange()));

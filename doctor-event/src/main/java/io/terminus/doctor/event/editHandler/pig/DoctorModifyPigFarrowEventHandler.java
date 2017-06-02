@@ -113,6 +113,7 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent) {
+
         //1.新建编辑
         DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findByRelPigEventIdAndType(newPigEvent.getId(), GroupEventType.NEW.getValue());
         if (notNull(newCreateEvent)) {
@@ -141,6 +142,12 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
+        //还原本胎次下的初配事件是否分娩字段
+        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(deletePigEvent.getPigId(),
+                doctorPigEventDao.findLastParity(deletePigEvent.getPigId()));
+        firstMate.setIsDelivery(IsOrNot.NO.getValue());
+        doctorPigEventDao.update(firstMate);
+
         //1.转入回滚
         DoctorGroupEvent deleteGroupEvent = doctorGroupEventDao.findByRelPigEventIdAndType(deletePigEvent.getId(), GroupEventType.MOVE_IN.getValue());
         modifyGroupMoveInEventHandler.rollbackHandle(deleteGroupEvent, operatorId, operatorName);
