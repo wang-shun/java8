@@ -498,6 +498,7 @@ public class DoctorPigEventExports {
         List<DoctorNewExportGroup> list = paging.getData().stream().map(doctorGroupEventDetail -> {
             try {
                 DoctorNewGroupInput newGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorNewGroupInput.class);
+                newGroupEvent.setEventAt(null);
                 DoctorNewExportGroup exportData = BeanMapper.map(newGroupEvent, DoctorNewExportGroup.class);
                 DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(doctorGroupEventDetail.getGroupId()));
                 exportData.setPigTypeName(PigType.from(doctorGroupEventDetail.getPigType()).getDesc());
@@ -528,6 +529,7 @@ public class DoctorPigEventExports {
         List<DoctorMoveInGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
             try {
                 DoctorMoveInGroupInput moveInGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorMoveInGroupInput.class);
+                moveInGroupEvent.setEventAt(null);
                 DoctorMoveInGroupExportDto exportData = BeanMapper.map(moveInGroupEvent, DoctorMoveInGroupExportDto.class);
                 exportData.setQuantity(doctorGroupEventDetail.getQuantity());
                 exportData.setAvgDayAge(doctorGroupEventDetail.getAvgDayAge());
@@ -560,6 +562,7 @@ public class DoctorPigEventExports {
         List<DoctorChangeGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
             try {
                 DoctorChangeGroupInput changeGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorChangeGroupInput.class);
+                changeGroupEvent.setEventAt(null);
                 DoctorChangeGroupExportDto exportData = BeanMapper.map(changeGroupEvent, DoctorChangeGroupExportDto.class);
                 exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
                 exportData.setBarnName(doctorGroupEventDetail.getBarnName());
@@ -586,6 +589,7 @@ public class DoctorPigEventExports {
         List<DoctorChgFarmGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
             try {
                 DoctorTransFarmGroupInput transFarmGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorTransFarmGroupInput.class);
+                transFarmGroupEvent.setEventAt(null);
                 DoctorChgFarmGroupExportDto exportData = BeanMapper.map(transFarmGroupEvent, DoctorChgFarmGroupExportDto.class);
                 exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
                 exportData.setBarnName(doctorGroupEventDetail.getBarnName());
@@ -614,6 +618,7 @@ public class DoctorPigEventExports {
         List<DoctorDiseaseGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
             try {
                 DoctorDiseaseGroupInput diseaseGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorDiseaseGroupInput.class);
+                diseaseGroupEvent.setEventAt(null);
                 DoctorDiseaseGroupExportDto exportData = BeanMapper.map(diseaseGroupEvent, DoctorDiseaseGroupExportDto.class);
                 exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
                 exportData.setBarnName(doctorGroupEventDetail.getBarnName());
@@ -639,6 +644,7 @@ public class DoctorPigEventExports {
         List<DoctorVaccinationGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
             try {
                 DoctorAntiepidemicGroupInput antiepidemicGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorAntiepidemicGroupInput.class);
+                antiepidemicGroupEvent.setEventAt(null);
                 DoctorVaccinationGroupExportDto exportData = BeanMapper.map(antiepidemicGroupEvent, DoctorVaccinationGroupExportDto.class);
                 exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
                 exportData.setBarnName(doctorGroupEventDetail.getBarnName());
@@ -691,6 +697,7 @@ public class DoctorPigEventExports {
         List<DoctorTurnSeedGroupExportDto> list = paging.getData().stream().map(doctorGroupEventDetail -> {
             try {
                 DoctorTurnSeedGroupInput seedGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorTurnSeedGroupInput.class);
+                seedGroupEvent.setEventAt(null);
                 DoctorTurnSeedGroupExportDto exportData = BeanMapper.map(seedGroupEvent, DoctorTurnSeedGroupExportDto.class);
                 exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
                 exportData.setBarnName(doctorGroupEventDetail.getBarnName());

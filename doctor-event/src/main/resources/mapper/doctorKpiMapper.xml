@@ -30,6 +30,7 @@
             ifnull(sum(quantity),0) AS dead_count
           FROM doctor_group_events
           WHERE status = 1
+            AND event_source != 5
             AND change_type_id IN (110, 111)  -- 变动类型是死亡和淘汰
             AND group_id = #{groupId}
         )
@@ -39,6 +40,7 @@
             ifnull(sum(quantity),1) AS trans_in_count
           FROM doctor_group_events
           WHERE status = 1
+            AND event_source != 5
             AND type = 2  -- 转入猪群事件
             AND group_id = #{groupId}
         ), 0)
@@ -674,6 +676,7 @@
         select case ifnull(count(1),0) when 0 then 1 else count(1) end
         from doctor_pig_events t1
         where t1.status = 1
+        and t1.event_source != 5
         and t1.`type` = 9
         and t1.kind = 1
         and t1.current_mating_count = 1
@@ -835,6 +838,7 @@
             FROM doctor_group_events
             WHERE group_id = #{groupId}
                 AND status = 1
+                AND event_source != 5
                 AND  TYPE IN (2, 3, 4, 5, 9)
                 AND event_at &lt;= (
                     SELECT event_at  FROM  doctor_group_events  WHERE group_id = #{groupId} AND TYPE = 2 AND status = 1
@@ -1048,6 +1052,7 @@
         a.TYPE IN (2, 6, 7, 20) AND
         b.boar_type = 1
         and a.status = 1
+        AND event_source != 5
         GROUP BY a.type
         ) AS delta
         )
@@ -1063,6 +1068,8 @@
         where a.farm_id = #{farmId}
         and a.kind = 1
         and a.type in(2, 6, 7, 20)
+        and a.status = 1
+        and a.event_source != 5
         and a.event_at &lt;= date_add(date(#{date}), INTERVAL 86399 SECOND)
     </select>
 
@@ -1090,7 +1097,8 @@
         a.event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
         a.kind = 1 AND
         ((a.type IN (2, 6, 7, 10, 12) AND b.pig_type = 7) OR a.type = 14) AND
-        a.status = 1
+        a.status = 1 AND
+        a.event_source != 5
         )
     </select>
 
@@ -1117,6 +1125,7 @@
             event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
             kind = 1 AND
             status = 1 AND
+            event_source != 5 AND
             (( barn_type in ( 5, 6 ) and type in(2,6,7,14) ) OR ( barn_type = 7 and type = 12 ) )  -- 保育舍发生的转场+销售+转分娩舍-(产房发生的进场+转配怀舍)
         )
     </select>
@@ -1222,6 +1231,7 @@
         where t2.type = 11
         and t2.preg_check_result = 1
         AND t2.status = 1
+        AND t2.event_source != 5
     </select>
 
     <!-- 公猪生产月报: 产仔母猪数 -->
@@ -1236,6 +1246,7 @@
         left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
         AND t2.status = 1
+        AND t2.event_source != 5
     </select>
 
 
@@ -1251,6 +1262,7 @@
         left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
         AND t2.status = 1
+        AND t2.event_source != 5
     </select>
 
     <!-- 公猪生产月报: 平均产活仔数 -->
@@ -1265,6 +1277,7 @@
         left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
         AND t2.status = 1
+        AND t2.event_source != 5
     </select>
 
     <!-- 公猪生产月报: 受胎率 -->
@@ -1280,7 +1293,8 @@
         left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 11
         and t2.preg_check_result = 1
-        AND t2.status = 1)
+        AND t2.status = 1
+        AND t2.event_source != 5)
         / (
         select case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end as pzcs
         from doctor_pig_events
@@ -1303,7 +1317,8 @@
         group by farm_id, boar_code, pig_id,parity) as t1
         left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_id = t2.pig_id and t1.parity = t2.parity
         where t2.type = 15
-        AND t2.status = 1)
+        AND t2.status = 1
+        AND t2.event_source != 5)
         / (
         select case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end as pzcs
         from doctor_pig_events
@@ -1683,6 +1698,7 @@
         and farm_id = #{farmId}
         and event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
         AND status = 1
+        AND event_source != 5
         group by case when parity &lt; 10 then parity else '10' end
         ) t13 on t11.parity = t13.parity
         left join
@@ -1696,6 +1712,7 @@
         and farm_id = #{farmId}
         and event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
         AND status = 1
+        AND event_source != 5
         group by case when parity-1 &lt; 9 then parity-1 else '10' end
         ) t14 on t11.parity = t14.parity
         left join (
@@ -1709,6 +1726,7 @@
         and farm_id = #{farmId}
         and event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
         AND status = 1
+        AND event_source != 5
         group by case when parity &lt; 10 then parity else '10' end
         ) t15 on t11.parity = t15.parity
     </select>
@@ -1722,7 +1740,10 @@
               t11.counts - ifnull(t12.inCounts, 0) + ifnull(t12.outCounts, 0) as count
         from(
         SELECT t1.id as breed_id, t1.name as breed_name, ifnull(t2.counts, 0) as counts
-          FROM doctor_basics t1
+          FROM (
+          select * from doctor_basics
+          where find_in_set(id, (select `basic_ids` from doctor_farm_basics where farm_id = #{farmId}))
+          ) t1
           left join  (
           select breed_id,breed_name, count(1) as counts
           from doctor_pigs
@@ -1745,6 +1766,7 @@
             and t1.event_at &gt;= date_add(DATE(#{endAt}), INTERVAL 1 DAY)
             AND t1.farm_id = #{farmId}
             AND t1.status = 1
+            AND t1.event_source != 5
         GROUP BY t2.breed_id, t2.breed_name
         ) t12 on t11.breed_id = t12.breed_id and t11.breed_name = t12.breed_name;
     </select>
@@ -1772,6 +1794,7 @@
         and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
         and event_at &lt;= #{endAt}
         AND status = 1
+        AND event_source != 5
         ) t2,
         (
         -- 断奶七天内配种
@@ -1782,6 +1805,8 @@
         and farm_id = #{farmId}
         and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
         and event_at &lt;= #{endAt}
+        AND status = 1
+        AND event_source != 5
         and pig_id in(
         select pig_id
         from  doctor_pig_events
@@ -1792,6 +1817,7 @@
         and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
         and event_at &lt;= #{endAt}
         AND status = 1
+        AND event_source != 5
         )
         )  t3,
         (-- 本月7天内断奶配种数
@@ -1812,6 +1838,7 @@
         and farm_id = 92
         and current_mating_count = 1
         AND status = 1
+        AND event_source != 5
         and pig_id in(
         select  pig_id
         from doctor_pig_events

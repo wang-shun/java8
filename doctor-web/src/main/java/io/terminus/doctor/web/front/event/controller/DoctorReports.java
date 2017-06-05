@@ -1,13 +1,11 @@
 package io.terminus.doctor.web.front.event.controller;
 
-import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
-import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
@@ -18,23 +16,25 @@ import io.terminus.doctor.event.dto.DoctorStockStructureDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
-import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorRangeReport;
-import io.terminus.doctor.event.service.*;
+import io.terminus.doctor.event.service.DoctorCommonReportReadService;
+import io.terminus.doctor.event.service.DoctorDailyReportReadService;
+import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorRangeReportReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.ArrayList;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -171,38 +171,7 @@ public class DoctorReports {
         if (notEmpty(dto.getPigTypeCommas())) {
             dto.setPigTypes(Splitters.splitToInteger(dto.getPigTypeCommas(), Splitters.COMMA));
         }
-        Paging<DoctorGroupBatchSummary> paging = RespHelper.or500(doctorGroupBatchSummaryReadService.pagingGroupBatchSummary(dto, pageNo, pageSize));
-        //如果猪群没有关闭，刷新下料肉比
-        List<DoctorGroupBatchSummary> summaries = paging.getData().stream()
-                .map(s -> {
-                    if (Objects.equals(s.getStatus(), DoctorGroup.Status.CREATED.getValue())) {
-                        Double material = RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, s.getGroupId(), null, null), 0D);
-                        s.setFcr(material / s.getFcr());
-                    }
-                    return s;
-                })
-                .collect(Collectors.toList());
-
-        //对批次表进行金额的注入
-        List<DoctorGroupBatchSummary> batchSummaries = summaries.stream()
-                .map(s -> {
-                    List<DoctorMaterialConsumeProvider> consumeProviders = Lists.newArrayList();
-                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,1L,null,null));
-                    s.setFeedAmount(getMaterialAmount(consumeProviders));
-                    s.setFendNumber(getMaterialNumber(consumeProviders));
-                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,2L,null,null));
-                    s.setMedicineAmount(getMaterialAmount(consumeProviders));
-                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,3L,null,null));
-                    s.setVaccineAmount(getMaterialAmount(consumeProviders));
-                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,4L,null,null));
-                    s.setMedicineAmount(getMaterialAmount(consumeProviders));
-                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,5L,null,null));
-                    s.setConsumablesAmount(getMaterialAmount(consumeProviders));
-                    return s;
-                })
-                .collect(Collectors.toList());
-
-        return new Paging<>(paging.getTotal(), batchSummaries);
+        return RespHelper.or500(doctorGroupBatchSummaryReadService.pagingGroupBatchSummary(dto, pageNo, pageSize));
     }
 
     private static String getDate(Object o) {
@@ -210,42 +179,6 @@ public class DoctorReports {
             return null;
         }
         return String.valueOf(o);
-    }
-
-    private static Double getMaterialNumber(List<DoctorMaterialConsumeProvider> doctorMaterialConsumeProviders) {
-        Double number = 0.0;
-        for (int i = 0; i < doctorMaterialConsumeProviders.size(); i++) {
-            if (doctorMaterialConsumeProviders.get(i).getExtra() != null && doctorMaterialConsumeProviders.get(i).getExtraMap().containsKey("consumePrice")) {
-                List<Map<String, Object>> priceCompose = (ArrayList) doctorMaterialConsumeProviders.get(i).getExtraMap().get("consumePrice");
-                for (Map<String, Object> eachPrice : priceCompose) {
-                    Double count = Double.valueOf(eachPrice.get("count").toString());
-                    number += count;
-                }
-            } else {
-                Double count = doctorMaterialConsumeProviders.get(i).getEventCount();
-                number += count;
-            }
-        }
-        return number;
-    }
-
-    private static Double getMaterialAmount(List<DoctorMaterialConsumeProvider> doctorMaterialConsumeProviders) {
-        Double amount = 0.0;
-        for (int i = 0; i < doctorMaterialConsumeProviders.size(); i++) {
-            if (doctorMaterialConsumeProviders.get(i).getExtra() != null && doctorMaterialConsumeProviders.get(i).getExtraMap().containsKey("consumePrice")) {
-                List<Map<String, Object>> priceCompose = (ArrayList) doctorMaterialConsumeProviders.get(i).getExtraMap().get("consumePrice");
-                for (Map<String, Object> eachPrice : priceCompose) {
-                    Long unitPrice = Long.valueOf(eachPrice.get("unitPrice").toString());
-                    Double count = Double.valueOf(eachPrice.get("count").toString());
-                    amount += unitPrice * count;
-                }
-            } else {
-                Long unitPrice = doctorMaterialConsumeProviders.get(i).getUnitPrice();
-                Double count = doctorMaterialConsumeProviders.get(i).getEventCount();
-                amount += unitPrice * count;
-            }
-        }
-        return amount;
     }
 
     /**

@@ -81,7 +81,6 @@ import io.terminus.doctor.event.manager.DoctorGroupReportManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -91,6 +90,7 @@ import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
+import io.terminus.doctor.move.job.DoctorGroupBatchSummaryManager;
 import io.terminus.doctor.move.model.DoctorSowFarrowWeight;
 import io.terminus.doctor.move.model.Proc_InventoryGain;
 import io.terminus.doctor.move.model.SowOutFarmSoon;
@@ -174,6 +174,8 @@ public class DoctorMoveDataService {
     private DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     @Autowired
     private DoctorPigTypeStatisticDao doctorPigTypeStatisticDao;
+    @Autowired
+    private DoctorGroupBatchSummaryManager groupBatchSummaryManager;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -246,22 +248,11 @@ public class DoctorMoveDataService {
     }
 
     /**
-     * 已关闭的猪群生成批次总结
+     * 猪群生成批次总结
      */
-    @Transactional
     public void createClosedGroupSummary(Long farmId) {
-        DoctorGroupSearchDto search = new DoctorGroupSearchDto();
-        search.setFarmId(farmId);
-        search.setStatus(DoctorGroup.Status.CLOSED.getValue());
-        List<DoctorGroup> groups = doctorGroupDao.findBySearchDto(search);
-        groups.forEach(group -> {
-            DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
-            Double frcFeed = RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, group.getId(), null, null), 0D);
-            Response<DoctorGroupBatchSummary> result = doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack), frcFeed);
-            if (result.isSuccess() && result.getResult() != null) {
-                doctorGroupBatchSummaryWriteService.createGroupBatchSummary(result.getResult());
-            }
-        });
+        List<DoctorGroup> groups = doctorGroupDao.findByFarmId(farmId);
+        groups.forEach(group -> groupBatchSummaryManager.createGroupSummary(group));
     }
 
     /**
