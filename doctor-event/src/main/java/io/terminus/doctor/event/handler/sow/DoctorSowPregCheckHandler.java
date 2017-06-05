@@ -48,9 +48,11 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
                         || Objects.equals(fromTrack.getStatus(), PigStatus.Farrow.getKey())
                 ,"pig.status.failed", PigEvent.from(executeEvent.getType()).getName(), PigStatus.from(fromTrack.getStatus()).getName());
         DoctorPregChkResultDto pregChkResultDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorPregChkResultDto.class);
-        if (Objects.equals(executeEvent.getPregCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
-            expectTrue(notNull(pregChkResultDto.getAbortionReasonId()), "liuchan.reason.not.null", pregChkResultDto.getPigCode());
-        }
+
+        // TODO: 17/6/1 流程原因逻辑变动为非必填 
+//        if (Objects.equals(executeEvent.getPregCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
+//            expectTrue(notNull(pregChkResultDto.getAbortionReasonId()), "liuchan.reason.not.null", pregChkResultDto.getPigCode());
+//        }
         if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
             checkCanPregCheckResult(fromTrack.getStatus(), pregChkResultDto.getCheckResult(), pregChkResultDto.getPigCode());
         }

@@ -1237,6 +1237,16 @@
         AND parity = #{parity}
     </select>
 
+    <select id="getWeanEventByParity" parameterType="map" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        status = 1
+        AND type = 16
+        AND pig_id = #{pigId}
+        AND parity = #{parity}
+    </select>
+
     <select id="getLastStatusEventBeforeEventAt" parameterType="map" resultMap="DoctorPigEventMap">
         SELECT <include refid="cols_all" />
         FROM <include refid="tb"/>
@@ -1315,6 +1325,7 @@
         WHERE
         pig_id = #{pigId}
         AND event_source = 5
+        AND   status = 1
     </delete>
 
     <update id="updateIncludeNull" parameterType="DoctorPigEvent">
@@ -1423,6 +1434,7 @@
         FROM
         <include refid="tb"/>
         where pig_id = #{pigId}
+        AND   status = 1
     </select>
 
     <select id="findUnWeanCountByParity" parameterType="map" resultType="int">
@@ -1433,6 +1445,20 @@
         )
         from doctor_pig_events
         where pig_id  = #{pigId}
-        and parity = #{parity};
+        and parity = #{parity}
+        AND   status = 1
+    </select>
+
+    <select id="getFirstMatingBeforePregCheck" parameterType="map" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        status = 1
+        AND pig_id = #{pigId}
+        AND parity = #{parity}
+        AND id &lt; #{id}
+        AND type = 9
+        AND current_mating_count = 1
+        ORDER by id desc limit 1
     </select>
 </mapper>

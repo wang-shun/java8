@@ -65,7 +65,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         if (Objects.equals(weanDto.getFarrowingLiveCount(), 0) && !Objects.equals(weanDto.getPartWeanAvgWeight(), 0d)) {
             throw new InvalidException("wean.avg.weight.not.zero", weanDto.getPigCode());
         }
-        if (!Objects.equals(weanDto.getFarrowingLiveCount(), 0) && (weanDto.getPartWeanAvgWeight() < 3 || weanDto.getPartWeanAvgWeight() > 9)) {
+        if (!Objects.equals(weanDto.getFarrowingLiveCount(), 0) && weanDto.getPartWeanAvgWeight() > 9) {
             throw new InvalidException("wean.avg.weight.range.error", weanDto.getPigCode());
         }
     }
