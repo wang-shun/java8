@@ -1238,6 +1238,10 @@ alter table doctor_boar_monthly_reports add column `boar_type` varchar(32) defau
 alter table doctor_range_reports add column `fatten_feed_conversion` double default null comment '育肥料肉比' after `mate_in_seven`;
 alter table doctor_range_reports add column `nursery_feed_conversion` double default null comment '育肥料肉比' after `mate_in_seven`;
 
+
+-- 2017-06-01
+alter table doctor_feed_formulas drop index feed_id ;
+
 -- 2017-06-05 猪群批次总结
 alter table doctor_group_batch_summaries add column `vaccine_amount` double default null comment '疫苗金额' after `updated_at`;
 alter table doctor_group_batch_summaries add column `medicine_amount` double default null comment '药品金额' after `vaccine_amount`;
