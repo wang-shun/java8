@@ -42,33 +42,34 @@ public class DoctorGroupBatchSummaryManager {
 
     public void createAllGroupSummary() {
         List<DoctorGroup> groups = doctorGroupDao.listAll();
-        groups.forEach(group -> {
-            try {
-                DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
-                Double frcFeed = RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, group.getId(), null, null), 0D);
-                Response<DoctorGroupBatchSummary> result = doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack), frcFeed);
-                if (result.isSuccess() && result.getResult() != null) {
-                    DoctorGroupBatchSummary s = result.getResult();
-                    List<DoctorMaterialConsumeProvider> consumeProviders = Lists.newArrayList();
-                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,1L,null,null));
-                    s.setFeedAmount(getMaterialAmount(consumeProviders));
-                    s.setFendNumber(getMaterialNumber(consumeProviders));
-                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,2L,null,null));
-                    s.setMedicineAmount(getMaterialAmount(consumeProviders));
-                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,3L,null,null));
-                    s.setVaccineAmount(getMaterialAmount(consumeProviders));
-                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,4L,null,null));
-                    s.setMedicineAmount(getMaterialAmount(consumeProviders));
-                    consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,5L,null,null));
-                    s.setConsumablesAmount(getMaterialAmount(consumeProviders));
+        groups.forEach(this::createGroupSummary);
+    }
 
-                    doctorGroupBatchSummaryWriteService.createGroupBatchSummary(s);
-                }
-            } catch (Exception e) {
-                log.error("create.group.summary.failed, groupId:{}, cause:{}", group.getId(), Throwables.getStackTraceAsString(e));
+    public void createGroupSummary(DoctorGroup group) {
+        try {
+            DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
+            Double frcFeed = RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, group.getId(), null, null), 0D);
+            Response<DoctorGroupBatchSummary> result = doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack), frcFeed);
+            if (result.isSuccess() && result.getResult() != null) {
+                DoctorGroupBatchSummary s = result.getResult();
+                List<DoctorMaterialConsumeProvider> consumeProviders = Lists.newArrayList();
+                consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,1L,null,null));
+                s.setFeedAmount(getMaterialAmount(consumeProviders));
+                s.setFendNumber(getMaterialNumber(consumeProviders));
+                consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,2L,null,null));
+                s.setMedicineAmount(getMaterialAmount(consumeProviders));
+                consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,3L,null,null));
+                s.setVaccineAmount(getMaterialAmount(consumeProviders));
+                consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,4L,null,null));
+                s.setMedicineAmount(getMaterialAmount(consumeProviders));
+                consumeProviders = RespHelper.or500(doctorMaterialConsumeProviderReadService.findMaterialByGroupId(s.getFarmId(),s.getGroupId(),null,null,null,null,5L,null,null));
+                s.setConsumablesAmount(getMaterialAmount(consumeProviders));
+
+                doctorGroupBatchSummaryWriteService.createGroupBatchSummary(s);
             }
-
-        });
+        } catch (Exception e) {
+            log.error("create.group.summary.failed, groupId:{}, cause:{}", group.getId(), Throwables.getStackTraceAsString(e));
+        }
     }
 
     private static Double getMaterialNumber(List<DoctorMaterialConsumeProvider> doctorMaterialConsumeProviders) {
