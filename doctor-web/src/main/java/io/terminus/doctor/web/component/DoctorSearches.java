@@ -5,7 +5,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sun.org.apache.xpath.internal.Arg;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
@@ -125,7 +124,10 @@ public class DoctorSearches {
     }
 
     @RequestMapping(value = "/suggest/event", method = RequestMethod.GET)
-    public List<DoctorSuggestPig> suggestPigsByEvent(@RequestParam Long farmId, @RequestParam Integer eventType, @RequestParam(required = false) String pigCode, @RequestParam Integer sex) {
+    public List<DoctorSuggestPig> suggestPigsByEvent(@RequestParam Long farmId,
+                                                     @RequestParam Integer eventType,
+                                                     @RequestParam(required = false) String pigCode,
+                                                     @RequestParam Integer sex) {
         return RespHelper.or500(doctorPigEventReadService.suggestPigsByEvent(eventType, farmId, pigCode, sex));
     }
     /**

@@ -1237,3 +1237,11 @@ alter table doctor_boar_monthly_reports add column `boar_type` varchar(32) defau
 -- 2017-05-27
 alter table doctor_range_reports add column `fatten_feed_conversion` double default null comment '育肥料肉比' after `mate_in_seven`;
 alter table doctor_range_reports add column `nursery_feed_conversion` double default null comment '育肥料肉比' after `mate_in_seven`;
+
+-- 2017-06-05 猪群批次总结
+alter table doctor_group_batch_summaries add column `vaccine_amount` double default null comment '疫苗金额' after `out_cost`;
+alter table doctor_group_batch_summaries add column `medicine_amount` double default null comment '药品金额' after `vaccine_amount`;
+alter table doctor_group_batch_summaries add column `consumables_amount` double default null comment '易耗品金额' after `medicine_amount`;
+alter table doctor_group_batch_summaries add column `fend_number` double default null comment '饲料金额' after `consumables_amount`;
+alter table doctor_group_batch_summaries add column `feed_amount` double default null comment '饲料数量' after `fend_number`;
+
