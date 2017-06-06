@@ -91,8 +91,8 @@ public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPi
         }
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto2));
         if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
-            doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
-                    changeDto2.getEntryCountChange(), changeDto2.getPhCountChange(), changeDto2.getCfCountChange());
+            doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt())
+                    , changeDto2.getEntryCountChange(), changeDto2.getPhCountChange(), changeDto2.getCfCountChange());
         } else {
             doctorDailyPigDao.updateDailyBoarPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()), changeDto2.getEntryCountChange());
         }
@@ -103,9 +103,9 @@ public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPi
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
         if (Objects.equals(changeDto.getPigSex(), DoctorPig.PigSex.SOW.getKey())) {
            if (Objects.equals(changeDto.getBarnType(), PigType.DELIVER_SOW.getValue())) {
-               oldDailyPig.setSowCfIn(EventUtil.plusInt(oldDailyPig.getSowCfIn(), changeDto.getEntryCountChange()));
                oldDailyPig.setSowCf(EventUtil.plusInt(oldDailyPig.getSowCf(), changeDto.getEntryCountChange()));
                oldDailyPig.setSowCfEnd(EventUtil.plusInt(oldDailyPig.getSowCfEnd(), changeDto.getEntryCountChange()));
+               oldDailyPig.setSowCfInFarmIn(EventUtil.plusInt(oldDailyPig.getSowCfInFarmIn(), changeDto.getEntryCountChange()));
            } else {
                oldDailyPig.setSowPh(EventUtil.plusInt(oldDailyPig.getSowPh(), changeDto.getEntryCountChange()));
                oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getEntryCountChange()));

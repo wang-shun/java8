@@ -106,6 +106,10 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
         DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
         doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
         updateDailyGroupLiveStock(oldGroupEvent.getGroupId(), getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
+
+        Integer weanChangeCount = oldGroupEvent.getQuantity();
+        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(oldGroupEvent.getGroupId()
+                , oldGroupEvent.getEventAt(), 0, weanChangeCount);
     }
 
     @Override
@@ -118,6 +122,10 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
         DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
         doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
         updateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
+
+        Integer weanChangeCount = - newInput.getQuantity();
+        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(newGroupEvent.getGroupId()
+                , eventAt, 0, weanChangeCount);
     }
 
     @Override

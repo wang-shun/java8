@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.getAfterDay;
 
 /**
@@ -110,9 +111,17 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
                 && !Objects.equals(oldPigEvent.getBoarType(), BoarEntryType.HGZ.getKey())) {
             return;
         }
+        //默认普通进场
+        Integer entrySource = 1;
+        if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())
+                && notNull(oldPigEvent.getRelGroupEventId())) {
+            entrySource = 2;
+        }
+
         DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .pigSex(oldPigEvent.getKind())
+                .entrySource(entrySource)
                 .entryCountChange(-1)
                 .phCountChange(-1)
                 .build();
@@ -132,9 +141,16 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
                 && !Objects.equals(newDto.getBoarType(), BoarEntryType.HGZ.getKey())) {
             return;
         }
+        //默认普通进场
+        Integer entrySource = 1;
+        if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())
+                && notNull(oldPigEvent.getRelGroupEventId())) {
+            entrySource = 2;
+        }
         DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), inputDto.eventAt());
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .pigSex(oldPigEvent.getKind())
+                .entrySource(entrySource)
                 .entryCountChange(1)
                 .phCountChange(1)
                 .build();
@@ -150,15 +166,21 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
-        if (Objects.equals(changeDto.getPigSex(), DoctorPig.PigSex.SOW.getKey())) {
-            oldDailyPig.setSowIn(EventUtil.plusInt(oldDailyPig.getSowIn(), changeDto.getEntryCountChange()));
-            oldDailyPig.setSowEnd(EventUtil.plusInt(oldDailyPig.getSowEnd(), changeDto.getEntryCountChange()));
-            oldDailyPig.setSowPh(EventUtil.plusInt(oldDailyPig.getSowPh(), changeDto.getEntryCountChange()));
-            oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getEntryCountChange()));
-            oldDailyPig.setSowPhInFarmIn(EventUtil.plusInt(oldDailyPig.getSowPhInFarmIn(), changeDto.getEntryCountChange()));
-        } else {
+
+        if (Objects.equals(changeDto.getPigSex(), DoctorPig.PigSex.BOAR.getKey())) {
             oldDailyPig.setBoarIn(EventUtil.plusInt(oldDailyPig.getBoarIn(), changeDto.getEntryCountChange()));
             oldDailyPig.setBoarEnd(EventUtil.plusInt(oldDailyPig.getBoarEnd(), changeDto.getEntryCountChange()));
+            return oldDailyPig;
+        }
+
+        oldDailyPig.setSowIn(EventUtil.plusInt(oldDailyPig.getSowIn(), changeDto.getEntryCountChange()));
+        oldDailyPig.setSowEnd(EventUtil.plusInt(oldDailyPig.getSowEnd(), changeDto.getEntryCountChange()));
+        oldDailyPig.setSowPh(EventUtil.plusInt(oldDailyPig.getSowPh(), changeDto.getEntryCountChange()));
+        oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getEntryCountChange()));
+        if (changeDto.getEntrySource() == 1) {
+            oldDailyPig.setSowPhInFarmIn(EventUtil.plusInt(oldDailyPig.getSowPhInFarmIn(), changeDto.getEntryCountChange()));
+        } else {
+            oldDailyPig.setSowPhReserveIn(EventUtil.plusInt(oldDailyPig.getSowPhReserveIn(), changeDto.getEntryCountChange()));
         }
         return oldDailyPig;
     }

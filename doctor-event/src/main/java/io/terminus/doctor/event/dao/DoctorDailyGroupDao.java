@@ -151,6 +151,19 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
      * @return
      */
     public List<DoctorDailyGroup> findAfterSumAt(Long groupId, String sumAt) {
-        return getSqlSession().selectList(sqlId("findAfterSumAt"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt));
+        return getSqlSession().selectList(sqlId("findAfterSumAt")
+                , ImmutableMap.of("groupId", groupId, "sumAt", sumAt));
+    }
+
+    /**
+     * 更新某日包括某日之后的哺乳与断奶数
+     * @param groupId 猪群id
+     * @param sumAt 日期
+     * @param unweanChangeCount 哺乳数变化量
+     * @param weanChangeCount 断奶数变化量
+     */
+    public void updateUnweanAndWeanLiveStock(Long groupId, Date sumAt, Integer unweanChangeCount, Integer weanChangeCount) {
+        getSqlSession().update(sqlId("updateUnweanAndWeanLiveStock"), ImmutableMap.of("groupId", groupId
+                , "sumAt", sumAt, "unweanChangeCount", unweanChangeCount, "weanChangeCount", weanChangeCount));
     }
 }

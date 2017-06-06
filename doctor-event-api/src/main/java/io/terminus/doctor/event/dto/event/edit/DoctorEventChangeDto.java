@@ -57,6 +57,12 @@ public class DoctorEventChangeDto {
      */
 
     private Integer entryCountChange;
+
+    /**
+     * 进场来源。1.普通进场、2.后备猪进场(更新报表参数)
+     */
+    private Integer entrySource;
+
     /**
      * 新进场来源
      */

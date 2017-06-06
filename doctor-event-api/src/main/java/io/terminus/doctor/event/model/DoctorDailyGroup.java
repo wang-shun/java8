@@ -46,6 +46,11 @@ public class DoctorDailyGroup implements Serializable {
      * 断奶数量
      */
     private Integer weanCount;
+
+    /**
+     * 日断奶数
+     */
+    private Integer dayWeanCount;
     
     /**
      * 未断奶数量
@@ -61,6 +66,16 @@ public class DoctorDailyGroup implements Serializable {
      * 不同类型猪群转入，外部转入
      */
     private Integer outerIn;
+
+    /**
+     * 分娩转入
+     */
+    private Integer farrowingIn;
+
+    /**
+     * 其他转入
+     */
+    private Integer OtherIn;
     
     /**
      * 销售

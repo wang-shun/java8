@@ -53,7 +53,7 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
     }
 
     /**
-     * 更新日期之后每日母猪存栏
+     * 更新日期(包括更新日期)之后每日母猪存栏
      * @param farmId 猪群id
      * @param sumAt 日期
      * @param liveChangeCount 存栏变动数量
@@ -62,17 +62,35 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
      *
      */
     public void updateDailySowPigLiveStock(Long farmId, Date sumAt, Integer liveChangeCount, Integer phChangeCount, Integer cfChangeCount) {
-        getSqlSession().update(sqlId("updateDailySowPigLiveStock"),
-                MapBuilder.of().put("farmId", farmId).put("sumAt", DateUtil.toDateString(sumAt)).put("liveChangeCount", liveChangeCount).put("phChangeCount", phChangeCount).put("cfChangeCount", cfChangeCount).map());
+        getSqlSession().update(sqlId("updateDailySowPigLiveStock"), MapBuilder.of().put("farmId", farmId)
+                .put("sumAt", DateUtil.toDateString(sumAt)).put("liveChangeCount", liveChangeCount)
+                .put("phChangeCount", phChangeCount).put("cfChangeCount", cfChangeCount).map());
     }
 
     /**
-     * 更新日期之后每日公猪存栏
+     * 更新日期(包括更新日期)之后每日公猪存栏
      * @param farmId 猪群id
      * @param sumAt 日期
      * @param changeCount 变动数量
      */
     public void updateDailyBoarPigLiveStock(Long farmId, Date sumAt, Integer changeCount) {
-        getSqlSession().update(sqlId("updateDailyBoarPigLiveStock"), ImmutableMap.of("farmId", farmId, "sumAt", DateUtil.toDateString(sumAt), "changeCount", changeCount));
+        getSqlSession().update(sqlId("updateDailyBoarPigLiveStock"), ImmutableMap.of("farmId"
+                , farmId, "sumAt", DateUtil.toDateString(sumAt), "changeCount", changeCount));
+    }
+
+
+    /**
+     * 更新日期(包括更新日期)之后配怀舍个状态母猪数
+     * @param farmId 猪场id
+     * @param sumAt 日期
+     * @param phMatingChangeCount 配种母猪变化量
+     * @param phKonghuaiChangeCount 空怀母猪变化量
+     * @param phPregnantChangeCount 怀孕母猪变化量
+     */
+    public void updateDailyPhStatusLiveStock(Long farmId, Date sumAt, Integer phMatingChangeCount
+            , Integer phKonghuaiChangeCount, Integer phPregnantChangeCount) {
+         getSqlSession().update(sqlId("updateDailyPhStatusLiveStock"), ImmutableMap.of("farmId"
+                , farmId, "sumAt", DateUtil.toDateString(sumAt), "phMatingChangeCount", phMatingChangeCount
+                , "phKonghuaiChangeCount", phKonghuaiChangeCount, "phPregnantChangeCount", phPregnantChangeCount));
     }
 }

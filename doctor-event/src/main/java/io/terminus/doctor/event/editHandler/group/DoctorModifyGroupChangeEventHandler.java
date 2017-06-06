@@ -161,11 +161,21 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .quantityChange(EventUtil.minusInt(0, oldInput.getQuantity()))
                 .changeTypeId(oldInput.getChangeTypeId())
-                .isSowTrigger(notNull(oldGroupEvent.getSowId()))
                 .build();
         DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
         doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
         updateDailyGroupLiveStock(oldGroupEvent.getGroupId(), getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
+
+        Integer unweanChangeCount = 0;
+        Integer weanChangeCount = 0;
+        if (notNull(oldGroupEvent.getSowId())) {
+            unweanChangeCount = oldGroupEvent.getQuantity();
+        } else {
+            weanChangeCount = oldGroupEvent.getQuantity();
+        }
+        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(oldGroupEvent.getGroupId()
+                , oldGroupEvent.getEventAt(), unweanChangeCount, weanChangeCount);
+
     }
 
     @Override
@@ -175,21 +185,26 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .quantityChange(newInput.getQuantity())
                 .changeTypeId(newInput.getChangeTypeId())
-                .isSowTrigger(notNull(newGroupEvent.getSowId()))
                 .build();
         DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
         doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
         updateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
 
+        Integer unweanChangeCount = 0;
+        Integer weanChangeCount = 0;
+        if (notNull(newGroupEvent.getSowId())) {
+            unweanChangeCount = - newInput.getQuantity();
+        } else {
+            weanChangeCount =  - newInput.getQuantity();
+        }
+        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(newGroupEvent.getGroupId()
+                , eventAt, unweanChangeCount, weanChangeCount);
     }
 
     @Override
     protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
         oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
         updateChange(oldDailyGroup, changeDto.getQuantityChange(), changeDto.getChangeTypeId());
-        if (changeDto.getIsSowTrigger()) {
-            oldDailyGroup.setUnweanCount(EventUtil.minusInt(oldDailyGroup.getUnweanCount(), changeDto.getQuantityChange()));
-        }
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
         return oldDailyGroup;
     }
