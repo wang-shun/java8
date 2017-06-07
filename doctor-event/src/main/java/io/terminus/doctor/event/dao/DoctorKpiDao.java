@@ -889,6 +889,28 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 猪群时间段内分娩转入
+     * @param groupId 猪群id
+     * @param startAt 开始时间
+     * @param endAt 结束时间
+     * @return 分娩转入数量
+     */
+    public int getGroupFarrowIn(Long groupId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getGroupFarrowIn"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 猪群时间段内断奶数量
+     * @param groupId 猪群id
+     * @param startAt 开始时间
+     * @param endAt 结束时间
+     * @return 分娩转入数量
+     */
+    public int getGroupDayWeanCount(Long groupId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getGroupDayWeanCount"), ImmutableMap.of("groupId", groupId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 具体某个猪群外部转入
      * @param groupId
      * @param startAt
@@ -1150,6 +1172,60 @@ public class DoctorKpiDao {
 
     public Double getFattenFeedConversion(Long farmId, Date startAt, Date endAt) {
         return getFeedConversion(farmId, startAt, endAt, PigType.FATTEN_PIG.getValue());
+    }
+
+    /**
+     * 获取某日的已配种母猪数
+     * @param farmId 猪场id
+     * @param startAt 日期
+     * @return 已配种母猪数
+     */
+    public Integer getSowMatingCount(Long farmId, Date startAt) {
+        return sqlSession.selectOne(sqlId("getSowMatingCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt));
+    }
+
+    /**
+     * 获取某日的空怀母猪数
+     * @param farmId 猪场id
+     * @param startAt 日期
+     * @return 空怀母猪数
+     */
+    public Integer getSowKonghuaiCount(Long farmId, Date startAt) {
+        return sqlSession.selectOne(sqlId("getSowKonghuaiCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt));
+    }
+
+    /**
+     * 获取某日的怀孕母猪数
+     * @param farmId 猪场id
+     * @param startAt 日期
+     * @return 怀孕母猪数
+     */
+    public Integer getSowPregnantCount(Long farmId, Date startAt) {
+        return sqlSession.selectOne(sqlId("getSowPregnantCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt));
+    }
+
+    /**
+     * 获取配怀后备转入
+     * @param farmId 猪场id
+     * @param startAt 开始时间
+     * @param endAt 结束时间
+     * @return 后备转入数量
+     */
+    public Integer getSowPhReserveIn(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSowPhReserveIn"), ImmutableMap.of("farmId", farmId
+                , "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 获取转场转入产房
+     * @param farmId 猪场id
+     * @param startAt 开始时间
+     * @param endAt 结束时间
+     * @return 转入数量
+     */
+    public Integer getSowCfInFarmIn(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSowCfInFarmIn"), ImmutableMap.of("farmId", farmId
+                , "startAt", startAt, "endAt", endAt));
     }
 
     private Double getFeedConversion(Long farmId, Date startAt, Date endAt, int type) {

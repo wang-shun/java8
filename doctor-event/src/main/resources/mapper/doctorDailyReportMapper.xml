@@ -20,7 +20,6 @@
         <result column="sow_chg_farm" property="sowChgFarm"/>
         <result column="sow_end" property="sowEnd"/>
         <result column="sow_ph_start" property="sowPhStart"/>
-        <result column="sow_mating_count" property="sowMatingCount"/>
         <result column="sow_ph_mating" property="sowPhMating"/>
         <result column="sow_ph_konghuai" property="sowPhKonghuai"/>
         <result column="sow_ph_pregnant" property="sowPhPregnant"/>
@@ -137,7 +136,6 @@
         sow_chg_farm,
         sow_end,
         sow_ph_start,
-        sow_mating_count,
         sow_ph_mating,
         sow_ph_konghuai,
         sow_ph_pregnant,
@@ -246,7 +244,6 @@
         #{sowChgFarm},
         #{sowEnd},
         #{sowPhStart},
-        #{sowMatingCount},
         #{sowPhMating},
         #{sowPhKonghuai},
         #{sowPhPregnant},
@@ -355,7 +352,6 @@
         <if test="sowOtherOut != null">AND sow_other_out = #{sowOtherOut}</if>
         <if test="sowEnd != null">AND sow_end = #{sowEnd}</if>
         <if test="sowPhStart != null">AND sow_ph_start = #{sowPhStart}</if>
-        <if test="sowMatingCount != null">AND sow_mating_count = #{sowMatingCount}</if>
         <if test="sowPhMating != null">AND sow_ph_mating = #{sowPhMating}</if>
         <if test="sowPhKonghuai != null">AND sow_ph_konghuai = #{sowPhKonghuai}</if>
         <if test="sowPhPregnant != null">AND sow_ph_pregnant = #{sowPhPregnant}</if>
@@ -471,7 +467,6 @@
             <if test="sowChgFarm != null">sow_chg_farm = #{sowChgFarm},</if>
             <if test="sowEnd != null">sow_end = #{sowEnd},</if>
             <if test="sowPhStart != null">sow_ph_start = #{sowPhStart},</if>
-            <if test="sowMatingCount != null">sow_mating_count = #{sowMatingCount},</if>
             <if test="sowPhMating != null">sow_ph_mating = #{sowPhMating},</if>
             <if test="sowPhKonghuai != null">sow_ph_konghuai = #{sowPhKonghuai},</if>
             <if test="sowPhPregnant != null">sow_ph_pregnant = #{sowPhPregnant},</if>

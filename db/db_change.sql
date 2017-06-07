@@ -1255,7 +1255,6 @@ alter table doctor_daily_reports add column sow_cf_in_farm_in int(11) default nu
 alter table doctor_daily_reports add column sow_ph_mating int(11) default null comment '配怀舍配种母猪' after `sow_cf_in_farm_in`;
 alter table doctor_daily_reports add column sow_ph_konghuai int(11) default null comment '配怀舍空怀母猪' after `sow_ph_mating`;
 alter table doctor_daily_reports add column sow_ph_pregnant int(11) default null comment '配怀舍怀孕母猪' after `sow_ph_konghuai`;
-alter table doctor_daily_reports add column sow_mating_count int(11) default null comment '配种数' after `sow_ph_pregnant`;
 
 alter table doctor_daily_groups add column day_wean_count int(11) default null comment '日断奶数' after `updated_at`;
 alter table doctor_daily_groups add column farrowing_in int(11) default null comment '分娩转入' after `day_wean_count`;

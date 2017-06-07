@@ -117,34 +117,6 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
     }
 
     @Override
-    public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
-        DoctorEventChangeDto changeDto;
-        Integer matingChangeCount;
-        Integer farrowChangCount;
-        if (Objects.equals(newPigEvent.getType(), PigEvent.TO_FARROWING.getKey())) {
-            changeDto = DoctorEventChangeDto.builder()
-                    .chgLocationChangeCount(1)
-                    .chgLocationType(PigEvent.TO_FARROWING.getKey())
-                    .build();
-            matingChangeCount = -1;
-            farrowChangCount = 1;
-        } else if (Objects.equals(newPigEvent.getType(), PigEvent.TO_MATING.getKey())) {
-            changeDto = DoctorEventChangeDto.builder()
-                    .chgLocationChangeCount(1)
-                    .chgLocationType(PigEvent.TO_MATING.getKey())
-                    .build();
-            matingChangeCount = 1;
-            farrowChangCount = -1;
-        } else {
-            return;
-        }
-        DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
-        doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
-                0, matingChangeCount, farrowChangCount);
-    }
-
-    @Override
     public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
         DoctorEventChangeDto changeDto;
         Integer matingChangeCount;
@@ -156,6 +128,8 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                     .build();
             matingChangeCount = -1;
             farrowChangCount = 1;
+            doctorDailyPigDao.updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+                    , 0, 0, 1);
         } else if (Objects.equals(oldPigEvent.getType(), PigEvent.TO_MATING.getKey())) {
             changeDto = DoctorEventChangeDto.builder()
                     .chgLocationChangeCount(-1)
@@ -169,6 +143,40 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
         DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
         doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()),
+                0, matingChangeCount, farrowChangCount);
+    }
+
+    @Override
+    public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
+        DoctorEventChangeDto changeDto;
+        Integer matingChangeCount;
+        Integer farrowChangCount;
+        if (Objects.equals(newPigEvent.getType(), PigEvent.TO_FARROWING.getKey())) {
+            changeDto = DoctorEventChangeDto.builder()
+                    .chgLocationChangeCount(1)
+                    .chgLocationType(PigEvent.TO_FARROWING.getKey())
+                    .build();
+            matingChangeCount = -1;
+            farrowChangCount = 1;
+            doctorDailyPigDao.updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
+                    , 0, 0, -1);
+        } else if (Objects.equals(newPigEvent.getType(), PigEvent.TO_MATING.getKey())) {
+            changeDto = DoctorEventChangeDto.builder()
+                    .chgLocationChangeCount(1)
+                    .chgLocationType(PigEvent.TO_MATING.getKey())
+                    .build();
+            matingChangeCount = 1;
+            farrowChangCount = -1;
+            if (Objects.equals(newPigEvent.getPigStatusBefore(), PigStatus.KongHuai.getKey())) {
+                doctorDailyPigDao.updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
+                        , 0, 1, 0);
+            }
+        } else {
+            return;
+        }
+        DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
+        doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
+        doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
                 0, matingChangeCount, farrowChangCount);
     }
 

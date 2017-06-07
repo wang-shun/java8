@@ -63,7 +63,7 @@ public class DoctorDailyGroup implements Serializable {
     private Integer innerIn;
     
     /**
-     * 不同类型猪群转入，外部转入
+     * 不同类型猪群转入，外部转入(分娩转入+其他转入)
      */
     private Integer outerIn;
 
@@ -71,11 +71,6 @@ public class DoctorDailyGroup implements Serializable {
      * 分娩转入
      */
     private Integer farrowingIn;
-
-    /**
-     * 其他转入
-     */
-    private Integer OtherIn;
     
     /**
      * 销售

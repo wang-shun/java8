@@ -149,7 +149,6 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
     @Override
     protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
-        oldDailyPig.setSowMatingCount(changeDto.getDoctorMateTypeCountChange());
         DoctorMatingType matingType = DoctorMatingType.from(changeDto.getDoctorMateType());
         Checks.expectNotNull(matingType, "mating.type.is.null");
         switch (matingType) {

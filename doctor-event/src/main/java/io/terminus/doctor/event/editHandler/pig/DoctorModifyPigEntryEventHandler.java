@@ -177,11 +177,10 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
         oldDailyPig.setSowEnd(EventUtil.plusInt(oldDailyPig.getSowEnd(), changeDto.getEntryCountChange()));
         oldDailyPig.setSowPh(EventUtil.plusInt(oldDailyPig.getSowPh(), changeDto.getEntryCountChange()));
         oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getEntryCountChange()));
-        if (changeDto.getEntrySource() == 1) {
-            oldDailyPig.setSowPhInFarmIn(EventUtil.plusInt(oldDailyPig.getSowPhInFarmIn(), changeDto.getEntryCountChange()));
-        } else {
+        if (changeDto.getEntrySource() == 2) {
             oldDailyPig.setSowPhReserveIn(EventUtil.plusInt(oldDailyPig.getSowPhReserveIn(), changeDto.getEntryCountChange()));
         }
+        oldDailyPig.setSowPhInFarmIn(EventUtil.plusInt(oldDailyPig.getSowPhInFarmIn(), changeDto.getEntryCountChange()));
         return oldDailyPig;
     }
 }
