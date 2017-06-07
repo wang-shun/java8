@@ -1228,6 +1228,7 @@ public class DoctorKpiDao {
                 , "startAt", startAt, "endAt", endAt));
     }
 
+
     private Double getFeedConversion(Long farmId, Date startAt, Date endAt, int type) {
         Double feed = sqlSession.selectOne(sqlId("getFeedConsume"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt, "type", type));
         Double weight = sqlSession.selectOne(sqlId("getWeightGain"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt, "type", type));

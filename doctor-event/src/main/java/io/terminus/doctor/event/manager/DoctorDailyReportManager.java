@@ -167,9 +167,9 @@ public class DoctorDailyReportManager {
         doctorDailyReport.setSowPhSale(EventUtil.minusInt(doctorDailyReport.getSowSale(), doctorDailyReport.getSowCfSale()));
         doctorDailyReport.setSowPhOtherOut(EventUtil.minusInt(doctorDailyReport.getSowOtherOut(), doctorDailyReport.getSowCfOtherOut()));
         doctorDailyReport.setSowPhChgFarm(EventUtil.minusInt(doctorDailyReport.getSowChgFarm(), doctorDailyReport.getSowCfChgFarm()));
-        doctorDailyReport.setSowPhMating(doctorKpiDao.getSowMatingCount(farmId, startAt));
-        doctorDailyReport.setSowPhKonghuai(doctorKpiDao.getSowKonghuaiCount(farmId, startAt));
-        doctorDailyReport.setSowPhPregnant(doctorKpiDao.getSowPregnantCount(farmId, startAt));
+        doctorDailyReport.setSowPhMating(doctorKpiDao.getSowMatingCount(farmId, endAt));
+        doctorDailyReport.setSowPhKonghuai(doctorKpiDao.getSowKonghuaiCount(farmId, endAt));
+        doctorDailyReport.setSowPhPregnant(doctorKpiDao.getSowPregnantCount(farmId, endAt));
 //        doctorDailyReport.setSowPhEnd(doctorKpiDao.realTimeLiveStockPHSow(farmId, startAt));
         doctorDailyReport.setSowPhEnd(EventUtil.minusInt(doctorDailyReport.getSowEnd(), doctorDailyReport.getSowCfEnd()));
 
