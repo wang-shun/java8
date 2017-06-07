@@ -1228,6 +1228,17 @@ public class DoctorKpiDao {
                 , "startAt", startAt, "endAt", endAt));
     }
 
+    /**
+     * 获取转场转入配怀舍
+     * @param farmId 猪场id
+     * @param startAt 开始时间
+     * @param endAt 结束时间
+     * @return 转入数量
+     */
+    public Integer getSowPhChgFarmIn(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSowPhChgFarmIn"), ImmutableMap.of("farmId", farmId
+                , "startAt", startAt, "endAt", endAt));
+    }
 
     private Double getFeedConversion(Long farmId, Date startAt, Date endAt, int type) {
         Double feed = sqlSession.selectOne(sqlId("getFeedConsume"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt, "type", type));

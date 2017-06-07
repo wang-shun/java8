@@ -24,7 +24,8 @@
         <result column="sow_ph_konghuai" property="sowPhKonghuai"/>
         <result column="sow_ph_pregnant" property="sowPhPregnant"/>
         <result column="sow_ph_in_farm_in" property="sowPhInFarmIn"/>
-        <result column="sow_ph_reserve_In" property="sowPhReserveIn"/>
+        <result column="sow_ph_reserve_in" property="sowPhReserveIn"/>
+        <result column="sow_ph_chg_farm_in" property="sowPhChgFarmIn"/>
         <result column="sow_ph_wean_in" property="sowPhWeanIn"/>
         <result column="sow_ph_dead" property="sowPhDead"/>
         <result column="sow_ph_weed_out" property="sowPhWeedOut"/>
@@ -141,6 +142,7 @@
         sow_ph_pregnant,
         sow_ph_in_farm_in,
         sow_ph_reserve_in,
+        sow_ph_chg_farm_in,
         sow_ph_wean_in,
         sow_ph_dead,
         sow_ph_weed_out,
@@ -249,6 +251,7 @@
         #{sowPhPregnant},
         #{sowPhInFarmIn},
         #{sowPhReserveIn},
+        #{sowPhChgFarmIn},
         #{sowPhWeanIn},
         #{sowPhDead},
         #{sowPhWeedOut},
@@ -357,6 +360,7 @@
         <if test="sowPhPregnant != null">AND sow_ph_pregnant = #{sowPhPregnant}</if>
         <if test="sowPhInFarmIn != null">AND sow_ph_in_farm_in = #{sowPhInFarmIn}</if>
         <if test="sowPhReserveIn != null">AND sow_ph_reserve_in = #{sowPhReserveIn}</if>
+        <if test="sowPhChgFarmIn != null">AND sow_ph_chg_farm_in = #{sowPhChgFarmIn}</if>
         <if test="sowPhWeanIn != null">AND sow_ph_wean_in = #{sowPhWeanIn}</if>
         <if test="sowPhDead != null">AND sow_ph_dead = #{sowPhDead}</if>
         <if test="sowPhWeedOut != null">AND sow_ph_weed_out = #{sowPhWeedOut}</if>
@@ -472,6 +476,7 @@
             <if test="sowPhPregnant != null">sow_ph_pregnant = #{sowPhPregnant},</if>
             <if test="sowPhInFarmIn != null">sow_ph_in_farm_in = #{sowPhInFarmIn},</if>
             <if test="sowPhReserveIn != null">sow_ph_reserve_in = #{sowPhReserveIn},</if>
+            <if test="sowPhChgFarmIn != null">sow_ph_chg_farm_in = #{sowPhChgFarmIn},</if>
             <if test="sowPhWeanIn != null">sow_ph_wean_in = #{sowPhWeanIn},</if>
             <if test="sowPhDead != null">sow_ph_dead = #{sowPhDead},</if>
             <if test="sowPhWeedOut != null">sow_ph_weed_out = #{sowPhWeedOut},</if>

@@ -1251,6 +1251,7 @@ alter table doctor_group_batch_summaries add column `feed_amount` double default
 
 -- 2017-06-06 报表新增字段
 alter table doctor_daily_reports add column sow_ph_reserve_in int(11) default null comment '后备猪转入' after `updated_at`;
+alter table doctor_daily_reports add column sow_ph_chg_farm_in int(11) default null comment '配怀舍转场转入' after `sow_ph_reserve_in`;
 alter table doctor_daily_reports add column sow_cf_in_farm_in int(11) default null comment '产房转场转入' after `sow_ph_reserve_in`;
 alter table doctor_daily_reports add column sow_ph_mating int(11) default null comment '配怀舍配种母猪' after `sow_cf_in_farm_in`;
 alter table doctor_daily_reports add column sow_ph_konghuai int(11) default null comment '配怀舍空怀母猪' after `sow_ph_mating`;

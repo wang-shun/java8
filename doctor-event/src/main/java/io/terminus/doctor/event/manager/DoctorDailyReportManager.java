@@ -159,6 +159,7 @@ public class DoctorDailyReportManager {
 //        doctorDailyReport.setSowPhStart(doctorKpiDao.realTimeLiveStockPHSow(farmId, new DateTime(startAt).minusDays(1).toDate()));
         doctorDailyReport.setSowPhStart(EventUtil.minusInt(doctorDailyReport.getSowStart(), doctorDailyReport.getSowCfStart()));
         doctorDailyReport.setSowPhReserveIn(doctorKpiDao.getSowPhReserveIn(farmId, startAt, endAt));
+        doctorDailyReport.setSowPhChgFarmIn(doctorKpiDao.getSowPhChgFarmIn(farmId, startAt, endAt));
         doctorDailyReport.setSowPhWeanIn(doctorDailyReport.getSowCfWeanOut());
         doctorDailyReport.setSowPhToCf(doctorKpiDao.getMonthlyLiveStockChangeToFarrow(farmId, startAt, endAt));
         doctorDailyReport.setSowPhInFarmIn(doctorKpiDao.getSowPhInFarm(farmId, startAt, endAt));
