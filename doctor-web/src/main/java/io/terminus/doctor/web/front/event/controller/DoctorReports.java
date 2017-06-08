@@ -26,6 +26,7 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorRangeReportReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -88,6 +89,23 @@ public class DoctorReports {
     }
 
     /**
+     * 查询日报猪场时间段内每天的日报,包含指标
+     * @param farmId 猪场id
+     * @param startDate   开始日期 yyyy-MM-dd
+     * @param endDate   结束日期 yyyy-MM-dd
+     * @return 猪场日报表
+     */
+    @RequestMapping(value = "/daily/duration", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<DoctorDailyReportDto> findDailyReportDtoByFarmIdAndSlot(@RequestParam Long farmId,
+                                                                        @RequestParam String startDate,
+                                                                        @RequestParam String endDate) {
+
+        if(DateUtil.toDate(endDate).after(new Date())){
+            endDate = DateUtil.toDateString(new Date());
+        }
+        return RespHelper.or500(doctorDailyReportReadService.findDailyReportDtoByFarmIdAndDuration(farmId, startDate, endDate));
+    }
+    /**
      * 根据farmId和日期查询猪场日报表(缓存方式)
      * @param farmId  猪场id
      * @param startAt 开始时间 yyyy-MM-dd
@@ -113,6 +131,21 @@ public class DoctorReports {
                                                                              @RequestParam(value = "index", required = false) Integer index) {
         return RespHelper.or500(doctorCommonReportReadService.findMonthlyReportTrendByFarmIdAndSumAt(farmId, date, index));
     }
+
+    /**
+     * 根据farmId和日期段查询猪场月报表
+     * @param farmId 猪场id
+     * @param startDate 开始日期 yyyy-MM
+     * @param endDate 结束日期 yyyy-MM
+     * @return 猪场月报表
+     */
+    @RequestMapping(value = "/monthly/duration", method = RequestMethod.GET)
+    public List<DoctorCommonReportTrendDto> findMonthlyReportTrendByFarmIdAndDuration(@RequestParam Long farmId,
+                                                                             @RequestParam String startDate,
+                                                                             @RequestParam String endDate) {
+        return RespHelper.or500(doctorCommonReportReadService.findMonthlyReportTrendByFarmIdAndDuration(farmId, startDate, endDate));
+    }
+
 
     /**
      * 根据farmId和日期查询猪场月报表
@@ -144,7 +177,22 @@ public class DoctorReports {
                                                                             @RequestParam(value = "index", required = false) Integer index) {
         return RespHelper.or500(doctorCommonReportReadService.findWeeklyReportTrendByFarmIdAndSumAt(farmId, year, week, index));
     }
-    
+
+    /**
+     * 根据farmId和周段查询猪场周报表
+     * @param farmId 猪场id
+     * @param year   年份 如2016
+     * @param startWeek 开始周
+     * @param endWeek   结束周
+     * @return 猪场周报报表
+     */
+    @RequestMapping(value = "/weekly/duration", method = RequestMethod.GET)
+    public List<DoctorCommonReportTrendDto> findWeeklyReportTrendByFarmIdAndDuration(@RequestParam Long farmId,
+                                                                                     @RequestParam Integer year,
+                                                                                     @RequestParam Integer startWeek,
+                                                                                     @RequestParam Integer endWeek) {
+        return RespHelper.or500(doctorCommonReportReadService.findWeeklyReportTrendByFarmIdAndDuration(farmId, year, startWeek, endWeek));
+    }
     /**
      * 分页查询猪群批次总结
      * @return 批次总结

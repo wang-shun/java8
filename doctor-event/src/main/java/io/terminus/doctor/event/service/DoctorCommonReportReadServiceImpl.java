@@ -29,6 +29,8 @@ import io.terminus.doctor.event.model.DoctorParityMonthlyReport;
 import io.terminus.doctor.event.model.DoctorRangeReport;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +58,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.nonEmptyMapper();
     private static final int MONTH_INDEX = 12;
     private static final int WEEK_INDEX = 20;
+    private DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM");
 
     private final DoctorParityMonthlyReportDao doctorParityMonthlyReportDao;
     private final DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao;
@@ -116,6 +119,31 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     }
 
     @Override
+    public Response<List<DoctorCommonReportTrendDto>> findMonthlyReportTrendByFarmIdAndDuration(Long farmId, String startDate, String endDate) {
+        try {
+            List<DoctorCommonReportTrendDto> list = Lists.newArrayList();
+            DateTime startTime = DateTime.parse(startDate, formatter);
+            DateTime endTime = DateTime.parse(endDate, formatter);
+
+            while (!startTime.isAfter(endTime)) {
+                String monthStr = startTime.toString(formatter);
+                startTime = startTime.plusMonths(1);
+                DoctorRangeReport report = doctorRangeReportDao.findByRangeReport(farmId, ReportRangeType.MONTH.getValue(), monthStr);
+                if (report == null) {
+                    list.add(failReportTrend(monthStr));
+                    continue;
+                }
+                list.add(new DoctorCommonReportTrendDto(getDoctorCommonReportDto(report), null, null, null));
+            }
+            return Response.ok(list);
+        } catch (Exception e) {
+            log.error("find monthly report by farmId and duration failed, farmId:{}, startDate:{}, endDate:{}, cause:{}",
+                    farmId, startDate, endDate, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.monthly.report.by.farmId.and.duration.failed");
+        }
+    }
+
+    @Override
     public Response<DoctorCommonReportTrendDto> findWeeklyReportTrendByFarmIdAndSumAt(Long farmId, Integer year, Integer week, Integer index) {
         String weekStr = DateUtil.getYearWeek(MoreObjects.firstNonNull(year, DateTime.now().getWeekyear()), MoreObjects.firstNonNull(week, DateTime.now().getWeekOfWeekyear())); //取周一代表一周
         log.info("find weekly report, week is : {}", weekStr);
@@ -141,6 +169,28 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             log.error("find weekly report by farmId and sumAt failed, farmId:{}, week:{}, cause:{}",
                     farmId, week, Throwables.getStackTraceAsString(e));
             return Response.ok(failReportTrend(weekStr));
+        }
+    }
+
+    @Override
+    public Response<List<DoctorCommonReportTrendDto>> findWeeklyReportTrendByFarmIdAndDuration(Long farmId, Integer year, Integer startWeek, Integer endWeek) {
+        try {
+            List<DoctorCommonReportTrendDto> list = Lists.newArrayList();
+            while (startWeek <= endWeek) {
+                String weekStr = DateUtil.getYearWeek(MoreObjects.firstNonNull(year, DateTime.now().getWeekyear()), MoreObjects.firstNonNull(startWeek, DateTime.now().getWeekOfWeekyear())); //取周一代表一周
+                startWeek++;
+                DoctorRangeReport report = doctorRangeReportDao.findByRangeReport(farmId, ReportRangeType.WEEK.getValue(), weekStr);
+                if (report == null) {
+                    list.add(failReportTrend(weekStr));
+                    continue;
+                }
+                list.add(new DoctorCommonReportTrendDto(getDoctorCommonReportDto(report), null, null, null));
+            }
+            return Response.ok(list);
+        } catch (Exception e) {
+            log.error("find weekly report trend by farmId and duration, farmId:{}, year:{}, startWeek:{}, endWeek:{}, cause:{}"
+                    , farmId, year, startWeek, endWeek, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.weekly.report.trend.farmId.and.duration.failed");
         }
     }
 

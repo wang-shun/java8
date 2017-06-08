@@ -48,6 +48,15 @@ public interface DoctorDailyReportReadService {
     Response<DoctorDailyReportDto> findDailyReportDtoByFarmIdAndSumAt(Long farmId, String date);
 
     /**
+     * 查询日报猪场时间段内每天的日报,包含指标
+     * @param farmId 猪场id
+     * @param startDate 开始时间
+     * @param endDate 结束时间
+     * @return
+     */
+    Response<List<DoctorDailyReportDto>> findDailyReportDtoByFarmIdAndDuration(Long farmId, String startDate, String endDate);
+
+    /**
      * 查询DoctorDailyReportDto范围
      * @param farmId
      * @param startAt

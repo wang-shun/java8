@@ -34,6 +34,15 @@ public interface DoctorCommonReportReadService {
                                                                                 @Nullable Integer index);
 
     /**
+     * 根据farmId和日期段查询猪场月报表
+     * @param farmId 猪场id
+     * @param startDate 开始日期 yyyy-MM-dd
+     * @param endDate 结束日期 yyyy-MM-dd
+     * @return 猪场月报表
+     */
+     Response<List<DoctorCommonReportTrendDto>> findMonthlyReportTrendByFarmIdAndDuration( Long farmId, String startDate, String endDate);
+
+    /**
      * 根据farmId和统计日期查询猪场周报表和趋势图
      *
      * @param farmId 猪场id
@@ -48,10 +57,22 @@ public interface DoctorCommonReportReadService {
                                                                                @Nullable Integer index);
 
     /**
-     * 根据统计时间查询所有猪场月报数据列
-     * @param sumAt 统计时间
-     * @return
+     * 根据farmId和周段查询猪场周报表
+     * @param farmId 猪场id
+     * @param year   年份 如2016
+     * @param startWeek 开始周
+     * @param endWeek   结束周
+     * @return 猪场周报报表
      */
+    Response<List<DoctorCommonReportTrendDto>> findWeeklyReportTrendByFarmIdAndDuration(
+            Long farmId, Integer year, Integer startWeek, Integer endWeek);
+
+
+        /**
+         * 根据统计时间查询所有猪场月报数据列
+         * @param sumAt 统计时间
+         * @return
+         */
     Response<List<DoctorCommonReportDto>> findMonthlyReports(@NotNull(message = "date.not.null") String sumAt);
 
     /**
