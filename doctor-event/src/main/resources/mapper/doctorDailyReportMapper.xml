@@ -771,4 +771,50 @@
         AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
     </update>
 
+    <sql id="clique">
+        ifnull(sum(sow_end),0) AS avgSowLiveStock,
+        ifnull(sum(mate_hb),0) AS mateHb,
+        ifnull(sum(mate_dn),0) AS mateDn,
+        ifnull(sum(mate_fq),0) AS mateFq,
+        ifnull(sum(mate_lc),0) AS mateLc,
+        ifnull(sum(mate_yx),0) AS mateYx,
+        ifnull(sum(preg_positive),0) AS pregPositive,
+        ifnull(sum(preg_negative),0) AS pregNegative,
+        ifnull(sum(preg_fanqing),0) AS pregFanqing,
+        ifnull(sum(preg_liuchan),0) AS pregLiuchan,
+        ifnull(sum(farrow_nest),0) AS farrowNest,
+        ifnull(sum(farrow_all),0) AS farrowAll,
+        ifnull(sum(farrow_live),0) AS farrowLive,
+        ifnull(sum(farrow_health),0) AS farrowHealth,
+        ifnull(sum(farrow_weak),0) AS farrowWeak,
+        ifnull(sum(farrow_dead),0) AS farrowDead,
+        ifnull(sum(farrow_sjmh - farrow_dead),0) AS farrowJmh,
+        ifnull(sum(farrow_weight),0) AS farrowWeight,
+        ifnull(sum(wean_nest),0) AS weanNest,
+        ifnull(sum(wean_count),0) AS weanCount,
+        ifnull(sum(wean_avg_weight),0) AS weanAvgWeight,
+        ifnull(sum(wean_day_age),0) AS weanDayAge,
+        ifnull(sum(sow_sale),0) AS sowSale,
+        ifnull(sum(boar_sale),0) AS boarSale
+    </sql>
+
+    <select id="getTransverseCliqueReport" parameterType="map" resultType= "io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto" >
+        SELECT <include refid="clique"/>
+        FROM <include refid="tb"/>
+        WHERE sum_at &gt;= #{startDate}
+        AND sum_at &lt;= #{endDate}
+        AND farm_id = #{farmId}
+    </select>
+
+    <select id="getPortraitCliqueReport" parameterType="map" resultType= "io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto">
+        SELECT <include refid="clique"/>
+        FROM <include refid="tb"/>
+        WHERE sum_at &gt;= #{startDate}
+        AND sum_at &lt;= #{endDate}
+        AND farm_id IN
+        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")" >
+            #{farmId}
+        </foreach>
+    </select>
+
 </mapper>

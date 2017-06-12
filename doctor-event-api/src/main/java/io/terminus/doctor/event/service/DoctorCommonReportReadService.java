@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
@@ -95,4 +96,22 @@ public interface DoctorCommonReportReadService {
      * @return
      */
     Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList);
+
+    /**
+     * 获取横向报表
+     * @param farmIds 猪场id列表
+     * @param startDate 开始日期 yyyy-MM-dd
+     * @param endDate 结束时间 yyyy-MM-dd
+     * @return 横向报表
+     */
+    Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(List<Long> farmIds, String startDate, String endDate);
+
+    /**
+     * 获取纵向报表
+     * @param farmIds 猪场id列表
+     * @param startDate 开始日期 yyyy-MM-dd
+     * @param endDate 结束时间 yyyy-MM-dd
+     * @return 纵向报表
+     */
+    Response<List<DoctorCliqueReportDto>> getPortraitCliqueReport(List<Long> farmIds, String startDate, String endDate);
 }

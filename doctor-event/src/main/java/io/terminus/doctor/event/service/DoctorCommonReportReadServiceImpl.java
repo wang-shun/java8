@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorParityMonthlyReportDao;
 import io.terminus.doctor.event.dao.DoctorRangeReportDao;
+import io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
@@ -59,6 +60,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     private static final int MONTH_INDEX = 12;
     private static final int WEEK_INDEX = 20;
     private DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM");
+    private DateTimeFormatter date = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     private final DoctorParityMonthlyReportDao doctorParityMonthlyReportDao;
     private final DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao;
@@ -323,6 +325,64 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             log.error("find farms live stock failed, farmIdList:{}, cause:{}",
                     farmIdList, Throwables.getStackTraceAsString(e));
             return Response.fail("find.farms.live.stock.failed");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(List<Long> farmIds, String startDate, String endDate) {
+        try {
+            Date startTime = DateUtil.toDate(startDate);
+            Date endTime = DateUtil.toDate(endDate);
+            int dayDiff = DateUtil.getDeltaDays(startTime, endTime) + 1;
+            List<DoctorCliqueReportDto> list = farmIds.stream().map(farmId -> {
+                DoctorCliqueReportDto dto1 = doctorDailyReportDao.getTransverseCliqueReport(farmId, startDate, endDate);
+                dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
+                        + dto1.getMateFq() + dto1.getMateFq()
+                        + dto1.getMateLc() + dto1.getMateYx());
+                dto1.setPregCount(dto1.getPregPositive() + dto1.getPregNegative()
+                        + dto1.getPregFanqing() + dto1.getPregLiuchan());
+                dto1.setAvgSowLiveStock(dto1.getAvgSowLiveStock()/dayDiff);
+                DoctorCliqueReportDto dto2 = doctorDailyGroupDao.getTransverseCliqueReport(farmId, startDate, endDate);
+                dto1.setHpSale(dto2.getHpSale());
+                dto1.setCfSale(dto2.getCfSale());
+                dto1.setYfSale(dto2.getYfSale());
+                return dto1;
+            }).collect(Collectors.toList());
+            return Response.ok(list);
+        } catch (Exception e) {
+            log.error("get transverse clique report failed, farmIds:{}, startDate:{}, endDate:{},cause:{}"
+                    , farmIds, startDate, endDate, Throwables.getStackTraceAsString(e));
+            return Response.fail("get.transverse.clique.report.failed");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorCliqueReportDto>> getPortraitCliqueReport(List<Long> farmIds, String startDate, String endDate) {
+        try {
+            DateTime startTime = DateTime.parse(startDate, date);
+            DateTime endTime = DateTime.parse(endDate, date);
+            List<DoctorCliqueReportDto> list = Lists.newArrayList();
+            int dayDiff = DateUtil.getDeltaDays(startTime.toDate(), endTime.toDate()) + 1;
+            while (!startTime.isAfter(endTime)) {
+                DoctorCliqueReportDto dto1 = doctorDailyReportDao.getPortraitCliqueReport(farmIds, startDate, endDate);
+                dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
+                        + dto1.getMateFq() + dto1.getMateFq()
+                        + dto1.getMateLc() + dto1.getMateYx());
+                dto1.setPregCount(dto1.getPregPositive() + dto1.getPregNegative()
+                        + dto1.getPregFanqing() + dto1.getPregLiuchan());
+                dto1.setAvgSowLiveStock(dto1.getAvgSowLiveStock()/dayDiff);
+                DoctorCliqueReportDto dto2 = doctorDailyGroupDao.getPortraitCliqueReport(farmIds, startDate, endDate);
+                dto1.setHpSale(dto2.getHpSale());
+                dto1.setCfSale(dto2.getCfSale());
+                dto1.setYfSale(dto2.getYfSale());
+                list.add(dto1);
+                startTime = startTime.plusDays(1);
+            }
+            return Response.ok(list);
+        } catch (Exception e) {
+            log.error("get portrait clique report failed, farmIds:{}, startDate:{}, endDate:{},cause:{}"
+                    , farmIds, startDate, endDate, Throwables.getStackTraceAsString(e));
+            return Response.fail("get.portrait.clique.report.failed");
         }
     }
 

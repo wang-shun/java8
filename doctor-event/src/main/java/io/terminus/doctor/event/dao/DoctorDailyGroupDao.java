@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dao;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorGroupChangeSum;
 import io.terminus.doctor.event.model.DoctorGroupStock;
@@ -165,5 +166,29 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
     public void updateUnweanAndWeanLiveStock(Long groupId, Date sumAt, Integer unweanChangeCount, Integer weanChangeCount) {
         getSqlSession().update(sqlId("updateUnweanAndWeanLiveStock"), ImmutableMap.of("groupId", groupId
                 , "sumAt", sumAt, "unweanChangeCount", unweanChangeCount, "weanChangeCount", weanChangeCount));
+    }
+
+    /**
+     * 获取一个猪场横向报表
+     * @param farmId 猪场id
+     * @param startDate 开始日期 yyyy-MM-dd
+     * @param endDate 结束时间 yyyy-MM-dd
+     * @return 横向报表
+     */
+    public DoctorCliqueReportDto getTransverseCliqueReport(Long farmId, String startDate, String endDate) {
+        return getSqlSession().selectOne(sqlId("getTransverseCliqueReport")
+                , ImmutableMap.of("farmId", farmId, "startDate", startDate, "endDate", endDate));
+    }
+
+    /**
+     * 获取一个月的纵向报表
+     * @param farmIds 猪场id列表
+     * @param startDate 开始日期 yyyy-MM-dd
+     * @param endDate 结束时间 yyyy-MM-dd
+     * @return 纵向报表
+     */
+    public DoctorCliqueReportDto getPortraitCliqueReport(List<Long> farmIds, String startDate, String endDate) {
+        return getSqlSession().selectOne(sqlId("getPortraitCliqueReport")
+                , ImmutableMap.of("farmIds", farmIds, "startDate", startDate, "endDate", endDate));
     }
 }

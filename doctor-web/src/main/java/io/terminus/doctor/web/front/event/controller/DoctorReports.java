@@ -13,6 +13,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorStockStructureDto;
+import io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
@@ -243,5 +244,35 @@ public class DoctorReports {
     public Map<String, Integer> getBarnLiveStocks(@RequestParam Long barnId,
                                            @RequestParam Integer index){
         return RespHelper.or500(doctorCommonReportReadService.findBarnLiveStock(barnId, new Date(), index));
+    }
+
+    /**
+     * 获取横向报表
+     * @param farmIds 猪场id列表
+     * @param startDate 开始日期 yyyy-MM-dd
+     * @param endDate 结束时间 yyyy-MM-dd
+     * @return 横向报表
+     */
+    @RequestMapping(value = "/transverse/clique", method = RequestMethod.GET)
+    public List<DoctorCliqueReportDto> getTransverseCliqueReport(@RequestParam String farmIds,
+                                                                 @RequestParam String startDate,
+                                                                 @RequestParam String endDate) {
+        List<Long> farmIdList = Splitters.splitToLong(farmIds, Splitters.UNDERSCORE);
+        return RespHelper.or500(doctorCommonReportReadService.getTransverseCliqueReport(farmIdList, startDate, endDate));
+    }
+
+    /**
+     * 获取纵向报表
+     * @param farmIds 猪场id列表
+     * @param startDate 开始日期 yyyy-MM-dd
+     * @param endDate 结束时间 yyyy-MM-dd
+     * @return 纵向报表
+     */
+    @RequestMapping(value = "/portrait/clique", method = RequestMethod.GET)
+    public List<DoctorCliqueReportDto> getPortraitCliqueReport(@RequestParam String farmIds,
+                                                               @RequestParam String startDate,
+                                                               @RequestParam String endDate) {
+        List<Long> farmIdList = Splitters.splitToLong(farmIds, Splitters.UNDERSCORE);
+        return RespHelper.or500(doctorCommonReportReadService.getPortraitCliqueReport(farmIdList, startDate, endDate));
     }
 }
