@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
+import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport;
 import io.terminus.doctor.event.dto.report.common.DoctorStockStructureCommonReport;
 import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
@@ -1141,4 +1143,22 @@ public class DoctorKpiDao {
     public Integer getNurSeryOuterOut(Long groupId, Integer pigType, Date startAt, Date endAt) {
         return sqlSession.selectOne(sqlId("getNurseryOuterOutByType"), ImmutableMap.of("groupId", groupId, "pigType", pigType, "startAt", startAt, "endAt", endAt));
     }
+
+    public Double getNurserFeedConversion(Long farmId, Date startAt, Date endAt) {
+        return getFeedConversion(farmId, startAt, endAt, PigType.NURSERY_PIGLET.getValue());
+    }
+
+    public Double getFattenFeedConversion(Long farmId, Date startAt, Date endAt) {
+        return getFeedConversion(farmId, startAt, endAt, PigType.FATTEN_PIG.getValue());
+    }
+
+    private Double getFeedConversion(Long farmId, Date startAt, Date endAt, int type) {
+        Double feed = sqlSession.selectOne(sqlId("getFeedConsume"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt, "type", type));
+        Double weight = sqlSession.selectOne(sqlId("getWeightGain"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt, "type", type));
+        if(Arguments.isNull(feed) || Arguments.isNull(weight) || Objects.equals(0d, weight)){
+            return null;
+        }
+        return feed/weight;
+    }
+
 }

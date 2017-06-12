@@ -2228,4 +2228,31 @@
         AND barn_type in (5,6)
         <include refid="criteria" />
     </select>
+
+    <select id="getFeedConsume" parameterType="map" resultType="double">
+        select sum(event_count)
+        from doctor_material_consume_providers
+        where farm_id = #{farmId}
+        and event_type = 1
+        and type = 1
+        and group_id in
+        ( select group_id
+        from doctor_group_batch_summaries
+        where status = -1
+        and farm_id = #{farmId}
+        and pig_type = #{type}
+        and close_at &gt;= #{startAt}
+        and close_at &lt;= #{endAt}
+        )
+    </select>
+
+    <select id="getWeightGain" parameterType="map" resultType="double">
+        select sum(daily_weight_gain * ((UNIX_TIMESTAMP(close_at) - UNIX_TIMESTAMP(open_at)))/ 86400)
+        from doctor_group_batch_summaries
+        where status = -1
+        and farm_id = #{farmId}
+        and pig_type = #{type}
+        and close_at &gt;= #{startAt}
+        and close_at &lt;= #{endAt}
+    </select>
 </mapper>
