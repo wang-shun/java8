@@ -83,7 +83,13 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
             DateTime endTime = DateTime.parse(endDate, formatter);
             List<DoctorDailyReportDto> list = Lists.newArrayList();
             while (!startTime.isAfter(endTime)) {
-                list.add(getDoctorDailyReportDto(farmId, startTime.toString(formatter)));
+                DoctorDailyReportDto dto = getDoctorDailyReportDto(farmId, startTime.toString(formatter));
+                if (dto.isFail()) {
+                    DoctorDailyReport report = new DoctorDailyReport();
+                    report.setSumAt(DateUtil.toDateString(startTime.toDate()));
+                    dto.setDailyReport(report);
+                }
+                list.add(dto);
                 startTime = startTime.plusDays(1);
             }
             return Response.ok(list);
