@@ -1143,7 +1143,16 @@
         FROM <include refid="tb"/>
         WHERE
         1 = 1
-        <include refid="criteria"/>
+        <if test="orgId != null">AND org_id = #{orgId}</if>
+        <if test="orgName != null">AND org_name = #{orgName}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="farmName != null">AND farm_name = #{farmName}</if>
+        <if test="pigId != null">AND pig_id = #{pigId}</if>
+        <if test="pigCode != null">AND pig_code LIKE concat('%',#{pigCode},'%')</if>
+        <if test="isAuto != null">AND is_auto = #{isAuto}</if>
+        <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+        <if test="type != null">AND type = #{type}</if>
         AND kind = 1
         GROUP BY pig_id
         ) number , `doctor_pig_tracks` tracks
@@ -1174,7 +1183,7 @@
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="farmName != null">AND farm_name = #{farmName}</if>
         <if test="pigId != null">AND pig_id = #{pigId}</if>
-        <if test="pigCode != null">AND pig_code = #{pigCode}</if>
+        <if test="pigCode != null">AND pig_code LIKE concat('%',#{pigCode},'%')</if>
         <if test="isAuto != null">AND is_auto = #{isAuto}</if>
         <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
