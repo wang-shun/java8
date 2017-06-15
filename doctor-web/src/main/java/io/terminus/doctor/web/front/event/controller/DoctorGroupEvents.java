@@ -208,7 +208,7 @@ public class DoctorGroupEvents {
         if (Arguments.isNullOrEmpty(groupList)) {
             return pigTrack.getCurrentBarnName() + "(" + eventAt + ")";
         }
-        return groupList.get(0).getCurrentBarnName();
+        return groupList.get(0).getGroupCode();
     }
 
     /**
