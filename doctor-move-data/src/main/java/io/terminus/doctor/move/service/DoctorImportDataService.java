@@ -127,6 +127,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.*;
+import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
 
 /**
  * Desc:
@@ -1524,8 +1525,9 @@ public class DoctorImportDataService {
         farrow.setFarrowStaff1(info.getStaff1());
         farrow.setFarrowStaff2(info.getStaff2());
         farrow.setFarrowRemark(info.getRemark());
+        farrow.setEventType(PigEvent.FARROWING.getKey());
 
-        event.setDesc("分娩");
+        event.setDesc(generateEventDescFromExtra(farrow));
         event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farrow));
         if(event.getEventAt() == null){
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取分娩事件时间，请检查数据");
