@@ -13,6 +13,16 @@ public class DoctorCliqueReportDto implements Serializable{
     private static final long serialVersionUID = -1992589291884077647L;
 
     /**
+     * 猪场名称(横向报表可用)
+     */
+    private String farmName;
+
+    /**
+     * 月份(纵向报表可用)
+     */
+    private String month;
+
+    /**
      * 母猪平均存栏
      */
     private Integer avgSowLiveStock;

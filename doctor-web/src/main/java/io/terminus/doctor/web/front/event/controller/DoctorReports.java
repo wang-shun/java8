@@ -25,6 +25,8 @@ import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorRangeReportReadService;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.http.MediaType;
@@ -37,6 +39,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -71,6 +74,9 @@ public class DoctorReports {
 
     @RpcConsumer
     private DoctorRangeReportReadService doctorRangeReportReadService;
+
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
 
     /**
      * 根据farmId和日期查询猪场日报表(缓存方式)
@@ -258,7 +264,10 @@ public class DoctorReports {
                                                                  @RequestParam String startDate,
                                                                  @RequestParam String endDate) {
         List<Long> farmIdList = Splitters.splitToLong(farmIds, Splitters.UNDERSCORE);
-        return RespHelper.or500(doctorCommonReportReadService.getTransverseCliqueReport(farmIdList, startDate, endDate));
+        List<DoctorFarm> farmList = RespHelper.or500(doctorFarmReadService.findFarmsByIds(farmIdList));
+        Map<Long, String> farmIdToName = farmList.stream()
+                .collect(Collectors.toMap(DoctorFarm::getId, DoctorFarm::getName));
+        return RespHelper.or500(doctorCommonReportReadService.getTransverseCliqueReport(farmIdToName, startDate, endDate));
     }
 
     /**

@@ -329,13 +329,14 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     }
 
     @Override
-    public Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(List<Long> farmIds, String startDate, String endDate) {
+    public Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(Map<Long, String> farmIdToName, String startDate, String endDate) {
         try {
             Date startTime = DateUtil.toDate(startDate);
             Date endTime = DateUtil.toDate(endDate);
             int dayDiff = DateUtil.getDeltaDays(startTime, endTime) + 1;
-            List<DoctorCliqueReportDto> list = farmIds.stream().map(farmId -> {
+            List<DoctorCliqueReportDto> list = farmIdToName.keySet().stream().map(farmId -> {
                 DoctorCliqueReportDto dto1 = doctorDailyReportDao.getTransverseCliqueReport(farmId, startDate, endDate);
+                dto1.setFarmName(farmIdToName.get(farmId));
                 dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
                         + dto1.getMateFq() + dto1.getMateFq()
                         + dto1.getMateLc() + dto1.getMateYx());
@@ -350,8 +351,8 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             }).collect(Collectors.toList());
             return Response.ok(list);
         } catch (Exception e) {
-            log.error("get transverse clique report failed, farmIds:{}, startDate:{}, endDate:{},cause:{}"
-                    , farmIds, startDate, endDate, Throwables.getStackTraceAsString(e));
+            log.error("get transverse clique report failed, farmIdToName:{}, startDate:{}, endDate:{},cause:{}"
+                    , farmIdToName, startDate, endDate, Throwables.getStackTraceAsString(e));
             return Response.fail("get.transverse.clique.report.failed");
         }
     }
@@ -359,12 +360,15 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     @Override
     public Response<List<DoctorCliqueReportDto>> getPortraitCliqueReport(List<Long> farmIds, String startDate, String endDate) {
         try {
-            DateTime startTime = DateTime.parse(startDate, date);
-            DateTime endTime = DateTime.parse(endDate, date);
+            DateTime startTime = DateTime.parse(startDate, date).withDayOfMonth(1);
+            DateTime endTime = DateTime.parse(endDate, date).withDayOfMonth(1);
+            DateTime monthStartTime = startTime;
+            DateTime monthEndTime = DateUtil.getMonthEnd(startTime);
             List<DoctorCliqueReportDto> list = Lists.newArrayList();
-            int dayDiff = DateUtil.getDeltaDays(startTime.toDate(), endTime.toDate()) + 1;
-            while (!startTime.isAfter(endTime)) {
+            while (!monthStartTime.isAfter(endTime)) {
+                int dayDiff = DateUtil.getDeltaDays(monthStartTime.toDate(), monthEndTime.toDate()) + 1;
                 DoctorCliqueReportDto dto1 = doctorDailyReportDao.getPortraitCliqueReport(farmIds, startDate, endDate);
+                dto1.setMonth(DateUtil.getYearMonth(monthStartTime.toDate()));
                 dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
                         + dto1.getMateFq() + dto1.getMateFq()
                         + dto1.getMateLc() + dto1.getMateYx());
@@ -376,7 +380,8 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 dto1.setCfSale(dto2.getCfSale());
                 dto1.setYfSale(dto2.getYfSale());
                 list.add(dto1);
-                startTime = startTime.plusDays(1);
+                monthStartTime = monthStartTime.plusMonths(1);
+                monthEndTime = DateUtil.getMonthEnd(startTime);
             }
             return Response.ok(list);
         } catch (Exception e) {
