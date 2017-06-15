@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.NumberUtils;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
@@ -343,6 +344,11 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 dto1.setPregCount(dto1.getPregPositive() + dto1.getPregNegative()
                         + dto1.getPregFanqing() + dto1.getPregLiuchan());
                 dto1.setAvgSowLiveStock(dto1.getAvgSowLiveStock()/dayDiff);
+                if (Objects.equals(dto1.getWeanNest(), 0)) {
+                    dto1.setNestAvgWean(0D);
+                } else {
+                    dto1.setNestAvgWean(Double.parseDouble(NumberUtils.divide(dto1.getWeanCount(), dto1.getWeanNest(), 2)));
+                }
                 DoctorCliqueReportDto dto2 = doctorDailyGroupDao.getTransverseCliqueReport(farmId, startDate, endDate);
                 dto1.setHpSale(dto2.getHpSale());
                 dto1.setCfSale(dto2.getCfSale());
@@ -375,6 +381,11 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 dto1.setPregCount(dto1.getPregPositive() + dto1.getPregNegative()
                         + dto1.getPregFanqing() + dto1.getPregLiuchan());
                 dto1.setAvgSowLiveStock(dto1.getAvgSowLiveStock()/dayDiff);
+                if (Objects.equals(dto1.getWeanNest(), 0)) {
+                    dto1.setNestAvgWean(0D);
+                } else {
+                    dto1.setNestAvgWean(Double.parseDouble(NumberUtils.divide(dto1.getWeanCount(), dto1.getWeanNest(), 2)));
+                }
                 DoctorCliqueReportDto dto2 = doctorDailyGroupDao.getPortraitCliqueReport(farmIds, startDate, endDate);
                 dto1.setHpSale(dto2.getHpSale());
                 dto1.setCfSale(dto2.getCfSale());

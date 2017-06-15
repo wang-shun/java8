@@ -153,6 +153,11 @@ public class DoctorCliqueReportDto implements Serializable{
     private Integer weanCount;
 
     /**
+     * 窝均断奶数
+     */
+    private Double nestAvgWean;
+
+    /**
      * 断奶均重
      */
     private Double weanAvgWeight;
