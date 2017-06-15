@@ -273,8 +273,8 @@ public class DoctorReports {
     /**
      * 获取纵向报表
      * @param farmIds 猪场id列表
-     * @param startDate 开始日期 yyyy-MM-dd
-     * @param endDate 结束时间 yyyy-MM-dd
+     * @param startDate 开始日期 yyyy-MM-dd 所在月一号
+     * @param endDate 结束时间 yyyy-MM-dd 所在月一号
      * @return 纵向报表
      */
     @RequestMapping(value = "/portrait/clique", method = RequestMethod.GET)
