@@ -27,10 +27,10 @@ public class DoctorCliqueReportDto implements Serializable{
      */
     private Integer avgSowLiveStock;
 
-    /**
-     * 公猪平均存栏
-     */
-    private Integer avgBoarLiveStock;
+//    /**
+//     * 公猪平均存栏
+//     */
+//    private Integer avgBoarLiveStock;
 
     /**
      * 配种总数
@@ -168,19 +168,29 @@ public class DoctorCliqueReportDto implements Serializable{
     private Double weanDayAge;
 
     /**
-     * 产房死淘率
+     * 种母猪死淘率
      */
-    private Double deadFarrowRate;
+    private Double deadSowRate;
 
     /**
-     * 保育死淘率
+     * 种公猪死淘率
      */
-    private Double deadNurseryRate;
+    private Double deadBoarRate;
 
     /**
-     * 育肥死淘率
+     * 产房成活率
      */
-    private Double deadFattenRate;
+    private Double liveFarrowRate;
+
+    /**
+     * 保育成活率
+     */
+    private Double liveNurseryRate;
+
+    /**
+     * 育肥成活率
+     */
+    private Double liveFattenRate;
 
     /**
      * 后备销售
@@ -217,5 +227,19 @@ public class DoctorCliqueReportDto implements Serializable{
      */
     private Double psy;
 
+    /**
+     * 妊娠期
+     */
+    private Double pregDate;
+
+    /**
+     * 哺乳期
+     */
+    private Double feedDate;
+
+    /**
+     * 年产胎次
+     */
+    private Double yearFarrowParity;
 
 }

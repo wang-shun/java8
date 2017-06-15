@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -27,6 +28,7 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorRangeReportReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.http.MediaType;
@@ -272,16 +274,21 @@ public class DoctorReports {
 
     /**
      * 获取纵向报表
-     * @param farmIds 猪场id列表
+     * @param farmIds 猪场id列表(可选, 默认拥有权限的猪场)
      * @param startDate 开始日期 yyyy-MM-dd 所在月一号
      * @param endDate 结束时间 yyyy-MM-dd 所在月一号
      * @return 纵向报表
      */
     @RequestMapping(value = "/portrait/clique", method = RequestMethod.GET)
-    public List<DoctorCliqueReportDto> getPortraitCliqueReport(@RequestParam String farmIds,
+    public List<DoctorCliqueReportDto> getPortraitCliqueReport(@RequestParam(required = false) String farmIds,
                                                                @RequestParam String startDate,
                                                                @RequestParam String endDate) {
-        List<Long> farmIdList = Splitters.splitToLong(farmIds, Splitters.UNDERSCORE);
+        List<Long> farmIdList;
+        if (Strings.isNullOrEmpty(farmIds)) {
+            farmIdList = RespHelper.or500(doctorFarmReadService.findFarmIdsByUserId(UserUtil.getUserId()));
+        } else {
+            farmIdList = Splitters.splitToLong(farmIds, Splitters.UNDERSCORE);
+        }
         return RespHelper.or500(doctorCommonReportReadService.getPortraitCliqueReport(farmIdList, startDate, endDate));
     }
 }
