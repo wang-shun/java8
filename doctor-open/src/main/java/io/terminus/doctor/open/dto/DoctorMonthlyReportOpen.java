@@ -14,9 +14,9 @@ public class DoctorMonthlyReportOpen implements Serializable{
     private static final long serialVersionUID = 55475440288200390L;
 
     /**
-     * 猪场名称
+     * 用户名称
      */
-    private String farmName;
+    private String userName;
 
     /**
      * 统计时间

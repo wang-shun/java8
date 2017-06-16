@@ -5,6 +5,8 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.user.model.PrimaryUser;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @author Effet
  */
@@ -26,5 +28,13 @@ public class PrimaryUserDao extends MyBatisDao<PrimaryUser> {
 
     public PrimaryUser findPrimaryByFarmIdAndStatus(Long farmId, Integer status ) {
         return getSqlSession().selectOne(sqlId("findPrimaryByFarmIdAndStatus"), ImmutableMap.of("farmId", farmId, "status", status));
+    }
+
+    /**
+     * 获取所有关联猪场不为空的列表
+     * @return 主账户类别
+     */
+    public List<PrimaryUser> findAllRelFarmId() {
+        return getSqlSession().selectList(sqlId("findAllRelFarmId"));
     }
 }
