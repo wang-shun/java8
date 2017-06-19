@@ -1924,6 +1924,25 @@
         <include refid="groupCriteria"/>
     </select>
 
+    <select id="getGroupFarrowIn" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 2
+        and sow_id is not null
+        <include refid="groupCriteria"/>
+    </select>
+
+    <select id="getGroupDayWeanCount" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 11
+        <include refid="groupCriteria"/>
+    </select>
+
     <select id="getGroupOuterIn" parameterType="map" resultType="int">
         select
         ifnull(sum(quantity), 0)
@@ -2255,4 +2274,122 @@
         and close_at &gt;= #{startAt}
         and close_at &lt;= #{endAt}
     </select>
+
+    <select id="getSowMatingCount" parameterType="map" resultType="int" >
+        select
+        (
+        select count(1)
+        from doctor_pig_tracks
+        where status = 3
+        and farm_id = #{farmId}
+        and current_barn_type in(5,6)
+        )
+        -
+        (
+        select ifnull(sum(
+        case when type = 9 and current_mating_count =1 then 1 else 0 end -
+        case when type = 11 and pig_status_before = 3 then 1 else 0 end)
+        ,0)
+        from doctor_pig_events
+        where event_at &gt; #{startAt}
+        and farm_id = #{farmId}
+        and type in(9 ,11)
+        and barn_type in(5,6)
+        and status =1
+        and event_source != 5
+        )
+    </select>
+
+    <select id="getSowKonghuaiCount" parameterType="map" resultType="int" >
+        select
+        (
+        select count(1)
+        from doctor_pig_tracks
+        where status = 5
+        and farm_id = #{farmId}
+        and current_barn_type in(5,6)
+        )
+        -
+        (
+        select ifnull(sum(
+        case when barn_type in(5,6) and pig_status_before != 5 and pig_status_after = 5 then 1 else 0 end +
+        case when type = 12 and pig_status_after = 5 then 1 else 0 end -
+        case when barn_type in(5,6) and pig_status_before = 5 and pig_status_after != 5 then 1 else 0 end
+        )
+        ,0)
+        from doctor_pig_events
+        where event_at &gt; #{startAt}
+        and farm_id = #{farmId}
+        and type in(9,11,12)
+        and status =1
+        and event_source != 5
+        )
+    </select>
+
+    <select id="getSowPregnantCount" parameterType="map" resultType="int" >
+        select
+        (
+        select count(1)
+        from doctor_pig_tracks
+        where status = 4
+        and farm_id = #{farmId}
+        and current_barn_type in(5,6)
+        )
+        -
+        (
+        select ifnull(sum(
+        case when type = 11 and pig_status_after = 4 then 1 else 0 end -
+        case when type in (11,14) and pig_status_before = 4  then 1 else 0 end
+        )
+        ,0)
+        from doctor_pig_events
+        where event_at &gt; #{startAt}
+        and farm_id = #{farmId}
+        and pig_status_before != pig_status_after
+        and type in(11,14)
+        and barn_type in(5,6)
+        and status =1
+        and event_source != 5
+        )
+    </select>
+
+    <select id="getSowPhReserveIn" parameterType="map" resultType="int" >
+        SELECT
+        ifnull(count(*),0)
+        FROM doctor_pig_events
+        WHERE farm_id = #{farmId}
+        and event_at &gt;= #{startAt}
+        and event_at &lt;= #{endAt}
+        and type = 7
+        and barn_type in(5,6)
+        and status =1
+        and event_source != 5
+    </select>
+
+    <select id="getSowCfInFarmIn" parameterType="map" resultType="int" >
+        SELECT
+        ifnull(count(*),0)
+        FROM doctor_pig_events
+        WHERE farm_id = #{farmId}
+        and event_at &gt;= #{startAt}
+        and event_at &lt;= #{endAt}
+        and type = 20
+        and barn_type = 7
+        and status =1
+        and event_source != 5
+    </select>
+
+    <select id="getSowPhChgFarmIn" parameterType="map" resultType="int" >
+        SELECT
+        ifnull(count(*),0)
+        FROM doctor_pig_events
+        WHERE farm_id = #{farmId}
+        and event_at &gt;= #{startAt}
+        and event_at &lt;= #{endAt}
+        and type = 20
+        and barn_type in(5,6)
+        and status =1
+        and event_source != 5
+    </select>
+
 </mapper>

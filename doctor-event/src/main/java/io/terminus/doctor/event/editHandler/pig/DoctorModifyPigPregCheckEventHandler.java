@@ -2,6 +2,7 @@ package io.terminus.doctor.event.editHandler.pig;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
@@ -68,14 +69,13 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
         DoctorPigEvent newEvent = super.buildNewEvent(oldPigEvent, inputDto);
         DoctorPregChkResultDto newDto = (DoctorPregChkResultDto) inputDto;
         newEvent.setPregCheckResult(newDto.getCheckResult());
+        newEvent.setPigStatusAfter(getStatus(newDto.getCheckResult()));
         return newEvent;
     }
 
     @Override
     public DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto) {
-        Integer newStatus = Objects.equals(changeDto.getNewPregCheckResult(), PregCheckResult.YANG.getKey())
-                ? PigStatus.Pregnancy.getKey() : PigStatus.KongHuai.getKey();
-        oldPigTrack.setStatus(newStatus);
+        oldPigTrack.setStatus(getStatus(changeDto.getNewPregCheckResult()));
         Map<String, Object> extra = MoreObjects.firstNonNull(oldPigTrack.getExtraMap(), Maps.newHashMap());
         extra.put("pregCheckResult", PREG_CHECK_RESULT.get(changeDto.getNewPregCheckResult()));
         oldPigTrack.setExtraMap(extra);
@@ -109,16 +109,10 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
     @Override
     protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack) {
         DoctorPigEvent beforeStatusEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(deletePigEvent.getPigId(), deletePigEvent.getEventAt());
-        if (Objects.equals(beforeStatusEvent.getType(), PigEvent.MATING.getKey())) {
-            oldPigTrack.setStatus(PigStatus.Mate.getKey());
+        Integer beforeStatus = getStatus(beforeStatusEvent);
+        oldPigTrack.setStatus(beforeStatus);
+        if (Objects.equals(beforeStatus, PigStatus.Mate.getKey())) {
             oldPigTrack.setCurrentMatingCount(beforeStatusEvent.getCurrentMatingCount());
-            return oldPigTrack;
-        }
-
-        if (Objects.equals(beforeStatusEvent.getPregCheckResult(), PregCheckResult.YANG.getKey())) {
-            oldPigTrack.setStatus(PigStatus.Pregnancy.getKey());
-        } else {
-            oldPigTrack.setStatus(PigStatus.KongHuai.getKey());
         }
         Map<String, Object> extra = MoreObjects.firstNonNull(oldPigTrack.getExtraMap(), Maps.newHashMap());
         extra.put("pregCheckResult", beforeStatusEvent.getPregCheckResult());
@@ -152,6 +146,35 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 .pregCheckResultCountChange(-1)
                 .build();
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+
+        //更新配种、空怀、怀孕母猪数量
+        if (!PigType.MATING_TYPES.contains(oldPigEvent.getBarnType())) {
+            return;
+        }
+        Integer phMatingChangeCount = 0;
+        Integer phKongHuaiChangeCount= 0;
+        Integer phPregnantChangeCount = 0;
+        Integer afterStatus = getStatus(oldPigEvent.getPregCheckResult());
+        DoctorPigEvent beforeStatusEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(oldPigEvent.getPigId(), oldPigEvent.getEventAt());
+        Integer beforeStatus = getStatus(beforeStatusEvent);
+        if (Objects.equals(beforeStatus, afterStatus)) {
+            return;
+        }
+        if (Objects.equals(beforeStatus, PigStatus.Mate.getKey())) {
+            phMatingChangeCount = 1;
+        } else if (Objects.equals(beforeStatus, PigStatus.KongHuai.getKey())) {
+            phKongHuaiChangeCount = 1;
+        } else {
+            phPregnantChangeCount = 1;
+        }
+
+        if (Objects.equals(afterStatus, PigStatus.KongHuai.getKey())) {
+            phKongHuaiChangeCount = -1;
+        } else {
+            phPregnantChangeCount = -1;
+        }
+        doctorDailyPigDao.updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+                , phMatingChangeCount, phKongHuaiChangeCount, phPregnantChangeCount);
     }
 
     @Override
@@ -163,6 +186,36 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 .pregCheckResultCountChange(1)
                 .build();
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+
+        //更新配种、空怀、怀孕母猪数量
+        if (!PigType.MATING_TYPES.contains(newPigEvent.getBarnType())) {
+           return;
+        }
+        Integer afterStatus = getStatus(newDto.getCheckResult());
+        Integer beforeStatus = newPigEvent.getPigStatusBefore();
+        if (Objects.equals(beforeStatus, afterStatus)) {
+            return;
+        }
+
+        Integer phMatingChangeCount = 0;
+        Integer phKongHuaiChangeCount= 0;
+        Integer phPregnantChangeCount = 0;
+        if (Objects.equals(beforeStatus, PigStatus.Mate.getKey())) {
+            phMatingChangeCount = -1;
+        }
+        else if (Objects.equals(newPigEvent.getPigStatusBefore(), PigStatus.KongHuai.getKey())) {
+            phKongHuaiChangeCount = -1;
+        } else {
+            phPregnantChangeCount = -1;
+        }
+
+        if (Objects.equals(afterStatus, PigStatus.KongHuai.getKey())) {
+            phKongHuaiChangeCount = 1;
+        } else {
+            phPregnantChangeCount = 1;
+        }
+        doctorDailyPigDao.updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
+                , phMatingChangeCount, phKongHuaiChangeCount, phPregnantChangeCount);
     }
 
     @Override
@@ -187,6 +240,20 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 throw new InvalidException("preg.check.result.error", checkResult.getKey());
         }
         return oldDailyPig;
+    }
+
+    private Integer getStatus(Integer pregCheckResult) {
+        return Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())
+                ? PigStatus.Pregnancy.getKey() : PigStatus.KongHuai.getKey();
+    }
+
+    private Integer getStatus(DoctorPigEvent beforeStatusEvent) {
+        if (Objects.equals(beforeStatusEvent.getType(), PigEvent.MATING.getKey())) {
+            return PigStatus.Mate.getKey();
+        }
+
+        return Objects.equals(beforeStatusEvent.getPregCheckResult(), PregCheckResult.YANG.getKey())
+                ? PigStatus.Pregnancy.getKey() : PigStatus.KongHuai.getKey();
     }
 }
 

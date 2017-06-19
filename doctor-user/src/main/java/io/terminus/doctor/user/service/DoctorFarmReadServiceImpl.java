@@ -108,4 +108,17 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
             return Response.fail("farm.find.fail");
         }
     }
+
+    @Override
+    public Response<List<DoctorFarm>> findFarmsByIds(List<Long> ids) {
+        try {
+            if (Arguments.isNullOrEmpty(ids)) {
+                return Response.ok(Lists.newArrayList());
+            }
+            return Response.ok(doctorFarmDao.findFarmsByIds(ids));
+        } catch (Exception e) {
+            log.error("find farms by ids failed, ids:{} cause:{}", ids, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.farms.by.ids.failed");
+        }
+    }
 }

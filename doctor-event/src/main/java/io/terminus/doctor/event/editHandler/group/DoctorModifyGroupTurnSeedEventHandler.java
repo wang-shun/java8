@@ -126,6 +126,8 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
         doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
         updateDailyGroupLiveStock(oldGroupEvent.getGroupId(), getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
 
+        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(oldGroupEvent.getGroupId()
+                , oldGroupEvent.getEventAt(), 0, 1);
     }
 
     @Override
@@ -136,6 +138,7 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
         doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
         updateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
 
+        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(newGroupEvent.getGroupId(), eventAt, 0, -1);
     }
 
     @Override

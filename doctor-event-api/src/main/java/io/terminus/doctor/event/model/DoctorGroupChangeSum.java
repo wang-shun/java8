@@ -1,10 +1,8 @@
 package io.terminus.doctor.event.model;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 
 /**
  * Created by IntelliJ IDEA.
@@ -15,10 +13,27 @@ import java.lang.reflect.Field;
 public class DoctorGroupChangeSum implements Serializable{
     private static final long serialVersionUID = -7911853420209555558L;
 
+
     /**
      * 期初
      */
     private Integer farrowStart;
+
+    /**
+     * 已断奶数量
+     */
+    private Integer weanCount;
+
+    /**
+     * 断奶数量
+     */
+    private Integer dayWeanCount;
+
+    /**
+     * 未断奶数量
+     */
+    private Integer unweanCount;
+
     /**
      * 同类型猪群转入，后面统计不计入该类型猪群转入
      */
@@ -28,6 +43,11 @@ public class DoctorGroupChangeSum implements Serializable{
      * 不同类型猪群转入，外部转入
      */
     private Integer farrowOuterIn;
+
+    /**
+     * 分娩转入
+     */
+    private Integer farrowingIn;
 
     /**
      * 销售

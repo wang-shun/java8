@@ -113,6 +113,15 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
                 .doctorMateTypeCountChange(-1)
                 .build();
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+
+        //更新配种母猪数
+        Integer sowPhKonghuaiChangeCount = 0;
+        if (Objects.equals(oldPigEvent.getPigStatusBefore(), PigStatus.KongHuai.getKey())) {
+            sowPhKonghuaiChangeCount = 1;
+        }
+        doctorDailyPigDao.updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+                , -1, sowPhKonghuaiChangeCount , 0);
+
     }
 
     @Override
@@ -126,6 +135,14 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
                 .doctorMateTypeCountChange(1)
                 .build();
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+
+        //更新配种母猪数
+        Integer sowPhKonghuaiChangeCount = 0;
+        if (Objects.equals(newPigEvent.getPigStatusBefore(), PigStatus.KongHuai.getKey())) {
+            sowPhKonghuaiChangeCount = -1;
+        }
+        doctorDailyPigDao.updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
+                , 1, sowPhKonghuaiChangeCount, 0);
 
     }
 

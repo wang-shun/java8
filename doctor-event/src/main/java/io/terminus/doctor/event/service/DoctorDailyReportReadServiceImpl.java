@@ -5,16 +5,16 @@ import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
-import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorGroupChangeSum;
-import io.terminus.doctor.event.model.DoctorGroupStock;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +36,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorDailyGroupDao doctorDailyGroupDao;
 
+    private DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
     @Autowired
     public DoctorDailyReportReadServiceImpl(DoctorDailyReportDao doctorDailyReportDao,
                                             DoctorDailyGroupDao doctorDailyGroupDao) {
@@ -68,10 +69,35 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         try{
             return Response.ok(getDoctorDailyReportDto(farmId, date));
         }catch (Exception e){
-            log.error("find doctorDailyReport by farmId: {}, sumAt: {} failed, cause: {}", farmId, date, Throwables.getStackTraceAsString(e));
+            log.error("find doctorDailyReport by farmId: {}, sumAt: {} failed, cause: {}"
+                    , farmId, date, Throwables.getStackTraceAsString(e));
             return Response.fail("doctorDailyReport.find.fail");
         }
 
+    }
+
+    @Override
+    public Response<List<DoctorDailyReportDto>> findDailyReportDtoByFarmIdAndDuration(Long farmId, String startDate, String endDate) {
+        try {
+            DateTime startTime = DateTime.parse(startDate, formatter);
+            DateTime endTime = DateTime.parse(endDate, formatter);
+            List<DoctorDailyReportDto> list = Lists.newArrayList();
+            while (!startTime.isAfter(endTime)) {
+                DoctorDailyReportDto dto = getDoctorDailyReportDto(farmId, startTime.toString(formatter));
+                if (dto.isFail()) {
+                    DoctorDailyReport report = new DoctorDailyReport();
+                    report.setSumAt(DateUtil.toDateString(startTime.toDate()));
+                    dto.setDailyReport(report);
+                }
+                list.add(dto);
+                startTime = startTime.plusDays(1);
+            }
+            return Response.ok(list);
+        } catch (Exception e) {
+            log.error("find daily report dto by farmId and slot failed, farmId:{}, startDate:{}, endDate:{}, cause:{}"
+                    , farmId, startDate, endDate, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.daily.report.dto.by.farmId.and.failed");
+        }
     }
 
     private DoctorDailyReportDto getDoctorDailyReportDto(Long farmId, String date) {

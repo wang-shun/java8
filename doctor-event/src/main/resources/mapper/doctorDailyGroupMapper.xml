@@ -13,9 +13,11 @@
         <result column="sum_at" property="sumAt"/>
         <result column="start" property="start"/>
         <result column="wean_count" property="weanCount"/>
+        <result column="day_wean_count" property="dayWeanCount"/>
         <result column="unwean_count" property="unweanCount"/>
         <result column="inner_in" property="innerIn"/>
         <result column="outer_in" property="outerIn"/>
+        <result column="farrowing_in" property="farrowingIn"/>
         <result column="sale" property="sale"/>
         <result column="dead" property="dead"/>
         <result column="weed_out" property="weedOut"/>
@@ -47,9 +49,11 @@
         sum_at,
         start,
         wean_count,
+        day_wean_count,
         unwean_count,
         inner_in,
         outer_in,
+        farrowing_in,
         sale,
         dead,
         weed_out,
@@ -73,9 +77,11 @@
         #{sumAt},
         #{start},
         #{weanCount},
+        #{dayWeanCount},
         #{unweanCount},
         #{innerIn},
         #{outerIn},
+        #{farrowingIn},
         #{sale},
         #{dead},
         #{weedOut},
@@ -100,9 +106,11 @@
         <if test="sumAt != null">AND sum_at = #{sumAt}</if>
         <if test="start != null">AND start = #{start}</if>
         <if test="weanCount != null">AND wean_count = #{weanCount}</if>
+        <if test="dayWeanCount != null">AND day_wean_count = #{dayWeanCount}</if>
         <if test="unweanCount != null">AND unwean_count = #{unweanCount}</if>
         <if test="innerIn != null">AND inner_in = #{innerIn}</if>
         <if test="outerIn != null">AND outer_in = #{outerIn}</if>
+        <if test="farrowingIn != null">AND farrowing_in = #{farrowingIn}</if>
         <if test="sale != null">AND sale = #{sale}</if>
         <if test="dead != null">AND dead = #{dead}</if>
         <if test="weedOut != null">AND weed_out = #{weedOut}</if>
@@ -132,9 +140,11 @@
                 #{item.sumAt},
                 #{item.start},
                 #{item.weanCount},
+                #{item.dayWeanCount},
                 #{item.unweanCount},
                 #{item.innerIn},
                 #{item.outerIn},
+                #{item.farrowingIn},
                 #{item.sale},
                 #{item.dead},
                 #{item.weedOut},
@@ -166,9 +176,11 @@
             <if test="sumAt != null">sum_at = #{sumAt},</if>
             <if test="start != null">start = #{start},</if>
             <if test="weanCount != null">wean_count = #{weanCount},</if>
+            <if test="dayWeanCount != null">day_wean_count = #{dayWeanCount},</if>
             <if test="unweanCount != null">unwean_count = #{unweanCount},</if>
             <if test="innerIn != null">inner_in = #{innerIn},</if>
             <if test="outerIn != null">outer_in = #{outerIn},</if>
+            <if test="farrowingIn != null">farrowing_in = #{farrowingIn},</if>
             <if test="sale != null">sale = #{sale},</if>
             <if test="dead != null">dead = #{dead},</if>
             <if test="weedOut != null">weed_out = #{weedOut},</if>
@@ -240,7 +252,11 @@
     <select id="getGroupChangeSum" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorGroupChangeSum">
         select
         sum(case when type = 7 and sum_at = #{startAt} then `start` else 0 END) as farrowStart,
+        sum(case when type = 7 and sum_at = #{endAt} then `wean_count` else 0 END) as weanCount,
+        sum(case when type = 7  then `day_wean_count` else 0 END) as dayWeanCount,
+        sum(case when type = 7 and sum_at = #{endAt} then `unwean_count` else 0 END) as unweanCount,
         sum(case when type = 7  then `inner_in` else 0 END) as farrowInnerIn,
+        sum(case when type = 7  then `farrowing_in` else 0 END) as farrowingIn,
         sum(case when type = 7  then `outer_in` else 0 END) as farrowOuterIn,
         sum(case when type = 7  then `sale` else 0 END) as farrowSale,
         sum(case when type = 7  then `dead` else 0 END) as farrowDead,
@@ -333,4 +349,37 @@
         AND sum_at &gt;= #{sumAt}
     </select>
 
+
+    <update id="updateUnweanAndWeanLiveStock" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        SET unwean_count = ifnull(unwean_count,0) + #{unweanChangeCount},
+        `wean_count` = ifnull(`wean_count`,0) + #{weanChangeCount}
+        WHERE
+        group_id = #{groupId}
+        AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
+    </update>
+
+    <sql id="clique" >
+        sum(case when type = 4 then sale else 0 end) AS hpSale,
+        sum(case when type = 7 then sale else 0 end) AS cfSale,
+        sum(case when type = 3 then sale else 0 end) AS yfSale
+    </sql>
+    <select id="getTransverseCliqueReport" parameterType="map" resultType= "io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto" >
+        SELECT <include refid="clique"/>
+        FROM <include refid="tb"/>
+        WHERE sum_at &gt;= #{startDate}
+        AND sum_at &lt;= #{endDate}
+        AND farm_id = #{farmId}
+    </select>
+
+    <select id="getPortraitCliqueReport" parameterType="map" resultType= "io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto">
+        SELECT <include refid="clique"/>
+        FROM <include refid="tb"/>
+        WHERE sum_at &gt;= #{startDate}
+        AND sum_at &lt;= #{endDate}
+        AND farm_id IN
+        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")" >
+            #{farmId}
+        </foreach>
+    </select>
 </mapper>

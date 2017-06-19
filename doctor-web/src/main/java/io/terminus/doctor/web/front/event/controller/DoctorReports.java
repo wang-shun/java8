@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -13,6 +14,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorStockStructureDto;
+import io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
@@ -24,8 +26,12 @@ import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorRangeReportReadService;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,6 +41,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -70,6 +77,9 @@ public class DoctorReports {
     @RpcConsumer
     private DoctorRangeReportReadService doctorRangeReportReadService;
 
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
+
     /**
      * 根据farmId和日期查询猪场日报表(缓存方式)
      * @param farmId 猪场id
@@ -87,6 +97,23 @@ public class DoctorReports {
         return RespHelper.or500(doctorDailyReportReadService.findDailyReportDtoByFarmIdAndSumAt(farmId, date));
     }
 
+    /**
+     * 查询日报猪场时间段内每天的日报,包含指标
+     * @param farmId 猪场id
+     * @param startDate   开始日期 yyyy-MM-dd
+     * @param endDate   结束日期 yyyy-MM-dd
+     * @return 猪场日报表
+     */
+    @RequestMapping(value = "/daily/duration", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<DoctorDailyReportDto> findDailyReportDtoByFarmIdAndSlot(@RequestParam Long farmId,
+                                                                        @RequestParam String startDate,
+                                                                        @RequestParam String endDate) {
+
+        if(DateUtil.toDate(endDate).after(new Date())){
+            endDate = DateUtil.toDateString(new Date());
+        }
+        return RespHelper.or500(doctorDailyReportReadService.findDailyReportDtoByFarmIdAndDuration(farmId, startDate, endDate));
+    }
     /**
      * 根据farmId和日期查询猪场日报表(缓存方式)
      * @param farmId  猪场id
@@ -113,6 +140,21 @@ public class DoctorReports {
                                                                              @RequestParam(value = "index", required = false) Integer index) {
         return RespHelper.or500(doctorCommonReportReadService.findMonthlyReportTrendByFarmIdAndSumAt(farmId, date, index));
     }
+
+    /**
+     * 根据farmId和日期段查询猪场月报表
+     * @param farmId 猪场id
+     * @param startDate 开始日期 yyyy-MM
+     * @param endDate 结束日期 yyyy-MM
+     * @return 猪场月报表
+     */
+    @RequestMapping(value = "/monthly/duration", method = RequestMethod.GET)
+    public List<DoctorCommonReportTrendDto> findMonthlyReportTrendByFarmIdAndDuration(@RequestParam Long farmId,
+                                                                             @RequestParam String startDate,
+                                                                             @RequestParam String endDate) {
+        return RespHelper.or500(doctorCommonReportReadService.findMonthlyReportTrendByFarmIdAndDuration(farmId, startDate, endDate));
+    }
+
 
     /**
      * 根据farmId和日期查询猪场月报表
@@ -144,7 +186,22 @@ public class DoctorReports {
                                                                             @RequestParam(value = "index", required = false) Integer index) {
         return RespHelper.or500(doctorCommonReportReadService.findWeeklyReportTrendByFarmIdAndSumAt(farmId, year, week, index));
     }
-    
+
+    /**
+     * 根据farmId和周段查询猪场周报表
+     * @param farmId 猪场id
+     * @param year   年份 如2016
+     * @param startWeek 开始周
+     * @param endWeek   结束周
+     * @return 猪场周报报表
+     */
+    @RequestMapping(value = "/weekly/duration", method = RequestMethod.GET)
+    public List<DoctorCommonReportTrendDto> findWeeklyReportTrendByFarmIdAndDuration(@RequestParam Long farmId,
+                                                                                     @RequestParam Integer year,
+                                                                                     @RequestParam Integer startWeek,
+                                                                                     @RequestParam Integer endWeek) {
+        return RespHelper.or500(doctorCommonReportReadService.findWeeklyReportTrendByFarmIdAndDuration(farmId, year, startWeek, endWeek));
+    }
     /**
      * 分页查询猪群批次总结
      * @return 批次总结
@@ -195,5 +252,43 @@ public class DoctorReports {
     public Map<String, Integer> getBarnLiveStocks(@RequestParam Long barnId,
                                            @RequestParam Integer index){
         return RespHelper.or500(doctorCommonReportReadService.findBarnLiveStock(barnId, new Date(), index));
+    }
+
+    /**
+     * 获取横向报表
+     * @param farmIds 猪场id列表
+     * @param startDate 开始日期 yyyy-MM-dd
+     * @param endDate 结束时间 yyyy-MM-dd
+     * @return 横向报表
+     */
+    @RequestMapping(value = "/transverse/clique", method = RequestMethod.GET)
+    public List<DoctorCliqueReportDto> getTransverseCliqueReport(@RequestParam String farmIds,
+                                                                 @RequestParam String startDate,
+                                                                 @RequestParam String endDate) {
+        List<Long> farmIdList = Splitters.splitToLong(farmIds, Splitters.UNDERSCORE);
+        List<DoctorFarm> farmList = RespHelper.or500(doctorFarmReadService.findFarmsByIds(farmIdList));
+        Map<Long, String> farmIdToName = farmList.stream()
+                .collect(Collectors.toMap(DoctorFarm::getId, DoctorFarm::getName));
+        return RespHelper.or500(doctorCommonReportReadService.getTransverseCliqueReport(farmIdToName, startDate, endDate));
+    }
+
+    /**
+     * 获取纵向报表
+     * @param farmIds 猪场id列表(可选, 默认拥有权限的猪场)
+     * @param startDate 开始日期 yyyy-MM-dd 所在月一号
+     * @param endDate 结束时间 yyyy-MM-dd 所在月一号
+     * @return 纵向报表
+     */
+    @RequestMapping(value = "/portrait/clique", method = RequestMethod.GET)
+    public List<DoctorCliqueReportDto> getPortraitCliqueReport(@RequestParam(required = false) String farmIds,
+                                                               @RequestParam String startDate,
+                                                               @RequestParam String endDate) {
+        List<Long> farmIdList;
+        if (Strings.isNullOrEmpty(farmIds)) {
+            farmIdList = RespHelper.or500(doctorFarmReadService.findFarmIdsByUserId(UserUtil.getUserId()));
+        } else {
+            farmIdList = Splitters.splitToLong(farmIds, Splitters.UNDERSCORE);
+        }
+        return RespHelper.or500(doctorCommonReportReadService.getPortraitCliqueReport(farmIdList, startDate, endDate));
     }
 }

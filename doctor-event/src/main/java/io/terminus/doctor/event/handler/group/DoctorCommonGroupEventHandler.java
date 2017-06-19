@@ -232,6 +232,7 @@ public class DoctorCommonGroupEventHandler {
         farmEntryDto.setPigCode(input.getPigCode());
         farmEntryDto.setBarnId(barn.getId());
         farmEntryDto.setBarnName(barn.getName());
+        farmEntryDto.setBarnType(barn.getPigType());
         basicDto.setFarmId(group.getFarmId());
         basicDto.setFarmName(group.getFarmName());
         basicDto.setOrgId(group.getOrgId());
