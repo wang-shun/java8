@@ -202,6 +202,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         toInputDto.setPigType(fromInputDto.getPigType());
         toInputDto.setBarnId(fromInputDto.getBarnId());
         toInputDto.setBarnName(fromInputDto.getBarnName());
+        toInputDto.setBarnType(fromInputDto.getBarnType());
         toInputDto.setRelPigEventId(fromEventId);
         toInputDto.setEventName(pigEvent.getName());
         toInputDto.setEventType(pigEvent.getKey());
