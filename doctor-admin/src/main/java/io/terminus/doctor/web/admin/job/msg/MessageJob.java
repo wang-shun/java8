@@ -67,7 +67,7 @@ public class MessageJob {
     /**
      * 消费邮件消息
      */
-    @Scheduled(cron = "0 */15 * * * ?")
+//    @Scheduled(cron = "0 */15 * * * ?")
     @RequestMapping(value = "/consume/email", method = RequestMethod.GET)
     public void emailConsume() {
         try {
@@ -86,7 +86,7 @@ public class MessageJob {
     /**
      * 消费 app push 消息
      */
-    @Scheduled(cron = "0 */15 * * * ?")
+//    @Scheduled(cron = "0 */15 * * * ?")
     @RequestMapping(value = "/consume/app", method = RequestMethod.GET)
     public void appPushConsume() {
         try {
