@@ -374,7 +374,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 .businessCode(deleteEvent.getGroupCode())
                 .farmId(deleteEvent.getFarmId())
                 .deleteEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(deleteEvent))
-                .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .type(DoctorEventModifyRequest.TYPE.GROUP.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
     }
