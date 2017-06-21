@@ -1319,4 +1319,16 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 刷新配种事件里的配种次数
+     * @return
+     */
+    @RequestMapping(value = "/flushMatingCount", method = RequestMethod.GET)
+    public Boolean flushMatingCount(){
+        log.info("flush mating count starting");
+        doctorMoveDataService.fixMatingCount();
+        log.info("flush mating count ending");
+        return true;
+    }
 }

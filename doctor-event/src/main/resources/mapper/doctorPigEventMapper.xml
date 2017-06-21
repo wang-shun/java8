@@ -1444,4 +1444,13 @@
         where pig_id  = #{pigId}
         and parity = #{parity};
     </select>
+
+    <select id="findEffectMatingCountByPigIdForAsc" parameterType="long" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM
+        <include refid="tb"/>
+        WHERE pig_id = #{pigId}
+        AND type in (9, 11)
+        ORDER BY event_at ASC , id ASC
+    </select>
 </mapper>

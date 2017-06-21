@@ -569,4 +569,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public DoctorPigEvent getLastStatusEvent(Long pigId) {
         return getSqlSession().selectOne(sqlId("getLastStatusEvent"), pigId);
     }
+
+    public List<DoctorPigEvent> findEffectMatingCountByPigIdForAsc(Long pigId) {
+        return sqlSession.selectList(sqlId("findEffectMatingCountByPigIdForAsc"), pigId);
+    }
 }
