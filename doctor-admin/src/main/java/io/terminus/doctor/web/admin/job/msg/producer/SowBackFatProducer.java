@@ -82,8 +82,10 @@ public class SowBackFatProducer extends AbstractJobProducer {
                                 isSend = true;
                             }
                         } else if (key == 2 || key == 3) {
-                            matingPigEvent.setEventAt(new DateTime(matingPigEvent.getEventAt()).plusDays(ruleValue.getValue().intValue()).toDate());
-                            if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, matingPigEvent, PigEvent.CONDITION)) {
+                            DoctorPigEvent tempEvent = new DoctorPigEvent();
+                            tempEvent.setId(matingPigEvent.getId());
+                            tempEvent.setEventAt(new DateTime(matingPigEvent.getEventAt()).plusDays(ruleValue.getValue().intValue()).toDate());
+                            if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, tempEvent, PigEvent.CONDITION)) {
                                 isSend = true;
                             }
                         } else {
