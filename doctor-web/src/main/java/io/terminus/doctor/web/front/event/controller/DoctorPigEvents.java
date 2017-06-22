@@ -234,8 +234,10 @@ public class DoctorPigEvents {
         if (StringUtils.isNotBlank((String)params.get("barnTypes"))) {
             params.put("barnTypes", Splitters.UNDERSCORE.splitToList((String) params.get("barnTypes")));
         }
-        if (StringUtils.isNotBlank((String) params.get("endDate"))) {
-            params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusMillis(1).toDate());
+
+        if (StringUtils.isNotBlank((String) params.get("pigCode"))) {
+            params.put("pigCodeFuzzy", params.get("pigCode"));
+            params.remove("pigCode");
         }
         Response<Paging<DoctorPigEvent>> pigEventPagingResponse = doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize);
         if (!pigEventPagingResponse.isSuccess()) {
@@ -373,15 +375,17 @@ public class DoctorPigEvents {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
-        if (StringUtils.isNotBlank((String) params.get("endDate"))) {
-            params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusMillis(1).toDate());
-        }
+
         if (StringUtils.isNotBlank((String) params.get("pigTypes"))) {
             params.put("pigTypes", Splitters.UNDERSCORE.splitToList((String)params.get("pigTypes")));
         }
 
         if (StringUtils.isNotBlank((String) params.get("changeTypeIds"))) {
             params.put("changeTypeIds", Splitters.UNDERSCORE.splitToList((String)params.get("changeTypeIds")));
+        }
+        if (StringUtils.isNotBlank((String) params.get("groupCode"))) {
+            params.put("groupCodeFuzzy", params.get("groupCode"));
+            params.remove("groupCode");
         }
         Response<Paging<DoctorGroupEvent>> pagingResponse = doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize);
         if (!pagingResponse.isSuccess()) {
