@@ -334,6 +334,12 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         try {
             Date startTime = DateUtil.toDate(startDate);
             Date endTime = DateUtil.toDate(endDate);
+            if (endTime.after(new Date())){
+                endTime = new Date();
+            }
+            if (endTime.before(startTime)) {
+                return Response.ok(Lists.newArrayList());
+            }
             int dayDiff = DateUtil.getDeltaDays(startTime, endTime) + 1;
             List<DoctorCliqueReportDto> list = farmIdToName.keySet().stream().map(farmId -> {
                 DoctorCliqueReportDto dto1 = doctorDailyReportDao.getTransverseCliqueReport(farmId, startDate, endDate);
