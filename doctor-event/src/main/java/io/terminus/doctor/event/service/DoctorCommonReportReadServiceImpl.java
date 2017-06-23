@@ -334,12 +334,15 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         try {
             Date startTime = DateUtil.toDate(startDate);
             Date endTime = DateUtil.toDate(endDate);
+
+            //日期校验
             if (endTime.after(new Date())){
                 endTime = new Date();
             }
             if (endTime.before(startTime)) {
                 return Response.ok(Lists.newArrayList());
             }
+
             int dayDiff = DateUtil.getDeltaDays(startTime, endTime) + 1;
             List<DoctorCliqueReportDto> list = farmIdToName.keySet().stream().map(farmId -> {
                 DoctorCliqueReportDto dto1 = doctorDailyReportDao.getTransverseCliqueReport(farmId, startDate, endDate);
@@ -375,15 +378,19 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             DateTime startTime = DateTime.parse(startDate, date).withDayOfMonth(1);
             DateTime endTime = DateTime.parse(endDate, date).withDayOfMonth(1);
 
-            //获取每月的月初、月末
+            //初始化月初、月末
             DateTime monthStartTime = startTime;
             DateTime monthEndTime = DateUtil.getMonthEnd(monthStartTime).isAfter(DateTime.now())
                     ? DateTime.now() : DateUtil.getMonthEnd(monthStartTime);
 
             List<DoctorCliqueReportDto> list = Lists.newArrayList();
+            String monthStartStr;
+            String monthEndStr;
             while (!monthStartTime.isAfter(endTime)) {
+                monthStartStr = monthStartTime.toString(date);
+                monthEndStr = monthEndTime.toString(date);
                 int dayDiff = DateUtil.getDeltaDays(monthStartTime.toDate(), monthEndTime.toDate()) + 1;
-                DoctorCliqueReportDto dto1 = doctorDailyReportDao.getPortraitCliqueReport(farmIds, startDate, endDate);
+                DoctorCliqueReportDto dto1 = doctorDailyReportDao.getPortraitCliqueReport(farmIds, monthStartStr, monthEndStr);
                 dto1.setMonth(DateUtil.getYearMonth(monthStartTime.toDate()));
                 dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
                         + dto1.getMateFq() + dto1.getMateFq()
@@ -396,11 +403,12 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 } else {
                     dto1.setNestAvgWean(Double.parseDouble(NumberUtils.divide(dto1.getWeanCount(), dto1.getWeanNest(), 2)));
                 }
-                DoctorCliqueReportDto dto2 = doctorDailyGroupDao.getPortraitCliqueReport(farmIds, startDate, endDate);
+                DoctorCliqueReportDto dto2 = doctorDailyGroupDao.getPortraitCliqueReport(farmIds, monthStartStr, monthEndStr);
                 dto1.setHpSale(dto2.getHpSale());
                 dto1.setCfSale(dto2.getCfSale());
                 dto1.setYfSale(dto2.getYfSale());
                 list.add(dto1);
+
                 //按月增加
                 monthStartTime = monthStartTime.plusMonths(1);
                 monthEndTime = DateUtil.getMonthEnd(monthStartTime).isAfter(DateTime.now())
