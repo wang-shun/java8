@@ -265,10 +265,18 @@ public class DoctorReports {
     public List<DoctorCliqueReportDto> getTransverseCliqueReport(@RequestParam String farmIds,
                                                                  @RequestParam String startDate,
                                                                  @RequestParam String endDate) {
+        //获取猪场
         List<Long> farmIdList = Splitters.splitToLong(farmIds, Splitters.UNDERSCORE);
         List<DoctorFarm> farmList = RespHelper.or500(doctorFarmReadService.findFarmsByIds(farmIdList));
         Map<Long, String> farmIdToName = farmList.stream()
                 .collect(Collectors.toMap(DoctorFarm::getId, DoctorFarm::getName));
+
+        //校验日期(获取月末)
+        Date endTime = DateUtil.getMonthEnd(new DateTime(DateUtil.toDate(endDate))).toDate();
+        if (endTime.after(new Date())){
+            endTime = new Date();
+        }
+        endDate = DateUtil.toDateString(endTime);
         return RespHelper.or500(doctorCommonReportReadService.getTransverseCliqueReport(farmIdToName, startDate, endDate));
     }
 

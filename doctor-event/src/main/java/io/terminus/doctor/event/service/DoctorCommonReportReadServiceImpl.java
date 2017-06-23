@@ -374,8 +374,12 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         try {
             DateTime startTime = DateTime.parse(startDate, date).withDayOfMonth(1);
             DateTime endTime = DateTime.parse(endDate, date).withDayOfMonth(1);
+
+            //获取每月的月初、月末
             DateTime monthStartTime = startTime;
-            DateTime monthEndTime = DateUtil.getMonthEnd(startTime);
+            DateTime monthEndTime = DateUtil.getMonthEnd(monthStartTime).isAfter(DateTime.now())
+                    ? DateTime.now() : DateUtil.getMonthEnd(monthStartTime);
+
             List<DoctorCliqueReportDto> list = Lists.newArrayList();
             while (!monthStartTime.isAfter(endTime)) {
                 int dayDiff = DateUtil.getDeltaDays(monthStartTime.toDate(), monthEndTime.toDate()) + 1;
@@ -397,8 +401,10 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 dto1.setCfSale(dto2.getCfSale());
                 dto1.setYfSale(dto2.getYfSale());
                 list.add(dto1);
+                //按月增加
                 monthStartTime = monthStartTime.plusMonths(1);
-                monthEndTime = DateUtil.getMonthEnd(startTime);
+                monthEndTime = DateUtil.getMonthEnd(monthStartTime).isAfter(DateTime.now())
+                        ? DateTime.now() : DateUtil.getMonthEnd(monthStartTime);
             }
             return Response.ok(list);
         } catch (Exception e) {
