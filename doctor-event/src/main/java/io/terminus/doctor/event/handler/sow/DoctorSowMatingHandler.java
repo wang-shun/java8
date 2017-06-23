@@ -101,11 +101,12 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
 
     @Override
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
-        DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         DoctorMatingDto matingDto = (DoctorMatingDto) inputDto;
+        matingDto.setJudgePregDate(getJudgePregDate(inputDto.getPigId(), inputDto.eventAt(), doctorPigTrack.getCurrentMatingCount()));
+        DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         doctorPigEvent.setJudgePregDate(matingDto.getJudgePregDate());
         doctorPigEvent.setMateType(matingDto.getMatingType());
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
         doctorPigEvent.setBoarCode(matingDto.getMatingBoarPigCode());
         //  校验断奶后, 第一次配种, 增加胎次
         Map<String, Object> trackExtraMap = doctorPigTrack.getExtraMap();
@@ -138,7 +139,6 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
             //查询最近一次进场事件
             DoctorPigEvent lastEnter = doctorPigEventDao.queryLastEnter(doctorPigTrack.getPigId());
             expectTrue(notNull(lastEnter), "mating.last.enter.not.null", doctorPigTrack.getPigId());
-            //进场时间
             DateTime lastEnterTime = new DateTime(lastEnter.getEventAt());
 
             Integer jpNPD = Math.abs(Days.daysBetween(lastEnterTime, new DateTime(doctorPigEvent.getEventAt())).getDays());
@@ -183,5 +183,20 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
             return DoctorMatingType.LPC;
         }
         return DoctorMatingType.DP;
+    }
+
+    /**
+     * 获取最新胎次下预产期
+     * @param pigId 猪id
+     * @param matingDate 配种日期
+     * @return 预产期
+     */
+    private Date getJudgePregDate(Long pigId, Date matingDate, Integer currentMatingCount) {
+        if (currentMatingCount == 0) {
+            return new DateTime(matingDate).plusDays(MATING_PREG_DAYS).toDate();
+        }
+        int parity = doctorPigEventDao.findLastParity(pigId);
+        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(pigId, parity);
+        return firstMate.getJudgePregDate();
     }
 }
