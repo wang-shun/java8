@@ -277,7 +277,10 @@ public class DoctorReports {
             endTime = new Date();
         }
         endDate = DateUtil.toDateString(endTime);
-        return RespHelper.or500(doctorCommonReportReadService.getTransverseCliqueReport(farmIdToName, startDate, endDate));
+
+        //获取有权限的猪场id
+        List<Long> permissionFarmIds = RespHelper.or500(doctorFarmReadService.findFarmIdsByUserId(UserUtil.getUserId()));
+        return RespHelper.or500(doctorCommonReportReadService.getTransverseCliqueReport(permissionFarmIds, farmIdToName, startDate, endDate));
     }
 
     /**

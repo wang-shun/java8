@@ -330,7 +330,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     }
 
     @Override
-    public Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(Map<Long, String> farmIdToName, String startDate, String endDate) {
+    public Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(List<Long> farmIds, Map<Long, String> farmIdToName, String startDate, String endDate) {
         try {
             Date startTime = DateUtil.toDate(startDate);
             Date endTime = DateUtil.toDate(endDate);
@@ -346,24 +346,15 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             int dayDiff = DateUtil.getDeltaDays(startTime, endTime) + 1;
             List<DoctorCliqueReportDto> list = farmIdToName.keySet().stream().map(farmId -> {
                 DoctorCliqueReportDto dto1 = doctorDailyReportDao.getTransverseCliqueReport(farmId, startDate, endDate);
-                dto1.setFarmName(farmIdToName.get(farmId));
-                dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
-                        + dto1.getMateFq() + dto1.getMateFq()
-                        + dto1.getMateLc() + dto1.getMateYx());
-                dto1.setPregCount(dto1.getPregPositive() + dto1.getPregNegative()
-                        + dto1.getPregFanqing() + dto1.getPregLiuchan());
-                dto1.setAvgSowLiveStock(dto1.getAvgSowLiveStock()/dayDiff);
-                if (Objects.equals(dto1.getWeanNest(), 0)) {
-                    dto1.setNestAvgWean(0D);
-                } else {
-                    dto1.setNestAvgWean(Double.parseDouble(NumberUtils.divide(dto1.getWeanCount(), dto1.getWeanNest(), 2)));
-                }
                 DoctorCliqueReportDto dto2 = doctorDailyGroupDao.getTransverseCliqueReport(farmId, startDate, endDate);
-                dto1.setHpSale(dto2.getHpSale());
-                dto1.setCfSale(dto2.getCfSale());
-                dto1.setYfSale(dto2.getYfSale());
+                fillCommonCliqueReport(dto1, dto2, dayDiff);
+                dto1.setFarmName(farmIdToName.get(farmId));
                 return dto1;
             }).collect(Collectors.toList());
+
+            //构建集团数据
+            list.add(buildCliqueReport(farmIds, new DateTime(startDate), new DateTime(endDate)));
+
             return Response.ok(list);
         } catch (Exception e) {
             log.error("get transverse clique report failed, farmIdToName:{}, startDate:{}, endDate:{},cause:{}"
@@ -384,31 +375,9 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                     ? DateTime.now() : DateUtil.getMonthEnd(monthStartTime);
 
             List<DoctorCliqueReportDto> list = Lists.newArrayList();
-            String monthStartStr;
-            String monthEndStr;
             while (!monthStartTime.isAfter(endTime)) {
-                monthStartStr = monthStartTime.toString(date);
-                monthEndStr = monthEndTime.toString(date);
-                int dayDiff = DateUtil.getDeltaDays(monthStartTime.toDate(), monthEndTime.toDate()) + 1;
-                DoctorCliqueReportDto dto1 = doctorDailyReportDao.getPortraitCliqueReport(farmIds, monthStartStr, monthEndStr);
-                dto1.setMonth(DateUtil.getYearMonth(monthStartTime.toDate()));
-                dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
-                        + dto1.getMateFq() + dto1.getMateFq()
-                        + dto1.getMateLc() + dto1.getMateYx());
-                dto1.setPregCount(dto1.getPregPositive() + dto1.getPregNegative()
-                        + dto1.getPregFanqing() + dto1.getPregLiuchan());
-                dto1.setAvgSowLiveStock(dto1.getAvgSowLiveStock()/dayDiff);
-                if (Objects.equals(dto1.getWeanNest(), 0)) {
-                    dto1.setNestAvgWean(0D);
-                } else {
-                    dto1.setNestAvgWean(Double.parseDouble(NumberUtils.divide(dto1.getWeanCount(), dto1.getWeanNest(), 2)));
-                }
-                DoctorCliqueReportDto dto2 = doctorDailyGroupDao.getPortraitCliqueReport(farmIds, monthStartStr, monthEndStr);
-                dto1.setHpSale(dto2.getHpSale());
-                dto1.setCfSale(dto2.getCfSale());
-                dto1.setYfSale(dto2.getYfSale());
-                list.add(dto1);
-
+                //构建每月数据
+                list.add(buildCliqueReport(farmIds, monthStartTime, monthEndTime));
                 //按月增加
                 monthStartTime = monthStartTime.plusMonths(1);
                 monthEndTime = DateUtil.getMonthEnd(monthStartTime).isAfter(DateTime.now())
@@ -420,6 +389,49 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                     , farmIds, startDate, endDate, Throwables.getStackTraceAsString(e));
             return Response.fail("get.portrait.clique.report.failed");
         }
+    }
+
+    /**
+     * 构建一个多个猪场某月的报表数据
+     * @param farmIds 猪场id
+     * @param monthStartTime 月初
+     * @param monthEndTime 月末
+     * @return 报表数据
+     */
+    private DoctorCliqueReportDto buildCliqueReport(List<Long> farmIds, DateTime monthStartTime, DateTime monthEndTime) {
+        String monthStartStr = monthStartTime.toString(date);
+        String monthEndStr = monthEndTime.toString(date);
+        int dayDiff = DateUtil.getDeltaDays(monthStartTime.toDate(), monthEndTime.toDate()) + 1;
+        DoctorCliqueReportDto dto1 = doctorDailyReportDao.getPortraitCliqueReport(farmIds, monthStartStr, monthEndStr);
+        DoctorCliqueReportDto dto2 = doctorDailyGroupDao.getPortraitCliqueReport(farmIds, monthStartStr, monthEndStr);
+        fillCommonCliqueReport(dto1, dto2, dayDiff);
+        dto1.setMonth(DateUtil.getYearMonth(monthStartTime.toDate()));
+        return dto1;
+    }
+
+    /**
+     * 填充集团报汇总共有数据
+     * @param dto1
+     * @param dto2
+     * @param dayDiff
+     * @return
+     */
+    private DoctorCliqueReportDto fillCommonCliqueReport(DoctorCliqueReportDto dto1, DoctorCliqueReportDto dto2, Integer dayDiff) {
+        dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
+                + dto1.getMateFq() + dto1.getMateFq()
+                + dto1.getMateLc() + dto1.getMateYx());
+        dto1.setPregCount(dto1.getPregPositive() + dto1.getPregNegative()
+                + dto1.getPregFanqing() + dto1.getPregLiuchan());
+        dto1.setAvgSowLiveStock(dto1.getAvgSowLiveStock()/dayDiff);
+        if (Objects.equals(dto1.getWeanNest(), 0)) {
+            dto1.setNestAvgWean(0D);
+        } else {
+            dto1.setNestAvgWean(Double.parseDouble(NumberUtils.divide(dto1.getWeanCount(), dto1.getWeanNest(), 2)));
+        }
+        dto1.setHpSale(dto2.getHpSale());
+        dto1.setCfSale(dto2.getCfSale());
+        dto1.setYfSale(dto2.getYfSale());
+        return dto1;
     }
 
     /**
