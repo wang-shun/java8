@@ -149,7 +149,7 @@
         id = #{id}
     </delete>
 
-    <select id="findAllRelFarmId" resultType="PrimaryUserMap">
+    <select id="findAllRelFarmId" resultMap="PrimaryUserMap">
         SELECT
         <include refid="cols_all"/>
         FROM
