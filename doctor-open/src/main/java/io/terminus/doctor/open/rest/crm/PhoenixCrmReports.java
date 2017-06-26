@@ -93,7 +93,7 @@ public class PhoenixCrmReports {
     /**
      * 根据日期查询全部猪场的日报
      *
-     * @param date 日期
+     * @param date 日期 2017-01-01
      * @return 日报数据json
      */
     @OpenMethod(key = "get.daily.report", paramNames = "date")
@@ -127,57 +127,58 @@ public class PhoenixCrmReports {
             doctorDailyReportOpen.setUserName(farmToUserNameMap.get(pigDailyReport.getFarmId()));
             doctorDailyReportOpen.setSumAt(DateTime.parse(pigDailyReport.getSumAt()).toDate());
 
-            doctorDailyReportOpen.getWean().setCount(pigDailyReport.getWeanCount());
-            doctorDailyReportOpen.getWean().setWeight(pigDailyReport.getWeanAvgWeight());
+            doctorDailyReportOpen.getWean().setCount(MoreObjects.firstNonNull(pigDailyReport.getWeanCount(), 0));
+            doctorDailyReportOpen.getWean().setWeight(MoreObjects.firstNonNull(pigDailyReport.getWeanAvgWeight(), 0.0));
 
-            doctorDailyReportOpen.getDeliver().setNest(pigDailyReport.getFarrowNest());
-            doctorDailyReportOpen.getDeliver().setLive(pigDailyReport.getFarrowLive());
-            doctorDailyReportOpen.getDeliver().setHealth(pigDailyReport.getFarrowHealth());
-            doctorDailyReportOpen.getDeliver().setWeak(pigDailyReport.getFarrowWeak());
-            doctorDailyReportOpen.getDeliver().setBlack(pigDailyReport.getFarrowSjmh());
+            doctorDailyReportOpen.getDeliver().setNest(MoreObjects.firstNonNull(pigDailyReport.getFarrowNest(), 0));
+            doctorDailyReportOpen.getDeliver().setLive(MoreObjects.firstNonNull(pigDailyReport.getFarrowLive(), 0));
+            doctorDailyReportOpen.getDeliver().setHealth(MoreObjects.firstNonNull(pigDailyReport.getFarrowHealth(), 0));
+            doctorDailyReportOpen.getDeliver().setWeak(MoreObjects.firstNonNull(pigDailyReport.getFarrowWeak(), 0));
+            doctorDailyReportOpen.getDeliver().setBlack(MoreObjects.firstNonNull(pigDailyReport.getFarrowSjmh(), 0));
 
-            doctorDailyReportOpen.getCheckPreg().setPositive(pigDailyReport.getPregPositive());
-            doctorDailyReportOpen.getCheckPreg().setNegative(pigDailyReport.getPregNegative());
-            doctorDailyReportOpen.getCheckPreg().setFanqing(pigDailyReport.getPregFanqing());
-            doctorDailyReportOpen.getCheckPreg().setLiuchan(pigDailyReport.getPregLiuchan());
+            doctorDailyReportOpen.getCheckPreg().setPositive(MoreObjects.firstNonNull(pigDailyReport.getPregPositive(), 0));
+            doctorDailyReportOpen.getCheckPreg().setNegative(MoreObjects.firstNonNull(pigDailyReport.getPregNegative(), 0));
+            doctorDailyReportOpen.getCheckPreg().setFanqing(MoreObjects.firstNonNull(pigDailyReport.getPregFanqing(), 0));
+            doctorDailyReportOpen.getCheckPreg().setLiuchan(MoreObjects.firstNonNull(pigDailyReport.getPregLiuchan(), 0));
             DoctorCheckPregDailyReport checkPreg = doctorDailyReportOpen.getCheckPreg();
             checkPreg.setPregTotal(checkPreg.getPositive() + checkPreg.getNegative()
                     + checkPreg.getFanqing() + checkPreg.getLiuchan());
 
-            doctorDailyReportOpen.getMating().setHoubei(pigDailyReport.getMateHb());
-            doctorDailyReportOpen.getMating().setDuannai(pigDailyReport.getMateDn());
-            doctorDailyReportOpen.getMating().setFanqing(pigDailyReport.getMateFq());
-            doctorDailyReportOpen.getMating().setLiuchan(pigDailyReport.getMateLc());
+            doctorDailyReportOpen.getMating().setHoubei(MoreObjects.firstNonNull(pigDailyReport.getMateHb(), 0));
+            doctorDailyReportOpen.getMating().setDuannai(MoreObjects.firstNonNull(pigDailyReport.getMateDn(), 0));
+            doctorDailyReportOpen.getMating().setFanqing(MoreObjects.firstNonNull(pigDailyReport.getMateFq(), 0));
+            doctorDailyReportOpen.getMating().setLiuchan(MoreObjects.firstNonNull(pigDailyReport.getMateLc(), 0));
             DoctorMatingDailyReportOpen mating = doctorDailyReportOpen.getMating();
             mating.setMatingTotal(mating.getHoubei() + mating.getDuannai()
                     + mating.getFanqing() + mating.getLiuchan());
 
-            doctorDailyReportOpen.getLiveStock().setPeihuaiSow(pigDailyReport.getSowPh());
-            doctorDailyReportOpen.getLiveStock().setBuruSow(pigDailyReport.getSowCf());
-            doctorDailyReportOpen.getLiveStock().setSowTotal(pigDailyReport.getSowPh() + pigDailyReport.getSowCf());
-            doctorDailyReportOpen.getLiveStock().setGroup(farmToGroupCountMap.get(pigDailyReport.getFarmId()));
+            doctorDailyReportOpen.getLiveStock().setPeihuaiSow(MoreObjects.firstNonNull(pigDailyReport.getSowPh(), 0));
+            doctorDailyReportOpen.getLiveStock().setBuruSow(MoreObjects.firstNonNull(pigDailyReport.getSowCf(), 0));
+            doctorDailyReportOpen.getLiveStock().setSowTotal(MoreObjects.firstNonNull(pigDailyReport.getSowPh() + pigDailyReport.getSowCf(), 0));
+            doctorDailyReportOpen.getLiveStock().setGroup(MoreObjects.firstNonNull(farmToGroupCountMap.get(pigDailyReport.getFarmId()), 0));
+
 //            doctorDailyReportOpen.getLiveStock().setHoubeiSow(groupDailyReport.getHoubeiEnd());
-            doctorDailyReportOpen.getLiveStock().setBoar(pigDailyReport.getBoarEnd());
-            doctorDailyReportOpen.getLiveStock().setFarrow(groupDailyReport.getFarrowEnd());
-            doctorDailyReportOpen.getLiveStock().setNursery(groupDailyReport.getNurseryEnd());
-            doctorDailyReportOpen.getLiveStock().setFatten(groupDailyReport.getFattenEnd());
-            doctorDailyReportOpen.getLiveStock().setFattenOut(doctorDailyReportDto.getFattenWillOut());
+            doctorDailyReportOpen.getLiveStock().setBoar(MoreObjects.firstNonNull(pigDailyReport.getBoarEnd(), 0));
+            doctorDailyReportOpen.getLiveStock().setFarrow(MoreObjects.firstNonNull(groupDailyReport.getFarrowEnd(), 0));
+            doctorDailyReportOpen.getLiveStock().setNursery(MoreObjects.firstNonNull(groupDailyReport.getNurseryEnd(), 0));
+            doctorDailyReportOpen.getLiveStock().setFatten(MoreObjects.firstNonNull(groupDailyReport.getFattenEnd(), 0));
+            doctorDailyReportOpen.getLiveStock().setFattenOut(MoreObjects.firstNonNull(doctorDailyReportDto.getFattenWillOut(), 0));
             DoctorLiveStockDailyReportOpen liveStock = doctorDailyReportOpen.getLiveStock();
             liveStock.setLiveStockTotal(liveStock.getSowTotal() + liveStock.getBoar() + liveStock.getFarrow()
                     + liveStock.getNursery() + liveStock.getFatten() + liveStock.getFattenOut());
 
-            doctorDailyReportOpen.getDead().setSow(pigDailyReport.getSowDead());
-            doctorDailyReportOpen.getDead().setBoar(pigDailyReport.getBoarDead());
-            doctorDailyReportOpen.getDead().setFarrow(groupDailyReport.getFarrowDead());
-            doctorDailyReportOpen.getDead().setNursery(groupDailyReport.getNurseryDead());
-            doctorDailyReportOpen.getDead().setFatten(groupDailyReport.getFattenDead());
+            doctorDailyReportOpen.getDead().setSow(MoreObjects.firstNonNull(pigDailyReport.getSowDead(), 0));
+            doctorDailyReportOpen.getDead().setBoar(MoreObjects.firstNonNull(pigDailyReport.getBoarDead(), 0));
+            doctorDailyReportOpen.getDead().setFarrow(MoreObjects.firstNonNull(groupDailyReport.getFarrowDead(), 0));
+            doctorDailyReportOpen.getDead().setNursery(MoreObjects.firstNonNull(groupDailyReport.getNurseryDead(), 0));
+            doctorDailyReportOpen.getDead().setFatten(MoreObjects.firstNonNull(groupDailyReport.getFattenDead(), 0));
             DoctorDeadDailyReportOpen dead = doctorDailyReportOpen.getDead();
             dead.setDeadTotal(dead.getSow() + dead.getBoar() + dead.getFarrow() + dead.getNursery() + dead.getFatten());
 
-            doctorDailyReportOpen.getSale().setSow(pigDailyReport.getSowSale());
-            doctorDailyReportOpen.getSale().setBoar(pigDailyReport.getBoarSale());
+            doctorDailyReportOpen.getSale().setSow(MoreObjects.firstNonNull(pigDailyReport.getSowSale(), 0));
+            doctorDailyReportOpen.getSale().setBoar(MoreObjects.firstNonNull(pigDailyReport.getBoarSale(), 0));
             doctorDailyReportOpen.getSale().setNursery(EventUtil.plusInt(groupDailyReport.getFarrowSale(), groupDailyReport.getNurserySale()));
-            doctorDailyReportOpen.getSale().setFatten(groupDailyReport.getFattenSale());
+            doctorDailyReportOpen.getSale().setFatten(MoreObjects.firstNonNull(groupDailyReport.getFattenSale(), 0));
             DoctorSaleDailyReportOpen sale = doctorDailyReportOpen.getSale();
             sale.setSaleTotal(sale.getSow() + sale.getBoar() + sale.getNursery() + sale.getFatten());
 
@@ -188,7 +189,7 @@ public class PhoenixCrmReports {
 
     /**
      * 根据统计日期查询月报
-     * @param date 查询日期
+     * @param date 查询日期 2017-01
      * @return 月报数据json
      */
     @OpenMethod(key = "get.monthly.report", paramNames = "date")
@@ -211,46 +212,46 @@ public class PhoenixCrmReports {
             DoctorGroupChangeSum groupChangeSum = MoreObjects.firstNonNull(doctorCommonReportDto.getGroupChangeReport(), new DoctorGroupChangeSum());
             DoctorRangeReport indicatorReport = MoreObjects.firstNonNull(doctorCommonReportDto.getIndicatorReport(), new DoctorRangeReport());
 
-            doctorMonthlyReportOpen.setMateHoubei(dailyReportSum.getMateHb());
-            doctorMonthlyReportOpen.setMateFanqing(dailyReportSum.getMateFq());
-            doctorMonthlyReportOpen.setMateAbort(dailyReportSum.getMateLc());
-            doctorMonthlyReportOpen.setMateWean(dailyReportSum.getMateDn());
-            doctorMonthlyReportOpen.setMateNegtive(dailyReportSum.getMateYx());
-            doctorMonthlyReportOpen.setMateEstimatePregRate(indicatorReport.getMateEstimatePregRate());
-            doctorMonthlyReportOpen.setMateRealPregRate(indicatorReport.getMateRealPregRate());
-            doctorMonthlyReportOpen.setMateEstimateFarrowingRate(indicatorReport.getMateEstimateFarrowingRate());
-            doctorMonthlyReportOpen.setMateRealFarrowingRate(indicatorReport.getMateRealFarrowingRate());
+            doctorMonthlyReportOpen.setMateHoubei(MoreObjects.firstNonNull(dailyReportSum.getMateHb(), 0));
+            doctorMonthlyReportOpen.setMateFanqing(MoreObjects.firstNonNull(dailyReportSum.getMateFq(), 0));
+            doctorMonthlyReportOpen.setMateAbort(MoreObjects.firstNonNull(dailyReportSum.getMateLc(), 0));
+            doctorMonthlyReportOpen.setMateWean(MoreObjects.firstNonNull(dailyReportSum.getMateDn(), 0));
+            doctorMonthlyReportOpen.setMateNegtive(MoreObjects.firstNonNull(dailyReportSum.getMateYx(), 0));
+            doctorMonthlyReportOpen.setMateEstimatePregRate(MoreObjects.firstNonNull(indicatorReport.getMateEstimatePregRate(), 0.0));
+            doctorMonthlyReportOpen.setMateRealPregRate(MoreObjects.firstNonNull(indicatorReport.getMateRealPregRate(), 0.0));
+            doctorMonthlyReportOpen.setMateEstimateFarrowingRate(MoreObjects.firstNonNull(indicatorReport.getMateEstimateFarrowingRate(), 0.0));
+            doctorMonthlyReportOpen.setMateRealFarrowingRate(MoreObjects.firstNonNull(indicatorReport.getMateRealFarrowingRate(), 0.0));
 
-            doctorMonthlyReportOpen.setFarrowNest(dailyReportSum.getFarrowNest());
-            doctorMonthlyReportOpen.setFarrowEstimateParity(dailyReportSum.getPreFarrowCount());
-            doctorMonthlyReportOpen.setFarrowAll(dailyReportSum.getFarrowAll());
-            doctorMonthlyReportOpen.setFarrowAlive(dailyReportSum.getFarrowLive());
-            doctorMonthlyReportOpen.setFarrowHealth(dailyReportSum.getFarrowHealth());
-            doctorMonthlyReportOpen.setFarrowWeak(dailyReportSum.getFarrowWeak());
-            doctorMonthlyReportOpen.setFarrowDead(dailyReportSum.getFarrowDead());
-            doctorMonthlyReportOpen.setFarrowMny(dailyReportSum.getFarrowMny());
+            doctorMonthlyReportOpen.setFarrowNest(MoreObjects.firstNonNull(dailyReportSum.getFarrowNest(), 0));
+            doctorMonthlyReportOpen.setFarrowEstimateParity(MoreObjects.firstNonNull(dailyReportSum.getPreFarrowCount(), 0));
+            doctorMonthlyReportOpen.setFarrowAll(MoreObjects.firstNonNull(dailyReportSum.getFarrowAll(), 0));
+            doctorMonthlyReportOpen.setFarrowAlive(MoreObjects.firstNonNull(dailyReportSum.getFarrowLive(), 0));
+            doctorMonthlyReportOpen.setFarrowHealth(MoreObjects.firstNonNull(dailyReportSum.getFarrowHealth(), 0));
+            doctorMonthlyReportOpen.setFarrowWeak(MoreObjects.firstNonNull(dailyReportSum.getFarrowWeak(), 0));
+            doctorMonthlyReportOpen.setFarrowDead(MoreObjects.firstNonNull(dailyReportSum.getFarrowDead(), 0));
+            doctorMonthlyReportOpen.setFarrowMny(MoreObjects.firstNonNull(dailyReportSum.getFarrowMny(), 0));
             doctorMonthlyReportOpen.setFarrowAvgAll((Arguments.isNull(dailyReportSum.getFarrowNest()) || dailyReportSum.getFarrowNest() == 0) ? 0 : dailyReportSum.getFarrowAll()/dailyReportSum.getFarrowNest());
             doctorMonthlyReportOpen.setFarrowAvgAlive(dailyReportSum.getFarrowAvgLive());
             doctorMonthlyReportOpen.setFarrowAvgHealth(dailyReportSum.getFarrowAvgHealth());
 
-            doctorMonthlyReportOpen.setCheckPositive(dailyReportSum.getPregPositive());
-            doctorMonthlyReportOpen.setCheckFanqing(dailyReportSum.getPregFanqing());
-            doctorMonthlyReportOpen.setCheckAbort(dailyReportSum.getPregLiuchan());
-            doctorMonthlyReportOpen.setCheckNegtive(dailyReportSum.getPregNegative());
+            doctorMonthlyReportOpen.setCheckPositive(MoreObjects.firstNonNull(dailyReportSum.getPregPositive(), 0));
+            doctorMonthlyReportOpen.setCheckFanqing(MoreObjects.firstNonNull(dailyReportSum.getPregFanqing(), 0));
+            doctorMonthlyReportOpen.setCheckAbort(MoreObjects.firstNonNull(dailyReportSum.getPregLiuchan(), 0));
+            doctorMonthlyReportOpen.setCheckNegtive(MoreObjects.firstNonNull(dailyReportSum.getPregNegative(), 0));
 
-            doctorMonthlyReportOpen.setNpd(indicatorReport.getNpd());
-            doctorMonthlyReportOpen.setPsy(indicatorReport.getPsy());
-            doctorMonthlyReportOpen.setMateInSeven(indicatorReport.getMateInSeven());
+            doctorMonthlyReportOpen.setNpd(MoreObjects.firstNonNull(indicatorReport.getNpd(), 0.0));
+            doctorMonthlyReportOpen.setPsy(MoreObjects.firstNonNull(indicatorReport.getPsy(), 0.0));
+            doctorMonthlyReportOpen.setMateInSeven(MoreObjects.firstNonNull(indicatorReport.getMateInSeven(), 0.0));
 
-            doctorMonthlyReportOpen.setSaleSow(dailyReportSum.getSowSale());
-            doctorMonthlyReportOpen.setSaleBoar(dailyReportSum.getBoarSale());
-            doctorMonthlyReportOpen.setSaleNursery(groupChangeSum.getNurserySale());
-            doctorMonthlyReportOpen.setSaleFatten(groupChangeSum.getFattenSale());
+            doctorMonthlyReportOpen.setSaleSow(MoreObjects.firstNonNull(dailyReportSum.getSowSale(), 0));
+            doctorMonthlyReportOpen.setSaleBoar(MoreObjects.firstNonNull(dailyReportSum.getBoarSale(), 0));
+            doctorMonthlyReportOpen.setSaleNursery(MoreObjects.firstNonNull(groupChangeSum.getNurserySale(), 0));
+            doctorMonthlyReportOpen.setSaleFatten(MoreObjects.firstNonNull(groupChangeSum.getFattenSale(), 0));
             doctorMonthlyReportOpen.setSaleTotal(doctorMonthlyReportOpen.getSaleSow()
                     + doctorMonthlyReportOpen.getSaleBoar()
                     + doctorMonthlyReportOpen.getSaleNursery()
                     + doctorMonthlyReportOpen.getSaleFatten());
-            doctorMonthlyReportOpen.setSaleFarrow(groupChangeSum.getFarrowSale());
+            doctorMonthlyReportOpen.setSaleFarrow(MoreObjects.firstNonNull(groupChangeSum.getFarrowSale(), 0));
 
             doctorMonthlyReportOpen.setDate(DateUtil.getMonthEndOrToday(DateTime.parse(doctorCommonReportDto.getDate(), DateUtil.YYYYMM)));
             return doctorMonthlyReportOpen;
@@ -260,7 +261,7 @@ public class PhoenixCrmReports {
 
     /**
      * 获取猪群存栏明细
-     * @param date 查询日期
+     * @param date 查询日期 2017-01-01
      * @return 猪群存栏明细json
      */
     @OpenMethod(key = "get.group.live.stock.detail", paramNames = "date")
@@ -280,7 +281,7 @@ public class PhoenixCrmReports {
             DoctorGroupLiveStockDetailOpen doctorGroupLiveStockDetailOpen = new DoctorGroupLiveStockDetailOpen();
             doctorGroupLiveStockDetailOpen.setUserName(farmToUserNameMap.get(doctorDailyGroup.getFarmId()));
             doctorGroupLiveStockDetailOpen.setGroupCode(groupDetail.getGroup().getGroupCode());
-            doctorGroupLiveStockDetailOpen.setLiveStocks(doctorDailyGroup.getEnd());
+            doctorGroupLiveStockDetailOpen.setLiveStocks(MoreObjects.firstNonNull(doctorDailyGroup.getEnd(), 0));
             doctorGroupLiveStockDetailOpen.setType(PigType.from(doctorDailyGroup.getType()).getName());
             doctorGroupLiveStockDetailOpen.setSumAt(doctorDailyGroup.getSumAt());
             doctorGroupLiveStockDetailOpen.setDayAge(DateUtil.getDeltaDaysAbs(groupDetail.getGroupTrack().getBirthDate(), doctorDailyGroup.getSumAt()));

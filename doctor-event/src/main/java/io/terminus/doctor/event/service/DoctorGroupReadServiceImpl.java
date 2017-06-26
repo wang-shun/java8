@@ -511,7 +511,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         try {
             List<Map<String, Object>> list = doctorGroupDao.findFarmToGroupCount();
             Map<Long, Integer> map = list.stream().collect(Collectors
-                    .toMap(k -> (long)k.get("farmId"), v -> (int)v.get("groupCount")));
+                    .toMap(k -> (long)k.get("farmId"), v -> Long.valueOf((long)v.get("groupCount")).intValue()));
             return Response.ok(map);
 
         } catch (Exception e) {
