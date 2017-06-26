@@ -13,6 +13,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorDailyReport;
@@ -25,8 +26,13 @@ import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.doctor.open.dto.DoctorDailyReportOpen;
+import io.terminus.doctor.open.dto.DoctorDeadDailyReportOpen;
 import io.terminus.doctor.open.dto.DoctorGroupLiveStockDetailOpen;
+import io.terminus.doctor.open.dto.DoctorLiveStockDailyReportOpen;
+import io.terminus.doctor.open.dto.DoctorMatingDailyReportOpen;
 import io.terminus.doctor.open.dto.DoctorMonthlyReportOpen;
+import io.terminus.doctor.open.dto.DoctorSaleDailyReportOpen;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
@@ -100,24 +106,29 @@ public class PhoenixCrmReports {
         if (!mapResponse.isSuccess()) {
             return "";
         }
+        Response<List<DoctorFarm>> farmsResponse = doctorFarmReadService.findAllFarms();
+        if (!farmsResponse.isSuccess()) {
+            return "";
+        }
+        Response<Map<Long, Integer>> mapResponse1 = doctorGroupReadService.findFarmToGroupCount();
+        if (!mapResponse1.isSuccess()) {
+            return "";
+        }
+        Map<Long, Integer> farmToGroupCountMap = mapResponse1.getResult();
+        Map<Long, String> farmIdToFarmNameMap = farmsResponse.getResult().stream().collect(Collectors.toMap(DoctorFarm::getId, DoctorFarm::getName));
         Map<Long, String> farmToUserNameMap = mapResponse.getResult();
+
         List<DoctorDailyReportOpen> doctorDailyReportDtos = dailyReportsResponse.getResult().stream().map(doctorDailyReportDto -> {
             DoctorDailyReportOpen doctorDailyReportOpen = new DoctorDailyReportOpen();
             DoctorDailyReport pigDailyReport = MoreObjects.firstNonNull(doctorDailyReportDto.getDailyReport(), new DoctorDailyReport());
             DoctorGroupChangeSum groupDailyReport = MoreObjects.firstNonNull(doctorDailyReportDto.getGroupChangeSum(), new DoctorGroupChangeSum());
 
+            doctorDailyReportOpen.setFarmName(farmIdToFarmNameMap.get(pigDailyReport.getFarmId()));
             doctorDailyReportOpen.setUserName(farmToUserNameMap.get(pigDailyReport.getFarmId()));
             doctorDailyReportOpen.setSumAt(DateTime.parse(pigDailyReport.getSumAt()).toDate());
 
-            doctorDailyReportOpen.getMating().setHoubei(pigDailyReport.getMateHb());
-            doctorDailyReportOpen.getMating().setDuannai(pigDailyReport.getMateDn());
-            doctorDailyReportOpen.getMating().setFanqing(pigDailyReport.getMateFq());
-            doctorDailyReportOpen.getMating().setLiuchan(pigDailyReport.getMateLc());
-
-            doctorDailyReportOpen.getCheckPreg().setPositive(pigDailyReport.getPregPositive());
-            doctorDailyReportOpen.getCheckPreg().setNegative(pigDailyReport.getPregNegative());
-            doctorDailyReportOpen.getCheckPreg().setFanqing(pigDailyReport.getPregFanqing());
-            doctorDailyReportOpen.getCheckPreg().setLiuchan(pigDailyReport.getPregLiuchan());
+            doctorDailyReportOpen.getWean().setCount(pigDailyReport.getWeanCount());
+            doctorDailyReportOpen.getWean().setWeight(pigDailyReport.getWeanAvgWeight());
 
             doctorDailyReportOpen.getDeliver().setNest(pigDailyReport.getFarrowNest());
             doctorDailyReportOpen.getDeliver().setLive(pigDailyReport.getFarrowLive());
@@ -125,28 +136,50 @@ public class PhoenixCrmReports {
             doctorDailyReportOpen.getDeliver().setWeak(pigDailyReport.getFarrowWeak());
             doctorDailyReportOpen.getDeliver().setBlack(pigDailyReport.getFarrowSjmh());
 
-            doctorDailyReportOpen.getWean().setCount(pigDailyReport.getWeanCount());
-            doctorDailyReportOpen.getWean().setWeight(pigDailyReport.getWeanAvgWeight());
+            doctorDailyReportOpen.getCheckPreg().setPositive(pigDailyReport.getPregPositive());
+            doctorDailyReportOpen.getCheckPreg().setNegative(pigDailyReport.getPregNegative());
+            doctorDailyReportOpen.getCheckPreg().setFanqing(pigDailyReport.getPregFanqing());
+            doctorDailyReportOpen.getCheckPreg().setLiuchan(pigDailyReport.getPregLiuchan());
+            DoctorCheckPregDailyReport checkPreg = doctorDailyReportOpen.getCheckPreg();
+            checkPreg.setPregTotal(checkPreg.getPositive() + checkPreg.getNegative()
+                    + checkPreg.getFanqing() + checkPreg.getLiuchan());
+
+            doctorDailyReportOpen.getMating().setHoubei(pigDailyReport.getMateHb());
+            doctorDailyReportOpen.getMating().setDuannai(pigDailyReport.getMateDn());
+            doctorDailyReportOpen.getMating().setFanqing(pigDailyReport.getMateFq());
+            doctorDailyReportOpen.getMating().setLiuchan(pigDailyReport.getMateLc());
+            DoctorMatingDailyReportOpen mating = doctorDailyReportOpen.getMating();
+            mating.setMatingTotal(mating.getHoubei() + mating.getDuannai()
+                    + mating.getFanqing() + mating.getLiuchan());
 
             doctorDailyReportOpen.getLiveStock().setPeihuaiSow(pigDailyReport.getSowPh());
             doctorDailyReportOpen.getLiveStock().setBuruSow(pigDailyReport.getSowCf());
-            doctorDailyReportOpen.getLiveStock().setHoubeiSow(groupDailyReport.getHoubeiEnd());
+            doctorDailyReportOpen.getLiveStock().setSowTotal(pigDailyReport.getSowPh() + pigDailyReport.getSowCf());
+            doctorDailyReportOpen.getLiveStock().setGroup(farmToGroupCountMap.get(pigDailyReport.getFarmId()));
+//            doctorDailyReportOpen.getLiveStock().setHoubeiSow(groupDailyReport.getHoubeiEnd());
             doctorDailyReportOpen.getLiveStock().setBoar(pigDailyReport.getBoarEnd());
             doctorDailyReportOpen.getLiveStock().setFarrow(groupDailyReport.getFarrowEnd());
             doctorDailyReportOpen.getLiveStock().setNursery(groupDailyReport.getNurseryEnd());
             doctorDailyReportOpen.getLiveStock().setFatten(groupDailyReport.getFattenEnd());
             doctorDailyReportOpen.getLiveStock().setFattenOut(doctorDailyReportDto.getFattenWillOut());
+            DoctorLiveStockDailyReportOpen liveStock = doctorDailyReportOpen.getLiveStock();
+            liveStock.setLiveStockTotal(liveStock.getSowTotal() + liveStock.getBoar() + liveStock.getFarrow()
+                    + liveStock.getNursery() + liveStock.getFatten() + liveStock.getFattenOut());
 
             doctorDailyReportOpen.getDead().setSow(pigDailyReport.getSowDead());
             doctorDailyReportOpen.getDead().setBoar(pigDailyReport.getBoarDead());
             doctorDailyReportOpen.getDead().setFarrow(groupDailyReport.getFarrowDead());
             doctorDailyReportOpen.getDead().setNursery(groupDailyReport.getNurseryDead());
             doctorDailyReportOpen.getDead().setFatten(groupDailyReport.getFattenDead());
+            DoctorDeadDailyReportOpen dead = doctorDailyReportOpen.getDead();
+            dead.setDeadTotal(dead.getSow() + dead.getBoar() + dead.getFarrow() + dead.getNursery() + dead.getFatten());
 
             doctorDailyReportOpen.getSale().setSow(pigDailyReport.getSowSale());
             doctorDailyReportOpen.getSale().setBoar(pigDailyReport.getBoarSale());
             doctorDailyReportOpen.getSale().setNursery(EventUtil.plusInt(groupDailyReport.getFarrowSale(), groupDailyReport.getNurserySale()));
             doctorDailyReportOpen.getSale().setFatten(groupDailyReport.getFattenSale());
+            DoctorSaleDailyReportOpen sale = doctorDailyReportOpen.getSale();
+            sale.setSaleTotal(sale.getSow() + sale.getBoar() + sale.getNursery() + sale.getFatten());
 
             return doctorDailyReportOpen;
         }).collect(Collectors.toList());
@@ -168,13 +201,16 @@ public class PhoenixCrmReports {
         if (!mapResponse.isSuccess()) {
             return "";
         }
+
         Map<Long, String> farmToUserNameMap = mapResponse.getResult();
         List<DoctorMonthlyReportOpen> doctorCommonReportDtos = monthlyReportsResponse.getResult().stream().map(doctorCommonReportDto -> {
             DoctorMonthlyReportOpen doctorMonthlyReportOpen = new DoctorMonthlyReportOpen();
+
             doctorMonthlyReportOpen.setUserName(farmToUserNameMap.get(doctorCommonReportDto.getFarmId()));
             DoctorDailyReportSum dailyReportSum = MoreObjects.firstNonNull(doctorCommonReportDto.getChangeReport(), new DoctorDailyReportSum());
             DoctorGroupChangeSum groupChangeSum = MoreObjects.firstNonNull(doctorCommonReportDto.getGroupChangeReport(), new DoctorGroupChangeSum());
             DoctorRangeReport indicatorReport = MoreObjects.firstNonNull(doctorCommonReportDto.getIndicatorReport(), new DoctorRangeReport());
+
             doctorMonthlyReportOpen.setMateHoubei(dailyReportSum.getMateHb());
             doctorMonthlyReportOpen.setMateFanqing(dailyReportSum.getMateFq());
             doctorMonthlyReportOpen.setMateAbort(dailyReportSum.getMateLc());
@@ -197,15 +233,24 @@ public class PhoenixCrmReports {
             doctorMonthlyReportOpen.setFarrowAvgAlive(dailyReportSum.getFarrowAvgLive());
             doctorMonthlyReportOpen.setFarrowAvgHealth(dailyReportSum.getFarrowAvgHealth());
 
+            doctorMonthlyReportOpen.setCheckPositive(dailyReportSum.getPregPositive());
+            doctorMonthlyReportOpen.setCheckFanqing(dailyReportSum.getPregFanqing());
+            doctorMonthlyReportOpen.setCheckAbort(dailyReportSum.getPregLiuchan());
+            doctorMonthlyReportOpen.setCheckNegtive(dailyReportSum.getPregNegative());
+
             doctorMonthlyReportOpen.setNpd(indicatorReport.getNpd());
             doctorMonthlyReportOpen.setPsy(indicatorReport.getPsy());
             doctorMonthlyReportOpen.setMateInSeven(indicatorReport.getMateInSeven());
 
             doctorMonthlyReportOpen.setSaleSow(dailyReportSum.getSowSale());
             doctorMonthlyReportOpen.setSaleBoar(dailyReportSum.getBoarSale());
-            doctorMonthlyReportOpen.setSaleFarrow(groupChangeSum.getFarrowSale());
             doctorMonthlyReportOpen.setSaleNursery(groupChangeSum.getNurserySale());
             doctorMonthlyReportOpen.setSaleFatten(groupChangeSum.getFattenSale());
+            doctorMonthlyReportOpen.setSaleTotal(doctorMonthlyReportOpen.getSaleSow()
+                    + doctorMonthlyReportOpen.getSaleBoar()
+                    + doctorMonthlyReportOpen.getSaleNursery()
+                    + doctorMonthlyReportOpen.getSaleFatten());
+            doctorMonthlyReportOpen.setSaleFarrow(groupChangeSum.getFarrowSale());
 
             doctorMonthlyReportOpen.setDate(DateUtil.getMonthEndOrToday(DateTime.parse(doctorCommonReportDto.getDate(), DateUtil.YYYYMM)));
             return doctorMonthlyReportOpen;

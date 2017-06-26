@@ -120,4 +120,12 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
     public Boolean updateCurrentBarnName(Long currentBarnId, String currentBarnName) {
         return getSqlSession().update(sqlId("updateCurrentBarnName"), ImmutableMap.of("currentBarnId", currentBarnId, "currentBarnName", currentBarnName)) == 1;
     }
+
+    /**
+     * 查询猪场与当前开启猪群数量映射
+     * @return
+     */
+    public List<Map<String, Object>> findFarmToGroupCount() {
+        return getSqlSession().selectList(sqlId("findFarmToGroupCount"));
+    }
 }

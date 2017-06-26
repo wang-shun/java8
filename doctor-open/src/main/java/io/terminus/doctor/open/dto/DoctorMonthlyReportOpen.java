@@ -47,6 +47,14 @@ public class DoctorMonthlyReportOpen implements Serializable{
     private double farrowAvgAlive;            //窝均活仔数
 
     /**
+     * 妊娠情况
+     */
+    private int checkPositive;                //妊娠检查阳性
+    private int checkFanqing;                 //妊娠检查返情
+    private int checkAbort;                   //妊娠检查流产
+    private int checkNegtive;                 //妊娠检查阴性
+
+    /**
      * 其他
      */
     private double npd;                       //非生产天数
@@ -85,10 +93,11 @@ public class DoctorMonthlyReportOpen implements Serializable{
     private int saleBoar;                     //公猪
     private int saleNursery;                  //保育猪（产房+保育）
     private int saleFatten;                   //育肥猪
-    private double saleAmount;                //销售金额汇总
-    private double saleFarrow;                //仔猪销售数
-    // TODO: 16/12/22  缺少字段  saleAmount saleFarrow purchaseAmount
+    private int saleTotal;                    //销售汇总(上面四个相加)
+    private int saleFarrow;                   //仔猪销售数
 
+    // TODO: 16/12/22  缺少字段  saleAmount purchaseAmount
+    private double saleAmount;                //销售金额汇总
     private double purchaseAmount;            //采购金额
 
 

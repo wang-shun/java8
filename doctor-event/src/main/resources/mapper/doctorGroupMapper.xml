@@ -312,4 +312,11 @@
         SET current_barn_name = #{currentBarnName}
         WHERE current_barn_id = #{currentBarnId}
     </update>
+
+    <select id="findFarmToGroupCount" resultMap="map" >
+        SELECT farm_id AS farmId, ifnull(COUNT(*), 0) AS groupCount
+        FROM <include refid="tb"/>
+        WHERE status = 1
+        GROUP BY farm_id
+    </select>
 </mapper>

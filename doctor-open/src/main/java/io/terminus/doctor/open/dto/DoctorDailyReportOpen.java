@@ -15,6 +15,11 @@ public class DoctorDailyReportOpen implements Serializable{
     private static final long serialVersionUID = 5134718595331440935L;
 
     /**
+     * 猪场名称
+     */
+    private String farmName;
+
+    /**
      * 用户名称
      */
     private String userName;
