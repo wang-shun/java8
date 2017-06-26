@@ -1451,7 +1451,7 @@
         FROM
         <include refid="tb"/>
         WHERE pig_id = #{pigId}
-        AND type in (9, 11)
+        AND type in (9, 11, 16)
         ORDER BY event_at ASC , id ASC
     </select>
 </mapper>
