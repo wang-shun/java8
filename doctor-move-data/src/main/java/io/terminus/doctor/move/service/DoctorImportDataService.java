@@ -551,6 +551,9 @@ public class DoctorImportDataService {
         User user;
         Long userId;
         Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
+        if (!result.isSuccess() || isNull(result.getResult())) {
+            result = doctorUserReadService.findBy(loginName, LoginType.NAME);
+        }
         if(result.isSuccess() && result.getResult() != null){
             log.warn("primary user has existed, mobile={}", mobile);
             user = result.getResult();
