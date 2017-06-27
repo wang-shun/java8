@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.editHandler.group;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
@@ -204,6 +205,9 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         int avgDay = 0;
         Date lastEvent = new Date();
         for (DoctorGroupEvent groupEvent : groupEventList) {
+            if (Objects.equals(MoreObjects.firstNonNull(groupEvent.getQuantity(), 0), 0)) {
+                continue;
+            }
             if (Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
                 avgDay = avgDay + DateUtil.getDeltaDays(lastEvent, groupEvent.getEventAt());
                 avgDay = EventUtil.getAvgDayAge(avgDay, currentQuantity, groupEvent.getAvgDayAge(), groupEvent.getQuantity());
