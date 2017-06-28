@@ -786,7 +786,7 @@ public class DoctorPigEventExports {
 
     private void exportSowEvents(Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
         switch (eventCriteria.get("eventTypes")) {
-            case "7":
+            case "7,20":
                 //进场
                 exporter.export("web-pig-sowInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
                 break;
