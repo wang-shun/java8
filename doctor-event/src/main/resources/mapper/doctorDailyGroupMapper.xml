@@ -361,7 +361,7 @@
 
     <sql id="clique" >
         sum(case when type = 4 then sale else 0 end) AS hpSale,
-        sum(case when type = 7 then sale else 0 end) AS cfSale,
+        sum(case when type IN(2,7) then sale else 0 end) AS cfSale,
         sum(case when type = 3 then sale else 0 end) AS yfSale
     </sql>
     <select id="getTransverseCliqueReport" parameterType="map" resultType= "io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto" >
