@@ -137,6 +137,26 @@ public class DoctorCliqueReportDto implements Serializable{
      */
     private Integer farrowJmh;
 
+    /**
+     * 窝均活仔数
+     */
+    private Double avgFarrowLive;
+
+    /**
+     * 窝均健仔数
+     */
+    private Double avgFarrowHealth;
+
+    /**
+     * 窝均弱仔数
+     */
+    private Double avgFarrowWeak;
+
+    /**
+     * 窝均初生重
+     */
+    private Double avgFarrowWeight;
+
    /**
      * 出生总重
      */

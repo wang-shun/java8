@@ -417,21 +417,53 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
      * @return
      */
     private DoctorCliqueReportDto fillCommonCliqueReport(DoctorCliqueReportDto dto1, DoctorCliqueReportDto dto2, Integer dayDiff) {
+        //配种总数
         dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
                 + dto1.getMateFq() + dto1.getMateFq()
                 + dto1.getMateLc() + dto1.getMateYx());
+
+        //妊娠总数
         dto1.setPregCount(dto1.getPregPositive() + dto1.getPregNegative()
                 + dto1.getPregFanqing() + dto1.getPregLiuchan());
         dto1.setAvgSowLiveStock(dto1.getAvgSowLiveStock()/dayDiff);
-        if (Objects.equals(dto1.getWeanNest(), 0)) {
+
+        //窝均分娩
+        if (isNull(dto1.getFarrowNest()) || dto1.getFarrowNest() == 0) {
+            dto1.setFarrowNest(0);
+            dto1.setAvgFarrowWeight(0.00D);
+            dto1.setAvgFarrowLive(0.00D);
+            dto1.setAvgFarrowHealth(0.00D);
+            dto1.setAvgFarrowWeak(0.00D);
+        } else {
+            dto1.setAvgFarrowLive(get2(dto1.getFarrowLive(), dto1.getFarrowNest()));
+            dto1.setAvgFarrowHealth(get2(dto1.getFarrowHealth(), dto1.getFarrowNest()));
+            dto1.setAvgFarrowWeak(get2(dto1.getFarrowWeak(), dto1.getFarrowNest()));
+            dto1.setAvgFarrowWeight(Double.parseDouble(String.format("%2f", dto1.getFarrowWeight() / dto1.getFarrowNest())));
+        }
+
+        //窝均断奶
+        if (isNull(dto1.getWeanNest()) || dto1.getWeanNest() == 0) {
+            dto1.setWeanNest(0);
             dto1.setNestAvgWean(0D);
         } else {
-            dto1.setNestAvgWean(Double.parseDouble(NumberUtils.divide(dto1.getWeanCount(), dto1.getWeanNest(), 2)));
+            dto1.setNestAvgWean(get2(dto1.getWeanCount(), dto1.getWeanNest()));
         }
+
+        //销售
         dto1.setHpSale(dto2.getHpSale());
         dto1.setCfSale(dto2.getCfSale());
         dto1.setYfSale(dto2.getYfSale());
         return dto1;
+    }
+
+    /**
+     * 整数相除保留两位小数
+     * @param total 总数
+     * @param quantity 被除数
+     * @return
+     */
+    private Double get2(Integer total, Integer quantity) {
+        return Double.parseDouble(NumberUtils.divide(total, quantity, 2));
     }
 
     /**
