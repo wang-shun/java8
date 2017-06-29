@@ -631,6 +631,8 @@
 
             ifnull(sum(case when sum_at = #{startAt} then sow_ph_start else 0 end),0) as sowPhStart,
             ifnull(sum(sow_ph_in_farm_in),0) as sowPhInFarmIn,
+            ifnull(sum(sow_ph_reserve_in),0) as sowPhReserveIn,
+            ifnull(sum(sow_ph_chg_farm_in),0) as sowPhChgFarmIn,
             ifnull(sum(sow_ph_wean_in),0) as sowPhWeanIn,
             ifnull(sum(sow_ph_dead),0) as sowPhDead,
             ifnull(sum(sow_ph_weed_out),0) as sowPhWeedOut,
