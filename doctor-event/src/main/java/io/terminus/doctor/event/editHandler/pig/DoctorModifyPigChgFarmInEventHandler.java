@@ -110,6 +110,7 @@ public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPi
                oldDailyPig.setSowPh(EventUtil.plusInt(oldDailyPig.getSowPh(), changeDto.getEntryCountChange()));
                oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getEntryCountChange()));
                oldDailyPig.setSowPhChgFarmIn(EventUtil.plusInt(oldDailyPig.getSowPhChgFarmIn(), changeDto.getEntryCountChange()));
+               oldDailyPig.setSowPhInFarmIn(EventUtil.plusInt(oldDailyPig.getSowPhInFarmIn(), changeDto.getEntryCountChange()));
            }
             oldDailyPig.setSowIn(EventUtil.plusInt(oldDailyPig.getSowIn(), changeDto.getEntryCountChange()));
             oldDailyPig.setSowEnd(EventUtil.plusInt(oldDailyPig.getSowEnd(), changeDto.getEntryCountChange()));
