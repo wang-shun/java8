@@ -295,6 +295,8 @@ public class DoctorReports {
                                                                @RequestParam String startDate,
                                                                @RequestParam String endDate) {
         List<Long> farmIdList;
+        // TODO: 17/6/30 暂时屏蔽前台传值
+        farmIds = "";
         if (Strings.isNullOrEmpty(farmIds)) {
             farmIdList = RespHelper.or500(doctorFarmReadService.findFarmIdsByUserId(UserUtil.getUserId()));
         } else {
