@@ -438,7 +438,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             dto1.setAvgFarrowLive(get2(dto1.getFarrowLive(), dto1.getFarrowNest()));
             dto1.setAvgFarrowHealth(get2(dto1.getFarrowHealth(), dto1.getFarrowNest()));
             dto1.setAvgFarrowWeak(get2(dto1.getFarrowWeak(), dto1.getFarrowNest()));
-            dto1.setAvgFarrowWeight(Double.parseDouble(String.format("%2f", dto1.getFarrowWeight() / dto1.getFarrowNest())));
+            dto1.setAvgFarrowWeight(Double.parseDouble(String.format("%.2f", dto1.getFarrowWeight() / dto1.getFarrowNest())));
         }
 
         //窝均断奶
