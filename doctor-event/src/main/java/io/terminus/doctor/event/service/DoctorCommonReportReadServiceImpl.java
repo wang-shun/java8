@@ -425,7 +425,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         //妊娠总数
         dto1.setPregCount(dto1.getPregPositive() + dto1.getPregNegative()
                 + dto1.getPregFanqing() + dto1.getPregLiuchan());
-        dto1.setAvgSowLiveStock(dto1.getAvgSowLiveStock()/dayDiff);
+        dto1.setAvgSowLiveStock(Integer.parseInt(NumberUtils.divide(dto1.getAvgSowLiveStock(), dayDiff, 0)));
 
         //窝均分娩
         if (isNull(dto1.getFarrowNest()) || dto1.getFarrowNest() == 0) {
