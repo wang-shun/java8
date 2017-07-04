@@ -47,6 +47,7 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
@@ -96,6 +97,7 @@ import java.util.Objects;
 
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Created by terminus on 2017/3/20.
@@ -287,6 +289,10 @@ public class DoctorPigEventExports {
      */
     public Paging<DoctorPigMatingExportDto> pagingMating(Map<String, String> pigEventCriteria) {
         Paging<DoctorPigEvent> pigEventPaging = pigEventPaging(pigEventCriteria);
+        List<Long> pigIds = pigEventPaging.getData().stream().map(DoctorPigEvent::getPigId).collect(toList());
+        List<DoctorPigTrack> pigTrackList = RespHelper.or500(doctorPigReadService.queryCurrentStatus(pigIds));
+        Map<Long, Integer> pigIdToStatus = pigTrackList.stream().collect(toMap(DoctorPigTrack::getPigId, DoctorPigTrack::getStatus));
+
         List<DoctorPigMatingExportDto> list = pigEventPaging.getData().stream().map(doctorPigEventDetail -> {
             try {
                 DoctorMatingDto matingDto = JSON_MAPPER.fromJson(doctorPigEventDetail.getExtra(), DoctorMatingDto.class);
@@ -296,9 +302,8 @@ public class DoctorPigEventExports {
                     dto.setMatingTypeName(MatingType.from(dto.getMatingType()).getDesc());
                 }
                 dto.setCreatorName(doctorPigEventDetail.getCreatorName());
-                if (doctorPigEventDetail.getPigStatusAfter() != null) {
-                    dto.setPigStatusAfterName(PigStatus.from(doctorPigEventDetail.getPigStatusAfter()).getDesc());
-                }
+                dto.setPigStatusAfter(pigIdToStatus.get(doctorPigEventDetail.getPigId()));
+                dto.setPigStatusAfterName(PigStatus.from(dto.getPigStatusAfter()).getDesc());
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
