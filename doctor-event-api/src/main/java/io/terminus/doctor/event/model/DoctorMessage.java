@@ -191,6 +191,21 @@ public class DoctorMessage implements Serializable {
 
     private Integer ruleValueId;
 
+    /**
+     * 消耗剂量
+     */
+    private Long dose;
+
+    /**
+     * 疫苗Id
+     */
+    private Long materialId;
+
+    /**
+     * 疫苗名称
+     */
+    private String materialName;
+
     public enum BUSINESS_TYPE{
         PIG(1, "猪"),
         GROUP(2, "猪群"),

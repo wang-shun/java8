@@ -181,6 +181,7 @@ public class DoctorMessages {
         exportNameMap.put(Category.FATTEN_PIG_REMOVE.getKey(), "web-message-fattenPigRemove");
         exportNameMap.put(Category.SOW_BACK_FAT.getKey(), "web-message-backFat");
         exportNameMap.put(Category.STORAGE_SHORTAGE.getKey(), "web-message-storageShortage");
+        exportNameMap.put(Category.PIG_VACCINATION.getKey(), "web-message-vaccination");
         return exportNameMap;
     }
 
@@ -198,7 +199,8 @@ public class DoctorMessages {
         //查询用户
         DoctorMessageUserDto doctorMessageUserDto = MAPPER.convertValue(criteria, DoctorMessageUserDto.class);
         doctorMessageUserDto.setUserId(UserUtil.getUserId());
-        List<DoctorMessageUser> messageUserList = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto));
+        List<DoctorMessageUser> messageUserList = RespHelper.or500(doctorMessageUserReadService
+                .findDoctorMessageUsersByCriteria(doctorMessageUserDto));
         if (Arguments.isNullOrEmpty(messageUserList)) {
             return null;
         }
@@ -226,7 +228,8 @@ public class DoctorMessages {
         if (messageSearchDto == null) {
             return Paging.empty();
         }
-        return RespHelper.or500(doctorMessageReadService.pagingWarnMessages(messageSearchDto, Integer.parseInt(messageSearchDtoMap.get("pageNo")), Integer.parseInt(messageSearchDtoMap.get("size"))));
+        return RespHelper.or500(doctorMessageReadService.pagingWarnMessages(messageSearchDto
+                , Integer.parseInt(messageSearchDtoMap.get("pageNo")), Integer.parseInt(messageSearchDtoMap.get("size"))));
     }
 
     /**
@@ -237,7 +240,9 @@ public class DoctorMessages {
      * @return
      */
     @RequestMapping(value = "/suggest/messageBarn", method = RequestMethod.GET)
-    public List<DoctorSuggestBarn> suggestMessageBarn(@RequestParam Long templateId, @RequestParam Long farmId, @RequestParam(required = false) String barnName){
+    public List<DoctorSuggestBarn> suggestMessageBarn(@RequestParam Long templateId,
+                                                      @RequestParam Long farmId,
+                                                      @RequestParam(required = false) String barnName) {
         DoctorMessageUserDto messageUserDto = new DoctorMessageUserDto();
         messageUserDto.setTemplateId(templateId);
         messageUserDto.setFarmId(farmId);

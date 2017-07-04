@@ -161,4 +161,19 @@ public class DoctorMessageInfo implements Serializable{
      */
     private String reason;
 
+    /**
+     * 消耗剂量
+     */
+    private Long dose;
+
+    /**
+     * 疫苗Id
+     */
+    private Long materialId;
+
+    /**
+     * 疫苗名称
+     */
+    private String materialName;
+
 }

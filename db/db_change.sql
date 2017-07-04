@@ -1237,3 +1237,8 @@ alter table doctor_boar_monthly_reports add column `boar_type` varchar(32) defau
 -- 2017-05-27
 alter table doctor_range_reports add column `fatten_feed_conversion` double default null comment '育肥料肉比' after `mate_in_seven`;
 alter table doctor_range_reports add column `nursery_feed_conversion` double default null comment '育肥料肉比' after `mate_in_seven`;
+
+-- 2017-07-04
+alter table doctor_messages add column `dose` int(11) default null comment '剂量' after `avg_day_age`;
+alter table doctor_messages add column `material_id` bigint(20) default null comment '疫苗id' after `dose`;
+alter table doctor_messages add column `material_name` VARCHAR(20) default null comment '疫苗名称' after `material_id`;

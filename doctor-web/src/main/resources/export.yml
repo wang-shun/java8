@@ -240,6 +240,17 @@ export.tables:
         display: 剩余量
       - name: operatorName
         display: 管理员
+  web-message-vaccination:
+    display: 免疫消息导出
+    columns:
+      - name: code
+        display: 猪群/猪号
+      - name: barnName
+        display: 所属猪舍
+      - name: materialName
+        display: 疫苗
+      - name: dose
+        display: 剂量
   web-material-export:
     display: 仓库物料导出
     columns:
