@@ -150,6 +150,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             } else {
                 DoctorGroupTrack newTrack = buildNewTrackForRollback(deleteGroupEvent, oldTrack);
                 doctorGroupTrackDao.update(newTrack);
+
+                //自动关闭或开启猪群
+                autoCloseOrOpen(newTrack);
             }
         }
 
@@ -221,6 +224,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         if (!Objects.equals(groupTrack.getQuantity(), 0) && notNull(closeEvent)) {
             //(1).删除关闭事件
             doctorGroupEventDao.delete(closeEvent.getId());
+            createModifyLog(closeEvent);
 
             //(2).更新猪群状态
             DoctorGroup group = doctorGroupDao.findById(groupTrack.getId());
@@ -244,7 +248,6 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             group.setStatus(DoctorGroup.Status.CLOSED.getValue());
             group.setCloseAt(new Date());
             doctorGroupDao.update(group);
-            return;
         }
     }
 
@@ -268,7 +271,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param oldGroup 原猪群信息
      * @return 新猪群信息
      */
-    protected DoctorGroup buildNewGroupForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroup oldGroup){return null;}
+    protected DoctorGroup buildNewGroupForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroup oldGroup){return oldGroup;}
 
     /**
      * 构建track(删除)
@@ -276,7 +279,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param oldGroupTrack 原track
      * @return 新 track
      */
-    protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {return null;}
+    protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {return oldGroupTrack;}
     /**
      * 更新日记录(删除)
      * @param deleteGroupEvent 删除事件
@@ -345,7 +348,6 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         // TODO: 17/4/13 是否需要跟新
         return true;
     }
-
 
     /**
      * 创建编辑记录
@@ -478,7 +480,6 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         closeInput.setRelGroupEventId(groupEvent.getId());
         return closeInput;
     }
-
 
     protected DoctorGroupEvent dozerGroupEvent(DoctorGroup group, GroupEventType eventType, BaseGroupInput baseInput) {
         DoctorGroupEvent event = new DoctorGroupEvent();
