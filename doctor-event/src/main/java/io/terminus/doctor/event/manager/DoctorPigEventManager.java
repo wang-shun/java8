@@ -21,7 +21,6 @@ import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.event.MsgGroupPublishDto;
 import io.terminus.doctor.event.event.MsgListenedGroupEvent;
 import io.terminus.doctor.event.event.MsgListenedPigEvent;
@@ -252,36 +251,21 @@ public class DoctorPigEventManager {
      */
     private static void publishPigEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId, CoreEventDispatcher coreEventDispatcher, Publisher publisher){
         log.info("publish pig event starting");
-//        //猪事件触发报表更新(eventBus)
-//        Map<Integer, List<DoctorEventInfo>> pigEventInfoMap = eventInfoList.stream()
-//                .collect(Collectors.groupingBy(DoctorEventInfo::getEventType));
-//        pigEventInfoMap.keySet().forEach(eventType -> {
-//            List<DoctorPigPublishDto> pigPublishDtoList = pigEventInfoMap.get(eventType).stream().map(doctorEventInfo -> {
-//                DoctorPigPublishDto pigPublishDto = new DoctorPigPublishDto();
-//                pigPublishDto.setPigId(doctorEventInfo.getBusinessId());
-//                pigPublishDto.setEventId(doctorEventInfo.getEventId());
-//                pigPublishDto.setEventAt(doctorEventInfo.getEventAt());
-//                pigPublishDto.setKind(doctorEventInfo.getKind());
-//                pigPublishDto.setMateType(doctorEventInfo.getMateType());
-//                pigPublishDto.setPregCheckResult(doctorEventInfo.getPregCheckResult());
-//                return pigPublishDto;
-//            }).collect(Collectors.toList());
-//            coreEventDispatcher.publish(new ListenedPigEvent(orgId, farmId, eventType, pigPublishDtoList));
-//        });
+
         //猪事件触发更新消息(zk)
         try {
             List<MsgPigPublishDto> msgPigPublishDtoList = eventInfoList.stream()
                     .filter(doctorEventInfo -> PigEvent.NOTICE_MESSAGE_PIG_EVENT.contains(doctorEventInfo.getEventType()))
                     .map(doctorEventInfo -> {
 
-                        MsgPigPublishDto msgPigPublishDto =  MsgPigPublishDto.builder()
+                        MsgPigPublishDto msgPigPublishDto = MsgPigPublishDto.builder()
                                 .pigId(doctorEventInfo.getBusinessId())
                                 .eventAt(doctorEventInfo.getEventAt())
                                 .eventId(doctorEventInfo.getEventId())
                                 .eventType(doctorEventInfo.getEventType())
                                 .build();
-                        if (Objects.equals(doctorEventInfo.getEventType(), PigEvent.PREG_CHECK.getKey())
-                                && !Objects.equals(doctorEventInfo.getPregCheckResult(), PregCheckResult.YANG.getKey())) {
+                        if (Objects.equals(doctorEventInfo.getPreStatus(), PigStatus.Pregnancy.getKey())
+                                && !Objects.equals(doctorEventInfo.getStatus(), PigStatus.Pregnancy.getKey())) {
                             msgPigPublishDto.setEventType(PigEvent.TO_FARROWING.getKey());
                         }
                         return msgPigPublishDto;
@@ -302,20 +286,7 @@ public class DoctorPigEventManager {
      */
     private static void publishGroupEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId, CoreEventDispatcher coreEventDispatcher, Publisher publisher) {
         log.info("publish group event starting");
-//        //猪群事件触发报表更新(eventBus)
-//        Map<Integer, List<DoctorEventInfo>> groupEventInfoMap = eventInfoList.stream()
-//                .collect(Collectors.groupingBy(DoctorEventInfo::getEventType));
-//        groupEventInfoMap.keySet().forEach(eventType -> {
-//            List<DoctorGroupPublishDto> groupPublishDtoList = groupEventInfoMap.get(eventType).stream().map(doctorEventInfo -> {
-//                DoctorGroupPublishDto groupPublishDto = new DoctorGroupPublishDto();
-//                groupPublishDto.setGroupId(doctorEventInfo.getBusinessId());
-//                groupPublishDto.setEventId(doctorEventInfo.getEventId());
-//                groupPublishDto.setEventAt(doctorEventInfo.getEventAt());
-//                groupPublishDto.setPigType(doctorEventInfo.getPigType());
-//                return groupPublishDto;
-//            }).collect(Collectors.toList());
-//            coreEventDispatcher.publish(new ListenedGroupEvent(orgId, farmId, eventType, groupPublishDtoList));
-//        });
+
         //猪群事件触发的消息更新(zk)
         try {
             List<MsgGroupPublishDto> msgGroupPublishDtoList = eventInfoList.stream()

@@ -104,6 +104,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .businessId(executeEvent.getPigId())
                 .code(executeEvent.getPigCode())
                 .status(toTrack.getStatus())
+                .preStatus(executeEvent.getPigStatusBefore())
                 .businessType(DoctorEventInfo.Business_Type.PIG.getValue())
                 .eventType(executeEvent.getType())
                 .pigType(doctorBarn.getPigType())

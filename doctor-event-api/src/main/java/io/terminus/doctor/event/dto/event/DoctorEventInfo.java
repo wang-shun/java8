@@ -50,6 +50,11 @@ public class DoctorEventInfo {
     private Integer status;
 
     /**
+     * 事件发生前目标状态
+     */
+    private Integer preStatus;
+
+    /**
      * 事件时间
      */
     private Date eventAt;
