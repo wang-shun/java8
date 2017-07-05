@@ -227,7 +227,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             createModifyLog(closeEvent);
 
             //(2).更新猪群状态
-            DoctorGroup group = doctorGroupDao.findById(groupTrack.getId());
+            DoctorGroup group = doctorGroupDao.findById(groupTrack.getGroupId());
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
             doctorGroupDao.update(group);
             return;
@@ -235,7 +235,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
         //2.数量为零,未关闭
         if (Objects.equals(groupTrack.getQuantity(), 0) && isNull(closeEvent)){
-            DoctorGroup group = doctorGroupDao.findById(groupTrack.getId());
+            DoctorGroup group = doctorGroupDao.findById(groupTrack.getGroupId());
 
             //(1).生成关闭事件
             DoctorCloseGroupInput closeGroupInput = new DoctorCloseGroupInput();
