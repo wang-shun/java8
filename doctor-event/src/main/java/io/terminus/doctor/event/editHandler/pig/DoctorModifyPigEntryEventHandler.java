@@ -127,39 +127,49 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
                 .build();
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
         if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
+            //更新母猪存栏
             doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(),  getAfterDay(oldPigEvent.getEventAt()),
                     changeDto1.getEntryCountChange(), changeDto1.getPhCountChange(), changeDto1.getCfCountChange());
+
+            //更新空怀母猪数
+            doctorDailyPigDao.updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+                    , 0, -1, 0);
         } else {
             doctorDailyPigDao.updateDailyBoarPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()), changeDto1.getEntryCountChange());
         }
     }
 
     @Override
-    public void updateDailyOfNew(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+    public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
         DoctorFarmEntryDto newDto = (DoctorFarmEntryDto) inputDto;
-        if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())
+        if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())
                 && !Objects.equals(newDto.getBoarType(), BoarEntryType.HGZ.getKey())) {
             return;
         }
         //默认普通进场
         Integer entrySource = 1;
-        if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())
-                && notNull(oldPigEvent.getRelGroupEventId())) {
+        if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())
+                && notNull(newPigEvent.getRelGroupEventId())) {
             entrySource = 2;
         }
-        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), inputDto.eventAt());
+        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
-                .pigSex(oldPigEvent.getKind())
+                .pigSex(newPigEvent.getKind())
                 .entrySource(entrySource)
                 .entryCountChange(1)
                 .phCountChange(1)
                 .build();
         doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
-        if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
-            doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
+        if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
+            //更新母猪存栏
+            doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
                     changeDto2.getEntryCountChange(), changeDto2.getPhCountChange(), changeDto2.getCfCountChange());
+
+            //更新空怀母猪数
+            doctorDailyPigDao.updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
+                    , 0, 1, 0);
         } else {
-            doctorDailyPigDao.updateDailyBoarPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()), changeDto2.getEntryCountChange());
+            doctorDailyPigDao.updateDailyBoarPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()), changeDto2.getEntryCountChange());
         }
     }
 
