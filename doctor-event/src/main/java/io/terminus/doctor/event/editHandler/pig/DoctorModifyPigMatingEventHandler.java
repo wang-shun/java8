@@ -3,6 +3,7 @@ package io.terminus.doctor.event.editHandler.pig;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.Checks;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -15,9 +16,12 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPregCheckEventHandler.PREG_CHECK_RESULT;
 
 /**
@@ -26,6 +30,14 @@ import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPregCheckE
  */
 @Component
 public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEventHandler{
+
+    @Override
+    protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        super.modifyHandleCheck(oldPigEvent, inputDto);
+        if (oldPigEvent.getCurrentMatingCount() > 1) {
+            serialMateValid(oldPigEvent.getPigId(), oldPigEvent.getParity(), inputDto.eventAt());
+        }
+    }
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
@@ -173,5 +185,14 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
                 throw new InvalidException("mating.type.error");
         }
         return oldDailyPig;
+    }
+
+    public void serialMateValid(Long pigId, Integer parity, Date eventAt) {
+        DoctorPigEvent firstMatingEvent = doctorPigEventDao.queryLastFirstMate(pigId
+                , parity);
+        expectNotNull(firstMatingEvent, "first.mate.not.null", pigId);
+        expectTrue(DateUtil.getDeltaDays(firstMatingEvent.getEventAt(), eventAt) <= 3,
+                "serial.mating.over.three.day", DateUtil.toDateString(firstMatingEvent.getEventAt()));
+
     }
 }

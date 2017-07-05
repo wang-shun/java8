@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -53,17 +52,15 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
                 || Objects.equals(fromTrack.getStatus(), PigStatus.KongHuai.getKey())
                 || Objects.equals(fromTrack.getStatus(), PigStatus.Wean.getKey())
                 || Objects.equals(fromTrack.getStatus(), PigStatus.Mate.getKey())
-                ,"pig.status.failed", PigEvent.from(executeEvent.getType()).getName(), PigStatus.from(fromTrack.getStatus()).getName());
+                ,"pig.status.failed", PigEvent.from(executeEvent.getType()).getName()
+                , PigStatus.from(fromTrack.getStatus()).getName());
         expectTrue(fromTrack.getCurrentMatingCount() < 3, "mate.count.over");
         expectTrue(notNull(executeEvent.getOperatorId()), "mating.operator.not.null");
 
         if (fromTrack.getCurrentMatingCount() > 0) {
-            DoctorPigEvent firstMatingEvent = doctorPigEventDao.queryLastFirstMate(fromTrack.getPigId()
-                    , doctorPigEventDao.findLastParity(fromTrack.getPigId()));
-            expectTrue(notNull(firstMatingEvent), "first.mate.not.null", fromTrack.getPigId());
-            expectTrue(DateUtil.getDeltaDays(firstMatingEvent.getEventAt(), executeEvent.getEventAt()) <= 3,
-                    "serial.mating.over.three.day", DateUtil.toDateString(firstMatingEvent.getEventAt()));
-
+            Integer parity = doctorPigEventDao.findLastParity(fromTrack.getPigId());
+            doctorModifyPigMatingEventHandler.serialMateValid(fromTrack.getPigId()
+                    , parity, executeEvent.getEventAt());
         }
     }
 
