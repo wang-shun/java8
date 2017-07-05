@@ -2,6 +2,7 @@ package io.terminus.doctor.event.editHandler.group;
 
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -222,33 +223,37 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         DoctorGroupEvent closeEvent = doctorGroupEventDao.findCloseGroupByGroupId(groupTrack.getGroupId());
         //1.数量不为0,却已关闭
         if (!Objects.equals(groupTrack.getQuantity(), 0) && notNull(closeEvent)) {
+            DoctorGroup group = doctorGroupDao.findById(groupTrack.getGroupId());
+            if (Objects.equals(group.getPigType(), PigType.DELIVER_SOW.getValue())) {
+                List<DoctorGroup> groupList = doctorGroupDao.findByCurrentBarnId(group.getCurrentBarnId());
+                expectTrue(groupList.isEmpty(), "lead.to.deliver.two.group", group.getId());
+            }
             //(1).删除关闭事件
             doctorGroupEventDao.delete(closeEvent.getId());
             createModifyLog(closeEvent);
 
             //(2).更新猪群状态
-            DoctorGroup group = doctorGroupDao.findById(groupTrack.getGroupId());
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
             doctorGroupDao.update(group);
-            return;
         }
 
-        //2.数量为零,未关闭
-        if (Objects.equals(groupTrack.getQuantity(), 0) && isNull(closeEvent)){
-            DoctorGroup group = doctorGroupDao.findById(groupTrack.getGroupId());
-
-            //(1).生成关闭事件
-            DoctorCloseGroupInput closeGroupInput = new DoctorCloseGroupInput();
-            closeGroupInput.setEventAt(DateUtil.toDateString(new Date()));
-            closeGroupInput.setIsAuto(IsOrNot.NO.getValue());
-            DoctorGroupEvent closeEvent1 = dozerGroupEvent(group, GroupEventType.CLOSE, closeGroupInput);
-            doctorGroupEventDao.create(closeEvent1);
-
-            //(2).更新猪群状态
-            group.setStatus(DoctorGroup.Status.CLOSED.getValue());
-            group.setCloseAt(new Date());
-            doctorGroupDao.update(group);
-        }
+        // TODO: 17/7/5 导致数量为零时,暂不关闭
+//        //2.数量为零,未关闭
+//        if (Objects.equals(groupTrack.getQuantity(), 0) && isNull(closeEvent)){
+//            DoctorGroup group = doctorGroupDao.findById(groupTrack.getGroupId());
+//
+//            //(1).生成关闭事件
+//            DoctorCloseGroupInput closeGroupInput = new DoctorCloseGroupInput();
+//            closeGroupInput.setEventAt(DateUtil.toDateString(new Date()));
+//            closeGroupInput.setIsAuto(IsOrNot.NO.getValue());
+//            DoctorGroupEvent closeEvent1 = dozerGroupEvent(group, GroupEventType.CLOSE, closeGroupInput);
+//            doctorGroupEventDao.create(closeEvent1);
+//
+//            //(2).更新猪群状态
+//            group.setStatus(DoctorGroup.Status.CLOSED.getValue());
+//            group.setCloseAt(new Date());
+//            doctorGroupDao.update(group);
+//        }
     }
 
     /**
