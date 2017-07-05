@@ -10,6 +10,7 @@ import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
+import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -59,6 +60,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
     @Autowired
     protected DoctorDailyReportManager doctorDailyReportManager;
+
+    @Autowired
+    protected DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
 
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
@@ -235,6 +239,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             //(2).更新猪群状态
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
             doctorGroupDao.update(group);
+
+            //(3).删除关联的猪群批次总结
+            doctorGroupBatchSummaryDao.deleteByGroupId(group.getId());
         }
 
         // TODO: 17/7/5 导致数量为零时,暂不关闭
