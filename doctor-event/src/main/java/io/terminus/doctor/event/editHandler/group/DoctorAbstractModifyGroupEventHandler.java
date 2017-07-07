@@ -175,7 +175,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         if (!Objects.equals(oldGroupEvent.getType(), GroupEventType.NEW.getValue())) {
             DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findNewGroupByGroupId(oldGroupEvent.getGroupId());
-            validEventAt(DateUtil.toDate(input.getEventAt()), notNull(newCreateEvent) ? newCreateEvent.getEventAt() : null);
+            DoctorGroupEvent closeEvent = doctorGroupEventDao.findCloseGroupByGroupId(oldGroupEvent.getGroupId());
+            validEventAt(DateUtil.toDate(input.getEventAt()), notNull(newCreateEvent) ? newCreateEvent.getEventAt() : null
+                    , notNull(closeEvent) ? closeEvent.getEventAt() : null);
         }
     }
 
@@ -468,15 +470,16 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     }
 
     /**
-     * 事件时间校验, 不小于下限时间, 不大于当前事件
+     * 事件时间校验, 不小于下限时间, 不大与上限时间
      * @param eventAt 事件时间
-     * @param lastEventAt 下限时间
+     * @param downEventAt 下限时间
+     * @param upEventAt 上限时间
      */
-    public static void validEventAt(Date eventAt, Date lastEventAt) {
-        if ((notNull(lastEventAt)
-                && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEventAt)))
-                || Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date()))) {
-            throw new InvalidException("event.at.error", DateUtil.toDateString(lastEventAt), DateUtil.toDateString(new Date()));
+    public static void validEventAt(Date eventAt, Date downEventAt, Date upEventAt) {
+        if ((notNull(downEventAt)
+                && Dates.startOfDay(eventAt).before(Dates.startOfDay(downEventAt)))
+                || (notNull(upEventAt) && Dates.startOfDay(eventAt).after(Dates.startOfDay(upEventAt)))) {
+            throw new InvalidException("event.at.error", DateUtil.toDateString(downEventAt), DateUtil.toDateString(upEventAt));
         }
     }
 
