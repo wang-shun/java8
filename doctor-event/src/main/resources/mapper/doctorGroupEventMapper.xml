@@ -245,6 +245,7 @@
         <if test="farmName != null">AND farm_name = #{farmName}</if>
         <if test="groupId != null">AND group_id = #{groupId}</if>
         <if test="groupCode != null">AND group_code = #{groupCode}</if>
+        <if test="groupCodeFuzzy != null">AND group_code LIKE concat('%', #{groupCodeFuzzy},'%')</if>
         <if test="eventAt != null">AND event_at = #{eventAt}</if>
         <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>

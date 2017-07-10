@@ -1,14 +1,17 @@
 package io.terminus.doctor.web.admin.job;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.model.DoctorDailyReport;
-import io.terminus.doctor.event.service.*;
+import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
+import io.terminus.doctor.event.service.DoctorDailyGroupWriteService;
+import io.terminus.doctor.event.service.DoctorDailyReportReadService;
+import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorRangeReportWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.leader.HostLeader;
@@ -22,10 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-
-import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc: 猪场日报job
@@ -96,7 +96,8 @@ public class DoctorReportJobs {
                 return;
             }
             log.info("daily group job start, now is:{}", DateUtil.toDateTimeString(new Date()));
-            RespHelper.or500(doctorDailyGroupWriteService.generateYesterdayAndToday(getAllFarmIds(), new Date()));
+            Date today = Dates.startOfDay(new Date());
+            RespHelper.or500(doctorDailyGroupWriteService.generateYesterdayAndToday(getAllFarmIds(), today));
             log.info("daily group job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         }catch (Exception e){
             log.error("daily group job failed, cause:{}", Throwables.getStackTraceAsString(e));

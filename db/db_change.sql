@@ -1260,3 +1260,7 @@ alter table doctor_daily_reports add column sow_ph_pregnant int(11) default null
 alter table doctor_daily_groups add column day_wean_count int(11) default null comment '日断奶数' after `updated_at`;
 alter table doctor_daily_groups add column farrowing_in int(11) default null comment '分娩转入' after `day_wean_count`;
 
+-- 2017-07-04
+alter table doctor_messages add column `dose` int(11) default null comment '剂量' after `avg_day_age`;
+alter table doctor_messages add column `material_id` bigint(20) default null comment '疫苗id' after `dose`;
+alter table doctor_messages add column `material_name` VARCHAR(20) default null comment '疫苗名称' after `material_id`;

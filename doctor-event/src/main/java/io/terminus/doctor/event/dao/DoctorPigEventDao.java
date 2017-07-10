@@ -507,6 +507,17 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+     * 获取某时间前的包括制定id的影响状态的最近的事件
+     * @param pigId 猪id
+     * @param eventAt 时间
+     * @param id 不包括的事件id
+     * @return 事件
+     */
+    public DoctorPigEvent getLastStatusEventAfterEventAtExcludeId(Long pigId, Date eventAt, Long id){
+        return getSqlSession().selectOne(sqlId("getLastStatusEventAfterEventAtExcludeId"), ImmutableMap.of("pigId", pigId, "eventAt",eventAt, "id", id));
+    }
+
+    /**
      * 获取时间前的初配事件
      * @param pigId 猪id
      * @param eventAt 时间
@@ -592,5 +603,9 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public DoctorPigEvent getFirstMatingBeforePregCheck(Long pigId, Integer parity, Long id) {
         return getSqlSession().selectOne(sqlId("getFirstMatingBeforePregCheck"),
                 ImmutableMap.of("pigId", pigId, "parity", parity, "id", id));
+    }
+
+    public List<DoctorPigEvent> findEffectMatingCountByPigIdForAsc(Long pigId) {
+        return sqlSession.selectList(sqlId("findEffectMatingCountByPigIdForAsc"), pigId);
     }
 }

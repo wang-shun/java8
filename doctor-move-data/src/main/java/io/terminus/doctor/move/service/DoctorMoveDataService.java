@@ -2783,4 +2783,35 @@ public class DoctorMoveDataService {
         });
         doctorPigEventDao.updates(pigEventList);
     }
+
+    /**
+     * 刷新配种事件的配种次数
+     */
+    public void fixMatingCount() {
+        List<Long> pigIds = doctorPigDao.findAllPigIds();
+        pigIds.parallelStream().forEach(this::updateMatingCount);
+    }
+
+    private void updateMatingCount(Long pigId) {
+        List<DoctorPigEvent> list = doctorPigEventDao.findEffectMatingCountByPigIdForAsc(pigId);
+        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigId);
+        List<DoctorPigEvent> matingList = Lists.newArrayList();
+        int currentMatingCount = 0;
+        for (DoctorPigEvent pigEvent : list){
+            if (Objects.equals(pigEvent.getType(), PigEvent.MATING.getKey())) {
+                pigEvent.setCurrentMatingCount(++currentMatingCount);
+                matingList.add(pigEvent);
+            } else {
+                currentMatingCount = 0;
+            }
+        }
+        DoctorPigTrack updateTrack = new DoctorPigTrack();
+        updateTrack.setId(pigTrack.getId());
+        updateTrack.setCurrentMatingCount(currentMatingCount);
+        doctorPigTrackDao.update(updateTrack);
+        if (!matingList.isEmpty()) {
+            doctorPigEventDao.updates(matingList);
+        }
+    }
+
 }

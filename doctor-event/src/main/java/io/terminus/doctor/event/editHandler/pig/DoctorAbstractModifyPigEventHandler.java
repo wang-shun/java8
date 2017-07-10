@@ -28,6 +28,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -174,16 +175,20 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      */
     protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         //编辑的事件的时间校验
-        DoctorPigEvent lastEvent;
+        DoctorPigEvent downEvent;
+        DoctorPigEvent upEvent = null;
         if (IGNORE_EVENT.contains(oldPigEvent.getType())) {
-            lastEvent = doctorPigEventDao.queryLastEnter(oldPigEvent.getPigId());
+            downEvent = doctorPigEventDao.queryLastEnter(oldPigEvent.getPigId());
         } else if (Objects.equals(oldPigEvent.getType(), PigEvent.REMOVAL.getKey())) {
-            lastEvent = doctorPigEventDao.getLastEventBeforeRemove(oldPigEvent.getPigId(), oldPigEvent.getId());
+            downEvent = doctorPigEventDao.getLastEventBeforeRemove(oldPigEvent.getPigId(), oldPigEvent.getId());
         } else {
-            lastEvent = doctorPigEventDao.getLastStatusEventBeforeEventAtExcludeId(
+            downEvent = doctorPigEventDao.getLastStatusEventBeforeEventAtExcludeId(
+                    oldPigEvent.getPigId(), oldPigEvent.getEventAt(), oldPigEvent.getId());
+            upEvent = doctorPigEventDao.getLastStatusEventAfterEventAtExcludeId(
                     oldPigEvent.getPigId(), oldPigEvent.getEventAt(), oldPigEvent.getId());
         }
-        validEventAt(inputDto.eventAt(), notNull(lastEvent) ? lastEvent.getEventAt() : null);
+        validEventAt(inputDto.eventAt(), notNull(downEvent) ? downEvent.getEventAt() : null
+                , notNull(upEvent) ? upEvent.getEventAt() : new Date());
     }
 
     @Override

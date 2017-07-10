@@ -80,7 +80,6 @@ import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -733,8 +732,9 @@ public class DoctorPigEventExports {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
-        if (StringUtils.isNotBlank((String) params.get("endDate"))) {
-            params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusMillis(1).toDate());
+        if (StringUtils.isNotBlank((String) params.get("groupCode"))) {
+            params.put("groupCodeFuzzy", params.get("groupCode"));
+            params.remove("groupCode");
         }
         Response<Paging<DoctorGroupEvent>> pagingResponse = doctorGroupReadService.queryGroupEventsByCriteria(params, Integer.parseInt(groupEventCriteriaMap.get("pageNo")), Integer.parseInt(groupEventCriteriaMap.get("size")));
         if (!pagingResponse.isSuccess()) {
@@ -755,8 +755,9 @@ public class DoctorPigEventExports {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
-        if (StringUtils.isNotBlank((String) params.get("endDate"))) {
-            params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusMillis(1).toDate());
+        if (StringUtils.isNotBlank((String) params.get("pigCode"))) {
+            params.put("pigCodeFuzzy", params.get("pigCode"));
+            params.remove("pigCode");
         }
         Response<Paging<DoctorPigEvent>> pigEventPagingResponse = doctorPigEventReadService.queryPigEventsByCriteria(params, Integer.parseInt(groupEventCriteriaMap.get("pageNo")), Integer.parseInt(groupEventCriteriaMap.get("size")));
         if (!pigEventPagingResponse.isSuccess()) {
@@ -790,7 +791,7 @@ public class DoctorPigEventExports {
 
     private void exportSowEvents(Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
         switch (eventCriteria.get("eventTypes")) {
-            case "7":
+            case "7,20":
                 //进场
                 exporter.export("web-pig-sowInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
                 break;
