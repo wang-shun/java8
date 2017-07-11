@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorWeanGroupInput;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupWeanEventHandler;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -31,6 +32,8 @@ import java.util.List;
 public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler{
 
     private final DoctorGroupEventDao doctorGroupEventDao;
+    @Autowired
+    private DoctorModifyGroupWeanEventHandler modifyGroupWeanEventHandler;
 
     @Autowired
     public DoctorWeanGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao, DoctorGroupEventDao doctorGroupEventDao, DoctorBarnDao doctorBarnDao) {
@@ -93,7 +96,13 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
 
         updateGroupTrack(groupTrack, event);
 
+        updateDailyForNew(event);
+
     }
 
-
+    @Override
+    protected void updateDailyForNew(DoctorGroupEvent newGroupEvent) {
+        BaseGroupInput newInput = JSON_MAPPER.fromJson(newGroupEvent.getExtra(), DoctorWeanGroupInput.class);
+        modifyGroupWeanEventHandler.updateDailyOfNew(newGroupEvent, newInput);
+    }
 }

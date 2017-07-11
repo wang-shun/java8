@@ -41,6 +41,11 @@ public class DoctorChgLocationDto extends BasePigEventInputDto implements Serial
 
     private String chgLocationToBarnName;   // 转舍名称
 
+    /**
+     * 备注
+     */
+    private String remark;
+
     @Override
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
@@ -60,6 +65,6 @@ public class DoctorChgLocationDto extends BasePigEventInputDto implements Serial
 
     @Override
     public String changeRemark() {
-        return null;
+        return remark;
     }
 }

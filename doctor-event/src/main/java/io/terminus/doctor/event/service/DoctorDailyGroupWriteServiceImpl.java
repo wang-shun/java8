@@ -176,6 +176,8 @@ public class DoctorDailyGroupWriteServiceImpl implements DoctorDailyGroupWriteSe
             doctorDailyGroup.setUnweanCount(doctorKpiDao.getGroupUnWean(groupId, endAt));
             doctorDailyGroup.setWeanCount(doctorKpiDao.getGroupWean(groupId, endAt));
             doctorDailyGroup.setToNursery(doctorKpiDao.getGroupOuterOut(groupId, startAt, endAt));
+            doctorDailyGroup.setFarrowingIn(doctorKpiDao.getGroupFarrowIn(groupId, startAt, endAt));
+            doctorDailyGroup.setDayWeanCount(doctorKpiDao.getGroupDayWeanCount(groupId, startAt, endAt));
         }
         if(Objects.equals(PigType.NURSERY_PIGLET.getValue(), group.getPigType())){
             doctorDailyGroup.setToFatten(doctorKpiDao.getNurSeryOuterOut(groupId, PigType.FATTEN_PIG.getValue(), startAt, endAt));

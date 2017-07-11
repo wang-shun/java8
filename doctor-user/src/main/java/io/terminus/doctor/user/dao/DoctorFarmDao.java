@@ -32,4 +32,8 @@ public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
     public List<DoctorFarm> findBySource(Integer source){
         return sqlSession.selectList(sqlId("findByParams"), MapBuilder.newHashMap().put("source", source).map());
     }
+
+    public List<DoctorFarm> findFarmsByIds(List<Long> list) {
+        return getSqlSession().selectList(sqlId("findFarmsByIds"), list);
+    }
 }

@@ -1,9 +1,7 @@
 package io.terminus.doctor.event.manager;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorDataFactorDao;
 import io.terminus.doctor.event.model.DoctorDataFactor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +22,6 @@ public class FactorManager {
 
     private final DoctorDataFactorDao doctorDataFactorDao;
 
-    private static ObjectMapper objectMapper = JsonMapper.nonDefaultMapper().getMapper();
-
     @Autowired
     public FactorManager(DoctorDataFactorDao doctorDataFactorDao) {
         this.doctorDataFactorDao = doctorDataFactorDao;
@@ -43,7 +39,6 @@ public class FactorManager {
         for(DoctorDataFactor factor: datas) {
             rangeVerify(factor);
             factor.setId(null);
-            factor.setIsDelete(0);
             if(factor.getRangeFrom()>factor.getRangeTo()){
                 throw new JsonResponseException(500,"range.from.gt.to");
             }

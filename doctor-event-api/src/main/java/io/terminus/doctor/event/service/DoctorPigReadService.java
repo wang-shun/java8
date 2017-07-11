@@ -167,4 +167,11 @@ public interface DoctorPigReadService {
      * @return
      */
     Response<DoctorPigCountDto> getPigCount(@NotNull(message = "farmId.not.null") Long farmId);
+
+    /**
+     * 获取猪的当前状态
+     * @param pigIds 猪ids
+     * @return 返回的track中只包含pigId 和 status 字段
+     */
+    Response<List<DoctorPigTrack>> queryCurrentStatus(List<Long> pigIds);
 }

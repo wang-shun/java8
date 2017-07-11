@@ -3,6 +3,7 @@ package io.terminus.doctor.web.util;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.FarrowingType;
@@ -10,14 +11,17 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.enums.VaccinResult;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
+import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserProfileReadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +46,8 @@ public class TransFromUtil {
     private DoctorGroupReadService doctorGroupReadService;
     @RpcConsumer
     private DoctorPigEventReadService doctorPigEventReadService;
+    @RpcConsumer
+    private DoctorPigReadService doctorPigReadService;
 
     @Autowired
     public TransFromUtil(DoctorBasicReadService doctorBasicReadService, UserProfileReadService userProfileReadService, DoctorBarnReadService doctorBarnReadService) {
@@ -85,6 +91,13 @@ public class TransFromUtil {
                     extraMap.put("boarTypeName", BoarEntryType.from(Integer.valueOf(extraMap.get("boarType").toString())).getDesc());
                 }
 
+                if (Objects.equals(doctorPigEvent.getType(), PigEvent.MATING.getKey())) {
+                    DoctorPigTrack doctorPigTrack = RespHelper.orServEx(doctorPigReadService.findPigTrackByPigId(doctorPigEvent.getPigId()));
+                    doctorPigEvent.setPigStatus(PigStatus.from(doctorPigTrack.getStatus()).getName());
+                }
+                if (Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK.getKey())) {
+                    doctorPigEvent.setMatingDay(getMatingDay(doctorPigEvent));
+                }
                 Boolean isRollback = false;
                 Response<Boolean> booleanResponse = doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId());
                 if (booleanResponse.isSuccess()) {
@@ -118,6 +131,17 @@ public class TransFromUtil {
             groupEvent.setIsRollback(isRollback);
         });
         return doctorGroupEvents;
+    }
+
+    /**
+     * 获取已配种天数
+     * @param pregCheckEvent 妊娠检查事件
+     * @return 已配种天数
+     */
+    private Integer getMatingDay(DoctorPigEvent pregCheckEvent) {
+        DoctorPigEvent firstMatingEvent = RespHelper.orServEx(doctorPigEventReadService
+                .findFirstMatingBeforePregCheck(pregCheckEvent.getPigId(), pregCheckEvent.getParity(), pregCheckEvent.getId()));
+        return DateUtil.getDeltaDays(firstMatingEvent.getEventAt(), pregCheckEvent.getEventAt());
     }
 
     private static Integer toInteger(Object o) {

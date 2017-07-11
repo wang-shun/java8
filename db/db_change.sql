@@ -1238,6 +1238,28 @@ alter table doctor_boar_monthly_reports add column `boar_type` varchar(32) defau
 alter table doctor_range_reports add column `fatten_feed_conversion` double default null comment '育肥料肉比' after `mate_in_seven`;
 alter table doctor_range_reports add column `nursery_feed_conversion` double default null comment '育肥料肉比' after `mate_in_seven`;
 
+
+-- 2017-06-01
+alter table doctor_feed_formulas drop index feed_id ;
+
+-- 2017-06-05 猪群批次总结
+alter table doctor_group_batch_summaries add column `vaccine_amount` double default null comment '疫苗金额' after `updated_at`;
+alter table doctor_group_batch_summaries add column `medicine_amount` double default null comment '药品金额' after `vaccine_amount`;
+alter table doctor_group_batch_summaries add column `consumables_amount` double default null comment '易耗品金额' after `medicine_amount`;
+alter table doctor_group_batch_summaries add column `fend_number` double default null comment '饲料金额' after `consumables_amount`;
+alter table doctor_group_batch_summaries add column `feed_amount` double default null comment '饲料数量' after `fend_number`;
+
+-- 2017-06-06 报表新增字段
+alter table doctor_daily_reports add column sow_ph_reserve_in int(11) default null comment '后备猪转入' after `updated_at`;
+alter table doctor_daily_reports add column sow_ph_chg_farm_in int(11) default null comment '配怀舍转场转入' after `sow_ph_reserve_in`;
+alter table doctor_daily_reports add column sow_cf_in_farm_in int(11) default null comment '产房转场转入' after `sow_ph_reserve_in`;
+alter table doctor_daily_reports add column sow_ph_mating int(11) default null comment '配怀舍配种母猪' after `sow_cf_in_farm_in`;
+alter table doctor_daily_reports add column sow_ph_konghuai int(11) default null comment '配怀舍空怀母猪' after `sow_ph_mating`;
+alter table doctor_daily_reports add column sow_ph_pregnant int(11) default null comment '配怀舍怀孕母猪' after `sow_ph_konghuai`;
+
+alter table doctor_daily_groups add column day_wean_count int(11) default null comment '日断奶数' after `updated_at`;
+alter table doctor_daily_groups add column farrowing_in int(11) default null comment '分娩转入' after `day_wean_count`;
+
 -- 2017-07-04
 alter table doctor_messages add column `dose` int(11) default null comment '剂量' after `avg_day_age`;
 alter table doctor_messages add column `material_id` bigint(20) default null comment '疫苗id' after `dose`;

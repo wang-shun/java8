@@ -980,7 +980,7 @@ public class DoctorMoveDataController {
     }
 
     /**
-     * 已关闭的猪群生成批次总结
+     * 猪场下所有猪群生成批次总结
      */
     @RequestMapping(value = "/createClosedGroupSummary", method = RequestMethod.GET)
     public Boolean createClosedGroupSummary(@RequestParam("farmId") Long farmId) {

@@ -20,7 +20,12 @@
         <result column="sow_chg_farm" property="sowChgFarm"/>
         <result column="sow_end" property="sowEnd"/>
         <result column="sow_ph_start" property="sowPhStart"/>
+        <result column="sow_ph_mating" property="sowPhMating"/>
+        <result column="sow_ph_konghuai" property="sowPhKonghuai"/>
+        <result column="sow_ph_pregnant" property="sowPhPregnant"/>
         <result column="sow_ph_in_farm_in" property="sowPhInFarmIn"/>
+        <result column="sow_ph_reserve_in" property="sowPhReserveIn"/>
+        <result column="sow_ph_chg_farm_in" property="sowPhChgFarmIn"/>
         <result column="sow_ph_wean_in" property="sowPhWeanIn"/>
         <result column="sow_ph_dead" property="sowPhDead"/>
         <result column="sow_ph_weed_out" property="sowPhWeedOut"/>
@@ -31,6 +36,7 @@
         <result column="sow_ph_end" property="sowPhEnd"/>
         <result column="sow_cf_start" property="sowCfStart"/>
         <result column="sow_cf_in" property="sowCfIn"/>
+        <result column="sow_cf_in_farm_in" property="sowCfInFarmIn"/>
         <result column="sow_cf_dead" property="sowCfDead"/>
         <result column="sow_cf_weed_out" property="sowCfWeedOut"/>
         <result column="sow_cf_sale" property="sowCfSale"/>
@@ -131,7 +137,12 @@
         sow_chg_farm,
         sow_end,
         sow_ph_start,
+        sow_ph_mating,
+        sow_ph_konghuai,
+        sow_ph_pregnant,
         sow_ph_in_farm_in,
+        sow_ph_reserve_in,
+        sow_ph_chg_farm_in,
         sow_ph_wean_in,
         sow_ph_dead,
         sow_ph_weed_out,
@@ -142,6 +153,7 @@
         sow_ph_end,
         sow_cf_start,
         sow_cf_in,
+        sow_cf_in_farm_in,
         sow_cf_dead,
         sow_cf_weed_out,
         sow_cf_sale,
@@ -234,7 +246,12 @@
         #{sowChgFarm},
         #{sowEnd},
         #{sowPhStart},
+        #{sowPhMating},
+        #{sowPhKonghuai},
+        #{sowPhPregnant},
         #{sowPhInFarmIn},
+        #{sowPhReserveIn},
+        #{sowPhChgFarmIn},
         #{sowPhWeanIn},
         #{sowPhDead},
         #{sowPhWeedOut},
@@ -245,6 +262,7 @@
         #{sowPhEnd},
         #{sowCfStart},
         #{sowCfIn},
+        #{sowCfInFarmIn},
         #{sowCfDead},
         #{sowCfWeedOut},
         #{sowCfSale},
@@ -337,7 +355,12 @@
         <if test="sowOtherOut != null">AND sow_other_out = #{sowOtherOut}</if>
         <if test="sowEnd != null">AND sow_end = #{sowEnd}</if>
         <if test="sowPhStart != null">AND sow_ph_start = #{sowPhStart}</if>
+        <if test="sowPhMating != null">AND sow_ph_mating = #{sowPhMating}</if>
+        <if test="sowPhKonghuai != null">AND sow_ph_konghuai = #{sowPhKonghuai}</if>
+        <if test="sowPhPregnant != null">AND sow_ph_pregnant = #{sowPhPregnant}</if>
         <if test="sowPhInFarmIn != null">AND sow_ph_in_farm_in = #{sowPhInFarmIn}</if>
+        <if test="sowPhReserveIn != null">AND sow_ph_reserve_in = #{sowPhReserveIn}</if>
+        <if test="sowPhChgFarmIn != null">AND sow_ph_chg_farm_in = #{sowPhChgFarmIn}</if>
         <if test="sowPhWeanIn != null">AND sow_ph_wean_in = #{sowPhWeanIn}</if>
         <if test="sowPhDead != null">AND sow_ph_dead = #{sowPhDead}</if>
         <if test="sowPhWeedOut != null">AND sow_ph_weed_out = #{sowPhWeedOut}</if>
@@ -345,6 +368,7 @@
         <if test="sowPhEnd != null">AND sow_ph_end = #{sowPhEnd}</if>
         <if test="sowCfStart != null">AND sow_cf_start = #{sowCfStart}</if>
         <if test="sowCfIn != null">AND sow_cf_in = #{sowCfIn}</if>
+        <if test="sowCfInFarmIn != null">AND sow_cf_in_farm_in = #{sowCfInFarmIn}</if>
         <if test="sowCfDead != null">AND sow_cf_dead = #{sowCfDead}</if>
         <if test="sowCfWeedOut != null">AND sow_cf_weed_out = #{sowCfWeedOut}</if>
         <if test="sowCfWeanOut != null">AND sow_cf_wean_out = #{sowCfWeanOut}</if>
@@ -447,7 +471,12 @@
             <if test="sowChgFarm != null">sow_chg_farm = #{sowChgFarm},</if>
             <if test="sowEnd != null">sow_end = #{sowEnd},</if>
             <if test="sowPhStart != null">sow_ph_start = #{sowPhStart},</if>
+            <if test="sowPhMating != null">sow_ph_mating = #{sowPhMating},</if>
+            <if test="sowPhKonghuai != null">sow_ph_konghuai = #{sowPhKonghuai},</if>
+            <if test="sowPhPregnant != null">sow_ph_pregnant = #{sowPhPregnant},</if>
             <if test="sowPhInFarmIn != null">sow_ph_in_farm_in = #{sowPhInFarmIn},</if>
+            <if test="sowPhReserveIn != null">sow_ph_reserve_in = #{sowPhReserveIn},</if>
+            <if test="sowPhChgFarmIn != null">sow_ph_chg_farm_in = #{sowPhChgFarmIn},</if>
             <if test="sowPhWeanIn != null">sow_ph_wean_in = #{sowPhWeanIn},</if>
             <if test="sowPhDead != null">sow_ph_dead = #{sowPhDead},</if>
             <if test="sowPhWeedOut != null">sow_ph_weed_out = #{sowPhWeedOut},</if>
@@ -458,6 +487,7 @@
             <if test="sowPhEnd != null">sow_ph_end = #{sowPhEnd},</if>
             <if test="sowCfStart != null">sow_cf_start = #{sowCfStart},</if>
             <if test="sowCfIn != null">sow_cf_in = #{sowCfIn},</if>
+            <if test="sowCfInFarmIn != null">sow_cf_in_farm_in = #{sowCfInFarmIn},</if>
             <if test="sowCfDead != null">sow_cf_dead = #{sowCfDead},</if>
             <if test="sowCfWeedOut != null">sow_cf_weed_out = #{sowCfWeedOut},</if>
             <if test="sowCfSale != null">sow_cf_sale = #{sowCfSale},</if>
@@ -586,10 +616,10 @@
     <select id="findDailyReportSum" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorDailyReportSum">
         select
             ifnull(sum(mate_hb+mate_dn+mate_fq+mate_lc+mate_yx),0) as preFarrowCount,
-            ifnull(sum(farrow_live)/sum(farrow_nest),0) as farrowAvgLive,
-            ifnull(sum(farrow_health)/sum(farrow_nest),0) as farrowAvgHealth,
-            ifnull(sum(farrow_weak)/sum(farrow_nest),0) as farrowAvgWeak,
-            ifnull(sum(wean_count)/sum(wean_nest),0) as avgWeanCount,
+            CONVERT(ifnull(sum(farrow_live)/sum(farrow_nest),0),DECIMAL(10,2)) as farrowAvgLive,
+            CONVERT(ifnull(sum(farrow_health)/sum(farrow_nest),0),DECIMAL(10,2))  as farrowAvgHealth,
+            CONVERT(ifnull(sum(farrow_weak)/sum(farrow_nest),0),DECIMAL(10,2))  as farrowAvgWeak,
+            CONVERT(ifnull(sum(wean_count)/sum(wean_nest),0),DECIMAL(10,2))  as avgWeanCount,
             ifnull(sum(case when sum_at = #{startAt} then sow_start else 0 end),0) as sowStart,
             ifnull(sum(sow_in),0) as sowIn,
             ifnull(sum(sow_dead),0) as sowDead,
@@ -601,6 +631,8 @@
 
             ifnull(sum(case when sum_at = #{startAt} then sow_ph_start else 0 end),0) as sowPhStart,
             ifnull(sum(sow_ph_in_farm_in),0) as sowPhInFarmIn,
+            ifnull(sum(sow_ph_reserve_in),0) as sowPhReserveIn,
+            ifnull(sum(sow_ph_chg_farm_in),0) as sowPhChgFarmIn,
             ifnull(sum(sow_ph_wean_in),0) as sowPhWeanIn,
             ifnull(sum(sow_ph_dead),0) as sowPhDead,
             ifnull(sum(sow_ph_weed_out),0) as sowPhWeedOut,
@@ -650,11 +682,11 @@
             ifnull(sum(farrow_black),0) as farrowBlack,
             ifnull(sum(farrow_sjmh),0) as farrowSjmh,
             ifnull(sum(farrow_weight),0) as farrowWeight,
-            ifnull(sum(farrow_weight)/sum(farrow_live),0) as farrowAvgWeight,
+            CONVERT(ifnull(sum(farrow_weight)/sum(farrow_live),0),DECIMAL(10,2))  as farrowAvgWeight,
             ifnull(sum(wean_nest),0) as weanNest,
             ifnull(sum(wean_count),0) as weanCount,
-            ifnull(sum(wean_count*wean_avg_weight)/sum(wean_count),0) as weanAvgWeight,
-            ifnull(sum(wean_count*wean_day_age)/sum(wean_count),0) as weanDage,
+            CONVERT(ifnull(sum(wean_count*wean_avg_weight)/sum(wean_count),0),DECIMAL(10,2)) as weanAvgWeight,
+            CONVERT(ifnull(sum(wean_count*wean_day_age)/sum(wean_count),0),DECIMAL(10,2)) as weanDage,
 
             ifnull(sum(sow_ph_feed),0) as sowPhFeed,
             ifnull(sum(sow_ph_feed_amount),0) as sowPhFeedAmount,
@@ -728,6 +760,63 @@
         WHERE farm_id = #{farmId}
           AND sum_at &gt;= #{startAt}
           AND sum_at &lt;= #{endAt}
+    </select>
+
+    <update id="updateDailyPhStatusLiveStock" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        SET sow_ph_mating = ifnull(sow_ph_mating,0) + #{phMatingChangeCount},
+        `sow_ph_konghuai` = ifnull(`sow_ph_konghuai`,0) + #{phKonghuaiChangeCount},
+        `sow_ph_pregnant` = ifnull(`sow_ph_pregnant`,0) + #{phPregnantChangeCount}
+
+        WHERE
+        farm_id = #{farmId}
+        AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
+    </update>
+
+    <sql id="clique">
+        ifnull(sum(sow_end),0) AS avgSowLiveStock,
+        ifnull(sum(mate_hb),0) AS mateHb,
+        ifnull(sum(mate_dn),0) AS mateDn,
+        ifnull(sum(mate_fq),0) AS mateFq,
+        ifnull(sum(mate_lc),0) AS mateLc,
+        ifnull(sum(mate_yx),0) AS mateYx,
+        ifnull(sum(preg_positive),0) AS pregPositive,
+        ifnull(sum(preg_negative),0) AS pregNegative,
+        ifnull(sum(preg_fanqing),0) AS pregFanqing,
+        ifnull(sum(preg_liuchan),0) AS pregLiuchan,
+        ifnull(sum(farrow_nest),0) AS farrowNest,
+        ifnull(sum(farrow_all),0) AS farrowAll,
+        ifnull(sum(farrow_live),0) AS farrowLive,
+        ifnull(sum(farrow_health),0) AS farrowHealth,
+        ifnull(sum(farrow_weak),0) AS farrowWeak,
+        ifnull(sum(farrow_dead),0) AS farrowDead,
+        ifnull(sum(farrow_sjmh - farrow_dead),0) AS farrowJmh,
+        ifnull(sum(farrow_weight),0) AS farrowWeight,
+        ifnull(sum(wean_nest),0) AS weanNest,
+        ifnull(sum(wean_count),0) AS weanCount,
+        ifnull(sum(wean_avg_weight),0) AS weanAvgWeight,
+        ifnull(sum(wean_day_age),0) AS weanDayAge,
+        ifnull(sum(sow_sale),0) AS sowSale,
+        ifnull(sum(boar_sale),0) AS boarSale
+    </sql>
+
+    <select id="getTransverseCliqueReport" parameterType="map" resultType= "io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto" >
+        SELECT <include refid="clique"/>
+        FROM <include refid="tb"/>
+        WHERE sum_at &gt;= #{startDate}
+        AND sum_at &lt;= #{endDate}
+        AND farm_id = #{farmId}
+    </select>
+
+    <select id="getPortraitCliqueReport" parameterType="map" resultType= "io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto">
+        SELECT <include refid="clique"/>
+        FROM <include refid="tb"/>
+        WHERE sum_at &gt;= #{startDate}
+        AND sum_at &lt;= #{endDate}
+        AND farm_id IN
+        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")" >
+            #{farmId}
+        </foreach>
     </select>
 
 </mapper>

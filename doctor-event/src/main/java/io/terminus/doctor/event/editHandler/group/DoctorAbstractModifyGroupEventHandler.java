@@ -241,9 +241,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             //(2).更新猪群状态
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
             doctorGroupDao.update(group);
-
-            //(3).删除关联的猪群批次总结
-            doctorGroupBatchSummaryDao.deleteByGroupId(group.getId());
+            return;
         }
 
         // TODO: 17/7/5 导致数量为零时,暂不关闭

@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -457,6 +458,19 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         } catch (Exception e) {
             log.error("getPigCount.failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("get.pig.count.failed");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorPigTrack>> queryCurrentStatus(List<Long> pigIds) {
+        try {
+            if (Arguments.isNullOrEmpty(pigIds)) {
+                return Response.ok(Lists.newArrayList());
+            }
+            return Response.ok(doctorPigTrackDao.queryCurrentStatus(pigIds));
+        } catch (Exception e) {
+            log.error("query current status failed, pigIds:{}, cause:{}", pigIds, Throwables.getStackTraceAsString(e));
+            return Response.fail("query.current.status.failed");
         }
     }
 }

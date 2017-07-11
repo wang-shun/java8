@@ -43,6 +43,11 @@
         <result column="in_cost" property="inCost"/>
         <result column="fcr" property="fcr"/>
         <result column="out_cost" property="outCost"/>
+        <result column="vaccine_amount" property="vaccineAmount"/>
+        <result column="medicine_amount" property="medicineAmount"/>
+        <result column="consumables_amount" property="consumablesAmount"/>
+        <result column="fend_number" property="fendNumber"/>
+        <result column="feed_amount" property="feedAmount"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
 
@@ -93,6 +98,11 @@
         in_cost,
         fcr,
         out_cost,
+        vaccine_amount,
+        medicine_amount,
+        consumables_amount,
+        fend_number,
+        feed_amount,
         created_at,
         updated_at
 
@@ -135,6 +145,11 @@
         #{inCost},
         #{fcr},
         #{outCost},
+        #{vaccineAmount},
+        #{medicineAmount},
+        #{consumablesAmount},
+        #{fendNumber},
+        #{feedAmount},
         now(),
         now()
 
@@ -229,6 +244,11 @@
             #{item.inCost},
             #{item.fcr},
             #{item.outCost},
+            #{item.vaccineAmount},
+            #{item.medicineAmount},
+            #{item.consumablesAmount},
+            #{item.fendNumber},
+            #{item.feedAmount},
             now(),
             now()
             )
@@ -278,9 +298,12 @@
             <if test="inAvgWeight != null">in_avg_weight = #{inAvgWeight},</if>
             <if test="inCost != null">in_cost = #{inCost},</if>
             <if test="fcr != null">fcr = #{fcr},</if>
+            <if test="vaccineAmount != null">vaccine_amount = #{vaccineAmount},</if>
+            <if test="medicineAmount != null">medicine_amount = #{medicineAmount},</if>
+            <if test="consumablesAmount != null">consumables_amount = #{consumablesAmount},</if>
+            <if test="fendNumber != null">fend_number = #{fendNumber},</if>
+            <if test="feedAmount != null">feed_amount = #{feedAmount},</if>
             <if test="outCost != null">out_cost = #{outCost},</if>
-
-
 
             updated_at=now()
         </set>

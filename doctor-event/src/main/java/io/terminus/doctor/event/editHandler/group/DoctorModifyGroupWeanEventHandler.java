@@ -4,10 +4,13 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorWeanGroupInput;
+import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -16,8 +19,7 @@ import static io.terminus.common.utils.Arguments.notNull;
  * 断奶
  */
 @Component
-public class DoctorModifyGroupWeanEventHandler extends DoctorAbstractModifyGroupEventHandler
-{
+public class DoctorModifyGroupWeanEventHandler extends DoctorAbstractModifyGroupEventHandler {
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         DoctorWeanGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorWeanGroupInput.class);
@@ -58,5 +60,45 @@ public class DoctorModifyGroupWeanEventHandler extends DoctorAbstractModifyGroup
         oldGroupTrack.setWeanQty(EventUtil.minusInt(oldGroupTrack.getWeanQty(), deleteGroupEvent.getQuantity()));
         oldGroupTrack.setWeanWeight(EventUtil.minusDouble(oldGroupTrack.getWeanWeight(), deleteGroupEvent.getWeight()));
         return oldGroupTrack;
+    }
+
+    @Override
+    protected void updateDailyForDelete(DoctorGroupEvent deleteGroupEvent) {
+        updateDailyOfDelete(deleteGroupEvent);
+    }
+
+    @Override
+    public void updateDailyOfDelete(DoctorGroupEvent oldGroupEvent) {
+        DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
+                .quantityChange(EventUtil.minusInt(0, oldGroupEvent.getQuantity()))
+                .build();
+        DoctorDailyGroup oldDailyGroup2 = doctorDailyGroupDao.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
+        doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup2, changeDto2));
+
+        //更新哺乳与断奶数
+        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt()
+                , oldGroupEvent.getQuantity(), -oldGroupEvent.getQuantity());
+    }
+
+    @Override
+    public void updateDailyOfNew(DoctorGroupEvent newGroupEvent, BaseGroupInput input) {
+        Date eventAt = DateUtil.toDate(input.getEventAt());
+        DoctorWeanGroupInput newInput = (DoctorWeanGroupInput) input;
+        DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
+                .quantityChange(newInput.getPartWeanPigletsCount())
+                .build();
+        DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
+        doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
+
+        //更新哺乳数与断奶数
+        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(newGroupEvent.getGroupId(), eventAt
+                , -newInput.getPartWeanPigletsCount(), newInput.getPartWeanPigletsCount());
+    }
+
+    @Override
+    protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+        oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
+        oldDailyGroup.setDayWeanCount(EventUtil.plusInt(oldDailyGroup.getDayWeanCount(), changeDto.getQuantityChange()));
+        return oldDailyGroup;
     }
 }

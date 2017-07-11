@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.NumberUtils;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
@@ -15,6 +16,7 @@ import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorParityMonthlyReportDao;
 import io.terminus.doctor.event.dao.DoctorRangeReportDao;
+import io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.dto.report.common.DoctorGroupLiveStockDetailDto;
@@ -29,6 +31,8 @@ import io.terminus.doctor.event.model.DoctorParityMonthlyReport;
 import io.terminus.doctor.event.model.DoctorRangeReport;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +60,8 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.nonEmptyMapper();
     private static final int MONTH_INDEX = 12;
     private static final int WEEK_INDEX = 20;
+    private DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM");
+    private DateTimeFormatter date = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     private final DoctorParityMonthlyReportDao doctorParityMonthlyReportDao;
     private final DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao;
@@ -116,6 +122,31 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     }
 
     @Override
+    public Response<List<DoctorCommonReportTrendDto>> findMonthlyReportTrendByFarmIdAndDuration(Long farmId, String startDate, String endDate) {
+        try {
+            List<DoctorCommonReportTrendDto> list = Lists.newArrayList();
+            DateTime startTime = DateTime.parse(startDate, formatter);
+            DateTime endTime = DateTime.parse(endDate, formatter);
+
+            while (!startTime.isAfter(endTime)) {
+                String monthStr = startTime.toString(formatter);
+                startTime = startTime.plusMonths(1);
+                DoctorRangeReport report = doctorRangeReportDao.findByRangeReport(farmId, ReportRangeType.MONTH.getValue(), monthStr);
+                if (report == null) {
+                    list.add(failReportTrend(monthStr));
+                    continue;
+                }
+                list.add(new DoctorCommonReportTrendDto(getDoctorCommonReportDto(report), null, null, null));
+            }
+            return Response.ok(list);
+        } catch (Exception e) {
+            log.error("find monthly report by farmId and duration failed, farmId:{}, startDate:{}, endDate:{}, cause:{}",
+                    farmId, startDate, endDate, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.monthly.report.by.farmId.and.duration.failed");
+        }
+    }
+
+    @Override
     public Response<DoctorCommonReportTrendDto> findWeeklyReportTrendByFarmIdAndSumAt(Long farmId, Integer year, Integer week, Integer index) {
         String weekStr = DateUtil.getYearWeek(MoreObjects.firstNonNull(year, DateTime.now().getWeekyear()), MoreObjects.firstNonNull(week, DateTime.now().getWeekOfWeekyear())); //取周一代表一周
         log.info("find weekly report, week is : {}", weekStr);
@@ -141,6 +172,28 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             log.error("find weekly report by farmId and sumAt failed, farmId:{}, week:{}, cause:{}",
                     farmId, week, Throwables.getStackTraceAsString(e));
             return Response.ok(failReportTrend(weekStr));
+        }
+    }
+
+    @Override
+    public Response<List<DoctorCommonReportTrendDto>> findWeeklyReportTrendByFarmIdAndDuration(Long farmId, Integer year, Integer startWeek, Integer endWeek) {
+        try {
+            List<DoctorCommonReportTrendDto> list = Lists.newArrayList();
+            while (startWeek <= endWeek) {
+                String weekStr = DateUtil.getYearWeek(MoreObjects.firstNonNull(year, DateTime.now().getWeekyear()), MoreObjects.firstNonNull(startWeek, DateTime.now().getWeekOfWeekyear())); //取周一代表一周
+                startWeek++;
+                DoctorRangeReport report = doctorRangeReportDao.findByRangeReport(farmId, ReportRangeType.WEEK.getValue(), weekStr);
+                if (report == null) {
+                    list.add(failReportTrend(weekStr));
+                    continue;
+                }
+                list.add(new DoctorCommonReportTrendDto(getDoctorCommonReportDto(report), null, null, null));
+            }
+            return Response.ok(list);
+        } catch (Exception e) {
+            log.error("find weekly report trend by farmId and duration, farmId:{}, year:{}, startWeek:{}, endWeek:{}, cause:{}"
+                    , farmId, year, startWeek, endWeek, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.weekly.report.trend.farmId.and.duration.failed");
         }
     }
 
@@ -274,6 +327,143 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                     farmIdList, Throwables.getStackTraceAsString(e));
             return Response.fail("find.farms.live.stock.failed");
         }
+    }
+
+    @Override
+    public Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(List<Long> farmIds, Map<Long, String> farmIdToName, String startDate, String endDate) {
+        try {
+            Date startTime = DateUtil.toDate(startDate);
+            Date endTime = DateUtil.toDate(endDate);
+
+            //日期校验
+            if (endTime.after(new Date())){
+                endTime = new Date();
+            }
+            if (endTime.before(startTime)) {
+                return Response.ok(Lists.newArrayList());
+            }
+
+            int dayDiff = DateUtil.getDeltaDays(startTime, endTime) + 1;
+            List<DoctorCliqueReportDto> list = farmIdToName.keySet().stream().map(farmId -> {
+                DoctorCliqueReportDto dto1 = doctorDailyReportDao.getTransverseCliqueReport(farmId, startDate, endDate);
+                DoctorCliqueReportDto dto2 = doctorDailyGroupDao.getTransverseCliqueReport(farmId, startDate, endDate);
+                fillCommonCliqueReport(dto1, dto2, dayDiff);
+                dto1.setFarmName(farmIdToName.get(farmId));
+                return dto1;
+            }).collect(Collectors.toList());
+
+            //构建集团数据
+            list.add(buildCliqueReport(farmIds, new DateTime(startDate), new DateTime(endDate)));
+
+            return Response.ok(list);
+        } catch (Exception e) {
+            log.error("get transverse clique report failed, farmIdToName:{}, startDate:{}, endDate:{},cause:{}"
+                    , farmIdToName, startDate, endDate, Throwables.getStackTraceAsString(e));
+            return Response.fail("get.transverse.clique.report.failed");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorCliqueReportDto>> getPortraitCliqueReport(List<Long> farmIds, String startDate, String endDate) {
+        try {
+            DateTime startTime = DateTime.parse(startDate, date).withDayOfMonth(1);
+            DateTime endTime = DateTime.parse(endDate, date).withDayOfMonth(1);
+
+            //初始化月初、月末
+            DateTime monthStartTime = startTime;
+            DateTime monthEndTime = DateUtil.getMonthEnd(monthStartTime).isAfter(DateTime.now())
+                    ? DateTime.now() : DateUtil.getMonthEnd(monthStartTime);
+
+            List<DoctorCliqueReportDto> list = Lists.newArrayList();
+            while (!monthStartTime.isAfter(endTime)) {
+                //构建每月数据
+                list.add(buildCliqueReport(farmIds, monthStartTime, monthEndTime));
+                //按月增加
+                monthStartTime = monthStartTime.plusMonths(1);
+                monthEndTime = DateUtil.getMonthEnd(monthStartTime).isAfter(DateTime.now())
+                        ? DateTime.now() : DateUtil.getMonthEnd(monthStartTime);
+            }
+            return Response.ok(list);
+        } catch (Exception e) {
+            log.error("get portrait clique report failed, farmIds:{}, startDate:{}, endDate:{},cause:{}"
+                    , farmIds, startDate, endDate, Throwables.getStackTraceAsString(e));
+            return Response.fail("get.portrait.clique.report.failed");
+        }
+    }
+
+    /**
+     * 构建一个多个猪场某月的报表数据
+     * @param farmIds 猪场id
+     * @param monthStartTime 月初
+     * @param monthEndTime 月末
+     * @return 报表数据
+     */
+    private DoctorCliqueReportDto buildCliqueReport(List<Long> farmIds, DateTime monthStartTime, DateTime monthEndTime) {
+        String monthStartStr = monthStartTime.toString(date);
+        String monthEndStr = monthEndTime.toString(date);
+        int dayDiff = DateUtil.getDeltaDays(monthStartTime.toDate(), monthEndTime.toDate()) + 1;
+        DoctorCliqueReportDto dto1 = doctorDailyReportDao.getPortraitCliqueReport(farmIds, monthStartStr, monthEndStr);
+        DoctorCliqueReportDto dto2 = doctorDailyGroupDao.getPortraitCliqueReport(farmIds, monthStartStr, monthEndStr);
+        fillCommonCliqueReport(dto1, dto2, dayDiff);
+        dto1.setMonth(DateUtil.getYearMonth(monthStartTime.toDate()));
+        return dto1;
+    }
+
+    /**
+     * 填充集团报汇总共有数据
+     * @param dto1
+     * @param dto2
+     * @param dayDiff
+     * @return
+     */
+    private DoctorCliqueReportDto fillCommonCliqueReport(DoctorCliqueReportDto dto1, DoctorCliqueReportDto dto2, Integer dayDiff) {
+        //配种总数
+        dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
+                + dto1.getMateFq() + dto1.getMateFq()
+                + dto1.getMateLc() + dto1.getMateYx());
+
+        //妊娠总数
+        dto1.setPregCount(dto1.getPregPositive() + dto1.getPregNegative()
+                + dto1.getPregFanqing() + dto1.getPregLiuchan());
+        dto1.setAvgSowLiveStock(Integer.parseInt(NumberUtils.divide(dto1.getAvgSowLiveStock(), dayDiff, 0)));
+
+        //窝均分娩
+        if (isNull(dto1.getFarrowNest()) || dto1.getFarrowNest() == 0) {
+            dto1.setFarrowNest(0);
+            dto1.setAvgFarrowWeight(0.00D);
+            dto1.setAvgFarrowLive(0.00D);
+            dto1.setAvgFarrowHealth(0.00D);
+            dto1.setAvgFarrowWeak(0.00D);
+        } else {
+            dto1.setAvgFarrowLive(get2(dto1.getFarrowLive(), dto1.getFarrowNest()));
+            dto1.setAvgFarrowHealth(get2(dto1.getFarrowHealth(), dto1.getFarrowNest()));
+            dto1.setAvgFarrowWeak(get2(dto1.getFarrowWeak(), dto1.getFarrowNest()));
+            dto1.setAvgFarrowWeight(Double.parseDouble(String.format("%.2f", dto1.getFarrowWeight() / dto1.getFarrowNest())));
+        }
+
+        //窝均断奶
+        if (isNull(dto1.getWeanNest()) || dto1.getWeanNest() == 0) {
+            dto1.setWeanNest(0);
+            dto1.setNestAvgWean(0D);
+        } else {
+            dto1.setNestAvgWean(get2(dto1.getWeanCount(), dto1.getWeanNest()));
+        }
+
+        //销售
+        dto1.setHpSale(dto2.getHpSale());
+        dto1.setCfSale(dto2.getCfSale());
+        dto1.setYfSale(dto2.getYfSale());
+        return dto1;
+    }
+
+    /**
+     * 整数相除保留两位小数
+     * @param total 总数
+     * @param quantity 被除数
+     * @return
+     */
+    private Double get2(Integer total, Integer quantity) {
+        return Double.parseDouble(NumberUtils.divide(total, quantity, 2));
     }
 
     /**

@@ -30,7 +30,9 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 
 /**
@@ -44,6 +46,17 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
     private DoctorModifyGroupNewEventHandler modifyGroupNewEventHandler;
     @Autowired
     private DoctorModifyGroupMoveInEventHandler modifyGroupMoveInEventHandler;
+
+    @Override
+    protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        super.modifyHandleCheck(oldPigEvent, inputDto);
+        DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
+
+        //当前胎次下有断奶事件,不允许编辑分娩的活仔数
+        expectTrue(Objects.equals(farrowingDto.getFarrowingLiveCount(), oldPigEvent.getLiveCount())
+                        || isNull(doctorPigEventDao.getWeanEventByParity(oldPigEvent.getPigId(), oldPigEvent.getParity()))
+                , "current.parity.has.wean");
+    }
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
