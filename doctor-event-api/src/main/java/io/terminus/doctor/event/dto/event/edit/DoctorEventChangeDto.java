@@ -378,4 +378,9 @@ public class DoctorEventChangeDto {
      */
     private Boolean isSowTrigger;
 
+    /**
+     * 是否是分娩转入
+     */
+    private Boolean isFarrowIn;
+
 }

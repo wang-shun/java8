@@ -139,6 +139,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
                 .quantityChange(EventUtil.minusInt(0, input1.getQuantity()))
                 .transGroupType(oldGroupEvent.getTransGroupType())
                 .isSowTrigger(notNull(oldGroupEvent.getSowId()))
+                .isFarrowIn(notNull(oldGroupEvent.getRelPigEventId()))
                 .build();
         DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
         doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
@@ -163,6 +164,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
                 .quantityChange(input2.getQuantity())
                 .transGroupType(newGroupEvent.getTransGroupType())
                 .isSowTrigger(notNull(newGroupEvent.getSowId()))
+                .isFarrowIn(notNull(newGroupEvent.getRelPigEventId()))
                 .build();
         DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
         doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
@@ -195,7 +197,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         } else {
             oldDailyGroup.setInnerIn(EventUtil.plusInt(oldDailyGroup.getInnerIn(), changeDto.getQuantityChange()));
         }
-        if (changeDto.getIsSowTrigger()) {
+        if (changeDto.getIsFarrowIn()) {
             oldDailyGroup.setFarrowingIn(EventUtil.plusInt(oldDailyGroup.getFarrowingIn(), changeDto.getQuantityChange()));
         }
         oldDailyGroup.setEnd(EventUtil.plusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
