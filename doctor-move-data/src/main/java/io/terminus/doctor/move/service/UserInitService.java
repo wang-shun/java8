@@ -440,17 +440,18 @@ public class UserInitService {
         if (member.getMobilPhone().isEmpty()) {
             member.setMobilPhone(null);
         }
-        Response<User> result = doctorUserReadService.findBy(member.getMobilPhone(), LoginType.MOBILE);
+//        Response<User> result = doctorUserReadService.findBy(member.getMobilPhone(), LoginType.MOBILE);
         Response<User> userResponse = doctorUserReadService.findBy(name, LoginType.NAME);
-        if(result.isSuccess() && result.getResult() != null) {
-            subUser = result.getResult();
-        } else if(userResponse.isSuccess() && userResponse.getResult() != null) {
+//        if(result.isSuccess() && result.getResult() != null) {
+//            subUser = result.getResult();
+//        } else
+        if(userResponse.isSuccess() && userResponse.getResult() != null) {
             subUser = userResponse.getResult();
         } else {
             subUser = new User();
         }
         subUser.setName(name);
-        subUser.setMobile(member.getMobilPhone());
+//        subUser.setMobile(member.getMobilPhone());
         subUser.setPassword(EncryptUtil.encrypt("123456"));
         subUser.setType(UserType.FARM_SUB.value());
         if (Objects.equals(member.getIsStopUse(), "true")) {
