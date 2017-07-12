@@ -36,6 +36,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -206,6 +207,15 @@ public class DoctorMoveDataController {
             //把所有猪舍添加到所有用户的权限里去
             farmList.forEach(farmWithMobile -> userInitService.updatePermissionBarn(farmWithMobile.getDoctorFarm().getId()));
             log.warn("all data moved successfully, CONGRATULATIONS!!!");
+
+            //生成报表
+            farmList.forEach(farmWithMobile -> {
+                moveDailyReport(farmWithMobile.getDoctorFarm().getId(), DateUtil.toDateString(DateTime.now().minusYears(1).toDate())
+                        , DateUtil.toDateString(new Date()));
+                flushGroupDailyHistorty(farmWithMobile.getDoctorFarm().getId(), DateUtil.toDateString(DateTime.now().minusYears(1).toDate())
+                        , DateUtil.toDateString(new Date()));
+                moveDoctorRangeReport(farmWithMobile.getDoctorFarm().getId(), DateUtil.toDateString(DateTime.now().minusYears(1).toDate()));
+            });
             return true;
         } catch (Exception e) {
             log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
