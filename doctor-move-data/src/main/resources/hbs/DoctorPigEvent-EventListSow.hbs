@@ -93,4 +93,4 @@ FROM
     LEFT JOIN view_GainCardList AS gain ON a.toGroupOutId = gain.OID
     LEFT JOIN view_PigLocationList AS barn on a.barnOutId = barn.OID
     LEFT JOIN view_PigLocationList AS toBarn on a.toBarnOutId = toBarn.OID
-WHERE a.sowOutId IN ({{{sowOutIds}}})
+WHERE a.sowOutId IN ({{{sowOutIds}}}) order by currentParity asc,eventAt asc
