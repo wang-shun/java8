@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -91,6 +93,24 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
     }
 
     @Override
+    public Response<Boolean> generateOrgDoctorRangeReports(Map<Long, List<Long>> orgMap, Date since) {
+        try {
+            if (since.after(new Date())) {
+                return Response.ok(Boolean.FALSE);
+            }
+            orgMap.keySet().forEach(orgId -> {
+                List<Long> farmIdList = orgMap.get(orgId);
+                updateOrgMonthlyReport(orgId, farmIdList, since);
+            });
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("generate org doctorRangeReport failed,orgMap:{}, since:{}, cause:{}"
+                    , orgMap, since, Throwables.getStackTraceAsString(e));
+            return Response.ok(Boolean.FALSE);
+        }
+    }
+
+    @Override
     public Response<Boolean> generateDoctorRangeReports(Long farmId, Date date) {
         try{
             generateDoctorWeeklyReports(farmId, date);
@@ -143,6 +163,20 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
             doctorRangeReportDao.update(doctorRangeReport);
         }
 
+    }
+
+    private void updateOrgMonthlyReport(Long orgId, List<Long> farmIds, Date since) {
+        DateTime monthStart = new DateTime(since).withDayOfMonth(1);
+        DateTime currentMonthStart = DateTime.now().withDayOfMonth(1);
+        while (monthStart.isAfter(currentMonthStart)) {
+            DateTime monthEnd = DateUtil.getMonthEnd(monthStart);
+            if (monthEnd.isAfter(DateTime.now())) {
+                monthEnd = DateTime.now();
+            }
+            createOrgDoctorRangeReport(orgId, farmIds, DateUtil.getYearMonth(monthStart.toDate())
+                    , monthStart.toDate(), monthEnd.toDate());
+            monthStart = monthStart.plusMonths(1);
+        }
     }
 
     private void updateActualIndicator(Long farmId, Date date) {
@@ -216,6 +250,19 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
         doctorRangeReportDao.create(doctorRangeReport);
     }
 
+    private void createOrgDoctorRangeReport(Long orgId, List<Long> farmIds, String sumAt, Date startAt, Date endAt){
+        DoctorRangeReport doctorRangeReport = new DoctorRangeReport();
+        doctorRangeReport.setOrgId(orgId);
+        doctorRangeReport.setType(ReportRangeType.MONTH.getValue());
+        doctorRangeReport.setSumAt(sumAt);
+        doctorRangeReport.setSumFrom(startAt);
+        doctorRangeReport.setSumTo(endAt);
+        getCommonIndicator(doctorRangeReport, farmIds);
+
+        doctorRangeReportDao.deleteByOrgIdAndSumAt(orgId, sumAt);
+        doctorRangeReportDao.create(doctorRangeReport);
+    }
+
 
     /**
      * 根据时间段统计
@@ -224,28 +271,32 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
      */
     private DoctorRangeReport getDoctorRangeIndicator(DoctorRangeReport doctorRangeReport) {
         Long farmId = doctorRangeReport.getFarmId();
+        getCommonIndicator(doctorRangeReport, Lists.newArrayList(farmId));
+        return getStructureReport(doctorRangeReport);
+    }
+
+    private DoctorRangeReport getCommonIndicator(DoctorRangeReport doctorRangeReport, List<Long> farmIds) {
         Date startAt = doctorRangeReport.getSumFrom();
         Date endAt = doctorRangeReport.getSumTo();
+        doctorRangeReport.setMateEstimatePregRate(doctorKpiDao.assessPregnancyRate(farmIds, startAt, endAt));       //估算受胎率
+        doctorRangeReport.setMateEstimateFarrowingRate(doctorKpiDao.assessFarrowingRate(farmIds, startAt, endAt));  //估算配种分娩率
+        doctorRangeReport.setMateRealPregRate(doctorKpiDao.realPregnancyRate(farmIds, startAt, endAt));             //实际受胎率
+        doctorRangeReport.setMateRealFarrowingRate(doctorKpiDao.realFarrowingRate(farmIds, startAt, endAt));        //实际分娩率
 
-        doctorRangeReport.setMateEstimatePregRate(doctorKpiDao.assessPregnancyRate(farmId, startAt, endAt));       //估算受胎率
-        doctorRangeReport.setMateEstimateFarrowingRate(doctorKpiDao.assessFarrowingRate(farmId, startAt, endAt));  //估算配种分娩率
-        getActualIndicator(doctorRangeReport, farmId, startAt, endAt);
+        doctorRangeReport.setNpd(doctorKpiDao.npd(farmIds, startAt, endAt));                                        //非生产天数
+        doctorRangeReport.setPsy(doctorKpiDao.psy(farmIds, startAt, endAt));                                        //psy
+        doctorRangeReport.setMateInSeven(doctorKpiDao.getMateInSeven(farmIds, startAt, endAt));
 
-        doctorRangeReport.setNpd(doctorKpiDao.npd(farmId, startAt, endAt));                                        //非生产天数
-        doctorRangeReport.setPsy(doctorKpiDao.psy(farmId, startAt, endAt));                                        //psy
-        doctorRangeReport.setMateInSeven(doctorKpiDao.getMateInSeven(farmId, startAt, endAt));
+        doctorRangeReport.setWeanAvgCount(doctorKpiDao.getWeanPigletCountsAvg(farmIds, startAt, endAt));        //窝均断奶数
+        doctorRangeReport.setWeanAvgDayAge(doctorKpiDao.getWeanDayAgeAvg(farmIds, startAt, endAt));       //断奶日龄
 
-        doctorRangeReport.setWeanAvgCount(doctorKpiDao.getWeanPigletCountsAvg(farmId, startAt, endAt));        //窝均断奶数
-        doctorRangeReport.setWeanAvgDayAge(doctorKpiDao.getWeanDayAgeAvg(farmId, startAt, endAt));       //断奶日龄
+        doctorRangeReport.setDeadFarrowRate(doctorKpiDao.getDeadFarrowRate(farmIds, startAt, endAt));    //产房死淘率
+        doctorRangeReport.setDeadNurseryRate(doctorKpiDao.getDeadNurseryRate(farmIds, startAt, endAt));  //保育死淘率
+        doctorRangeReport.setDeadFattenRate(doctorKpiDao.getDeadFattenRate(farmIds, startAt, endAt));    //育肥死淘率
 
-        doctorRangeReport.setDeadFarrowRate(doctorKpiDao.getDeadFarrowRate(farmId, startAt, endAt));    //产房死淘率
-        doctorRangeReport.setDeadNurseryRate(doctorKpiDao.getDeadNurseryRate(farmId, startAt, endAt));  //保育死淘率
-        doctorRangeReport.setDeadFattenRate(doctorKpiDao.getDeadFattenRate(farmId, startAt, endAt));    //育肥死淘率
-
-        doctorRangeReport.setNurseryFeedConversion(doctorKpiDao.getNurserFeedConversion(farmId, startAt, endAt));
-        doctorRangeReport.setFattenFeedConversion(doctorKpiDao.getFattenFeedConversion(farmId, startAt, endAt));
-
-        return getStructureReport(doctorRangeReport);
+        doctorRangeReport.setNurseryFeedConversion(doctorKpiDao.getNurserFeedConversion(farmIds, startAt, endAt));
+        doctorRangeReport.setFattenFeedConversion(doctorKpiDao.getFattenFeedConversion(farmIds, startAt, endAt));
+        return doctorRangeReport;
     }
 
     private DoctorRangeReport getStructureReport(DoctorRangeReport doctorRangeReport) {

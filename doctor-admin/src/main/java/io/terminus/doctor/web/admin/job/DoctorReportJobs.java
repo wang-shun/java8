@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.admin.job;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -109,7 +111,7 @@ public class DoctorReportJobs {
      * 每两点执行一发
      */
     @Scheduled(cron = "0 0 2 * * ?")
-    @RequestMapping(value = "/range", method = RequestMethod.GET)
+    @RequestMapping(value = "/farm/range", method = RequestMethod.GET)
     public void monthlyReport() {
         try {
             if (!hostLeader.isLeader()) {
@@ -121,6 +123,27 @@ public class DoctorReportJobs {
             Date today = Dates.startOfDay(new Date());
             doctorRangeReportWriteService.generateDoctorRangeReports(farmIds, today);
             log.info("range report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        } catch (Exception e) {
+            log.error("range report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
+    /**
+     * 公司月报计算job
+     * 每两点执行一发
+     */
+    @Scheduled(cron = "0 0 2 * * ?")
+    @RequestMapping(value = "/org/range", method = RequestMethod.GET)
+    public void monthlyOrgReport() {
+        try {
+            if (!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("range report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+            Date since = Dates.startOfDay(new Date());
+            doctorRangeReportWriteService.generateOrgDoctorRangeReports(getOrgToFarm(), since);
+            log.info("range report job end");
         } catch (Exception e) {
             log.error("range report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
@@ -175,5 +198,15 @@ public class DoctorReportJobs {
 
     private List<Long> getAllFarmIds() {
         return RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
+    }
+
+    private Map<Long, List<Long>> getOrgToFarm() {
+        Map<Long, List<Long>> orgMapToFarm = Maps.newHashMap();
+        Map<Long, List<DoctorFarm>> orgToFarm = RespHelper.orServEx(doctorFarmReadService.findAllFarms())
+                .stream().collect(Collectors.groupingBy(DoctorFarm::getOrgId));
+        orgToFarm.keySet().forEach(orgId -> {
+            orgMapToFarm.put(orgId, orgToFarm.get(orgId).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
+        });
+        return orgMapToFarm;
     }
 }

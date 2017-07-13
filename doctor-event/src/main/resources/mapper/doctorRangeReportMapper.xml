@@ -8,6 +8,7 @@
     <resultMap id="DoctorRangeReportMap" type="DoctorRangeReport">
         <id column="id" property="id"/>
         <result column="farm_id" property="farmId"/>
+        <result column="org_id" property="orgId"/>
         <result column="type" property="type"/>
         <result column="sum_at" property="sumAt"/>
         <result column="sum_from" property="sumFrom"/>
@@ -41,7 +42,8 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, 
+        farm_id,
+        org_id,
         type, 
         sum_at,
         sum_from,
@@ -67,7 +69,8 @@
     </sql>
 
     <sql id="vals">
-        #{farmId}, 
+        #{farmId},
+        #{orgId},
         #{type}, 
         #{sumAt},
         #{sumFrom},
@@ -95,6 +98,7 @@
     <sql id="criteria">
         <if test="id != null">AND id = #{id}</if>
         <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="orgId != null">AND org_id = #{orgId}</if>
         <if test="type != null">AND type = #{type}</if>
         <if test="sumAt != null">AND sum_at = #{sumAt}</if>
         <if test="mateEstimatePregRate != null">AND mate_estimate_preg_rate = #{mateEstimatePregRate}</if>
@@ -130,6 +134,7 @@
         UPDATE <include refid="tb"/>
         <set>
             <if test="farmId != null">farm_id = #{farmId},</if>
+            <if test="orgId != null">org_id = #{orgId},</if>
             <if test="type != null">type = #{type},</if>
             <if test="sumAt != null">sum_at = #{sumAt},</if>
             <if test="sumFrom != null">sum_from = #{sumFrom},</if>
@@ -203,4 +208,18 @@
         AND sum_at = #{sumAt}
     </select>
 
+    <delete id="deleteByOrgIdAndSumAt" parameterType="map" >
+        DELETE
+        FROM <include refid="tb"/>
+        WHERE
+        org_id = #{orgId}
+        AND sum_at = {sumAt}
+    </delete>
+
+    <select id="findByOrgIdAndSumAt" parameterType="map" resultMap="DoctorRangeReportMap" >
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE
+        org_id = #{orgId}
+        AND sum_at = {sumAt}
+    </select>
 </mapper>

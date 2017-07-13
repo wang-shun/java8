@@ -1264,3 +1264,6 @@ alter table doctor_daily_groups add column farrowing_in int(11) default null com
 alter table doctor_messages add column `dose` int(11) default null comment '剂量' after `avg_day_age`;
 alter table doctor_messages add column `material_id` bigint(20) default null comment '疫苗id' after `dose`;
 alter table doctor_messages add column `material_name` VARCHAR(20) default null comment '疫苗名称' after `material_id`;
+
+-- 2017-07-13
+alter table doctor_range_reports add column `orgId` bigint(20) default null comment '公司id' after `farm_id`;

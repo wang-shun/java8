@@ -5,7 +5,6 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorRangeReport;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,6 +23,24 @@ public class DoctorRangeReportDao extends MyBatisDao<DoctorRangeReport> {
      */
     public void deleteByFarmIdAndTypeAndSumAt(Long farmId, Integer type, String sumAt) {
         getSqlSession().delete(sqlId("deleteByFarmIdAndTypeAndSumAt"), ImmutableMap.of("farmId", farmId, "type", type, "sumAt", sumAt));
+    }
+
+    /**
+     * 删除公司月报
+     * @param orgId 公司id
+     * @param sumAt 月份 yyyy-MM
+     */
+    public void deleteByOrgIdAndSumAt(Long orgId, String sumAt) {
+        sqlSession.delete(sqlId("deleteByOrgIdAndSumAt"), ImmutableMap.of("orgId", orgId, "sumAt", sumAt));
+    }
+
+    /**
+     * 获取公司月报
+     * @param orgId 公司id
+     * @param sumAt 月份 yyyy-MM
+     */
+    public void findByOrgIdAndSumAt(Long orgId, String sumAt) {
+        sqlSession.delete(sqlId("findByOrgIdAndSumAt"), ImmutableMap.of("orgId", orgId, "sumAt", sumAt));
     }
 
     /**
