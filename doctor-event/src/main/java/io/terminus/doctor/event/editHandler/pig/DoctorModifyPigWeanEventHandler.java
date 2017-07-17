@@ -106,7 +106,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         oldPigTrack.setUnweanQty(deletePigEvent.getWeanCount());
         DoctorPigEvent farrowEvent = doctorPigEventDao.getFarrowEventByParity(deletePigEvent.getPigId(), deletePigEvent.getParity());
         oldPigTrack.setFarrowQty(farrowEvent.getLiveCount());
-        oldPigTrack.setWeanQty(EventUtil.minusInt(oldPigTrack.getFarrowQty(), oldPigTrack.getUnweanQty()));
+        oldPigTrack.setWeanQty(0);
         oldPigTrack.setFarrowAvgWeight(EventUtil.getAvgWeight(farrowEvent.getWeight(), farrowEvent.getLiveCount()));
         oldPigTrack.setWeanAvgWeight(0D);
         oldPigTrack.setGroupId(deletePigEvent.getGroupId());

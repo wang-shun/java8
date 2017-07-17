@@ -417,6 +417,9 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
      * @return
      */
     private DoctorCliqueReportDto fillCommonCliqueReport(DoctorCliqueReportDto dto1, DoctorCliqueReportDto dto2, Integer dayDiff) {
+        if (isNull(dto1)) {
+            return new DoctorCliqueReportDto();
+        }
         //配种总数
         dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
                 + dto1.getMateFq() + dto1.getMateFq()
@@ -449,6 +452,9 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             dto1.setNestAvgWean(get2(dto1.getWeanCount(), dto1.getWeanNest()));
         }
 
+        if (isNull(dto2)) {
+            return dto1;
+        }
         //销售
         dto1.setHpSale(dto2.getHpSale());
         dto1.setCfSale(dto2.getCfSale());
