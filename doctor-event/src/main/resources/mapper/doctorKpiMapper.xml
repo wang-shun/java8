@@ -758,7 +758,7 @@
         where kind = 1
         <include refid="criteria" />
         ) /
-        (
+        ifnull((
         select
         case sum(sow_end)/(case count(1) when 0 then 1 else count(1) end)
         when 0 then 1
@@ -769,7 +769,7 @@
         <if test="startAt != null">and sum_at &gt;= #{startAt}</if>
         <if test="endAt != null">and sum_at &lt;= #{endAt}</if>
         limit 1
-        ) * 12 from dual
+        ) * 12, 1) from dual
     </select>
 
     <!-- PSY -->
@@ -781,7 +781,7 @@
         WHERE kind = 1
         <include refid="criteria" />
         ) /
-        (
+        ifnull((
         SELECT CASE sum(sow_end)/(CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
         WHEN 0 THEN 1 ELSE sum(sow_end)/(CASE count(1) WHEN 0 THEN 1 ELSE count(1) END) END
         FROM doctor_daily_reports
@@ -790,7 +790,7 @@
         <if test="startAt != null">and sum_at &gt;= #{startAt}</if>
         <if test="endAt != null">and sum_at &lt;= #{endAt}</if>
         limit 1
-        ) * 12
+        ) * 12, 1)
         FROM dual)) / (CASE (
         (SELECT ifnull(sum(preg_days), 0) / (CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
         FROM doctor_pig_events
