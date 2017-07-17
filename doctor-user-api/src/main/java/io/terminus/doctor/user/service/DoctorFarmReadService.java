@@ -43,11 +43,18 @@ public interface DoctorFarmReadService {
     Response<List<DoctorFarm>> findAllFarms();
 
     /**
-     * 根据公司id查询猪场信息列表
+     * 根据公司id查询猪场信息列表(子公司)
      * @param orgId 公司id
      * @return 猪场信息列表
      */
     Response<List<DoctorFarm>> findFarmsByOrgId(@NotNull(message = "orgId.not.null") Long orgId);
+
+    /**
+     * 根据公司id查询所有猪场信息列表(子公司或者父公司)
+     * @param orgId 公司id
+     * @return 猪场信息列表
+     */
+    Response<List<DoctorFarm>> findAllFarmsByOrgId(@NotNull(message = "orgId.not.null") Long orgId);
 
     /**
      * 根据farmIds 查询猪场

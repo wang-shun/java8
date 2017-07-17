@@ -77,4 +77,14 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
             return Response.fail("org.find.fail");
         }
     }
+
+    @Override
+    public Response<List<DoctorOrg>> findOrgByParentId(Long parentId) {
+        try {
+            return Response.ok(doctorOrgDao.findOrgByParentId(parentId));
+        } catch (Exception e) {
+            log.error("find org by parentId failed, parentId:{}, cause:{}", parentId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.org.by.parentId.failed");
+        }
+    }
 }

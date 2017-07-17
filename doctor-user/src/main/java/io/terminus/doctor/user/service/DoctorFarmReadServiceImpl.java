@@ -7,7 +7,9 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
+import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -29,12 +32,15 @@ import java.util.List;
 public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
 
     private final DoctorFarmDao doctorFarmDao;
+    private final DoctorOrgDao doctorOrgDao;
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
     @Autowired
     public DoctorFarmReadServiceImpl(DoctorFarmDao doctorFarmDao,
+                                     DoctorOrgDao doctorOrgDao,
                                      DoctorUserDataPermissionReadService doctorUserDataPermissionReadService){
         this.doctorFarmDao = doctorFarmDao;
+        this.doctorOrgDao = doctorOrgDao;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
     }
 
@@ -102,9 +108,24 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
     @Override
     public Response<List<DoctorFarm>> findFarmsByOrgId(@NotNull(message = "orgId.not.null") Long orgId) {
         try {
+
             return Response.ok(doctorFarmDao.findByOrgId(orgId));
         } catch (Exception e) {
             log.error("find farms by orgId failed, orgId:{}, cause:{}", orgId, Throwables.getStackTraceAsString(e));
+            return Response.fail("farm.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorFarm>> findAllFarmsByOrgId(@NotNull(message = "orgId.not.null") Long orgId) {
+        try {
+            List<DoctorOrg> orgList = doctorOrgDao.findOrgByParentId(orgId);
+            if (Arguments.isNullOrEmpty(orgList)) {
+                return Response.ok(doctorFarmDao.findByOrgId(orgId));
+            }
+            return Response.ok(doctorFarmDao.findByOrgIds(orgList.stream().map(DoctorOrg::getId).collect(Collectors.toList())));
+        } catch (Exception e) {
+            log.error("find all farms by orgId failed, orgId:{}, cause:{}", orgId, Throwables.getStackTraceAsString(e));
             return Response.fail("farm.find.fail");
         }
     }

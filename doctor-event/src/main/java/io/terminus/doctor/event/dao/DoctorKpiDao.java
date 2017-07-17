@@ -432,6 +432,20 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 死淘情况: 后备死淘率
+     */
+    public double getDeadHoubeiRate(Long farmId, Date startAt, Date endAt) {
+        return getDeadFarrowRate(Lists.newArrayList(farmId), startAt, endAt);
+    }
+
+    /**
+     * 死淘情况: 后备死淘率
+     */
+    public double getDeadHoubeiRate(List<Long> farmIds, Date startAt, Date endAt) {
+        return EventUtil.get4(sqlSession.selectOne(sqlId("getDeadFarrowRate"), ImmutableMap.of("farmIds", farmIds, "startAt", startAt, "endAt", endAt)));
+    }
+
+    /**
      * 死淘情况: 产房死淘率
      */
     public double getDeadFarrowRate(Long farmId, Date startAt, Date endAt) {

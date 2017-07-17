@@ -3,6 +3,7 @@ package io.terminus.doctor.web.admin.job;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -14,7 +15,9 @@ import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorRangeReportWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -58,6 +61,8 @@ public class DoctorReportJobs {
 
     @RpcConsumer(timeout = "60000")
     private DoctorDailyGroupWriteService doctorDailyGroupWriteService;
+    @RpcConsumer
+    private DoctorOrgReadService doctorOrgReadService;
 
     private final HostLeader hostLeader;
 
@@ -141,7 +146,7 @@ public class DoctorReportJobs {
                 return;
             }
             log.info("range report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
-            Date since = Dates.startOfDay(new Date());
+            Date since = DateTime.now().minusYears(1).toDate();
             doctorRangeReportWriteService.generateOrgDoctorRangeReports(getOrgToFarm(), since);
             log.info("range report job end");
         } catch (Exception e) {
@@ -202,10 +207,12 @@ public class DoctorReportJobs {
 
     private Map<Long, List<Long>> getOrgToFarm() {
         Map<Long, List<Long>> orgMapToFarm = Maps.newHashMap();
-        Map<Long, List<DoctorFarm>> orgToFarm = RespHelper.orServEx(doctorFarmReadService.findAllFarms())
-                .stream().collect(Collectors.groupingBy(DoctorFarm::getOrgId));
-        orgToFarm.keySet().forEach(orgId -> {
-            orgMapToFarm.put(orgId, orgToFarm.get(orgId).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
+        List<DoctorOrg> orgList = RespHelper.orServEx(doctorOrgReadService.findAllOrgs());
+        orgList.forEach(doctorOrg -> {
+            Response<List<DoctorFarm>> farmResponse = doctorFarmReadService.findAllFarmsByOrgId(doctorOrg.getId());
+            if (farmResponse.isSuccess()) {
+                orgMapToFarm.put(doctorOrg.getId(), farmResponse.getResult().stream().map(DoctorFarm::getId).collect(Collectors.toList()));
+            }
         });
         return orgMapToFarm;
     }

@@ -1266,4 +1266,5 @@ alter table doctor_messages add column `material_id` bigint(20) default null com
 alter table doctor_messages add column `material_name` VARCHAR(20) default null comment '疫苗名称' after `material_id`;
 
 -- 2017-07-13
-alter table doctor_range_reports add column `orgId` bigint(20) default null comment '公司id' after `farm_id`;
+alter table doctor_range_reports add column `org_id` bigint(20) default null comment '公司id' after `farm_id`;
+alter table doctor_range_reports modify column `org_id` bigint(20) default null comment '公司id' after `farm_id`;

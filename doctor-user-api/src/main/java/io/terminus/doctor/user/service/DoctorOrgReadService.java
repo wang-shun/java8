@@ -34,4 +34,11 @@ public interface DoctorOrgReadService {
      * @return 所有公司
      */
     Response<List<DoctorOrg>> findAllOrgs();
+
+    /**
+     * 查询父公司下所有子公司
+     * @param parentId 父公司id
+     * @return 子公司列表
+     */
+    Response<List<DoctorOrg>> findOrgByParentId(Long parentId);
 }

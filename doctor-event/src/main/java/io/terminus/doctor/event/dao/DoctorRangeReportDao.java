@@ -39,8 +39,8 @@ public class DoctorRangeReportDao extends MyBatisDao<DoctorRangeReport> {
      * @param orgId 公司id
      * @param sumAt 月份 yyyy-MM
      */
-    public void findByOrgIdAndSumAt(Long orgId, String sumAt) {
-        sqlSession.delete(sqlId("findByOrgIdAndSumAt"), ImmutableMap.of("orgId", orgId, "sumAt", sumAt));
+    public DoctorRangeReport findByOrgIdAndSumAt(Long orgId, String sumAt) {
+        return sqlSession.selectOne(sqlId("findByOrgIdAndSumAt"), ImmutableMap.of("orgId", orgId, "sumAt", sumAt));
     }
 
     /**

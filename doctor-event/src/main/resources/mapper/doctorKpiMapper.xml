@@ -9,8 +9,8 @@
     <sql id="criteria">
         AND status = 1
         AND event_source != 5
-        <if test="farmIds != null &amp;&amp; ids.size() > 0">
-            AND t1.farm_id IN
+        <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
+            AND farm_id IN
             <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
                 #{farmId}
             </foreach>
@@ -636,7 +636,7 @@
         and t1.`type` = 9
         and t1.kind = 1
         and t1.current_mating_count = 1
-        <if test="farmIds != null &amp;&amp; ids.size() > 0">
+        <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
             AND t1.farm_id IN
             <foreach collection="farmIds" item="farmId" open="(" separator="," close=")" >
                 #{farmId}
@@ -683,7 +683,7 @@
         where t1.status = 1
         and t1.`type` = 9
         and t1.kind = 1
-        <if test="farmIds != null &amp;&amp; ids.size() > 0">
+        <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
             and t1.farm_id IN
             <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
                 #{farmId}
@@ -731,7 +731,12 @@
         else sum(sow_end)/(case count(1) when 0 then 1 else count(1) end) end
         from doctor_daily_reports
         where 1=1
-        <include refid="criteria" />
+        <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
+            AND farm_id IN
+            <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                #{farmId}
+            </foreach>
+        </if>
         limit 1
         ) * 12 from dual
     </select>
@@ -750,7 +755,12 @@
         WHEN 0 THEN 1 ELSE sum(sow_end)/(CASE count(1) WHEN 0 THEN 1 ELSE count(1) END) END
         FROM doctor_daily_reports
         WHERE 1=1
-        <include refid="criteria" />
+        <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
+            AND farm_id IN
+            <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
+                #{farmId}
+            </foreach>
+        </if>
         limit 1
         ) * 12
         FROM dual)) / (CASE (

@@ -22,4 +22,13 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
     public List<DoctorOrg> findAll(){
         return sqlSession.selectList(sqlId("findAll"));
     }
+
+    /**
+     * 获取父公司下的子公司(直接关联)
+     * @param parentId 父公司id
+     * @return 子公司列表
+     */
+    public List<DoctorOrg> findOrgByParentId(Long parentId) {
+        return sqlSession.selectList(sqlId("findOrgByParentId"), parentId);
+    }
 }

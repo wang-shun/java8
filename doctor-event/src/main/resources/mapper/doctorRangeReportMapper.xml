@@ -213,13 +213,13 @@
         FROM <include refid="tb"/>
         WHERE
         org_id = #{orgId}
-        AND sum_at = {sumAt}
+        AND sum_at = #{sumAt}
     </delete>
 
     <select id="findByOrgIdAndSumAt" parameterType="map" resultMap="DoctorRangeReportMap" >
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         WHERE
         org_id = #{orgId}
-        AND sum_at = {sumAt}
+        AND sum_at = #{sumAt}
     </select>
 </mapper>

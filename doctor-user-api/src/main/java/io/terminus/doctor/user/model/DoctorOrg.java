@@ -28,6 +28,11 @@ public class DoctorOrg implements Serializable {
     private String mobile;
 
     /**
+     * 父公司id
+     */
+    private Long parentId;
+
+    /**
      * 营业执照复印件图片地址
      */
     private String license;

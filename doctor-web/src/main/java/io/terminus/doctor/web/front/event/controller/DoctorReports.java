@@ -280,7 +280,7 @@ public class DoctorReports {
 
         //获取有权限的猪场id
         List<Long> permissionFarmIds = RespHelper.or500(doctorFarmReadService.findFarmIdsByUserId(UserUtil.getUserId()));
-        return RespHelper.or500(doctorCommonReportReadService.getTransverseCliqueReport(permissionFarmIds, farmIdToName, startDate, endDate));
+        return RespHelper.or500(doctorCommonReportReadService.getTransverseCliqueReport(95L, permissionFarmIds, farmIdToName, startDate, endDate));
     }
 
     /**
@@ -302,6 +302,6 @@ public class DoctorReports {
         } else {
             farmIdList = Splitters.splitToLong(farmIds, Splitters.UNDERSCORE);
         }
-        return RespHelper.or500(doctorCommonReportReadService.getPortraitCliqueReport(farmIdList, startDate, endDate));
+        return RespHelper.or500(doctorCommonReportReadService.getPortraitCliqueReport(95L, farmIdList, startDate, endDate));
     }
 }
