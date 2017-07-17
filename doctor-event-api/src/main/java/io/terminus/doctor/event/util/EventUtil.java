@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 
+import static io.terminus.common.utils.Arguments.isNull;
+
 /**
  * Desc:
  * Mail: yangzl@terminus.io
@@ -146,4 +148,12 @@ public class EventUtil {
     public static double get4(double number) {
         return new BigDecimal(number).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
+
+    public static double divide(Double divisor, Double divided) {
+        if (isNull(divisor) || isNull(divided) || divided == 0) {
+            return 0.0D;
+        }
+        return divisor / divided;
+    }
+
 }
