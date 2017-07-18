@@ -630,6 +630,9 @@
             ifnull(sum(case when sum_at = #{endAt} then sow_end else 0 end),0) as sowEnd,
 
             ifnull(sum(case when sum_at = #{startAt} then sow_ph_start else 0 end),0) as sowPhStart,
+            ifnull(sum(case when sum_at = #{endAt} then sow_ph_mating else 0 end),0) as sowPhMating,
+            ifnull(sum(case when sum_at = #{endAt} then sow_ph_konghuai else 0 end),0) as sowPhKonghuai,
+            ifnull(sum(case when sum_at = #{endAt} then sow_ph_pregnant else 0 end),0) as sowPhPregnant,
             ifnull(sum(sow_ph_in_farm_in),0) as sowPhInFarmIn,
             ifnull(sum(sow_ph_reserve_in),0) as sowPhReserveIn,
             ifnull(sum(sow_ph_chg_farm_in),0) as sowPhChgFarmIn,
