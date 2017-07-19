@@ -15,7 +15,17 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.service.*;
+import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
+import io.terminus.doctor.event.service.DoctorDailyGroupWriteService;
+import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorEditGroupEventService;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.event.service.DoctorRangeReportWriteService;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.move.service.DoctorImportDataService;
@@ -43,6 +53,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -286,11 +297,14 @@ public class DoctorMoveDataController {
         doctorMoveBasicService.moveAllBasic(moveId, farm);
         log.warn("move bascic end");
 
+        //由母猪触发的猪群事件outId
+        List<String> groupEventOutId = Lists.newArrayList();
+
         //4.迁移公猪 母猪
         try {
             Stopwatch watch = Stopwatch.createStarted();
             log.warn("move pig start, moveId:{}", moveId);
-            doctorMoveDataService.movePig(moveId, farm);
+            doctorMoveDataService.movePig(moveId, farm, groupEventOutId);
             watch.stop();
             int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
             log.warn("move pig end, cost {} minutes, now dump ES", minute);
@@ -303,7 +317,7 @@ public class DoctorMoveDataController {
         //5.迁移猪群
         Stopwatch watch = Stopwatch.createStarted();
         log.warn("move group start, moveId:{}", moveId);
-        doctorMoveDataService.moveGroup(moveId, farm);
+        doctorMoveDataService.moveGroup(moveId, farm, groupEventOutId);
         watch.stop();
         int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
         log.warn("move group end, cost {} minutes", minute);
@@ -448,7 +462,7 @@ public class DoctorMoveDataController {
         try {
             DoctorFarm farm = doctorFarmDao.findById(farmId);
             log.warn("move pig start, moveId:{}", moveId);
-            doctorMoveDataService.movePig(moveId, farm);
+            doctorMoveDataService.movePig(moveId, farm, Lists.newArrayList());
             log.warn("move pig end");
             return true;
         } catch (Exception e) {
@@ -470,7 +484,7 @@ public class DoctorMoveDataController {
         try {
             DoctorFarm farm = doctorFarmDao.findById(farmId);
             log.warn("move group start, moveId:{}", moveId);
-            doctorMoveDataService.moveGroup(moveId, farm);
+            doctorMoveDataService.moveGroup(moveId, farm, Lists.newArrayList());
             log.warn("move group end");
             return true;
         } catch (Exception e) {

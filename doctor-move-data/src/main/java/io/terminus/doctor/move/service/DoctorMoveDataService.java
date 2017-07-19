@@ -2,6 +2,7 @@ package io.terminus.doctor.move.service;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -546,7 +547,7 @@ public class DoctorMoveDataService {
      * 迁移猪群
      */
     @Transactional
-    public void moveGroup(Long moveId, DoctorFarm farm) {
+    public void moveGroup(Long moveId, DoctorFarm farm, List<String> groupEventOutId) {
         //0. 基础数据准备: barn, basic, subUser, changeReason, customer
         Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap(farm.getId());
         Map<Integer, Map<String, DoctorBasic>> basicMap = doctorMoveBasicService.getBasicMap();
@@ -572,7 +573,7 @@ public class DoctorMoveDataService {
         //2. 迁移DoctorGroupEvent
         List<DoctorGroupEvent> events = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_EventListGain.class, "DoctorGroupEvent-EventListGain")).stream()
-                .map(gainEvent -> getGroupEvent(groupMap, gainEvent, subMap, barnMap, basicMap, changeReasonMap, customerMap, vaccMap, pigMap))
+                .map(gainEvent -> getGroupEvent(groupMap, gainEvent, subMap, barnMap, basicMap, changeReasonMap, customerMap, vaccMap, pigMap, groupEventOutId))
                 .filter(event -> event != null)
                 .collect(Collectors.toList());
         if (!events.isEmpty()) {
@@ -612,7 +613,7 @@ public class DoctorMoveDataService {
     /**
      * 迁移母猪公猪
      */
-    public void movePig(Long moveId, DoctorFarm farm) {
+    public void movePig(Long moveId, DoctorFarm farm, List<String> groupEventOutId) {
         //0. 基础数据准备: barn, basic, subUser
         Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap(farm.getId());
         Map<Integer, Map<String, DoctorBasic>> basicMap = doctorMoveBasicService.getBasicMap();
@@ -629,13 +630,13 @@ public class DoctorMoveDataService {
         doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PigSex.BOAR.getKey()).forEach(boar -> boarMap.put(boar.getPigCode(), boar));
 
         //2. 迁移sow
-        moveSow(moveId, farm, basicMap, barnMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap);
+        moveSow(moveId, farm, basicMap, barnMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap, groupEventOutId);
     }
 
     //迁移母猪
     private void moveSow(Long moveId, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
                          Map<String, Long> subMap, Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
-                         Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap) {
+                         Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap, List<String> groupEventOutId) {
         //1. 迁移DoctorPig
         List<View_SowCardList> sowCards = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_SowCardList.class, "DoctorPig-SowCardList")).stream()
@@ -665,7 +666,7 @@ public class DoctorMoveDataService {
 
         //2. 迁移DoctorPigEvent
         List<DoctorPigEvent> sowEvents = sowEventViews.stream()
-                .map(event -> getSowEvent(event, sowMap, barnMap, basicMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap))
+                .map(event -> getSowEvent(event, sowMap, barnMap, basicMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap, groupEventOutId))
                 .collect(Collectors.toList());
 
         //数据量略大, 分成5份插入吧
@@ -790,7 +791,7 @@ public class DoctorMoveDataService {
     private DoctorPigEvent getSowEvent(View_EventListSow event, Map<String, DoctorPig> sowMap, Map<String, DoctorBarn> barnMap,
                                        Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap,
                                        Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
-                                       Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap) {
+                                       Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap, List<String> groupEventOutId) {
         DoctorPig sow = sowMap.get(event.getSowOutId());
         if (sow == null) {
             return null;
@@ -829,14 +830,14 @@ public class DoctorMoveDataService {
             sowEvent.setBarnName(barn.getName());
             sowEvent.setBarnType(barn.getPigType());
         }
-        return getSowEventExtra(eventType, sowEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap, boarMap, vaccMap);
+        return getSowEventExtra(eventType, sowEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap, boarMap, vaccMap, groupEventOutId);
     }
 
     //拼接母猪事件extra字段
     private DoctorPigEvent getSowEventExtra(PigEvent eventType, DoctorPigEvent sowEvent, View_EventListSow event, Map<String, Long> subMap,
                                             Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
                                             Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
-                                            Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap) {
+                                            Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap, List<String> groupEventOutId) {
 
         if (eventType == null) {
             return sowEvent;
@@ -855,6 +856,12 @@ public class DoctorMoveDataService {
                 break;
             case CHG_LOCATION:  //转舍
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(getSowTranBarnExtra(event, barnMap)));
+                if (!Strings.isNullOrEmpty(event.getDisease())){
+                    groupEventOutId.add(event.getDisease());
+                }
+                if (!Strings.isNullOrEmpty(event.getPregCheckResult())) {
+                    groupEventOutId.add(event.getPregCheckResult());
+                }
                 break;
             case CHG_FARM:      //转场
                 DoctorChgFarmDto tranFarm = new DoctorChgFarmDto();
@@ -949,6 +956,9 @@ public class DoctorMoveDataService {
                 sowEvent.setFarrowWeight(event.getEventWeight());         //分娩总重(kg)
                 sowEvent.setFarrowingDate(event.getEventAt());            //分娩时间
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farrowing));
+                if (!Strings.isNullOrEmpty(event.getDisease())){
+                    groupEventOutId.add(event.getDisease());
+                }
                 break;
             case WEAN:          //断奶
                 DoctorWeanDto wean = getSowWeanExtra(event);
@@ -961,6 +971,12 @@ public class DoctorMoveDataService {
                 DoctorFostersDto fostersDto = getSowFosterExtra(event, basicMap);
                 sowEvent.setQuantity(fostersDto.getFostersCount());
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(fostersDto));
+                if (!Strings.isNullOrEmpty(event.getCustomer())){
+                    groupEventOutId.add(event.getCustomer());
+                }
+                if (!Strings.isNullOrEmpty(event.getServiceType())) {
+                    groupEventOutId.add(event.getServiceType());
+                }
                 break;
             case FOSTERS_BY:    //被拼窝
                 DoctorFostersDto fostersDto1 = getSowFosterExtra(event, basicMap);
@@ -975,6 +991,9 @@ public class DoctorMoveDataService {
                 sowEvent.setCustomerId(pigletsChgDto.getPigletsCustomerId());
                 sowEvent.setCustomerName(pigletsChgDto.getPigletsCustomerName());
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(getSowPigletChangeExtra(event, basicMap, changeReasonMap, customerMap)));
+                if (!Strings.isNullOrEmpty(event.getDisease())){
+                    groupEventOutId.add(event.getDisease());
+                }
                 break;
             default:
                 break;
@@ -1901,7 +1920,7 @@ public class DoctorMoveDataService {
     private DoctorGroupEvent getGroupEvent(Map<String, DoctorGroup> groupMap, View_EventListGain gainEvent, Map<String, Long> subMap,
                                            Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap,
                                            Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap,
-                                           Map<String, DoctorBasicMaterial> vaccMap, Map<String, DoctorPig> pigMap) {
+                                           Map<String, DoctorBasicMaterial> vaccMap, Map<String, DoctorPig> pigMap, List<String> groupEventOutId) {
         DoctorGroup group = groupMap.get(gainEvent.getGroupOutId());
         if (group == null) {
             return null;
@@ -1943,6 +1962,10 @@ public class DoctorMoveDataService {
         event.setIsAuto(gainEvent.getIsAuto());
         event.setOutId(gainEvent.getGroupEventOutId());
         event.setRemark(gainEvent.getRemark());
+        if (groupEventOutId.contains(event.getOutId())) {
+            event.setRelPigEventId(-1L);
+            event.setIsAuto(IsOrNot.YES.getValue());
+        }
         return getGroupEventExtra(type, event, gainEvent, basicMap, barnMap, groupMap, group, subMap, changeReasonMap, customerMap, vaccMap, pigMap);
     }
 
