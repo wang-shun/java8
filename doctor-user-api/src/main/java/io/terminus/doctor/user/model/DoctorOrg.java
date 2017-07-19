@@ -1,6 +1,7 @@
 package io.terminus.doctor.user.model;
 
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -33,6 +34,11 @@ public class DoctorOrg implements Serializable {
     private Long parentId;
 
     /**
+     * 公司类型
+     */
+    private Integer type;
+
+    /**
      * 营业执照复印件图片地址
      */
     private String license;
@@ -56,4 +62,21 @@ public class DoctorOrg implements Serializable {
      * 修改时间
      */
     private Date updatedAt;
+
+    public enum Type{
+        CLIQUE(1, "集团"),
+        ORG(2, "子公司");
+
+        @Getter
+        private Integer value;
+
+        @Getter
+        private String name;
+
+        Type(Integer value, String name) {
+            this.value = value;
+            this.name = name;
+        }
+
+    }
 }

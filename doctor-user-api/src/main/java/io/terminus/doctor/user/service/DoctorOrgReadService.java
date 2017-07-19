@@ -1,5 +1,6 @@
 package io.terminus.doctor.user.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.DoctorOrg;
 
@@ -41,4 +42,22 @@ public interface DoctorOrgReadService {
      * @return 子公司列表
      */
     Response<List<DoctorOrg>> findOrgByParentId(Long parentId);
+
+    /**
+     * 根据公司名字模糊搜索公司
+     * @param fuzzyName
+     * @param type 公司类型
+     * @return
+     */
+    Response<List<DoctorOrg>> suggestOrg(String fuzzyName, Integer type);
+
+    /**
+     * 分页查询
+     * @param doctorOrg 查询条件
+     * @param pageSize 分页大小
+     * @param pageNo 页码
+     * @return 分页结果
+     */
+    Response<Paging<DoctorOrg>> paging(DoctorOrg doctorOrg, Integer pageSize, Integer pageNo);
+
 }

@@ -10,6 +10,7 @@
         <result column="name" property="name"/>
         <result column="mobile" property="mobile"/>
         <result column="parent_id" property="parentId"/>
+        <result column="type" property="type"/>
         <result column="license" property="license"/>
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>
@@ -27,11 +28,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        name, mobile, parent_id, license, out_id, extra, created_at, updated_at
+        name, mobile, parent_id, `type`, license, out_id, extra, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{mobile}, #{parentId}, #{license}, #{outId}, #{extra}, now(), now()
+        #{name}, #{mobile}, #{parentId}, #{type}, #{license}, #{outId}, #{extra}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorOrg" keyProperty="id" useGeneratedKeys="true">
@@ -70,7 +71,8 @@
         <set>
             <if test="name != null">name = #{name},</if>
             <if test="mobile != null">mobile = #{mobile},</if>
-            <if test="parentId != null">paren_id = #{parentId},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="type != null">`type` = #{type},</if>
             <if test="license != null">license = #{license},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
@@ -94,5 +96,33 @@
         FROM <include refid="tb" />
         WHERE
         parent_id = #{parentId}
+    </select>
+
+    <sql id="criteria">
+        1=1
+        <if test="name != null">AND `name` = #{name}</if>
+        <if test="type != null">AND `type` = #{type}</if>
+        <if test="parentId != null">AND `parent_id` = #{parentId}</if>
+    </sql>
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(*)
+        FROM <include refid="tb"/>
+        WHERE <include refid="criteria"/>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorOrgMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE <include refid="criteria"/>
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="findByFuzzyName" parameterType="map" resultMap="DoctorOrgMap">
+        SELECT id, `name`
+        FROM <include refid="tb" />
+        WHERE `name` LIKE concat('%', #{fuzzyName}, '%')
+        <if test="type != null">AND `type` =  #{type} </if>
+        ORDER BY instr(`name`, #{fuzzyName}) ASC, LENGTH (`name`) ASC
+        limit 0, 20
     </select>
 </mapper>

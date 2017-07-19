@@ -1,5 +1,6 @@
 package io.terminus.doctor.user.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.user.model.DoctorOrg;
 import org.springframework.stereotype.Repository;
@@ -30,5 +31,15 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
      */
     public List<DoctorOrg> findOrgByParentId(Long parentId) {
         return sqlSession.selectList(sqlId("findOrgByParentId"), parentId);
+    }
+
+    /**
+     * 根据公司名字模糊搜索公司
+     * @param fuzzyName
+     * @param type 公司类型
+     * @return
+     */
+    public List<DoctorOrg> findByFuzzyName(String fuzzyName, Integer type) {
+        return sqlSession.selectList("findByFuzzyName", ImmutableMap.of("fuzzyName", fuzzyName, "type", type));
     }
 }

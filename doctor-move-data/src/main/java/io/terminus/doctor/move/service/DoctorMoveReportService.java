@@ -19,6 +19,7 @@ import io.terminus.doctor.move.model.ReportGroupLiveStock;
 import io.terminus.doctor.move.model.ReportSowLiveStock;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorDepartmentReadService;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -55,6 +56,7 @@ public class DoctorMoveReportService {
     private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
     private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
     private final DoctorFarmReadService doctorFarmReadService;
+    private final DoctorDepartmentReadService doctorDepartmentReadService;
 
     @Autowired
     public DoctorMoveReportService(DoctorDailyReportDao doctorDailyReportDao,
@@ -64,7 +66,8 @@ public class DoctorMoveReportService {
                                    DoctorDailyReportWriteService doctorDailyReportWriteService,
                                    DoctorRangeReportWriteService doctorRangeReportWriteService,
                                    DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
-                                   DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService) {
+                                   DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService,
+                                   DoctorDepartmentReadService doctorDepartmentReadService) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorFarmDao = doctorFarmDao;
         this.doctorFarmReadService = doctorFarmReadService;
@@ -73,6 +76,7 @@ public class DoctorMoveReportService {
         this.doctorRangeReportWriteService = doctorRangeReportWriteService;
         this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
         this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
+        this.doctorDepartmentReadService = doctorDepartmentReadService;
     }
 
 
@@ -162,7 +166,7 @@ public class DoctorMoveReportService {
     public void moveDoctorOrgRangeReport(List<Long> orgIds, Date since) {
         Map<Long, List<Long>> orgToFarm = Maps.newHashMap();
         orgIds.forEach(orgId -> {
-            Response<List<DoctorFarm>> response = doctorFarmReadService.findAllFarmsByOrgId(orgId);
+            Response<List<DoctorFarm>> response = doctorDepartmentReadService.findAllFarmsByOrgId(orgId);
             if (response.isSuccess()) {
                 orgToFarm.put(orgId, response.getResult().stream().map(DoctorFarm::getId).collect(Collectors.toList()));
             }

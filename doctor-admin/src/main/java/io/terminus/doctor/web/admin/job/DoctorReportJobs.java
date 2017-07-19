@@ -16,6 +16,7 @@ import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorRangeReportWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.service.DoctorDepartmentReadService;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.zookeeper.leader.HostLeader;
@@ -63,6 +64,8 @@ public class DoctorReportJobs {
     private DoctorDailyGroupWriteService doctorDailyGroupWriteService;
     @RpcConsumer
     private DoctorOrgReadService doctorOrgReadService;
+    @RpcConsumer
+    private DoctorDepartmentReadService doctorDepartmentReadService;
 
     private final HostLeader hostLeader;
 
@@ -209,7 +212,7 @@ public class DoctorReportJobs {
         Map<Long, List<Long>> orgMapToFarm = Maps.newHashMap();
         List<DoctorOrg> orgList = RespHelper.orServEx(doctorOrgReadService.findAllOrgs());
         orgList.forEach(doctorOrg -> {
-            Response<List<DoctorFarm>> farmResponse = doctorFarmReadService.findAllFarmsByOrgId(doctorOrg.getId());
+            Response<List<DoctorFarm>> farmResponse = doctorDepartmentReadService.findAllFarmsByOrgId(doctorOrg.getId());
             if (farmResponse.isSuccess()) {
                 orgMapToFarm.put(doctorOrg.getId(), farmResponse.getResult().stream().map(DoctorFarm::getId).collect(Collectors.toList()));
             }

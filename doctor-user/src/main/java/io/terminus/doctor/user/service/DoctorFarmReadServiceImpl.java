@@ -9,7 +9,6 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -112,20 +110,6 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
             return Response.ok(doctorFarmDao.findByOrgId(orgId));
         } catch (Exception e) {
             log.error("find farms by orgId failed, orgId:{}, cause:{}", orgId, Throwables.getStackTraceAsString(e));
-            return Response.fail("farm.find.fail");
-        }
-    }
-
-    @Override
-    public Response<List<DoctorFarm>> findAllFarmsByOrgId(@NotNull(message = "orgId.not.null") Long orgId) {
-        try {
-            List<DoctorOrg> orgList = doctorOrgDao.findOrgByParentId(orgId);
-            if (Arguments.isNullOrEmpty(orgList)) {
-                return Response.ok(doctorFarmDao.findByOrgId(orgId));
-            }
-            return Response.ok(doctorFarmDao.findByOrgIds(orgList.stream().map(DoctorOrg::getId).collect(Collectors.toList())));
-        } catch (Exception e) {
-            log.error("find all farms by orgId failed, orgId:{}, cause:{}", orgId, Throwables.getStackTraceAsString(e));
             return Response.fail("farm.find.fail");
         }
     }
