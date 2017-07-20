@@ -29,6 +29,11 @@ public class DoctorDepartmentDto implements Serializable{
     private String name;
 
     /**
+     * 所在部门树的层数 集团为1
+     */
+    private Integer level;
+
+    /**
      * 子节点列表
      */
     private List<DoctorDepartmentDto> childrenList;

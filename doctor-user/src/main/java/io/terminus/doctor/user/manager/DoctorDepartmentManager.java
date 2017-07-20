@@ -35,16 +35,25 @@ public class DoctorDepartmentManager {
     }
 
     public DoctorDepartmentDto findCliqueTree(Long departmentId) {
+        return findCliqueTreeImp(departmentId, 1);
+    }
+
+    private DoctorDepartmentDto findCliqueTreeImp(Long departmentId, Integer level) {
         DoctorOrg doctorOrg = doctorOrgDao.findById(departmentId);
         DoctorDepartmentDto departmentDto = new DoctorDepartmentDto();
         departmentDto.setId(doctorOrg.getId());
         departmentDto.setName(doctorOrg.getName());
+        departmentDto.setLevel(level);
+        level ++;
         List<DoctorOrg> children = doctorOrgDao.findOrgByParentId(departmentId);
         if (Arguments.isNullOrEmpty(children)) {
             return departmentDto;
         }
-        departmentDto.setChildrenList(children.stream().map(childOrg ->
-                findCliqueTree(childOrg.getId())).collect(Collectors.toList()));
+        List<DoctorDepartmentDto> childrenDepartmentList = Lists.newArrayList();
+        for (DoctorOrg childOrg : children) {
+            childrenDepartmentList.add(findCliqueTreeImp(childOrg.getId(), level));
+        }
+        departmentDto.setChildrenList(childrenDepartmentList);
         return departmentDto;
     }
 
@@ -68,7 +77,7 @@ public class DoctorDepartmentManager {
 
     public List<DoctorDepartmentDto> availableBindDepartment(Long departmentId) {
         List<DoctorOrg> orgList = doctorOrgDao.findExcludeIds(upAndIncludeSelfNodeId(departmentId));
-        return orgList.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null))
+        return orgList.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null, null))
                 .collect(Collectors.toList());
     }
 
