@@ -6,6 +6,7 @@ import io.terminus.doctor.user.model.DoctorOrg;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 public interface DoctorOrgReadService {
 
@@ -53,11 +54,11 @@ public interface DoctorOrgReadService {
 
     /**
      * 分页查询
-     * @param doctorOrg 查询条件
+     * @param criteria 查询条件
      * @param pageSize 分页大小
      * @param pageNo 页码
      * @return 分页结果
      */
-    Response<Paging<DoctorOrg>> paging(DoctorOrg doctorOrg, Integer pageSize, Integer pageNo);
+    Response<Paging<DoctorOrg>> paging(Map<String, Object> criteria, Integer pageSize, Integer pageNo);
 
 }

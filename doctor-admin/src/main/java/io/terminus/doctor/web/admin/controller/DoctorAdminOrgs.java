@@ -2,6 +2,7 @@ package io.terminus.doctor.web.admin.controller;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Params;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: admin端 公司api
@@ -65,10 +67,11 @@ public class DoctorAdminOrgs {
      */
     @RequestMapping(value = "/paging/clique", method = RequestMethod.GET)
     public Paging<DoctorOrg> pagingClique(@RequestParam(required = false) Integer pageNo,
-                                          @RequestParam(required = false) Integer pageSize) {
-        DoctorOrg doctorOrg = new DoctorOrg();
-        doctorOrg.setType(DoctorOrg.Type.CLIQUE.getValue());
-        return RespHelper.or500(doctorOrgReadService.paging(doctorOrg, pageSize, pageNo));
+                                          @RequestParam(required = false) Integer pageSize,
+                                          @RequestParam Map<String, Object> params) {
+        params = Params.filterNullOrEmpty(params);
+        params.put("type", DoctorOrg.Type.CLIQUE.getValue());
+        return RespHelper.or500(doctorOrgReadService.paging(params, pageSize, pageNo));
     }
 
     /**

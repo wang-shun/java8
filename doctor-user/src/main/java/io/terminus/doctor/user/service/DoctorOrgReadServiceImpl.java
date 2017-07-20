@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -102,12 +103,12 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
     }
 
     @Override
-    public Response<Paging<DoctorOrg>> paging(DoctorOrg doctorOrg, Integer pageSize, Integer pageNo) {
+    public Response<Paging<DoctorOrg>> paging(Map<String, Object> criteria, Integer pageSize, Integer pageNo) {
         try {
             PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
-            return Response.ok(doctorOrgDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), doctorOrg));
+            return Response.ok(doctorOrgDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
-         log.error("paging org failed, doctorOrg:{}, cause:{}", doctorOrg, Throwables.getStackTraceAsString(e));
+         log.error("paging org failed, doctorOrg:{}, cause:{}", criteria, Throwables.getStackTraceAsString(e));
             return Response.fail("paging.org.failed");
         }
     }
