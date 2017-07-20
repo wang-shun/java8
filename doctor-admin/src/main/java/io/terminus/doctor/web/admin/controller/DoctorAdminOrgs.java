@@ -90,7 +90,7 @@ public class DoctorAdminOrgs {
      * @param orgIds 子节点列表
      * @return
      */
-    @RequestMapping(value = "/bind", method = RequestMethod.GET)
+    @RequestMapping(value = "/bind", method = RequestMethod.PUT)
     public Boolean bindDepartment(@RequestParam Long parentId, @RequestParam String orgIds) {
         List<Long> orgIdList = Splitters.splitToLong(orgIds, Splitters.UNDERSCORE);
         return RespHelper.or500(doctorDepartmentWriteService.bindDepartment(parentId, orgIdList));
@@ -101,7 +101,7 @@ public class DoctorAdminOrgs {
      * @param orgId 节点id
      * @return
      */
-    @RequestMapping(value = "/unbind", method = RequestMethod.GET)
+    @RequestMapping(value = "/unbind", method = RequestMethod.PUT)
     public Boolean unbindDepartment(@RequestParam Long orgId) {
         return RespHelper.or500(doctorDepartmentWriteService.unbindDepartment(orgId));
     }
