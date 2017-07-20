@@ -1964,6 +1964,7 @@ public class DoctorMoveDataService {
         event.setRemark(gainEvent.getRemark());
         if (groupEventOutId.contains(event.getOutId())) {
             event.setRelPigEventId(-1L);
+            event.setSowId(-1L);
             event.setIsAuto(IsOrNot.YES.getValue());
         }
         return getGroupEventExtra(type, event, gainEvent, basicMap, barnMap, groupMap, group, subMap, changeReasonMap, customerMap, vaccMap, pigMap);
