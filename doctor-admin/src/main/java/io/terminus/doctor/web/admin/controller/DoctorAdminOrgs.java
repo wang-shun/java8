@@ -64,7 +64,8 @@ public class DoctorAdminOrgs {
      * @return 集团
      */
     @RequestMapping(value = "/paging/clique", method = RequestMethod.GET)
-    public Paging<DoctorOrg> pagingClique(@RequestParam Integer pageNo, @RequestParam Integer pageSize) {
+    public Paging<DoctorOrg> pagingClique(@RequestParam(required = false) Integer pageNo,
+                                          @RequestParam(required = false) Integer pageSize) {
         DoctorOrg doctorOrg = new DoctorOrg();
         doctorOrg.setType(DoctorOrg.Type.CLIQUE.getValue());
         return RespHelper.or500(doctorOrgReadService.paging(doctorOrg, pageSize, pageNo));
