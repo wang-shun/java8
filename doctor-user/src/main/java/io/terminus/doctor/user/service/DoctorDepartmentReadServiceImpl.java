@@ -43,4 +43,15 @@ public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadServ
             return Response.fail("find.clique.tree.failed");
         }
     }
+
+    @Override
+    public Response<List<DoctorDepartmentDto>> availableBindDepartment(@NotNull(message = "orgId.not.null") Long orgId) {
+        try {
+            return Response.ok(doctorDepartmentManager.availableBindDepartment(orgId));
+        } catch (Exception e) {
+            log.error("available bind department failed, orgId:{}, cause:{}",
+                    orgId, Throwables.getStackTraceAsString(e));
+            return Response.fail("available.bind.department.failed");
+        }
+    }
 }

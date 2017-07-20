@@ -26,4 +26,11 @@ public interface DoctorDepartmentReadService {
      * @return 集团数
      */
     Response<DoctorDepartmentDto> findCliqueTree(@NotNull(message = "orgId.not.null") Long orgId);
+
+    /**
+     * 可绑定的在次公司下的公司列表
+     * @param orgId 父公司id
+     * @return 公司列表
+     */
+    Response<List<DoctorDepartmentDto>> availableBindDepartment(@NotNull(message = "orgId.not.null") Long orgId);
 }

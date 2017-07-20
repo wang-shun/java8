@@ -1,5 +1,6 @@
 package io.terminus.doctor.user.manager;
 
+import com.google.common.collect.Lists;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -23,20 +25,21 @@ public class DoctorDepartmentManager {
     @Autowired
     private DoctorOrgDao doctorOrgDao;
 
-    public List<DoctorFarm> findAllFarmsByOrgId(Long orgId) {
-        List<DoctorOrg> orgList = doctorOrgDao.findOrgByParentId(orgId);
+    public List<DoctorFarm> findAllFarmsByOrgId(Long departmentId) {
+        List<DoctorOrg> orgList = doctorOrgDao.findOrgByParentId(departmentId);
         if (Arguments.isNullOrEmpty(orgList)) {
-            return doctorFarmDao.findByOrgId(orgId);
+            return doctorFarmDao.findByOrgId(departmentId);
         }
-        return doctorFarmDao.findByOrgIds(orgList.stream().map(DoctorOrg::getId).collect(Collectors.toList()));
+        return doctorFarmDao.findByOrgIds(orgList.stream().map(DoctorOrg::getId)
+                .collect(Collectors.toList()));
     }
 
-    public DoctorDepartmentDto findCliqueTree(Long orgId) {
-        DoctorOrg doctorOrg = doctorOrgDao.findById(orgId);
+    public DoctorDepartmentDto findCliqueTree(Long departmentId) {
+        DoctorOrg doctorOrg = doctorOrgDao.findById(departmentId);
         DoctorDepartmentDto departmentDto = new DoctorDepartmentDto();
-        departmentDto.setDepartmentId(doctorOrg.getId());
-        departmentDto.setDepartmentName(doctorOrg.getName());
-        List<DoctorOrg> children = doctorOrgDao.findOrgByParentId(orgId);
+        departmentDto.setId(doctorOrg.getId());
+        departmentDto.setName(doctorOrg.getName());
+        List<DoctorOrg> children = doctorOrgDao.findOrgByParentId(departmentId);
         if (Arguments.isNullOrEmpty(children)) {
             return departmentDto;
         }
@@ -46,23 +49,37 @@ public class DoctorDepartmentManager {
     }
 
     public Boolean bindDepartment(Long parentId, List<Long> orgIds) {
-        orgIds.forEach(orgId -> {
-            DoctorOrg doctorOrg = doctorOrgDao.findById(orgId);
-            DoctorOrg updateOrg = new DoctorOrg();
-            updateOrg.setId(doctorOrg.getId());
-            updateOrg.setParentId(parentId);
-            updateOrg.setType(DoctorOrg.Type.ORG.getValue());
-            doctorOrgDao.update(updateOrg);
-        });
+        if (Arguments.isNullOrEmpty(orgIds)) {
+            return Boolean.FALSE;
+        }
+
+        List<DoctorOrg> hasOrgList= doctorOrgDao.findOrgByParentId(parentId);
+        if (!hasOrgList.isEmpty()) {
+            doctorOrgDao.unbindDepartment(hasOrgList.stream().map(DoctorOrg::getId)
+                    .collect(Collectors.toList()));
+        }
+        doctorOrgDao.bindDepartment(orgIds, parentId);
         return Boolean.TRUE;
     }
 
-    public Boolean unbindDepartment(Long orgId) {
-        DoctorOrg doctorOrg = doctorOrgDao.findById(orgId);
-        DoctorOrg updateOrg = new DoctorOrg();
-        updateOrg.setId(doctorOrg.getId());
-        updateOrg.setParentId(0L);
-        updateOrg.setType(DoctorOrg.Type.CLIQUE.getValue());
-        return doctorOrgDao.update(updateOrg);
+    public Boolean unbindDepartment(Long departmentId) {
+        return doctorOrgDao.unbindDepartment(Lists.newArrayList(departmentId));
+    }
+
+    public List<DoctorDepartmentDto> availableBindDepartment(Long departmentId) {
+        List<DoctorOrg> orgList = doctorOrgDao.findExcludeIds(upAndIncludeSelfNodeId(departmentId));
+        return orgList.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null))
+                .collect(Collectors.toList());
+    }
+
+    private List<Long> upAndIncludeSelfNodeId(Long departmentId) {
+        List<Long> departmentIdList = Lists.newArrayList();
+        DoctorOrg doctorOrg = doctorOrgDao.findById(departmentId);
+        departmentIdList.add(doctorOrg.getId());
+        while (!Objects.equals(doctorOrg.getType(), DoctorOrg.Type.CLIQUE.getValue())) {
+            departmentIdList.add(doctorOrg.getId());
+            doctorOrg = doctorOrgDao.findById(doctorOrg.getParentId());
+        }
+        return departmentIdList;
     }
 }

@@ -105,4 +105,14 @@ public class DoctorAdminOrgs {
     public Boolean unbindDepartment(@RequestParam Long orgId) {
         return RespHelper.or500(doctorDepartmentWriteService.unbindDepartment(orgId));
     }
+
+    /**
+     * 可绑定的在次公司下的公司列表
+     * @param orgId 父公司id
+     * @return 公司列表
+     */
+    @RequestMapping(value = "/available/bind", method = RequestMethod.GET)
+    public List<DoctorDepartmentDto> availableBindDepartment(@RequestParam Long orgId) {
+        return RespHelper.or500(doctorDepartmentReadService.availableBindDepartment(orgId));
+    }
 }

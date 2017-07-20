@@ -1,6 +1,8 @@
 package io.terminus.doctor.user.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
@@ -10,6 +12,8 @@ import java.util.List;
  * 部门
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorDepartmentDto implements Serializable{
 
     private static final long serialVersionUID = -7438154880602109253L;
@@ -17,12 +21,12 @@ public class DoctorDepartmentDto implements Serializable{
     /**
      * 部门id(farmId、orgId)
      */
-    private Long departmentId;
+    private Long id;
 
     /**
      * 部门名称
      */
-    private String departmentName;
+    private String name;
 
     /**
      * 子节点列表
