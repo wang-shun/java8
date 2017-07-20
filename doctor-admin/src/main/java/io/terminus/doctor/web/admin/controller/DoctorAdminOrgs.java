@@ -10,6 +10,7 @@ import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorDepartmentReadService;
 import io.terminus.doctor.user.service.DoctorDepartmentWriteService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.doctor.web.admin.dto.DoctorAvailableBindDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -112,7 +113,10 @@ public class DoctorAdminOrgs {
      * @return 公司列表
      */
     @RequestMapping(value = "/available/bind", method = RequestMethod.GET)
-    public List<DoctorDepartmentDto> availableBindDepartment(@RequestParam Long orgId) {
-        return RespHelper.or500(doctorDepartmentReadService.availableBindDepartment(orgId));
+    public DoctorAvailableBindDto availableBindDepartment(@RequestParam Long orgId) {
+        DoctorAvailableBindDto dto = new DoctorAvailableBindDto();
+        dto.setDepartmentDtoList(RespHelper.or500(doctorDepartmentReadService.availableBindDepartment(orgId)));
+        dto.setDoctorDepartmentDto(RespHelper.or500(doctorDepartmentReadService.findCliqueTree(orgId)));
+        return dto;
     }
 }
