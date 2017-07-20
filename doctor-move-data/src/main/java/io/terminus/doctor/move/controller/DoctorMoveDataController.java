@@ -1331,4 +1331,16 @@ public class DoctorMoveDataController {
         log.info("flush mating count ending");
         return true;
     }
+
+    /**
+     * 刷新胎次
+     * @return
+     */
+    @RequestMapping(value = "/flushSowParity", method = RequestMethod.GET)
+    public Boolean flushSowParity() {
+        log.info("flush sow parity starting");
+        doctorMoveDataService.flushSowParity();
+        log.info("flush sow parity ending");
+        return Boolean.TRUE;
+    }
 }
