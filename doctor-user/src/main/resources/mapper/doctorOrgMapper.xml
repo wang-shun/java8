@@ -159,7 +159,7 @@
         WHERE
         1=1
         <if test="orgIds !=null &amp;&amp; orgIds.size()>0">
-        AND id IN
+        AND id NOT IN
         <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
             #{orgId}
         </foreach>
