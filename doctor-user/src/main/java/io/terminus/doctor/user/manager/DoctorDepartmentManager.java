@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
+
 /**
  * Created by xjn on 17/7/19.
  * 部门管理,暂时不添加缓存,从数据库查询
@@ -87,6 +89,9 @@ public class DoctorDepartmentManager {
     private List<Long> upAndIncludeSelfNodeId(Long departmentId) {
         List<Long> departmentIdList = Lists.newArrayList();
         DoctorOrg doctorOrg = doctorOrgDao.findById(departmentId);
+        if (isNull(doctorOrg)) {
+            return Lists.newArrayList();
+        }
         departmentIdList.add(doctorOrg.getId());
         while (!Objects.equals(doctorOrg.getType(), DoctorOrg.Type.CLIQUE.getValue())) {
             doctorOrg = doctorOrgDao.findById(doctorOrg.getParentId());
