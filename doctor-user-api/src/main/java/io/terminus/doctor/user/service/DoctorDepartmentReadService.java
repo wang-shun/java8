@@ -1,11 +1,13 @@
 package io.terminus.doctor.user.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
 import io.terminus.doctor.user.model.DoctorFarm;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by xjn on 17/7/19.
@@ -33,4 +35,13 @@ public interface DoctorDepartmentReadService {
      * @return 公司列表
      */
     Response<List<DoctorDepartmentDto>> availableBindDepartment(@NotNull(message = "orgId.not.null") Long orgId);
+
+    /**
+     * 分页获取集团树
+     * @param criteria 查询条件
+     * @param pageSize 分页大小
+     * @param pageNo 页码
+     * @return 分页数据
+     */
+    Response<Paging<DoctorDepartmentDto>> pagingCliqueTree(Map<String, Object> criteria, Integer pageSize, Integer pageNo);
 }

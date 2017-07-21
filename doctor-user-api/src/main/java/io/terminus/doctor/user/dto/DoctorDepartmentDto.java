@@ -36,5 +36,5 @@ public class DoctorDepartmentDto implements Serializable{
     /**
      * 子节点列表
      */
-    private List<DoctorDepartmentDto> childrenList;
+    private List<DoctorDepartmentDto> children;
 }

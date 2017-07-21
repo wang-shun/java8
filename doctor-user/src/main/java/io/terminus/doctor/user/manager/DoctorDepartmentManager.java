@@ -1,6 +1,8 @@
 package io.terminus.doctor.user.manager;
 
 import com.google.common.collect.Lists;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -53,7 +56,7 @@ public class DoctorDepartmentManager {
         for (DoctorOrg childOrg : children) {
             childrenDepartmentList.add(findCliqueTreeImp(childOrg.getId(), level));
         }
-        departmentDto.setChildrenList(childrenDepartmentList);
+        departmentDto.setChildren(childrenDepartmentList);
         return departmentDto;
     }
 
@@ -90,5 +93,13 @@ public class DoctorDepartmentManager {
             doctorOrg = doctorOrgDao.findById(doctorOrg.getParentId());
         }
         return departmentIdList;
+    }
+
+    public Paging<DoctorDepartmentDto> pagingCliqueTree(Map<String, Object> criteria, Integer pageSize, Integer pageNo) {
+        PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+        Paging<DoctorOrg> pagingOrg = doctorOrgDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria);
+        List<DoctorDepartmentDto> departmentDtoList = pagingOrg.getData().stream()
+                .map(doctorOrg -> findCliqueTree(doctorOrg.getId())).collect(Collectors.toList());
+        return new Paging<>(pagingOrg.getTotal(), departmentDtoList);
     }
 }

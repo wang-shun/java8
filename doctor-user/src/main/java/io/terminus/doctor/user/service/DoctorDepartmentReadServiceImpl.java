@@ -2,6 +2,7 @@ package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
 import io.terminus.doctor.user.manager.DoctorDepartmentManager;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by xjn on 17/7/19.
@@ -52,6 +54,16 @@ public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadServ
             log.error("available bind department failed, orgId:{}, cause:{}",
                     orgId, Throwables.getStackTraceAsString(e));
             return Response.fail("available.bind.department.failed");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorDepartmentDto>> pagingCliqueTree(Map<String, Object> criteria, Integer pageSize, Integer pageNo) {
+        try {
+            return Response.ok(doctorDepartmentManager.pagingCliqueTree(criteria, pageSize, pageNo));
+        } catch (Exception e) {
+            log.error("paging clique tree failed, criteria:{}, cause:{}", criteria, Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.clique.tree.failed");
         }
     }
 }

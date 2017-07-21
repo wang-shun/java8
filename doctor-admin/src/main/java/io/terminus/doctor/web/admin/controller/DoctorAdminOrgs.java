@@ -67,12 +67,12 @@ public class DoctorAdminOrgs {
      * @return 集团
      */
     @RequestMapping(value = "/paging/clique", method = RequestMethod.GET)
-    public Paging<DoctorOrg> pagingClique(@RequestParam(required = false) Integer pageNo,
+    public Paging<DoctorDepartmentDto> pagingClique(@RequestParam(required = false) Integer pageNo,
                                           @RequestParam(required = false) Integer pageSize,
                                           @RequestParam Map<String, Object> params) {
         params = Params.filterNullOrEmpty(params);
         params.put("type", DoctorOrg.Type.CLIQUE.getValue());
-        return RespHelper.or500(doctorOrgReadService.paging(params, pageSize, pageNo));
+        return RespHelper.or500(doctorDepartmentReadService.pagingCliqueTree(params, pageSize, pageNo));
     }
 
     /**
