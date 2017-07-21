@@ -59,7 +59,7 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
      * @return 是否成功
      */
     public Boolean unbindDepartment(List<Long> orgIds) {
-        return sqlSession.update(sqlId("bindDepartment"), ImmutableMap.of("orgIds", orgIds)) == 1;
+        return sqlSession.update(sqlId("unbindDepartment"), ImmutableMap.of("orgIds", orgIds)) == 1;
     }
 
     /**
