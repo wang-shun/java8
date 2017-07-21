@@ -1266,4 +1266,4 @@ alter table doctor_messages add column `material_id` bigint(20) default null com
 alter table doctor_messages add column `material_name` VARCHAR(20) default null comment '疫苗名称' after `material_id`;
 
 -- 2017-07-21
-ALTER table doctor_daily_reports modify column `fatten_feed_amount` int(20) DEFAULT NULL COMMENT '育肥猪饲料消耗金额';
+ALTER table doctor_daily_reports modify column `fatten_feed_amount` bigint(20) DEFAULT NULL COMMENT '育肥猪饲料消耗金额';
