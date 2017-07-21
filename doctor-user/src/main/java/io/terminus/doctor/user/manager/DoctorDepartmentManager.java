@@ -89,8 +89,8 @@ public class DoctorDepartmentManager {
         DoctorOrg doctorOrg = doctorOrgDao.findById(departmentId);
         departmentIdList.add(doctorOrg.getId());
         while (!Objects.equals(doctorOrg.getType(), DoctorOrg.Type.CLIQUE.getValue())) {
-            departmentIdList.add(doctorOrg.getId());
             doctorOrg = doctorOrgDao.findById(doctorOrg.getParentId());
+            departmentIdList.add(doctorOrg.getId());
         }
         return departmentIdList;
     }
