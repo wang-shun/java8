@@ -1930,7 +1930,7 @@
         from doctor_group_events
         where
         type = 2
-        and sow_id is not null
+        and rel_pig_event_id is not null
         <include refid="groupCriteria"/>
     </select>
 

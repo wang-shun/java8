@@ -975,7 +975,7 @@ public class DoctorMoveDataService {
                     groupEventOutId.add(event.getCustomer());
                 }
                 if (!Strings.isNullOrEmpty(event.getServiceType())) {
-                    groupEventOutId.add(event.getServiceType());
+                    groupEventOutId.add("chgToMoveIn" + event.getServiceType());
                 }
                 break;
             case FOSTERS_BY:    //被拼窝

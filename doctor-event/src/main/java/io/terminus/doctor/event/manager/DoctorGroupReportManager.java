@@ -49,7 +49,7 @@ public class DoctorGroupReportManager {
         }
         groupTrack.setWeakQty(0);      //弱仔数
         groupTrack.setUnweanQty(doctorKpiDao.getGroupUnWean(groupTrack.getGroupId(), new Date()));  //未断奶数
-        groupTrack.setUnweanQty(doctorKpiDao.getGroupWean(groupTrack.getGroupId(), new Date()));  //未断奶数
+        groupTrack.setWeanQty(doctorKpiDao.getGroupWean(groupTrack.getGroupId(), new Date()));  //未断奶数
         groupTrack.setUnqQty(0);        //合格数
         return groupTrack;
     }

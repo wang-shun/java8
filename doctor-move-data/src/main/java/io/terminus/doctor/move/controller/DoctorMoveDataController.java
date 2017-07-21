@@ -297,7 +297,7 @@ public class DoctorMoveDataController {
         doctorMoveBasicService.moveAllBasic(moveId, farm);
         log.warn("move bascic end");
 
-        //由母猪触发的猪群事件outId,?由哺乳母猪转舍触发转群在触发转入会加上前缀chgTomoveIn
+        //由母猪触发的猪群事件outId,?由哺乳母猪转舍触发转群在触发转入会加上前缀chgToMoveIn
         List<String> groupEventOutId = Lists.newArrayList();
 
         //4.迁移公猪 母猪
