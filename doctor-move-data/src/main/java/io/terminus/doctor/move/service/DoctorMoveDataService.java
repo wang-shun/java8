@@ -857,7 +857,7 @@ public class DoctorMoveDataService {
             case CHG_LOCATION:  //转舍
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(getSowTranBarnExtra(event, barnMap)));
                 if (!Strings.isNullOrEmpty(event.getDisease())){
-                    groupEventOutId.add(event.getDisease());
+                    groupEventOutId.add("chgToMoveIn" + event.getDisease());
                 }
                 if (!Strings.isNullOrEmpty(event.getPregCheckResult())) {
                     groupEventOutId.add(event.getPregCheckResult());
@@ -1964,6 +1964,11 @@ public class DoctorMoveDataService {
         event.setRemark(gainEvent.getRemark());
         if (groupEventOutId.contains(event.getOutId())) {
             event.setRelPigEventId(-1L);
+            event.setSowId(-1L);
+            event.setIsAuto(IsOrNot.YES.getValue());
+        }
+
+        if (groupEventOutId.contains("chgToMoveIn" + event.getOutId())) {
             event.setSowId(-1L);
             event.setIsAuto(IsOrNot.YES.getValue());
         }
