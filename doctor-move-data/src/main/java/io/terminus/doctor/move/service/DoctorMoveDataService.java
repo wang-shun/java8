@@ -2842,6 +2842,7 @@ public class DoctorMoveDataService {
             if (Objects.equals(pigEvent.getType(), PigEvent.MATING.getKey())
                     && weanToMating) {
                 parity++;
+                weanToMating = false;
             }
 
             pigEvent.setParity(parity);
