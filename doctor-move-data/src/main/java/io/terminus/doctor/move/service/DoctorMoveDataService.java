@@ -2818,7 +2818,7 @@ public class DoctorMoveDataService {
      * 刷新胎次
      */
     public void flushSowParity() {
-        List<Long> pigIds = doctorPigDao.findAllPigIds();
+        List<Long> pigIds = Lists.newArrayList(68474L); //doctorPigDao.findAllPigIds();
         pigIds.forEach(this::flushSowParityImpl);
     }
 
@@ -2835,7 +2835,8 @@ public class DoctorMoveDataService {
                 parity = Integer.valueOf(Objects.toString(pigEvent.getExtraMap().get("parity")));
             }
 
-            if (Objects.equals(pigEvent.getType(), PigEvent.WEAN.getKey())) {
+            if (Objects.equals(pigEvent.getType(), PigEvent.WEAN.getKey())
+                    || Objects.equals(pigEvent.getType(), PigEvent.FARROWING.getKey())) {
                 weanToMating = true;
             }
 
