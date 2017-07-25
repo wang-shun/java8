@@ -737,7 +737,8 @@ public class DoctorMoveDataService {
                     sowEvents.addAll(generateChgFarm(pigEventList.subList(0, i), barnMap, pigId));
                 }
             } catch (Exception e) {
-                log.error("correct chg farm failed, pigId:{}", pigId);
+                log.error("correct chg farm failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
+                throw e;
             }
         });
     }
