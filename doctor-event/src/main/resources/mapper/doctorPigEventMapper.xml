@@ -1493,4 +1493,20 @@
         AND type in (9, 11, 16)
         ORDER BY event_at ASC , id ASC
     </select>
+
+    <update id="flushChgFarmEventSource" parameterType="list" >
+        update
+        (
+        select id, pig_id
+        from <include refid="tb"/>
+        where farm_id IN
+        <foreach collection="list" item="farmId" open="(" separator="," close=")" >
+            #{farmId}
+        </foreach>
+        and type =20
+        ) a left join <include refid="tb"/> b
+        on a.pig_id = b.pig_id
+        set b.event_source = 5
+        where b.id &lt; a.id
+    </update>
 </mapper>

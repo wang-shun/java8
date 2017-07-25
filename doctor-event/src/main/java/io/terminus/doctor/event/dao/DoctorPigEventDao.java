@@ -608,4 +608,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<DoctorPigEvent> findEffectMatingCountByPigIdForAsc(Long pigId) {
         return sqlSession.selectList(sqlId("findEffectMatingCountByPigIdForAsc"), pigId);
     }
+
+
+    /**
+     * 将猪场中转场转入事件前的事件置为eventSource=5
+     * @param list 猪场id列表
+     */
+    public void flushChgFarmEventSource(List<Long> list) {
+        sqlSession.update(sqlId("flushChgFarmEventSource"), list);
+    }
 }

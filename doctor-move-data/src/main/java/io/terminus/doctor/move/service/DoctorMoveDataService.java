@@ -730,7 +730,6 @@ public class DoctorMoveDataService {
                 for (int i = 0; i < pigEventList.size(); i++) {
                     DoctorPigEvent pigEvent = pigEventList.get(i);
                     if (!Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM_IN.getKey())) {
-                        pigEvent.setEventSource(SourceType.TRANS_FARM.getValue());
                         continue;
                     }
                     sowEvents.addAll(generateChgFarm(pigEventList.subList(0, i+1), pigId));
@@ -2933,4 +2932,11 @@ public class DoctorMoveDataService {
         }
     }
 
+    /**
+     * 将猪场中转场转入事件前的事件置为eventSource=5
+     * @param list 猪场id列表
+     */
+    public void flushChgFarmEventSource(List<Long> list) {
+        doctorPigEventDao.flushChgFarmEventSource(list);
+    }
 }
