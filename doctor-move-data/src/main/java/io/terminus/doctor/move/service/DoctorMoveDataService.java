@@ -748,6 +748,7 @@ public class DoctorMoveDataService {
         log.info("----charmFarmIn:{}", chgFarmIn);
         log.info("----barnMap:{}", barnMap);
         DoctorChgFarmDto chgFarmDto = JSON_MAPPER.fromJson(chgFarmIn.getExtra(), DoctorChgFarmDto.class);
+        log.info("----chgFarmDto:{}", chgFarmDto);
         DoctorBarn fromBarn = barnMap.get(chgFarmDto.getFromBarnId());
         if (isNull(fromBarn)) {
             log.warn("from barn is null, pigId:{}, barnId:{}", pigId, chgFarmDto.getFromBarnId());
