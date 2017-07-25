@@ -783,6 +783,7 @@ public class DoctorMoveDataService {
         pigTrack.setCurrentBarnId(barn.getId());
         pigTrack.setCurrentBarnName(barn.getName());
         pigTrack.setCurrentBarnType(barn.getPigType());
+        pigTrack.setCurrentEventId(0L);
         doctorPigTrackDao.create(pigTrack);
 
         return pig.getId();

@@ -209,9 +209,10 @@ public class DoctorMoveDataController {
             //1.迁移猪场信息
             log.warn("move user farm start, mobile:{}, moveId:{}, path:{}", mobile, moveId, path);
 
-            List<DoctorFarmWithMobile> farmList = userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
+//            List<DoctorFarmWithMobile> farmList = userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
+            DoctorFarm doctorFarm = doctorFarmDao.findById(628L);
+            List<DoctorFarmWithMobile> farmList = Lists.newArrayList(new DoctorFarmWithMobile(doctorFarm, "1582222"));
             log.warn("move user farm end");
-
             //多个猪场遍历插入
             farmList.forEach(farmWithMobile -> moveAllExclude(moveId, farmWithMobile.getDoctorFarm(), farmWithMobile.getMobile(), index, monthIndex));
 
@@ -309,7 +310,7 @@ public class DoctorMoveDataController {
             int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
             log.warn("move pig end, cost {} minutes, now dump ES", minute);
         } catch (Exception e) {
-//            doctorMoveDataService.deleteAllPigs(farm.getId());
+            doctorMoveDataService.deleteAllPigs(farm.getId());
             log.error("move pig failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
             throw new ServiceException("move.pig.error");
         }
