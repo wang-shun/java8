@@ -670,7 +670,7 @@ public class DoctorMoveDataService {
                 .collect(Collectors.toList());
 
         //修复转场数据
-        correctChgFarm(sowEvents, farm.getId());
+        correctChgFarm(sowEvents);
 
         //数据量略大, 分成5份插入吧
         if (!sowEvents.isEmpty()) {
@@ -711,7 +711,7 @@ public class DoctorMoveDataService {
      * 修复母猪的转场逻辑
      * @param sowEvents 母猪事件
      */
-    private void correctChgFarm(List<DoctorPigEvent> sowEvents, Long farmId) {
+    private void correctChgFarm(List<DoctorPigEvent> sowEvents) {
 
         //获取有专场转入事件的猪id列表
         List<Long> pigIds = sowEvents.stream().filter(pigEvent ->
@@ -743,7 +743,6 @@ public class DoctorMoveDataService {
 
     private List<DoctorPigEvent> generateChgFarm(List<DoctorPigEvent> rawList, Long pigId) {
         DoctorPigEvent chgFarmIn = rawList.get(rawList.size() - 1);
-        log.info("----charmFarmIn:{}", chgFarmIn);
         DoctorChgFarmDto chgFarmDto = JSON_MAPPER.fromJson(chgFarmIn.getExtra(), DoctorChgFarmDto.class);
         DoctorBarn fromBarn = doctorBarnDao.findById(chgFarmDto.getFromBarnId());
         if (isNull(fromBarn)) {
@@ -754,10 +753,10 @@ public class DoctorMoveDataService {
 
         return rawList.stream().map(pigEvent -> {
             pigEvent.setFarmId(chgFarmDto.getFromFarmId());
-            pigEvent.setFarmName(chgFarmDto.getToFarmName());
+            pigEvent.setFarmName(chgFarmDto.getFromFarmName());
             pigEvent.setPigId(rowPigId);
-            pigEvent.setBarnId(chgFarmDto.getBarnId());
-            pigEvent.setBarnName(chgFarmDto.getBarnName());
+            pigEvent.setBarnId(fromBarn.getId());
+            pigEvent.setBarnName(fromBarn.getName());
             pigEvent.setBarnType(fromBarn.getPigType());
 
             if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM_IN.getKey())) {
@@ -772,6 +771,7 @@ public class DoctorMoveDataService {
         DoctorPig pig = doctorPigDao.findById(pigId);
         pig.setFarmId(barn.getFarmId());
         pig.setFarmName(barn.getFarmName());
+        pig.setIsRemoval(IsOrNot.YES.getValue());
         doctorPigDao.create(pig);
 
         DoctorPigTrack pigTrack = new DoctorPigTrack();
