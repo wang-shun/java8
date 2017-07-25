@@ -745,6 +745,8 @@ public class DoctorMoveDataService {
 
     private List<DoctorPigEvent> generateChgFarm(List<DoctorPigEvent> rawList, Map<Long, DoctorBarn> barnMap, Long pigId) {
         DoctorPigEvent chgFarmIn = rawList.get(rawList.size() - 1);
+        log.info("----charmFarmIn:{}", chgFarmIn);
+        log.info("----barnMap:{}", barnMap);
         DoctorChgFarmDto chgFarmDto = JSON_MAPPER.fromJson(chgFarmIn.getExtra(), DoctorChgFarmDto.class);
         DoctorBarn fromBarn = barnMap.get(chgFarmDto.getFromBarnId());
         if (isNull(fromBarn)) {
