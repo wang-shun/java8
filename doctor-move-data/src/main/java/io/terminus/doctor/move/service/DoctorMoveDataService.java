@@ -730,6 +730,7 @@ public class DoctorMoveDataService {
                 for (int i = 0; i < pigEventList.size(); i++) {
                     DoctorPigEvent pigEvent = pigEventList.get(i);
                     if (!Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM_IN.getKey())) {
+                        pigEvent.setEventSource(SourceType.TRANS_FARM.getValue());
                         continue;
                     }
                     sowEvents.addAll(generateChgFarm(pigEventList.subList(0, i+1), pigId));
@@ -752,18 +753,20 @@ public class DoctorMoveDataService {
         Long rowPigId = generatePigAndTrack(pigId, fromBarn);
 
         return rawList.stream().map(pigEvent -> {
-            pigEvent.setFarmId(chgFarmDto.getFromFarmId());
-            pigEvent.setFarmName(chgFarmDto.getFromFarmName());
-            pigEvent.setPigId(rowPigId);
-            pigEvent.setBarnId(fromBarn.getId());
-            pigEvent.setBarnName(fromBarn.getName());
-            pigEvent.setBarnType(fromBarn.getPigType());
+            DoctorPigEvent rowEvent = new DoctorPigEvent();
+            BeanMapper.copy(pigEvent, rowEvent);
+            rowEvent.setFarmId(chgFarmDto.getFromFarmId());
+            rowEvent.setFarmName(chgFarmDto.getFromFarmName());
+            rowEvent.setPigId(rowPigId);
+            rowEvent.setBarnId(fromBarn.getId());
+            rowEvent.setBarnName(fromBarn.getName());
+            rowEvent.setBarnType(fromBarn.getPigType());
 
             if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM_IN.getKey())) {
-                pigEvent.setType(PigEvent.CHG_FARM.getKey());
-                pigEvent.setName(PigEvent.CHG_FARM.getName());
+                rowEvent.setType(PigEvent.CHG_FARM.getKey());
+                rowEvent.setName(PigEvent.CHG_FARM.getName());
             }
-            return pigEvent;
+            return rowEvent;
         }).collect(Collectors.toList());
     }
 
