@@ -949,7 +949,7 @@ public class DoctorMoveDataService {
                 DoctorFarm fromFarm = doctorFarmDao.findByOutId(event.getChgType());
                 tranFarm.setFromFarmId(fromFarm.getId());
                 tranFarm.setFromFarmName(fromFarm.getName());
-                DoctorBarn fromBarn = doctorBarnDao.findByOutId(event.getBarnOutId());
+                DoctorBarn fromBarn = doctorBarnDao.findByOutId(fromFarm.getId(), event.getBarnOutId());
                 tranFarm.setFromBarnId(fromBarn.getId());
                 tranFarm.setFromBarnName(fromBarn.getName());
                 tranFarm.setRemark(event.getChgReason());

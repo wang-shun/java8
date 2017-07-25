@@ -23,8 +23,8 @@ import java.util.Map;
 @Repository
 public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
 
-    public DoctorBarn findByOutId(String outId) {
-        return getSqlSession().selectOne(sqlId("findByOutId"), outId);
+    public DoctorBarn findByOutId(Long farmId, String outId) {
+        return getSqlSession().selectOne(sqlId("findByOutId"), ImmutableMap.of("farmId", farmId, "outId", outId));
     }
 
     public List<DoctorBarn> findByOrgId(Long orgId){
