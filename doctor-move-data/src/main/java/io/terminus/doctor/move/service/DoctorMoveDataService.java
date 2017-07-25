@@ -712,8 +712,6 @@ public class DoctorMoveDataService {
      * @param sowEvents 母猪事件
      */
     private void correctChgFarm(List<DoctorPigEvent> sowEvents, Long farmId) {
-        Map<Long, DoctorBarn> barnMap = doctorBarnDao.findByFarmId(farmId).stream()
-                .collect(Collectors.toMap(DoctorBarn::getId, v->v));
 
         //获取有专场转入事件的猪id列表
         List<Long> pigIds = sowEvents.stream().filter(pigEvent ->
@@ -729,13 +727,12 @@ public class DoctorMoveDataService {
         pigEvents.keySet().forEach(pigId -> {
             try {
                 List<DoctorPigEvent> pigEventList = pigEvents.get(pigId);
-                log.info("-------pigEventList:{}", pigEventList);
                 for (int i = 0; i < pigEventList.size(); i++) {
                     DoctorPigEvent pigEvent = pigEventList.get(i);
                     if (!Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM_IN.getKey())) {
                         continue;
                     }
-                    sowEvents.addAll(generateChgFarm(pigEventList.subList(0, i+1), barnMap, pigId));
+                    sowEvents.addAll(generateChgFarm(pigEventList.subList(0, i+1), pigId));
                 }
             } catch (Exception e) {
                 log.error("correct chg farm failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
@@ -744,11 +741,11 @@ public class DoctorMoveDataService {
         });
     }
 
-    private List<DoctorPigEvent> generateChgFarm(List<DoctorPigEvent> rawList, Map<Long, DoctorBarn> barnMap, Long pigId) {
+    private List<DoctorPigEvent> generateChgFarm(List<DoctorPigEvent> rawList, Long pigId) {
         DoctorPigEvent chgFarmIn = rawList.get(rawList.size() - 1);
         log.info("----charmFarmIn:{}", chgFarmIn);
         DoctorChgFarmDto chgFarmDto = JSON_MAPPER.fromJson(chgFarmIn.getExtra(), DoctorChgFarmDto.class);
-        DoctorBarn fromBarn = barnMap.get(chgFarmDto.getFromBarnId());
+        DoctorBarn fromBarn = doctorBarnDao.findById(chgFarmDto.getFromBarnId());
         if (isNull(fromBarn)) {
             log.warn("from barn is null, pigId:{}, barnId:{}", pigId, chgFarmDto.getFromBarnId());
             return Lists.newArrayList();
