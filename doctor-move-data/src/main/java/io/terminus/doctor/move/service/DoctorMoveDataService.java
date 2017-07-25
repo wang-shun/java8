@@ -747,6 +747,10 @@ public class DoctorMoveDataService {
         DoctorPigEvent chgFarmIn = rawList.get(rawList.size() - 1);
         DoctorChgFarmDto chgFarmDto = JSON_MAPPER.fromJson(chgFarmIn.getExtra(), DoctorChgFarmDto.class);
         DoctorBarn fromBarn = barnMap.get(chgFarmDto.getFromBarnId());
+        if (isNull(fromBarn)) {
+            log.warn("from barn is null, pigId:{}, barnId:{}", pigId, chgFarmDto.getFromBarnId());
+            return Lists.newArrayList();
+        }
         Long rowPigId = generatePigAndTrack(pigId, fromBarn);
 
         return rawList.stream().map(pigEvent -> {

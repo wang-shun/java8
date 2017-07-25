@@ -309,7 +309,7 @@ public class DoctorMoveDataController {
             int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
             log.warn("move pig end, cost {} minutes, now dump ES", minute);
         } catch (Exception e) {
-            doctorMoveDataService.deleteAllPigs(farm.getId());
+//            doctorMoveDataService.deleteAllPigs(farm.getId());
             log.error("move pig failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
             throw new ServiceException("move.pig.error");
         }
