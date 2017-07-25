@@ -669,6 +669,9 @@ public class DoctorMoveDataService {
                 .map(event -> getSowEvent(event, sowMap, barnMap, basicMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap, groupEventOutId))
                 .collect(Collectors.toList());
 
+        //修复转场数据
+        correctChgFarm(sowEvents, farm.getId());
+
         //数据量略大, 分成5份插入吧
         if (!sowEvents.isEmpty()) {
             Lists.partition(sowEvents, 5).forEach(doctorPigEventDao::creates);
@@ -702,6 +705,83 @@ public class DoctorMoveDataService {
 
         //更新拼哺事件extra
         updateFosterSowCode(farm);
+    }
+
+    /**
+     * 修复母猪的转场逻辑
+     * @param sowEvents 母猪事件
+     */
+    private void correctChgFarm(List<DoctorPigEvent> sowEvents, Long farmId) {
+        Map<Long, DoctorBarn> barnMap = doctorBarnDao.findByFarmId(farmId).stream()
+                .collect(Collectors.toMap(DoctorBarn::getId, v->v));
+
+        //获取有专场转入事件的猪id列表
+        List<Long> pigIds = sowEvents.stream().filter(pigEvent ->
+                Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM_IN.getKey()))
+                .map(DoctorPigEvent::getPigId).collect(Collectors.toList());
+
+        //猪id与猪事件的映射
+        Map<Long, List<DoctorPigEvent>> pigEvents = sowEvents.stream()
+                .filter(pigEvent -> pigIds.contains(pigEvent.getPigId()))
+                .collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
+
+        //修复转场事件(生成pig、pigTrack、pigEvent)
+        pigEvents.keySet().forEach(pigId -> {
+            try {
+                List<DoctorPigEvent> pigEventList = pigEvents.get(pigId);
+                for (int i = 0; i < pigEventList.size(); i++) {
+                    DoctorPigEvent pigEvent = pigEventList.get(i);
+                    if (!Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM_IN.getKey())) {
+                        continue;
+                    }
+                    sowEvents.addAll(generateChgFarm(pigEventList.subList(0, i), barnMap, pigId));
+                }
+            } catch (Exception e) {
+                log.error("correct chg farm failed, pigId:{}", pigId);
+            }
+        });
+    }
+
+    private List<DoctorPigEvent> generateChgFarm(List<DoctorPigEvent> rawList, Map<Long, DoctorBarn> barnMap, Long pigId) {
+        DoctorPigEvent chgFarmIn = rawList.get(rawList.size() - 1);
+        DoctorChgFarmDto chgFarmDto = JSON_MAPPER.fromJson(chgFarmIn.getExtra(), DoctorChgFarmDto.class);
+        DoctorBarn fromBarn = barnMap.get(chgFarmDto.getFromBarnId());
+        Long rowPigId = generatePigAndTrack(pigId, fromBarn);
+
+        return rawList.stream().map(pigEvent -> {
+            pigEvent.setFarmId(chgFarmDto.getFromFarmId());
+            pigEvent.setFarmName(chgFarmDto.getToFarmName());
+            pigEvent.setPigId(rowPigId);
+            pigEvent.setBarnId(chgFarmDto.getBarnId());
+            pigEvent.setBarnName(chgFarmDto.getBarnName());
+            pigEvent.setBarnType(fromBarn.getPigType());
+
+            if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM_IN.getKey())) {
+                pigEvent.setType(PigEvent.CHG_FARM.getKey());
+                pigEvent.setName(PigEvent.CHG_FARM.getName());
+            }
+            return pigEvent;
+        }).collect(Collectors.toList());
+    }
+
+    private Long generatePigAndTrack(Long pigId, DoctorBarn barn) {
+        DoctorPig pig = doctorPigDao.findById(pigId);
+        pig.setFarmId(barn.getFarmId());
+        pig.setFarmName(barn.getFarmName());
+        doctorPigDao.create(pig);
+
+        DoctorPigTrack pigTrack = new DoctorPigTrack();
+        pigTrack.setFarmId(pig.getFarmId());
+        pigTrack.setPigId(pig.getId());
+        pigTrack.setPigType(pig.getPigType());
+        pigTrack.setStatus(PigStatus.Removal.getKey());
+        pigTrack.setIsRemoval(IsOrNot.YES.getValue());
+        pigTrack.setCurrentBarnId(barn.getId());
+        pigTrack.setCurrentBarnName(barn.getName());
+        pigTrack.setCurrentBarnType(barn.getPigType());
+        doctorPigTrackDao.create(pigTrack);
+
+        return pig.getId();
     }
 
     //如果是哺乳状态, 设置一下哺乳猪群的信息
@@ -863,13 +943,15 @@ public class DoctorMoveDataService {
                     groupEventOutId.add(event.getPregCheckResult());
                 }
                 break;
-            case CHG_FARM:      //转场
+            case CHG_FARM_IN:      //转场转入
                 DoctorChgFarmDto tranFarm = new DoctorChgFarmDto();
                 tranFarm.setChgFarmDate(event.getEventAt());
-                tranFarm.setFromFarmId(sowEvent.getFarmId());
-                tranFarm.setFromFarmName(sowEvent.getFarmName());
-                tranFarm.setFromBarnId(sowEvent.getBarnId());
-                tranFarm.setFromBarnName(sowEvent.getBarnName());
+                DoctorFarm fromFarm = doctorFarmDao.findByOutId(event.getChgType());
+                tranFarm.setFromFarmId(fromFarm.getId());
+                tranFarm.setFromFarmName(fromFarm.getName());
+                DoctorBarn fromBarn = doctorBarnDao.findByOutId(event.getBarnOutId());
+                tranFarm.setFromBarnId(fromBarn.getId());
+                tranFarm.setFromBarnName(fromBarn.getName());
                 tranFarm.setRemark(event.getChgReason());
                 sowEvent.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(tranFarm));
                 break;

@@ -314,23 +314,23 @@ public class DoctorMoveDataController {
             throw new ServiceException("move.pig.error");
         }
 
-        //5.迁移猪群
-        Stopwatch watch = Stopwatch.createStarted();
-        log.warn("move group start, moveId:{}", moveId);
-        doctorMoveDataService.moveGroup(moveId, farm, groupEventOutId);
-        watch.stop();
-        int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
-        log.warn("move group end, cost {} minutes", minute);
+//        //5.迁移猪群
+//        Stopwatch watch = Stopwatch.createStarted();
+//        log.warn("move group start, moveId:{}", moveId);
+//        doctorMoveDataService.moveGroup(moveId, farm, groupEventOutId);
+//        watch.stop();
+//        int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
+//        log.warn("move group end, cost {} minutes", minute);
+//
+//        log.warn("move farrow sow start, moveId:{}", moveId);
+//        doctorMoveDataService.updateFarrowSow(farm);
+//        log.warn("move farrow sow end");
+//
+//        log.warn("updateBuruSowTrack start, farmId:{}", farm.getId());
+//        doctorMoveDataService.updateBuruTrack(farm);
+//        log.warn("updateBuruSowTrack end");
 
-        log.warn("move farrow sow start, moveId:{}", moveId);
-        doctorMoveDataService.updateFarrowSow(farm);
-        log.warn("move farrow sow end");
-
-        log.warn("updateBuruSowTrack start, farmId:{}", farm.getId());
-        doctorMoveDataService.updateBuruTrack(farm);
-        log.warn("updateBuruSowTrack end");
-
-        // TODO: 17/5/8 暂时改为迁移后手动刷新报表
+        // TODO: 17/5/8 暂时改为迁移后刷新报表
 //        //首页统计
 //        movePigTypeStatistic(farm);
 //
@@ -349,19 +349,19 @@ public class DoctorMoveDataController {
 //        doctorMoveReportService.moveParityMonthlyReport(farm.getId(), monthIndex);
 //        log.warn("move parity monthly end");
 
-        //迁移仓库/物料
-        log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
-        wareHouseInitService.init(mobile, moveId, farm);
-        log.warn("move warehouse end");
-
-        //迁移仓库/物料
-        log.warn("move farmBasic start, mobile:{}, moveId:{}", mobile, moveId);
-        doctorImportDataService.importFarmBasics(farm.getId());
-        log.warn("move farmBasic end");
-
-        log.warn("move xrnm permission, mobile:{}, moveId:{}", mobile, moveId);
-        doctorImportDataService.createOrUpdateAdminPermission();
-        log.warn("move xrmm permission end");
+//        //迁移仓库/物料
+//        log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
+//        wareHouseInitService.init(mobile, moveId, farm);
+//        log.warn("move warehouse end");
+//
+//        //迁移仓库/物料
+//        log.warn("move farmBasic start, mobile:{}, moveId:{}", mobile, moveId);
+//        doctorImportDataService.importFarmBasics(farm.getId());
+//        log.warn("move farmBasic end");
+//
+//        log.warn("move xrnm permission, mobile:{}, moveId:{}", mobile, moveId);
+//        doctorImportDataService.createOrUpdateAdminPermission();
+//        log.warn("move xrmm permission end");
     }
 
     //统计下首页数据
