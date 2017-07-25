@@ -729,12 +729,13 @@ public class DoctorMoveDataService {
         pigEvents.keySet().forEach(pigId -> {
             try {
                 List<DoctorPigEvent> pigEventList = pigEvents.get(pigId);
+                log.info("-------pigEventList:{}", pigEventList);
                 for (int i = 0; i < pigEventList.size(); i++) {
                     DoctorPigEvent pigEvent = pigEventList.get(i);
                     if (!Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM_IN.getKey())) {
                         continue;
                     }
-                    sowEvents.addAll(generateChgFarm(pigEventList.subList(0, i), barnMap, pigId));
+                    sowEvents.addAll(generateChgFarm(pigEventList.subList(0, i+1), barnMap, pigId));
                 }
             } catch (Exception e) {
                 log.error("correct chg farm failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
@@ -746,9 +747,7 @@ public class DoctorMoveDataService {
     private List<DoctorPigEvent> generateChgFarm(List<DoctorPigEvent> rawList, Map<Long, DoctorBarn> barnMap, Long pigId) {
         DoctorPigEvent chgFarmIn = rawList.get(rawList.size() - 1);
         log.info("----charmFarmIn:{}", chgFarmIn);
-        log.info("----barnMap:{}", barnMap);
         DoctorChgFarmDto chgFarmDto = JSON_MAPPER.fromJson(chgFarmIn.getExtra(), DoctorChgFarmDto.class);
-        log.info("----chgFarmDto:{}", chgFarmDto);
         DoctorBarn fromBarn = barnMap.get(chgFarmDto.getFromBarnId());
         if (isNull(fromBarn)) {
             log.warn("from barn is null, pigId:{}, barnId:{}", pigId, chgFarmDto.getFromBarnId());
