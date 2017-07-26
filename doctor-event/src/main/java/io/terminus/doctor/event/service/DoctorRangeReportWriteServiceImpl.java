@@ -81,11 +81,14 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
     @Override
     public Response<Boolean> generateDoctorRangeReports(List<Long> farmIds, Date date) {
         try{
+            log.info("generateDoctorRangeReports start=========");
+            Stopwatch stopwatch = Stopwatch.createStarted();
             farmIds.forEach(farmId -> {
                 generateDoctorWeeklyReports(farmId, date);
                 generateDoctorMonthlyReports(farmId, date);
                 updateActualIndicator(farmId, new DateTime(date).minusMonths(TIME_RANGE).toDate());
             });
+            log.info("generateDoctorRangeReports end===,consume time:{}minute", stopwatch.elapsed(TimeUnit.MINUTES));
         }catch(Exception e){
             log.info("generate DoctorRangeReports failed, cause: {}", Throwables.getStackTraceAsString(e));
             return Response.ok(Boolean.FALSE);

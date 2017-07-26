@@ -128,7 +128,7 @@ public class DoctorReportJobs {
             }
             log.info("range report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
             List<Long> farmIds = getAllFarmIds();
-            Date today = Dates.startOfDay(new Date());
+            Date today = Dates.startOfDay(DateTime.now().minusYears(1).toDate());
             doctorRangeReportWriteService.generateDoctorRangeReports(farmIds, today);
             log.info("range report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
@@ -140,7 +140,7 @@ public class DoctorReportJobs {
      * 公司月报计算job
      * 每两点执行一发
      */
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 3 * * ?")
     @RequestMapping(value = "/org/range", method = RequestMethod.GET)
     public void monthlyOrgReport() {
         try {
@@ -161,7 +161,7 @@ public class DoctorReportJobs {
      * 公猪生产成绩月报计算job
      * 每天凌晨3点统计昨天的数据
      */
-    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 0 4 * * ?")
     @RequestMapping(value = "/boarMonthly", method = RequestMethod.GET)
     public void boarMonthlyReport() {
         try {
@@ -184,7 +184,7 @@ public class DoctorReportJobs {
      * 猪场胎次产仔月报计算job
      * 每天凌晨3点统计昨天的数据
      */
-    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 0 4 * * ?")
     @RequestMapping(value = "/parityMonthly", method = RequestMethod.GET)
     public void parityMonthlyReport() {
         try {
