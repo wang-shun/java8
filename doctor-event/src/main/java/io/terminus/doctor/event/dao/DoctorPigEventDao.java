@@ -617,4 +617,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public void flushChgFarmEventSource(List<Long> list) {
         sqlSession.update(sqlId("flushChgFarmEventSource"), list);
     }
+
+    /**
+     * 获取猪场的事件
+     * @param list 猪场id列表
+     * @return 事件列表
+     */
+    public List<DoctorPigEvent> findByFarmIds(List<Long> list){
+        return sqlSession.selectList(sqlId("findByFarmIds"), list);
+    }
 }

@@ -214,8 +214,8 @@ public class DoctorMoveDataController {
             //多个猪场遍历插入
             farmList.forEach(farmWithMobile -> moveAllExclude(moveId, farmWithMobile.getDoctorFarm(), farmWithMobile.getMobile(), index, monthIndex));
 
-            //将猪场中转场转入事件前的事件置为eventSource=5
-            doctorMoveDataService.flushChgFarmEventSource(farmList.stream().map(farmWithMobile -> farmWithMobile.getDoctorFarm()
+            //修正转场事件
+            doctorMoveDataService.correctChgFarm(farmList.stream().map(farmWithMobile -> farmWithMobile.getDoctorFarm()
                     .getId()).collect(Collectors.toList()));
 
             //把所有猪舍添加到所有用户的权限里去

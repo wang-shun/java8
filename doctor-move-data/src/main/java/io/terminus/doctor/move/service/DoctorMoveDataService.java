@@ -669,9 +669,6 @@ public class DoctorMoveDataService {
                 .map(event -> getSowEvent(event, sowMap, barnMap, basicMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap, groupEventOutId))
                 .collect(Collectors.toList());
 
-        //修复转场数据
-        correctChgFarm(sowEvents);
-
         //数据量略大, 分成5份插入吧
         if (!sowEvents.isEmpty()) {
             Lists.partition(sowEvents, 5).forEach(doctorPigEventDao::creates);
@@ -709,9 +706,14 @@ public class DoctorMoveDataService {
 
     /**
      * 修复母猪的转场逻辑
-     * @param sowEvents 母猪事件
+     * @param farmIds 猪场ids
      */
-    private void correctChgFarm(List<DoctorPigEvent> sowEvents) {
+    public void correctChgFarm(List<Long> farmIds) {
+        if (Arguments.isNullOrEmpty(farmIds)) {
+            return;
+        }
+        List<DoctorPigEvent> sowEvents = doctorPigEventDao.findByFarmIds(farmIds);
+        List<DoctorPigEvent> correctChgFarmEvents = Lists.newArrayList();
 
         //获取有专场转入事件的猪id列表
         List<Long> pigIds = sowEvents.stream().filter(pigEvent ->
@@ -732,13 +734,21 @@ public class DoctorMoveDataService {
                     if (!Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM_IN.getKey())) {
                         continue;
                     }
-                    sowEvents.addAll(generateChgFarm(pigEventList.subList(0, i+1), pigId));
+                    correctChgFarmEvents.addAll(generateChgFarm(pigEventList.subList(0, i+1), pigId));
                 }
             } catch (Exception e) {
                 log.error("correct chg farm failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
                 throw e;
             }
         });
+
+        //批量插入事件
+        if (!sowEvents.isEmpty()) {
+            Lists.partition(correctChgFarmEvents, 5).forEach(doctorPigEventDao::creates);
+        }
+
+        //将猪场中转场转入事件前的事件置为eventSource=5
+        flushChgFarmEventSource(farmIds);
     }
 
     private List<DoctorPigEvent> generateChgFarm(List<DoctorPigEvent> rawList, Long pigId) {

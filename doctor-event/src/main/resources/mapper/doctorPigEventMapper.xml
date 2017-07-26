@@ -1509,4 +1509,14 @@
         set b.event_source = 5
         where b.id &lt; a.id
     </update>
+
+    <select id="findByFarmIds" parameterType="list" resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all" />
+        FROM
+        <include refid="tb"/>
+        WHERE farm_id IN
+        <foreach collection="list" item="farmId" open="(" separator="," close=")" >
+            #{farmId}
+        </foreach>
+    </select>
 </mapper>
