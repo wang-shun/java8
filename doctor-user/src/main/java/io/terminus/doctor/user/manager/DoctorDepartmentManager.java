@@ -107,4 +107,20 @@ public class DoctorDepartmentManager {
                 .map(doctorOrg -> findCliqueTree(doctorOrg.getId())).collect(Collectors.toList());
         return new Paging<>(pagingOrg.getTotal(), departmentDtoList);
     }
+
+    public DoctorDepartmentDto findClique(Long departmentId, Boolean isFarm) {
+        if (isFarm) {
+            DoctorFarm doctorFarm = doctorFarmDao.findById(departmentId);
+            departmentId = doctorFarm.getOrgId();
+        }
+        return findClique(departmentId);
+    }
+
+    private DoctorDepartmentDto findClique(Long departmentId) {
+        DoctorOrg doctorOrg = doctorOrgDao.findById(departmentId);
+        if (Objects.equals(doctorOrg.getType(), DoctorOrg.Type.CLIQUE.getValue())) {
+            return new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), 1, null);
+        }
+        return findClique(doctorOrg.getParentId());
+    }
 }

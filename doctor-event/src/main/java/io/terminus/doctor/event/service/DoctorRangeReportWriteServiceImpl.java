@@ -107,7 +107,7 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
                         List<Long> farmIdList = orgMap.get(orgId);
                         updateOrgMonthlyReport(orgId, farmIdList, since);
                     });
-            log.info("generateOrgDoctorRangeReports end===,consume time:{}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+            log.info("generateOrgDoctorRangeReports end===,consume time:{}minute", stopwatch.elapsed(TimeUnit.MINUTES));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("generate org doctorRangeReport failed,orgMap:{}, since:{}, cause:{}"

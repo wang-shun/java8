@@ -44,4 +44,12 @@ public interface DoctorDepartmentReadService {
      * @return 分页数据
      */
     Response<Paging<DoctorDepartmentDto>> pagingCliqueTree(Map<String, Object> criteria, Integer pageSize, Integer pageNo);
+
+    /**
+     * 获取部门所在集团
+     * @param departmentId 部门id
+     * @param isFarm 是否是猪场
+     * @return 集团
+     */
+    Response<DoctorDepartmentDto> findClique(Long departmentId, Boolean isFarm);
 }

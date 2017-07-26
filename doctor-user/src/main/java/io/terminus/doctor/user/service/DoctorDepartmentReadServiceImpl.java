@@ -66,4 +66,15 @@ public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadServ
             return Response.fail("paging.clique.tree.failed");
         }
     }
+
+    @Override
+    public Response<DoctorDepartmentDto> findClique(Long departmentId, Boolean isFarm) {
+        try {
+            return Response.ok(doctorDepartmentManager.findClique(departmentId, isFarm));
+        } catch (Exception e) {
+            log.error("find clique faied, departmentId:{}, isFarm:{}, cause:{}"
+                    , departmentId, isFarm, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.clique.failed");
+        }
+    }
 }

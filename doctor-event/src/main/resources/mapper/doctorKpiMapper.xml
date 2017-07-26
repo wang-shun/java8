@@ -449,7 +449,7 @@
         /
         (
         SELECT
-        ifnull(sum(`end`), 1) as farrow_count -- 当天产房仔猪存栏
+        case when sum(`end`) is null or sum(end) = 0 then 1 else sum(`end`) end as farrow_count -- 当天产房仔猪存栏
         FROM doctor_daily_groups
         WHERE
         farm_id IN
@@ -477,7 +477,7 @@
         /
         (
         SELECT
-        ifnull(sum(`end`), 1) as farrow_count -- 当天产房仔猪存栏
+        case when sum(`end`) is null or sum(end) = 0 then 1 else sum(`end`) end as farrow_count -- 当天产房仔猪存栏
         FROM doctor_daily_groups
         WHERE
         farm_id IN
@@ -506,7 +506,7 @@
         /
         (
         SELECT
-        ifnull(sum(`end`), 1) as farrow_count -- 当天产房仔猪存栏
+        case when sum(`end`) is null or sum(end) = 0 then 1 else sum(`end`) end as farrow_count -- 当天产房仔猪存栏
         FROM doctor_daily_groups
         WHERE
         farm_id IN
