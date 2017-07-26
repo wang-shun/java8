@@ -31,13 +31,26 @@ public class DoctorDepartmentManager {
     private DoctorOrgDao doctorOrgDao;
 
     public List<DoctorFarm> findAllFarmsByOrgId(Long departmentId) {
+//        List<DoctorOrg> orgList = doctorOrgDao.findOrgByParentId(departmentId);
+//        if (Arguments.isNullOrEmpty(orgList)) {
+//            return doctorFarmDao.findByOrgId(departmentId);
+//        }
+//        return doctorFarmDao.findByOrgIds(orgList.stream().map(DoctorOrg::getId)
+//                .collect(Collectors.toList()));
+        List<DoctorFarm> farmList = Lists.newArrayList();
+        findFarm(departmentId, farmList);
+        return farmList;
+    }
+
+    private void findFarm(Long departmentId, List<DoctorFarm> farmList) {
         List<DoctorOrg> orgList = doctorOrgDao.findOrgByParentId(departmentId);
         if (Arguments.isNullOrEmpty(orgList)) {
-            return doctorFarmDao.findByOrgId(departmentId);
+            farmList.addAll(doctorFarmDao.findByOrgId(departmentId));
+            return;
         }
-        return doctorFarmDao.findByOrgIds(orgList.stream().map(DoctorOrg::getId)
-                .collect(Collectors.toList()));
+        orgList.forEach(doctorOrg -> findFarm(doctorOrg.getId(), farmList));
     }
+
 
     public DoctorDepartmentDto findCliqueTree(Long departmentId) {
         return findCliqueTreeImp(departmentId, 1);
