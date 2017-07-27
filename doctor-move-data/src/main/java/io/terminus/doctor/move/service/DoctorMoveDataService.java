@@ -803,22 +803,22 @@ public class DoctorMoveDataService {
 
     //如果是哺乳状态, 设置一下哺乳猪群的信息
     private void updateBuruSowTrack(DoctorFarm farm) {
+        Map<Long, Long> deleverBarnIdToMap = doctorGroupDao.findByFarmIdAndPigTypeAndStatus(farm.getId(), PigType.DELIVER_SOW.getValue()
+                , DoctorGroup.Status.CREATED.getValue()).stream().collect(Collectors.toMap(DoctorGroup::getCurrentBarnId, DoctorGroup::getId));
         doctorPigTrackDao.findByFarmIdAndStatus(farm.getId(), PigStatus.FEED.getKey()).stream()
-                .filter(t -> Objects.equals(t.getIsRemoval(), IsOrNot.NO.getValue()) && Objects.equals(t.getPigType(), DoctorPig.PigSex.SOW.getKey()))
+                .filter(t -> Objects.equals(t.getIsRemoval(), IsOrNot.NO.getValue())
+                        && Objects.equals(t.getPigType(), DoctorPig.PigSex.SOW.getKey()))
                 .forEach(track -> {
                     track.setExtra(track.getExtra());
                     Map<String, Object> extraMap = track.getExtraMap();
 
                     DoctorPigTrack updateTrack = new DoctorPigTrack();
                     updateTrack.setId(track.getId());
-                    if (extraMap.containsKey("farrowingPigletGroupId")) {
-                        updateTrack.setGroupId(Long.valueOf(String.valueOf(extraMap.get("farrowingPigletGroupId"))));
-                    }
-
+                    updateTrack.setGroupId(deleverBarnIdToMap.get(track.getCurrentBarnId()));
                     //更新哺乳母猪信息
-                    updateTrack.setUnweanQty(getIntegerDefault0(extraMap, "farrowingLiveCount"));
+                    updateTrack.setUnweanQty(doctorPigEventDao.getSowUnweanCount(track.getPigId()));
                     updateTrack.setWeanQty(getIntegerDefault0(extraMap, "partWeanPigletsCount"));
-                    updateTrack.setFarrowQty(updateTrack.getUnweanQty() + updateTrack.getWeanQty());
+                    updateTrack.setFarrowQty(getIntegerDefault0(extraMap, "farrowingLiveCount"));
                     updateTrack.setFarrowAvgWeight(getDoubleDefault0(extraMap, "birthNestAvg"));
                     updateTrack.setWeanAvgWeight(getDoubleDefault0(extraMap, "partWeanAvgWeight"));
                     doctorPigTrackDao.update(updateTrack);

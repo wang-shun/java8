@@ -626,4 +626,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<DoctorPigEvent> findByFarmIds(List<Long> list){
         return sqlSession.selectList(sqlId("findByFarmIds"), list);
     }
+
+    /**
+     * 获取当前母猪未断奶数量
+     * @param pigId 母猪id
+     * @return 未断奶数量
+     */
+    public Integer getSowUnweanCount(Long pigId) {
+        return sqlSession.selectOne(sqlId("getSowUnweanCount"), pigId);
+    }
 }

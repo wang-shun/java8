@@ -1519,4 +1519,16 @@
             #{farmId}
         </foreach>
     </select>
+
+    <select id="getSowUnweanCount" parameterType="long" resultType="int">
+        select sum(
+        case when type = 15 then `live_count` else 0 end +
+        case when type = 19 then quantity else 0 end -
+        case when type = 16 then wean_count else 0 end -
+        case when type in(17,18) then quantity else 0 end
+        )
+        from <include refid="tb"/>
+        where pig_id = #{pigId}
+        and type in (15, 16, 17,18,19)
+    </select>
 </mapper>
