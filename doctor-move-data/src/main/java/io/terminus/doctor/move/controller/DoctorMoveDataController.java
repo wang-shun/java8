@@ -209,7 +209,8 @@ public class DoctorMoveDataController {
             //1.迁移猪场信息
             log.warn("move user farm start, mobile:{}, moveId:{}, path:{}", mobile, moveId, path);
 
-            List<DoctorFarmWithMobile> farmList = userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
+            DoctorFarm doctorFarm = doctorFarmDao.findById(635L);
+            List<DoctorFarmWithMobile> farmList  = Lists.newArrayList(new DoctorFarmWithMobile(doctorFarm, "12121")); //= userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
             log.warn("move user farm end");
             //多个猪场遍历插入
             farmList.forEach(farmWithMobile -> moveAllExclude(moveId, farmWithMobile.getDoctorFarm(), farmWithMobile.getMobile(), index, monthIndex));
