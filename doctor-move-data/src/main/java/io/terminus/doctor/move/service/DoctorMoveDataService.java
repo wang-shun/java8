@@ -2949,4 +2949,48 @@ public class DoctorMoveDataService {
     public void flushChgFarmEventSource(List<Long> list) {
         doctorPigEventDao.flushChgFarmEventSource(list);
     }
+
+    /**
+     * 刷新胎次
+     */
+    public void flushSowParity() {
+        List<Long> pigIds = doctorPigDao.findAllPigIds();
+        pigIds.forEach(this::flushSowParityImpl);
+    }
+
+    private void flushSowParityImpl(Long pigId) {
+        int parity = 1;
+        boolean weanToMating = false;
+        List<DoctorPigEvent> list = doctorPigEventDao.queryAllEventsByPigIdForASC(pigId);
+        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigId);
+        for (DoctorPigEvent pigEvent : list) {
+            if (Objects.equals(pigEvent.getType(), PigEvent.ENTRY.getKey())
+                    &&!isNull(pigEvent.getExtraMap())
+                    && !isNull(pigEvent.getExtraMap().get("parity"))
+                    && !Objects.equals("0", pigEvent.getExtraMap().get("parity").toString())) {
+                parity = Integer.valueOf(Objects.toString(pigEvent.getExtraMap().get("parity")));
+            }
+
+            if (Objects.equals(pigEvent.getType(), PigEvent.WEAN.getKey())
+                    || Objects.equals(pigEvent.getType(), PigEvent.FARROWING.getKey())) {
+                weanToMating = true;
+            }
+
+            if (Objects.equals(pigEvent.getType(), PigEvent.MATING.getKey())
+                    && weanToMating) {
+                parity++;
+                weanToMating = false;
+            }
+
+            pigEvent.setParity(parity);
+        }
+
+        DoctorPigTrack updateTrack = new DoctorPigTrack();
+        updateTrack.setId(pigTrack.getId());
+        updateTrack.setCurrentParity(parity);
+        doctorPigTrackDao.update(updateTrack);
+
+        doctorPigEventDao.updates(list);
+    }
+
 }

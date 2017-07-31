@@ -252,6 +252,7 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/queryEvents", method = RequestMethod.GET)
     @ResponseBody
     public Object queryEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+
         if (params == null || params.isEmpty() ) {
             return Paging.empty();
         }

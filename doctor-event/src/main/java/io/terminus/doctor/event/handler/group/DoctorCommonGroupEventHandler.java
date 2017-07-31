@@ -1,12 +1,14 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -33,6 +35,7 @@ import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -48,6 +51,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Desc: 通用事件处理器
@@ -92,10 +96,14 @@ public class DoctorCommonGroupEventHandler {
     @Autowired
     private DoctorBarnDao doctorBarnDao;
 
+    @Autowired
+    private DoctorPigTrackDao doctorPigTrackDao;
+
     /**
      * 系统触发的自动关闭猪群事件(先生成一发批次总结)
      */
     public void autoGroupEventClose(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, BaseGroupInput baseInput, Date eventAt, Double fcrFeed) {
+        validCloseGroup(group, groupTrack);
         createGroupBatchSummaryWhenClosed(group, groupTrack, eventAt, fcrFeed);
 
         DoctorCloseGroupInput closeInput = new DoctorCloseGroupInput();
@@ -284,5 +292,16 @@ public class DoctorCommonGroupEventHandler {
         DoctorGroupTrack doctorGroupTrack = doctorGroupTrackDao.findByGroupId(input.getGroupId());
         DoctorGroup doctorGroup = doctorGroupDao.findById(input.getGroupId());
         doctorWeanGroupEventHandler.handle(eventInfoList, doctorGroup, doctorGroupTrack, input);
+    }
+
+    private void validCloseGroup(DoctorGroup group, DoctorGroupTrack groupTrack) {
+
+        expectTrue(groupTrack.getQuantity() == 0, "group.quantity.not.allow.close", group.getId());
+        if (!Objects.equals(group.getPigType(), PigType.DELIVER_SOW.getValue())) {
+            return;
+        }
+
+        List<DoctorPigTrack> pigTrackList = doctorPigTrackDao.findFeedSowTrackByGroupId(group.getId());
+        expectTrue(pigTrackList.isEmpty(), "group.has.burusow.not.allow.close", group.getId());
     }
 }

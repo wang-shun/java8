@@ -2306,7 +2306,7 @@
         (
         select count(1)
         from doctor_pig_tracks
-        where status in (1,5)
+        where status in (1,5,9)
         and farm_id = #{farmId}
         and current_barn_type in(5,6)
         )

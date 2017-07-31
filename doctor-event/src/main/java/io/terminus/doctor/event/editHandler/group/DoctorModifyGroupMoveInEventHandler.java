@@ -49,6 +49,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         changeDto.setFarmId(oldGroupEvent.getFarmId());
         changeDto.setBusinessId(oldGroupEvent.getGroupId());
         changeDto.setIsSowTrigger(notNull(oldGroupEvent.getSowId()));
+        changeDto.setIsFarrowIn(notNull(oldGroupEvent.getRelPigEventId()));
         changeDto.setTransGroupType(oldGroupEvent.getTransGroupType());
 
         //母猪触发
