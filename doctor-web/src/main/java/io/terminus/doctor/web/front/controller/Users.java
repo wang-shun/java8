@@ -14,10 +14,8 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
@@ -38,7 +36,6 @@ import io.terminus.doctor.web.core.Constants;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.login.DoctorCommonSessionBean;
-import io.terminus.doctor.web.core.login.Sessions;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.auth.core.AclLoader;
 import io.terminus.parana.auth.core.PermissionHelper;
@@ -143,6 +140,11 @@ public class Users {
     }
     @RequestMapping(value = "/getUserById/{id}",method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
     public UserWithServiceStatus getUserById(@PathVariable(value = "id") Long id) {
+        try {
+            Thread.sleep(60000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Response<User> userResponse=doctorUserReadService.findById(id);
         if (!userResponse.isSuccess()){
             throw new JsonResponseException(userResponse.getError());
