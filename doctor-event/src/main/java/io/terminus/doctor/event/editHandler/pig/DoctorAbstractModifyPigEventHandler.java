@@ -72,7 +72,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Override
     public final Boolean canModify(DoctorPigEvent oldPigEvent) {
         return Objects.equals(oldPigEvent.getIsAuto(), IsOrNot.NO.getValue())
-                && !UN_MODIFY.contains(oldPigEvent.getType());
+                && !UN_MODIFY.contains(oldPigEvent.getEventSource());
     }
 
     @Override
@@ -119,7 +119,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     public Boolean canRollback(DoctorPigEvent deletePigEvent) {
         return  isLastManualEvent(deletePigEvent)
                 && rollbackHandleCheck(deletePigEvent)
-                && !UN_MODIFY.contains(deletePigEvent.getType());
+                && !UN_MODIFY.contains(deletePigEvent.getEventSource());
     }
 
     @Override

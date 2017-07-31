@@ -140,11 +140,6 @@ public class Users {
     }
     @RequestMapping(value = "/getUserById/{id}",method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
     public UserWithServiceStatus getUserById(@PathVariable(value = "id") Long id) {
-        try {
-            Thread.sleep(60000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         Response<User> userResponse=doctorUserReadService.findById(id);
         if (!userResponse.isSuccess()){
             throw new JsonResponseException(userResponse.getError());

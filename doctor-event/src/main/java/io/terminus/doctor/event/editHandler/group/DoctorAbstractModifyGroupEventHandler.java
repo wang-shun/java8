@@ -72,7 +72,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     @Override
     public final Boolean canModify(DoctorGroupEvent oldGroupEvent) {
         return Objects.equals(oldGroupEvent.getIsAuto(), IsOrNot.NO.getValue())
-                && !UN_MODIFY.contains(oldGroupEvent.getType());
+                && !UN_MODIFY.contains(oldGroupEvent.getEventSource());
 
     }
 
@@ -123,7 +123,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     public Boolean canRollback(DoctorGroupEvent deleteGroupEvent) {
         return Objects.equals(deleteGroupEvent.getIsAuto(), IsOrNot.NO.getValue())
                 && rollbackHandleCheck(deleteGroupEvent)
-                && !UN_MODIFY.contains(deleteGroupEvent.getType());
+                && !UN_MODIFY.contains(deleteGroupEvent.getEventSource());
     }
     
     @Override
