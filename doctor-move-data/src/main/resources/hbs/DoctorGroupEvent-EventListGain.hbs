@@ -16,8 +16,8 @@ FROM
         MoveCategoryText AS inTypeName,     --转入猪群事件的转入类型
         EWeight AS weight,
         CASE WHEN EWeight = 0 OR NumberOfPigs = 0 THEN 0 ELSE  CONVERT(DECIMAL(18,2), EWeight/NumberOfPigs) END AS avgWeight,
-        cast(isnull(Price, 0) * 100 AS INT) as price,   -- 金额 * 100
-        cast(isnull(SumJe, 0) * 100 AS INT) as amount,  -- 金额 * 100
+        cast(isnull(Price, 0) * 100 AS BIGINT) as price,   -- 金额 * 100
+        cast(isnull(SumJe, 0) * 100 AS BIGINT) as amount,  -- 金额 * 100
         Customer as customer,
         Treament AS context,  --此字段有多个意思
         CASE WHEN AutoGenerate = 'true' THEN 1 ELSE 0 END isAuto, -- 是否是自动生成的事件

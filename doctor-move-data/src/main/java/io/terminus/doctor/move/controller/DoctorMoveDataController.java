@@ -15,7 +15,17 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.service.*;
+import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
+import io.terminus.doctor.event.service.DoctorDailyGroupWriteService;
+import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorEditGroupEventService;
+import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.event.service.DoctorRangeReportWriteService;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.move.service.DoctorImportDataService;
@@ -36,12 +46,14 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -197,15 +209,28 @@ public class DoctorMoveDataController {
             //1.迁移猪场信息
             log.warn("move user farm start, mobile:{}, moveId:{}, path:{}", mobile, moveId, path);
 
-            List<DoctorFarmWithMobile> farmList = userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
+            DoctorFarm doctorFarm = doctorFarmDao.findById(635L);
+            List<DoctorFarmWithMobile> farmList  = Lists.newArrayList(new DoctorFarmWithMobile(doctorFarm, "12121")); //= userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
             log.warn("move user farm end");
-
             //多个猪场遍历插入
             farmList.forEach(farmWithMobile -> moveAllExclude(moveId, farmWithMobile.getDoctorFarm(), farmWithMobile.getMobile(), index, monthIndex));
+
+            //修正转场事件
+            doctorMoveDataService.correctChgFarm(farmList.stream().map(farmWithMobile -> farmWithMobile.getDoctorFarm()
+                    .getId()).collect(Collectors.toList()));
 
             //把所有猪舍添加到所有用户的权限里去
             farmList.forEach(farmWithMobile -> userInitService.updatePermissionBarn(farmWithMobile.getDoctorFarm().getId()));
             log.warn("all data moved successfully, CONGRATULATIONS!!!");
+
+            //生成报表
+            farmList.forEach(farmWithMobile -> {
+                moveDailyReport(farmWithMobile.getDoctorFarm().getId(), DateUtil.toDateString(DateTime.now().minusYears(1).toDate())
+                        , DateUtil.toDateString(new Date()));
+                flushGroupDailyHistorty(farmWithMobile.getDoctorFarm().getId(), DateUtil.toDateString(DateTime.now().minusYears(1).toDate())
+                        , DateUtil.toDateString(new Date()));
+                moveDoctorRangeReport(farmWithMobile.getDoctorFarm().getId(), DateUtil.toDateString(DateTime.now().minusYears(1).toDate()));
+            });
             return true;
         } catch (Exception e) {
             log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
@@ -276,11 +301,14 @@ public class DoctorMoveDataController {
         doctorMoveBasicService.moveAllBasic(moveId, farm);
         log.warn("move bascic end");
 
+        //由母猪触发的猪群事件outId,?由哺乳母猪转舍触发转群在触发转入会加上前缀chgToMoveIn
+        List<String> groupEventOutId = Lists.newArrayList();
+
         //4.迁移公猪 母猪
         try {
             Stopwatch watch = Stopwatch.createStarted();
             log.warn("move pig start, moveId:{}", moveId);
-            doctorMoveDataService.movePig(moveId, farm);
+            doctorMoveDataService.movePig(moveId, farm, groupEventOutId);
             watch.stop();
             int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
             log.warn("move pig end, cost {} minutes, now dump ES", minute);
@@ -293,7 +321,7 @@ public class DoctorMoveDataController {
         //5.迁移猪群
         Stopwatch watch = Stopwatch.createStarted();
         log.warn("move group start, moveId:{}", moveId);
-        doctorMoveDataService.moveGroup(moveId, farm);
+        doctorMoveDataService.moveGroup(moveId, farm, groupEventOutId);
         watch.stop();
         int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
         log.warn("move group end, cost {} minutes", minute);
@@ -306,7 +334,7 @@ public class DoctorMoveDataController {
         doctorMoveDataService.updateBuruTrack(farm);
         log.warn("updateBuruSowTrack end");
 
-        // TODO: 17/5/8 暂时改为迁移后手动刷新报表
+        // TODO: 17/5/8 暂时改为迁移后刷新报表
 //        //首页统计
 //        movePigTypeStatistic(farm);
 //
@@ -438,7 +466,7 @@ public class DoctorMoveDataController {
         try {
             DoctorFarm farm = doctorFarmDao.findById(farmId);
             log.warn("move pig start, moveId:{}", moveId);
-            doctorMoveDataService.movePig(moveId, farm);
+            doctorMoveDataService.movePig(moveId, farm, Lists.newArrayList());
             log.warn("move pig end");
             return true;
         } catch (Exception e) {
@@ -460,7 +488,7 @@ public class DoctorMoveDataController {
         try {
             DoctorFarm farm = doctorFarmDao.findById(farmId);
             log.warn("move group start, moveId:{}", moveId);
-            doctorMoveDataService.moveGroup(moveId, farm);
+            doctorMoveDataService.moveGroup(moveId, farm, Lists.newArrayList());
             log.warn("move group end");
             return true;
         } catch (Exception e) {

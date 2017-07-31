@@ -608,4 +608,31 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<DoctorPigEvent> findEffectMatingCountByPigIdForAsc(Long pigId) {
         return sqlSession.selectList(sqlId("findEffectMatingCountByPigIdForAsc"), pigId);
     }
+
+
+    /**
+     * 将猪场中转场转入事件前的事件置为eventSource=5
+     * @param list 猪场id列表
+     */
+    public void flushChgFarmEventSource(List<Long> list) {
+        sqlSession.update(sqlId("flushChgFarmEventSource"), list);
+    }
+
+    /**
+     * 获取猪场的事件
+     * @param list 猪场id列表
+     * @return 事件列表
+     */
+    public List<DoctorPigEvent> findByFarmIds(List<Long> list){
+        return sqlSession.selectList(sqlId("findByFarmIds"), list);
+    }
+
+    /**
+     * 获取当前母猪未断奶数量
+     * @param pigId 母猪id
+     * @return 未断奶数量
+     */
+    public Integer getSowUnweanCount(Long pigId) {
+        return sqlSession.selectOne(sqlId("getSowUnweanCount"), pigId);
+    }
 }
