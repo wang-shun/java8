@@ -39,6 +39,7 @@ import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.enums.SourceType.UN_MODIFY;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
@@ -70,7 +71,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     @Override
     public final Boolean canModify(DoctorGroupEvent oldGroupEvent) {
-        return Objects.equals(oldGroupEvent.getIsAuto(), IsOrNot.NO.getValue());
+        return Objects.equals(oldGroupEvent.getIsAuto(), IsOrNot.NO.getValue())
+                && !UN_MODIFY.contains(oldGroupEvent.getEventSource());
+
     }
 
     @Override
@@ -119,8 +122,8 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     @Override
     public Boolean canRollback(DoctorGroupEvent deleteGroupEvent) {
         return Objects.equals(deleteGroupEvent.getIsAuto(), IsOrNot.NO.getValue())
-                && Objects.equals(deleteGroupEvent.getEventSource(), SourceType.INPUT.getValue())
-                && rollbackHandleCheck(deleteGroupEvent);
+                && rollbackHandleCheck(deleteGroupEvent)
+                && !UN_MODIFY.contains(deleteGroupEvent.getEventSource());
     }
     
     @Override
