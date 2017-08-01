@@ -1270,6 +1270,6 @@ alter table doctor_range_reports add column `org_id` bigint(20) default null com
 alter table doctor_range_reports modify column `farm_id` bigint(20) default null comment '猪场id' after `id`;
 
 -- 2017-07-18
-alter table doctor_orgs modify column `prarent_id` bigint(20) default null comment '父公司id' after `mobile`;
-alter table doctor_orgs modify column `type` smallint(4) default null comment '公司类型' after `parent_id`;
+alter table doctor_orgs add column `parent_id` bigint(20) default null comment '父公司id' after `mobile`;
+alter table doctor_orgs add column `type` smallint(4) default null comment '公司类型' after `parent_id`;
 
