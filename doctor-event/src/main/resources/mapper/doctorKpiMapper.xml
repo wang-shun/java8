@@ -1062,6 +1062,16 @@
     <!-- 实时存栏: 母猪 -->
     <select id="realTimeLiveStockSow" parameterType="map" resultType="int">
         select
+        (
+        select ifnull(count(1), 0)
+        from doctor_pig_tracks
+        where farm_id = #{farmId}
+        and pig_type = 1
+        and is_removal = 0
+        )
+        -
+        (
+        select
         ifnull(sum(case a.type when 7 then 1 when 20 then 1 else 0 end - case a.type when 2 then 1 when 6 then 1 else 0 end), 0) as count
         from doctor_pig_events a
         left join doctor_pigs b on a.pig_id = b.id
@@ -1070,7 +1080,8 @@
         and a.type in(2, 6, 7, 20)
         and a.status = 1
         and a.event_source != 5
-        and a.event_at &lt;= date_add(date(#{date}), INTERVAL 86399 SECOND)
+        and a.event_at &gt;#{date}
+        )
     </select>
 
     <!-- 实时存栏: 在产房的母猪 -->
