@@ -422,8 +422,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         }
         //配种总数
         dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
-                + dto1.getMateFq() + dto1.getMateFq()
-                + dto1.getMateLc() + dto1.getMateYx());
+                + dto1.getMateFq() + dto1.getMateLc() + dto1.getMateYx());
 
         //妊娠总数
         dto1.setPregCount(dto1.getPregPositive() + dto1.getPregNegative()
