@@ -11,8 +11,8 @@
         AND event_source != 5
         <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
             AND farm_id IN
-            <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
-                #{farmId}
+            <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+                #{fId}
             </foreach>
         </if>
         <if test="farmId != null">AND farm_id = #{farmId}</if>
@@ -453,8 +453,8 @@
         FROM doctor_daily_groups
         WHERE
         farm_id IN
-        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
-            #{farmId}
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+            #{fId}
         </foreach>
         AND sum_at = date_format(#{endAt}, '%Y-%m-%d')
         AND type = 7
@@ -481,8 +481,8 @@
         FROM doctor_daily_groups
         WHERE
         farm_id IN
-        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
-            #{farmId}
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+            #{fId}
         </foreach>
         AND sum_at = date_format(#{endAt}, '%Y-%m-%d')
         AND type = 2
@@ -510,8 +510,8 @@
         FROM doctor_daily_groups
         WHERE
         farm_id IN
-        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
-            #{farmId}
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+            #{fId}
         </foreach>
         AND sum_at = date_format(#{endAt}, '%Y-%m-%d')
         AND type = 2
@@ -638,8 +638,8 @@
         and t1.current_mating_count = 1
         <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
             AND t1.farm_id IN
-            <foreach collection="farmIds" item="farmId" open="(" separator="," close=")" >
-                #{farmId}
+            <foreach collection="farmIds" item="fId" open="(" separator="," close=")" >
+                #{fId}
             </foreach>
         </if>
         <if test="startAt != null">and t1.`event_at` &gt;= DATE_SUB(#{startAt}, INTERVAL 28 DAY)</if>
@@ -685,8 +685,8 @@
         and t1.kind = 1
         <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
             and t1.farm_id IN
-            <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
-                #{farmId}
+            <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+                #{fId}
             </foreach>
         </if>
         <if test="startAt != null">and t1.`event_at` &gt;= DATE_SUB(#{startAt}, INTERVAL 114 DAY)</if>
@@ -733,8 +733,8 @@
         where 1=1
         <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
             AND farm_id IN
-            <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
-                #{farmId}
+            <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+                #{fId}
             </foreach>
         </if>
         limit 1
@@ -757,8 +757,8 @@
         WHERE 1=1
         <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
             AND farm_id IN
-            <foreach collection="farmIds" item="farmId" open="(" separator="," close=")">
-                #{farmId}
+            <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+                #{fId}
             </foreach>
         </if>
         limit 1
@@ -2225,8 +2225,8 @@
         from doctor_material_consume_providers
         where
         farm_id IN
-        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")" >
-            #{farmId}
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")" >
+            #{fId}
         </foreach>
         and event_type = 1
         and type = 1
@@ -2235,8 +2235,8 @@
         from doctor_group_batch_summaries
         where status = -1
         and farm_id IN
-        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")" >
-            #{farmId}
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")" >
+            #{fId}
         </foreach>
         and pig_type = #{type}
         and close_at &gt;= #{startAt}
@@ -2249,8 +2249,8 @@
         from doctor_group_batch_summaries
         where status = -1
         and farm_id IN
-        <foreach collection="farmIds" item="farmId" open="(" separator="," close=")" >
-            #{farmId}
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")" >
+            #{fId}
         </foreach>
         and pig_type = #{type}
         and close_at &gt;= #{startAt}

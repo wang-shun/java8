@@ -333,8 +333,9 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     }
 
     @Override
-    public Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(Long orgId, List<Long> farmIds
-            , Map<Long, String> farmIdToName, String startDate, String endDate) {
+    public Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(Long orgId, List<Long> farmIds,
+                                                                           Map<Long, String> farmIdToName,
+                                                                           String startDate, String endDate) {
         try {
             Date startTime = DateUtil.toDate(startDate);
             Date endTime = DateUtil.toDate(endDate);
@@ -487,9 +488,11 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         }
 
         //销售
-        dto1.setHpSale(dto2.getHpSale());
-        dto1.setCfSale(dto2.getCfSale());
-        dto1.setYfSale(dto2.getYfSale());
+        if (notNull(dto2)) {
+            dto1.setHpSale(dto2.getHpSale());
+            dto1.setCfSale(dto2.getCfSale());
+            dto1.setYfSale(dto2.getYfSale());
+        }
         return dto1;
     }
 
