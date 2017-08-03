@@ -3,7 +3,6 @@ package io.terminus.doctor.event.editHandler.pig;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.enums.SourceType.UN_MODIFY;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.validEventAt;
@@ -72,7 +72,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Override
     public final Boolean canModify(DoctorPigEvent oldPigEvent) {
         return Objects.equals(oldPigEvent.getIsAuto(), IsOrNot.NO.getValue())
-                && !Objects.equals(oldPigEvent.getEventSource(), SourceType.TRANS_FARM.getValue());
+                && !UN_MODIFY.contains(oldPigEvent.getEventSource());
     }
 
     @Override
@@ -117,9 +117,9 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     @Override
     public Boolean canRollback(DoctorPigEvent deletePigEvent) {
-        return  !Objects.equals(deletePigEvent.getEventSource(), SourceType.TRANS_FARM.getValue())
-                && isLastManualEvent(deletePigEvent)
-                && rollbackHandleCheck(deletePigEvent);
+        return  isLastManualEvent(deletePigEvent)
+                && rollbackHandleCheck(deletePigEvent)
+                && !UN_MODIFY.contains(deletePigEvent.getEventSource());
     }
 
     @Override

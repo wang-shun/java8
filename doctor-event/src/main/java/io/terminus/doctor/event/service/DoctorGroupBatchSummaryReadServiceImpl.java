@@ -143,11 +143,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         summary.setInAvgWeight(EventUtil.get2(inAvgWeight));                                         //转入均重(kg)
 
         Double fcrWeight = getFcrDeltaWeight(events, inCount, inAvgWeight);
-        if (fcrFeed == null) {
-            summary.setFcr(0D);              //料肉比(这里只放分母，由上层算出物料的分子，出一下)2
-        } else {
-            summary.setFcr(fcrFeed / fcrWeight);
-        }
+        summary.setFcr(EventUtil.divide(fcrFeed, fcrWeight));
         Double gain = EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, groupTrack.getAvgDayAge() - getFirstMoveInEvent(events)));
         summary.setDailyWeightGain(gain < 0 ? 0 : gain);//日增重(kg)
         setToNurseryOrFatten(summary, events);                                       //阶段转

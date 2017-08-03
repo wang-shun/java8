@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
+
 /**
  * Created by xjn on 17/4/19.
  * 拼窝
@@ -20,6 +23,17 @@ import java.util.Objects;
 public class DoctorModifyPigFosterEventHandler extends DoctorAbstractModifyPigEventHandler {
     @Autowired
     private DoctorModifyPigFosterByEventHandler doctorModifyPigFosterByEventHandler;
+
+    @Override
+    protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        super.modifyHandleCheck(oldPigEvent, inputDto);
+        DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
+        //当前胎次下有断奶事件,不允许编辑分娩的活仔数
+        expectTrue(Objects.equals(fostersDto.getFostersCount(), oldPigEvent.getQuantity())
+                        || isNull(doctorPigEventDao.getWeanEventByParity(oldPigEvent.getPigId(), oldPigEvent.getParity()))
+                , "current.parity.has.wean");
+    }
+
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         DoctorFostersDto oldDto = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorFostersDto.class);

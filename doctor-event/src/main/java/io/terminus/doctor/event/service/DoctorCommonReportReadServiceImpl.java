@@ -455,10 +455,12 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
      * @return 集团报表
      */
     private DoctorCliqueReportDto fillCommonCliqueReport(DoctorCliqueReportDto dto1, DoctorCliqueReportDto dto2, Integer dayDiff) {
+        if (isNull(dto1)) {
+            return new DoctorCliqueReportDto();
+        }
         //配种总数
         dto1.setMateCount(dto1.getMateHb() + dto1.getMateDn()
-                + dto1.getMateFq() + dto1.getMateFq()
-                + dto1.getMateLc() + dto1.getMateYx());
+                + dto1.getMateFq() + dto1.getMateLc() + dto1.getMateYx());
 
         //妊娠总数
         dto1.setPregCount(dto1.getPregPositive() + dto1.getPregNegative()
@@ -487,6 +489,9 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             dto1.setNestAvgWean(get2(dto1.getWeanCount(), dto1.getWeanNest()));
         }
 
+        if (isNull(dto2)) {
+            return dto1;
+        }
         //销售
         if (notNull(dto2)) {
             dto1.setHpSale(dto2.getHpSale());

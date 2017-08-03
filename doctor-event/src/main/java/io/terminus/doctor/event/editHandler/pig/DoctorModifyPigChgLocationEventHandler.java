@@ -126,8 +126,8 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                     .chgLocationChangeCount(-1)
                     .chgLocationType(PigEvent.TO_FARROWING.getKey())
                     .build();
-            matingChangeCount = -1;
-            farrowChangCount = 1;
+            matingChangeCount = 1;
+            farrowChangCount = -1;
             doctorDailyPigDao.updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
                     , 0, 0, 1);
         } else if (Objects.equals(oldPigEvent.getType(), PigEvent.TO_MATING.getKey())) {
@@ -135,8 +135,10 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                     .chgLocationChangeCount(-1)
                     .chgLocationType(PigEvent.TO_MATING.getKey())
                     .build();
-            matingChangeCount = 1;
-            farrowChangCount = -1;
+            matingChangeCount = -1;
+            farrowChangCount = 1;
+            doctorDailyPigDao.updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+                    , 0, -1, 0);
         } else {
             return;
         }
@@ -167,10 +169,8 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                     .build();
             matingChangeCount = 1;
             farrowChangCount = -1;
-            if (Objects.equals(newPigEvent.getPigStatusBefore(), PigStatus.KongHuai.getKey())) {
-                doctorDailyPigDao.updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
-                        , 0, 1, 0);
-            }
+            doctorDailyPigDao.updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
+                    , 0, 1, 0);
         } else {
             return;
         }

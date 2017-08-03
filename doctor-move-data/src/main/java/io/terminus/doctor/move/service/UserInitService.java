@@ -437,20 +437,13 @@ public class UserInitService {
         DoctorFarm farm = doctorFarmDao.findById(farmId);
         String name = member.getLoginName() + "@" + farm.getFarmCode();
 
-        if (member.getMobilPhone().isEmpty()) {
-            member.setMobilPhone(null);
-        }
-        Response<User> result = doctorUserReadService.findBy(member.getMobilPhone(), LoginType.MOBILE);
         Response<User> userResponse = doctorUserReadService.findBy(name, LoginType.NAME);
-        if(result.isSuccess() && result.getResult() != null) {
-            subUser = result.getResult();
-        } else if(userResponse.isSuccess() && userResponse.getResult() != null) {
+        if(userResponse.isSuccess() && userResponse.getResult() != null) {
             subUser = userResponse.getResult();
         } else {
             subUser = new User();
         }
         subUser.setName(name);
-        subUser.setMobile(member.getMobilPhone());
         subUser.setPassword(EncryptUtil.encrypt("123456"));
         subUser.setType(UserType.FARM_SUB.value());
         if (Objects.equals(member.getIsStopUse(), "true")) {
@@ -470,10 +463,6 @@ public class UserInitService {
         log.info("subUser:{}", subUser);
         if(notNull(subUser.getId())) {
             // 设置下子账号的状态和关联猪场
-            PrimaryUser primary = primaryUserDao.findByUserId(subUser.getId());
-            if (notNull(primary)) {
-                primaryUserDao.delete(primary.getId());
-            }
             Sub sub = subDao.findByUserId(subUser.getId());
             if (notNull(sub)) {
                 subDao.delete(sub.getId());
@@ -488,6 +477,7 @@ public class UserInitService {
             }
             SubRole subRole = subRoleDao.findById(roleId);
             sub = new Sub();
+            sub.setFarmId(farmId);
             sub.setUserId(subUser.getId());
             sub.setUserName(subUser.getName());
             sub.setRealName(Params.get(subUser.getExtra(), "realName"));

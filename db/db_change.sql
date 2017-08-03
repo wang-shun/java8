@@ -1272,5 +1272,7 @@ alter table doctor_range_reports modify column `farm_id` bigint(20) default null
 -- 2017-07-18
 alter table doctor_orgs add column `parent_id` bigint(20) default null comment '父公司id' after `mobile`;
 alter table doctor_orgs add column `type` smallint(4) default null comment '公司类型' after `parent_id`;
--- 初始化
 update doctor_orgs set parent_id = 0, type = 1;
+
+-- 2017-07-21
+ALTER table doctor_daily_reports modify column `fatten_feed_amount` bigint(20) DEFAULT NULL COMMENT '育肥猪饲料消耗金额';
