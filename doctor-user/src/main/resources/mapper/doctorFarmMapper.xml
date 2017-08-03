@@ -93,6 +93,15 @@
         WHERE org_id = #{orgId}
     </select>
 
+    <select id="findByOrgIds" parameterType="list" resultMap="DoctorFarmMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE org_id IN
+        <foreach collection="orgIds" item="orgId" open="(" separator="," close=")" >
+            #{orgId}
+        </foreach>
+    </select>
+
     <update id="update" parameterType="DoctorFarm">
         UPDATE
         <include refid="tb"/>

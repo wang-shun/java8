@@ -43,7 +43,7 @@ public interface DoctorFarmReadService {
     Response<List<DoctorFarm>> findAllFarms();
 
     /**
-     * 根据公司id查询猪场信息列表
+     * 根据公司id查询猪场信息列表(子公司)
      * @param orgId 公司id
      * @return 猪场信息列表
      */

@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.api.client.util.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -27,6 +28,7 @@ import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorRangeReportReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorDepartmentReadService;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -79,6 +81,9 @@ public class DoctorReports {
 
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
+
+    @RpcConsumer
+    private DoctorDepartmentReadService doctorDepartmentReadService;
 
     /**
      * 根据farmId和日期查询猪场日报表(缓存方式)
@@ -263,10 +268,19 @@ public class DoctorReports {
      */
     @RequestMapping(value = "/transverse/clique", method = RequestMethod.GET)
     public List<DoctorCliqueReportDto> getTransverseCliqueReport(@RequestParam String farmIds,
+                                                                 @RequestParam Long farmId,
                                                                  @RequestParam String startDate,
                                                                  @RequestParam String endDate) {
         //获取猪场
         List<Long> farmIdList = Splitters.splitToLong(farmIds, Splitters.UNDERSCORE);
+        //获取有权限的猪场id
+        List<Long> permissionFarmIds = RespHelper.or500(doctorFarmReadService.findFarmIdsByUserId(UserUtil.getUserId()));
+
+        farmIdList.retainAll(permissionFarmIds);
+        if (Arguments.isNullOrEmpty(farmIdList)) {
+            return Lists.newArrayList();
+        }
+
         List<DoctorFarm> farmList = RespHelper.or500(doctorFarmReadService.findFarmsByIds(farmIdList));
         Map<Long, String> farmIdToName = farmList.stream()
                 .collect(Collectors.toMap(DoctorFarm::getId, DoctorFarm::getName));
@@ -277,10 +291,11 @@ public class DoctorReports {
             endTime = new Date();
         }
         endDate = DateUtil.toDateString(endTime);
+        Long cliqueId = RespHelper.or500(doctorDepartmentReadService.findClique(farmId, Boolean.TRUE)).getId();
+        List<DoctorFarm> cliqueFarms = RespHelper.or500(doctorDepartmentReadService.findAllFarmsByOrgId(cliqueId));
 
-        //获取有权限的猪场id
-        List<Long> permissionFarmIds = RespHelper.or500(doctorFarmReadService.findFarmIdsByUserId(UserUtil.getUserId()));
-        return RespHelper.or500(doctorCommonReportReadService.getTransverseCliqueReport(permissionFarmIds, farmIdToName, startDate, endDate));
+        return RespHelper.or500(doctorCommonReportReadService.getTransverseCliqueReport(cliqueId
+                , cliqueFarms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), farmIdToName, startDate, endDate));
     }
 
     /**
@@ -292,6 +307,7 @@ public class DoctorReports {
      */
     @RequestMapping(value = "/portrait/clique", method = RequestMethod.GET)
     public List<DoctorCliqueReportDto> getPortraitCliqueReport(@RequestParam(required = false) String farmIds,
+                                                               @RequestParam Long farmId,
                                                                @RequestParam String startDate,
                                                                @RequestParam String endDate) {
         List<Long> farmIdList;
@@ -302,6 +318,9 @@ public class DoctorReports {
         } else {
             farmIdList = Splitters.splitToLong(farmIds, Splitters.UNDERSCORE);
         }
-        return RespHelper.or500(doctorCommonReportReadService.getPortraitCliqueReport(farmIdList, startDate, endDate));
+        Long cliqueId = RespHelper.or500(doctorDepartmentReadService.findClique(farmId, Boolean.TRUE)).getId();
+        List<DoctorFarm> cliqueFarms = RespHelper.or500(doctorDepartmentReadService.findAllFarmsByOrgId(cliqueId));
+        return RespHelper.or500(doctorCommonReportReadService.getPortraitCliqueReport(cliqueId
+                , cliqueFarms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), startDate, endDate));
     }
 }

@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.NumberUtils;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -29,6 +30,7 @@ import io.terminus.doctor.event.model.DoctorGroupChangeSum;
 import io.terminus.doctor.event.model.DoctorGroupStock;
 import io.terminus.doctor.event.model.DoctorParityMonthlyReport;
 import io.terminus.doctor.event.model.DoctorRangeReport;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -45,6 +47,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 猪场报表读服务实现类
@@ -330,7 +333,9 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     }
 
     @Override
-    public Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(List<Long> farmIds, Map<Long, String> farmIdToName, String startDate, String endDate) {
+    public Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(Long orgId, List<Long> farmIds,
+                                                                           Map<Long, String> farmIdToName,
+                                                                           String startDate, String endDate) {
         try {
             Date startTime = DateUtil.toDate(startDate);
             Date endTime = DateUtil.toDate(endDate);
@@ -347,13 +352,21 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             List<DoctorCliqueReportDto> list = farmIdToName.keySet().stream().map(farmId -> {
                 DoctorCliqueReportDto dto1 = doctorDailyReportDao.getTransverseCliqueReport(farmId, startDate, endDate);
                 DoctorCliqueReportDto dto2 = doctorDailyGroupDao.getTransverseCliqueReport(farmId, startDate, endDate);
+
+                //填充数据
                 fillCommonCliqueReport(dto1, dto2, dayDiff);
                 dto1.setFarmName(farmIdToName.get(farmId));
+
+                //填充指标
+                fillCliqueRangeReport(dto1, farmId, null, DateUtil.getYearMonth(startTime));
+
                 return dto1;
             }).collect(Collectors.toList());
 
             //构建集团数据
-            list.add(buildCliqueReport(farmIds, new DateTime(startDate), new DateTime(endDate)));
+            DoctorCliqueReportDto clique = buildCliqueReport(farmIds, new DateTime(startDate), new DateTime(endDate));
+            fillCliqueRangeReport(clique, null, orgId, DateUtil.getYearMonth(startTime));
+            list.add(clique);
 
             return Response.ok(list);
         } catch (Exception e) {
@@ -364,7 +377,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     }
 
     @Override
-    public Response<List<DoctorCliqueReportDto>> getPortraitCliqueReport(List<Long> farmIds, String startDate, String endDate) {
+    public Response<List<DoctorCliqueReportDto>> getPortraitCliqueReport(Long orgId, List<Long> farmIds, String startDate, String endDate) {
         try {
             DateTime startTime = DateTime.parse(startDate, date).withDayOfMonth(1);
             DateTime endTime = DateTime.parse(endDate, date).withDayOfMonth(1);
@@ -377,7 +390,9 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             List<DoctorCliqueReportDto> list = Lists.newArrayList();
             while (!monthStartTime.isAfter(endTime)) {
                 //构建每月数据
-                list.add(buildCliqueReport(farmIds, monthStartTime, monthEndTime));
+                DoctorCliqueReportDto clique = buildCliqueReport(farmIds, monthStartTime, monthEndTime);
+                fillCliqueRangeReport(clique, null, orgId, DateUtil.getYearMonth(monthStartTime.toDate()));
+                list.add(clique);
                 //按月增加
                 monthStartTime = monthStartTime.plusMonths(1);
                 monthEndTime = DateUtil.getMonthEnd(monthStartTime).isAfter(DateTime.now())
@@ -392,8 +407,31 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     }
 
     /**
-     * 构建一个多个猪场某月的报表数据
-     * @param farmIds 猪场id
+     * 填充指标数据(猪场id不为空时填充猪场指标,公司id不为空时统计公司指标)
+     * @param dto 集团报表
+     * @param farmId 猪场id
+     * @param orgId 公司id
+     * @param sumAt 统计时间
+     * @return 集团报表
+     */
+    private DoctorCliqueReportDto fillCliqueRangeReport(DoctorCliqueReportDto dto, Long farmId, Long orgId, String sumAt) {
+        DoctorRangeReport rangeReport;
+        if (notNull(farmId)) {
+            rangeReport = doctorRangeReportDao.findByRangeReport(farmId, ReportRangeType.MONTH.getValue(), sumAt);
+        } else {
+            rangeReport = doctorRangeReportDao.findByOrgIdAndSumAt(orgId, sumAt);
+        }
+
+        BeanMapper.copy(rangeReport, dto);
+        dto.setLiveFarrowRate(EventUtil.minusDouble(1D, rangeReport.getDeadFarrowRate()));
+        dto.setLiveFattenRate(EventUtil.minusDouble(1D, rangeReport.getDeadFattenRate()));
+        dto.setLiveNurseryRate(EventUtil.minusDouble(1D, rangeReport.getDeadNurseryRate()));
+        return dto;
+    }
+
+    /**
+     * 构建一个由多个猪场构成的某月报表数据
+     * @param farmIds 猪场ids
      * @param monthStartTime 月初
      * @param monthEndTime 月末
      * @return 报表数据
@@ -410,11 +448,11 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     }
 
     /**
-     * 填充集团报汇总共有数据
-     * @param dto1
-     * @param dto2
-     * @param dayDiff
-     * @return
+     * 填充集团报汇总公有数据
+     * @param dto1 猪相关
+     * @param dto2 猪群相关
+     * @param dayDiff 天数差
+     * @return 集团报表
      */
     private DoctorCliqueReportDto fillCommonCliqueReport(DoctorCliqueReportDto dto1, DoctorCliqueReportDto dto2, Integer dayDiff) {
         if (isNull(dto1)) {
@@ -455,9 +493,11 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             return dto1;
         }
         //销售
-        dto1.setHpSale(dto2.getHpSale());
-        dto1.setCfSale(dto2.getCfSale());
-        dto1.setYfSale(dto2.getYfSale());
+        if (notNull(dto2)) {
+            dto1.setHpSale(dto2.getHpSale());
+            dto1.setCfSale(dto2.getCfSale());
+            dto1.setYfSale(dto2.getYfSale());
+        }
         return dto1;
     }
 

@@ -7,6 +7,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
+import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.parana.common.utils.RespHelper;
@@ -29,12 +30,15 @@ import java.util.List;
 public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
 
     private final DoctorFarmDao doctorFarmDao;
+    private final DoctorOrgDao doctorOrgDao;
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
     @Autowired
     public DoctorFarmReadServiceImpl(DoctorFarmDao doctorFarmDao,
+                                     DoctorOrgDao doctorOrgDao,
                                      DoctorUserDataPermissionReadService doctorUserDataPermissionReadService){
         this.doctorFarmDao = doctorFarmDao;
+        this.doctorOrgDao = doctorOrgDao;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
     }
 
@@ -102,6 +106,7 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
     @Override
     public Response<List<DoctorFarm>> findFarmsByOrgId(@NotNull(message = "orgId.not.null") Long orgId) {
         try {
+
             return Response.ok(doctorFarmDao.findByOrgId(orgId));
         } catch (Exception e) {
             log.error("find farms by orgId failed, orgId:{}, cause:{}", orgId, Throwables.getStackTraceAsString(e));

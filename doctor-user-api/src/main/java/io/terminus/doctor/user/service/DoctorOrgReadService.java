@@ -1,10 +1,12 @@
 package io.terminus.doctor.user.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.DoctorOrg;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 public interface DoctorOrgReadService {
 
@@ -34,4 +36,29 @@ public interface DoctorOrgReadService {
      * @return 所有公司
      */
     Response<List<DoctorOrg>> findAllOrgs();
+
+    /**
+     * 查询父公司下所有子公司
+     * @param parentId 父公司id
+     * @return 子公司列表
+     */
+    Response<List<DoctorOrg>> findOrgByParentId(Long parentId);
+
+    /**
+     * 根据公司名字模糊搜索公司
+     * @param fuzzyName
+     * @param type 公司类型
+     * @return
+     */
+    Response<List<DoctorOrg>> suggestOrg(String fuzzyName, Integer type);
+
+    /**
+     * 分页查询
+     * @param criteria 查询条件
+     * @param pageSize 分页大小
+     * @param pageNo 页码
+     * @return 分页结果
+     */
+    Response<Paging<DoctorOrg>> paging(Map<String, Object> criteria, Integer pageSize, Integer pageNo);
+
 }
