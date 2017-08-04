@@ -1,8 +1,14 @@
 package io.terminus.doctor.move.service;
 
+import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
+import io.terminus.doctor.basic.model.DoctorChangeReason;
+import io.terminus.doctor.basic.model.DoctorCustomer;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
 import io.terminus.doctor.move.manager.DoctorMoveAndImportManager;
+import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -10,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -42,10 +49,10 @@ public class DoctorMoveAndImportService {
             moveBasic(moveId, doctorFarm);
 
             //3.打包事件依赖基础数据
-            DoctorMoveBasicData moveBasicData = packageMoveBasicData();
+            DoctorMoveBasicData moveBasicData = packageMoveBasicData(doctorFarm);
 
             //4.猪
-            movePig(moveBasicData);
+            movePig(moveId, moveBasicData);
 
             //5.猪群
             moveGroup();
@@ -74,20 +81,42 @@ public class DoctorMoveAndImportService {
         moveBasicService.moveAllBasic(moveId, farm);
     }
 
-    public DoctorMoveBasicData packageMoveBasicData() {
-        // TODO: 17/8/4
-        return null;
+    public DoctorMoveBasicData packageMoveBasicData(DoctorFarm farm) {
+        Map<String, DoctorBarn> barnMap = moveBasicService.getBarnMap(farm.getId());
+        Map<Integer, Map<String, DoctorBasic>> basicMap = moveBasicService.getBasicMap();
+        Map<String, Long> subMap = moveBasicService.getSubMap(farm.getOrgId());
+        Map<String, DoctorChangeReason> changeReasonMap = moveBasicService.getReasonMap();
+        Map<String, DoctorCustomer> customerMap = moveBasicService.getCustomerMap(farm.getId());
+        Map<String, DoctorBasicMaterial> vaccMap = moveBasicService.getVaccMap();
+
+        return new DoctorMoveBasicData(farm, barnMap, basicMap, subMap, changeReasonMap, customerMap, vaccMap);
     }
 
-    public void movePig(DoctorMoveBasicData moveBasicData) {
+    public void movePig(Long moveId, DoctorMoveBasicData moveBasicData) {
+
+//        //获取所有猪事件的原始数据
+//        List<View_EventListBoar> boarRawEventList = moveAndImportManager
+//                .getAllRawBoarEvent(moveId, moveBasicData.getDoctorFarm());
+//
+//        //按猪维度分组
+//        Map<String, List<View_EventListBoar>> boarOutIdToRawEventMap = boarRawEventList.stream()
+//                .collect(Collectors.groupingBy(View_EventListBoar::getPigCode));
+//
+//        //循环执行事件
+//        boarOutIdToRawEventMap.entrySet().parallelStream().forEach(entry ->
+//                moveAndImportManager.executePigEvent(moveBasicData, entry.getValue()));
 
         //获取所有猪事件的原始数据
+        List<View_EventListSow> sowRawEventList = moveAndImportManager
+                .getAllRawSowEvent(moveId, moveBasicData.getDoctorFarm());
 
         //按猪维度分组
+        Map<String, List<View_EventListSow>> sowOutIdToRawEventMap = sowRawEventList.stream()
+                .collect(Collectors.groupingBy(View_EventListSow::getPigCode));
 
         //循环执行事件
-        // TODO: 17/8/4 调用 moveAndImportManager
-
+        sowOutIdToRawEventMap.entrySet().parallelStream().forEach(entry ->
+            moveAndImportManager.executePigEvent(moveBasicData, entry.getValue()));
     }
 
     public void moveGroup() {
