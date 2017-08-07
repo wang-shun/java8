@@ -306,6 +306,7 @@ public class DoctorPigEventExports {
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
+                dto.setMatingDate(doctorPigEventDetail.getEventAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingMating error: {}", Throwables.getStackTraceAsString(e));
