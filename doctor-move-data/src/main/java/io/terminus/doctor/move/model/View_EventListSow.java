@@ -9,9 +9,8 @@ import java.util.Date;
  * Created by chenzenghui on 16/7/27.
  */
 @Data
-public class View_EventListSow implements Serializable {
+public class View_EventListSow extends View_EventListPig implements Serializable {
     private static final long serialVersionUID = 8185298029467518284L;
-    private String eventName;       // 转换事件的名称, 以适应新版的事件
     private String sowOutId;
     private String farmOutId;
     private String pigCode;

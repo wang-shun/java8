@@ -9,7 +9,7 @@ import java.util.Date;
  * Created by chenzenghui on 16/7/27.
  */
 @Data
-public class View_EventListBoar implements Serializable {
+public class View_EventListBoar extends View_EventListPig implements Serializable {
     private static final long serialVersionUID = 5918176765258406604L;
     private String farmOutId;
     private String groupOutId;
@@ -27,7 +27,6 @@ public class View_EventListBoar implements Serializable {
     private String genetic;
     private String eventOutId;
     private Date eventAt;
-    private String eventName;       // 事件名称 转换成枚举里需要的值
     private String eventDesc;
     private String remark;          // 采精的remark和event的remark
     private String barnOutId;       // 事件发生猪舍outId

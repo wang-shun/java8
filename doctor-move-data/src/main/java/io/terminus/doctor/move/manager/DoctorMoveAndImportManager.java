@@ -5,12 +5,15 @@ import com.google.common.collect.Lists;
 import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
+import io.terminus.doctor.move.builder.DoctorPigEventInputBuilder;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.model.View_EventListBoar;
+import io.terminus.doctor.move.model.View_EventListPig;
 import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_SowCardList;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -19,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -37,15 +41,19 @@ public class DoctorMoveAndImportManager {
     public DoctorGroupManager groupManager;
     @Autowired
     public DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
+    @Autowired
+    private Map<String, DoctorPigEventInputBuilder> pigEventBuilderMap;
 
-    public void executePigEvent(DoctorMoveBasicData moveBasicData, List<View_EventListSow> rowEventList) {
+    public void executePigEvent(DoctorMoveBasicData moveBasicData, List<? extends View_EventListPig> rawEventList) {
         DoctorBasicInputInfoDto basicInputInfoDto = buildBasicInputInfo(moveBasicData);
-        rowEventList.forEach(rowEvent -> {
+        rawEventList.forEach(rawPigEvent -> {
+
             //1.构建事件所需数据
-            // TODO: 17/8/4 策略模式(最繁琐依据不同事件执行不同逻辑)
+            DoctorPigEventInputBuilder pigEventInputBuilder = pigEventBuilderMap.get(rawPigEvent.getEventName());
+            BasePigEventInputDto pigEventInputDto = pigEventInputBuilder.buildPigEventInput(moveBasicData, rawPigEvent);
 
             //2.执行事件
-            // TODO: 17/8/4 调用 pigEventManager
+            pigEventManager.eventHandle(pigEventInputDto, basicInputInfoDto);
         });
     }
 

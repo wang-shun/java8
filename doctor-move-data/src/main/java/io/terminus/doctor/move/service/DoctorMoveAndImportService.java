@@ -94,18 +94,6 @@ public class DoctorMoveAndImportService {
 
     public void movePig(Long moveId, DoctorMoveBasicData moveBasicData) {
 
-//        //获取所有猪事件的原始数据
-//        List<View_EventListBoar> boarRawEventList = moveAndImportManager
-//                .getAllRawBoarEvent(moveId, moveBasicData.getDoctorFarm());
-//
-//        //按猪维度分组
-//        Map<String, List<View_EventListBoar>> boarOutIdToRawEventMap = boarRawEventList.stream()
-//                .collect(Collectors.groupingBy(View_EventListBoar::getPigCode));
-//
-//        //循环执行事件
-//        boarOutIdToRawEventMap.entrySet().parallelStream().forEach(entry ->
-//                moveAndImportManager.executePigEvent(moveBasicData, entry.getValue()));
-
         //获取所有猪事件的原始数据
         List<View_EventListSow> sowRawEventList = moveAndImportManager
                 .getAllRawSowEvent(moveId, moveBasicData.getDoctorFarm());
