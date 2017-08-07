@@ -1,17 +1,24 @@
 package io.terminus.doctor.move;
 
+import com.google.common.collect.Maps;
 import io.terminus.doctor.basic.DoctorBasicConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.DoctorEventConfiguration;
+import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.move.builder.pig.DoctorChgLocationInputBuilder;
+import io.terminus.doctor.move.builder.pig.DoctorEntryInputBuilder;
+import io.terminus.doctor.move.builder.pig.DoctorFarrowInputBuilder;
+import io.terminus.doctor.move.builder.pig.DoctorMateInputBuilder;
+import io.terminus.doctor.move.builder.pig.DoctorPigEventInputBuilder;
+import io.terminus.doctor.move.builder.pig.DoctorPigLetsChgInputBuilder;
+import io.terminus.doctor.move.builder.pig.DoctorPigWeanInputBuilder;
+import io.terminus.doctor.move.builder.pig.DoctorPregCheckInputBuilder;
+import io.terminus.doctor.move.builder.pig.DoctorRemoveInputBuilder;
 import io.terminus.doctor.move.sql.DoctorSqlFactory;
-import io.terminus.doctor.user.DoctorUserConfiguration;
 import io.terminus.parana.article.impl.ArticleAutoConfig;
 import io.terminus.parana.file.FileAutoConfig;
 import io.terminus.parana.user.ExtraUserAutoConfig;
 import io.terminus.parana.user.UserAutoConfig;
-import io.terminus.zookeeper.pubsub.Publisher;
-import io.terminus.zookeeper.pubsub.Subscriber;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -23,6 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Desc: 单例模式启动 move-data 配置
@@ -50,5 +58,26 @@ public class DoctorMoveDataConfiguation extends WebMvcConfigurerAdapter {
         } catch (Exception e) {
             return new DoctorSqlFactory(null);
         }
+    }
+
+    @Bean
+    public Map<String, DoctorPigEventInputBuilder> getPigEvenInputBuilderMap(DoctorChgLocationInputBuilder chgLocationInputBuilder,
+                                                                         DoctorEntryInputBuilder entryInputBuilder,
+                                                                         DoctorFarrowInputBuilder farrowInputBuilder,
+                                                                         DoctorMateInputBuilder mateInputBuilder,
+                                                                         DoctorPigLetsChgInputBuilder pigLetsChgInputBuilder,
+                                                                         DoctorPigWeanInputBuilder pigWeanInputBuilder,
+                                                                         DoctorPregCheckInputBuilder pregCheckInputBuilder,
+                                                                         DoctorRemoveInputBuilder removeInputBuilder) {
+        Map<String, DoctorPigEventInputBuilder> pigEventInputBuilderMap = Maps.newHashMap();
+        pigEventInputBuilderMap.put(PigEvent.CHG_LOCATION.getName(), chgLocationInputBuilder);
+        pigEventInputBuilderMap.put(PigEvent.ENTRY.getName(), entryInputBuilder);
+        pigEventInputBuilderMap.put(PigEvent.FARROWING.getName(), farrowInputBuilder);
+        pigEventInputBuilderMap.put(PigEvent.MATING.getName(), mateInputBuilder);
+        pigEventInputBuilderMap.put(PigEvent.PIGLETS_CHG.getName(), pigLetsChgInputBuilder);
+        pigEventInputBuilderMap.put(PigEvent.WEAN.getName(), pigWeanInputBuilder);
+        pigEventInputBuilderMap.put(PigEvent.PREG_CHECK.getName(), pregCheckInputBuilder);
+        pigEventInputBuilderMap.put(PigEvent.REMOVAL.getName(), removeInputBuilder);
+        return pigEventInputBuilderMap;
     }
 }

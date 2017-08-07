@@ -1,5 +1,6 @@
 package io.terminus.doctor.move.service;
 
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
@@ -8,7 +9,6 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
 import io.terminus.doctor.move.manager.DoctorMoveAndImportManager;
-import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -72,39 +72,50 @@ public class DoctorMoveAndImportService {
     }
 
     public List<DoctorFarm> moveFarmAndUser(Long moveId, Sheet sheet) {
-        List<DoctorFarmWithMobile> farmWithMobileList = userInitService.init(null, null, moveId, sheet);
-        return farmWithMobileList.stream().map(DoctorFarmWithMobile::getDoctorFarm)
-                .collect(Collectors.toList());
+        log.info("move farm and user starting");
+        try {
+            List<DoctorFarmWithMobile> farmWithMobileList = userInitService.init(null, null, moveId, sheet);
+            return farmWithMobileList.stream().map(DoctorFarmWithMobile::getDoctorFarm)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new JsonResponseException("farm");
+        }
     }
 
     public void moveBasic(Long moveId, DoctorFarm farm) {
-        moveBasicService.moveAllBasic(moveId, farm);
+        log.info("move basic staring");
+        try {
+            moveBasicService.moveAllBasic(moveId, farm);
+        } catch (Exception e) {
+            throw new JsonResponseException("basic");
+        }
     }
 
     public DoctorMoveBasicData packageMoveBasicData(DoctorFarm farm) {
-        Map<String, DoctorBarn> barnMap = moveBasicService.getBarnMap(farm.getId());
-        Map<Integer, Map<String, DoctorBasic>> basicMap = moveBasicService.getBasicMap();
-        Map<String, Long> subMap = moveBasicService.getSubMap(farm.getOrgId());
-        Map<String, DoctorChangeReason> changeReasonMap = moveBasicService.getReasonMap();
-        Map<String, DoctorCustomer> customerMap = moveBasicService.getCustomerMap(farm.getId());
-        Map<String, DoctorBasicMaterial> vaccMap = moveBasicService.getVaccMap();
+        log.info("package move basic data starting");
+        try {
+            Map<String, DoctorBarn> barnMap = moveBasicService.getBarnMap(farm.getId());
+            Map<Integer, Map<String, DoctorBasic>> basicMap = moveBasicService.getBasicMap();
+            Map<String, Long> subMap = moveBasicService.getSubMap(farm.getOrgId());
+            Map<String, DoctorChangeReason> changeReasonMap = moveBasicService.getReasonMap();
+            Map<String, DoctorCustomer> customerMap = moveBasicService.getCustomerMap(farm.getId());
+            Map<String, DoctorBasicMaterial> vaccMap = moveBasicService.getVaccMap();
 
-        return new DoctorMoveBasicData(farm, barnMap, basicMap, subMap, changeReasonMap, customerMap, vaccMap);
+            return DoctorMoveBasicData.builder().barnMap(barnMap).basicMap(basicMap).subMap(subMap)
+                    .changeReasonMap(changeReasonMap).customerMap(customerMap).vaccMap(vaccMap)
+                    .build();
+        } catch (Exception e) {
+            throw new JsonResponseException("package");
+        }
     }
 
     public void movePig(Long moveId, DoctorMoveBasicData moveBasicData) {
-
-        //获取所有猪事件的原始数据
-        List<View_EventListSow> sowRawEventList = moveAndImportManager
-                .getAllRawSowEvent(moveId, moveBasicData.getDoctorFarm());
-
-        //按猪维度分组
-        Map<String, List<View_EventListSow>> sowOutIdToRawEventMap = sowRawEventList.stream()
-                .collect(Collectors.groupingBy(View_EventListSow::getPigCode));
-
-        //循环执行事件
-        sowOutIdToRawEventMap.entrySet().parallelStream().forEach(entry ->
-            moveAndImportManager.executePigEvent(moveBasicData, entry.getValue()));
+        log.info("move pig starting");
+        try {
+            moveAndImportManager.movePig(moveId, moveBasicData);
+        } catch (Exception e) {
+            throw new JsonResponseException("pig");
+        }
     }
 
     public void moveGroup() {

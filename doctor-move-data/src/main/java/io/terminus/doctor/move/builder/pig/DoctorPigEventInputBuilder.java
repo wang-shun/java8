@@ -1,4 +1,4 @@
-package io.terminus.doctor.move.builder;
+package io.terminus.doctor.move.builder.pig;
 
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
@@ -10,6 +10,6 @@ import io.terminus.doctor.move.model.View_EventListPig;
  */
 public interface DoctorPigEventInputBuilder {
 
-    BasePigEventInputDto buildPigEventInput(DoctorMoveBasicData moveBasicData,
-                                            View_EventListPig pigRawEvent);
+    BasePigEventInputDto buildPigEventInputFromMove(DoctorMoveBasicData moveBasicData,
+                                                    View_EventListPig pigRawEvent);
 }

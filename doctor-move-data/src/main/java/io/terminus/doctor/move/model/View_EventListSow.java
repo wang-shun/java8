@@ -13,7 +13,6 @@ public class View_EventListSow extends View_EventListPig implements Serializable
     private static final long serialVersionUID = 8185298029467518284L;
     private String sowOutId;
     private String farmOutId;
-    private String pigCode;
     private String pigFatherCode;
     private String pigMotherCode;
     private Integer source;
@@ -28,10 +27,7 @@ public class View_EventListSow extends View_EventListPig implements Serializable
     private String breed;
     private String genetic;
     private String eventOutId;
-    private Date eventAt;
-    private String eventDesc;       // 事件描述
     private String remark;          // 事件备注
-    private String barnOutId;       // 事件发生猪舍
     private Long price;             // 单价(分)
     private Long amount;            // 总额(分)
     private String boarCode;        // 配种事件的公猪code
@@ -56,7 +52,6 @@ public class View_EventListSow extends View_EventListPig implements Serializable
     private String chgReason;       // 转舍/拼窝/离场/妊娠检查/被拼窝/断奶/仔猪变动/分娩 复用字段, 真他妈屌啊!
     private String customer;        // 分娩事件要用到
     private String nurseSow;        // 拼窝/分娩 复用字段
-    private String toBarnOutId;     // 进场/转舍/分娩/被拼窝/断奶 复用事件 一般是outId或猪舍名称(分娩)
     private String disease;         // 防疫(疫苗名称)/仔猪变动/分娩/断奶/疾病(TB_FieldValue的ColID) 复用字段
     private String treatment;       // 防疫(防疫结果)/拼窝/被拼窝/转舍 复用字段
     private Integer netInCount;
