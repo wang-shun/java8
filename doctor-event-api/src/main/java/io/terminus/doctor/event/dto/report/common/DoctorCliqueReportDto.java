@@ -163,6 +163,16 @@ public class DoctorCliqueReportDto implements Serializable{
     private Double farrowWeight;
 
     /**
+     * 估算配种分娩率
+     */
+    private Double mateEstimateFarrowingRate;
+
+    /**
+     * 实际配种分娩率
+     */
+    private Double mateRealFarrowingRate;
+
+    /**
      * 断奶窝数
      */
     private Integer weanNest;

@@ -20,6 +20,10 @@ public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
         return sqlSession.selectList(sqlId("findByOrgId"), orgId);
     }
 
+    public List<DoctorFarm> findByOrgIds(List<Long> orgIds){
+        return sqlSession.selectList(sqlId("findByOrgIds"), orgIds);
+    }
+
     public List<DoctorFarm> findAll() {
         return sqlSession.selectList(sqlId("findAll"));
     }

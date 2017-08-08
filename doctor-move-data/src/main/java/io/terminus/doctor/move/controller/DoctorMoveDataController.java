@@ -37,7 +37,9 @@ import io.terminus.doctor.move.service.WareHouseInitService;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
@@ -63,8 +65,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 
 /**
  * Desc: 迁移数据总控入口
@@ -99,6 +100,8 @@ public class DoctorMoveDataController {
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorDailyGroupWriteService doctorDailyGroupWriteService;
     private final DoctorRangeReportWriteService doctorRangeReportWriteService;
+    private final DoctorOrgReadService doctorOrgReadService;
+
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
                                     WareHouseInitService wareHouseInitService,
@@ -119,7 +122,8 @@ public class DoctorMoveDataController {
                                     DoctorEditGroupEventService doctorEditGroupEventService,
                                     DoctorGroupReadService doctorGroupReadService,
                                     DoctorDailyGroupWriteService doctorDailyGroupWriteService,
-                                    DoctorRangeReportWriteService doctorRangeReportWriteService) {
+                                    DoctorRangeReportWriteService doctorRangeReportWriteService,
+                                    DoctorOrgReadService doctorOrgReadService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -140,6 +144,7 @@ public class DoctorMoveDataController {
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorDailyGroupWriteService = doctorDailyGroupWriteService;
         this.doctorRangeReportWriteService = doctorRangeReportWriteService;
+        this.doctorOrgReadService = doctorOrgReadService;
     }
 
     /**
@@ -670,11 +675,36 @@ public class DoctorMoveDataController {
     }
 
     /**
+     * 刷新公司指标数据
+     * @param orgId 公司id
+     * @param since 开始月份 yyyy-MM
+     * @return
+     */
+    @RequestMapping(value = "/monthly/org/since", method = RequestMethod.GET)
+    public Boolean flushOrgRangeReport(@RequestParam(required = false) Long orgId,
+                                       @RequestParam String since) {
+        log.info("flush org range report stating, orgId:{}, since:{}", orgId, since);
+        List<Long> orgList;
+        if (isNull(orgId)) {
+            orgList = RespHelper.or500(doctorOrgReadService.findAllOrgs()).stream().map(DoctorOrg::getId)
+                    .collect(Collectors.toList());
+        } else {
+            orgList = RespHelper.or500(doctorOrgReadService.findOrgByParentId(orgId))
+                    .stream().map(DoctorOrg::getId).collect(Collectors.toList());
+            orgList.add(orgId);
+        }
+        doctorMoveReportService.moveDoctorOrgRangeReport(orgList, DateUtil.toYYYYMM(since));
+        log.info("lush org range report end");
+        return Boolean.TRUE;
+    }
+
+
+    /**
      * 月报
      */
     @RequestMapping(value = "/monthly/date", method = RequestMethod.GET)
     public Boolean moveDoctorRangeReportOnlyOne(@RequestParam("farmId") Long farmId,
-                                     @RequestParam("date") String date) {
+                                                @RequestParam("date") String date) {
         try {
             log.warn("move monthly report date start, farmId:{}, date:{}", farmId, date);
             doctorMoveReportService.moveDoctorRangeReport(farmId, DateUtil.toDate(date));
