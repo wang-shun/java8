@@ -2325,10 +2325,10 @@
         (
         select ifnull(sum(
         case when type = 7 then 1 else 0 end +
-        case when type = 20 and pig_status_before = 5 then 1 else 0 end +
-        case when barn_type in(5,6) and pig_status_before != 5 and pig_status_after = 5 then 1 else 0 end +
-        case when type = 12 then 1 else 0 end -
-        case when barn_type in(5,6) and pig_status_before in (1,5) and pig_status_after != 5 then 1 else 0 end
+        case when type = 12 then 1 else 0 end +
+        case when type = 20 and barn_type in(5,6) and pig_status_before in (1,5,9) then 1 else 0 end +
+        case when type = 11 and pig_status_before != 5 and pig_status_after = 5 then 1 else 0 end -
+        case when barn_type in(5,6) and pig_status_before in (1,5,9) and pig_status_after not in(1,5,9) then 1 else 0 end
         )
         ,0)
         from doctor_pig_events
