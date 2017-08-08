@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
@@ -72,9 +73,13 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         }
         //3.特殊处理
         specialHandle(executeEvent, toTrack);
+
         //4.创建镜像
-//        createPigSnapshot(toTrack, executeEvent, 0L);
-        updateDailyForNew(executeEvent);
+        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())
+                && Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
+            updateDailyForNew(executeEvent);
+        }
+
         //5.记录发生的事件信息
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(executeEvent.getOrgId())

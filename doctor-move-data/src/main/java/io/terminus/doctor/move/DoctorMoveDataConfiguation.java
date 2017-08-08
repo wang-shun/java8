@@ -10,6 +10,7 @@ import io.terminus.doctor.move.builder.pig.DoctorEntryInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorFarrowInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorMateInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorPigEventInputBuilder;
+import io.terminus.doctor.move.builder.pig.DoctorPigEventInputBuilders;
 import io.terminus.doctor.move.builder.pig.DoctorPigLetsChgInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorPigWeanInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorPregCheckInputBuilder;
@@ -61,14 +62,14 @@ public class DoctorMoveDataConfiguation extends WebMvcConfigurerAdapter {
     }
 
     @Bean
-    public Map<String, DoctorPigEventInputBuilder> getPigEvenInputBuilderMap(DoctorChgLocationInputBuilder chgLocationInputBuilder,
-                                                                         DoctorEntryInputBuilder entryInputBuilder,
-                                                                         DoctorFarrowInputBuilder farrowInputBuilder,
-                                                                         DoctorMateInputBuilder mateInputBuilder,
-                                                                         DoctorPigLetsChgInputBuilder pigLetsChgInputBuilder,
-                                                                         DoctorPigWeanInputBuilder pigWeanInputBuilder,
-                                                                         DoctorPregCheckInputBuilder pregCheckInputBuilder,
-                                                                         DoctorRemoveInputBuilder removeInputBuilder) {
+    public DoctorPigEventInputBuilders getPigEvenInputBuilderMap(DoctorChgLocationInputBuilder chgLocationInputBuilder,
+                                                                 DoctorEntryInputBuilder entryInputBuilder,
+                                                                 DoctorFarrowInputBuilder farrowInputBuilder,
+                                                                 DoctorMateInputBuilder mateInputBuilder,
+                                                                 DoctorPigLetsChgInputBuilder pigLetsChgInputBuilder,
+                                                                 DoctorPigWeanInputBuilder pigWeanInputBuilder,
+                                                                 DoctorPregCheckInputBuilder pregCheckInputBuilder,
+                                                                 DoctorRemoveInputBuilder removeInputBuilder) {
         Map<String, DoctorPigEventInputBuilder> pigEventInputBuilderMap = Maps.newHashMap();
         pigEventInputBuilderMap.put(PigEvent.CHG_LOCATION.getName(), chgLocationInputBuilder);
         pigEventInputBuilderMap.put(PigEvent.ENTRY.getName(), entryInputBuilder);
@@ -78,6 +79,6 @@ public class DoctorMoveDataConfiguation extends WebMvcConfigurerAdapter {
         pigEventInputBuilderMap.put(PigEvent.WEAN.getName(), pigWeanInputBuilder);
         pigEventInputBuilderMap.put(PigEvent.PREG_CHECK.getName(), pregCheckInputBuilder);
         pigEventInputBuilderMap.put(PigEvent.REMOVAL.getName(), removeInputBuilder);
-        return pigEventInputBuilderMap;
+        return new DoctorPigEventInputBuilders(pigEventInputBuilderMap);
     }
 }
