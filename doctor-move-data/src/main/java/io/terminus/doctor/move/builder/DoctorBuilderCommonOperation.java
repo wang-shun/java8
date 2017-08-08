@@ -1,5 +1,6 @@
 package io.terminus.doctor.move.builder;
 
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -39,6 +40,7 @@ public class DoctorBuilderCommonOperation {
         inputDto.setEventName(pigEvent.getName());
         inputDto.setEventDesc(pigEvent.getDesc());
         inputDto.setEventType(pigEvent.getKey());
+        inputDto.setEventSource(SourceType.MOVE.getValue());
 
         //猪
         if (!Objects.equals(pigEvent.getKey(), PigEvent.ENTRY.getKey())) {

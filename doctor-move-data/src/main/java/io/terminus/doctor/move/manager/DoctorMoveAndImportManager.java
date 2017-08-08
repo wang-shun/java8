@@ -2,6 +2,7 @@ package io.terminus.doctor.move.manager;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -12,6 +13,7 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.move.builder.group.DoctorGroupEventInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorPigEventInputBuilder;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
@@ -57,15 +59,29 @@ public class DoctorMoveAndImportManager {
     private DoctorPigEventDao doctorPigEventDao;
 
     public void movePig(Long moveId, DoctorMoveBasicData moveBasicData) {
+
         //获取所有猪事件的原始数据
         List<View_EventListSow> sowRawEventList = getAllRawSowEvent(moveId, moveBasicData.getDoctorFarm());
+        List<View_EventListBoar> boarRawEventList = getAllRawBoarEvent(moveId, moveBasicData.getDoctorFarm());
 
         //按猪维度分组
         Map<String, List<View_EventListSow>> sowOutIdToRawEventMap = sowRawEventList.stream()
                 .collect(Collectors.groupingBy(View_EventListSow::getPigCode));
+        Map<String, List<View_EventListBoar>> boarOutIdToRawEventMap = boarRawEventList.stream()
+                .collect(Collectors.groupingBy(View_EventListBoar::getPigCode));
 
         //循环执行事件
         try {
+            rollbackPig(moveBasicData.getDoctorFarm().getId());
+
+            boarOutIdToRawEventMap.entrySet().parallelStream().forEach(entry ->
+                    executePigEventFromMove(moveBasicData, entry.getValue()));
+
+            Map<String, DoctorPig> boarMap = Maps.newHashMap();
+            doctorPigDao.findPigsByFarmIdAndPigType(moveBasicData.getDoctorFarm().getId(), DoctorPig.PigSex.BOAR.getKey())
+                    .forEach(boar -> boarMap.put(boar.getPigCode(), boar));
+            moveBasicData.setBoarMap(boarMap);
+
             sowOutIdToRawEventMap.entrySet().parallelStream().forEach(entry ->
                     executePigEventFromMove(moveBasicData, entry.getValue()));
         } catch (Exception e) {

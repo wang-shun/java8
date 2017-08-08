@@ -112,7 +112,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         doctorEventInfoList.add(doctorEventInfo);
 
         //8.触发事件
-        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
+        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())
+                && Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
             triggerEvent(doctorEventInfoList, executeEvent, toTrack);
         }
     }
@@ -142,7 +143,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .operatorName(StringUtils.hasText(inputDto.getOperatorName()) ? inputDto.getOperatorName() : basic.getStaffName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .isAuto(MoreObjects.firstNonNull(inputDto.getIsAuto(), IsOrNot.NO.getValue()))
-                .status(EventStatus.VALID.getValue()).eventSource(SourceType.INPUT.getValue()).isModify(IsOrNot.NO.getValue())
+                .status(EventStatus.VALID.getValue()).eventSource(inputDto.getEventSource()).isModify(IsOrNot.NO.getValue())
                 .npd(0).dpnpd(0).pfnpd(0).plnpd(0).psnpd(0).pynpd(0).ptnpd(0).jpnpd(0)
                 .build();
         doctorPigEvent.setRemark(inputDto.changeRemark());

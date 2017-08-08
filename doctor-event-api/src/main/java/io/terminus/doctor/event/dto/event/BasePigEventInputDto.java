@@ -63,6 +63,12 @@ public abstract class BasePigEventInputDto implements Serializable{
     private String eventDesc;
 
     /**
+     * 事件来源
+     * @see io.terminus.doctor.common.enums.SourceType
+     */
+    private Integer eventSource;
+
+    /**
      * 对事件的描述, 由一系列键值对组成, 只需要子类实现返回 Map 即可
      * @return
      */
