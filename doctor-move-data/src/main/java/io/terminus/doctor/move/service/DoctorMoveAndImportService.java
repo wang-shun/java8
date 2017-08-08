@@ -102,7 +102,7 @@ public class DoctorMoveAndImportService {
             Map<String, DoctorCustomer> customerMap = moveBasicService.getCustomerMap(farm.getId());
             Map<String, DoctorBasicMaterial> vaccMap = moveBasicService.getVaccMap();
 
-            return DoctorMoveBasicData.builder().barnMap(barnMap).basicMap(basicMap).subMap(subMap)
+            return DoctorMoveBasicData.builder().doctorFarm(farm).barnMap(barnMap).basicMap(basicMap).subMap(subMap)
                     .changeReasonMap(changeReasonMap).customerMap(customerMap).vaccMap(vaccMap)
                     .build();
         } catch (Exception e) {

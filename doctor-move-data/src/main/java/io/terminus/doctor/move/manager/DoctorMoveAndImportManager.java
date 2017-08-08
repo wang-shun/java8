@@ -95,6 +95,7 @@ public class DoctorMoveAndImportManager {
     }
 
     private void executePigEventFromMove(DoctorMoveBasicData moveBasicData, List<? extends View_EventListPig> rawEventList) {
+        log.info("execute pig event from move starting, rawEventList:{}", rawEventList);
         DoctorBasicInputInfoDto basicInputInfoDto = buildBasicInputInfo(moveBasicData);
         rawEventList.forEach(rawPigEvent -> {
 
