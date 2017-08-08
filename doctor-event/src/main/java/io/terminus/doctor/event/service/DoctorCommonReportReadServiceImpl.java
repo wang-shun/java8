@@ -256,6 +256,9 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         doctorCommonReportDto.setDate(report.getSumAt());
         DoctorDailyReportSum dailyReportSum = doctorDailyReportDao.findDailyReportSum(farmId, startAt, endAt);
         DoctorGroupChangeSum groupChangeSum = doctorDailyGroupDao.getGroupChangeSum(farmId, startAt, endAt);
+        if (isNull(groupChangeSum)) {
+            groupChangeSum = new DoctorGroupChangeSum();
+        }
 
         doctorCommonReportDto.setChangeReport(dailyReportSum);
         doctorCommonReportDto.setGroupChangeReport(groupChangeSum);
