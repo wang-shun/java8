@@ -2327,7 +2327,7 @@
         case when type = 7 then 1 else 0 end +
         case when type = 20 and pig_status_before = 5 then 1 else 0 end +
         case when barn_type in(5,6) and pig_status_before != 5 and pig_status_after = 5 then 1 else 0 end +
-        case when type = 12 and pig_status_after = 5 then 1 else 0 end -
+        case when type = 12 then 1 else 0 end -
         case when barn_type in(5,6) and pig_status_before in (1,5) and pig_status_after != 5 then 1 else 0 end
         )
         ,0)
