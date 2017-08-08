@@ -175,7 +175,7 @@ public class DoctorMoveAndImportManager {
 
     private DoctorPigEventInputBuilder getPigBuilder(String eventName) {
         return checkNotNull(pigEventBuilderMap.get(eventName),
-                "");
+                "eventName:" + eventName);
     }
 
     private DoctorGroupEventInputBuilder getGroupBuilder() {
