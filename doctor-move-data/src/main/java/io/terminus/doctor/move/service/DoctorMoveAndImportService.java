@@ -1,6 +1,5 @@
 package io.terminus.doctor.move.service;
 
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
@@ -78,7 +77,8 @@ public class DoctorMoveAndImportService {
             return farmWithMobileList.stream().map(DoctorFarmWithMobile::getDoctorFarm)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new JsonResponseException("farm");
+            log.error("move farm and user error");
+            throw e;
         }
     }
 
@@ -87,7 +87,8 @@ public class DoctorMoveAndImportService {
         try {
             moveBasicService.moveAllBasic(moveId, farm);
         } catch (Exception e) {
-            throw new JsonResponseException("basic");
+            log.error("move basic error -- farm:{}", farm);
+            throw e;
         }
     }
 
@@ -105,7 +106,8 @@ public class DoctorMoveAndImportService {
                     .changeReasonMap(changeReasonMap).customerMap(customerMap).vaccMap(vaccMap)
                     .build();
         } catch (Exception e) {
-            throw new JsonResponseException("package");
+            log.error("package move basic data error -- farm:{}", farm);
+            throw e;
         }
     }
 
@@ -114,7 +116,8 @@ public class DoctorMoveAndImportService {
         try {
             moveAndImportManager.movePig(moveId, moveBasicData);
         } catch (Exception e) {
-            throw new JsonResponseException("pig");
+            log.error("move pig error");
+            throw e;
         }
     }
 
