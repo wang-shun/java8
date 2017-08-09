@@ -889,7 +889,7 @@ public class DoctorMoveDataService {
                                        Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap,
                                        Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
                                        Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap, List<String> groupEventOutId) {
-        DoctorPig sow = sowMap.get(event.getSowOutId());
+        DoctorPig sow = sowMap.get(event.getPigOutId());
         if (sow == null) {
             return null;
         }

@@ -130,6 +130,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
                 .remark(dto.getEntryMark())
                 .creatorId(basic.getStaffId())
                 .creatorName(basic.getStaffName())
+                .outId(dto.getPigOutId())
                 .build();
         if (Objects.equals(dto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
             // add sow pig info

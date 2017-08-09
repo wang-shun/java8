@@ -18,6 +18,8 @@ public class View_EventListPig {
 
     private String pigCode;
 
+    private String pigOutId;
+
     /**
      * 事件名称 转换成枚举里需要的值
      * @see io.terminus.doctor.event.enums.PigEvent
