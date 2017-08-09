@@ -130,7 +130,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
 
         event.setExtraMap(moveIn);
-        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 

@@ -91,7 +91,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         setSaleEvent(event, change, group.getPigType());
 
         event.setExtraMap(change);
-        event.setEventSource(SourceType.INPUT.getValue());
         doctorGroupEventDao.create(event);
         
 

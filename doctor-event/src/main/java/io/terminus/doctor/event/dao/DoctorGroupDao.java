@@ -108,7 +108,8 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
      * @return
      */
     public List<DoctorGroup> findByFarmIdAndDate(Long farmId, Date date) {
-        return getSqlSession().selectList(sqlId("findByFarmIdAndDate"), ImmutableMap.of("farmId", farmId, "openAt", Dates.endOfDay(date), "colseAt", Dates.startOfDay(date)));
+        return getSqlSession().selectList(sqlId("findByFarmIdAndDate"), ImmutableMap.of("farmId", farmId, "openAt"
+                , Dates.endOfDay(date), "colseAt", Dates.startOfDay(date)));
     }
 
     /**
@@ -131,5 +132,15 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
     public List<DoctorGroup> findByFarmIdAndPigTypeAndStatus(Long farmId, Integer pigType, Integer status) {
         return getSqlSession().selectList(sqlId("findByFarmIdAndPigTypeAndStatus"), ImmutableMap.of("farmId"
                 , farmId, "pigType", pigType, "status", status));
+    }
+
+    /**
+     * 根据猪场id和外部id查询猪群
+     * @param farmId 猪场id
+     * @param outId 外部id
+     * @return 猪群
+     */
+    public DoctorGroup findByFarmAndOutId(Long farmId, String outId) {
+        return getSqlSession().selectOne(sqlId("findByFarmAndOutId"), ImmutableMap.of("farmId", farmId, "outId", outId));
     }
 }

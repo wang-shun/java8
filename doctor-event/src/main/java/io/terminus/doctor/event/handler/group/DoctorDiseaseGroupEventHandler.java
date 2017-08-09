@@ -53,7 +53,6 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         event.setBasicName(disease.getDiseaseName());
         event.setQuantity(disease.getQuantity());
         event.setExtraMap(disease);
-        event.setEventSource(SourceType.INPUT.getValue());
         event.setOperatorId(disease.getDoctorId());
         event.setOperatorName(disease.getDoctorName());
         return event;

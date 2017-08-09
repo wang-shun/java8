@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.Arguments;
-import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -51,7 +50,6 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         event.setQuantity(weanInput.getPartWeanPigletsCount());
         event.setAvgWeight(weanInput.getPartWeanAvgWeight());
         event.setExtraMap(weanInput);
-        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 

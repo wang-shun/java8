@@ -104,7 +104,6 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
         event.setExtraMap(transGroup);
-        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 

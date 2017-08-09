@@ -2,7 +2,6 @@ package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -83,7 +82,6 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
         event.setExtraMap(transFarm);
-        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 

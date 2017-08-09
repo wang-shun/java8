@@ -77,7 +77,6 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         event.setAvgWeight(turnSeed.getWeight());
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
-        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 
