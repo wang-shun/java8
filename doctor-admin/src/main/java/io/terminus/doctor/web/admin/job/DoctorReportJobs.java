@@ -128,7 +128,7 @@ public class DoctorReportJobs {
             }
             log.info("range report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
             List<Long> farmIds = getAllFarmIds();
-            Date today = Dates.startOfDay(DateTime.now().minusYears(1).toDate());
+            Date today = Dates.startOfDay(new Date());
             doctorRangeReportWriteService.generateDoctorRangeReports(farmIds, today);
             log.info("range report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
