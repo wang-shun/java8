@@ -299,7 +299,7 @@ public class PhoenixCrmReports {
         BufferedReader reader = null;
         HttpURLConnection urlConnection = null;
         try {
-            String url = "http://"+ domain + "/api/queryShopItemSaleOpen";
+            String url = "https://"+ domain + "/api/queryShopItemSaleOpen";
             return HttpRequest.get(url).body();
         } catch (Exception e) {
             log.error("get.shop.item.sale.failed, cause:{}", Throwables.getStackTraceAsString(e));
