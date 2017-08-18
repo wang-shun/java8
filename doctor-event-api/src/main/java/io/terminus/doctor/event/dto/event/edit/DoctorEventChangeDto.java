@@ -57,6 +57,12 @@ public class DoctorEventChangeDto {
      */
 
     private Integer entryCountChange;
+
+    /**
+     * 进场来源。1.普通进场、2.后备猪进场(更新报表参数)
+     */
+    private Integer entrySource;
+
     /**
      * 新进场来源
      */
@@ -371,5 +377,10 @@ public class DoctorEventChangeDto {
      * 猪群事件是否由母猪触发
      */
     private Boolean isSowTrigger;
+
+    /**
+     * 是否是分娩转入
+     */
+    private Boolean isFarrowIn;
 
 }

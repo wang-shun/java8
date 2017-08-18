@@ -6,7 +6,6 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.user.dao.*;
 import io.terminus.doctor.user.model.*;
-import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.auth.UserRoleLoader;
 import io.terminus.parana.user.impl.dao.UserDao;
@@ -69,7 +68,6 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
             forPrimary(user, roleBuilder);
             forSub(user, roleBuilder);
             forPigScore(user, roleBuilder);
-
             Set<String> originRoles = new HashSet<>();
             if (user.getRoles() != null) {
                 originRoles.addAll(user.getRoles());
@@ -116,19 +114,6 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
         mutableRoles.add("PRIMARY(OWNER)");
     }
 
-    protected void forSub(User user, Collection<String> mutableRoles) {
-        if (user == null || !isSub(user.getType())) {
-            return;
-        }
-        mutableRoles.add("SUB");
-        Sub sub = subDao.findByUserId(user.getId());
-        if (sub != null) {
-            if (sub.isActive() && sub.getRoleId() != null) {
-                mutableRoles.add(String.format("SUB(SUB(%s))", sub.getRoleId()));
-            }
-        }
-    }
-
     protected void forPigScore(User user, Collection<String> mutableRoles){
         if (user == null) {
             return;
@@ -150,9 +135,23 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
         if(farmId == null|| orgId == null){
             return;
         }
-        PigScoreApply apply = pigScoreApplyDao.findByFarmIdAndUserId(orgId, farmId, user.getId());
+        PigScoreApply apply = pigScoreApplyDao.findByOrgAndFarmId(orgId, farmId);
         if (apply != null && apply.getStatus() == 1) {
             mutableRoles.add("PIGSCORE");
+        }
+    }
+
+
+    protected void forSub(User user, Collection<String> mutableRoles) {
+        if (user == null || !isSub(user.getType())) {
+            return;
+        }
+        mutableRoles.add("SUB");
+        Sub sub = subDao.findByUserId(user.getId());
+        if (sub != null) {
+            if (sub.isActive() && sub.getRoleId() != null) {
+                mutableRoles.add(String.format("SUB(SUB(%s))", sub.getRoleId()));
+            }
         }
     }
 

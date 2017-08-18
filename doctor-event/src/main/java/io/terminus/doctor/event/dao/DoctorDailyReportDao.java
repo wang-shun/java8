@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dto.report.common.DoctorCliqueReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorDailyReportSum;
 import org.springframework.stereotype.Repository;
@@ -54,7 +55,7 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
     }
 
     /**
-     * 更新日期之后每日母猪存栏
+     * 更新日期(包括更新日期)之后每日母猪存栏
      * @param farmId 猪群id
      * @param sumAt 日期
      * @param liveChangeCount 存栏变动数量
@@ -63,17 +64,59 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
      *
      */
     public void updateDailySowPigLiveStock(Long farmId, Date sumAt, Integer liveChangeCount, Integer phChangeCount, Integer cfChangeCount) {
-        getSqlSession().update(sqlId("updateDailySowPigLiveStock"),
-                MapBuilder.of().put("farmId", farmId).put("sumAt", DateUtil.toDateString(sumAt)).put("liveChangeCount", liveChangeCount).put("phChangeCount", phChangeCount).put("cfChangeCount", cfChangeCount).map());
+        getSqlSession().update(sqlId("updateDailySowPigLiveStock"), MapBuilder.of().put("farmId", farmId)
+                .put("sumAt", DateUtil.toDateString(sumAt)).put("liveChangeCount", liveChangeCount)
+                .put("phChangeCount", phChangeCount).put("cfChangeCount", cfChangeCount).map());
     }
 
     /**
-     * 更新日期之后每日公猪存栏
+     * 更新日期(包括更新日期)之后每日公猪存栏
      * @param farmId 猪群id
      * @param sumAt 日期
      * @param changeCount 变动数量
      */
     public void updateDailyBoarPigLiveStock(Long farmId, Date sumAt, Integer changeCount) {
-        getSqlSession().update(sqlId("updateDailyBoarPigLiveStock"), ImmutableMap.of("farmId", farmId, "sumAt", DateUtil.toDateString(sumAt), "changeCount", changeCount));
+        getSqlSession().update(sqlId("updateDailyBoarPigLiveStock"), ImmutableMap.of("farmId"
+                , farmId, "sumAt", DateUtil.toDateString(sumAt), "changeCount", changeCount));
+    }
+
+
+    /**
+     * 更新日期(包括更新日期)之后配怀舍个状态母猪数
+     * @param farmId 猪场id
+     * @param sumAt 日期
+     * @param phMatingChangeCount 配种母猪变化量
+     * @param phKonghuaiChangeCount 空怀母猪变化量
+     * @param phPregnantChangeCount 怀孕母猪变化量
+     */
+    public void updateDailyPhStatusLiveStock(Long farmId, Date sumAt, Integer phMatingChangeCount
+            , Integer phKonghuaiChangeCount, Integer phPregnantChangeCount) {
+         getSqlSession().update(sqlId("updateDailyPhStatusLiveStock"), ImmutableMap.of("farmId"
+                , farmId, "sumAt", DateUtil.toDateString(sumAt), "phMatingChangeCount", phMatingChangeCount
+                , "phKonghuaiChangeCount", phKonghuaiChangeCount, "phPregnantChangeCount", phPregnantChangeCount));
+    }
+
+    /**
+     * 获取一个猪场的横向报表
+     * @param farmId 猪场id
+     * @param startDate 开始日期 yyyy-MM-dd
+     * @param endDate 结束时间 yyyy-MM-dd
+     * @return 横向报表
+     */
+    public DoctorCliqueReportDto getTransverseCliqueReport(Long farmId, String startDate, String endDate) {
+        return getSqlSession().selectOne(sqlId("getTransverseCliqueReport")
+                , ImmutableMap.of("farmId", farmId, "startDate", startDate, "endDate", endDate));
+    }
+
+    /**
+     * 获取一个月的纵向报表
+     * @param farmIds 猪场id列表
+     * @param startDate 开始日期 yyyy-MM-dd
+     * @param endDate 结束时间 yyyy-MM-dd
+     * @return 纵向报表
+     */
+    public DoctorCliqueReportDto getPortraitCliqueReport(List<Long> farmIds, String startDate, String endDate) {
+        return getSqlSession().selectOne(sqlId("getPortraitCliqueReport")
+                , ImmutableMap.of("farmIds", farmIds, "startDate", startDate, "endDate", endDate));
     }
 }

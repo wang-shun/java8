@@ -170,6 +170,14 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <select id="list" parameterType="map" resultMap="DoctorGroupMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+
     <select id="fingByStatus" parameterType="int" resultMap="DoctorGroupMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
@@ -318,5 +326,13 @@
         FROM <include refid="tb"/>
         WHERE status = 1
         GROUP BY farm_id
+    </select>
+    <select id="findByFarmIdAndPigTypeAndStatus" parameterType="map" resultMap="DoctorGroupMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE
+        farm_id = #{farmId}
+        AND pig_type = #{pigType}
+        AND status = #{status}
     </select>
 </mapper>

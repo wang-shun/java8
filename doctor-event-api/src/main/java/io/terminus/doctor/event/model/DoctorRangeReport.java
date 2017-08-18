@@ -23,6 +23,11 @@ public class DoctorRangeReport extends DoctorIndicatorReport implements Serializ
      * 猪场id
      */
     private Long farmId;
+
+    /**
+     * 公司id
+     */
+    private Long orgId;
     
     /**
      * 类型

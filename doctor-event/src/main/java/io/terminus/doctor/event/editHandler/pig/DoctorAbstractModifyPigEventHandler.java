@@ -2,7 +2,8 @@ package io.terminus.doctor.event.editHandler.pig;
 
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.enums.SourceType;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
@@ -16,6 +17,7 @@ import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
@@ -25,10 +27,12 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.enums.SourceType.UN_MODIFY;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.validEventAt;
@@ -68,7 +72,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Override
     public final Boolean canModify(DoctorPigEvent oldPigEvent) {
         return Objects.equals(oldPigEvent.getIsAuto(), IsOrNot.NO.getValue())
-                && !Objects.equals(oldPigEvent.getEventSource(), SourceType.TRANS_FARM.getValue());
+                && !UN_MODIFY.contains(oldPigEvent.getEventSource());
     }
 
     @Override
@@ -113,9 +117,9 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     @Override
     public Boolean canRollback(DoctorPigEvent deletePigEvent) {
-        return  !Objects.equals(deletePigEvent.getEventSource(), SourceType.TRANS_FARM.getValue())
-                && isLastManualEvent(deletePigEvent)
-                && rollbackHandleCheck(deletePigEvent);
+        return  isLastManualEvent(deletePigEvent)
+                && rollbackHandleCheck(deletePigEvent)
+                && !UN_MODIFY.contains(deletePigEvent.getEventSource());
     }
 
     @Override
@@ -171,16 +175,20 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      */
     protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         //编辑的事件的时间校验
-        DoctorPigEvent lastEvent;
+        DoctorPigEvent downEvent;
+        DoctorPigEvent upEvent = null;
         if (IGNORE_EVENT.contains(oldPigEvent.getType())) {
-            lastEvent = doctorPigEventDao.queryLastEnter(oldPigEvent.getPigId());
+            downEvent = doctorPigEventDao.queryLastEnter(oldPigEvent.getPigId());
         } else if (Objects.equals(oldPigEvent.getType(), PigEvent.REMOVAL.getKey())) {
-            lastEvent = doctorPigEventDao.getLastEventBeforeRemove(oldPigEvent.getPigId(), oldPigEvent.getId());
+            downEvent = doctorPigEventDao.getLastEventBeforeRemove(oldPigEvent.getPigId(), oldPigEvent.getId());
         } else {
-            lastEvent = doctorPigEventDao.getLastStatusEventBeforeEventAtExcludeId(
+            downEvent = doctorPigEventDao.getLastStatusEventBeforeEventAtExcludeId(
+                    oldPigEvent.getPigId(), oldPigEvent.getEventAt(), oldPigEvent.getId());
+            upEvent = doctorPigEventDao.getLastStatusEventAfterEventAtExcludeId(
                     oldPigEvent.getPigId(), oldPigEvent.getEventAt(), oldPigEvent.getId());
         }
-        validEventAt(inputDto.eventAt(), notNull(lastEvent) ? lastEvent.getEventAt() : null);
+        validEventAt(inputDto.eventAt(), notNull(downEvent) ? downEvent.getEventAt() : null
+                , notNull(upEvent) ? upEvent.getEventAt() : new Date());
     }
 
     @Override
@@ -384,5 +392,37 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         }
         DoctorPigEvent lastEvent = doctorPigEventDao.findLastManualEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
         return notNull(lastEvent) && Objects.equals(pigEvent.getId(), lastEvent.getId());
+    }
+
+    /**
+     * 更新配怀舍各种状态母猪的数量
+     * @param pigEvent 猪事件事件
+     * @param count 变化数量
+     */
+    public void updatePhSowStatusCount(DoctorPigEvent pigEvent, int count, Integer pigStatus) {
+        if (!PigType.MATING_TYPES.contains(pigEvent.getBarnType())) {
+            return;
+        }
+        int konghuai = 0;
+        int mating = 0;
+        int pregnant = 0;
+        PigStatus beforeStatus = PigStatus.from(pigStatus);
+        Checks.expectNotNull(beforeStatus, "event.before.status.is.null", pigEvent.getId());
+        switch (beforeStatus) {
+            case KongHuai:
+            case Entry:
+                konghuai = count;
+                break;
+            case Mate:
+                mating = count;
+                break;
+            case Pregnancy:
+                pregnant = count;
+                break;
+            default:
+                break;
+        }
+        doctorDailyPigDao.updateDailyPhStatusLiveStock(pigEvent.getFarmId(), pigEvent.getEventAt()
+                , mating, konghuai, pregnant);
     }
 }

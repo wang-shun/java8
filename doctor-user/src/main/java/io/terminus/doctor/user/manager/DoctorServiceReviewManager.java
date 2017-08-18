@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
@@ -20,7 +21,6 @@ import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
-import io.terminus.parana.auth.model.PermissionData;
 import io.terminus.parana.user.address.service.AddressReadService;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.model.User;
@@ -198,11 +198,13 @@ public class DoctorServiceReviewManager {
         //查询并保存permission
         DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
         if(permission != null){
-            permission.getFarmIdsList().forEach(oldFarmId -> {
-                if (!newFarmIds.contains(oldFarmId)) {
-                    doctorFarmDao.delete(oldFarmId);
-                }
-            });
+            if (!Arguments.isNullOrEmpty(permission.getFarmIdsList())) {
+                permission.getFarmIdsList().forEach(oldFarmId -> {
+                    if (!newFarmIds.contains(oldFarmId)) {
+                        doctorFarmDao.delete(oldFarmId);
+                    }
+                });
+            }
             permission.setFarmIds(newFarmIdStr);
             permission.setUpdatorId(user.getId());
             permission.setUpdatorName(user.getName());

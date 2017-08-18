@@ -120,6 +120,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         // 来源和前往都是 1 和 7 时, 仔猪也要跟着转群
         if(PigType.FARROW_TYPES.contains(fromBarn.getPigType())
                 && PigType.FARROW_TYPES.contains(toBarn.getPigType())
+                && Objects.equals(toTrack.getStatus(), PigStatus.FEED.getKey())
                 && toTrack.getGroupId() != null){
             Long groupId = pigletTrans(doctorEventInfoList, executeEvent, toTrack, chgLocationDto, toBarn);
 

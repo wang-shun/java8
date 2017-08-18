@@ -160,4 +160,13 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
         return getSqlSession().update(sqlId("updateCurrentBarnName"),
                 ImmutableMap.of("currentBarnId", currentBarnId, "currentBarnName", currentBarnName)) == 1;
     }
+
+    /**
+     * 获取猪的当前状态
+     * @param list 猪ids
+     * @return 返回的track中只包含pigId 和 status 字段
+     */
+    public List<DoctorPigTrack> queryCurrentStatus(List<Long> list) {
+        return getSqlSession().selectList(sqlId("queryCurrentStatus"), list);
+    }
 }

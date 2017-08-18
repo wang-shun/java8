@@ -2,6 +2,8 @@ package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -75,6 +78,38 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
         } catch (Exception e) {
             log.error("find all orgs failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("org.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorOrg>> findOrgByParentId(Long parentId) {
+        try {
+            return Response.ok(doctorOrgDao.findOrgByParentId(parentId));
+        } catch (Exception e) {
+            log.error("find org by parentId failed, parentId:{}, cause:{}", parentId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.org.by.parentId.failed");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorOrg>> suggestOrg(String fuzzyName, Integer type) {
+        try {
+            return Response.ok(doctorOrgDao.findByFuzzyName(fuzzyName, type));
+        } catch (Exception e) {
+            log.error("suggest org failed, fuzzyName:{}, type:{}, cause:{}"
+                    , fuzzyName, type, Throwables.getStackTraceAsString(e));
+            return Response.fail("suggest.org.failed");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorOrg>> paging(Map<String, Object> criteria, Integer pageSize, Integer pageNo) {
+        try {
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            return Response.ok(doctorOrgDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
+        } catch (Exception e) {
+         log.error("paging org failed, doctorOrg:{}, cause:{}", criteria, Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.org.failed");
         }
     }
 }

@@ -9,6 +9,12 @@
     <sql id="criteria">
         AND status = 1
         AND event_source != 5
+        <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
+            AND farm_id IN
+            <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+                #{fId}
+            </foreach>
+        </if>
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
         <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
@@ -431,136 +437,86 @@
     <!-- 死淘情况: 产房死淘率 -->
     <select id="getDeadFarrowRate" parameterType="map" resultType="double">
         SELECT
-        ifnull(a.dead_count / case (b.trans_in_count + c.farrow_count) when 0 then 1 else (b.trans_in_count + c.farrow_count)
-        end, 0)
-        FROM
         (
         SELECT
-        ifnull(farm_id, #{farmId}) as farm_id,
-        ifnull(sum(quantity),0) AS dead_count
+        ifnull(sum(quantity),0) -- 死淘数
         FROM doctor_group_events
         WHERE
         change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
         pig_type = 7 -- 产房仔猪
         <include refid="criteria"/>
-        ) AS a
-        LEFT JOIN
+        )
+        /
         (
         SELECT
-        ifnull(farm_id, #{farmId}) as farm_id,
-        ifnull(sum(quantity),0) AS trans_in_count
-        FROM doctor_group_events
-        WHERE
-        pig_type = 7 AND -- 产房仔猪
-        type = 2 AND -- 转入猪群事件
-        trans_group_type != 0 -- 排除掉内转
-        <include refid="criteria"/>
-        ) AS b
-        ON a.farm_id = b.farm_id
-        LEFT JOIN
-        (
-        SELECT
-        ifnull(farm_id, #{farmId}) as farm_id,
-        ifnull(sum(`end`), 0) as farrow_count -- 当天产房仔猪存栏
+        case when sum(`end`) is null or sum(end) = 0 then 1 else sum(`end`) end as farrow_count -- 当天产房仔猪存栏
         FROM doctor_daily_groups
         WHERE
-        farm_id = #{farmId} AND
-        sum_at = date_format(#{endAt}, '%Y-%m-%d') AND
-        type = 7
-        group by farm_id
-        ) AS c
-        ON a.farm_id = c.farm_id
-        limit 1
+        farm_id IN
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+            #{fId}
+        </foreach>
+        AND sum_at = date_format(#{endAt}, '%Y-%m-%d')
+        AND type = 7
+        )
+        FROM dual
     </select>
 
     <!-- 死淘情况: 保育死淘率 -->
     <select id="getDeadNurseryRate" parameterType="map" resultType="double">
         SELECT
-        ifnull(a.dead_count / case (b.trans_in_count + c.nursery_count) when 0 then 1 else (b.trans_in_count + c.nursery_count)
-        end, 0)
-        FROM
         (
         SELECT
-        ifnull(farm_id, #{farmId}) as farm_id,
-        ifnull(sum(quantity),0) AS dead_count
+        ifnull(sum(quantity),0) -- 死淘数
         FROM doctor_group_events
         WHERE
         change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
         pig_type = 2 -- 保育猪
         <include refid="criteria"/>
-        ) AS a
-        LEFT JOIN
+        )
+        /
         (
         SELECT
-        ifnull(farm_id, #{farmId}) as farm_id,
-        ifnull(sum(quantity),0) AS trans_in_count
-        FROM doctor_group_events
-        WHERE
-        pig_type = 2 AND -- 保育猪
-        type = 2 AND -- 转入猪群事件
-        trans_group_type != 0 -- 排除掉内转
-        <include refid="criteria"/>
-        ) AS b
-        ON a.farm_id = b.farm_id
-        LEFT JOIN
-        (
-        SELECT
-        ifnull(farm_id, #{farmId}) as farm_id,
-        ifnull(sum(`end`), 0) as nursery_count -- 当天保育存栏
+        case when sum(`end`) is null or sum(end) = 0 then 1 else sum(`end`) end as farrow_count -- 当天产房仔猪存栏
         FROM doctor_daily_groups
         WHERE
-        farm_id = #{farmId} AND
-        sum_at = date_format(#{endAt}, '%Y-%m-%d') AND
-        type = 2
-        group by farm_id
-        ) AS c
-        ON a.farm_id = c.farm_id
-        limit 1
+        farm_id IN
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+            #{fId}
+        </foreach>
+        AND sum_at = date_format(#{endAt}, '%Y-%m-%d')
+        AND type = 2
+        )
+        FROM dual
+
     </select>
 
     <!-- 死淘情况: 育肥死淘率 -->
     <select id="getDeadFattenRate" parameterType="map" resultType="double">
         SELECT
-        ifnull( a.dead_count / case (b.trans_in_count + c.fatten_count) when 0 then 1 else (b.trans_in_count + c.fatten_count)
-        end, 0)
-        FROM
         (
         SELECT
-        ifnull(farm_id, #{farmId}) as farm_id,
-        ifnull(sum(quantity),0) AS dead_count
+        ifnull(sum(quantity),0) -- 死淘数
         FROM doctor_group_events
         WHERE
         change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-        pig_type = 3 -- 育肥猪
+        pig_type = 2 -- 保育猪
         <include refid="criteria"/>
-        ) AS a
-        LEFT JOIN
+        )
+        /
         (
         SELECT
-        ifnull(farm_id, #{farmId}) as farm_id,
-        ifnull(sum(quantity),0) AS trans_in_count
-        FROM doctor_group_events
-        WHERE
-        pig_type = 3 AND -- 育肥猪
-        type = 2 AND -- 转入猪群事件
-        trans_group_type != 0 -- 排除掉内转
-        <include refid="criteria"/>
-        ) AS b
-        ON a.farm_id = b.farm_id
-        LEFT JOIN
-        (
-        SELECT
-        ifnull(farm_id, #{farmId}) as farm_id,
-        ifnull(sum(`end`), 0) as fatten_count -- 当天育肥存栏
+        case when sum(`end`) is null or sum(end) = 0 then 1 else sum(`end`) end as farrow_count -- 当天产房仔猪存栏
         FROM doctor_daily_groups
         WHERE
-        farm_id = #{farmId} AND
-        sum_at = date_format(#{endAt}, '%Y-%m-%d') AND
-        type = 3
-        group by farm_id
-        ) AS c
-        ON a.farm_id = c.farm_id
-        limit 1
+        farm_id IN
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+            #{fId}
+        </foreach>
+        AND sum_at = date_format(#{endAt}, '%Y-%m-%d')
+        AND type = 2
+        )
+        FROM dual
     </select>
 
     <!-- 配后备-->
@@ -680,7 +636,12 @@
         and t1.`type` = 9
         and t1.kind = 1
         and t1.current_mating_count = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
+            AND t1.farm_id IN
+            <foreach collection="farmIds" item="fId" open="(" separator="," close=")" >
+                #{fId}
+            </foreach>
+        </if>
         <if test="startAt != null">and t1.`event_at` &gt;= DATE_SUB(#{startAt}, INTERVAL 28 DAY)</if>
         <if test="endAt != null">and t1.`event_at` &lt;= DATE_SUB(#{endAt}, INTERVAL 28 DAY)</if>
         ) from dual
@@ -722,7 +683,12 @@
         where t1.status = 1
         and t1.`type` = 9
         and t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
+            and t1.farm_id IN
+            <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+                #{fId}
+            </foreach>
+        </if>
         <if test="startAt != null">and t1.`event_at` &gt;= DATE_SUB(#{startAt}, INTERVAL 114 DAY)</if>
         <if test="endAt != null">and t1.`event_at` &lt;= DATE_SUB(#{endAt}, INTERVAL 114 DAY)</if>
         and t1.current_mating_count = 1
@@ -758,18 +724,21 @@
         where kind = 1
         <include refid="criteria" />
         ) /
-        (
+        ifnull((
         select
         case sum(sow_end)/(case count(1) when 0 then 1 else count(1) end)
         when 0 then 1
         else sum(sow_end)/(case count(1) when 0 then 1 else count(1) end) end
         from doctor_daily_reports
         where 1=1
-        <if test="farmId != null">and farm_id = #{farmId}</if>
-        <if test="startAt != null">and sum_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and sum_at &lt;= #{endAt}</if>
+        <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
+            AND farm_id IN
+            <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+                #{fId}
+            </foreach>
+        </if>
         limit 1
-        ) * 12 from dual
+        ) * 12, 1) from dual
     </select>
 
     <!-- PSY -->
@@ -781,16 +750,19 @@
         WHERE kind = 1
         <include refid="criteria" />
         ) /
-        (
+        ifnull((
         SELECT CASE sum(sow_end)/(CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
         WHEN 0 THEN 1 ELSE sum(sow_end)/(CASE count(1) WHEN 0 THEN 1 ELSE count(1) END) END
         FROM doctor_daily_reports
         WHERE 1=1
-        <if test="farmId != null">and farm_id = #{farmId}</if>
-        <if test="startAt != null">and sum_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and sum_at &lt;= #{endAt}</if>
+        <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
+            AND farm_id IN
+            <foreach collection="farmIds" item="fId" open="(" separator="," close=")">
+                #{fId}
+            </foreach>
+        </if>
         limit 1
-        ) * 12
+        ) * 12, 1)
         FROM dual)) / (CASE (
         (SELECT ifnull(sum(preg_days), 0) / (CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
         FROM doctor_pig_events
@@ -1062,6 +1034,16 @@
     <!-- 实时存栏: 母猪 -->
     <select id="realTimeLiveStockSow" parameterType="map" resultType="int">
         select
+        (
+        select ifnull(count(1), 0)
+        from doctor_pig_tracks
+        where farm_id = #{farmId}
+        and pig_type = 1
+        and is_removal = 0
+        )
+        -
+        (
+        select
         ifnull(sum(case a.type when 7 then 1 when 20 then 1 else 0 end - case a.type when 2 then 1 when 6 then 1 else 0 end), 0) as count
         from doctor_pig_events a
         left join doctor_pigs b on a.pig_id = b.id
@@ -1070,7 +1052,8 @@
         and a.type in(2, 6, 7, 20)
         and a.status = 1
         and a.event_source != 5
-        and a.event_at &lt;= date_add(date(#{date}), INTERVAL 86399 SECOND)
+        and a.event_at &gt;#{date}
+        )
     </select>
 
     <!-- 实时存栏: 在产房的母猪 -->
@@ -1924,6 +1907,25 @@
         <include refid="groupCriteria"/>
     </select>
 
+    <select id="getGroupFarrowIn" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 2
+        and rel_pig_event_id is not null
+        <include refid="groupCriteria"/>
+    </select>
+
+    <select id="getGroupDayWeanCount" parameterType="map" resultType="int">
+        select
+        ifnull(sum(quantity), 0)
+        from doctor_group_events
+        where
+        type = 11
+        <include refid="groupCriteria"/>
+    </select>
+
     <select id="getGroupOuterIn" parameterType="map" resultType="int">
         select
         ifnull(sum(quantity), 0)
@@ -2232,14 +2234,21 @@
     <select id="getFeedConsume" parameterType="map" resultType="double">
         select sum(event_count)
         from doctor_material_consume_providers
-        where farm_id = #{farmId}
+        where
+        farm_id IN
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")" >
+            #{fId}
+        </foreach>
         and event_type = 1
         and type = 1
         and group_id in
         ( select group_id
         from doctor_group_batch_summaries
         where status = -1
-        and farm_id = #{farmId}
+        and farm_id IN
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")" >
+            #{fId}
+        </foreach>
         and pig_type = #{type}
         and close_at &gt;= #{startAt}
         and close_at &lt;= #{endAt}
@@ -2250,9 +2259,133 @@
         select sum(daily_weight_gain * ((UNIX_TIMESTAMP(close_at) - UNIX_TIMESTAMP(open_at)))/ 86400)
         from doctor_group_batch_summaries
         where status = -1
-        and farm_id = #{farmId}
+        and farm_id IN
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")" >
+            #{fId}
+        </foreach>
         and pig_type = #{type}
         and close_at &gt;= #{startAt}
         and close_at &lt;= #{endAt}
     </select>
+
+    <select id="getSowMatingCount" parameterType="map" resultType="int" >
+        select
+        (
+        select count(1)
+        from doctor_pig_tracks
+        where status = 3
+        and farm_id = #{farmId}
+        and current_barn_type in(5,6)
+        )
+        -
+        (
+        select ifnull(sum(
+        case when type = 20 and pig_status_before = 3 then 1 else 0 end +
+        case when type = 9 and current_mating_count =1 then 1 else 0 end -
+        case when type in (2,6,11) and pig_status_before = 3 then 1 else 0 end)
+        ,0)
+        from doctor_pig_events
+        where event_at &gt; #{startAt}
+        and farm_id = #{farmId}
+        and type in(2, 6, 9, 11)
+        and barn_type in(5,6)
+        and status =1
+        and event_source != 5
+        )
+    </select>
+
+    <select id="getSowKonghuaiCount" parameterType="map" resultType="int" >
+        select
+        (
+        select count(1)
+        from doctor_pig_tracks
+        where status in (1,5,9)
+        and farm_id = #{farmId}
+        and current_barn_type in(5,6)
+        )
+        -
+        (
+        select ifnull(sum(
+        case when type = 7 then 1 else 0 end +
+        case when type = 12 then 1 else 0 end +
+        case when type = 20 and barn_type in(5,6) and pig_status_before in (1,5,9) then 1 else 0 end +
+        case when type = 11 and pig_status_before != 5 and pig_status_after = 5 then 1 else 0 end -
+        case when barn_type in(5,6) and pig_status_before in (1,5,9) and pig_status_after not in(1,5,9) then 1 else 0 end
+        )
+        ,0)
+        from doctor_pig_events
+        where event_at &gt; #{startAt}
+        and farm_id = #{farmId}
+        and type in(2,6,7,9,11,12,20)
+        and status =1
+        and event_source != 5
+        )
+    </select>
+
+    <select id="getSowPregnantCount" parameterType="map" resultType="int" >
+        select
+        (
+        select count(1)
+        from doctor_pig_tracks
+        where status = 4
+        and farm_id = #{farmId}
+        and current_barn_type in(5,6)
+        )
+        -
+        (
+        select ifnull(sum(
+        case when type in (11,20) and pig_status_after = 4 then 1 else 0 end -
+        case when type in (2,6,11,14) and pig_status_before = 4  then 1 else 0 end
+        )
+        ,0)
+        from doctor_pig_events
+        where event_at &gt; #{startAt}
+        and farm_id = #{farmId}
+        and pig_status_before != pig_status_after
+        and type in(2,6,11,14,20)
+        and barn_type in(5,6)
+        and status =1
+        and event_source != 5
+        )
+    </select>
+
+    <select id="getSowPhReserveIn" parameterType="map" resultType="int" >
+        SELECT
+        ifnull(count(*),0)
+        FROM doctor_pig_events
+        WHERE farm_id = #{farmId}
+        and event_at &gt;= #{startAt}
+        and event_at &lt;= #{endAt}
+        and type = 7
+        and barn_type in(5,6)
+        and status =1
+        and event_source != 5
+    </select>
+
+    <select id="getSowCfInFarmIn" parameterType="map" resultType="int" >
+        SELECT
+        ifnull(count(*),0)
+        FROM doctor_pig_events
+        WHERE farm_id = #{farmId}
+        and event_at &gt;= #{startAt}
+        and event_at &lt;= #{endAt}
+        and type = 20
+        and barn_type = 7
+        and status =1
+        and event_source != 5
+    </select>
+
+    <select id="getSowPhChgFarmIn" parameterType="map" resultType="int" >
+        SELECT
+        ifnull(count(*),0)
+        FROM doctor_pig_events
+        WHERE farm_id = #{farmId}
+        and event_at &gt;= #{startAt}
+        and event_at &lt;= #{endAt}
+        and type = 20
+        and barn_type in(5,6)
+        and status =1
+        and event_source != 5
+    </select>
+
 </mapper>

@@ -245,6 +245,7 @@
         <if test="farmName != null">AND farm_name = #{farmName}</if>
         <if test="groupId != null">AND group_id = #{groupId}</if>
         <if test="groupCode != null">AND group_code = #{groupCode}</if>
+        <if test="groupCodeFuzzy != null">AND group_code LIKE concat('%', #{groupCodeFuzzy},'%')</if>
         <if test="eventAt != null">AND event_at = #{eventAt}</if>
         <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
@@ -675,6 +676,7 @@
         <include refid="tb"/>
         WHERE group_id = #{groupId}
         AND type = 1
+        AND status = 1
     </select>
 
     <select id="findCloseGroupByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
@@ -684,6 +686,7 @@
         <include refid="tb"/>
         WHERE group_id = #{groupId}
         AND type = 10
+        AND status = 1
     </select>
 
     <select id="findByRelPigEventIdAndType" parameterType="map" resultMap="DoctorGroupEventMap" >
@@ -693,6 +696,7 @@
         <include refid="tb"/>
         WHERE rel_pig_event_id = #{relPigEventId}
         AND `type` = #{type}
+        AND status = 1
     </select>
 
     <select id="getEventCount" parameterType="long" resultType="int" >

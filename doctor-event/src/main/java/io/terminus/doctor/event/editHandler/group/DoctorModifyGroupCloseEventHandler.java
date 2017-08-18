@@ -40,4 +40,9 @@ public class DoctorModifyGroupCloseEventHandler extends DoctorAbstractModifyGrou
         oldGroup.setStatus(DoctorGroup.Status.CREATED.getValue());
         return oldGroup;
     }
+
+    @Override
+    protected void updateDailyForDelete(DoctorGroupEvent deleteGroupEvent) {
+        doctorGroupBatchSummaryDao.deleteByGroupId(deleteGroupEvent.getGroupId());
+    }
 }

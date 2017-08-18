@@ -2,18 +2,25 @@ package io.terminus.doctor.move.service;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.model.DoctorDailyReport;
-import io.terminus.doctor.event.service.*;
+import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorRangeReportWriteService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.model.ReportBoarLiveStock;
 import io.terminus.doctor.move.model.ReportGroupLiveStock;
 import io.terminus.doctor.move.model.ReportSowLiveStock;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorDepartmentReadService;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,22 +55,28 @@ public class DoctorMoveReportService {
     private final DoctorRangeReportWriteService doctorRangeReportWriteService;
     private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
     private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
+    private final DoctorFarmReadService doctorFarmReadService;
+    private final DoctorDepartmentReadService doctorDepartmentReadService;
 
     @Autowired
     public DoctorMoveReportService(DoctorDailyReportDao doctorDailyReportDao,
                                    DoctorFarmDao doctorFarmDao,
+                                   DoctorFarmReadService doctorFarmReadService,
                                    DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
                                    DoctorDailyReportWriteService doctorDailyReportWriteService,
                                    DoctorRangeReportWriteService doctorRangeReportWriteService,
                                    DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
-                                   DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService) {
+                                   DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService,
+                                   DoctorDepartmentReadService doctorDepartmentReadService) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorFarmDao = doctorFarmDao;
+        this.doctorFarmReadService = doctorFarmReadService;
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorDailyReportWriteService = doctorDailyReportWriteService;
         this.doctorRangeReportWriteService = doctorRangeReportWriteService;
         this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
         this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
+        this.doctorDepartmentReadService = doctorDepartmentReadService;
     }
 
 
@@ -148,6 +161,18 @@ public class DoctorMoveReportService {
     public void moveDoctorRangeReport(Long farmId, Integer index) {
         DateUtil.getBeforeMonthEnds(DateTime.now().toDate(), MoreObjects.firstNonNull(index, MONTH_INDEX))
                 .forEach(date -> doctorRangeReportWriteService.flushDoctorRangeReports(farmId, date));
+    }
+
+    public void moveDoctorOrgRangeReport(List<Long> orgIds, Date since) {
+        Map<Long, List<Long>> orgToFarm = Maps.newHashMap();
+        orgIds.forEach(orgId -> {
+            Response<List<DoctorFarm>> response = doctorDepartmentReadService.findAllFarmsByOrgId(orgId);
+            if (response.isSuccess()) {
+                orgToFarm.put(orgId, response.getResult().stream().map(DoctorFarm::getId).collect(Collectors.toList()));
+            }
+        });
+        doctorRangeReportWriteService.generateOrgDoctorRangeReports(orgToFarm, since);
+
     }
 
     @Transactional

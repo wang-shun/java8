@@ -128,4 +128,15 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
     public List<Map<String, Object>> findFarmToGroupCount() {
         return getSqlSession().selectList(sqlId("findFarmToGroupCount"));
     }
+    /**
+     * 查询猪群
+     * @param farmId 猪场列表
+     * @param pigType 猪群类型
+     * @param status 猪群状态
+     * @return 猪群列表
+     */
+    public List<DoctorGroup> findByFarmIdAndPigTypeAndStatus(Long farmId, Integer pigType, Integer status) {
+        return getSqlSession().selectList(sqlId("findByFarmIdAndPigTypeAndStatus"), ImmutableMap.of("farmId"
+                , farmId, "pigType", pigType, "status", status));
+    }
 }

@@ -37,5 +37,11 @@ public interface PigScoreApplyReadService {
     */
     Response<List<PigScoreApply>> list(Map<String, Object> criteria);
 
-    Response<PigScoreApply> findByFarmIdAndUserId(Long orgId, Long farmId, Long userId);
+    /**
+     * 查询是否存在申请记录
+     * @param orgId
+     * @param farmId
+     * @return
+     */
+    Response<PigScoreApply> findByOrgAndFarmId(Long orgId, Long farmId);
 }

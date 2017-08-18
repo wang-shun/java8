@@ -60,9 +60,34 @@ public class DoctorBaseReport implements Serializable{
     private Integer sowPhStart;
 
     /**
-     * 配怀母猪进场转入
+     * 配怀舍配种母猪数
+     */
+    private Integer sowPhMating;
+
+    /**
+     * 配怀空怀母猪数
+     */
+    private Integer sowPhKonghuai;
+
+    /**
+     * 配怀怀孕母猪数
+     */
+    private Integer sowPhPregnant;
+
+    /**
+     * 配怀母猪进场转入(后配转入+进场)
      */
     private Integer sowPhInFarmIn;
+
+    /**
+     * 后备转入
+     */
+    private Integer sowPhReserveIn;
+
+    /**
+     * 转场转入
+     */
+    private Integer sowPhChgFarmIn;
 
     /**
      * 配怀母猪断奶转入
@@ -110,9 +135,15 @@ public class DoctorBaseReport implements Serializable{
     private Integer sowCfStart;
 
     /**
-     * 产房母猪转入
+     * 配怀母猪转入产房
+     *
      */
     private Integer sowCfIn;
+
+    /**
+     * 产房转场转入(其他转入)
+     */
+    private Integer sowCfInFarmIn;
 
     /**
      * 产房死亡母猪

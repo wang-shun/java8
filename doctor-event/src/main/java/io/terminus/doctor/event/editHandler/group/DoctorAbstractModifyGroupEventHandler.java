@@ -2,6 +2,7 @@ package io.terminus.doctor.event.editHandler.group;
 
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -9,6 +10,7 @@ import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
+import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -37,6 +39,7 @@ import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.enums.SourceType.UN_MODIFY;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
@@ -59,13 +62,18 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     @Autowired
     protected DoctorDailyReportManager doctorDailyReportManager;
 
+    @Autowired
+    protected DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
+
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     protected final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
 
     @Override
     public final Boolean canModify(DoctorGroupEvent oldGroupEvent) {
-        return Objects.equals(oldGroupEvent.getIsAuto(), IsOrNot.NO.getValue());
+        return Objects.equals(oldGroupEvent.getIsAuto(), IsOrNot.NO.getValue())
+                && !UN_MODIFY.contains(oldGroupEvent.getEventSource());
+
     }
 
     @Override
@@ -114,8 +122,8 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     @Override
     public Boolean canRollback(DoctorGroupEvent deleteGroupEvent) {
         return Objects.equals(deleteGroupEvent.getIsAuto(), IsOrNot.NO.getValue())
-                && Objects.equals(deleteGroupEvent.getEventSource(), SourceType.INPUT.getValue())
-                && rollbackHandleCheck(deleteGroupEvent);
+                && rollbackHandleCheck(deleteGroupEvent)
+                && !UN_MODIFY.contains(deleteGroupEvent.getEventSource());
     }
     
     @Override
@@ -150,6 +158,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             } else {
                 DoctorGroupTrack newTrack = buildNewTrackForRollback(deleteGroupEvent, oldTrack);
                 doctorGroupTrackDao.update(newTrack);
+
+                //自动关闭或开启猪群
+                autoCloseOrOpen(newTrack);
             }
         }
 
@@ -167,7 +178,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         if (!Objects.equals(oldGroupEvent.getType(), GroupEventType.NEW.getValue())) {
             DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findNewGroupByGroupId(oldGroupEvent.getGroupId());
-            validEventAt(DateUtil.toDate(input.getEventAt()), notNull(newCreateEvent) ? newCreateEvent.getEventAt() : null);
+            DoctorGroupEvent closeEvent = doctorGroupEventDao.findCloseGroupByGroupId(oldGroupEvent.getGroupId());
+            validEventAt(DateUtil.toDate(input.getEventAt()), notNull(newCreateEvent) ? newCreateEvent.getEventAt() : null
+                    , notNull(closeEvent) ? closeEvent.getEventAt() : null);
         }
     }
 
@@ -219,33 +232,38 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         DoctorGroupEvent closeEvent = doctorGroupEventDao.findCloseGroupByGroupId(groupTrack.getGroupId());
         //1.数量不为0,却已关闭
         if (!Objects.equals(groupTrack.getQuantity(), 0) && notNull(closeEvent)) {
+            DoctorGroup group = doctorGroupDao.findById(groupTrack.getGroupId());
+            if (Objects.equals(group.getPigType(), PigType.DELIVER_SOW.getValue())) {
+                List<DoctorGroup> groupList = doctorGroupDao.findByCurrentBarnId(group.getCurrentBarnId());
+                expectTrue(groupList.isEmpty(), "lead.to.deliver.two.group", group.getId());
+            }
             //(1).删除关闭事件
             doctorGroupEventDao.delete(closeEvent.getId());
+            createModifyLog(closeEvent);
 
             //(2).更新猪群状态
-            DoctorGroup group = doctorGroupDao.findById(groupTrack.getId());
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
             doctorGroupDao.update(group);
             return;
         }
 
-        //2.数量为零,未关闭
-        if (Objects.equals(groupTrack.getQuantity(), 0) && isNull(closeEvent)){
-            DoctorGroup group = doctorGroupDao.findById(groupTrack.getId());
-
-            //(1).生成关闭事件
-            DoctorCloseGroupInput closeGroupInput = new DoctorCloseGroupInput();
-            closeGroupInput.setEventAt(DateUtil.toDateString(new Date()));
-            closeGroupInput.setIsAuto(IsOrNot.NO.getValue());
-            DoctorGroupEvent closeEvent1 = dozerGroupEvent(group, GroupEventType.CLOSE, closeGroupInput);
-            doctorGroupEventDao.create(closeEvent1);
-
-            //(2).更新猪群状态
-            group.setStatus(DoctorGroup.Status.CLOSED.getValue());
-            group.setCloseAt(new Date());
-            doctorGroupDao.update(group);
-            return;
-        }
+        // TODO: 17/7/5 导致数量为零时,暂不关闭
+//        //2.数量为零,未关闭
+//        if (Objects.equals(groupTrack.getQuantity(), 0) && isNull(closeEvent)){
+//            DoctorGroup group = doctorGroupDao.findById(groupTrack.getGroupId());
+//
+//            //(1).生成关闭事件
+//            DoctorCloseGroupInput closeGroupInput = new DoctorCloseGroupInput();
+//            closeGroupInput.setEventAt(DateUtil.toDateString(new Date()));
+//            closeGroupInput.setIsAuto(IsOrNot.NO.getValue());
+//            DoctorGroupEvent closeEvent1 = dozerGroupEvent(group, GroupEventType.CLOSE, closeGroupInput);
+//            doctorGroupEventDao.create(closeEvent1);
+//
+//            //(2).更新猪群状态
+//            group.setStatus(DoctorGroup.Status.CLOSED.getValue());
+//            group.setCloseAt(new Date());
+//            doctorGroupDao.update(group);
+//        }
     }
 
     /**
@@ -268,7 +286,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param oldGroup 原猪群信息
      * @return 新猪群信息
      */
-    protected DoctorGroup buildNewGroupForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroup oldGroup){return null;}
+    protected DoctorGroup buildNewGroupForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroup oldGroup){return oldGroup;}
 
     /**
      * 构建track(删除)
@@ -276,7 +294,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param oldGroupTrack 原track
      * @return 新 track
      */
-    protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {return null;}
+    protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {return oldGroupTrack;}
     /**
      * 更新日记录(删除)
      * @param deleteGroupEvent 删除事件
@@ -346,7 +364,6 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         return true;
     }
 
-
     /**
      * 创建编辑记录
      * @param oldEvent 原事件
@@ -374,7 +391,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 .businessCode(deleteEvent.getGroupCode())
                 .farmId(deleteEvent.getFarmId())
                 .deleteEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(deleteEvent))
-                .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .type(DoctorEventModifyRequest.TYPE.GROUP.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
     }
@@ -454,15 +471,16 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     }
 
     /**
-     * 事件时间校验, 不小于下限时间, 不大于当前事件
+     * 事件时间校验, 不小于下限时间, 不大与上限时间
      * @param eventAt 事件时间
-     * @param lastEventAt 下限时间
+     * @param downEventAt 下限时间
+     * @param upEventAt 上限时间
      */
-    public static void validEventAt(Date eventAt, Date lastEventAt) {
-        if ((notNull(lastEventAt)
-                && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEventAt)))
-                || Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date()))) {
-            throw new InvalidException("event.at.error", DateUtil.toDateString(lastEventAt), DateUtil.toDateString(new Date()));
+    public static void validEventAt(Date eventAt, Date downEventAt, Date upEventAt) {
+        if ((notNull(downEventAt)
+                && Dates.startOfDay(eventAt).before(Dates.startOfDay(downEventAt)))
+                || (notNull(upEventAt) && Dates.startOfDay(eventAt).after(Dates.startOfDay(upEventAt)))) {
+            throw new InvalidException("event.at.error", DateUtil.toDateString(downEventAt), DateUtil.toDateString(upEventAt));
         }
     }
 
@@ -478,7 +496,6 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         closeInput.setRelGroupEventId(groupEvent.getId());
         return closeInput;
     }
-
 
     protected DoctorGroupEvent dozerGroupEvent(DoctorGroup group, GroupEventType eventType, BaseGroupInput baseInput) {
         DoctorGroupEvent event = new DoctorGroupEvent();

@@ -1,7 +1,10 @@
 package io.terminus.doctor.common.enums;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import lombok.Getter;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -36,4 +39,7 @@ public enum SourceType {
         }
         return null;
     }
+
+    public static List<Integer> UN_MODIFY = Lists.newArrayList(IMPORT.getValue()
+            , MOVE.getValue(), TRANS_FARM.getValue());
 }

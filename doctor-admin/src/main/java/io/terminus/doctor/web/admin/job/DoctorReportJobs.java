@@ -1,7 +1,9 @@
 package io.terminus.doctor.web.admin.job;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -13,7 +15,10 @@ import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorRangeReportWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.service.DoctorDepartmentReadService;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -25,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -56,6 +62,10 @@ public class DoctorReportJobs {
 
     @RpcConsumer(timeout = "60000")
     private DoctorDailyGroupWriteService doctorDailyGroupWriteService;
+    @RpcConsumer
+    private DoctorOrgReadService doctorOrgReadService;
+    @RpcConsumer
+    private DoctorDepartmentReadService doctorDepartmentReadService;
 
     private final HostLeader hostLeader;
 
@@ -109,7 +119,7 @@ public class DoctorReportJobs {
      * 每两点执行一发
      */
     @Scheduled(cron = "0 0 2 * * ?")
-    @RequestMapping(value = "/range", method = RequestMethod.GET)
+    @RequestMapping(value = "/farm/range", method = RequestMethod.GET)
     public void monthlyReport() {
         try {
             if (!hostLeader.isLeader()) {
@@ -127,10 +137,31 @@ public class DoctorReportJobs {
     }
 
     /**
+     * 公司月报计算job
+     * 每两点执行一发
+     */
+    @Scheduled(cron = "0 0 3 * * ?")
+    @RequestMapping(value = "/org/range", method = RequestMethod.GET)
+    public void monthlyOrgReport() {
+        try {
+            if (!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("range report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+            Date since = DateTime.now().minusYears(1).toDate();
+            doctorRangeReportWriteService.generateOrgDoctorRangeReports(getOrgToFarm(), since);
+            log.info("range report job end");
+        } catch (Exception e) {
+            log.error("range report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
+    /**
      * 公猪生产成绩月报计算job
      * 每天凌晨3点统计昨天的数据
      */
-    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 0 4 * * ?")
     @RequestMapping(value = "/boarMonthly", method = RequestMethod.GET)
     public void boarMonthlyReport() {
         try {
@@ -153,7 +184,7 @@ public class DoctorReportJobs {
      * 猪场胎次产仔月报计算job
      * 每天凌晨3点统计昨天的数据
      */
-    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 0 4 * * ?")
     @RequestMapping(value = "/parityMonthly", method = RequestMethod.GET)
     public void parityMonthlyReport() {
         try {
@@ -175,5 +206,17 @@ public class DoctorReportJobs {
 
     private List<Long> getAllFarmIds() {
         return RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
+    }
+
+    private Map<Long, List<Long>> getOrgToFarm() {
+        Map<Long, List<Long>> orgMapToFarm = Maps.newHashMap();
+        List<DoctorOrg> orgList = RespHelper.orServEx(doctorOrgReadService.findAllOrgs());
+        orgList.forEach(doctorOrg -> {
+            Response<List<DoctorFarm>> farmResponse = doctorDepartmentReadService.findAllFarmsByOrgId(doctorOrg.getId());
+            if (farmResponse.isSuccess()) {
+                orgMapToFarm.put(doctorOrg.getId(), farmResponse.getResult().stream().map(DoctorFarm::getId).collect(Collectors.toList()));
+            }
+        });
+        return orgMapToFarm;
     }
 }

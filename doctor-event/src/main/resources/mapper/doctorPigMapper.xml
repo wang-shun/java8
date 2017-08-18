@@ -265,4 +265,9 @@
         WHERE
         farm_id = #{farmId}
     </select>
+
+    <select id="findAllPigIds" resultType="long" >
+        SELECT id
+        FROM <include refid="tb" />
+    </select>
 </mapper>

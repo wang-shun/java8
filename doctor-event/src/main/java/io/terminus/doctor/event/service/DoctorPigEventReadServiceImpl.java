@@ -437,4 +437,15 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("find.last.first.mate.event.failed");
         }
     }
+
+    @Override
+    public Response<DoctorPigEvent> findFirstMatingBeforePregCheck(Long pigId, Integer parity, Long id) {
+        try {
+            return Response.ok(doctorPigEventDao.getFirstMatingBeforePregCheck(pigId, parity, id));
+        } catch (Exception e) {
+            log.error("find first mating before preg check, pigId:{}, parity:{}, id:{}, cause:{}",
+                    pigId, parity, id, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.first.mating.before.preg.check");
+        }
+    }
 }

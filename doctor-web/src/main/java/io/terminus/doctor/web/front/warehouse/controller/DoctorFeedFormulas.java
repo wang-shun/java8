@@ -25,6 +25,7 @@ import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -101,6 +102,15 @@ public class DoctorFeedFormulas {
     }
 
     /**
+     * 获取配方信息
+     * @return
+     */
+    @RequestMapping(value = "/rules/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public FeedFormula updateMaterialRules(@PathVariable Long id){
+        return RespHelper.or500(feedFormulaReadService.findFeedFormulaById(id));
+    }
+
+    /**
      * 录入对应的物料生产规则信息
      * @param dto
      * @return
@@ -119,14 +129,57 @@ public class DoctorFeedFormulas {
         feedFormula.setFarmName(RespHelper.or500(doctorFarmReadService.findFarmById(dto.getFarmId())).getName());
         feedFormula.setFormulaMap(ImmutableMap.of("materialProduce", ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(dto.getProduce())));
 
-        FeedFormula exist = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(feed.getId(), dto.getFarmId()));
-        if(exist == null){
-            RespHelper.or500(feedFormulaWriteService.createFeedFormula(feedFormula));
-        }else{
-            feedFormula.setId(exist.getId());
-            RespHelper.or500(feedFormulaWriteService.updateFeedFormula(feedFormula));
-        }
+        //由于现在可以一个饲料对应多个配方所以不需要判断是否存在，直接创建即可
+        RespHelper.or500(feedFormulaWriteService.createFeedFormula(feedFormula));
         return true;
+    }
+
+
+    /**
+     * 更新配方
+     * @param dto
+     * @return
+     */
+    @RequestMapping(value = "/rules/{id}/update", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean updateMaterialRules(@PathVariable Long id, @RequestBody DoctorMaterialProductRatioDto dto){
+
+        FeedFormula exist = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(id));
+        checkFeedFormula(exist);
+
+        dto.getProduce().calculateTotalPercent();
+        buildProduceInfo(dto.getProduce());
+        // 此配方要生产的饲料
+        DoctorBasicMaterial feed = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
+
+        FeedFormula feedFormula = new FeedFormula();
+        feedFormula.setId(id);
+        feedFormula.setFeedId(feed.getId());
+        feedFormula.setFeedName(feed.getName());
+        feedFormula.setFarmId(dto.getFarmId());
+        feedFormula.setFarmName(RespHelper.or500(doctorFarmReadService.findFarmById(dto.getFarmId())).getName());
+        feedFormula.setFormulaMap(ImmutableMap.of("materialProduce", ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(dto.getProduce())));
+
+        //更新
+        return RespHelper.or500(feedFormulaWriteService.updateFeedFormula(feedFormula));
+    }
+
+    /**
+     * 删除配方
+     * @return
+     */
+    @RequestMapping(value = "/rules/{id}/delete", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean deleteMaterialRules(@PathVariable Long id){
+
+        FeedFormula exist = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(id));
+        checkFeedFormula(exist);
+        return RespHelper.or500(feedFormulaWriteService.deleteFeedFormulaById(id));
+    }
+
+
+    private void checkFeedFormula(FeedFormula feedFormula){
+        if(feedFormula == null){
+            throw new JsonResponseException(500, "formula.not.exist");
+        }
     }
 
     /**

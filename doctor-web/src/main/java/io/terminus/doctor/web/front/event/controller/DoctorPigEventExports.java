@@ -47,6 +47,7 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
@@ -79,7 +80,6 @@ import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +96,7 @@ import java.util.Objects;
 
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Created by terminus on 2017/3/20.
@@ -287,6 +288,10 @@ public class DoctorPigEventExports {
      */
     public Paging<DoctorPigMatingExportDto> pagingMating(Map<String, String> pigEventCriteria) {
         Paging<DoctorPigEvent> pigEventPaging = pigEventPaging(pigEventCriteria);
+        List<Long> pigIds = pigEventPaging.getData().stream().map(DoctorPigEvent::getPigId).collect(toList());
+        List<DoctorPigTrack> pigTrackList = RespHelper.or500(doctorPigReadService.queryCurrentStatus(pigIds));
+        Map<Long, Integer> pigIdToStatus = pigTrackList.stream().collect(toMap(DoctorPigTrack::getPigId, DoctorPigTrack::getStatus));
+
         List<DoctorPigMatingExportDto> list = pigEventPaging.getData().stream().map(doctorPigEventDetail -> {
             try {
                 DoctorMatingDto matingDto = JSON_MAPPER.fromJson(doctorPigEventDetail.getExtra(), DoctorMatingDto.class);
@@ -296,12 +301,12 @@ public class DoctorPigEventExports {
                     dto.setMatingTypeName(MatingType.from(dto.getMatingType()).getDesc());
                 }
                 dto.setCreatorName(doctorPigEventDetail.getCreatorName());
-                if (doctorPigEventDetail.getPigStatusAfter() != null) {
-                    dto.setPigStatusAfterName(PigStatus.from(doctorPigEventDetail.getPigStatusAfter()).getDesc());
-                }
+                dto.setPigStatusAfter(pigIdToStatus.get(doctorPigEventDetail.getPigId()));
+                dto.setPigStatusAfterName(PigStatus.from(dto.getPigStatusAfter()).getDesc());
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
+                dto.setMatingDate(doctorPigEventDetail.getEventAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingMating error: {}", Throwables.getStackTraceAsString(e));
@@ -728,8 +733,9 @@ public class DoctorPigEventExports {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
-        if (StringUtils.isNotBlank((String) params.get("endDate"))) {
-            params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusMillis(1).toDate());
+        if (StringUtils.isNotBlank((String) params.get("groupCode"))) {
+            params.put("groupCodeFuzzy", params.get("groupCode"));
+            params.remove("groupCode");
         }
         Response<Paging<DoctorGroupEvent>> pagingResponse = doctorGroupReadService.queryGroupEventsByCriteria(params, Integer.parseInt(groupEventCriteriaMap.get("pageNo")), Integer.parseInt(groupEventCriteriaMap.get("size")));
         if (!pagingResponse.isSuccess()) {
@@ -750,8 +756,9 @@ public class DoctorPigEventExports {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
-        if (StringUtils.isNotBlank((String) params.get("endDate"))) {
-            params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusMillis(1).toDate());
+        if (StringUtils.isNotBlank((String) params.get("pigCode"))) {
+            params.put("pigCodeFuzzy", params.get("pigCode"));
+            params.remove("pigCode");
         }
         Response<Paging<DoctorPigEvent>> pigEventPagingResponse = doctorPigEventReadService.queryPigEventsByCriteria(params, Integer.parseInt(groupEventCriteriaMap.get("pageNo")), Integer.parseInt(groupEventCriteriaMap.get("size")));
         if (!pigEventPagingResponse.isSuccess()) {
@@ -785,7 +792,7 @@ public class DoctorPigEventExports {
 
     private void exportSowEvents(Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
         switch (eventCriteria.get("eventTypes")) {
-            case "7":
+            case "7,20":
                 //进场
                 exporter.export("web-pig-sowInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
                 break;

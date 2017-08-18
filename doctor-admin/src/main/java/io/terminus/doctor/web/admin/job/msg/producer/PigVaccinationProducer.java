@@ -583,6 +583,9 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                     .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
                     .status(pigDto.getStatus())
                     .statusName(pigDto.getStatusName())
+                    .dose(warn.getDose())
+                    .materialId(warn.getMaterialId())
+                    .materialName(warn.getMaterialName())
                     .build();
 
             createMessage(subUsers, ruleRole, messageInfo);
@@ -617,6 +620,9 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                     .url(jumpUrl)
                     .businessId(detail.getGroup().getId())
                     .businessType(DoctorMessage.BUSINESS_TYPE.GROUP.getValue())
+                    .dose(warn.getDose())
+                    .materialId(warn.getMaterialId())
+                    .materialName(warn.getMaterialName())
                     .build();
 
             createMessage(subUsers, ruleRole, messageInfo);

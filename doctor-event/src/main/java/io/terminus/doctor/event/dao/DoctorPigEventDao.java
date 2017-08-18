@@ -476,6 +476,16 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+     * 获取猪某一胎次下的断奶事件
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @return 断奶事件
+     */
+    public DoctorPigEvent getWeanEventByParity(Long pigId, Integer parity) {
+        return getSqlSession().selectOne(sqlId("getWeanEventByParity"), ImmutableMap.of("pigId", pigId, "parity", parity));
+    }
+
+    /**
      * 获取某时间前的影响状态的最近的事件
      * @param pigId 猪id
      * @param eventAt 时间
@@ -494,6 +504,17 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      */
     public DoctorPigEvent getLastStatusEventBeforeEventAtExcludeId(Long pigId, Date eventAt, Long id){
         return getSqlSession().selectOne(sqlId("getLastStatusEventBeforeEventAtExcludeId"), ImmutableMap.of("pigId", pigId, "eventAt",eventAt, "id", id));
+    }
+
+    /**
+     * 获取某时间前的包括制定id的影响状态的最近的事件
+     * @param pigId 猪id
+     * @param eventAt 时间
+     * @param id 不包括的事件id
+     * @return 事件
+     */
+    public DoctorPigEvent getLastStatusEventAfterEventAtExcludeId(Long pigId, Date eventAt, Long id){
+        return getSqlSession().selectOne(sqlId("getLastStatusEventAfterEventAtExcludeId"), ImmutableMap.of("pigId", pigId, "eventAt",eventAt, "id", id));
     }
 
     /**
@@ -563,10 +584,55 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
     /**
      * 获取最新的去除(事件类型:3,4,5,8)
+     * @see PigEvent
      * @param pigId 猪id
      * @return 事件
      */
     public DoctorPigEvent getLastStatusEvent(Long pigId) {
         return getSqlSession().selectOne(sqlId("getLastStatusEvent"), pigId);
+    }
+
+    /**
+     * 获取某猪某胎次下,妊娠检查时间前最近的初配事件
+     * @param pigId 猪id
+     * @param parity 胎次
+     * @param id 妊娠检查事件id
+     *
+     * @return 初配事件
+     */
+    public DoctorPigEvent getFirstMatingBeforePregCheck(Long pigId, Integer parity, Long id) {
+        return getSqlSession().selectOne(sqlId("getFirstMatingBeforePregCheck"),
+                ImmutableMap.of("pigId", pigId, "parity", parity, "id", id));
+    }
+
+    public List<DoctorPigEvent> findEffectMatingCountByPigIdForAsc(Long pigId) {
+        return sqlSession.selectList(sqlId("findEffectMatingCountByPigIdForAsc"), pigId);
+    }
+
+
+    /**
+     * 将猪场中转场转入事件前的事件置为eventSource=5
+     * @param list 猪场id列表
+     */
+    public void flushChgFarmEventSource(List<Long> list) {
+        sqlSession.update(sqlId("flushChgFarmEventSource"), list);
+    }
+
+    /**
+     * 获取猪场的事件
+     * @param list 猪场id列表
+     * @return 事件列表
+     */
+    public List<DoctorPigEvent> findByFarmIds(List<Long> list){
+        return sqlSession.selectList(sqlId("findByFarmIds"), list);
+    }
+
+    /**
+     * 获取当前母猪未断奶数量
+     * @param pigId 母猪id
+     * @return 未断奶数量
+     */
+    public Integer getSowUnweanCount(Long pigId) {
+        return sqlSession.selectOne(sqlId("getSowUnweanCount"), pigId);
     }
 }
