@@ -208,7 +208,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 return Response.fail("find.monthly.report.data.failed");
             }
             List<DoctorCommonReportDto> commonReportDtos = Lists.newArrayList();
-            List<DoctorRangeReport> reports = doctorRangeReportDao.findBySumAt(ReportRangeType.MONTH.getValue(), sumAt);
+            List<DoctorRangeReport> reports = doctorRangeReportDao.findFarmBySumAt(ReportRangeType.MONTH.getValue(), sumAt);
             reports.forEach(report -> {
                 commonReportDtos.add(getDoctorCommonReportDto(report));
             });

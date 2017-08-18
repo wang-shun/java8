@@ -202,9 +202,10 @@
         AND sum_at = #{sumAt}
     </select>
 
-    <select id="findBySumAt" parameterType="map" resultMap="DoctorRangeReportMap">
+    <select id="findFarmBySumAt" parameterType="map" resultMap="DoctorRangeReportMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         WHERE `type` = #{type}
+        AND farm_id is not NULL
         AND sum_at = #{sumAt}
     </select>
 
