@@ -22,6 +22,7 @@ public class DoctorPigletsChgExportDto implements Serializable{
     private String pigletsChangeTypeName;   // 仔猪变动类型内容
     private String pigletsChangeReasonName;
     private Double pigletsWeight;  // 变动重量 (必填)
+    private Double pigletsAvgWeight; //平均重量
     private Long pigletsPrice;   // 变动价格(分) （非必填）
     private Long pigletsSum; //  总价(分)（非必填）
     private String pigletsCustomerName;    //客户姓名 （非必填）

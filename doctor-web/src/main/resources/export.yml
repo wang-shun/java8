@@ -703,6 +703,7 @@ export.tables:
           display: 猪舍
         - name: pigletsChangeDate
           display: 变动日期
+          format: isoDateFormatter
         - name: pigletsChangeTypeName
           display: 变动类型
         - name: pigletsChangeReasonName
@@ -711,6 +712,8 @@ export.tables:
           display: 头数
         - name: pigletsWeight
           display: 总重
+        - name: pigletsAvgWeight
+          display: 平均总重
         - name: pigletsCustomerName
           display: 客户
         - name: pigletsPrice

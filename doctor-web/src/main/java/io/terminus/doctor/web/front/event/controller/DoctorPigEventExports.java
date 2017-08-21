@@ -56,6 +56,7 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.event.dto.DoctorBoarConditionExportDto;
 import io.terminus.doctor.web.front.event.dto.DoctorChangeGroupExportDto;
@@ -317,6 +318,7 @@ public class DoctorPigEventExports {
                 DoctorPigletsChgDto matingDto = JSON_MAPPER.fromJson(doctorPigEventDetail.getExtra(), DoctorPigletsChgDto.class);
                 DoctorPigletsChgExportDto dto = OBJECT_MAPPER.convertValue(matingDto, DoctorPigletsChgExportDto.class);
                 dto.setParity(doctorPigEventDetail.getParity());
+                dto.setPigletsAvgWeight(EventUtil.getAvgWeight(dto.getPigletsWeight(), dto.getPigletsCount()));
                 dto.setCreatorName(doctorPigEventDetail.getCreatorName());
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
