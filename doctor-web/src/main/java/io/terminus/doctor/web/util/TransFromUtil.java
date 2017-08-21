@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -141,6 +142,9 @@ public class TransFromUtil {
     private Integer getMatingDay(DoctorPigEvent pregCheckEvent) {
         DoctorPigEvent firstMatingEvent = RespHelper.orServEx(doctorPigEventReadService
                 .findFirstMatingBeforePregCheck(pregCheckEvent.getPigId(), pregCheckEvent.getParity(), pregCheckEvent.getId()));
+        if (isNull(firstMatingEvent)) {
+            return 0;
+        }
         return DateUtil.getDeltaDays(firstMatingEvent.getEventAt(), pregCheckEvent.getEventAt());
     }
 
