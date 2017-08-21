@@ -693,7 +693,7 @@ export.tables:
         - name: creatorName
           display: 录入人员
   web-pig-PigletsChg:
-      display: 猪仔变动
+      display: 仔猪变动
       columns:
         - name: pigCode
           display: 母猪号
@@ -733,6 +733,7 @@ export.tables:
           format: isoDateFormatter
         - name: barnName
           display: 断奶猪舍
+        - name: partWeanPigletsCount
         - name: partWeanPigletsCount
           display: 断奶数
         - name: partWeanAvgWeight

@@ -410,6 +410,21 @@ public class DoctorPigEvent implements Serializable {
     private Integer isModify;
 
     /**
+     * 是否能够回滚事件
+     */
+    private Boolean isRollback;
+
+    /**
+     * 猪当前状态
+     */
+    private String pigStatus;
+
+    /**
+     * 已配种天数
+     */
+    private Integer matingDay;
+
+    /**
      * 事件来源
      * @see io.terminus.doctor.common.enums.SourceType
      */

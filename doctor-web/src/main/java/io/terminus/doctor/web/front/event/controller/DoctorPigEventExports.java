@@ -3,11 +3,13 @@ package io.terminus.doctor.web.front.event.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
@@ -82,8 +84,6 @@ import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -109,45 +109,29 @@ import static java.util.stream.Collectors.toMap;
 @RequestMapping("/api/doctor/events/pig")
 public class DoctorPigEventExports {
 
-    private final DoctorPigReadService doctorPigReadService;
+    @RpcConsumer
+    private DoctorPigReadService doctorPigReadService;
+    @RpcConsumer
+    private DoctorPigEventReadService doctorPigEventReadService;
+    @RpcConsumer
+    private DoctorPigEventWriteService doctorPigEventWriteService;
+    @RpcConsumer
+    private UserReadService userReadService;
+    @RpcConsumer
+    private DoctorBarnReadService doctorBarnReadService;
+    @RpcConsumer
+    private DoctorGroupReadService doctorGroupReadService;
+    @RpcConsumer
+    private DoctorBasicReadService doctorBasicReadService;
 
-    private final DoctorPigEventReadService doctorPigEventReadService;
-
-    private final DoctorPigEventWriteService doctorPigEventWriteService;
-
-    private final UserReadService userReadService;
-
-    private final DoctorBarnReadService doctorBarnReadService;
-
-    private final DoctorGroupReadService doctorGroupReadService;
-
-    private final TransFromUtil transFromUtil;
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
     private static final JsonMapperUtil JSON_MAPPER  = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
-    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
-
-
-
     @Autowired
     private Exporter exporter;
     @Autowired
-    public DoctorPigEventExports(DoctorPigReadService doctorPigReadService,
-                                 DoctorPigEventReadService doctorPigEventReadService,
-                                 DoctorPigEventWriteService doctorPigEventWriteService,
-                                 UserReadService userReadService,
-                                 DoctorGroupReadService doctorGroupReadService,
-                                 TransFromUtil transFromUtil,
-                                 DoctorBarnReadService doctorBarnReadService) {
-        this.doctorPigReadService = doctorPigReadService;
-        this.doctorPigEventReadService = doctorPigEventReadService;
-        this.doctorPigEventWriteService = doctorPigEventWriteService;
-        this.userReadService = userReadService;
-        this.doctorGroupReadService = doctorGroupReadService;
-        this.transFromUtil = transFromUtil;
-        this.doctorBarnReadService = doctorBarnReadService;
-    }
+    private TransFromUtil transFromUtil;
 
     /**
      * 猪入场事件的导出报表的构建
@@ -434,6 +418,7 @@ public class DoctorPigEventExports {
                 DoctorFostersExportDto dto = OBJECT_MAPPER.convertValue(fostersDto, DoctorFostersExportDto.class);
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setParity(doctorPigEventDetail.getParity());
+                dto.setFosterReasonName(RespHelper.or500(doctorBasicReadService.findBasicById(fostersDto.getFosterReason())).getName());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
                 return dto;

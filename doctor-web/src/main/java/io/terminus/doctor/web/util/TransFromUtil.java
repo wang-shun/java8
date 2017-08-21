@@ -2,6 +2,7 @@ package io.terminus.doctor.web.util;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -59,8 +60,7 @@ public class TransFromUtil {
     }
 
     public void transFromExtraMap(List<DoctorPigEvent> doctorPigEvents) {
-        for (DoctorPigEvent doctorPigEvent : doctorPigEvents) {
-            DoctorPigEventForDisplay display = (DoctorPigEventForDisplay) doctorPigEvent;
+        for (DoctorPigEvent display : doctorPigEvents) {
             codeToName(display);
 
             if (Objects.equals(display.getType(), PigEvent.MATING.getKey())) {
@@ -83,7 +83,7 @@ public class TransFromUtil {
     /**
      * 枚举值转换中文
      */
-    private void codeToName(DoctorPigEventForDisplay display) {
+    private void codeToName(DoctorPigEvent display) {
         Map<String, Object> extraMap = display.getExtraMap();
         if (isNull(extraMap)) {
             return;
@@ -111,6 +111,9 @@ public class TransFromUtil {
         }
         if (getLong(extraMap, "toBarnId") != null) {
             extraMap.put("toBarnId", RespHelper.or500(doctorBarnReadService.findBarnById(toLong(extraMap.get("toBarnId")))).getName());
+        }
+        if (getLong(extraMap, "chgLocationToBarnId") != null) {
+            extraMap.put("chgLocationToBarnName", RespHelper.or500(doctorBarnReadService.findBarnById(toLong(extraMap.get("chgLocationToBarnId")))).getName());
         }
         if (Objects.equals(display.getType(), PigEvent.ENTRY.getKey())
                 && notNull(display.getExtraMap())
