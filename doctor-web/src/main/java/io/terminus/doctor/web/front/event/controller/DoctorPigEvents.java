@@ -133,7 +133,8 @@ public class DoctorPigEvents {
             Date beginDateTime = Strings.isNullOrEmpty(startDate) ? null : DTF.parseDateTime(startDate).withTimeAtStartOfDay().toDate();
             Date endDateTime = Strings.isNullOrEmpty(endDate) ? null : (DTF).parseDateTime(endDate).plusDays(1).withTimeAtStartOfDay().toDate(); // 添加一天
 
-            Paging<DoctorPigEvent> doctorPigEventPaging = RespHelper.or500(doctorPigEventReadService.queryPigDoctorEvents(farmId, pigId, pageNo, pageSize, beginDateTime, endDateTime));
+            Paging<DoctorPigEvent> doctorPigEventPaging = RespHelper.or500(doctorPigEventReadService.queryPigDoctorEvents(farmId,
+                    pigId, pageNo, pageSize, beginDateTime, endDateTime));
             transFromUtil.transFromExtraMap(doctorPigEventPaging.getData());
             return doctorPigEventPaging;
         } catch (Exception e) {

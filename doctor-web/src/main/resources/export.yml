@@ -733,11 +733,11 @@ export.tables:
           format: isoDateFormatter
         - name: barnName
           display: 断奶猪舍
-        - name: weanPigletsCount
+        - name: partWeanPigletsCount
           display: 断奶数
         - name: partWeanAvgWeight
           display: 断奶均重
-        - name: chgLocationToBarnId
+        - name: chgLocationToBarnName
           display: 母猪转入猪舍
         - name: qualifiedCount
           display: 合格数
@@ -766,11 +766,11 @@ export.tables:
         - name: fostersCount
           display: 猪只数
         - name: fosterReasonName
-          display: 寄养原因名称
+          display: 拼窝原因
         - name: fosterRemark
           display: 备注
         - name: operatorName
-          display: 转场人员
+          display: 录入人员
   web-pig-sowTransFarm:
       display: 母猪转场事件
       columns:

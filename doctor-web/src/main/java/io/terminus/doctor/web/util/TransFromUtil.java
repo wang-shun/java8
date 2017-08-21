@@ -22,6 +22,7 @@ import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.web.front.event.dto.DoctorPigEventForDisplay;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserProfileReadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -58,53 +60,62 @@ public class TransFromUtil {
 
     public void transFromExtraMap(List<DoctorPigEvent> doctorPigEvents) {
         for (DoctorPigEvent doctorPigEvent : doctorPigEvents) {
-            Map<String,Object> extraMap = doctorPigEvent.getExtraMap();
-            if (extraMap != null) {
-                if (getInteger(extraMap, "matingType") != null) {
-                    extraMap.put("matingType", MatingType.from(toInteger(extraMap.get("matingType"))).getDesc());
-                }
-                if (getInteger(extraMap, "checkResult") != null) {
-                    extraMap.put("checkResult", PregCheckResult.from(toInteger(extraMap.get("checkResult"))).getDesc());
-                }
-                if (getInteger(extraMap, "farrowingType") != null) {
-                    extraMap.put("farrowingType", FarrowingType.from(toInteger(extraMap.get("farrowingType"))).getDesc());
-                }
-                if (getInteger(extraMap, "farrowIsSingleManager") != null) {
-                    extraMap.put("farrowIsSingleManager", (toInteger(extraMap.get("farrowIsSingleManager")) == 1) ? IsOrNot.YES.getDesc() : IsOrNot.NO.getDesc());
-                }
-                if (getLong(extraMap, "fosterReason") != null) {
-                    extraMap.put("fosterReason", RespHelper.or500(doctorBasicReadService.findBasicById(toLong(extraMap.get("fosterReason")))).getName());
-                }
-                if (getLong(extraMap, "vaccinationStaffId") != null) {
-                    UserProfile userProfile = RespHelper.or500(userProfileReadService.findProfileByUserId(toLong(extraMap.get("vaccinationStaffId"))));
-                    if (userProfile != null && notEmpty(userProfile.getRealName())) {
-                        extraMap.put("vaccinationStaffName", userProfile.getRealName());
-                    }
-                }
-                if (getLong(extraMap, "toBarnId") != null) {
-                    extraMap.put("toBarnId", RespHelper.or500(doctorBarnReadService.findBarnById(toLong(extraMap.get("toBarnId")))).getName());
-                }
+            DoctorPigEventForDisplay display = (DoctorPigEventForDisplay) doctorPigEvent;
+            codeToName(display);
 
-                if( Objects.equals(doctorPigEvent.getType(), PigEvent.ENTRY.getKey())
-                        && notNull(doctorPigEvent.getExtraMap())
-                        && doctorPigEvent.getExtraMap().containsKey("boarType")){
-                    extraMap.put("boarTypeName", BoarEntryType.from(Integer.valueOf(extraMap.get("boarType").toString())).getDesc());
-                }
-
-                if (Objects.equals(doctorPigEvent.getType(), PigEvent.MATING.getKey())) {
-                    DoctorPigTrack doctorPigTrack = RespHelper.orServEx(doctorPigReadService.findPigTrackByPigId(doctorPigEvent.getPigId()));
-                    doctorPigEvent.setPigStatus(PigStatus.from(doctorPigTrack.getStatus()).getName());
-                }
-                if (Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK.getKey())) {
-                    doctorPigEvent.setMatingDay(getMatingDay(doctorPigEvent));
-                }
-                Boolean isRollback = false;
-                Response<Boolean> booleanResponse = doctorPigEventReadService.eventCanRollback(doctorPigEvent.getId());
-                if (booleanResponse.isSuccess()) {
-                    isRollback = booleanResponse.getResult();
-                }
-                doctorPigEvent.setIsRollback(isRollback);
+            if (Objects.equals(display.getType(), PigEvent.MATING.getKey())) {
+                DoctorPigTrack doctorPigTrack = RespHelper.orServEx(doctorPigReadService.findPigTrackByPigId(display.getPigId()));
+                display.setPigStatus(PigStatus.from(doctorPigTrack.getStatus()).getName());
             }
+
+            if (Objects.equals(display.getType(), PigEvent.PREG_CHECK.getKey())) {
+                display.setMatingDay(getMatingDay(display));
+            }
+            Boolean isRollback = false;
+            Response<Boolean> booleanResponse = doctorPigEventReadService.eventCanRollback(display.getId());
+            if (booleanResponse.isSuccess()) {
+                isRollback = booleanResponse.getResult();
+            }
+            display.setIsRollback(isRollback);
+        }
+    }
+
+    /**
+     * 枚举值转换中文
+     */
+    private void codeToName(DoctorPigEventForDisplay display) {
+        Map<String, Object> extraMap = display.getExtraMap();
+        if (isNull(extraMap)) {
+            return;
+        }
+        if (getInteger(extraMap, "matingType") != null) {
+            extraMap.put("matingType", MatingType.from(toInteger(extraMap.get("matingType"))).getDesc());
+        }
+        if (getInteger(extraMap, "checkResult") != null) {
+            extraMap.put("checkResult", PregCheckResult.from(toInteger(extraMap.get("checkResult"))).getDesc());
+        }
+        if (getInteger(extraMap, "farrowingType") != null) {
+            extraMap.put("farrowingType", FarrowingType.from(toInteger(extraMap.get("farrowingType"))).getDesc());
+        }
+        if (getInteger(extraMap, "farrowIsSingleManager") != null) {
+            extraMap.put("farrowIsSingleManager", (toInteger(extraMap.get("farrowIsSingleManager")) == 1) ? IsOrNot.YES.getDesc() : IsOrNot.NO.getDesc());
+        }
+        if (getLong(extraMap, "fosterReason") != null) {
+            extraMap.put("fosterReason", RespHelper.or500(doctorBasicReadService.findBasicById(toLong(extraMap.get("fosterReason")))).getName());
+        }
+        if (getLong(extraMap, "vaccinationStaffId") != null) {
+            UserProfile userProfile = RespHelper.or500(userProfileReadService.findProfileByUserId(toLong(extraMap.get("vaccinationStaffId"))));
+            if (userProfile != null && notEmpty(userProfile.getRealName())) {
+                extraMap.put("vaccinationStaffName", userProfile.getRealName());
+            }
+        }
+        if (getLong(extraMap, "toBarnId") != null) {
+            extraMap.put("toBarnId", RespHelper.or500(doctorBarnReadService.findBarnById(toLong(extraMap.get("toBarnId")))).getName());
+        }
+        if (Objects.equals(display.getType(), PigEvent.ENTRY.getKey())
+                && notNull(display.getExtraMap())
+                && display.getExtraMap().containsKey("boarType")) {
+            extraMap.put("boarTypeName", BoarEntryType.from(Integer.valueOf(extraMap.get("boarType").toString())).getDesc());
         }
     }
 

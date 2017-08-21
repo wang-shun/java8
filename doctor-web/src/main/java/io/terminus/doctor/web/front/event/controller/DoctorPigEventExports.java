@@ -43,11 +43,13 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
@@ -94,6 +96,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -114,6 +117,8 @@ public class DoctorPigEventExports {
 
     private final UserReadService userReadService;
 
+    private final DoctorBarnReadService doctorBarnReadService;
+
     private final DoctorGroupReadService doctorGroupReadService;
 
     private final TransFromUtil transFromUtil;
@@ -133,13 +138,15 @@ public class DoctorPigEventExports {
                                  DoctorPigEventWriteService doctorPigEventWriteService,
                                  UserReadService userReadService,
                                  DoctorGroupReadService doctorGroupReadService,
-                                 TransFromUtil transFromUtil) {
+                                 TransFromUtil transFromUtil,
+                                 DoctorBarnReadService doctorBarnReadService) {
         this.doctorPigReadService = doctorPigReadService;
         this.doctorPigEventReadService = doctorPigEventReadService;
         this.doctorPigEventWriteService = doctorPigEventWriteService;
         this.userReadService = userReadService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.transFromUtil = transFromUtil;
+        this.doctorBarnReadService = doctorBarnReadService;
     }
 
     /**
@@ -350,6 +357,10 @@ public class DoctorPigEventExports {
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setParity(doctorPigEventDetail.getParity());
                 dto.setCreatorName(doctorPigEventDetail.getCreatorName());
+                if (notNull(weanDto.getChgLocationToBarnId())) {
+                    DoctorBarn chgToBarn = RespHelper.or500(doctorBarnReadService.findBarnById(weanDto.getChgLocationToBarnId()));
+                    dto.setChgLocationToBarnName(chgToBarn.getName());
+                }
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
                 return dto;
