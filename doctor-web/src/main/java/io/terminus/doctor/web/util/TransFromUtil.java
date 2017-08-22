@@ -93,6 +93,7 @@ public class TransFromUtil {
         }
         if (getInteger(extraMap, "farrowingType") != null) {
             extraMap.put("farrowingType", FarrowingType.from(toInteger(extraMap.get("farrowingType"))).getDesc());
+            extraMap.put("farrowType", FarrowingType.from(toInteger(extraMap.get("farrowingType"))).getDesc());
         }
         if (getInteger(extraMap, "farrowIsSingleManager") != null) {
             extraMap.put("farrowIsSingleManager", (toInteger(extraMap.get("farrowIsSingleManager")) == 1) ? IsOrNot.YES.getDesc() : IsOrNot.NO.getDesc());
