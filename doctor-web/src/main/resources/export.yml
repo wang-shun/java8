@@ -840,7 +840,7 @@ export.tables:
           display: 当前状态
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-group-MoveIn:
       display: 转入猪群
@@ -876,7 +876,7 @@ export.tables:
           display: 母猪数量
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-group-change:
       display: 猪群变动
@@ -900,6 +900,12 @@ export.tables:
           display: 单价
         - name: amount
           display: 金额
+        - name: weight
+          display: 总重
+        - name: avgWeight
+          display: 均重
+        - name: creatorName
+          display: 录入人员
   web-group-transGroup:
       display: 猪群转群
       columns:
@@ -924,7 +930,7 @@ export.tables:
           display: 母猪数
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-group-turnSeed:
       display: 转种猪事件
@@ -934,7 +940,7 @@ export.tables:
         - name: barnName
           display: 猪舍
         - name: eventAt
-          display: 转入日期
+          display: 转出日期
           format: isoDateFormatter
         - name: birthDate
           display: 出生日期
@@ -953,6 +959,10 @@ export.tables:
           display: 品系
         - name: sex
           display: 性别
+        - name: remark
+          display: 备注
+        - name: creatorName
+          display: 录入人员
   web-group-Disease:
       display: 猪群疾病
       columns:
@@ -989,7 +999,7 @@ export.tables:
           display: 防疫人员
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-group-transFarm:
       display: 猪群转场事件
@@ -1017,5 +1027,5 @@ export.tables:
           display: 总重
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员

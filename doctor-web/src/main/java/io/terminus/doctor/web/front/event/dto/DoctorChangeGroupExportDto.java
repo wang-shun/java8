@@ -35,7 +35,7 @@ public class DoctorChangeGroupExportDto extends DoctorGroupEvent{
     /**
      * 单价(分)
      */
-    private Long price;
+    private Double price;
 
     /**
      * 金额(分)

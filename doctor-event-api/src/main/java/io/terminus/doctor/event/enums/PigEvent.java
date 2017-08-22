@@ -87,5 +87,11 @@ public enum PigEvent {
         return Arrays.asList(values()).stream().filter(pigEvent -> types.contains(pigEvent.getType())).collect(Collectors.toList());
     }
 
-    public static final List<Integer> NOTICE_MESSAGE_PIG_EVENT = Lists.newArrayList(CONDITION.getKey(), VACCINATION.getKey(), REMOVAL.getKey(), MATING.getKey(), PREG_CHECK.getKey(), TO_FARROWING.getKey(), WEAN.getKey());
+    public static final List<Integer> NOTICE_MESSAGE_PIG_EVENT = Lists.newArrayList(CONDITION.getKey(), VACCINATION.getKey()
+            , REMOVAL.getKey(), MATING.getKey(), PREG_CHECK.getKey(), TO_FARROWING.getKey(), WEAN.getKey());
+
+    /**
+     * 广义转舍事件
+     */
+    public static final List<Integer> CHANGE_LOCATION = Lists.newArrayList(CHG_LOCATION.getKey(), TO_MATING.getKey(), TO_FARROWING.getKey());
 }

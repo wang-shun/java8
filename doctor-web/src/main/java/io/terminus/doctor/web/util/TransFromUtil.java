@@ -2,7 +2,6 @@ package io.terminus.doctor.web.util;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -23,7 +22,6 @@ import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
-import io.terminus.doctor.web.front.event.dto.DoctorPigEventForDisplay;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserProfileReadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 
 /**
  * Created by highway on 16/8/11.
@@ -63,7 +59,8 @@ public class TransFromUtil {
         for (DoctorPigEvent display : doctorPigEvents) {
             codeToName(display);
 
-            if (Objects.equals(display.getType(), PigEvent.MATING.getKey())) {
+            if (Objects.equals(display.getType(), PigEvent.MATING.getKey())
+                    || PigEvent.CHANGE_LOCATION.contains(display.getType())) {
                 DoctorPigTrack doctorPigTrack = RespHelper.orServEx(doctorPigReadService.findPigTrackByPigId(display.getPigId()));
                 display.setPigStatus(PigStatus.from(doctorPigTrack.getStatus()).getName());
             }

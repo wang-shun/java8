@@ -8,6 +8,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.common.utils.NumberUtils;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.constants.JacksonType;
@@ -259,9 +260,12 @@ public class DoctorPigEventExports {
                 DoctorRemovalDto removalDto = JSON_MAPPER.fromJson(doctorPigEventDetail.getExtra(), DoctorRemovalDto.class);
                 DoctorPigRemoveExportDto dto = OBJECT_MAPPER.convertValue(removalDto, DoctorPigRemoveExportDto.class);
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
+                if (notNull(dto.getPrice())) {
+                    dto.setPrice(Double.parseDouble(NumberUtils.divide(removalDto.getPrice(), 100L, 2)));
+                }
                 dto.setAmount(doctorPigEventDetail.getAmount());
-                if (dto.getPrice() != null) {
-                    dto.setPrice(dto.getPrice() / 100);
+                if (notNull(dto.getAmount())) {
+                    dto.setAmount(dto.getAmount() / 100);
                 }
                 dto.setParity(doctorPigEventDetail.getParity());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
@@ -567,6 +571,12 @@ public class DoctorPigEventExports {
                 DoctorChangeGroupInput changeGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorChangeGroupInput.class);
                 changeGroupEvent.setEventAt(null);
                 DoctorChangeGroupExportDto exportData = BeanMapper.map(changeGroupEvent, DoctorChangeGroupExportDto.class);
+                if (notNull(exportData.getPrice())) {
+                    exportData.setPrice(Double.parseDouble(NumberUtils.divide(changeGroupEvent.getPrice(), 100L, 2)));
+                }
+                if (notNull(exportData.getAmount())) {
+                    exportData.setAmount(exportData.getAmount() / 100);
+                }
                 exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
                 exportData.setBarnName(doctorGroupEventDetail.getBarnName());
                 exportData.setQuantity(doctorGroupEventDetail.getQuantity());
