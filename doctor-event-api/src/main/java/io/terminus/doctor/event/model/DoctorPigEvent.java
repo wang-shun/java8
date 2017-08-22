@@ -420,7 +420,7 @@ public class DoctorPigEvent implements Serializable {
     private String pigStatus;
 
     /**
-     * 已配种天数(不存于数据库,用于前台显示)
+     * 已配种天数(不存于数据库, 用于前台显示)
      */
     private Integer matingDay;
 

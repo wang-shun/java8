@@ -21,8 +21,8 @@ public class DoctorWeanExportDto implements Serializable{
     private String partWeanRemark;  //部分断奶标识
     private Integer qualifiedCount; // 合格数量
     private Integer notQualifiedCount; //不合格的数量
-    private Long chgLocationToBarnId;   // 转舍Id
-    private Integer weanPigletsCount; //已断奶数
+    private String chgLocationToBarnName;   // 转舍
+    private Integer partWeanPigletsCount; //已断奶数
     private String operatorName;
     private String creatorName;
 

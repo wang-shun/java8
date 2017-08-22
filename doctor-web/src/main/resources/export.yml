@@ -693,7 +693,7 @@ export.tables:
         - name: creatorName
           display: 录入人员
   web-pig-PigletsChg:
-      display: 猪仔变动
+      display: 仔猪变动
       columns:
         - name: pigCode
           display: 母猪号
@@ -703,6 +703,7 @@ export.tables:
           display: 猪舍
         - name: pigletsChangeDate
           display: 变动日期
+          format: isoDateFormatter
         - name: pigletsChangeTypeName
           display: 变动类型
         - name: pigletsChangeReasonName
@@ -711,6 +712,8 @@ export.tables:
           display: 头数
         - name: pigletsWeight
           display: 总重
+        - name: pigletsAvgWeight
+          display: 平均重量
         - name: pigletsCustomerName
           display: 客户
         - name: pigletsPrice
@@ -733,11 +736,11 @@ export.tables:
           format: isoDateFormatter
         - name: barnName
           display: 断奶猪舍
-        - name: weanPigletsCount
+        - name: partWeanPigletsCount
           display: 断奶数
         - name: partWeanAvgWeight
           display: 断奶均重
-        - name: chgLocationToBarnId
+        - name: chgLocationToBarnName
           display: 母猪转入猪舍
         - name: qualifiedCount
           display: 合格数
@@ -766,11 +769,11 @@ export.tables:
         - name: fostersCount
           display: 猪只数
         - name: fosterReasonName
-          display: 寄养原因名称
+          display: 拼窝原因
         - name: fosterRemark
           display: 备注
         - name: operatorName
-          display: 转场人员
+          display: 录入人员
   web-pig-sowTransFarm:
       display: 母猪转场事件
       columns:
@@ -836,7 +839,7 @@ export.tables:
           display: 当前状态
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-group-MoveIn:
       display: 转入猪群
@@ -872,7 +875,7 @@ export.tables:
           display: 母猪数量
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-group-change:
       display: 猪群变动
@@ -892,10 +895,16 @@ export.tables:
           display: 猪只数
         - name: customerName
           display: 客户
-        - name: price
+        - name: rawPrice
           display: 单价
         - name: amount
           display: 金额
+        - name: weight
+          display: 总重
+        - name: avgWeight
+          display: 均重
+        - name: creatorName
+          display: 录入人员
   web-group-transGroup:
       display: 猪群转群
       columns:
@@ -920,7 +929,7 @@ export.tables:
           display: 母猪数
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-group-turnSeed:
       display: 转种猪事件
@@ -930,7 +939,7 @@ export.tables:
         - name: barnName
           display: 猪舍
         - name: eventAt
-          display: 转入日期
+          display: 转出日期
           format: isoDateFormatter
         - name: birthDate
           display: 出生日期
@@ -949,6 +958,10 @@ export.tables:
           display: 品系
         - name: sex
           display: 性别
+        - name: remark
+          display: 备注
+        - name: creatorName
+          display: 录入人员
   web-group-Disease:
       display: 猪群疾病
       columns:
@@ -985,7 +998,7 @@ export.tables:
           display: 防疫人员
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
   web-group-transFarm:
       display: 猪群转场事件
@@ -1013,5 +1026,5 @@ export.tables:
           display: 总重
         - name: remark
           display: 备注
-        - name: updatorName
+        - name: creatorName
           display: 录入人员
