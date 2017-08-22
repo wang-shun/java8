@@ -415,12 +415,12 @@ public class DoctorPigEvent implements Serializable {
     private Boolean isRollback;
 
     /**
-     * 猪当前状态(不存于数据库, 用于前台判断)
+     * 猪当前状态(不存于数据库, 用于前台显示)
      */
     private String pigStatus;
 
     /**
-     * 已配种天数(不存于数据库, 用于前台判断)
+     * 已配种天数(不存于数据库, 用于前台显示)
      */
     private Integer matingDay;
 
