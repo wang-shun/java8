@@ -42,7 +42,6 @@ import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.MatingType;
-import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
@@ -859,36 +858,36 @@ public class DoctorPigEventExports {
 
 
     private void exportBoarEvents(Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
-        switch(PigEvent.from(Integer.parseInt(eventCriteria.get("eventTypes")))){
-            case ENTRY:
+        switch(eventCriteria.get("eventTypes")){
+            case "7,20":
                 //进场
                 exporter.export("web-pig-boarInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
                 break;
-            case SEMEN:
+            case "8":
                 //采精
                 exporter.export("web-pig-boarCollect", eventCriteria, 1, 500, this::pagingSemenExport, request, response);
                 break;
-            case CHG_LOCATION:
+            case "1":
                 exporter.export("web-pig-boarChangeBarn", eventCriteria, 1, 500, this::pagingChangeBarn, request, response);
                 //转舍
                 break;
-            case CHG_FARM:
+            case "2":
                 exporter.export("web-pig-boarTransFarm", eventCriteria, 1, 500, this::pagingChgFarm, request, response);
                 //转场
                 break;
-            case CONDITION:
+            case "3":
                 exporter.export("web-pig-boarCondition", eventCriteria, 1, 500, this::pagingBoarCondition, request, response);
                 //体况
                 break;
-            case DISEASE:
+            case "4":
                 exporter.export("web-pig-boarDisease", eventCriteria, 1, 500, this::pagingDisease, request, response);
                 //疾病
                 break;
-            case VACCINATION:
+            case "5":
                 exporter.export("web-pig-boarVaccination", eventCriteria, 1, 500, this::pagingVaccination, request, response);
                 //防疫
                 break;
-            case REMOVAL:
+            case "6":
                 exporter.export("web-pig-boarRemove", eventCriteria, 1, 500, this::pagingRemove, request, response);
                 //离场
                 break;
