@@ -572,11 +572,12 @@ public class DoctorPigEventExports {
                 changeGroupEvent.setEventAt(null);
                 DoctorChangeGroupExportDto exportData = BeanMapper.map(changeGroupEvent, DoctorChangeGroupExportDto.class);
                 if (notNull(exportData.getPrice())) {
-                    exportData.setPrice(Double.parseDouble(NumberUtils.divide(changeGroupEvent.getPrice(), 100L, 2)));
+                    exportData.setRawPrice(Double.parseDouble(NumberUtils.divide(changeGroupEvent.getPrice(), 100L, 2)));
                 }
                 if (notNull(exportData.getAmount())) {
                     exportData.setAmount(exportData.getAmount() / 100);
                 }
+                exportData.setAvgWeight(doctorGroupEventDetail.getAvgWeight());
                 exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
                 exportData.setBarnName(doctorGroupEventDetail.getBarnName());
                 exportData.setQuantity(doctorGroupEventDetail.getQuantity());

@@ -713,7 +713,7 @@ export.tables:
         - name: pigletsWeight
           display: 总重
         - name: pigletsAvgWeight
-          display: 平均总重
+          display: 平均重量
         - name: pigletsCustomerName
           display: 客户
         - name: pigletsPrice
@@ -736,7 +736,6 @@ export.tables:
           format: isoDateFormatter
         - name: barnName
           display: 断奶猪舍
-        - name: partWeanPigletsCount
         - name: partWeanPigletsCount
           display: 断奶数
         - name: partWeanAvgWeight
@@ -896,7 +895,7 @@ export.tables:
           display: 猪只数
         - name: customerName
           display: 客户
-        - name: price
+        - name: rawPrice
           display: 单价
         - name: amount
           display: 金额
