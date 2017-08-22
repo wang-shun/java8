@@ -410,17 +410,17 @@ public class DoctorPigEvent implements Serializable {
     private Integer isModify;
 
     /**
-     * 是否能够回滚事件
+     * 是否能够回滚事件(不存于数据库, 用于前台判断)
      */
     private Boolean isRollback;
 
     /**
-     * 猪当前状态
+     * 猪当前状态(不存于数据库, 用于前台判断)
      */
     private String pigStatus;
 
     /**
-     * 已配种天数
+     * 已配种天数(不存于数据库, 用于前台判断)
      */
     private Integer matingDay;
 
