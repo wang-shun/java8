@@ -794,11 +794,12 @@
         ifnull(sum(farrow_weak),0) AS farrowWeak,
         ifnull(sum(farrow_dead),0) AS farrowDead,
         ifnull(sum(farrow_sjmh - farrow_dead),0) AS farrowJmh,
+        CONVERT(ifnull(sum(farrow_weight)/sum(farrow_live),0),DECIMAL(10,2))  as avgFarrowWeight,
         ifnull(sum(farrow_weight),0) AS farrowWeight,
         ifnull(sum(wean_nest),0) AS weanNest,
         ifnull(sum(wean_count),0) AS weanCount,
-        ifnull(sum(wean_avg_weight),0) AS weanAvgWeight,
-        ifnull(sum(wean_day_age),0) AS weanDayAge,
+        CONVERT(ifnull(sum(wean_count*wean_avg_weight)/sum(wean_count),0),DECIMAL(10,2)) as weanAvgWeight,
+        CONVERT(ifnull(sum(wean_count*wean_day_age)/sum(wean_count),0),DECIMAL(10,2)) as weanDayAge,
         ifnull(sum(sow_sale),0) AS sowSale,
         ifnull(sum(boar_sale),0) AS boarSale
     </sql>

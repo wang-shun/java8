@@ -30,8 +30,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static io.terminus.common.utils.Arguments.*;
+import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Created by highway on 16/8/11.
@@ -153,6 +154,9 @@ public class TransFromUtil {
     private Integer getMatingDay(DoctorPigEvent pregCheckEvent) {
         DoctorPigEvent firstMatingEvent = RespHelper.orServEx(doctorPigEventReadService
                 .findFirstMatingBeforePregCheck(pregCheckEvent.getPigId(), pregCheckEvent.getParity(), pregCheckEvent.getId()));
+        if (isNull(firstMatingEvent)) {
+            return 0;
+        }
         return DateUtil.getDeltaDays(firstMatingEvent.getEventAt(), pregCheckEvent.getEventAt());
     }
 
