@@ -132,6 +132,10 @@ public class WarehouseController {
         warehouseResponse.getResult().forEach(wareHouse -> {
 
             FarmWarehouseVo vo = new FarmWarehouseVo();
+            vo.setId(wareHouse.getId());
+            vo.setName(wareHouse.getWareHouseName());
+            vo.setType(wareHouse.getType());
+            vo.setManagerName(wareHouse.getManagerName());
 
             DoctorWarehouseMaterialHandle handleCriteria = new DoctorWarehouseMaterialHandle();
             handleCriteria.setWarehouseId(wareHouse.getId());
@@ -180,7 +184,7 @@ public class WarehouseController {
             long totalMoney = 0L;
             for (DoctorWarehousePurchase purchase : warehousePurchasesResponse.getResult()) {
                 BigDecimal leftQuantity = purchase.getQuantity().subtract(purchase.getHandleQuantity());
-                totalQuantity.add(leftQuantity);
+                totalQuantity = totalQuantity.add(leftQuantity);
                 totalMoney += leftQuantity.multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
             }
             vo.setStockQuantity(totalQuantity);
