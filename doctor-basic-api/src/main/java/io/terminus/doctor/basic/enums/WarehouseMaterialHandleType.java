@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 /**
  * Created by sunbo@terminus.io on 2017/8/10.
  */
-public enum WarehouseMaterialHandlerType {
+public enum WarehouseMaterialHandleType {
 
     /**
      * 未知
@@ -48,13 +48,13 @@ public enum WarehouseMaterialHandlerType {
     private int value;
 
 
-    WarehouseMaterialHandlerType(int value) {
+    WarehouseMaterialHandleType(int value) {
         this.value = value;
     }
 
 
-    public static WarehouseMaterialHandlerType fromValue(int value) {
-        return Stream.of(WarehouseMaterialHandlerType.values()).parallel().filter(t -> t.value == value).findFirst().orElse(UNKNOWN);
+    public static WarehouseMaterialHandleType fromValue(int value) {
+        return Stream.of(WarehouseMaterialHandleType.values()).parallel().filter(t -> t.value == value).findFirst().orElse(UNKNOWN);
     }
 
 }

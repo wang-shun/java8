@@ -1,6 +1,9 @@
 package io.terminus.doctor.web.front.new_warehouse.vo;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.util.List;
 
@@ -10,18 +13,18 @@ import java.util.List;
 @Data
 public class WarehouseReportVo {
 
-    private String warehouseName;
+    private String monthAndType;
 
     private List<WarehouseReportMonthDetail> details;
 
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class WarehouseReportMonthDetail {
 
-        private String month;
-
-        private Long in;
-        private Long out;
-        private Long balance;
+        private String name;
+        private long amount;
 
     }
 

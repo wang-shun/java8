@@ -8,15 +8,12 @@ import io.terminus.doctor.basic.dto.WarehouseStockInDto;
 import io.terminus.doctor.basic.dto.WarehouseStockInventoryDto;
 import io.terminus.doctor.basic.dto.WarehouseStockOutDto;
 import io.terminus.doctor.basic.dto.WarehouseStockTransferDto;
-import io.terminus.doctor.basic.enums.WarehouseMaterialHandlerType;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialStock;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseStockVo;
-import jodd.csselly.selector.PseudoClass;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -120,7 +117,7 @@ public class StockController {
         DoctorWarehouseMaterialHandle handleCriteria = new DoctorWarehouseMaterialHandle();
         handleCriteria.setHandleYear(now.get(Calendar.YEAR));
         handleCriteria.setHandleMonth(now.get(Calendar.MONTH) + 1);
-        handleCriteria.setType(WarehouseMaterialHandlerType.OUT.getValue());
+        handleCriteria.setType(WarehouseMaterialHandleType.OUT.getValue());
         handleCriteria.setWarehouseId(warehouseId);
         Response<List<DoctorWarehouseMaterialHandle>> outHandleResponse = doctorWarehouseMaterialHandleReadService.list(handleCriteria);
         if (!outHandleResponse.isSuccess())
@@ -144,7 +141,7 @@ public class StockController {
 
 
         //本月入库记录
-        handleCriteria.setType(WarehouseMaterialHandlerType.IN.getValue());
+        handleCriteria.setType(WarehouseMaterialHandleType.IN.getValue());
         Response<List<DoctorWarehouseMaterialHandle>> inHandleResponse = doctorWarehouseMaterialHandleReadService.list(handleCriteria);
         if (!inHandleResponse.isSuccess())
             throw new JsonResponseException(inHandleResponse.getError());

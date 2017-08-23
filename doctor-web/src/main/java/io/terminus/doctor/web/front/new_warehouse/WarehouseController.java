@@ -5,7 +5,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
-import io.terminus.doctor.basic.enums.WarehouseMaterialHandlerType;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
@@ -87,6 +87,8 @@ public class WarehouseController {
 
         Response<User> currentUserResponse = userReadService.findById(UserUtil.getUserId());
         User currentUser = currentUserResponse.getResult();
+        if (null == currentUser)
+            throw new JsonResponseException("user.not.login");
 
         DoctorWareHouse doctorWareHouse = DoctorWareHouse.builder()
                 .wareHouseName(warehouseDto.getName())
@@ -153,13 +155,13 @@ public class WarehouseController {
 
             thisMonthHandlesResponse.getResult().forEach(handle -> {
                 long money = handle.getQuantity().multiply(new BigDecimal(handle.getUnitPrice())).longValue();
-                if (handle.getType() == WarehouseMaterialHandlerType.IN.getValue()) {
+                if (handle.getType() == WarehouseMaterialHandleType.IN.getValue()) {
                     vo.setInAmount(vo.getInAmount() + money);
                     vo.setInQuantity(vo.getInQuantity().add(handle.getQuantity()));
-                } else if (handle.getType() == WarehouseMaterialHandlerType.OUT.getValue()) {
+                } else if (handle.getType() == WarehouseMaterialHandleType.OUT.getValue()) {
                     vo.setOutAmount(vo.getOutAmount() + money);
                     vo.setOutQuantity(vo.getOutQuantity().add(handle.getQuantity()));
-                } else if (handle.getType() == WarehouseMaterialHandlerType.TRANSFER.getValue()) {
+                } else if (handle.getType() == WarehouseMaterialHandleType.TRANSFER.getValue()) {
                     vo.setTransferOutAmount(vo.getTransferOutAmount() + money);
                     vo.setTransferOutQuantity(vo.getTransferOutQuantity().add(handle.getQuantity()));
                 }
@@ -169,7 +171,7 @@ public class WarehouseController {
             handleCriteria.setTargetWarehouseId(wareHouse.getId());
             handleCriteria.setHandleYear(now.get(Calendar.YEAR));
             handleCriteria.setHandleMonth(now.get(Calendar.MONTH) + 1);
-            handleCriteria.setType(WarehouseMaterialHandlerType.TRANSFER.getValue());
+            handleCriteria.setType(WarehouseMaterialHandleType.TRANSFER.getValue());
             thisMonthHandlesResponse = doctorWarehouseMaterialHandleReadService.list(handleCriteria);
             if (!thisMonthHandlesResponse.isSuccess())
                 throw new JsonResponseException(thisMonthHandlesResponse.getError());
@@ -234,26 +236,26 @@ public class WarehouseController {
 //    @RequestMapping(method = RequestMethod.PUT, value = "in")
 //    public void in(@RequestBody @Validated(WarehouseStockDto.InWarehouseValid.class) WarehouseStockDto dto) {
 //
-//        dto.setType(WarehouseMaterialHandlerType.IN.getValue());
+//        dto.setType(WarehouseMaterialHandleType.IN.getValue());
 //        newDoctorWarehouseWriterService.handler(dto);
 //    }
 //
 //
 //    @RequestMapping(method = RequestMethod.PUT, value = "out")
 //    public void out(@RequestBody @Validated(WarehouseStockDto.OutWarehouseValid.class) WarehouseStockDto dto) {
-//        dto.setType(WarehouseMaterialHandlerType.OUT.getValue());
+//        dto.setType(WarehouseMaterialHandleType.OUT.getValue());
 //        newDoctorWarehouseWriterService.handler(dto);
 //    }
 //
 //    @RequestMapping(method = RequestMethod.PUT, value = "inventory")
 //    public void inventory(@RequestBody @Validated(WarehouseStockDto.InventoryWarehouseValid.class) WarehouseStockDto dto) {
-//        dto.setType(WarehouseMaterialHandlerType.INVENTORY.getValue());
+//        dto.setType(WarehouseMaterialHandleType.INVENTORY.getValue());
 //        newDoctorWarehouseWriterService.handler(dto);
 //    }
 //
 //    @RequestMapping(method = RequestMethod.PUT, value = "transfer")
 //    public void transfer(@RequestBody @Validated(WarehouseStockDto.TransferWarehouseValid.class) WarehouseStockDto dto) {
-//        dto.setType(WarehouseMaterialHandlerType.TRANSFER.getValue());
+//        dto.setType(WarehouseMaterialHandleType.TRANSFER.getValue());
 //        newDoctorWarehouseWriterService.handler(dto);
 //    }
 

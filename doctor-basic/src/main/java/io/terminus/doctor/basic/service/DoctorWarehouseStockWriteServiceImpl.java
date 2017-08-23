@@ -10,7 +10,7 @@ import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.dao.DoctorWarehousePurchaseDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
 import io.terminus.doctor.basic.dto.*;
-import io.terminus.doctor.basic.enums.WarehouseMaterialHandlerType;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.DoctorWarehouseHandlerManager;
 import io.terminus.doctor.basic.manager.DoctorWarehouseMaterialApplyManager;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
@@ -151,7 +151,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             materialHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
             materialHandle.setWarehouseType(context.getWareHouse().getType());
             materialHandle.setUnitPrice(detail.getUnitPrice());
-            materialHandle.setType(WarehouseMaterialHandlerType.IN.getValue());
+            materialHandle.setType(WarehouseMaterialHandleType.IN.getValue());
             materialHandle.setQuantity(detail.getQuantity());
             materialHandle.setHandleDate(stockIn.getHandleDate());
             materialHandle.setHandleYear(c.get(Calendar.YEAR));
@@ -251,7 +251,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             materialHandle.setMaterialId(detail.getMaterialId());
             materialHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
             materialHandle.setWarehouseType(context.getWareHouse().getType());
-            materialHandle.setType(WarehouseMaterialHandlerType.INVENTORY.getValue());
+            materialHandle.setType(WarehouseMaterialHandleType.INVENTORY.getValue());
             materialHandle.setQuantity(changedQuantity);
             materialHandle.setHandleDate(stockInventory.getHandleDate());
             materialHandle.setHandleYear(c.get(Calendar.YEAR));
@@ -401,7 +401,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             materialHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
             materialHandle.setWarehouseType(context.getWareHouse().getType());
             materialHandle.setUnitPrice(averagePrice);
-            materialHandle.setType(WarehouseMaterialHandlerType.TRANSFER.getValue());
+            materialHandle.setType(WarehouseMaterialHandleType.TRANSFER.getValue());
             materialHandle.setQuantity(detail.getQuantity());
             materialHandle.setHandleDate(stockTransfer.getHandleDate());
             materialHandle.setHandleYear(c.get(Calendar.YEAR));
@@ -466,7 +466,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             materialHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
             materialHandle.setWarehouseType(context.getWareHouse().getType());
             materialHandle.setUnitPrice(averagePrice);
-            materialHandle.setType(WarehouseMaterialHandlerType.OUT.getValue());
+            materialHandle.setType(WarehouseMaterialHandleType.OUT.getValue());
             materialHandle.setQuantity(detail.getQuantity());
             materialHandle.setHandleDate(stockOut.getHandleDate());
             Calendar c = Calendar.getInstance();
@@ -503,7 +503,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //        DoctorWarehouseMaterialHandle inHandleCriteria = new DoctorWarehouseMaterialHandle();
 //        inHandleCriteria.setWarehouseId(warehouseID);
 //        inHandleCriteria.setMarterialId(materialID);
-//        inHandleCriteria.setType(WarehouseMaterialHandlerType.IN.getValue());
+//        inHandleCriteria.setType(WarehouseMaterialHandleType.IN.getValue());
 //        inHandleCriteria.setVendorName(vendorName);
 //        List<DoctorWarehouseMaterialHandle> inhandles = doctorWarehouseMaterialHandleDao.list(inHandleCriteria);
 //        if (null == inhandles || inhandles.isEmpty())
@@ -514,7 +514,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //        DoctorWarehouseMaterialHandle outHandleCriteria = new DoctorWarehouseMaterialHandle();
 //        outHandleCriteria.setWarehouseId(warehouseID);
 //        outHandleCriteria.setMarterialId(materialID);
-//        outHandleCriteria.setType(WarehouseMaterialHandlerType.OUT.getValue());
+//        outHandleCriteria.setType(WarehouseMaterialHandleType.OUT.getValue());
 //        outHandleCriteria.setVendorName(vendorName);
 //        List<DoctorWarehouseMaterialHandle> outHandles = doctorWarehouseMaterialHandleDao.list(outHandleCriteria);
 //        Map<String, BigDecimal> alreadyOut = new HashMap<>();

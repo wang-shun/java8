@@ -9,7 +9,7 @@ import io.terminus.doctor.basic.dao.*;
 import io.terminus.doctor.basic.dto.DoctorWarehouseStockHandleDto;
 import io.terminus.doctor.basic.dto.WarehouseStockDetailDto;
 import io.terminus.doctor.basic.dto.WarehouseStockDto;
-import io.terminus.doctor.basic.enums.WarehouseMaterialHandlerType;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.DoctorWarehouseHandlerManager;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
@@ -108,7 +108,7 @@ public class NewDoctorWarehouseWriterServiceImpl implements NewDoctorWarehouseWr
             dto.setHandleDetail(handlerDetail);
             dto.setHandleDate(warehouseStockDto.getHandlerDate());
             dto.setNumber(handlerDetail.getNumber());
-            if (warehouseStockDto.getType() == WarehouseMaterialHandlerType.IN.getValue()) {
+            if (warehouseStockDto.getType() == WarehouseMaterialHandleType.IN.getValue()) {
                 if (null == stock) {
                     stock = new DoctorWarehouseStock();
                     stock.setFarmId(warehouseStockDto.getFarmID());
@@ -124,7 +124,7 @@ public class NewDoctorWarehouseWriterServiceImpl implements NewDoctorWarehouseWr
                 }
                 dto.setStock(stock);
                 inHandles.add(dto);
-            } else if (warehouseStockDto.getType() == WarehouseMaterialHandlerType.OUT.getValue()) {
+            } else if (warehouseStockDto.getType() == WarehouseMaterialHandleType.OUT.getValue()) {
                 if (stock == null)
                     throw new ServiceException("物料在仓库中没有库存，无法出库");
 
@@ -134,7 +134,7 @@ public class NewDoctorWarehouseWriterServiceImpl implements NewDoctorWarehouseWr
                 handlerDetail.setRecipientId(detail.getRecipientID());
                 dto.setStock(stock);
                 outHandles.add(dto);
-            } else if (warehouseStockDto.getType() == WarehouseMaterialHandlerType.TRANSFER.getValue()) {
+            } else if (warehouseStockDto.getType() == WarehouseMaterialHandleType.TRANSFER.getValue()) {
                 if (stock == null)
                     throw new ServiceException("物料在仓库中没有库存，无法出库");
 
@@ -170,7 +170,7 @@ public class NewDoctorWarehouseWriterServiceImpl implements NewDoctorWarehouseWr
                 indto.setNumber(handlerDetail.getNumber());
                 indto.setHandleDate(warehouseStockDto.getHandlerDate());
                 inHandles.add(indto);
-            } else if (warehouseStockDto.getType() == WarehouseMaterialHandlerType.INVENTORY.getValue()) {
+            } else if (warehouseStockDto.getType() == WarehouseMaterialHandleType.INVENTORY.getValue()) {
                 if (null == stock)
                     throw new ServiceException("物料无库存");
                 dto.setStock(stock);
@@ -185,13 +185,13 @@ public class NewDoctorWarehouseWriterServiceImpl implements NewDoctorWarehouseWr
                 }
 
             }
-//            if (warehouseStockDto.getType() == WarehouseMaterialHandlerType.IN.getValue())
+//            if (warehouseStockDto.getType() == WarehouseMaterialHandleType.IN.getValue())
 //                stock = in(stock, warehouseStockDto, wareHouse, detail, materials);
-//            else if (warehouseStockDto.getType() == WarehouseMaterialHandlerType.OUT.getValue())
+//            else if (warehouseStockDto.getType() == WarehouseMaterialHandleType.OUT.getValue())
 //                out(stock, detail, handlerDetail);
-//            else if (warehouseStockDto.getType() == WarehouseMaterialHandlerType.INVENTORY.getValue())
+//            else if (warehouseStockDto.getType() == WarehouseMaterialHandleType.INVENTORY.getValue())
 //                stock = inventory(stock, warehouseStockDto, wareHouse, detail, materials);
-//            else if (warehouseStockDto.getType() == WarehouseMaterialHandlerType.TRANSFER.getValue())
+//            else if (warehouseStockDto.getType() == WarehouseMaterialHandleType.TRANSFER.getValue())
 //                stocks.add(transfer(stock, detail, wareHouse, handlerDetail));
 //            else
 //                throw new ServiceException("不支持的库存处理操作");

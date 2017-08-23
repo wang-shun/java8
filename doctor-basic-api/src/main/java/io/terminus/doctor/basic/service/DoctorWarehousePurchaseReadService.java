@@ -17,6 +17,7 @@ public interface DoctorWarehousePurchaseReadService {
 
     /**
      * 查询
+     *
      * @param id
      * @return doctorWarehousePurchase
      */
@@ -24,6 +25,7 @@ public interface DoctorWarehousePurchaseReadService {
 
     /**
      * 分页
+     *
      * @param pageNo
      * @param pageSize
      * @param criteria
@@ -31,13 +33,27 @@ public interface DoctorWarehousePurchaseReadService {
      */
     Response<Paging<DoctorWarehousePurchase>> paging(Integer pageNo, Integer pageSize, Map<String, Object> criteria);
 
-   /**
-    * 列表
-    * @param criteria
-    * @return List<DoctorWarehousePurchase>
-    */
+    /**
+     * 列表
+     *
+     * @param criteria
+     * @return List<DoctorWarehousePurchase>
+     */
     Response<List<DoctorWarehousePurchase>> list(Map<String, Object> criteria);
 
 
+    /**
+     * 列表
+     *
+     * @param criteria
+     * @return
+     */
     Response<List<DoctorWarehousePurchase>> list(DoctorWarehousePurchase criteria);
+
+    /**
+     * 统计猪厂下每个仓库余额
+     *
+     * @return
+     */
+    Response<Map<Long, Long>> countWarehouseBalanceAmount(Long farmId);
 }

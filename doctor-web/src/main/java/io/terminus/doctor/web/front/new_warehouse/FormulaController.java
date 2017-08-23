@@ -8,7 +8,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.basic.dto.DoctorWarehouseStockHandleDto;
-import io.terminus.doctor.basic.enums.WarehouseMaterialHandlerType;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.FeedFormula;
@@ -246,7 +246,7 @@ public class FormulaController {
         stockHandle.setFarmId(farmId);
         //配方生产后的物料的入仓仓库
         stockHandle.setWarehouseId(warehouseId);
-        stockHandle.setHandlerType(WarehouseMaterialHandlerType.FORMULA.getValue());
+        stockHandle.setHandlerType(WarehouseMaterialHandleType.FORMULA.getValue());
         stockHandle.setHandlerDate(handleDate);
         doctorWarehouseStockWriteService.outAndIn(inStockHandle, outStockHandle, stockHandle);
 

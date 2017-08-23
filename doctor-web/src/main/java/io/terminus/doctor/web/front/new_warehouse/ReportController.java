@@ -3,13 +3,19 @@ package io.terminus.doctor.web.front.new_warehouse;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.enums.WarehouseMaterialHandlerType;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
+import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
+import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseMonthlyReportVo;
+import io.terminus.doctor.web.front.new_warehouse.vo.WarehousePigGroupApplyVo;
+import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseReportVo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,12 +23,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.xml.ws.soap.Addressing;
 import java.math.BigDecimal;
 import java.util.*;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/9.
  */
+@Slf4j
 @RestController
 @RequestMapping("api/doctor/warehouse/report")
 public class ReportController {
@@ -43,45 +51,141 @@ public class ReportController {
     @RpcConsumer
     private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
 
+    @RpcConsumer
+    private NewDoctorWarehouseReaderService doctorWareHouseReadService;
+
+    @RpcConsumer
+    private DoctorGroupReadService doctorGroupReadService;
+
     @RequestMapping(method = RequestMethod.GET)
-    public Map<String, Map<Integer, Long[]>> report(@RequestParam Long farmId,
-                                                    @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
+    public List<WarehouseReportVo> report(@RequestParam Long farmId,
+                                          @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
-        //TODO 待修改
-        DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
-        purchaseCriteria.setFarmId(farmId);
-        purchaseCriteria.setHandleYear(date.get(Calendar.YEAR));
-        Response<List<DoctorWarehousePurchase>> purchaseResponse = doctorWarehousePurchaseReadService.list(purchaseCriteria);
-        if (!purchaseResponse.isSuccess())
-            throw new JsonResponseException(purchaseResponse.getError());
+        if (date.after(Calendar.getInstance()))
+            throw new JsonResponseException("date.after.now");
 
+        List<WarehouseReportVo> reports = new ArrayList<>();
 
-        Map<String, Map<Integer, Long[]>> warehouseReport = new HashMap<>();
-        for (DoctorWarehousePurchase purchase : purchaseResponse.getResult()) {
-            if (!warehouseReport.containsKey(purchase.getWarehouseName())) {
-                Map<Integer, Long[]> month = new HashMap<>();
-                long inMoney = purchase.getQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
-                long outMoney = purchase.getHandleQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
-                month.put(purchase.getHandleMonth(), new Long[]{inMoney, outMoney, inMoney - outMoney});
-                warehouseReport.put(purchase.getWarehouseName(), month);
-            } else {
-                Map<Integer, Long[]> month = warehouseReport.get(purchase.getWarehouseName());
-                if (!month.containsKey(purchase.getHandleMonth())) {
-
-                    long inMoney = purchase.getQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
-                    long outMoney = purchase.getHandleQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
-                    month.put(purchase.getHandleMonth(), new Long[]{inMoney, outMoney, inMoney - outMoney});
-                } else {
-                    Long[] moneys = month.get(purchase.getHandleMonth());
-                    long inMoney = purchase.getQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
-                    long outMoney = purchase.getHandleQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
-                    moneys[0] = moneys[0] + inMoney;
-                    moneys[1] = moneys[1] + outMoney;
-                    moneys[2] = moneys[2] + inMoney - outMoney;
-                }
-            }
+        Response<List<DoctorWareHouse>> warehouseResponse = doctorWareHouseReadService.findByFarmId(farmId);
+        if (!warehouseResponse.isSuccess())
+            throw new JsonResponseException(warehouseResponse.getError());
+        if (null == warehouseResponse.getResult() || warehouseResponse.getResult().isEmpty()) {
+            log.info("猪厂{}下未找到仓库", farmId);
+            return Collections.emptyList();
         }
-        return warehouseReport;
+
+        date.add(Calendar.MONTH, 1); //包含选中的那一月
+        for (int i = 0; i < 6; i++) { //最近六个月
+            date.add(Calendar.MONTH, -1);
+            int month = date.get(Calendar.MONTH) + 1; //默认月份0～11
+            int year = date.get(Calendar.YEAR);
+
+            //统计猪厂下每个仓库本月的入库和出库金额
+            Response<Map<WarehouseMaterialHandleType, Map<Long, Long>>> inAndOutAmountsResponse = doctorWarehouseMaterialHandleReadService.
+                    countWarehouseAmount(DoctorWarehouseMaterialHandle.builder()
+                            .farmId(farmId)
+                            .handleYear(year)
+                            .handleMonth(month)
+                            .build(), WarehouseMaterialHandleType.OUT, WarehouseMaterialHandleType.IN);
+
+            if (!inAndOutAmountsResponse.isSuccess())
+                throw new JsonResponseException(inAndOutAmountsResponse.getError());
+
+            //统计猪厂下每个仓库的余额
+            Response<Map<Long, Long>> balanceAmountsResponse = doctorWarehousePurchaseReadService.countWarehouseBalanceAmount(farmId);
+            if (!balanceAmountsResponse.isSuccess())
+                throw new JsonResponseException(balanceAmountsResponse.getError());
+
+            WarehouseReportVo balanceVo = new WarehouseReportVo();
+            balanceVo.setMonthAndType(year + "-" + month + "结余");
+
+            WarehouseReportVo inVo = new WarehouseReportVo();
+            inVo.setMonthAndType(year + "-" + month + "入库");
+
+            WarehouseReportVo outVo = new WarehouseReportVo();
+            outVo.setMonthAndType(year + "-" + month + "出库");
+
+            List<WarehouseReportVo.WarehouseReportMonthDetail> balanceDetails = new ArrayList<>(warehouseResponse.getResult().size());
+            List<WarehouseReportVo.WarehouseReportMonthDetail> inDetails = new ArrayList<>(warehouseResponse.getResult().size());
+            List<WarehouseReportVo.WarehouseReportMonthDetail> outDetails = new ArrayList<>(warehouseResponse.getResult().size());
+            long totalBalance = 0, totalIn = 0, totalOut = 0;
+            for (DoctorWareHouse wareHouse : warehouseResponse.getResult()) {
+                balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
+                        .name(wareHouse.getWareHouseName())
+                        .amount(balanceAmountsResponse.getResult().get(wareHouse.getId()))
+                        .build());
+
+                long inAmount = inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.IN.getValue()).get(wareHouse.getId());
+                inDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
+                        .name(wareHouse.getWareHouseName())
+                        .amount(inAmount)
+                        .build());
+
+                long outAmount = inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.OUT.getValue()).get(wareHouse.getId());
+                outDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
+                        .name(wareHouse.getWareHouseName())
+                        .amount(outAmount)
+                        .build());
+
+                totalBalance += balanceAmountsResponse.getResult().get(wareHouse.getId());
+                totalIn += inAmount;
+                totalOut += outAmount;
+            }
+            balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
+                    .name("合计")
+                    .amount(totalBalance)
+                    .build());
+            inDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
+                    .name("合计")
+                    .amount(totalIn)
+                    .build());
+            outDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
+                    .name("合计")
+                    .amount(totalOut)
+                    .build());
+            balanceVo.setDetails(balanceDetails);
+            inVo.setDetails(inDetails);
+            outVo.setDetails(outDetails);
+            reports.add(balanceVo);
+            reports.add(inVo);
+            reports.add(outVo);
+        }
+        return reports;
+        //TODO 待修改
+//        DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
+//        purchaseCriteria.setFarmId(farmId);
+//        purchaseCriteria.setHandleYear(date.get(Calendar.YEAR));
+//        Response<List<DoctorWarehousePurchase>> purchaseResponse = doctorWarehousePurchaseReadService.list(purchaseCriteria);
+//        if (!purchaseResponse.isSuccess())
+//            throw new JsonResponseException(purchaseResponse.getError());
+//
+//
+//        Map<String, Map<Integer, Long[]>> warehouseReport = new HashMap<>();
+//        for (DoctorWarehousePurchase purchase : purchaseResponse.getResult()) {
+//            if (!warehouseReport.containsKey(purchase.getWarehouseName())) {
+//                Map<Integer, Long[]> month = new HashMap<>();
+//                long inMoney = purchase.getQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
+//                long outMoney = purchase.getHandleQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
+//                month.put(purchase.getHandleMonth(), new Long[]{inMoney, outMoney, inMoney - outMoney});
+//                warehouseReport.put(purchase.getWarehouseName(), month);
+//            } else {
+//                Map<Integer, Long[]> month = warehouseReport.get(purchase.getWarehouseName());
+//                if (!month.containsKey(purchase.getHandleMonth())) {
+//
+//                    long inMoney = purchase.getQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
+//                    long outMoney = purchase.getHandleQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
+//                    month.put(purchase.getHandleMonth(), new Long[]{inMoney, outMoney, inMoney - outMoney});
+//                } else {
+//                    Long[] moneys = month.get(purchase.getHandleMonth());
+//                    long inMoney = purchase.getQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
+//                    long outMoney = purchase.getHandleQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
+//                    moneys[0] = moneys[0] + inMoney;
+//                    moneys[1] = moneys[1] + outMoney;
+//                    moneys[2] = moneys[2] + inMoney - outMoney;
+//                }
+//            }
+//        }
+//        return warehouseReport;
 
     }
 
@@ -101,7 +205,7 @@ public class ReportController {
         lastMonthOutCriteria.setWarehouseId(warehouseId);
         lastMonthOutCriteria.setHandleMonth(date.get(Calendar.MONTH));
         lastMonthOutCriteria.setHandleYear(date.get(Calendar.YEAR));
-        lastMonthOutCriteria.setType(WarehouseMaterialHandlerType.OUT.getValue());
+        lastMonthOutCriteria.setType(WarehouseMaterialHandleType.OUT.getValue());
         Response<List<DoctorWarehouseMaterialHandle>> lastMonthOutResponse = doctorWarehouseMaterialHandleReadService.list(lastMonthOutCriteria);
         if (!lastMonthOutResponse.isSuccess())
             throw new JsonResponseException(lastMonthOutResponse.getError());
@@ -130,7 +234,7 @@ public class ReportController {
         lastMonthInCriteria.setWarehouseId(warehouseId);
         lastMonthInCriteria.setHandleMonth(date.get(Calendar.MONTH));
         lastMonthInCriteria.setHandleYear(date.get(Calendar.YEAR));
-        lastMonthInCriteria.setType(WarehouseMaterialHandlerType.IN.getValue());
+        lastMonthInCriteria.setType(WarehouseMaterialHandleType.IN.getValue());
         Response<List<DoctorWarehouseMaterialHandle>> lastMonthInResponse = doctorWarehouseMaterialHandleReadService.list(lastMonthInCriteria);
         if (!lastMonthInResponse.isSuccess())
             throw new JsonResponseException(lastMonthInResponse.getError());
@@ -159,7 +263,7 @@ public class ReportController {
         thisMonthInHandleCriteria.setWarehouseId(warehouseId);
         thisMonthInHandleCriteria.setHandleMonth(date.get(Calendar.MONTH) + 1);
         thisMonthInHandleCriteria.setHandleYear(date.get(Calendar.YEAR));
-        thisMonthInHandleCriteria.setType(WarehouseMaterialHandlerType.IN.getValue());
+        thisMonthInHandleCriteria.setType(WarehouseMaterialHandleType.IN.getValue());
         Response<List<DoctorWarehouseMaterialHandle>> thisMonthInHandleResponse = doctorWarehouseMaterialHandleReadService.list(thisMonthInHandleCriteria);
         if (!thisMonthInHandleResponse.isSuccess())
             throw new JsonResponseException(thisMonthInHandleResponse.getError());
@@ -190,7 +294,7 @@ public class ReportController {
         thisMonthOutHandleCriteria.setWarehouseId(warehouseId);
         thisMonthOutHandleCriteria.setHandleMonth(date.get(Calendar.MONTH) + 1);
         thisMonthOutHandleCriteria.setHandleYear(date.get(Calendar.YEAR));
-        thisMonthOutHandleCriteria.setType(WarehouseMaterialHandlerType.OUT.getValue());
+        thisMonthOutHandleCriteria.setType(WarehouseMaterialHandleType.OUT.getValue());
         Response<List<DoctorWarehouseMaterialHandle>> thisMonthOutHandleResponse = doctorWarehouseMaterialHandleReadService.list(thisMonthOutHandleCriteria);
         if (!thisMonthOutHandleResponse.isSuccess())
             throw new JsonResponseException(thisMonthOutHandleResponse.getError());
@@ -300,7 +404,7 @@ public class ReportController {
      * @param date
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, value = "apply")
+    @RequestMapping(method = RequestMethod.GET, value = "pigBarnApply")
     public List<DoctorWarehouseMaterialApply> apply(@RequestParam(required = false) Long pigBarnId,
                                                     @RequestParam Long warehouseId,
                                                     @RequestParam(required = false) Integer type,
@@ -322,6 +426,54 @@ public class ReportController {
         if (!applyResponse.isSuccess())
             throw new JsonResponseException(applyResponse.getError());
         return applyResponse.getResult();
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "pigGroupApply")
+    public List<WarehousePigGroupApplyVo> pigGroupApply(@RequestParam Long warehouseId,
+                                                        @RequestParam Long pigGroupId,
+                                                        @RequestParam(required = false) Integer materialType,
+                                                        @RequestParam(required = false) String materialName) {
+        Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(DoctorWarehouseMaterialApply.builder()
+                .warehouseId(warehouseId)
+                .type(materialType)
+                .materialName(materialName)
+                .pigGroupId(pigGroupId)
+                .build());
+
+        if (!applyResponse.isSuccess())
+            throw new JsonResponseException(applyResponse.getError());
+        if (null == applyResponse.getResult() || applyResponse.getResult().isEmpty()) {
+            log.info("未找到物料领用记录,warehouseId[{}],pigGroupId[{}],materialType[{}],materialName[{}]", warehouseId, pigGroupId, materialType, materialName);
+            return Collections.emptyList();
+        }
+
+        List<WarehousePigGroupApplyVo> vos = new ArrayList<>();
+        for (DoctorWarehouseMaterialApply apply : applyResponse.getResult()) {
+            if (null == apply.getPigGroupId())
+                continue;
+
+            Response<DoctorGroup> groupResponse = doctorGroupReadService.findGroupById(apply.getPigGroupId());
+            if (!groupResponse.isSuccess())
+                throw new JsonResponseException(groupResponse.getError());
+            if (null == groupResponse.getResult())
+                throw new JsonResponseException("pig.group.not.found");
+
+            vos.add(WarehousePigGroupApplyVo.builder()
+                    .pigGroupId(apply.getPigGroupId())
+                    .createDate(groupResponse.getResult().getCreatedAt())
+                    .closeDate(groupResponse.getResult().getCloseAt())
+                    .pigBarnName(apply.getPigBarnName())
+                    .applyStaffName(apply.getApplyStaffName())
+                    .materialType(apply.getType())
+                    .materialName(apply.getMaterialName())
+                    .unit(apply.getUnit())
+                    .quantity(apply.getQuantity())
+                    .unitPrice(apply.getUnitPrice())
+                    .amount(apply.getQuantity().multiply(new BigDecimal(apply.getUnitPrice())).longValue())
+                    .build());
+        }
+
+        return vos;
     }
 
 }
