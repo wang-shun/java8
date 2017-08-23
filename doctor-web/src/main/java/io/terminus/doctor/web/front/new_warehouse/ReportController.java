@@ -86,8 +86,10 @@ public class ReportController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "monthly")
-    public List<WarehouseMonthlyReportVo> monthlyReport(@RequestParam Long warehouseID, @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
+    public List<WarehouseMonthlyReportVo> monthlyReport(@RequestParam Long warehouseID,
+                                                        @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
+        //上月仓库出库记录
         DoctorWarehouseMaterialHandle lastMonthOutCriteria = new DoctorWarehouseMaterialHandle();
         lastMonthOutCriteria.setWarehouseId(warehouseID);
         lastMonthOutCriteria.setHandleMonth(date.get(Calendar.MONTH));
@@ -97,7 +99,7 @@ public class ReportController {
         if (!lastMonthOutResponse.isSuccess())
             throw new JsonResponseException(lastMonthOutResponse.getError());
 
-
+        //统计月初余额和余量
         Map<String, BigDecimal> stockEaryOutQuantity = new HashMap<>();
         Map<String, Long> stockEaryOutMoney = new HashMap<>();
         for (DoctorWarehouseMaterialHandle outHandle : lastMonthOutResponse.getResult()) {
@@ -260,17 +262,17 @@ public class ReportController {
     /**
      * 物料变动明细
      *
-     * @param warehouseID
+     * @param warehouseId
      * @param date
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "material")
-    public List<DoctorWarehouseMaterialHandle> materialHandleReport(@RequestParam Long warehouseID,
+    public List<DoctorWarehouseMaterialHandle> materialHandleReport(@RequestParam Long warehouseId,
                                                                     @RequestParam(required = false) String materialName,
                                                                     @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
         DoctorWarehouseMaterialHandle criteria = new DoctorWarehouseMaterialHandle();
-        criteria.setWarehouseId(warehouseID);
+        criteria.setWarehouseId(warehouseId);
         criteria.setHandleYear(date.get(Calendar.YEAR));
         criteria.setHandleMonth(date.get(Calendar.MONTH) + 1);
         if (StringUtils.isNotBlank(materialName))
