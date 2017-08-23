@@ -30,9 +30,9 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Override
     public Response<DoctorWarehouseMaterialApply> findById(Long id) {
-        try{
+        try {
             return Response.ok(doctorWarehouseMaterialApplyDao.findById(id));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("failed to find doctor warehouse material apply by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.material.apply.find.fail");
         }
@@ -40,10 +40,10 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Override
     public Response<Paging<DoctorWarehouseMaterialApply>> paging(Integer pageNo, Integer pageSize, Map<String, Object> criteria) {
-        try{
+        try {
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseMaterialApplyDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("failed to paging doctor warehouse material apply by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.material.apply.paging.fail");
         }
@@ -51,9 +51,9 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Override
     public Response<List<DoctorWarehouseMaterialApply>> list(Map<String, Object> criteria) {
-        try{
+        try {
             return Response.ok(doctorWarehouseMaterialApplyDao.list(criteria));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("failed to list doctor warehouse material apply, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.material.apply.list.fail");
         }
@@ -61,9 +61,19 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Override
     public Response<List<DoctorWarehouseMaterialApply>> list(DoctorWarehouseMaterialApply criteria) {
-        try{
+        try {
             return Response.ok(doctorWarehouseMaterialApplyDao.list(criteria));
-        }catch (Exception e){
+        } catch (Exception e) {
+            log.error("failed to list doctor warehouse material apply, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.material.apply.list.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorWarehouseMaterialApply>> listOrderByHandleDate(DoctorWarehouseMaterialApply criteria,Integer limit) {
+        try {
+            return Response.ok(doctorWarehouseMaterialApplyDao.listAndOrderByHandleDate(criteria,limit));
+        } catch (Exception e) {
             log.error("failed to list doctor warehouse material apply, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.material.apply.list.fail");
         }

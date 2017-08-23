@@ -14,9 +14,11 @@ import java.util.List;
 public interface NewDoctorWarehouseReaderService {
 
 
-    Response<Paging<DoctorWareHouse>> paing(DoctorWareHouseCriteria criteria);
+    Response<Paging<DoctorWareHouse>> paging(DoctorWareHouseCriteria criteria);
 
     Response<List<DoctorWareHouse>> findByFarmId(Long farmId);
+
+    Response<DoctorWareHouse> findById(Long warehouseId);
 
     Response<List<DoctorWareHouse>> list(DoctorWareHouse criteria);
 }

@@ -1,15 +1,12 @@
 package io.terminus.doctor.basic.dto;
 
-import com.sun.xml.internal.ws.api.model.MEP;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.context.support.MessageSourceSupport;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.List;
 
 /**

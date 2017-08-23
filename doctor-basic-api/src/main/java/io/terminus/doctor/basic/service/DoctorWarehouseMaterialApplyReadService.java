@@ -39,4 +39,6 @@ public interface DoctorWarehouseMaterialApplyReadService {
     Response<List<DoctorWarehouseMaterialApply>> list(Map<String, Object> criteria);
 
     Response<List<DoctorWarehouseMaterialApply>> list(DoctorWarehouseMaterialApply criteria);
+
+    Response<List<DoctorWarehouseMaterialApply>> listOrderByHandleDate(DoctorWarehouseMaterialApply criteria,Integer limit);
 }

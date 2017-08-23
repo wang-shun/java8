@@ -147,4 +147,13 @@
         ORDER BY `id` DESC
     </select>
 
+    <select id="listAndOrderByHandleDate" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `apply_date` DESC
+        <if test="limit!=null">LIMIT #{limit}</if>
+    </select>
+
+
 </mapper>

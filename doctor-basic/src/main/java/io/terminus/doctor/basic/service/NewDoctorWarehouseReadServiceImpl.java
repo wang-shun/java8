@@ -28,7 +28,7 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
     private DoctorWareHouseDao doctorWareHouseDao;
 
     @Override
-    public Response<Paging<DoctorWareHouse>> paing(DoctorWareHouseCriteria criteria) {
+    public Response<Paging<DoctorWareHouse>> paging(DoctorWareHouseCriteria criteria) {
         PageInfo pageInfo = new PageInfo(criteria.getPageNo(), criteria.getPageSize());
 
 
@@ -55,6 +55,17 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
     public Response<List<DoctorWareHouse>> findByFarmId(Long farmId) {
         try {
             return Response.ok(doctorWareHouseDao.findByFarmId(farmId));
+        } catch (Exception e) {
+            log.error("failed to find doctor warehouse, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.find.fail");
+        }
+    }
+
+
+    @Override
+    public Response<DoctorWareHouse> findById(Long warehouseId) {
+        try {
+            return Response.ok(doctorWareHouseDao.findById(warehouseId));
         } catch (Exception e) {
             log.error("failed to find doctor warehouse, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.find.fail");

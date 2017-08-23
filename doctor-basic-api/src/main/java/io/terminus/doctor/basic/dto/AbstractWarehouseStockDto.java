@@ -1,6 +1,5 @@
 package io.terminus.doctor.basic.dto;
 
-import com.sun.xml.internal.ws.api.model.MEP;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;

@@ -7,6 +7,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandlerType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.service.*;
@@ -66,6 +67,9 @@ public class WarehouseController {
     @RpcConsumer
     private NewDoctorWarehouseWriterService newDoctorWarehouseWriterService;
 
+    @RpcConsumer
+    private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
+
     @RequestMapping(method = RequestMethod.PUT)
     public void create(@Valid WarehouseDto warehouseDto, Errors errors) {
 
@@ -98,7 +102,7 @@ public class WarehouseController {
     @RequestMapping(method = RequestMethod.GET)
     public Paging<DoctorWareHouse> query(@Valid DoctorWareHouseCriteria criteria) {
 
-        return doctorWarehouseReaderService.paing(criteria).getResult();
+        return doctorWarehouseReaderService.paging(criteria).getResult();
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "type/{type}")
@@ -193,6 +197,35 @@ public class WarehouseController {
 
         });
         return vos;
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "{warehouseId}")
+    public WarehouseVo find(@PathVariable Long warehouseId) {
+        Response<DoctorWareHouse> wareHouseResponse = doctorWarehouseReaderService.findById(warehouseId);
+        if (!wareHouseResponse.isSuccess())
+            throw new JsonResponseException(wareHouseResponse.getError());
+        if (null == wareHouseResponse.getResult())
+            throw new JsonResponseException("warehouse.not.found");
+
+        //最近一次领用记录
+        DoctorWarehouseMaterialApply applyCriteria = new DoctorWarehouseMaterialApply();
+        applyCriteria.setWarehouseId(warehouseId);
+        Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(applyCriteria, 1);
+        if (!applyResponse.isSuccess())
+            throw new JsonResponseException(applyResponse.getError());
+
+        WarehouseVo vo = new WarehouseVo();
+        vo.setId(warehouseId);
+        vo.setName(wareHouseResponse.getResult().getWareHouseName());
+        vo.setType(wareHouseResponse.getResult().getType());
+        vo.setManagerId(wareHouseResponse.getResult().getManagerId());
+        vo.setManagerName(wareHouseResponse.getResult().getManagerName());
+
+        if (null != applyResponse && !applyResponse.getResult().isEmpty())
+            vo.setLastApplyDate(applyResponse.getResult().get(0).getApplyDate());
+
+        return vo;
     }
 
 
