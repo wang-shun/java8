@@ -111,9 +111,9 @@ public class StockController {
 
     @RequestMapping(method = RequestMethod.GET)
     public Paging<WarehouseStockVo> paging(@RequestParam Long warehouseId,
-                                              @RequestParam(required = false) String materialName,
-                                              @RequestParam(required = false) Integer pageNo,
-                                              @RequestParam(required = false) Integer pageSize) {
+                                           @RequestParam(required = false) String materialName,
+                                           @RequestParam(required = false) Integer pageNo,
+                                           @RequestParam(required = false) Integer pageSize) {
 
         //本月出库记录
         Calendar now = Calendar.getInstance();
@@ -143,14 +143,14 @@ public class StockController {
         }
 
 
-        //本月出库记录
+        //本月入库记录
         handleCriteria.setType(WarehouseMaterialHandlerType.IN.getValue());
         Response<List<DoctorWarehouseMaterialHandle>> inHandleResponse = doctorWarehouseMaterialHandleReadService.list(handleCriteria);
         if (!inHandleResponse.isSuccess())
             throw new JsonResponseException(inHandleResponse.getError());
         Map<Long/*materialId*/, BigDecimal> totalInQuantity = new HashMap<>();
         Map<Long/*materialId*/, Long> totalInAmount = new HashMap<>();
-        for (DoctorWarehouseMaterialHandle handle : outHandleResponse.getResult()) {
+        for (DoctorWarehouseMaterialHandle handle : inHandleResponse.getResult()) {
             if (!totalInQuantity.containsKey(handle.getMaterialId()))
                 totalInQuantity.put(handle.getMaterialId(), handle.getQuantity());
             else {
@@ -186,9 +186,15 @@ public class StockController {
             vo.setUnit(stock.getUnit());
 
             vo.setOutQuantity(totalOutQuantity.get(stock.getMaterialId()));
-            vo.setOutAmount(totalOutAmount.get(stock.getMaterialId()));
+            if (!totalOutAmount.containsKey(stock.getMaterialId()))
+                vo.setOutAmount(0);
+            else
+                vo.setOutAmount(totalOutAmount.get(stock.getMaterialId()));
             vo.setInQuantity(totalInQuantity.get(stock.getMaterialId()));
-            vo.setInAmount(totalInAmount.get(stock.getMaterialId()));
+            if (!totalInAmount.containsKey(stock.getMaterialId()))
+                vo.setInAmount(0);
+            else
+                vo.setInAmount(totalInAmount.get(stock.getMaterialId()));
 
             vo.setBalanceQuantity(stock.getQuantity());
             vo.setBalanceAmount(vo.getInAmount() - vo.getOutAmount());
