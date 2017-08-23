@@ -62,7 +62,7 @@ public class FormulaController {
 
     @RequestMapping(method = RequestMethod.GET)
     public Paging<FeedFormula> paging(@RequestParam("farmId") Long farmId,
-                                      @RequestParam(value = "materialName",required = false) String materialName,
+                                      @RequestParam(value = "materialName", required = false) String materialName,
                                       @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                       @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         return RespHelper.or500(feedFormulaReadService.paging(null, farmId, materialName, pageNo, pageSize));
@@ -98,7 +98,7 @@ public class FormulaController {
 
         FeedFormula exist = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(id));
         if (null == exist)
-            throw new JsonResponseException("");
+            throw new JsonResponseException("formula.not.exist");
 
         dto.getProduce().calculateTotalPercent();
         buildProduceInfo(dto.getProduce());
@@ -115,6 +115,14 @@ public class FormulaController {
 
         //更新
         return RespHelper.or500(feedFormulaWriteService.updateFeedFormula(feedFormula));
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE,value = "{id}")
+    public boolean delete(@PathVariable Long id) {
+        FeedFormula exist = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(id));
+        if (null == exist)
+            throw new JsonResponseException("formula.not.exist");
+        return RespHelper.or500(feedFormulaWriteService.deleteFeedFormulaById(id));
     }
 
 
