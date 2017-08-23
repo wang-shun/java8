@@ -55,15 +55,15 @@ public class DoctorWareHouseManager {
         // 创建WareHouse 信息
         doctorWareHouseDao.create(doctorWareHouse);
 
-        DoctorWareHouseTrack doctorWareHouseTrack = DoctorWareHouseTrack.builder()
-                .wareHouseId(doctorWareHouse.getId())
-                .farmId(doctorWareHouse.getFarmId()).farmName(doctorWareHouse.getFarmName())
-                .managerId(doctorWareHouse.getManagerId()).managerName(doctorWareHouse.getManagerName())
-                .materialLotNumber(null).lotNumber(0D).isDefault(IsOrNot.NO.getKey())
-                .extraMap(new HashMap<>())
-                .build();
-
-        doctorWareHouseTrackDao.create(doctorWareHouseTrack);
+//        DoctorWareHouseTrack doctorWareHouseTrack = DoctorWareHouseTrack.builder()
+//                .wareHouseId(doctorWareHouse.getId())
+//                .farmId(doctorWareHouse.getFarmId()).farmName(doctorWareHouse.getFarmName())
+//                .managerId(doctorWareHouse.getManagerId()).managerName(doctorWareHouse.getManagerName())
+//                .materialLotNumber(null).lotNumber(0D).isDefault(IsOrNot.NO.getKey())
+//                .extraMap(new HashMap<>())
+//                .build();
+//
+//        doctorWareHouseTrackDao.create(doctorWareHouseTrack);
         return Boolean.TRUE;
     }
 

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ ~ Desc:
+ ~ Mail: [ your email ]
+ ~ Date: 2017-08-21 17:52:59
+ ~ Created by [ your name ]
+-->
+
+<mapper namespace="DoctorWarehouseStock">
+    <resultMap id="DoctorWarehouseStockMap" type="DoctorWarehouseStock">
+        <id property="id" column="id"/>
+        <result property="warehouseId" column="warehouse_id"/>
+        <result property="warehouseName" column="warehouse_name"/>
+        <result property="warehouseType" column="warehouse_type"/>
+        <result property="vendorName" column="vendor_name"/>
+        <result property="farmId" column="farm_id"/>
+        <result property="managerId" column="manager_id"/>
+        <result property="materialName" column="material_name"/>
+        <result property="materialId" column="material_id"/>
+        <result property="quantity" column="quantity"/>
+        <result property="unit" column="unit"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="tb">
+        doctor_warehouse_stock
+    </sql>
+
+    <sql id="cols_all">
+        id,
+        <include refid="cols_exclude_id"/>
+    </sql>
+
+    <sql id="cols_exclude_id">
+        `warehouse_id`, `warehouse_name`, `warehouse_type`, `vendor_name`, `farm_id`, `manager_id`, `material_name`, `material_id`, `quantity`, `unit`, 
+        created_at, updated_at
+    </sql>
+
+    <sql id="vals">
+        #{warehouseId}, #{warehouseName}, #{warehouseType}, #{vendorName}, #{farmId}, #{managerId}, #{materialName}, #{materialId}, #{quantity}, #{unit}, 
+        now(), now()
+    </sql>
+
+    <sql id="criteria">
+        <where>
+            <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
+            <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
+            <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
+            <if test="vendorName != null">AND `vendor_name` = #{vendorName}</if>
+            <if test="farmId != null">AND `farm_id` = #{farmId}</if>
+            <if test="managerId != null">AND `manager_id` = #{managerId}</if>
+            <if test="materialName != null">AND `material_name` = #{materialName}</if>
+            <if test="materialId != null">AND `material_id` = #{materialId}</if>
+            <if test="quantity != null">AND `quantity` = #{quantity}</if>
+            <if test="unit != null">AND `unit` = #{unit}</if>
+            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
+            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+        </where>
+    </sql>
+
+    <insert id="create" parameterType="DoctorWarehouseStock" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tb"/>
+        (<include refid="cols_exclude_id"/>)
+        VALUES
+        (<include refid="vals"/>)
+    </insert>
+
+    <select id="findById" parameterType="long" resultMap="DoctorWarehouseStockMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="findByIds" parameterType="list" resultMap="DoctorWarehouseStockMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="update" parameterType="DoctorWarehouseStock">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
+            <if test="warehouseName != null">`warehouse_name` = #{warehouseName},</if>
+            <if test="warehouseType != null">`warehouse_type` = #{warehouseType},</if>
+            <if test="vendorName != null">`vendor_name` = #{vendorName},</if>
+            <if test="farmId != null">`farm_id` = #{farmId},</if>
+            <if test="managerId != null">`manager_id` = #{managerId},</if>
+            <if test="materialName != null">`material_name` = #{materialName},</if>
+            <if test="materialId != null">`material_id` = #{materialId},</if>
+            <if test="quantity != null">`quantity` = #{quantity},</if>
+            <if test="unit != null">`unit` = #{unit},</if>
+            updated_at = now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE id = #{id}
+    </delete>
+    
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorWarehouseStockMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="list" parameterType="map" resultMap="DoctorWarehouseStockMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+    </select>
+
+</mapper>
