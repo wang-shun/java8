@@ -7,12 +7,11 @@ import io.terminus.doctor.basic.dto.WarehouseStockInDto;
 import io.terminus.doctor.basic.dto.WarehouseStockInventoryDto;
 import io.terminus.doctor.basic.dto.WarehouseStockOutDto;
 import io.terminus.doctor.basic.dto.WarehouseStockTransferDto;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandlerType;
+import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
-import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
-import io.terminus.doctor.basic.service.DoctorWarehousePurchaseReadService;
-import io.terminus.doctor.basic.service.DoctorWarehouseStockReadService;
-import io.terminus.doctor.basic.service.DoctorWarehouseStockWriteService;
+import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseStockVo;
 import org.apache.commons.lang3.StringUtils;
@@ -44,9 +43,11 @@ public class StockController {
     private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
 
     @RpcConsumer
+    private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
+    @RpcConsumer
     private DoctorGroupWebService doctorGroupWebService;
 
-    @RequestMapping(method = RequestMethod.POST, value = "in")
+    @RequestMapping(method = RequestMethod.PUT, value = "in")
     public void in(@RequestBody @Validated WarehouseStockInDto stockIn, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
@@ -55,7 +56,7 @@ public class StockController {
             throw new JsonResponseException(response.getError());
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "out")
+    @RequestMapping(method = RequestMethod.PUT, value = "out")
     public void out(@RequestBody @Validated WarehouseStockOutDto stockOut, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
@@ -73,7 +74,7 @@ public class StockController {
             throw new JsonResponseException(response.getError());
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "inventory")
+    @RequestMapping(method = RequestMethod.PUT, value = "inventory")
     public void inventory(@RequestBody @Validated WarehouseStockInventoryDto stockInventory, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
@@ -83,7 +84,7 @@ public class StockController {
             throw new JsonResponseException(response.getError());
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "transfer")
+    @RequestMapping(method = RequestMethod.PUT, value = "transfer")
     public void transfer(@RequestBody @Validated WarehouseStockTransferDto stockTransfer, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
@@ -108,30 +109,41 @@ public class StockController {
         if (null == stockResponse.getResult() || stockResponse.getResult().isEmpty())
             throw new JsonResponseException("stock.not.found");
 
-        DoctorWarehousePurchase criteria = new DoctorWarehousePurchase();
-        criteria.setWarehouseId(warehouseId);
-        criteria.setHandleFinishFlag(1);
-        if (StringUtils.isNotBlank(materialName))
-            criteria.setMaterialId(stockResponse.getResult().get(0).getMaterialId());
-        Response<List<DoctorWarehousePurchase>> purchaseResponse = doctorWarehousePurchaseReadService.list(criteria);
-        if (!purchaseResponse.isSuccess())
-            throw new JsonResponseException(purchaseResponse.getError());
 
-//        DoctorWarehouseStock stockCriteria = new DoctorWarehouseStock();
-//        stockCriteria.setWarehouseId(warehouseId);
-//        Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.list(stockCriteria);
-//        if (!stockResponse.isSuccess())
-//            throw new JsonResponseException(stockResponse.getError());
         Map<String, WarehouseStockVo> vos = new HashMap<>();
+        //合并不同供应商
         stockResponse.getResult().forEach(stock -> {
 
             if (!vos.containsKey(stock.getMaterialName())) {
                 WarehouseStockVo vo = new WarehouseStockVo();
                 vo.setMaterialName(stock.getMaterialName());
                 vo.setUnit(stock.getUnit());
+                vo.setBalanceQuantity(stock.getQuantity());
+                vos.put(stock.getMaterialName(), vo);
+            } else {
+                BigDecimal quantity = vos.get(stock.getMaterialName()).getBalanceQuantity();
+                vos.get(stock.getMaterialName()).setBalanceQuantity(quantity.add(stock.getQuantity()));
             }
-
         });
+
+
+        //本月出库记录
+        Calendar now = Calendar.getInstance();
+        DoctorWarehouseMaterialHandle handleCriteria = new DoctorWarehouseMaterialHandle();
+        handleCriteria.setHandleYear(now.get(Calendar.YEAR));
+        handleCriteria.setHandleMonth(now.get(Calendar.MONTH) + 1);
+        handleCriteria.setType(WarehouseMaterialHandlerType.OUT.getValue());
+        Response<List<DoctorWarehouseMaterialHandle>> outHandleResponse = doctorWarehouseMaterialHandleReadService.list(handleCriteria);
+        if (!outHandleResponse.isSuccess())
+            throw new JsonResponseException(outHandleResponse.getError());
+
+
+        //本月出库记录
+        handleCriteria.setType(WarehouseMaterialHandlerType.IN.getValue());
+        Response<List<DoctorWarehouseMaterialHandle>> inHandleResponse = doctorWarehouseMaterialHandleReadService.list(handleCriteria);
+        if (!inHandleResponse.isSuccess())
+            throw new JsonResponseException(inHandleResponse.getError());
+
 
         return new ArrayList<>(vos.values());
     }

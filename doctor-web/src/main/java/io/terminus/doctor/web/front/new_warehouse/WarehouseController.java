@@ -70,7 +70,7 @@ public class WarehouseController {
     @RpcConsumer
     private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
 
-    @RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.POST)
     public void create(@Valid WarehouseDto warehouseDto, Errors errors) {
 
         if (errors.hasErrors())

@@ -69,7 +69,7 @@ public class FormulaController {
     }
 
 
-    @RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.POST)
     public boolean create(@RequestBody DoctorMaterialProductRatioDto dto) {
         dto.getProduce().calculateTotalPercent();
         buildProduceInfo(dto.getProduce());
@@ -93,7 +93,7 @@ public class FormulaController {
         return RespHelper.or500(feedFormulaReadService.findFeedFormulaById(id));
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "{id}")
+    @RequestMapping(method = RequestMethod.PUT, value = "{id}")
     public boolean update(@PathVariable Long id, @RequestBody DoctorMaterialProductRatioDto dto) {
 
         FeedFormula exist = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(id));
