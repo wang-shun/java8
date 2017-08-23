@@ -7,6 +7,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandlerType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.service.*;
@@ -70,7 +71,7 @@ public class WarehouseController {
     private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
 
     @RequestMapping(method = RequestMethod.POST)
-    public void create(@Valid WarehouseDto warehouseDto, Errors errors) {
+    public void create(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
 
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
