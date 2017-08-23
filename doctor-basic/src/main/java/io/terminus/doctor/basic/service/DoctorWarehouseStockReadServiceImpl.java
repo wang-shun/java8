@@ -50,6 +50,28 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
     }
 
     @Override
+    public Response<Paging<DoctorWarehouseStock>> paging(Integer pageNo, Integer pageSize, DoctorWarehouseStock criteria) {
+        try {
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            return Response.ok(doctorWarehouseStockDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
+        } catch (Exception e) {
+            log.error("failed to paging doctor warehouse stock by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.stock.paging.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorWarehouseStock>> pagingMergeVendor(Integer pageNo, Integer pageSize, DoctorWarehouseStock criteria) {
+        try {
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            return Response.ok(doctorWarehouseStockDao.pagingMergeVendor(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
+        } catch (Exception e) {
+            log.error("failed to paging doctor warehouse stock by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.stock.paging.fail");
+        }
+    }
+
+    @Override
     public Response<List<DoctorWarehouseStock>> list(DoctorWarehouseStock criteria) {
         try {
             return Response.ok(doctorWarehouseStockDao.list(criteria));

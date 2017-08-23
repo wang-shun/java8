@@ -28,15 +28,15 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
         private static final long serialVersionUID = -6161879769774585774L;
 
         @NotNull(message = "stock.apply.person.id.null")
-        private Long applyPersonId;
+        private Long applyStaffId;
 
-        private String applyPersonName;
+        private String applyStaffName;
 
         @NotNull(message = "stock.apply.pig.house.id.null")
-        private Long applyPigHouseId;
+        private Long applyPigBarnId;
 
         @NotBlank(message = "stock.apply.pig.house.name.null")
-        private String applyPigHouseName;
+        private String applyPigBarnName;
 
         private Long applyPigGroupId;
 

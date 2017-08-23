@@ -1,9 +1,16 @@
 package io.terminus.doctor.basic.dao;
 
+import com.google.common.collect.Maps;
+import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
 import org.springframework.stereotype.Repository;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Desc:
@@ -13,5 +20,24 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class DoctorWarehouseStockDao extends MyBatisDao<DoctorWarehouseStock> {
+
+
+    public Paging<DoctorWarehouseStock> pagingMergeVendor(Integer offset, Integer limit, DoctorWarehouseStock criteria) {
+        Map<String, Object> params = Maps.newHashMap();
+        if (criteria != null) {
+            Map<String, Object> objMap = (Map) JsonMapper.nonDefaultMapper().getMapper().convertValue(criteria, Map.class);
+            params.putAll(objMap);
+        }
+
+        Long total = (Long) this.sqlSession.selectOne(this.sqlId("countMergeVendor"), criteria);
+        if (total.longValue() <= 0L) {
+            return new Paging(0L, Collections.emptyList());
+        } else {
+            params.put("offset", offset);
+            params.put("limit", limit);
+            List<DoctorWarehouseStock> datas = this.sqlSession.selectList(this.sqlId("pagingMergeVendor"), params);
+            return new Paging(total, datas);
+        }
+    }
 
 }

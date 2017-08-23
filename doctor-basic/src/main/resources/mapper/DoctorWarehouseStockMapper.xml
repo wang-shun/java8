@@ -132,4 +132,33 @@
         ORDER BY `id` DESC
     </select>
 
+
+    <select id="countMergeVendor" parameterType="map" resultType="long">
+        SELECT count(*) from (
+        SELECT warehouse_id
+        FROM <include refid="tb"/>
+        <where>
+            <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
+            <if test="materialName != null">AND `material_name` = #{materialName}</if>
+        </where>
+        GROUP BY warehouse_id, material_id
+        ) as t0
+    </select>
+
+    <select id="pagingMergeVendor" parameterType="map" resultMap="DoctorWarehouseStockMap">
+        SELECT t0.*,t1.material_name,t1.unit
+        FROM(
+        SELECT max(id) as id, material_id, sum(quantity) as quantity
+        FROM <include refid="tb"/>
+        <where>
+            <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
+            <if test="materialName != null">AND `material_name` = #{materialName}</if>
+        </where>
+        GROUP BY warehouse_id, material_id
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}) as t0
+        LEFT JOIN <include refid="tb"/> as t1 on t0.id=t1.id
+    </select>
+
+
 </mapper>

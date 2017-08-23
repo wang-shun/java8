@@ -88,7 +88,26 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @Override
     public Response<Boolean> delete(Long id) {
         try {
-            return Response.ok(doctorWarehouseStockDao.delete(id));
+
+            DoctorWarehouseStock stock = doctorWarehouseStockDao.findById(id);
+
+            DoctorWarehouseStock criteria = new DoctorWarehouseStock();
+            criteria.setWarehouseId(stock.getWarehouseId());
+            criteria.setMaterialId(stock.getMaterialId());
+            List<DoctorWarehouseStock> allVendorStocks = doctorWarehouseStockDao.list(criteria);
+
+            for (DoctorWarehouseStock s : allVendorStocks) {
+                if (s.getQuantity().compareTo(new BigDecimal(0)) > 0)
+                    return Response.fail("stock.not.empty");
+            }
+
+            for (DoctorWarehouseStock s : allVendorStocks) {
+                Boolean result = doctorWarehouseStockDao.delete(s.getId());
+                if (!result)
+                    return Response.fail("doctor.warehouse.stock.delete.fail");
+            }
+
+            return Response.ok(true);
         } catch (Exception e) {
             log.error("failed to delete doctor warehouse stock by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.stock.delete.fail");
@@ -466,11 +485,11 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             materialApply.setUnit(stocks.get(0).getUnit());//单位都是一致的
             materialApply.setQuantity(detail.getQuantity());
             materialApply.setUnitPrice(averagePrice);
-            materialApply.setPigBarnId(detail.getApplyPigHouseId());
-            materialApply.setPigBarnName(detail.getApplyPigHouseName());
+            materialApply.setPigBarnId(detail.getApplyPigBarnId());
+            materialApply.setPigBarnName(detail.getApplyPigBarnName());
             materialApply.setPigGroupId(detail.getApplyPigGroupId());
             materialApply.setPigGroupName(detail.getApplyPigGroupName());
-            materialApply.setApplyStaffName(detail.getApplyPersonName());
+            materialApply.setApplyStaffName(detail.getApplyStaffName());
             materialApplies.add(materialApply);
 
             handleContexts.add(handleContext);

@@ -33,6 +33,12 @@ public interface DoctorWarehouseStockReadService {
      */
     Response<Paging<DoctorWarehouseStock>> paging(Integer pageNo, Integer pageSize, Map<String, Object> criteria);
 
+
+    Response<Paging<DoctorWarehouseStock>> paging(Integer pageNo, Integer pageSize, DoctorWarehouseStock criteria);
+
+
+    Response<Paging<DoctorWarehouseStock>> pagingMergeVendor(Integer pageNo, Integer pageSize, DoctorWarehouseStock criteria);
+
     /**
      * 列表
      *
