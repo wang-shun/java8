@@ -134,9 +134,9 @@ public class FormulaController {
 
     @RequestMapping(method = RequestMethod.POST, value = "produce")
     public void produce(@RequestParam("farmId") Long farmId,
-                        @RequestParam("wareHouseId") Long wareHouseId,
+                        @RequestParam("warehouseId") Long warehouseId,
                         @RequestParam("materialId") Long feedFormulaId,
-                        @RequestParam("materialProduce") String materialProduceJson) {
+                        @RequestParam("materialProduceJson") String materialProduceJson) {
 
         FeedFormula feedFormula = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(feedFormulaId));
 
@@ -151,7 +151,7 @@ public class FormulaController {
         DoctorBasicMaterial feed = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(feedFormula.getFeedId()));
 
         // 校验生产后的入仓仓库类型
-        DoctorWareHouse wareHouse = RespHelper.orServEx(doctorWareHouseReadService.findById(wareHouseId));
+        DoctorWareHouse wareHouse = RespHelper.orServEx(doctorWareHouseReadService.findById(warehouseId));
         checkState(Objects.equals(wareHouse.getType(), feed.getType()), "produce.targetWarehouseType.fail");
 
         Long userId = UserUtil.getUserId();
@@ -221,7 +221,7 @@ public class FormulaController {
         if (null == inStockResponse.getResult()) {
             DoctorWarehouseStock stock = new DoctorWarehouseStock();
             stock.setFarmId(farmId);
-            stock.setWarehouseId(wareHouseId);
+            stock.setWarehouseId(warehouseId);
             stock.setWarehouseName(wareHouse.getWareHouseName());
             stock.setWarehouseType(wareHouse.getType());
             stock.setMaterialId(feed.getId());
@@ -245,7 +245,7 @@ public class FormulaController {
         DoctorWarehouseStockHandler stockHandle = new DoctorWarehouseStockHandler();
         stockHandle.setFarmId(farmId);
         //配方生产后的物料的入仓仓库
-        stockHandle.setWarehouseId(wareHouseId);
+        stockHandle.setWarehouseId(warehouseId);
         stockHandle.setHandlerType(WarehouseMaterialHandlerType.FORMULA.getValue());
         stockHandle.setHandlerDate(handleDate);
         doctorWarehouseStockWriteService.outAndIn(inStockHandle, outStockHandle, stockHandle);
