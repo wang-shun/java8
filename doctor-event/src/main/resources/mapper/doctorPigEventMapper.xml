@@ -1531,4 +1531,26 @@
         where pig_id = #{pigId}
         and type in (15, 16, 17,18,19)
     </select>
+
+    <select id="findAllFarrowNoNestCode" resultMap="DoctorPigEventMap" >
+        SELECT farm_id, event_at
+        FROM <include refid="tb"/>
+        where type = 15 and extra not like '%nextCode%'
+        group by farm_id, date_format(event_at, '%Y-%m')
+    </select>
+    
+    <update id="insertNestCode" parameterType="map" >
+        UPDATE
+        (select @rownum:=@rownum+1 as rownum, a.id,
+        replace(extra, '}', concat(',"nestCode":', '"', date_format(event_at, '%Y%m'), '-',@rownum, '"', '}')) as extra
+        from doctor_pig_events a, (select @rownum:= -1) b
+        where farm_id = #{farmId}
+        and type = 15
+        and extra not like '%nestCode%'
+        and event_at &gt;= #{begin}
+        and event_at &lt;= #{end}
+        order by event_at, id) c
+        left join doctor_pig_events d on c.id = d.id
+        set d.extra = c.extra
+    </update>
 </mapper>

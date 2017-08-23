@@ -52,12 +52,12 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
     @Override
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
+        farrowingDto.setNestCode(generateNestCode(basic.getFarmId(), new DateTime(inputDto.eventAt())));
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
         expectTrue(notNull(doctorPigTrack), "pig.track.not.null", inputDto.getPigId());
-        DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
 
-        farrowingDto.setNestCode(generateNestCode(doctorPigTrack.getFarmId(), new DateTime(doctorPigEvent.getEventAt())));
 
         Map<String, Object> extra = doctorPigEvent.getExtraMap();
 
