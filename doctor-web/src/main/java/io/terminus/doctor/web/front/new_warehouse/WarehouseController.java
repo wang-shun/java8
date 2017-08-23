@@ -119,6 +119,8 @@ public class WarehouseController {
             vo.setId(wareHouse.getId());
             vo.setName(wareHouse.getWareHouseName());
             vo.setType(wareHouse.getType());
+            vo.setManagerName(wareHouse.getManagerName());
+            vo.setManagerId(wareHouse.getManagerId());
             vos.add(vo);
         });
         return vos;
@@ -200,9 +202,9 @@ public class WarehouseController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "{warehouseId}")
-    public WarehouseVo find(@PathVariable Long warehouseId) {
-        Response<DoctorWareHouse> wareHouseResponse = doctorWarehouseReaderService.findById(warehouseId);
+    @RequestMapping(method = RequestMethod.GET, value = "{id}")
+    public WarehouseVo find(@PathVariable Long id) {
+        Response<DoctorWareHouse> wareHouseResponse = doctorWarehouseReaderService.findById(id);
         if (!wareHouseResponse.isSuccess())
             throw new JsonResponseException(wareHouseResponse.getError());
         if (null == wareHouseResponse.getResult())
@@ -210,13 +212,13 @@ public class WarehouseController {
 
         //最近一次领用记录
         DoctorWarehouseMaterialApply applyCriteria = new DoctorWarehouseMaterialApply();
-        applyCriteria.setWarehouseId(warehouseId);
+        applyCriteria.setWarehouseId(id);
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(applyCriteria, 1);
         if (!applyResponse.isSuccess())
             throw new JsonResponseException(applyResponse.getError());
 
         WarehouseVo vo = new WarehouseVo();
-        vo.setId(warehouseId);
+        vo.setId(id);
         vo.setName(wareHouseResponse.getResult().getWareHouseName());
         vo.setType(wareHouseResponse.getResult().getType());
         vo.setManagerId(wareHouseResponse.getResult().getManagerId());
