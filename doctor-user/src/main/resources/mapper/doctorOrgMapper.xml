@@ -9,6 +9,8 @@
         <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="mobile" property="mobile"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="type" property="type"/>
         <result column="license" property="license"/>
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>
@@ -26,11 +28,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        name, mobile, license, out_id, extra, created_at, updated_at
+        name, mobile, parent_id, `type`, license, out_id, extra, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{mobile}, #{license}, #{outId}, #{extra}, now(), now()
+        #{name}, #{mobile}, #{parentId}, #{type}, #{license}, #{outId}, #{extra}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorOrg" keyProperty="id" useGeneratedKeys="true">
@@ -69,6 +71,8 @@
         <set>
             <if test="name != null">name = #{name},</if>
             <if test="mobile != null">mobile = #{mobile},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="type != null">`type` = #{type},</if>
             <if test="license != null">license = #{license},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
@@ -85,5 +89,80 @@
     <select id="findAll" resultMap="DoctorOrgMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
+    </select>
+
+    <select id="findOrgByParentId" parameterType="long" resultMap="DoctorOrgMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE
+        parent_id = #{parentId}
+    </select>
+
+    <sql id="criteria">
+        1=1
+        <if test="name != null">AND `name` = #{name}</if>
+        <if test="fuzzyName != null">AND `name` LIKE concat('%', #{fuzzyName}, '%')</if>
+        <if test="id != null">AND `id` = #{id}</if>
+        <if test="type != null">AND `type` = #{type}</if>
+        <if test="parentId != null">AND `parent_id` = #{parentId}</if>
+    </sql>
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(*)
+        FROM <include refid="tb"/>
+        WHERE <include refid="criteria"/>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorOrgMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE <include refid="criteria"/>
+        <if test="fuzzyName != null">
+        ORDER BY instr(`name`, #{fuzzyName}) ASC, LENGTH (`name`) ASC
+        </if>
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="findByFuzzyName" parameterType="map" resultMap="DoctorOrgMap">
+        SELECT id, `name`
+        FROM <include refid="tb" />
+        WHERE `name` LIKE concat('%', #{fuzzyName}, '%')
+        <if test="type != null">AND `type` =  #{type} </if>
+        ORDER BY instr(`name`, #{fuzzyName}) ASC, LENGTH (`name`) ASC
+        limit 0, 20
+    </select>
+
+    <update id="bindDepartment" parameterType="map" >
+        UPDATE
+        <include refid="tb"/>
+        SET parent_id = #{parentId}, `type` = 2
+        WHERE
+        id IN
+        <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+            #{orgId}
+        </foreach>
+    </update>
+
+    <update id="unbindDepartment" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        SET parent_id = 0, `type` = 1
+        WHERE
+        id IN
+        <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+            #{orgId}
+        </foreach>
+    </update>
+
+    <select id="findExcludeIds" parameterType="map" resultMap="DoctorOrgMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        1=1
+        <if test="orgIds !=null &amp;&amp; orgIds.size()>0">
+        AND id NOT IN
+        <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+            #{orgId}
+        </foreach>
+        </if>
     </select>
 </mapper>

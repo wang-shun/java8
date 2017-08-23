@@ -3,11 +3,14 @@ package io.terminus.doctor.web.front.event.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.common.utils.NumberUtils;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
@@ -39,19 +42,21 @@ import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.MatingType;
-import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.event.dto.DoctorBoarConditionExportDto;
 import io.terminus.doctor.web.front.event.dto.DoctorChangeGroupExportDto;
@@ -80,8 +85,6 @@ import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -94,6 +97,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -106,41 +110,29 @@ import static java.util.stream.Collectors.toMap;
 @RequestMapping("/api/doctor/events/pig")
 public class DoctorPigEventExports {
 
-    private final DoctorPigReadService doctorPigReadService;
+    @RpcConsumer
+    private DoctorPigReadService doctorPigReadService;
+    @RpcConsumer
+    private DoctorPigEventReadService doctorPigEventReadService;
+    @RpcConsumer
+    private DoctorPigEventWriteService doctorPigEventWriteService;
+    @RpcConsumer
+    private UserReadService userReadService;
+    @RpcConsumer
+    private DoctorBarnReadService doctorBarnReadService;
+    @RpcConsumer
+    private DoctorGroupReadService doctorGroupReadService;
+    @RpcConsumer
+    private DoctorBasicReadService doctorBasicReadService;
 
-    private final DoctorPigEventReadService doctorPigEventReadService;
-
-    private final DoctorPigEventWriteService doctorPigEventWriteService;
-
-    private final UserReadService userReadService;
-
-    private final DoctorGroupReadService doctorGroupReadService;
-
-    private final TransFromUtil transFromUtil;
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
     private static final JsonMapperUtil JSON_MAPPER  = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
-    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
-
-
-
     @Autowired
     private Exporter exporter;
     @Autowired
-    public DoctorPigEventExports(DoctorPigReadService doctorPigReadService,
-                                 DoctorPigEventReadService doctorPigEventReadService,
-                                 DoctorPigEventWriteService doctorPigEventWriteService,
-                                 UserReadService userReadService,
-                                 DoctorGroupReadService doctorGroupReadService,
-                                 TransFromUtil transFromUtil) {
-        this.doctorPigReadService = doctorPigReadService;
-        this.doctorPigEventReadService = doctorPigEventReadService;
-        this.doctorPigEventWriteService = doctorPigEventWriteService;
-        this.userReadService = userReadService;
-        this.doctorGroupReadService = doctorGroupReadService;
-        this.transFromUtil = transFromUtil;
-    }
+    private TransFromUtil transFromUtil;
 
     /**
      * 猪入场事件的导出报表的构建
@@ -267,9 +259,12 @@ public class DoctorPigEventExports {
                 DoctorRemovalDto removalDto = JSON_MAPPER.fromJson(doctorPigEventDetail.getExtra(), DoctorRemovalDto.class);
                 DoctorPigRemoveExportDto dto = OBJECT_MAPPER.convertValue(removalDto, DoctorPigRemoveExportDto.class);
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
+                if (notNull(dto.getPrice())) {
+                    dto.setPrice(Double.parseDouble(NumberUtils.divide(removalDto.getPrice(), 100L, 2)));
+                }
                 dto.setAmount(doctorPigEventDetail.getAmount());
-                if (dto.getPrice() != null) {
-                    dto.setPrice(dto.getPrice() / 100);
+                if (notNull(dto.getAmount())) {
+                    dto.setAmount(dto.getAmount() / 100);
                 }
                 dto.setParity(doctorPigEventDetail.getParity());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
@@ -326,6 +321,7 @@ public class DoctorPigEventExports {
                 DoctorPigletsChgDto matingDto = JSON_MAPPER.fromJson(doctorPigEventDetail.getExtra(), DoctorPigletsChgDto.class);
                 DoctorPigletsChgExportDto dto = OBJECT_MAPPER.convertValue(matingDto, DoctorPigletsChgExportDto.class);
                 dto.setParity(doctorPigEventDetail.getParity());
+                dto.setPigletsAvgWeight(EventUtil.getAvgWeight(dto.getPigletsWeight(), dto.getPigletsCount()));
                 dto.setCreatorName(doctorPigEventDetail.getCreatorName());
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
@@ -350,6 +346,10 @@ public class DoctorPigEventExports {
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setParity(doctorPigEventDetail.getParity());
                 dto.setCreatorName(doctorPigEventDetail.getCreatorName());
+                if (notNull(weanDto.getChgLocationToBarnId())) {
+                    DoctorBarn chgToBarn = RespHelper.or500(doctorBarnReadService.findBarnById(weanDto.getChgLocationToBarnId()));
+                    dto.setChgLocationToBarnName(chgToBarn.getName());
+                }
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
                 return dto;
@@ -423,6 +423,7 @@ public class DoctorPigEventExports {
                 DoctorFostersExportDto dto = OBJECT_MAPPER.convertValue(fostersDto, DoctorFostersExportDto.class);
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setParity(doctorPigEventDetail.getParity());
+                dto.setFosterReasonName(RespHelper.or500(doctorBasicReadService.findBasicById(fostersDto.getFosterReason())).getName());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
                 return dto;
@@ -569,6 +570,13 @@ public class DoctorPigEventExports {
                 DoctorChangeGroupInput changeGroupEvent = JSON_MAPPER.fromJson(doctorGroupEventDetail.getExtra(), DoctorChangeGroupInput.class);
                 changeGroupEvent.setEventAt(null);
                 DoctorChangeGroupExportDto exportData = BeanMapper.map(changeGroupEvent, DoctorChangeGroupExportDto.class);
+                if (notNull(exportData.getPrice())) {
+                    exportData.setRawPrice(Double.parseDouble(NumberUtils.divide(changeGroupEvent.getPrice(), 100L, 2)));
+                }
+                if (notNull(exportData.getAmount())) {
+                    exportData.setAmount(exportData.getAmount() / 100);
+                }
+                exportData.setAvgWeight(doctorGroupEventDetail.getAvgWeight());
                 exportData.setGroupCode(doctorGroupEventDetail.getGroupCode());
                 exportData.setBarnName(doctorGroupEventDetail.getBarnName());
                 exportData.setQuantity(doctorGroupEventDetail.getQuantity());
@@ -850,36 +858,36 @@ public class DoctorPigEventExports {
 
 
     private void exportBoarEvents(Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
-        switch(PigEvent.from(Integer.parseInt(eventCriteria.get("eventTypes")))){
-            case ENTRY:
+        switch(eventCriteria.get("eventTypes")){
+            case "7,20":
                 //进场
                 exporter.export("web-pig-boarInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
                 break;
-            case SEMEN:
+            case "8":
                 //采精
                 exporter.export("web-pig-boarCollect", eventCriteria, 1, 500, this::pagingSemenExport, request, response);
                 break;
-            case CHG_LOCATION:
+            case "1":
                 exporter.export("web-pig-boarChangeBarn", eventCriteria, 1, 500, this::pagingChangeBarn, request, response);
                 //转舍
                 break;
-            case CHG_FARM:
+            case "2":
                 exporter.export("web-pig-boarTransFarm", eventCriteria, 1, 500, this::pagingChgFarm, request, response);
                 //转场
                 break;
-            case CONDITION:
+            case "3":
                 exporter.export("web-pig-boarCondition", eventCriteria, 1, 500, this::pagingBoarCondition, request, response);
                 //体况
                 break;
-            case DISEASE:
+            case "4":
                 exporter.export("web-pig-boarDisease", eventCriteria, 1, 500, this::pagingDisease, request, response);
                 //疾病
                 break;
-            case VACCINATION:
+            case "5":
                 exporter.export("web-pig-boarVaccination", eventCriteria, 1, 500, this::pagingVaccination, request, response);
                 //防疫
                 break;
-            case REMOVAL:
+            case "6":
                 exporter.export("web-pig-boarRemove", eventCriteria, 1, 500, this::pagingRemove, request, response);
                 //离场
                 break;

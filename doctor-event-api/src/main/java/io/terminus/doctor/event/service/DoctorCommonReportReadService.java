@@ -99,20 +99,22 @@ public interface DoctorCommonReportReadService {
 
     /**
      * 获取横向报表
-     * @param farmIds 所有有权限的猪场id
+     * @param orgId 集团id
+     * @param farmIds 集团下的所有猪场Ids
      * @param farmIdToName 猪场id与farmName映射
      * @param startDate 开始日期 yyyy-MM-dd(月初)
      * @param endDate 结束时间 yyyy-MM-dd(月末)
      * @return 横向报表
      */
-    Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(List<Long> farmIds, Map<Long, String> farmIdToName, String startDate, String endDate);
+    Response<List<DoctorCliqueReportDto>> getTransverseCliqueReport(Long orgId, List<Long> farmIds,Map<Long, String> farmIdToName, String startDate, String endDate);
 
     /**
      * 获取纵向报表
+     * @param orgId  集团id
      * @param farmIds 猪场id列表
      * @param startDate 开始日期 yyyy-MM-dd(一号)
      * @param endDate 结束时间 yyyy-MM-dd(一号)
      * @return 纵向报表
      */
-    Response<List<DoctorCliqueReportDto>> getPortraitCliqueReport(List<Long> farmIds, String startDate, String endDate);
+    Response<List<DoctorCliqueReportDto>> getPortraitCliqueReport(Long orgId, List<Long> farmIds, String startDate, String endDate);
 }

@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -116,7 +117,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventHandler {
     }
 
     private void changePigletsChangeInfo(Long groupId, DoctorPigEvent doctorPigEvent) {
-        RespHelper.orServEx(doctorGroupWriteService.groupEventChange(RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId)),
+        RespWithExHelper.orInvalid(doctorGroupWriteService.groupEventChange(RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId)),
                 (DoctorChangeGroupInput) buildTriggerGroupEventInput(doctorPigEvent)));
     }
 

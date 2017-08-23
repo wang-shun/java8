@@ -33,12 +33,12 @@ public class DoctorChangeGroupExportDto extends DoctorGroupEvent{
     private String breedName;
 
     /**
-     * 单价(分)
+     * 单价(元)
      */
-    private Long price;
+    private Double rawPrice;
 
     /**
-     * 金额(分)
+     * 金额(元)
      */
     private Long amount;
 

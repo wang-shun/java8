@@ -153,7 +153,7 @@ public class DoctorCliqueReportDto implements Serializable{
     private Double avgFarrowWeak;
 
     /**
-     * 窝均初生重
+     * 初生均个重
      */
     private Double avgFarrowWeight;
 
@@ -161,6 +161,16 @@ public class DoctorCliqueReportDto implements Serializable{
      * 出生总重
      */
     private Double farrowWeight;
+
+    /**
+     * 估算配种分娩率
+     */
+    private Double mateEstimateFarrowingRate;
+
+    /**
+     * 实际配种分娩率
+     */
+    private Double mateRealFarrowingRate;
 
     /**
      * 断奶窝数
@@ -178,12 +188,12 @@ public class DoctorCliqueReportDto implements Serializable{
     private Double nestAvgWean;
 
     /**
-     * 断奶均重
+     * 断奶均重(个体)
      */
     private Double weanAvgWeight;
 
     /**
-     * 断奶日龄
+     * 断奶日龄(个体)
      */
     private Double weanDayAge;
 
