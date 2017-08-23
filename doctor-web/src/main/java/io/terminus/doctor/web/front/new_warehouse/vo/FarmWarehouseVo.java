@@ -19,25 +19,56 @@ public class FarmWarehouseVo {
 
     private String managerName;
 
-    private BigDecimal stockQuantity = new BigDecimal(0);
+    /**
+     * 余额
+     */
+    private BigDecimal balanceQuantity = new BigDecimal(0);
 
-    private long stockMoney;
+    /**
+     * 余量
+     */
+    private long balanceAmount;
 
+    /**
+     * 本月入库数量
+     */
     private BigDecimal inQuantity = new BigDecimal(0);
 
-    private long inMoney;
+    /**
+     * 本月入库金额
+     */
+    private long inAmount;
 
+    /**
+     * 本月出库数量
+     */
     private BigDecimal outQuantity = new BigDecimal(0);
 
-    private long outMoney;
+    /**
+     * 本月出库金额
+     */
+    private long outAmount;
 
+    /**
+     * 本月调拨出数量
+     */
     private BigDecimal transferOutQuantity = new BigDecimal(0);
 
-    private long transferOutMoney;
+    /**
+     * 本月调拨出金额
+     */
+    private long transferOutAmount;
 
+
+    /**
+     * 本月调拨入数量
+     */
     private BigDecimal transferInQuantity = new BigDecimal(0);
 
-    private long transferInMoney;
+    /**
+     * 本月调拨入金额
+     */
+    private long transferInAmount;
 
 
 }

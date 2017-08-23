@@ -1,7 +1,6 @@
 package io.terminus.doctor.basic.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialApply;
 
 /**
  * Desc:

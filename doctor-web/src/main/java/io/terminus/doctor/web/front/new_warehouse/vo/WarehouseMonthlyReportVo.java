@@ -17,20 +17,44 @@ public class WarehouseMonthlyReportVo {
 
     private String unit;
 
+    /**
+     * 月初余量
+     */
     private BigDecimal initialQuantity;
 
-    private Long initialMoney;
+    /**
+     * 月初余额
+     */
+    private Long initialAmount;
 
+    /**
+     * 月度入库数量
+     */
     private BigDecimal inQuantity;
 
-    private Long inMoney;
+    /**
+     * 月度入库金额
+     */
+    private Long inAmount;
 
+    /**
+     * 月度出库数量
+     */
     private BigDecimal outQuantity;
 
-    private Long outMoney;
+    /**
+     * 月度出库金额
+     */
+    private Long outAmount;
 
+    /**
+     * 月末余量
+     */
     private BigDecimal balanceQuantity;
 
-    private Long balanceMoney;
+    /**
+     * 月末余额
+     */
+    private Long balanceAmount;
 
 }

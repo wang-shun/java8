@@ -466,11 +466,11 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             materialApply.setUnit(stocks.get(0).getUnit());//单位都是一致的
             materialApply.setQuantity(detail.getQuantity());
             materialApply.setUnitPrice(averagePrice);
-            materialApply.setPigHouseId(detail.getApplyPigHouseId());
-            materialApply.setPigHouseName(detail.getApplyPigHouseName());
+            materialApply.setPigBarnId(detail.getApplyPigHouseId());
+            materialApply.setPigBarnName(detail.getApplyPigHouseName());
             materialApply.setPigGroupId(detail.getApplyPigGroupId());
             materialApply.setPigGroupName(detail.getApplyPigGroupName());
-            materialApply.setApplyPersonName(detail.getApplyPersonName());
+            materialApply.setApplyStaffName(detail.getApplyPersonName());
             materialApplies.add(materialApply);
 
             handleContexts.add(handleContext);

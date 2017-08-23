@@ -227,28 +227,28 @@ public class ReportController {
                 vo.setInitialQuantity(stockEaryInQuantity.get(key).subtract(stockEaryOutQuantity.get(key)));
             if (!stockEaryOutMoney.containsKey(key))
                 if (!stockEaryInMoney.containsKey(key))
-                    vo.setInitialMoney(0L);
+                    vo.setInitialAmount(0L);
                 else
-                    vo.setInitialMoney(stockEaryInMoney.get(key));
+                    vo.setInitialAmount(stockEaryInMoney.get(key));
             else
-                vo.setInitialMoney(stockEaryInMoney.get(key) - stockEaryOutMoney.get(key));
+                vo.setInitialAmount(stockEaryInMoney.get(key) - stockEaryOutMoney.get(key));
             if (!outMoney.containsKey(key))
-                vo.setOutMoney(0L);
+                vo.setOutAmount(0L);
             else
-                vo.setOutMoney(outMoney.get(key));
+                vo.setOutAmount(outMoney.get(key));
             if (!outQuantity.containsKey(key))
                 vo.setOutQuantity(new BigDecimal(0));
             else
                 vo.setOutQuantity(outQuantity.get(key));
             if (!inMoney.containsKey(key))
-                vo.setInMoney(0L);
+                vo.setInAmount(0L);
             else
-                vo.setInMoney(inMoney.get(key));
+                vo.setInAmount(inMoney.get(key));
             if (!inQuantity.containsKey(key))
                 vo.setInQuantity(new BigDecimal(0));
             else
                 vo.setInQuantity(inQuantity.get(key));
-            vo.setBalanceMoney(vo.getInMoney() - vo.getOutMoney());
+            vo.setBalanceAmount(vo.getInAmount() - vo.getOutAmount());
             vo.setBalanceQuantity(vo.getInQuantity().subtract(vo.getOutQuantity()));
             report.add(vo);
         }
@@ -286,13 +286,13 @@ public class ReportController {
     /**
      * 领用
      *
-     * @param pigHouseId
+     * @param pigBarnId
      * @param warehouseId
      * @param date
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "apply")
-    public List<DoctorWarehouseMaterialApply> apply(@RequestParam(required = false) Long pigHouseId,
+    public List<DoctorWarehouseMaterialApply> apply(@RequestParam(required = false) Long pigBarnId,
                                                     @RequestParam Long warehouseId,
                                                     @RequestParam(required = false) String materialName,
                                                     @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
@@ -302,8 +302,8 @@ public class ReportController {
         criteria.setWarehouseId(warehouseId);
         if (StringUtils.isNotBlank(materialName))
             criteria.setMaterialName(materialName);
-        if (null != pigHouseId)
-            criteria.setPigHouseId(pigHouseId);
+        if (null != pigBarnId)
+            criteria.setPigBarnId(pigBarnId);
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
         if (!applyResponse.isSuccess())
             throw new JsonResponseException(applyResponse.getError());

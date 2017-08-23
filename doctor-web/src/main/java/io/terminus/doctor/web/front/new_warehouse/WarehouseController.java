@@ -7,7 +7,6 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandlerType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.service.*;
@@ -152,13 +151,13 @@ public class WarehouseController {
             thisMonthHandlesResponse.getResult().forEach(handle -> {
                 long money = handle.getQuantity().multiply(new BigDecimal(handle.getUnitPrice())).longValue();
                 if (handle.getType() == WarehouseMaterialHandlerType.IN.getValue()) {
-                    vo.setInMoney(vo.getInMoney() + money);
+                    vo.setInAmount(vo.getInAmount() + money);
                     vo.setInQuantity(vo.getInQuantity().add(handle.getQuantity()));
                 } else if (handle.getType() == WarehouseMaterialHandlerType.OUT.getValue()) {
-                    vo.setOutMoney(vo.getOutMoney() + money);
+                    vo.setOutAmount(vo.getOutAmount() + money);
                     vo.setOutQuantity(vo.getOutQuantity().add(handle.getQuantity()));
                 } else if (handle.getType() == WarehouseMaterialHandlerType.TRANSFER.getValue()) {
-                    vo.setTransferOutMoney(vo.getTransferOutMoney() + money);
+                    vo.setTransferOutAmount(vo.getTransferOutAmount() + money);
                     vo.setTransferOutQuantity(vo.getTransferOutQuantity().add(handle.getQuantity()));
                 }
             });
@@ -172,7 +171,7 @@ public class WarehouseController {
             if (!thisMonthHandlesResponse.isSuccess())
                 throw new JsonResponseException(thisMonthHandlesResponse.getError());
             thisMonthHandlesResponse.getResult().forEach(handle -> {
-                vo.setTransferInMoney(vo.getTransferInMoney() + handle.getQuantity().multiply(new BigDecimal(handle.getUnitPrice())).longValue());
+                vo.setTransferInAmount(vo.getTransferInAmount() + handle.getQuantity().multiply(new BigDecimal(handle.getUnitPrice())).longValue());
                 vo.setTransferInQuantity(vo.getTransferInQuantity().add(handle.getQuantity()));
             });
 
@@ -191,8 +190,8 @@ public class WarehouseController {
                 totalQuantity = totalQuantity.add(leftQuantity);
                 totalMoney += leftQuantity.multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
             }
-            vo.setStockQuantity(totalQuantity);
-            vo.setStockMoney(totalMoney);
+            vo.setBalanceQuantity(totalQuantity);
+            vo.setBalanceAmount(totalMoney);
             vos.add(vo);
 
         });

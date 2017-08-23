@@ -10,20 +10,40 @@ import java.math.BigDecimal;
 @Data
 public class WarehouseStockVo {
 
+    private Long materialId;
+
     private String materialName;
 
+    /**
+     * 余量
+     */
     private BigDecimal balanceQuantity;
 
-    private long balanceMoney;
+    /**
+     * 余额
+     */
+    private long balanceAmount;
 
     private String unit;
 
+    /**
+     * 本月入库数量
+     */
     private BigDecimal inQuantity;
 
-    private long inMoney;
+    /**
+     * 本月入库金额
+     */
+    private long inAmount;
 
+    /**
+     * 本月出库数量
+     */
     private BigDecimal outQuantity;
 
-    private long outMoney;
+    /**
+     * 本月出库金额
+     */
+    private long outAmount;
 
 }

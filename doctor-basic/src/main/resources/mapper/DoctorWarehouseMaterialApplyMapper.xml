@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-08-22 17:44:57
+ ~ Date: 2017-08-23 14:29:31
  ~ Created by [ your name ]
 -->
 
@@ -11,13 +11,13 @@
     <resultMap id="DoctorWarehouseMaterialApplyMap" type="DoctorWarehouseMaterialApply">
         <id property="id" column="id"/>
         <result property="warehouseId" column="warehouse_id"/>
-        <result property="pigHouseId" column="pig_house_id"/>
-        <result property="pigHouseName" column="pig_house_name"/>
+        <result property="pigBarnId" column="pig_barn_id"/>
+        <result property="pigBarnName" column="pig_barn_name"/>
         <result property="pigGroupId" column="pig_group_id"/>
         <result property="pigGroupName" column="pig_group_name"/>
         <result property="materialId" column="material_id"/>
         <result property="applyDate" column="apply_date"/>
-        <result property="applyPersonName" column="apply_person_name"/>
+        <result property="applyStaffName" column="apply_staff_name"/>
         <result property="applyYear" column="apply_year"/>
         <result property="applyMonth" column="apply_month"/>
         <result property="materialName" column="material_name"/>
@@ -39,25 +39,25 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `warehouse_id`, `pig_house_id`, `pig_house_name`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_person_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, 
+        `warehouse_id`, `pig_barn_id`, `pig_barn_name`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{warehouseId}, #{pigHouseId}, #{pigHouseName}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyPersonName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, 
+        #{warehouseId}, #{pigBarnId}, #{pigBarnName}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, 
         now(), now()
     </sql>
 
     <sql id="criteria">
         <where>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
-            <if test="pigHouseId != null">AND `pig_house_id` = #{pigHouseId}</if>
-            <if test="pigHouseName != null">AND `pig_house_name` = #{pigHouseName}</if>
+            <if test="pigBarnId != null">AND `pig_barn_id` = #{pigBarnId}</if>
+            <if test="pigBarnName != null">AND `pig_barn_name` = #{pigBarnName}</if>
             <if test="pigGroupId != null">AND `pig_group_id` = #{pigGroupId}</if>
             <if test="pigGroupName != null">AND `pig_group_name` = #{pigGroupName}</if>
             <if test="materialId != null">AND `material_id` = #{materialId}</if>
             <if test="applyDate != null">AND `apply_date` = #{applyDate}</if>
-            <if test="applyPersonName != null">AND `apply_person_name` = #{applyPersonName}</if>
+            <if test="applyStaffName != null">AND `apply_staff_name` = #{applyStaffName}</if>
             <if test="applyYear != null">AND `apply_year` = #{applyYear}</if>
             <if test="applyMonth != null">AND `apply_month` = #{applyMonth}</if>
             <if test="materialName != null">AND `material_name` = #{materialName}</if>
@@ -102,13 +102,13 @@
         <include refid="tb"/>
         <set>
             <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
-            <if test="pigHouseId != null">`pig_house_id` = #{pigHouseId},</if>
-            <if test="pigHouseName != null">`pig_house_name` = #{pigHouseName},</if>
+            <if test="pigBarnId != null">`pig_barn_id` = #{pigBarnId},</if>
+            <if test="pigBarnName != null">`pig_barn_name` = #{pigBarnName},</if>
             <if test="pigGroupId != null">`pig_group_id` = #{pigGroupId},</if>
             <if test="pigGroupName != null">`pig_group_name` = #{pigGroupName},</if>
             <if test="materialId != null">`material_id` = #{materialId},</if>
             <if test="applyDate != null">`apply_date` = #{applyDate},</if>
-            <if test="applyPersonName != null">`apply_person_name` = #{applyPersonName},</if>
+            <if test="applyStaffName != null">`apply_staff_name` = #{applyStaffName},</if>
             <if test="applyYear != null">`apply_year` = #{applyYear},</if>
             <if test="applyMonth != null">`apply_month` = #{applyMonth},</if>
             <if test="materialName != null">`material_name` = #{materialName},</if>
@@ -146,14 +146,5 @@
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>
-
-    <select id="listAndOrderByHandleDate" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
-        <include refid="criteria"/>
-        ORDER BY `apply_date` DESC
-        <if test="limit!=null">LIMIT #{limit}</if>
-    </select>
-
 
 </mapper>
