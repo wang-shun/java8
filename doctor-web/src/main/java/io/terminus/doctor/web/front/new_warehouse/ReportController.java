@@ -85,13 +85,20 @@ public class ReportController {
 
     }
 
+    /**
+     * 月报
+     *
+     * @param warehouseId
+     * @param date
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "monthly")
-    public List<WarehouseMonthlyReportVo> monthlyReport(@RequestParam Long warehouseID,
+    public List<WarehouseMonthlyReportVo> monthlyReport(@RequestParam Long warehouseId,
                                                         @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
         //上月仓库出库记录
         DoctorWarehouseMaterialHandle lastMonthOutCriteria = new DoctorWarehouseMaterialHandle();
-        lastMonthOutCriteria.setWarehouseId(warehouseID);
+        lastMonthOutCriteria.setWarehouseId(warehouseId);
         lastMonthOutCriteria.setHandleMonth(date.get(Calendar.MONTH));
         lastMonthOutCriteria.setHandleYear(date.get(Calendar.YEAR));
         lastMonthOutCriteria.setType(WarehouseMaterialHandlerType.OUT.getValue());
@@ -120,7 +127,7 @@ public class ReportController {
         }
 
         DoctorWarehouseMaterialHandle lastMonthInCriteria = new DoctorWarehouseMaterialHandle();
-        lastMonthInCriteria.setWarehouseId(warehouseID);
+        lastMonthInCriteria.setWarehouseId(warehouseId);
         lastMonthInCriteria.setHandleMonth(date.get(Calendar.MONTH));
         lastMonthInCriteria.setHandleYear(date.get(Calendar.YEAR));
         lastMonthInCriteria.setType(WarehouseMaterialHandlerType.IN.getValue());
@@ -149,7 +156,7 @@ public class ReportController {
 
 
         DoctorWarehouseMaterialHandle thisMonthInHandleCriteria = new DoctorWarehouseMaterialHandle();
-        thisMonthInHandleCriteria.setWarehouseId(warehouseID);
+        thisMonthInHandleCriteria.setWarehouseId(warehouseId);
         thisMonthInHandleCriteria.setHandleMonth(date.get(Calendar.MONTH) + 1);
         thisMonthInHandleCriteria.setHandleYear(date.get(Calendar.YEAR));
         thisMonthInHandleCriteria.setType(WarehouseMaterialHandlerType.IN.getValue());
@@ -180,7 +187,7 @@ public class ReportController {
         }
 
         DoctorWarehouseMaterialHandle thisMonthOutHandleCriteria = new DoctorWarehouseMaterialHandle();
-        thisMonthOutHandleCriteria.setWarehouseId(warehouseID);
+        thisMonthOutHandleCriteria.setWarehouseId(warehouseId);
         thisMonthOutHandleCriteria.setHandleMonth(date.get(Calendar.MONTH) + 1);
         thisMonthOutHandleCriteria.setHandleYear(date.get(Calendar.YEAR));
         thisMonthOutHandleCriteria.setType(WarehouseMaterialHandlerType.OUT.getValue());
@@ -205,7 +212,7 @@ public class ReportController {
         }
 
         DoctorWarehouseStock stockCriteria = new DoctorWarehouseStock();
-        stockCriteria.setWarehouseId(warehouseID);
+        stockCriteria.setWarehouseId(warehouseId);
         Response<List<DoctorWarehouseStock>> stocksResponse = doctorWarehouseStockReadService.list(stockCriteria);
         if (!stocksResponse.isSuccess())
             throw new JsonResponseException(stocksResponse.getError());
@@ -296,16 +303,21 @@ public class ReportController {
     @RequestMapping(method = RequestMethod.GET, value = "apply")
     public List<DoctorWarehouseMaterialApply> apply(@RequestParam(required = false) Long pigBarnId,
                                                     @RequestParam Long warehouseId,
+                                                    @RequestParam(required = false) Integer type,
                                                     @RequestParam(required = false) String materialName,
                                                     @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
         DoctorWarehouseMaterialApply criteria = new DoctorWarehouseMaterialApply();
         criteria.setApplyYear(date.get(Calendar.YEAR));
         criteria.setApplyMonth(date.get(Calendar.MONTH) + 1);
         criteria.setWarehouseId(warehouseId);
+
         if (StringUtils.isNotBlank(materialName))
             criteria.setMaterialName(materialName);
         if (null != pigBarnId)
             criteria.setPigBarnId(pigBarnId);
+        if (null != type)
+            criteria.setType(type);
+
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
         if (!applyResponse.isSuccess())
             throw new JsonResponseException(applyResponse.getError());
