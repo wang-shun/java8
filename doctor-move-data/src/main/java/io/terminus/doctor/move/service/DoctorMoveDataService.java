@@ -2994,11 +2994,8 @@ public class DoctorMoveDataService {
     }
 
     public void flushNestCode() {
-        DoctorPigEvent temp = new DoctorPigEvent();
-        temp.setFarmId(92L);
-        temp.setEventAt(DateUtil.toDate("2017-04-09"));
-        List<DoctorPigEvent> list = Lists.newArrayList(temp);
-//                = doctorPigEventDao.findAllFarrowNoNestCode();
+        List<DoctorPigEvent> list
+                = doctorPigEventDao.findAllFarrowNoNestCode();
 
         list.forEach(doctorPigEvent -> {
             DateTime eventAt = new DateTime(doctorPigEvent.getEventAt());
