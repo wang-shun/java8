@@ -62,7 +62,7 @@ public class FormulaController {
 
     @RequestMapping(method = RequestMethod.GET)
     public Paging<FeedFormula> paging(@RequestParam("farmId") Long farmId,
-                                      @RequestParam("materialName") String materialName,
+                                      @RequestParam(value = "materialName",required = false) String materialName,
                                       @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                       @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         return RespHelper.or500(feedFormulaReadService.paging(null, farmId, materialName, pageNo, pageSize));
