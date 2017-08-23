@@ -130,4 +130,13 @@
         </where>
         LIMIT #{offset}, #{limit}
     </select>
+
+    <select id="list" parameterType="map" resultMap="DoctorWareHouseMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        ORDER BY `id` DESC
+    </select>
 </mapper>
