@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -594,21 +595,28 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         if (null == wareHouse)
             throw new JsonResponseException("warehouse.not.found");
 
-
-        Map<Long, String> supportedMaterials = new HashedMap(details.size());
+        //先过滤一遍。
         details.forEach(detail -> {
             if (!currentFarmSupportedMaterials.contains(detail.getMaterialId()))
                 throw new ServiceException("material.not.allow.in.this.warehouse");
+        });
 
-            DoctorBasicMaterial basicMaterial = doctorBasicMaterialDao.findById(detail.getMaterialId());
-            if (null == basicMaterial)
-                throw new ServiceException("material.not.found");
 
-            supportedMaterials.put(detail.getMaterialId(), basicMaterial.getName());
+        List<DoctorBasicMaterial> supportedMaterials = doctorBasicMaterialDao.findByIdsAndType(wareHouse.getType().longValue(), details.stream().map(AbstractWarehouseStockDetail::getMaterialId).collect(Collectors.toList()));
+        if (null == supportedMaterials)
+            throw new ServiceException("material.not.found");
+        Map<Long, String> supportedMaterialIds = new HashedMap(supportedMaterials.size());
+        supportedMaterials.forEach(material -> {
+            supportedMaterialIds.put(material.getId(), material.getName());
+        });
+        //再过滤一遍，加上type类型条件
+        details.forEach(detail -> {
+            if (!supportedMaterialIds.containsKey(detail.getMaterialId()))
+                throw new ServiceException("material.not.allow.in.this.warehouse");
         });
 
         StockContext context = new StockContext();
-        context.setSupportedMaterials(supportedMaterials);
+        context.setSupportedMaterials(supportedMaterialIds);
         context.setWareHouse(wareHouse);
         return context;
     }
