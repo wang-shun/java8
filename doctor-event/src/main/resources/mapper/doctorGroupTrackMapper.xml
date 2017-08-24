@@ -231,4 +231,5 @@
         AND t.avg_day_age > #{avgDayAge} AND date_format(g.open_at, '%Y-%m-%d') &lt;= #{sumAt} AND g.pig_type = 3
         GROUP BY g.farm_id
     </select>
+
 </mapper>

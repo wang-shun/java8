@@ -198,6 +198,8 @@ public class DoctorGroupManager {
         //建群时间与状态
         group.setOpenAt(generateEventAt(DateUtil.toDate(newGroupInput.getEventAt())));
         group.setStatus(DoctorGroup.Status.CREATED.getValue());
+
+        group.setOutId(newGroupInput.getGroupOutId());
         return group;
     }
 

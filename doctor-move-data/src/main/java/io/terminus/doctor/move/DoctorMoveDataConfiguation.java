@@ -4,7 +4,15 @@ import com.google.common.collect.Maps;
 import io.terminus.doctor.basic.DoctorBasicConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.DoctorEventConfiguration;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.move.builder.group.DoctorChangeEventInputBuilder;
+import io.terminus.doctor.move.builder.group.DoctorCloseEventInputBuilder;
+import io.terminus.doctor.move.builder.group.DoctorGroupEventInputBuilder;
+import io.terminus.doctor.move.builder.group.DoctorGroupEventInputBuilders;
+import io.terminus.doctor.move.builder.group.DoctorMoveInEventInputBuilder;
+import io.terminus.doctor.move.builder.group.DoctorNewEventInputBuilder;
+import io.terminus.doctor.move.builder.group.DoctorTransGroupEventInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorChgLocationInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorEntryInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorFarrowInputBuilder;
@@ -80,5 +88,20 @@ public class DoctorMoveDataConfiguation extends WebMvcConfigurerAdapter {
         pigEventInputBuilderMap.put(PigEvent.PREG_CHECK.getName(), pregCheckInputBuilder);
         pigEventInputBuilderMap.put(PigEvent.REMOVAL.getName(), removeInputBuilder);
         return new DoctorPigEventInputBuilders(pigEventInputBuilderMap);
+    }
+
+    @Bean
+    public DoctorGroupEventInputBuilders getGroupEventInputBuildMap(DoctorChangeEventInputBuilder changeEventInputBuilder,
+                                                                    DoctorCloseEventInputBuilder closeEventInputBuilder,
+                                                                    DoctorMoveInEventInputBuilder moveInEventInputBuilder,
+                                                                    DoctorNewEventInputBuilder newEventInputBuilder,
+                                                                    DoctorTransGroupEventInputBuilder transGroupEventInputBuilder) {
+        Map<String, DoctorGroupEventInputBuilder> groupEventInputBuilderMap = Maps.newHashMap();
+        groupEventInputBuilderMap.put(GroupEventType.CHANGE.getDesc(), changeEventInputBuilder);
+        groupEventInputBuilderMap.put(GroupEventType.CLOSE.getDesc(), closeEventInputBuilder);
+        groupEventInputBuilderMap.put(GroupEventType.MOVE_IN.getDesc(), moveInEventInputBuilder);
+        groupEventInputBuilderMap.put(GroupEventType.NEW.getDesc(), newEventInputBuilder);
+        groupEventInputBuilderMap.put(GroupEventType.TRANS_GROUP.getDesc(), transGroupEventInputBuilder);
+        return new DoctorGroupEventInputBuilders(groupEventInputBuilderMap);
     }
 }

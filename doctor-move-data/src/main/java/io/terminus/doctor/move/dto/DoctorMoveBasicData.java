@@ -5,6 +5,7 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.AllArgsConstructor;
@@ -32,4 +33,5 @@ public class DoctorMoveBasicData {
     private Map<String, DoctorCustomer> customerMap;
     private Map<String, DoctorBasicMaterial> vaccMap;
     private Map<String, DoctorPig> boarMap;
+    private Map<String, DoctorGroup> groupMap;
 }

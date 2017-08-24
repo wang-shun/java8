@@ -244,4 +244,12 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public Boolean updateIncludeNull(DoctorGroupEvent groupEvent) {
         return getSqlSession().update(sqlId("updateIncludeNull"), groupEvent) == 1;
     }
+
+    /**
+     * 删除猪场下的所有猪群事件
+     * @param farmId 猪场id
+     */
+    public void deleteByFarmId(Long farmId) {
+        getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
+    }
 }

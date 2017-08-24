@@ -337,4 +337,10 @@
         farm_id = #{farmId}
         AND out_id = #{OutId}
     </select>
+
+    <delete id="deleteByFarmId" parameterType="long" >
+        DELETE
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+    </delete>
 </mapper>

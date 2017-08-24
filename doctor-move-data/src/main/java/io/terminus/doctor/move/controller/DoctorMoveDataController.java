@@ -461,7 +461,7 @@ public class DoctorMoveDataController {
         try {
             DoctorFarm farm = doctorFarmDao.findById(farmId);
             log.warn("move group start, moveId:{}", moveId);
-            doctorMoveDataService.moveGroup(moveId, farm, Lists.newArrayList());
+            doctorMoveAndImportService.moveGroup(moveId, doctorMoveAndImportService.packageMoveBasicData(farm));
             log.warn("move group end");
             return true;
         } catch (Exception e) {
