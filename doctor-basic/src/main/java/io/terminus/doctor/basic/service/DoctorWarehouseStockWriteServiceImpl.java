@@ -446,6 +446,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 handleContext.setMaterialHandle(Collections.singletonList(materialHandle));
 
                 DoctorWarehouseMaterialApply materialApply = new DoctorWarehouseMaterialApply();
+                materialApply.setWarehouseId(stockOut.getWarehouseId());
                 materialApply.setMaterialId(detail.getMaterialId());
                 materialApply.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
                 materialApply.setApplyDate(stockOut.getHandleDate());
@@ -460,6 +461,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 materialApply.setPigGroupId(detail.getApplyPigGroupId());
                 materialApply.setPigGroupName(detail.getApplyPigGroupName());
                 materialApply.setApplyStaffName(detail.getApplyStaffName());
+
 //            materialApplies.add(materialApply);
                 handleContext.setApply(materialApply);
                 handleContexts.add(handleContext);
