@@ -17,7 +17,8 @@ import java.util.List;
 public interface DoctorWarehouseStockWriteService {
 
 
-     String DEFAULT_VENDOR_NAME = "默认";
+    String DEFAULT_VENDOR_NAME = "默认";
+
     /**
      * 创建
      *
@@ -43,18 +44,42 @@ public interface DoctorWarehouseStockWriteService {
     Response<Boolean> delete(Long id);
 
 
+    /**
+     * 入库
+     *
+     * @param stockIn
+     * @return
+     */
     Response<Boolean> in(WarehouseStockInDto stockIn);
 
-
+    /**
+     * 盘点
+     *
+     * @param stockInventory
+     * @return
+     */
     Response<Boolean> inventory(WarehouseStockInventoryDto stockInventory);
 
+    /**
+     * 调拨
+     *
+     * @param stockTransfer
+     * @return
+     */
     Response<Boolean> transfer(WarehouseStockTransferDto stockTransfer);
 
+    /**
+     * 出库
+     *
+     * @param stockOut
+     * @return
+     */
     Response<Boolean> out(WarehouseStockOutDto stockOut);
 
 //    Response<Boolean> out(List<DoctorWarehouseStockHandleDto> dtos, DoctorWarehouseStockHandler handle);
 
 
+    @Deprecated
     Response<Boolean> outAndIn(List<DoctorWarehouseStockHandleDto> inHandles, List<DoctorWarehouseStockHandleDto> outHandles, DoctorWarehouseStockHandler handle);
 
 }

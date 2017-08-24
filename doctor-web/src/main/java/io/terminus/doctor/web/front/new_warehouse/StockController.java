@@ -13,7 +13,7 @@ import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
-import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseStockVo;
+import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseStockStatisticsVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -107,10 +107,10 @@ public class StockController {
 
 
     @RequestMapping(method = RequestMethod.GET)
-    public Paging<WarehouseStockVo> paging(@RequestParam Long warehouseId,
-                                           @RequestParam(required = false) String materialName,
-                                           @RequestParam(required = false) Integer pageNo,
-                                           @RequestParam(required = false) Integer pageSize) {
+    public Paging<WarehouseStockStatisticsVo> paging(@RequestParam Long warehouseId,
+                                                     @RequestParam(required = false) String materialName,
+                                                     @RequestParam(required = false) Integer pageNo,
+                                                     @RequestParam(required = false) Integer pageSize) {
 
         //本月出库记录
         Calendar now = Calendar.getInstance();
@@ -173,11 +173,11 @@ public class StockController {
         if (null == stockResponse.getResult().getData() || stockResponse.getResult().getData().isEmpty())
             throw new JsonResponseException("stock.not.found");
 
-        Paging<WarehouseStockVo> result = new Paging<>();
+        Paging<WarehouseStockStatisticsVo> result = new Paging<>();
         result.setTotal(stockResponse.getResult().getTotal());
-        List<WarehouseStockVo> vos = new ArrayList<>(stockResponse.getResult().getData().size());
+        List<WarehouseStockStatisticsVo> vos = new ArrayList<>(stockResponse.getResult().getData().size());
         stockResponse.getResult().getData().forEach(stock -> {
-            WarehouseStockVo vo = new WarehouseStockVo();
+            WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
             vo.setMaterialId(stock.getMaterialId());
             vo.setMaterialName(stock.getMaterialName());
             vo.setUnit(stock.getUnit());

@@ -25,6 +25,7 @@ import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.new_warehouse.dto.WarehouseDto;
 import io.terminus.doctor.web.front.new_warehouse.vo.FarmWarehouseVo;
 import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseStatisticsVo;
+import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseStockVo;
 import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseVo;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
@@ -92,6 +93,12 @@ public class WarehouseController {
     @RpcConsumer
     private DoctorWarehouseStockWriteService doctorWarehouseStockWriteService;
 
+    /**
+     * 创建仓库
+     *
+     * @param warehouseDto
+     * @param errors
+     */
     @RequestMapping(method = RequestMethod.POST)
     public void create(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
 
@@ -129,6 +136,13 @@ public class WarehouseController {
         return doctorWarehouseReaderService.paging(criteria).getResult();
     }
 
+    /**
+     * 猪厂下同类型的仓库列表
+     *
+     * @param type
+     * @param farmId
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "type/{type}")
     public List<WarehouseVo> query(@PathVariable Integer type, @RequestParam Long farmId) {
         DoctorWareHouse criteria = new DoctorWareHouse();
@@ -150,6 +164,12 @@ public class WarehouseController {
         return vos;
     }
 
+    /**
+     * 猪厂下所有仓库，及仓库的出入库等统计信息
+     *
+     * @param farmId
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "farm/{farmId}")
     public List<FarmWarehouseVo> query(@PathVariable Long farmId) {
 
@@ -225,7 +245,12 @@ public class WarehouseController {
         return vos;
     }
 
-
+    /**
+     * 仓库及仓库最近一次领用信息
+     *
+     * @param id
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
     public WarehouseVo find(@PathVariable Long id) {
         Response<DoctorWareHouse> wareHouseResponse = doctorWarehouseReaderService.findById(id);
@@ -254,6 +279,13 @@ public class WarehouseController {
         return vo;
     }
 
+    /**
+     * 仓库的出入库，余额，余量统计
+     *
+     * @param id
+     * @param date
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "{id}/statistics")
     public WarehouseStatisticsVo warehouseInAndOut(@PathVariable Long id,
                                                    @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
@@ -306,8 +338,22 @@ public class WarehouseController {
     }
 
 
+    /**
+     * 仓库可以添加的物料列表
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "material")
+    public List<DoctorBasicMaterial> farmMaterail(@RequestParam Long farmId, @RequestParam Long type) {
+        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialsOwned(farmId, type, null));
+    }
+
+    /**
+     * 仓库的已添加的物料
+     *
+     * @param id
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "{id}/material")
-    public List<DoctorWarehouseStock> material(@PathVariable Long id) {
+    public List<WarehouseStockVo> material(@PathVariable Long id) {
 
         Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.listMergeVendor(DoctorWarehouseStock.builder()
                 .warehouseId(id)
@@ -316,12 +362,34 @@ public class WarehouseController {
         if (!stockResponse.isSuccess())
             throw new JsonResponseException(stockResponse.getError());
 
-        return stockResponse.getResult();
+
+        List<WarehouseStockVo> vos = new ArrayList<>(stockResponse.getResult().size());
+        for (DoctorWarehouseStock stock : stockResponse.getResult()) {
+            vos.add(WarehouseStockVo.builder()
+                    .materialId(stock.getMaterialId())
+                    .materialName(stock.getMaterialName())
+                    .quantity(stock.getQuantity())
+                    .unit(stock.getUnit())
+                    .build());
+        }
+
+        return vos;
     }
 
+
+    /**
+     * 仓库下添加物料
+     *
+     * @param id
+     * @param warehouseMaterialDto
+     */
     @RequestMapping(method = RequestMethod.POST, value = "{id}/material")
     public void material(@PathVariable Long id,
-                         @RequestBody @Valid WarehouseMaterialDto warehouseMaterialDto) {
+                         @RequestBody @Valid WarehouseMaterialDto warehouseMaterialDto,
+                         Errors errors) {
+
+        if (errors.hasErrors())
+            throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
         DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(warehouseMaterialDto.getMaterialId()));
         if (material == null) {
@@ -334,6 +402,16 @@ public class WarehouseController {
         if (!wareHouse.getType().equals(material.getType())) {
             throw new JsonResponseException("warehouse.material.type.not.match"); // 仓库与物料类型不一致
         }
+        Response<DoctorFarmBasic> farmBasicResponse = doctorFarmBasicReadService.findFarmBasicByFarmId(wareHouse.getFarmId());
+        if (!farmBasicResponse.isSuccess())
+            throw new ServiceException(farmBasicResponse.getError());
+        DoctorFarmBasic farmBasic = farmBasicResponse.getResult();
+        if (null == farmBasic)
+            throw new JsonResponseException("farm.basic.not.found");
+
+        List<Long> currentFarmSupportedMaterials = farmBasic.getMaterialIdList();
+        if (!currentFarmSupportedMaterials.contains(warehouseMaterialDto.getMaterialId()))
+            throw new JsonResponseException("material.not.allow.in.this.warehouse");
 
         Response<Boolean> existedResponse = doctorWarehouseStockReadService.existed(DoctorWarehouseStock.builder()
                 .warehouseId(id)

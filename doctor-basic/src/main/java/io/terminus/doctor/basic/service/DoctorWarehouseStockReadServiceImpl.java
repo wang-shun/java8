@@ -117,6 +117,10 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
 
     @Override
     public Response<Boolean> existed(DoctorWarehouseStock criteria) {
-        return null;
+        Response<Paging<DoctorWarehouseStock>> listResponse = this.paging(1, 1, criteria);
+        if (!listResponse.isSuccess())
+            return Response.fail(listResponse.getError());
+
+        return Response.ok(!listResponse.getResult().isEmpty());
     }
 }

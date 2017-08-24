@@ -1,49 +1,26 @@
 package io.terminus.doctor.web.front.new_warehouse.vo;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.math.BigDecimal;
 
 /**
- * Created by sunbo@terminus.io on 2017/8/22.
+ * Created by sunbo@terminus.io on 2017/8/24.
  */
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class WarehouseStockVo {
 
     private Long materialId;
 
     private String materialName;
 
-    /**
-     * 余量
-     */
-    private BigDecimal balanceQuantity;
-
-    /**
-     * 余额
-     */
-    private long balanceAmount;
+    private BigDecimal quantity;
 
     private String unit;
-
-    /**
-     * 本月入库数量
-     */
-    private BigDecimal inQuantity;
-
-    /**
-     * 本月入库金额
-     */
-    private long inAmount;
-
-    /**
-     * 本月出库数量
-     */
-    private BigDecimal outQuantity;
-
-    /**
-     * 本月出库金额
-     */
-    private long outAmount;
-
 }
