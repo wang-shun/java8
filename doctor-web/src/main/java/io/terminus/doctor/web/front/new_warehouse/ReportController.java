@@ -112,22 +112,34 @@ public class ReportController {
             for (DoctorWareHouse wareHouse : warehouseResponse.getResult()) {
                 balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
-                        .amount(balanceAmountsResponse.getResult().get(wareHouse.getId()))
+                        .amount(balanceAmountsResponse.getResult().containsKey(wareHouse.getId()) ? balanceAmountsResponse.getResult().get(wareHouse.getId()) : 0)
                         .build());
 
-                long inAmount = inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.IN.getValue()).get(wareHouse.getId());
+                long inAmount;
+                if (!inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.IN))
+                    inAmount = 0;
+                else if (!inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.IN).containsKey(wareHouse.getId()))
+                    inAmount = 0;
+                else
+                    inAmount = inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.IN).get(wareHouse.getId());
                 inDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
                         .amount(inAmount)
                         .build());
 
-                long outAmount = inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.OUT.getValue()).get(wareHouse.getId());
+                long outAmount;
+                if (!inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.OUT))
+                    outAmount = 0;
+                else if (!inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.OUT).containsKey(wareHouse.getId()))
+                    outAmount = 0;
+                else
+                    outAmount = inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.OUT).get(wareHouse.getId());
                 outDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
                         .amount(outAmount)
                         .build());
 
-                totalBalance += balanceAmountsResponse.getResult().get(wareHouse.getId());
+                totalBalance += balanceAmountsResponse.getResult().containsKey(wareHouse.getId()) ? balanceAmountsResponse.getResult().get(wareHouse.getId()) : 0;
                 totalIn += inAmount;
                 totalOut += outAmount;
             }
@@ -361,6 +373,7 @@ public class ReportController {
                 vo.setInQuantity(new BigDecimal(0));
             else
                 vo.setInQuantity(inQuantity.get(key));
+            //TODO 应该从purchase中拉取余额
             vo.setBalanceAmount(vo.getInAmount() - vo.getOutAmount());
             vo.setBalanceQuantity(vo.getInQuantity().subtract(vo.getOutQuantity()));
             report.add(vo);
@@ -380,12 +393,15 @@ public class ReportController {
     @RequestMapping(method = RequestMethod.GET, value = "material")
     public List<DoctorWarehouseMaterialHandle> materialHandleReport(@RequestParam Long warehouseId,
                                                                     @RequestParam(required = false) String materialName,
+                                                                    @RequestParam(required = false) Integer type,
                                                                     @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
         DoctorWarehouseMaterialHandle criteria = new DoctorWarehouseMaterialHandle();
         criteria.setWarehouseId(warehouseId);
         criteria.setHandleYear(date.get(Calendar.YEAR));
         criteria.setHandleMonth(date.get(Calendar.MONTH) + 1);
+        if (null != type)
+            criteria.setType(type);
         if (StringUtils.isNotBlank(materialName))
             criteria.setMaterialName(materialName);
 
