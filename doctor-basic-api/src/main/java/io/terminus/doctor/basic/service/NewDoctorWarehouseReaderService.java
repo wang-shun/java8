@@ -2,6 +2,7 @@ package io.terminus.doctor.basic.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dto.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 
@@ -21,4 +22,12 @@ public interface NewDoctorWarehouseReaderService {
     Response<DoctorWareHouse> findById(Long warehouseId);
 
     Response<List<DoctorWareHouse>> list(DoctorWareHouse criteria);
+
+    /**
+     * 统计仓库余额和余量
+     *
+     * @param warehouseId 仓库编号
+     * @return
+     */
+    Response<AmountAndQuantityDto> countWarehouseBalance(Long warehouseId);
 }

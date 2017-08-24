@@ -4,7 +4,6 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
-import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
@@ -12,6 +11,7 @@ import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseMaterialHandleVo;
 import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseMonthlyReportVo;
 import io.terminus.doctor.web.front.new_warehouse.vo.WarehousePigGroupApplyVo;
 import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseReportVo;
@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.xml.ws.soap.Addressing;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -56,6 +55,7 @@ public class ReportController {
 
     @RpcConsumer
     private DoctorGroupReadService doctorGroupReadService;
+
 
     @RequestMapping(method = RequestMethod.GET)
     public List<WarehouseReportVo> report(@RequestParam Long farmId,
@@ -391,10 +391,10 @@ public class ReportController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "material")
-    public List<DoctorWarehouseMaterialHandle> materialHandleReport(@RequestParam Long warehouseId,
-                                                                    @RequestParam(required = false) String materialName,
-                                                                    @RequestParam(required = false) Integer type,
-                                                                    @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
+    public List<WarehouseMaterialHandleVo> materialHandleReport(@RequestParam Long warehouseId,
+                                                                @RequestParam(required = false) String materialName,
+                                                                @RequestParam(required = false) Integer type,
+                                                                @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
         DoctorWarehouseMaterialHandle criteria = new DoctorWarehouseMaterialHandle();
         criteria.setWarehouseId(warehouseId);
@@ -409,7 +409,44 @@ public class ReportController {
         if (!materialHandleResponse.isSuccess())
             throw new JsonResponseException(materialHandleResponse.getError());
 
-        return materialHandleResponse.getResult();
+        Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(DoctorWarehouseMaterialApply.builder()
+                .warehouseId(warehouseId)
+                .materialName(StringUtils.isBlank(materialName) ? null : materialName)
+                .applyYear(date.get(Calendar.YEAR))
+                .applyMonth(date.get(Calendar.MONTH) + 1)
+                .build());
+        if (!applyResponse.isSuccess())
+            throw new JsonResponseException(applyResponse.getError());
+
+
+        Map<Long/*MaterialHandleId*/, DoctorWarehouseMaterialApply> handleApply = new HashMap<>();
+        for (DoctorWarehouseMaterialApply apply : applyResponse.getResult()) {
+            handleApply.put(apply.getMaterialHandleId(), apply);
+        }
+
+        List<WarehouseMaterialHandleVo> vos = new ArrayList<>(materialHandleResponse.getResult().size());
+        for (DoctorWarehouseMaterialHandle handle : materialHandleResponse.getResult()) {
+
+            String pigBarnName, pigGroupName;
+            if (!handleApply.containsKey(handle.getId()))
+                pigBarnName = pigGroupName = null;
+            else {
+                pigBarnName = handleApply.get(handle.getId()).getPigBarnName();
+                pigGroupName = handleApply.get(handle.getId()).getPigGroupName();
+            }
+
+            vos.add(WarehouseMaterialHandleVo.builder()
+                    .materialName(handle.getMaterialName())
+                    .type(handle.getType())
+                    .handleDate(handle.getHandleDate())
+                    .quantity(handle.getQuantity())
+                    .unitPrice(handle.getUnitPrice())
+                    .pigBarnName(pigBarnName)
+                    .pigGroupName(pigGroupName)
+                    .warehouseName(handle.getWarehouseName())
+                    .build());
+        }
+        return vos;
     }
 
     /**
@@ -476,7 +513,7 @@ public class ReportController {
 
             vos.add(WarehousePigGroupApplyVo.builder()
                     .pigGroupId(apply.getPigGroupId())
-                    .createDate(groupResponse.getResult().getCreatedAt())
+                    .openDate(groupResponse.getResult().getOpenAt())
                     .closeDate(groupResponse.getResult().getCloseAt())
                     .pigBarnName(apply.getPigBarnName())
                     .applyStaffName(apply.getApplyStaffName())

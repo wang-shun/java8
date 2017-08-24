@@ -4,6 +4,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dto.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
@@ -17,12 +18,14 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.new_warehouse.dto.WarehouseDto;
 import io.terminus.doctor.web.front.new_warehouse.vo.FarmWarehouseVo;
+import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseStatisticsVo;
 import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseVo;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -230,6 +234,64 @@ public class WarehouseController {
             vo.setLastApplyDate(applyResponse.getResult().get(0).getApplyDate());
 
         return vo;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "{id}/statistics")
+    public WarehouseStatisticsVo warehouseInAndOut(@PathVariable Long id,
+                                                   @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
+
+
+        DoctorWarehouseMaterialHandle handleCriteria = DoctorWarehouseMaterialHandle.builder()
+                .handleYear(date.get(Calendar.YEAR))
+                .handleMonth(date.get(Calendar.MONTH) + 1)
+                .warehouseId(id)
+                .type(WarehouseMaterialHandleType.IN.getValue())
+                .build();
+
+        Response<List<DoctorWarehouseMaterialHandle>> inHandlesResponse = doctorWarehouseMaterialHandleReadService.list(handleCriteria);
+        if (!inHandlesResponse.isSuccess())
+            throw new JsonResponseException(inHandlesResponse.getError());
+
+        long totalInAmount = 0;
+        BigDecimal totalInQuantity = new BigDecimal(0);
+        for (DoctorWarehouseMaterialHandle inHandle : inHandlesResponse.getResult()) {
+            totalInQuantity = totalInQuantity.add(inHandle.getQuantity());
+            totalInAmount += inHandle.getQuantity().multiply(new BigDecimal(inHandle.getUnitPrice())).longValue();
+        }
+
+        handleCriteria.setType(WarehouseMaterialHandleType.OUT.getValue());
+        Response<List<DoctorWarehouseMaterialHandle>> outHandlesResponse = doctorWarehouseMaterialHandleReadService.list(handleCriteria);
+        if (!outHandlesResponse.isSuccess())
+            throw new JsonResponseException(outHandlesResponse.getError());
+        long totalOutAmount = 0;
+        BigDecimal totalOutQuantity = new BigDecimal(0);
+        for (DoctorWarehouseMaterialHandle outHandle : outHandlesResponse.getResult()) {
+            totalOutQuantity = totalOutQuantity.add(outHandle.getQuantity());
+            totalOutAmount += outHandle.getQuantity().multiply(new BigDecimal(outHandle.getUnitPrice())).longValue();
+        }
+
+
+        Response<AmountAndQuantityDto> amountAndQuantityResponse = doctorWarehouseReaderService.countWarehouseBalance(id);
+        if (!amountAndQuantityResponse.isSuccess())
+            throw new JsonResponseException(amountAndQuantityResponse.getError());
+
+
+        return WarehouseStatisticsVo.builder()
+                .id(id)
+                .balanceQuantity(amountAndQuantityResponse.getResult().getQuantity())
+                .balanceAmount(amountAndQuantityResponse.getResult().getAmount())
+                .inAmount(totalInAmount)
+                .inQuantity(totalInQuantity)
+                .outAmount(totalOutAmount)
+                .outQuantity(totalOutQuantity)
+                .build();
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "{id}/material")
+    public void material(@PathVariable Long id) {
+
+
     }
 
 

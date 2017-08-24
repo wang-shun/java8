@@ -9,7 +9,6 @@ import io.terminus.doctor.basic.dto.WarehouseStockInventoryDto;
 import io.terminus.doctor.basic.dto.WarehouseStockOutDto;
 import io.terminus.doctor.basic.dto.WarehouseStockTransferDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
