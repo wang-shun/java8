@@ -66,8 +66,11 @@ public class DoctorWarehouseHandlerManager {
                 doctorWarehouseMaterialHandleDao.create(handle);
             });
 
-            context.getApply().setMaterialHandleId(context.getMaterialHandle().get(0).getId());
-            doctorWarehouseMaterialApplyDao.create(context.getApply());
+            if (null != context.getApply()) {
+                //出库才有
+                context.getApply().setMaterialHandleId(context.getMaterialHandle().get(0).getId());
+                doctorWarehouseMaterialApplyDao.create(context.getApply());
+            }
         });
 
 //        context.forEach((stock, purchases) -> {
