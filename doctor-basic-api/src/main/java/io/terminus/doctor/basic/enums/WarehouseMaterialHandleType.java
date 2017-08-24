@@ -27,15 +27,36 @@ public enum WarehouseMaterialHandleType {
 
 
     /**
-     * 调拨
+     * 调拨（无用）
      */
     TRANSFER(3),
 
 
     /**
-     * 盘点
+     * 盘点（无用）
      */
     INVENTORY(4),
+
+    /**
+     * 盘盈
+     */
+    INVENTORY_PROFIT(7),
+
+    /**
+     * 盘亏
+     */
+    INVENTORY_DEFICIT(8),
+
+
+    /**
+     * 调入
+     */
+    TRANSFER_IN(9),
+
+    /**
+     * 调出
+     */
+    TRANSFER_OUT(10),
 
 
     /**
