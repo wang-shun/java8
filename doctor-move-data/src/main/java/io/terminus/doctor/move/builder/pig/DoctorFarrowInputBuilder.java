@@ -4,6 +4,7 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.move.builder.DoctorBuilderCommonOperation;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
 import io.terminus.doctor.move.model.View_EventListPig;
@@ -23,10 +24,11 @@ public class DoctorFarrowInputBuilder implements DoctorPigEventInputBuilder {
     private DoctorBuilderCommonOperation builderCommonOperation;
 
     @Override
-    public BasePigEventInputDto buildPigEventInputFromMove(DoctorMoveBasicData moveBasicData,
-                                                           View_EventListPig pigRawEvent) {
+    public BasePigEventInputDto buildFromMove(DoctorMoveBasicData moveBasicData,
+                                              View_EventListPig pigRawEvent) {
         View_EventListSow event = (View_EventListSow) pigRawEvent;
         Map<String, DoctorBarn> barnMap = moveBasicData.getBarnMap();
+        Map<String, DoctorGroup> groupMap = moveBasicData.getGroupMap();
 
         DoctorFarrowingDto farrow = new DoctorFarrowingDto();
         builderCommonOperation.fillPigEventCommonInputFromMove(farrow, moveBasicData, pigRawEvent);
@@ -44,6 +46,7 @@ public class DoctorFarrowInputBuilder implements DoctorPigEventInputBuilder {
         farrow.setFarrowStaff1(event.getStaffName());      //接生员1
         farrow.setFarrowStaff2(event.getStaffName());      //接生员2
         farrow.setFarrowIsSingleManager(event.getIsSingleManage());    //是否个体管理
+        farrow.setGroupId(groupMap.get(event.getToGroupOutId()).getId());
         farrow.setGroupCode(event.getToGroupCode());       // 仔猪猪群Code
         farrow.setNestCode(event.getNestCode());           // 窝号
         FarrowingType farrowingType = FarrowingType.from(event.getFarrowType());

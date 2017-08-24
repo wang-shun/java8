@@ -77,6 +77,11 @@ public abstract class BaseGroupInput implements Serializable {
      */
     private Integer eventSource;
 
+    /**
+     * 原系统事件id(迁移使用)
+     */
+    private String outId;
+
     public final String generateEventDesc(){
         Map<String, String> descMap = this.descMap();
         if(descMap == null){

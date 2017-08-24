@@ -69,6 +69,11 @@ public abstract class BasePigEventInputDto implements Serializable{
     private Integer eventSource;
 
     /**
+     * 原系统事件id(迁移使用)
+     */
+    private String outId;
+
+    /**
      * 对事件的描述, 由一系列键值对组成, 只需要子类实现返回 Map 即可
      * @return
      */

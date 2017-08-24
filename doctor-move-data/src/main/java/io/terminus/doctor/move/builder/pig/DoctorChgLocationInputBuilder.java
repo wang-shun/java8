@@ -21,8 +21,8 @@ public class DoctorChgLocationInputBuilder implements DoctorPigEventInputBuilder
     private DoctorBuilderCommonOperation builderCommonOperation;
 
     @Override
-    public BasePigEventInputDto buildPigEventInputFromMove(DoctorMoveBasicData moveBasicData,
-                                                           View_EventListPig pigRawEvent) {
+    public BasePigEventInputDto buildFromMove(DoctorMoveBasicData moveBasicData,
+                                              View_EventListPig pigRawEvent) {
 
         Map<String, DoctorBarn> barnMap = moveBasicData.getBarnMap();
 

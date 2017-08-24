@@ -45,6 +45,11 @@ public class DoctorFarrowingDto extends BasePigEventInputDto implements Serializ
     @NotNull(message = "farrowing.type.not.null")
     private Integer farrowingType;  // 分娩类型
 
+    /**
+     * 分娩猪群id(仅迁移导入使用)
+     */
+    private Long groupId;
+
     @NotEmpty(message = "group.code.not.empty")
     private String groupCode;   // 仔猪猪群Code
 

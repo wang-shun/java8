@@ -143,4 +143,12 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
     public DoctorGroup findByFarmAndOutId(Long farmId, String outId) {
         return getSqlSession().selectOne(sqlId("findByFarmAndOutId"), ImmutableMap.of("farmId", farmId, "outId", outId));
     }
+
+    /**
+     * 删除猪场下的所有猪群
+     * @param farmId 猪场id
+     */
+    public void deleteByFarmId(Long farmId) {
+        getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
+    }
 }
