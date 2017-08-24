@@ -39,6 +39,9 @@ public class DoctorWarehouseHandlerManager {
     @Autowired
     private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
 
+    @Autowired
+    private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
+
 
     @Transactional
     public void handle(List<StockHandleContext> contexts) {
@@ -58,8 +61,13 @@ public class DoctorWarehouseHandlerManager {
                 });
             });
 
-            doctorWarehouseMaterialHandleDao.create(context.getMaterialHandle());
 
+            context.getMaterialHandle().forEach(handle -> {
+                doctorWarehouseMaterialHandleDao.create(handle);
+            });
+
+            context.getApply().setMaterialHandleId(context.getMaterialHandle().get(0).getId());
+            doctorWarehouseMaterialApplyDao.create(context.getApply());
         });
 
 //        context.forEach((stock, purchases) -> {
@@ -225,9 +233,16 @@ public class DoctorWarehouseHandlerManager {
 
         private Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> stockAndPurchases;
 
-        private DoctorWarehouseMaterialHandle materialHandle;
+        private List<DoctorWarehouseMaterialHandle> materialHandle;
+
+        private DoctorWarehouseMaterialApply apply;
 
 //        private List<DoctorWarehousePurchase> purchases;
+
+
+        public void addMaterialHandle(DoctorWarehouseMaterialHandle handle) {
+            this.materialHandle.add(handle);
+        }
 
     }
 

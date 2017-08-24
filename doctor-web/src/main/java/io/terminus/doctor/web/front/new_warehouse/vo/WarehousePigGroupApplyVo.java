@@ -19,7 +19,7 @@ public class WarehousePigGroupApplyVo {
 
     private Long pigGroupId;
 
-    private Date createDate;
+    private Date openDate;
 
     private Date closeDate;
 

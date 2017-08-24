@@ -59,5 +59,14 @@ public interface DoctorWarehouseMaterialHandleReadService {
     Response<Map<Long/*warehouseId*/, Long>> countWarehouseAmount(List<DoctorWarehouseMaterialHandle> data);
 
 
+    /**
+     * 统计仓库纬度（出库，入库，调拨，盘点）金额
+     *
+     * @param criteria
+     * @param types
+     * @return
+     */
     Response<Map<WarehouseMaterialHandleType, Map<Long, Long>>> countWarehouseAmount(DoctorWarehouseMaterialHandle criteria, WarehouseMaterialHandleType... types);
+
+
 }

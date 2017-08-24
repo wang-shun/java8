@@ -159,7 +159,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
             DoctorWarehouseHandlerManager.StockHandleContext handleContext = new DoctorWarehouseHandlerManager.StockHandleContext();
             handleContext.setStockAndPurchases(Collections.singletonMap(stock, Collections.singletonList(purchase)));
-            handleContext.setMaterialHandle(materialHandle);
+            handleContext.setMaterialHandle(Collections.singletonList(materialHandle));
             handleContexts.add(handleContext);
         });
 
@@ -215,6 +215,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 changedQuantity = totalStockQuantity.subtract(detail.getQuantity());
                 long averagePrice = handleOutAndCalcAveragePrice(changedQuantity, purchases, stockAndPurchases, stocks, false, null, null);
                 materialHandle.setUnitPrice(averagePrice);
+                materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
             } else {
                 //盘盈
                 changedQuantity = detail.getQuantity().subtract(totalStockQuantity);
@@ -233,6 +234,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 purchase.setHandleYear(c.get(Calendar.YEAR));
 
                 materialHandle.setUnitPrice(purchase.getUnitPrice());
+                materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
                 DoctorWarehouseStock stock = null;
                 for (DoctorWarehouseStock s : stocks) {
                     if (s.getMaterialId().longValue() == purchase.getMaterialId().longValue() && Objects.equals(s.getVendorName(), purchase.getVendorName())) {
@@ -251,7 +253,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             materialHandle.setMaterialId(detail.getMaterialId());
             materialHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
             materialHandle.setWarehouseType(context.getWareHouse().getType());
-            materialHandle.setType(WarehouseMaterialHandleType.INVENTORY.getValue());
+//            materialHandle.setType(WarehouseMaterialHandleType.INVENTORY.getValue());
             materialHandle.setQuantity(changedQuantity);
             materialHandle.setHandleDate(stockInventory.getHandleDate());
             materialHandle.setHandleYear(c.get(Calendar.YEAR));
@@ -298,7 +300,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //                stockAndPurchases.put(stock, needHandlePurchase);
 //                materialHandle.setUnitPrice(averagePrice);
 //            }
-            handleContext.setMaterialHandle(materialHandle);
+            handleContext.setMaterialHandle(Collections.singletonList(materialHandle));
             handleContext.setStockAndPurchases(stockAndPurchases);
             handleContexts.add(handleContext);
         }
@@ -352,8 +354,9 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //            List<DoctorWarehousePurchase> transferOutPurchase = new ArrayList<>();
 //            List<DoctorWarehousePurchase> transferInPurchase = new ArrayList<>();
 //
+            DoctorWarehouseHandlerManager.StockHandleContext handleContext = new DoctorWarehouseHandlerManager.StockHandleContext();
             Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> stockAndPurchases = new HashMap<>();
-
+            handleContext.setStockAndPurchases(stockAndPurchases);
 
             Calendar c = Calendar.getInstance();
             c.setTime(stockTransfer.getHandleDate());
@@ -391,22 +394,39 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
 //            handleContext.put(transferInStock, transferInPurchase);
 //            stockAndPurchases.put(transferInStock, transferInPurchase);
-            DoctorWarehouseHandlerManager.StockHandleContext handleContext = new DoctorWarehouseHandlerManager.StockHandleContext();
-            handleContext.setStockAndPurchases(stockAndPurchases);
 
-            DoctorWarehouseMaterialHandle materialHandle = new DoctorWarehouseMaterialHandle();
-            materialHandle.setFarmId(stockTransfer.getFarmId());
-            materialHandle.setWarehouseId(stockTransfer.getWarehouseId());
-            materialHandle.setMaterialId(detail.getMaterialId());
-            materialHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
-            materialHandle.setWarehouseType(context.getWareHouse().getType());
-            materialHandle.setUnitPrice(averagePrice);
-            materialHandle.setType(WarehouseMaterialHandleType.TRANSFER.getValue());
-            materialHandle.setQuantity(detail.getQuantity());
-            materialHandle.setHandleDate(stockTransfer.getHandleDate());
-            materialHandle.setHandleYear(c.get(Calendar.YEAR));
-            materialHandle.setHandleMonth(c.get(Calendar.MONTH) + 1);
-            handleContext.setMaterialHandle(materialHandle);
+            //调出
+            DoctorWarehouseMaterialHandle outHandle = new DoctorWarehouseMaterialHandle();
+            outHandle.setFarmId(stockTransfer.getFarmId());
+            outHandle.setWarehouseId(stockTransfer.getWarehouseId());
+            outHandle.setMaterialId(detail.getMaterialId());
+            outHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
+            outHandle.setWarehouseType(context.getWareHouse().getType());
+            outHandle.setUnitPrice(averagePrice);
+            outHandle.setType(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
+            outHandle.setQuantity(detail.getQuantity());
+            outHandle.setHandleDate(stockTransfer.getHandleDate());
+            outHandle.setHandleYear(c.get(Calendar.YEAR));
+            outHandle.setHandleMonth(c.get(Calendar.MONTH) + 1);
+            handleContext.addMaterialHandle(outHandle);
+
+            //构造调入MaterialHandle记录
+            DoctorWarehouseMaterialHandle inHandle = new DoctorWarehouseMaterialHandle();
+            inHandle.setFarmId(targetWareHouse.getFarmId());
+            inHandle.setWarehouseId(targetWareHouse.getId());
+            inHandle.setWarehouseName(targetWareHouse.getWareHouseName());
+            inHandle.setWarehouseType(targetWareHouse.getType());
+            inHandle.setMaterialId(detail.getMaterialId());
+            inHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
+            inHandle.setUnitPrice(averagePrice);
+            inHandle.setType(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
+            inHandle.setQuantity(detail.getQuantity());
+            inHandle.setHandleDate(stockTransfer.getHandleDate());
+            inHandle.setHandleYear(c.get(Calendar.YEAR));
+            inHandle.setHandleMonth(c.get(Calendar.MONTH) + 1);
+            handleContext.addMaterialHandle(inHandle);
+
+
             handleContexts.add(handleContext);
         }
         doctorWarehouseHandlerManager.handle(handleContexts);
@@ -418,7 +438,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
         StockContext context = validAndGetContext(stockOut.getFarmId(), stockOut.getWarehouseId(), stockOut.getDetails());
         List<DoctorWarehouseHandlerManager.StockHandleContext> handleContexts = new ArrayList<>();
-        List<DoctorWarehouseMaterialApply> materialApplies = new ArrayList<>(stockOut.getDetails().size());
+//        List<DoctorWarehouseMaterialApply> materialApplies = new ArrayList<>(stockOut.getDetails().size());
         for (WarehouseStockOutDto.WarehouseStockOutDetail detail : stockOut.getDetails()) {
 
             //无论什么供应商的都可以出库
@@ -473,7 +493,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             c.setTime(stockOut.getHandleDate());
             materialHandle.setHandleYear(c.get(Calendar.YEAR));
             materialHandle.setHandleMonth(c.get(Calendar.MONTH) + 1);
-            handleContext.setMaterialHandle(materialHandle);
+            handleContext.setMaterialHandle(Collections.singletonList(materialHandle));
 
             DoctorWarehouseMaterialApply materialApply = new DoctorWarehouseMaterialApply();
             materialApply.setMaterialId(detail.getMaterialId());
@@ -490,12 +510,12 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             materialApply.setPigGroupId(detail.getApplyPigGroupId());
             materialApply.setPigGroupName(detail.getApplyPigGroupName());
             materialApply.setApplyStaffName(detail.getApplyStaffName());
-            materialApplies.add(materialApply);
-
+//            materialApplies.add(materialApply);
+            handleContext.setApply(materialApply);
             handleContexts.add(handleContext);
         }
-        doctorWarehouseMaterialApplyManager.creates(materialApplies);
         doctorWarehouseHandlerManager.handle(handleContexts);
+//        doctorWarehouseMaterialApplyManager.creates(materialApplies);
         return Response.ok(true);
     }
 
@@ -662,7 +682,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
     private long handleOutAndCalcAveragePrice(BigDecimal totalNeedOutQuantity,
                                               List<DoctorWarehousePurchase> purchases,
-                                              Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> stockWithPurchase,
+                                              Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> stockAndPurchases,
                                               List<DoctorWarehouseStock> stocks,
                                               boolean isTransfer,
                                               DoctorWareHouse targetWarehouse,
@@ -701,12 +721,12 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             //扣减库存
             stock.setQuantity(stock.getQuantity().subtract(actualCutDownQuantity));
             log.info("库存[{}]扣减{}{}", stock.getId(), actualCutDownQuantity, stock.getUnit());
-            if (!stockWithPurchase.containsKey(stock)) {
+            if (!stockAndPurchases.containsKey(stock)) {
                 List<DoctorWarehousePurchase> stockPurchases = new ArrayList<>();
                 stockPurchases.add(purchase);
-                stockWithPurchase.put(stock, stockPurchases);
+                stockAndPurchases.put(stock, stockPurchases);
             } else
-                stockWithPurchase.get(stock).add(purchase);
+                stockAndPurchases.get(stock).add(purchase);
 
             if (isTransfer) {
                 //如果是调拨，还需要根据转出构建对应的转入stock和purchase
@@ -726,7 +746,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
 
         if (isTransfer) {
-            for (DoctorWarehouseStock stock : stockWithPurchase.keySet()) {
+            for (DoctorWarehouseStock stock : stockAndPurchases.keySet()) {
                 //根据出库构造入库
                 DoctorWarehouseStock transferInStock = getStock(targetWarehouse.getId(), stock.getMaterialId(), stock.getVendorName());
                 if (null == transferInStock) {
@@ -743,13 +763,13 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 } else
                     transferInStock.setQuantity(transferInStock.getQuantity().add(stockChangedQuantity.get(stock)));
 
-                List<DoctorWarehousePurchase> transferOutPurchase = stockWithPurchase.get(stock);
+                List<DoctorWarehousePurchase> transferOutPurchase = stockAndPurchases.get(stock);
                 List<DoctorWarehousePurchase> transferInPurchase = new ArrayList<>(transferOutPurchase.size());
                 for (DoctorWarehousePurchase purchase : transferOutPurchase) {
                     transferInPurchase.add(copyPurchase(purchase, handleDate, targetWarehouse.getId(), targetWarehouse.getWareHouseName(), stockChangedQuantity.get(stock)));
                 }
 
-                stockWithPurchase.put(transferInStock, transferInPurchase);
+                stockAndPurchases.put(transferInStock, transferInPurchase);
             }
         }
 
