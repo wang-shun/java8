@@ -98,6 +98,7 @@ public class DoctorMonthlyReportOpen implements Serializable{
 
     // TODO: 16/12/22  缺少字段  saleAmount purchaseAmount
     private double saleAmount;                //销售金额汇总
+    private double saleFarrowAmount;           //仔猪销售额
     private double purchaseAmount;            //采购金额
 
 
