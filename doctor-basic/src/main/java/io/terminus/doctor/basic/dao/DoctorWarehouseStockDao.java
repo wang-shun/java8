@@ -40,4 +40,8 @@ public class DoctorWarehouseStockDao extends MyBatisDao<DoctorWarehouseStock> {
         }
     }
 
+    public List<DoctorWarehouseStock> listMergeVendor(DoctorWarehouseStock criteria) {
+        return this.sqlSession.selectList(this.sqlId("listMergeVendor"), criteria);
+    }
+
 }

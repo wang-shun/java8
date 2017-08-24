@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.service;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
@@ -47,6 +48,7 @@ public interface DoctorWarehouseStockReadService {
      */
     Response<List<DoctorWarehouseStock>> list(DoctorWarehouseStock criteria);
 
+    Response<List<DoctorWarehouseStock>> listMergeVendor(DoctorWarehouseStock criteria);
 
     /**
      * 获取农场下所有仓库中指定物料的库存
@@ -59,4 +61,7 @@ public interface DoctorWarehouseStockReadService {
 
 
     Response<DoctorWarehouseStock> findOneByCriteria(DoctorWarehouseStock criteria);
+
+
+    Response<Boolean> existed(DoctorWarehouseStock criteria);
 }

@@ -1,16 +1,22 @@
 package io.terminus.doctor.web.front.new_warehouse;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
+import io.terminus.doctor.basic.dto.warehouse.WarehouseMaterialDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
+import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehousePurchase;
+import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -73,6 +79,18 @@ public class WarehouseController {
 
     @RpcConsumer
     private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
+
+    @RpcConsumer
+    private DoctorFarmBasicReadService doctorFarmBasicReadService;
+
+    @RpcConsumer
+    private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
+
+    @RpcConsumer
+    private DoctorWarehouseStockReadService doctorWarehouseStockReadService;
+
+    @RpcConsumer
+    private DoctorWarehouseStockWriteService doctorWarehouseStockWriteService;
 
     @RequestMapping(method = RequestMethod.POST)
     public void create(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
@@ -289,9 +307,57 @@ public class WarehouseController {
 
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}/material")
-    public void material(@PathVariable Long id) {
+    public List<DoctorWarehouseStock> material(@PathVariable Long id) {
 
+        Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.listMergeVendor(DoctorWarehouseStock.builder()
+                .warehouseId(id)
+                .build());
 
+        if (!stockResponse.isSuccess())
+            throw new JsonResponseException(stockResponse.getError());
+
+        return stockResponse.getResult();
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "{id}/material")
+    public void material(@PathVariable Long id,
+                         @RequestBody @Valid WarehouseMaterialDto warehouseMaterialDto) {
+
+        DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(warehouseMaterialDto.getMaterialId()));
+        if (material == null) {
+            throw new JsonResponseException("basicMaterial.not.found");
+        }
+        DoctorWareHouse wareHouse = RespHelper.or500(doctorWarehouseReaderService.findById(id));
+        if (wareHouse == null) {
+            throw new JsonResponseException("warehouse.not.found");
+        }
+        if (!wareHouse.getType().equals(material.getType())) {
+            throw new JsonResponseException("warehouse.material.type.not.match"); // 仓库与物料类型不一致
+        }
+
+        Response<Boolean> existedResponse = doctorWarehouseStockReadService.existed(DoctorWarehouseStock.builder()
+                .warehouseId(id)
+                .materialId(warehouseMaterialDto.getMaterialId())
+                .build());
+        if (!existedResponse.isSuccess())
+            throw new JsonResponseException(existedResponse.getError());
+        if (existedResponse.getResult())
+            throw new JsonResponseException("warehouse.stock.existed");
+
+        Response<Long> createResponse = doctorWarehouseStockWriteService.create(DoctorWarehouseStock.builder()
+                .farmId(wareHouse.getFarmId())
+                .warehouseId(id)
+                .warehouseName(wareHouse.getWareHouseName())
+                .warehouseType(wareHouse.getType())
+                .vendorName(DoctorWarehouseStockWriteService.DEFAULT_VENDOR_NAME)
+                .materialId(warehouseMaterialDto.getMaterialId())
+                .materialName(material.getName())
+                .quantity(new BigDecimal(0))
+                .unit(warehouseMaterialDto.getUnitName())
+                .build());
+
+        if (!createResponse.isSuccess())
+            throw new JsonResponseException(createResponse.getError());
     }
 
 

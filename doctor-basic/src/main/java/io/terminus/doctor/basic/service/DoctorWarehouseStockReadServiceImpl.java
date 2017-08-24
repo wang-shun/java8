@@ -82,6 +82,16 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
     }
 
     @Override
+    public Response<List<DoctorWarehouseStock>> listMergeVendor(DoctorWarehouseStock criteria) {
+        try {
+            return Response.ok(doctorWarehouseStockDao.listMergeVendor(criteria));
+        } catch (Exception e) {
+            log.error("failed to list doctor warehouse stock, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.stock.list.fail");
+        }
+    }
+
+    @Override
     public Response<List<DoctorWarehouseStock>> list(Long farmID, Long materialID) {
         try {
 
@@ -103,5 +113,10 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
             return Response.ok(null);
 
         return Response.ok(stocks.get(0));
+    }
+
+    @Override
+    public Response<Boolean> existed(DoctorWarehouseStock criteria) {
+        return null;
     }
 }
