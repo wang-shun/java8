@@ -170,7 +170,7 @@ public class StockController {
         Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.pagingMergeVendor(pageNo, pageSize, stockCriteria);
         if (!stockResponse.isSuccess())
             throw new JsonResponseException(stockResponse.getError());
-        if (null == stockResponse.getResult().getData() || stockResponse.getResult().getData().isEmpty())
+        if (null == stockResponse.getResult().getData())
             throw new JsonResponseException("stock.not.found");
 
         Paging<WarehouseStockStatisticsVo> result = new Paging<>();
