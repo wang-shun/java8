@@ -25,7 +25,6 @@ public class View_EventListSow extends View_EventListPig implements Serializable
     private Integer rightCount;
     private String breed;
     private String genetic;
-    private String eventOutId;
     private String remark;          // 事件备注
     private Long price;             // 单价(分)
     private Long amount;            // 总额(分)
@@ -63,5 +62,6 @@ public class View_EventListSow extends View_EventListPig implements Serializable
     private String diseaseName;      // 疾病事件的疾病名称
     private String changeTypeName;   // 变动类型名称
     private String fosterReasonName; // 寄养原因名称
+    private String toGroupOutId;     // 分娩转入外部id
     private String toGroupCode;      // 分娩转入猪群code
 }

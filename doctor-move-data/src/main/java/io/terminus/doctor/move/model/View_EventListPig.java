@@ -25,9 +25,9 @@ public class View_EventListPig {
      * @see io.terminus.doctor.event.enums.PigEvent
      */
     private String eventName;
-
     private Date eventAt;
     private String eventDesc;
+    private String eventOutId;
 
     private String barnOutId;       // 事件发生猪舍
     private String toBarnOutId;     // 进场事件: 进场猪舍outId, 转舍的目的地

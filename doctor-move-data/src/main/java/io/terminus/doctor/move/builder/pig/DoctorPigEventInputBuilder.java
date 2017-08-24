@@ -10,6 +10,6 @@ import io.terminus.doctor.move.model.View_EventListPig;
  */
 public interface DoctorPigEventInputBuilder {
 
-    BasePigEventInputDto buildPigEventInputFromMove(DoctorMoveBasicData moveBasicData,
-                                                    View_EventListPig pigRawEvent);
+    BasePigEventInputDto buildFromMove(DoctorMoveBasicData moveBasicData,
+                                       View_EventListPig pigRawEvent);
 }

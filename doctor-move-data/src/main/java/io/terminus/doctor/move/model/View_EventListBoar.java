@@ -24,7 +24,6 @@ public class View_EventListBoar extends View_EventListPig implements Serializabl
     private Integer source;
     private String breed;
     private String genetic;
-    private String eventOutId;
     private String remark;          // 采精的remark和event的remark
     private Long price;
     private Long amount;

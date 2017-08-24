@@ -28,8 +28,8 @@ public class DoctorRemoveInputBuilder implements DoctorPigEventInputBuilder {
     private DoctorBuilderCommonOperation builderCommonOperation;
 
     @Override
-    public BasePigEventInputDto buildPigEventInputFromMove(DoctorMoveBasicData moveBasicData,
-                                                           View_EventListPig pigRawEvent) {
+    public BasePigEventInputDto buildFromMove(DoctorMoveBasicData moveBasicData,
+                                              View_EventListPig pigRawEvent) {
         if (Objects.equals(pigRawEvent.getPigSex(), DoctorPig.PigSex.SOW.getKey())) {
             return buildSowRemoveInput(moveBasicData, pigRawEvent);
         }

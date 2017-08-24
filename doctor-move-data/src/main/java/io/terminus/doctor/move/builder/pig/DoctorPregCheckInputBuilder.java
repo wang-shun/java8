@@ -20,8 +20,8 @@ public class DoctorPregCheckInputBuilder implements DoctorPigEventInputBuilder {
     private DoctorBuilderCommonOperation builderCommonOperation;
 
     @Override
-    public BasePigEventInputDto buildPigEventInputFromMove(DoctorMoveBasicData moveBasicData,
-                                                           View_EventListPig pigRawEvent) {
+    public BasePigEventInputDto buildFromMove(DoctorMoveBasicData moveBasicData,
+                                              View_EventListPig pigRawEvent) {
         View_EventListSow event = (View_EventListSow) pigRawEvent;
 
         DoctorPregChkResultDto preg = new DoctorPregChkResultDto();
