@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.new_warehouse;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
@@ -56,7 +57,12 @@ public class ReportController {
     @RpcConsumer
     private DoctorGroupReadService doctorGroupReadService;
 
-
+    /**
+     * 仓库报表
+     * @param farmId
+     * @param date
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET)
     public List<WarehouseReportVo> report(@RequestParam Long farmId,
                                           @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
@@ -391,6 +397,7 @@ public class ReportController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "material")
+    @JsonView(WarehouseMaterialHandleVo.MaterialHandleReportView.class)
     public List<WarehouseMaterialHandleVo> materialHandleReport(@RequestParam Long warehouseId,
                                                                 @RequestParam(required = false) String materialName,
                                                                 @RequestParam(required = false) Integer type,

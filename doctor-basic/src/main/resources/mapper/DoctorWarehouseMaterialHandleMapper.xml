@@ -68,6 +68,36 @@
         </where>
     </sql>
 
+    <sql id="adv_criteria">
+        <where>
+            <if test="farmId != null">AND `farm_id` = #{farmId}</if>
+            <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
+            <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
+            <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
+            <if test="targetWarehouseId != null">AND `target_warehouse_id` = #{targetWarehouseId}</if>
+            <if test="vendorName != null">AND `vendor_name` = #{vendorName}</if>
+            <if test="materialId != null">AND `material_id` = #{materialId}</if>
+            <if test="materialName != null">AND `material_name` = #{materialName}</if>
+            <if test="type != null">AND `type` = #{type}</if>
+            <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
+            <if test="quantity != null">AND `quantity` = #{quantity}</if>
+            <if test="handleDate != null">AND `handle_date` = #{handleDate}</if>
+            <if test="handleYear != null">AND `handle_year` = #{handleYear}</if>
+            <if test="handleMonth != null">AND `handle_month` = #{handleMonth}</if>
+            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
+            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+            <if test="bigType != null and bigType.size() > 0">
+                AND
+                <foreach collection="bigType" item="t" open="(" separator="or" close=")">
+                    type =#{t}
+                </foreach>
+            </if>
+            <if test="startDate != null">AND handle_date between #{startDate} and #{endDate}</if>
+            <if test="startDate ==null and endDate!=null">AND <![CDATA[ handle_date <= #{endDate}]]></if>
+        </where>
+    </sql>
+
+
     <insert id="create" parameterType="DoctorWarehouseMaterialHandle" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
         <include refid="tb"/>
@@ -127,6 +157,9 @@
         SELECT COUNT(1)
         FROM <include refid="tb"/>
         <include refid="criteria"/>
+        <where>
+
+        </where>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
@@ -141,6 +174,31 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
+        ORDER BY `id` DESC
+    </select>
+
+
+    <select id="advCount" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <include refid="adv_criteria"/>
+        <where>
+
+        </where>
+    </select>
+
+    <select id="advPaging" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="adv_criteria"/>
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="advList" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="adv_criteria"/>
         ORDER BY `id` DESC
     </select>
 

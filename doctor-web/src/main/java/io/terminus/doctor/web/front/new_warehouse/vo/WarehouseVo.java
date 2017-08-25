@@ -2,6 +2,7 @@ package io.terminus.doctor.web.front.new_warehouse.vo;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -21,4 +22,6 @@ public class WarehouseVo {
     private Long managerId;
 
     private Date lastApplyDate;
+
+    private BigDecimal balanceQuantity;
 }

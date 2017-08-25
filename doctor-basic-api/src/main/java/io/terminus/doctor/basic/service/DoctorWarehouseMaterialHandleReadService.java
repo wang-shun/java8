@@ -34,6 +34,29 @@ public interface DoctorWarehouseMaterialHandleReadService {
      */
     Response<Paging<DoctorWarehouseMaterialHandle>> paging(Integer pageNo, Integer pageSize, Map<String, Object> criteria);
 
+
+    /**
+     * 高级分页
+     * 添加对handleDate开始和结束日期的过滤；type类型的多条件过滤
+     *
+     * @param pageNo
+     * @param pageSize
+     * @param criteria
+     * @return
+     */
+    Response<Paging<DoctorWarehouseMaterialHandle>> advPaging(Integer pageNo, Integer pageSize, Map<String, Object> criteria);
+
+
+    /**
+     * 分页
+     *
+     * @param pageNo
+     * @param pageSize
+     * @param criteria
+     * @return
+     */
+    Response<Paging<DoctorWarehouseMaterialHandle>> paging(Integer pageNo, Integer pageSize, DoctorWarehouseMaterialHandle criteria);
+
     /**
      * 列表
      *
@@ -41,6 +64,16 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @return List<DoctorWarehouseMaterialHandle>
      */
     Response<List<DoctorWarehouseMaterialHandle>> list(Map<String, Object> criteria);
+
+
+    /**
+     * 高级列表
+     * 添加对handleDate开始和结束日期的过滤；type类型的多条件过滤
+     *
+     * @param criteria
+     * @return
+     */
+    Response<List<DoctorWarehouseMaterialHandle>> advList(Map<String, Object> criteria);
 
     /**
      * 列表

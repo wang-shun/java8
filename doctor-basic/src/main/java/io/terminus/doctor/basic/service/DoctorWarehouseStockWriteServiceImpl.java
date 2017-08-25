@@ -91,6 +91,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     public Response<Boolean> delete(Long id) {
         try {
 
+
             DoctorWarehouseStock stock = doctorWarehouseStockDao.findById(id);
 
             DoctorWarehouseStock criteria = new DoctorWarehouseStock();

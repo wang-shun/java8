@@ -276,6 +276,12 @@ public class WarehouseController {
         if (null != applyResponse && !applyResponse.getResult().isEmpty())
             vo.setLastApplyDate(applyResponse.getResult().get(0).getApplyDate());
 
+        Response<AmountAndQuantityDto> amountAndQuantityDtoResponse = doctorWarehouseReaderService.countWarehouseBalance(id);
+        if (!amountAndQuantityDtoResponse.isSuccess())
+            throw new JsonResponseException(amountAndQuantityDtoResponse.getError());
+
+        vo.setBalanceQuantity(amountAndQuantityDtoResponse.getResult().getQuantity());
+
         return vo;
     }
 
