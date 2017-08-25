@@ -10,6 +10,9 @@ import java.math.BigDecimal;
 @Data
 public class WarehouseStockStatisticsVo {
 
+
+    private Long id;
+
     private Long materialId;
 
     private String materialName;

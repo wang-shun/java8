@@ -178,6 +178,7 @@ public class StockController {
         List<WarehouseStockStatisticsVo> vos = new ArrayList<>(stockResponse.getResult().getData().size());
         stockResponse.getResult().getData().forEach(stock -> {
             WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
+            vo.setId(stock.getId());
             vo.setMaterialId(stock.getMaterialId());
             vo.setMaterialName(stock.getMaterialName());
             vo.setUnit(stock.getUnit());
