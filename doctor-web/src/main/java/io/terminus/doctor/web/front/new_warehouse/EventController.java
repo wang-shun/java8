@@ -13,17 +13,20 @@ import io.terminus.doctor.web.core.exceptions.NotLoginException;
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseMaterialEventVo;
 import io.terminus.doctor.web.front.new_warehouse.vo.WarehouseMaterialHandleVo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/24.
  */
+@Slf4j
 @RestController
 @RequestMapping("api/doctor/warehouse/event")
 public class EventController {
@@ -77,10 +80,16 @@ public class EventController {
         List<WarehouseMaterialEventVo> vos = new ArrayList<>(handleResponse.getResult().getData().size());
         for (DoctorWarehouseMaterialHandle handle : handleResponse.getResult().getData()) {
             vos.add(WarehouseMaterialEventVo.builder()
+                    .id(handle.getId())
                     .materialName(handle.getMaterialName())
                     .warehouseName(handle.getWarehouseName())
                     .handleDate(handle.getHandleDate())
                     .quantity(handle.getQuantity())
+                    .type(handle.getType())
+                    .unit("")//TODO 数据库添加字段
+                    .unitPrice(handle.getUnitPrice())
+                    .amount(handle.getQuantity().multiply(new BigDecimal(handle.getUnitPrice())).longValue())
+                    .vendorName(handle.getVendorName())
                     .build());
         }
 
@@ -90,7 +99,7 @@ public class EventController {
         return warehouseMaterialHandleVoPaging;
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "export")
+    @RequestMapping(method = RequestMethod.GET, value = "export")
     public void export(@RequestParam Long farmId,
                        @RequestParam(required = false) Integer type,//1入库2出库
                        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -130,9 +139,24 @@ public class EventController {
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
     public void delete(@PathVariable Long id) {
 
+
+        Response<DoctorWarehouseMaterialHandle> handleResponse = doctorWarehouseMaterialHandleReadService.findById(id);
+        if (!handleResponse.isSuccess())
+            throw new JsonResponseException(handleResponse.getError());
+        if (null == handleResponse.getResult()) {
+            log.info("物料处理明细不存在,忽略仓库事件删除操作,id[{}]", id);
+            return;
+        }
+
+        //删除出库，直接逻辑删除，stock+库存，purchase+handle_quantity，改handle_flag
+
+        //删除入库，查询入库对应的purchase，purchase的handle_quantity是否大于0
+
+
         Map<String, Object> criteria = new HashMap<>();
-//        criteria.put("");
-        doctorWarehouseMaterialHandleReadService.list(criteria);
+        criteria.put("warehouseId", handleResponse.getResult().getWarehouseId());
+        criteria.put("afterHandleDate", handleResponse.getResult().getHandleDate());
+        doctorWarehouseMaterialHandleReadService.advList(criteria);
     }
 
 
