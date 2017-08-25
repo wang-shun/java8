@@ -60,9 +60,19 @@ public enum WarehouseMaterialHandleType {
 
 
     /**
-     * 配方生产
+     * 配方生产（无用）
      */
-    FORMULA(5);
+    FORMULA(5),
+
+    /**
+     * 配方生产导致的入库，饲料
+     */
+    FORMULA_IN(11),
+
+    /**
+     * 配方生产导致的出库，药品和原料
+     */
+    FORMULA_OUT(12);
 
 
     @Getter
