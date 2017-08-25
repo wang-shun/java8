@@ -41,4 +41,6 @@ public class WarehouseMaterialEventVo {
 
     private String vendorName;
 
+    private boolean allowDelete;
+
 }
