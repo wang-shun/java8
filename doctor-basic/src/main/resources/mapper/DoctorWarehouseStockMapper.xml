@@ -140,6 +140,7 @@
         <where>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="materialName != null">AND `material_name` = #{materialName}</if>
+            <if test="materialNameLike !=null">AND `material_name` like CONCAT('%',#{materialNameLike},'%') </if>
         </where>
         GROUP BY warehouse_id, material_id
         ) as t0
@@ -153,6 +154,7 @@
         <where>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="materialName != null">AND `material_name` = #{materialName}</if>
+            <if test="materialNameLike !=null">AND `material_name` like  CONCAT('%',#{materialNameLike},'%')</if>
         </where>
         GROUP BY warehouse_id, material_id
         ORDER BY `id` DESC

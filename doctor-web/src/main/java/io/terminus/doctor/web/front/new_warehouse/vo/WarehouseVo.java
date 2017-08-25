@@ -18,25 +18,25 @@ import java.util.Date;
 @NoArgsConstructor
 public class WarehouseVo {
 
-    @JsonView(WarehouseView.class)
+    @JsonView(WarehouseWithOutStatisticsView.class)
     private Long id;
 
-    @JsonView(WarehouseView.class)
+    @JsonView(WarehouseWithOutStatisticsView.class)
     private String name;
 
-    @JsonView(WarehouseWithOutStatisticsView.class)
+    @JsonView({WarehouseWithOutStatisticsView.class, WarehouseStatisticsView.class})
     private Integer type;
 
-    @JsonView(WarehouseView.class)
+    @JsonView(WarehouseWithOutStatisticsView.class)
     private String managerName;
 
-    @JsonView(WarehouseView.class)
+    @JsonView(WarehouseWithOutStatisticsView.class)
     private Long managerId;
 
-    @JsonView(WarehouseWithOutStatisticsView.class)
+    @JsonView({WarehouseView.class, WarehouseStatisticsView.class})
     private Date lastApplyDate;
 
-    @JsonView(WarehouseWithOutStatisticsView.class)
+    @JsonView({WarehouseView.class, WarehouseStatisticsView.class})
     private BigDecimal balanceQuantity;
 
 
@@ -45,6 +45,10 @@ public class WarehouseVo {
     }
 
     public interface WarehouseWithOutStatisticsView {
+
+    }
+
+    public interface WarehouseStatisticsView {
 
     }
 }

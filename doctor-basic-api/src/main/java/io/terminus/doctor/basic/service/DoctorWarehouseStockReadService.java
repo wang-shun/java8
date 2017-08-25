@@ -40,6 +40,8 @@ public interface DoctorWarehouseStockReadService {
 
     Response<Paging<DoctorWarehouseStock>> pagingMergeVendor(Integer pageNo, Integer pageSize, DoctorWarehouseStock criteria);
 
+    Response<Paging<DoctorWarehouseStock>> pagingMergeVendor(Integer pageNo, Integer pageSize, Map<String, Object> criteria);
+
     /**
      * 列表
      *

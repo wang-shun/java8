@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-08-25 15:05:56
+ ~ Date: 2017-08-25 16:22:00
  ~ Created by [ your name ]
 -->
 
@@ -11,6 +11,7 @@
     <resultMap id="DoctorWarehouseMaterialApplyMap" type="DoctorWarehouseMaterialApply">
         <id property="id" column="id"/>
         <result property="materialHandleId" column="material_handle_id"/>
+        <result property="farmId" column="farm_id"/>
         <result property="warehouseId" column="warehouse_id"/>
         <result property="warehouseType" column="warehouse_type"/>
         <result property="warehouseName" column="warehouse_name"/>
@@ -42,18 +43,19 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `material_handle_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, 
+        `material_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{materialHandleId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, 
+        #{materialHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, 
         now(), now()
     </sql>
 
     <sql id="criteria">
         <where>
             <if test="materialHandleId != null">AND `material_handle_id` = #{materialHandleId}</if>
+            <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
             <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
@@ -108,6 +110,7 @@
         <include refid="tb"/>
         <set>
             <if test="materialHandleId != null">`material_handle_id` = #{materialHandleId},</if>
+            <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
             <if test="warehouseType != null">`warehouse_type` = #{warehouseType},</if>
             <if test="warehouseName != null">`warehouse_name` = #{warehouseName},</if>
@@ -155,6 +158,7 @@
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>
+
     <select id="listAndOrderByHandleDate" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>

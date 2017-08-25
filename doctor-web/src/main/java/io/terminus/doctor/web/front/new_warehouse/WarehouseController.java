@@ -166,7 +166,7 @@ public class WarehouseController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "type/statistics")
-    @JsonView(WarehouseVo.WarehouseView.class)
+    @JsonView(WarehouseVo.WarehouseStatisticsView.class)
     public List<WarehouseVo> sameTypeWarehouseStatistics(@RequestParam Long farmId) {
 
         Response<List<DoctorWareHouse>> warehousesResponse = doctorWarehouseReaderService.findByFarmId(farmId);
@@ -197,62 +197,86 @@ public class WarehouseController {
             }
         }
 
+        Date feedLastApplyDate = null;
+        Date materialLastApplyDate = null;
+        Date vaccinationLastApplyDate = null;
+        Date medicineLastApplyDate = null;
+        Date consumeLastApplyDate = null;
         //饲料最近一次领用记录
-        Response<List<DoctorWarehouseMaterialApply>> feedapplyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(DoctorWarehouseMaterialApply.builder()
-                .type(WareHouseType.FEED.getKey())
+        Response<List<DoctorWarehouseMaterialApply>> feedApplyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(DoctorWarehouseMaterialApply.builder()
+                .farmId(farmId)
+                .warehouseType(WareHouseType.FEED.getKey())
                 .build(), 1);
-        if (!feedapplyResponse.isSuccess())
-            throw new JsonResponseException(feedapplyResponse.getError());
+        if (!feedApplyResponse.isSuccess())
+            throw new JsonResponseException(feedApplyResponse.getError());
+        if (null != feedApplyResponse && !feedApplyResponse.getResult().isEmpty())
+            feedLastApplyDate = feedApplyResponse.getResult().get(0).getApplyDate();
+
         //原料最近一次领用记录
         Response<List<DoctorWarehouseMaterialApply>> materialApplyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(DoctorWarehouseMaterialApply.builder()
-                .type(WareHouseType.MATERIAL.getKey())
+                .farmId(farmId)
+                .warehouseType(WareHouseType.MATERIAL.getKey())
                 .build(), 1);
         if (!materialApplyResponse.isSuccess())
             throw new JsonResponseException(materialApplyResponse.getError());
+        if (null != materialApplyResponse && !materialApplyResponse.getResult().isEmpty())
+            materialLastApplyDate = materialApplyResponse.getResult().get(0).getApplyDate();
+
         //疫苗最近一次领用记录
         Response<List<DoctorWarehouseMaterialApply>> vaccinationApplyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(DoctorWarehouseMaterialApply.builder()
-                .type(WareHouseType.VACCINATION.getKey())
+                .farmId(farmId)
+                .warehouseType(WareHouseType.VACCINATION.getKey())
                 .build(), 1);
         if (!vaccinationApplyResponse.isSuccess())
             throw new JsonResponseException(vaccinationApplyResponse.getError());
+        if (null != vaccinationApplyResponse && !vaccinationApplyResponse.getResult().isEmpty())
+            vaccinationLastApplyDate = vaccinationApplyResponse.getResult().get(0).getApplyDate();
+
         //疫苗最近一次领用记录
         Response<List<DoctorWarehouseMaterialApply>> medicineApplyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(DoctorWarehouseMaterialApply.builder()
-                .type(WareHouseType.MEDICINE.getKey())
+                .farmId(farmId)
+                .warehouseType(WareHouseType.MEDICINE.getKey())
                 .build(), 1);
         if (!medicineApplyResponse.isSuccess())
             throw new JsonResponseException(medicineApplyResponse.getError());
+        if (null != medicineApplyResponse && !medicineApplyResponse.getResult().isEmpty())
+            medicineLastApplyDate = medicineApplyResponse.getResult().get(0).getApplyDate();
+
         //疫苗最近一次领用记录
         Response<List<DoctorWarehouseMaterialApply>> consumerApplyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(DoctorWarehouseMaterialApply.builder()
-                .type(WareHouseType.CONSUME.getKey())
+                .farmId(farmId)
+                .warehouseType(WareHouseType.CONSUME.getKey())
                 .build(), 1);
         if (!consumerApplyResponse.isSuccess())
             throw new JsonResponseException(consumerApplyResponse.getError());
+        if (null != consumerApplyResponse && !consumerApplyResponse.getResult().isEmpty())
+            consumeLastApplyDate = consumerApplyResponse.getResult().get(0).getApplyDate();
 
         List<WarehouseVo> vos = new ArrayList<>(5);
         vos.add(WarehouseVo.builder()
                 .type(WareHouseType.FEED.getKey())
                 .balanceQuantity(quantityStatistics.get(WareHouseType.FEED.getKey()))
-                .lastApplyDate(feedapplyResponse.getResult().get(0).getApplyDate())
+                .lastApplyDate(feedLastApplyDate)
                 .build());
         vos.add(WarehouseVo.builder()
                 .type(WareHouseType.MATERIAL.getKey())
                 .balanceQuantity(quantityStatistics.get(WareHouseType.MATERIAL.getKey()))
-                .lastApplyDate(materialApplyResponse.getResult().get(0).getApplyDate())
+                .lastApplyDate(materialLastApplyDate)
                 .build());
         vos.add(WarehouseVo.builder()
                 .type(WareHouseType.VACCINATION.getKey())
                 .balanceQuantity(quantityStatistics.get(WareHouseType.FEED.getKey()))
-                .lastApplyDate(vaccinationApplyResponse.getResult().get(0).getApplyDate())
+                .lastApplyDate(vaccinationLastApplyDate)
                 .build());
         vos.add(WarehouseVo.builder()
                 .type(WareHouseType.MEDICINE.getKey())
                 .balanceQuantity(quantityStatistics.get(WareHouseType.FEED.getKey()))
-                .lastApplyDate(medicineApplyResponse.getResult().get(0).getApplyDate())
+                .lastApplyDate(medicineLastApplyDate)
                 .build());
         vos.add(WarehouseVo.builder()
                 .type(WareHouseType.CONSUME.getKey())
                 .balanceQuantity(quantityStatistics.get(WareHouseType.FEED.getKey()))
-                .lastApplyDate(consumerApplyResponse.getResult().get(0).getApplyDate())
+                .lastApplyDate(consumeLastApplyDate)
                 .build());
         return vos;
     }
@@ -453,31 +477,33 @@ public class WarehouseController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "{id}/material")
-    public List<WarehouseStockVo> material(@PathVariable Long id,
-                                           @RequestParam(required = false) String materialName,
-                                           @RequestParam(required = false) Integer pageNo,
-                                           @RequestParam(required = false) Integer pageSize) {
+    public Paging<WarehouseStockVo> material(@PathVariable Long id,
+                                             @RequestParam(required = false) String materialName,
+                                             @RequestParam(required = false) Integer pageNo,
+                                             @RequestParam(required = false) Integer pageSize) {
 
-        //TODO 添加物料名的模糊搜索
-        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.pagingMergeVendor(pageNo, pageSize, DoctorWarehouseStock.builder()
-                .warehouseId(id)
-                .build());
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("warehouseId", id);
+        criteria.put("materialNameLike", materialName);
+        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.pagingMergeVendor(pageNo, pageSize, criteria);
 
         if (!stockResponse.isSuccess())
             throw new JsonResponseException(stockResponse.getError());
 
-
-        List<WarehouseStockVo> vos = new ArrayList<>(stockResponse.getResult().getData().size());
+        Paging<WarehouseStockVo> vo = new Paging<>();
+        List<WarehouseStockVo> data = new ArrayList<>(stockResponse.getResult().getData().size());
         for (DoctorWarehouseStock stock : stockResponse.getResult().getData()) {
-            vos.add(WarehouseStockVo.builder()
+            data.add(WarehouseStockVo.builder()
                     .materialId(stock.getMaterialId())
                     .materialName(stock.getMaterialName())
                     .quantity(stock.getQuantity())
                     .unit(stock.getUnit())
                     .build());
         }
+        vo.setData(data);
+        vo.setTotal(stockResponse.getResult().getTotal());
 
-        return vos;
+        return vo;
     }
 
 
