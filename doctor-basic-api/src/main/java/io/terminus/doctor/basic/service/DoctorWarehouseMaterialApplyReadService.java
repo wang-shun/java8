@@ -40,5 +40,5 @@ public interface DoctorWarehouseMaterialApplyReadService {
 
     Response<List<DoctorWarehouseMaterialApply>> list(DoctorWarehouseMaterialApply criteria);
 
-    Response<List<DoctorWarehouseMaterialApply>> listOrderByHandleDate(DoctorWarehouseMaterialApply criteria,Integer limit);
+    Response<List<DoctorWarehouseMaterialApply>> listOrderByHandleDate(DoctorWarehouseMaterialApply criteria, Integer limit);
 }

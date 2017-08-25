@@ -1,6 +1,6 @@
 package io.terminus.doctor.web.front.new_warehouse;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
+import com.fasterxml.jackson.annotation.JsonView;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
@@ -10,6 +10,7 @@ import io.terminus.doctor.basic.dto.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.dto.warehouse.WarehouseMaterialDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
+import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
@@ -18,6 +19,7 @@ import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -39,9 +41,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -144,7 +144,8 @@ public class WarehouseController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "type/{type}")
-    public List<WarehouseVo> query(@PathVariable Integer type, @RequestParam Long farmId) {
+    @JsonView(WarehouseVo.WarehouseWithOutStatisticsView.class)
+    public List<WarehouseVo> sameTypeWarehouse(@PathVariable Integer type, @RequestParam Long farmId) {
         DoctorWareHouse criteria = new DoctorWareHouse();
         criteria.setType(type);
         criteria.setFarmId(farmId);
@@ -161,6 +162,98 @@ public class WarehouseController {
             vo.setManagerId(wareHouse.getManagerId());
             vos.add(vo);
         });
+        return vos;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "type/statistics")
+    @JsonView(WarehouseVo.WarehouseView.class)
+    public List<WarehouseVo> sameTypeWarehouseStatistics(@RequestParam Long farmId) {
+
+        Response<List<DoctorWareHouse>> warehousesResponse = doctorWarehouseReaderService.findByFarmId(farmId);
+        if (!warehousesResponse.isSuccess())
+            throw new JsonResponseException(warehousesResponse.getError());
+
+        Map<Long, Integer> warehouseTypes = new HashMap<>();
+        for (DoctorWareHouse wareHouse : warehousesResponse.getResult()) {
+            warehouseTypes.put(wareHouse.getId(), wareHouse.getType());
+        }
+
+        Response<List<DoctorWarehousePurchase>> purchasesResponse = doctorWarehousePurchaseReadService.list(DoctorWarehousePurchase.builder()
+                .farmId(farmId)
+                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+                .build());
+        if (!purchasesResponse.isSuccess())
+            throw new JsonResponseException(purchasesResponse.getError());
+
+        //统计余量
+        Map<Integer/*warehouseType*/, BigDecimal> quantityStatistics = new HashMap<>();
+        for (DoctorWarehousePurchase purchase : purchasesResponse.getResult()) {
+            Integer type = warehouseTypes.get(purchase.getWarehouseId());
+            if (!quantityStatistics.containsKey(type)) {
+                quantityStatistics.put(type, purchase.getQuantity().multiply(purchase.getHandleQuantity()));
+            } else {
+                BigDecimal quantity = quantityStatistics.get(type);
+                quantityStatistics.put(type, purchase.getQuantity().multiply(purchase.getHandleQuantity()).add(quantity));
+            }
+        }
+
+        //饲料最近一次领用记录
+        Response<List<DoctorWarehouseMaterialApply>> feedapplyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(DoctorWarehouseMaterialApply.builder()
+                .type(WareHouseType.FEED.getKey())
+                .build(), 1);
+        if (!feedapplyResponse.isSuccess())
+            throw new JsonResponseException(feedapplyResponse.getError());
+        //原料最近一次领用记录
+        Response<List<DoctorWarehouseMaterialApply>> materialApplyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(DoctorWarehouseMaterialApply.builder()
+                .type(WareHouseType.MATERIAL.getKey())
+                .build(), 1);
+        if (!materialApplyResponse.isSuccess())
+            throw new JsonResponseException(materialApplyResponse.getError());
+        //疫苗最近一次领用记录
+        Response<List<DoctorWarehouseMaterialApply>> vaccinationApplyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(DoctorWarehouseMaterialApply.builder()
+                .type(WareHouseType.VACCINATION.getKey())
+                .build(), 1);
+        if (!vaccinationApplyResponse.isSuccess())
+            throw new JsonResponseException(vaccinationApplyResponse.getError());
+        //疫苗最近一次领用记录
+        Response<List<DoctorWarehouseMaterialApply>> medicineApplyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(DoctorWarehouseMaterialApply.builder()
+                .type(WareHouseType.MEDICINE.getKey())
+                .build(), 1);
+        if (!medicineApplyResponse.isSuccess())
+            throw new JsonResponseException(medicineApplyResponse.getError());
+        //疫苗最近一次领用记录
+        Response<List<DoctorWarehouseMaterialApply>> consumerApplyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(DoctorWarehouseMaterialApply.builder()
+                .type(WareHouseType.CONSUME.getKey())
+                .build(), 1);
+        if (!consumerApplyResponse.isSuccess())
+            throw new JsonResponseException(consumerApplyResponse.getError());
+
+        List<WarehouseVo> vos = new ArrayList<>(5);
+        vos.add(WarehouseVo.builder()
+                .type(WareHouseType.FEED.getKey())
+                .balanceQuantity(quantityStatistics.get(WareHouseType.FEED.getKey()))
+                .lastApplyDate(feedapplyResponse.getResult().get(0).getApplyDate())
+                .build());
+        vos.add(WarehouseVo.builder()
+                .type(WareHouseType.MATERIAL.getKey())
+                .balanceQuantity(quantityStatistics.get(WareHouseType.MATERIAL.getKey()))
+                .lastApplyDate(materialApplyResponse.getResult().get(0).getApplyDate())
+                .build());
+        vos.add(WarehouseVo.builder()
+                .type(WareHouseType.VACCINATION.getKey())
+                .balanceQuantity(quantityStatistics.get(WareHouseType.FEED.getKey()))
+                .lastApplyDate(vaccinationApplyResponse.getResult().get(0).getApplyDate())
+                .build());
+        vos.add(WarehouseVo.builder()
+                .type(WareHouseType.MEDICINE.getKey())
+                .balanceQuantity(quantityStatistics.get(WareHouseType.FEED.getKey()))
+                .lastApplyDate(medicineApplyResponse.getResult().get(0).getApplyDate())
+                .build());
+        vos.add(WarehouseVo.builder()
+                .type(WareHouseType.CONSUME.getKey())
+                .balanceQuantity(quantityStatistics.get(WareHouseType.FEED.getKey()))
+                .lastApplyDate(consumerApplyResponse.getResult().get(0).getApplyDate())
+                .build());
         return vos;
     }
 
@@ -252,6 +345,7 @@ public class WarehouseController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
+    @JsonView(WarehouseVo.WarehouseView.class)
     public WarehouseVo find(@PathVariable Long id) {
         Response<DoctorWareHouse> wareHouseResponse = doctorWarehouseReaderService.findById(id);
         if (!wareHouseResponse.isSuccess())
@@ -359,9 +453,13 @@ public class WarehouseController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "{id}/material")
-    public List<WarehouseStockVo> material(@PathVariable Long id) {
+    public List<WarehouseStockVo> material(@PathVariable Long id,
+                                           @RequestParam(required = false) String materialName,
+                                           @RequestParam(required = false) Integer pageNo,
+                                           @RequestParam(required = false) Integer pageSize) {
 
-        Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.listMergeVendor(DoctorWarehouseStock.builder()
+        //TODO 添加物料名的模糊搜索
+        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.pagingMergeVendor(pageNo, pageSize, DoctorWarehouseStock.builder()
                 .warehouseId(id)
                 .build());
 
@@ -369,8 +467,8 @@ public class WarehouseController {
             throw new JsonResponseException(stockResponse.getError());
 
 
-        List<WarehouseStockVo> vos = new ArrayList<>(stockResponse.getResult().size());
-        for (DoctorWarehouseStock stock : stockResponse.getResult()) {
+        List<WarehouseStockVo> vos = new ArrayList<>(stockResponse.getResult().getData().size());
+        for (DoctorWarehouseStock stock : stockResponse.getResult().getData()) {
             vos.add(WarehouseStockVo.builder()
                     .materialId(stock.getMaterialId())
                     .materialName(stock.getMaterialName())

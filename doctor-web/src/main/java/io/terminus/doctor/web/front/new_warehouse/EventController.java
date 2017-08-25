@@ -37,6 +37,7 @@ public class EventController {
     @RpcConsumer
     private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
 
+    //TODO 可能需要加一个逻辑，如果物料处理记录处理的物料是仓库中最后一笔处理记录，则允许出现删除按钮，允许删除
     @RequestMapping(method = RequestMethod.GET)
 //    @JsonView(WarehouseMaterialHandleVo.MaterialHandleEventView.class)
     public Paging<WarehouseMaterialEventVo> paging(
@@ -150,7 +151,16 @@ public class EventController {
 
         //删除出库，直接逻辑删除，stock+库存，purchase+handle_quantity，改handle_flag
 
-        //删除入库，查询入库对应的purchase，purchase的handle_quantity是否大于0
+
+        //删除入库，查询入库对应的purchase，purchase的handle_quantity是否大于0，也就是是否已出过库，出过库不允许删除
+
+
+
+        //删除盘点
+
+        //删除调拨
+
+        //删除配方生产
 
 
         Map<String, Object> criteria = new HashMap<>();

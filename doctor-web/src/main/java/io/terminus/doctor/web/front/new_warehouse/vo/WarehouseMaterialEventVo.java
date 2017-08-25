@@ -20,19 +20,25 @@ import java.util.Date;
 @NoArgsConstructor
 public class WarehouseMaterialEventVo {
 
+
+    private Long id;
+
     private String materialName;
 
-    private Integer type;
+    private String warehouseName;
 
     private Date handleDate;
 
     private BigDecimal quantity;
 
+    private Integer type;
+
+    private String unit;
+
     private Long unitPrice;
 
-    private String pigBarnName;
+    private Long amount;
 
-    private String pigGroupName;
+    private String vendorName;
 
-    private String warehouseName;
 }
