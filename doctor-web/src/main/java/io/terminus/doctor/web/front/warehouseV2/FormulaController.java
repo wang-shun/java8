@@ -136,7 +136,7 @@ public class FormulaController {
     @RequestMapping(method = RequestMethod.POST, value = "produce")
     public void produce(@RequestParam("farmId") Long farmId,
                         @RequestParam("warehouseId") Long warehouseId,
-                        @RequestParam("materialId") Long feedFormulaId,
+                        @RequestParam("feedFormulaId") Long feedFormulaId,
                         @RequestParam("materialProduceJson") String materialProduceJson) {
 
         FeedFormula feedFormula = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(feedFormulaId));
