@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * Desc:
  * Mail: [ your email ]
- * Date: 2017-08-24 13:34:00
+ * Date: 2017-08-28 10:22:54
  * Created by [ your name ]
  */
 @Data
@@ -20,7 +20,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class DoctorWarehouseMaterialHandle implements Serializable {
 
-    private static final long serialVersionUID = -760508433193325235L;
+    private static final long serialVersionUID = 4487094125372765248L;
 
     /**
      * 自增主键
@@ -48,9 +48,9 @@ public class DoctorWarehouseMaterialHandle implements Serializable {
     private String warehouseName;
     
     /**
-     * 调拨，调入仓库编号
+     * 另一条调拨物料处理单的编号
      */
-    private Long targetWarehouseId;
+    private Long otherTrasnferHandleId;
     
     /**
      * 物料供应商名称
@@ -76,6 +76,16 @@ public class DoctorWarehouseMaterialHandle implements Serializable {
      * 单价，单位分
      */
     private Long unitPrice;
+    
+    /**
+     * 单位
+     */
+    private String unit;
+    
+    /**
+     * 删除标志，0正常，1删除
+     */
+    private Integer deleteFlag;
     
     /**
      * 数量

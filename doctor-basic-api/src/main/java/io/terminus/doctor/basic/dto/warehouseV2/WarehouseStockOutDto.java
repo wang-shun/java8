@@ -2,7 +2,10 @@ package io.terminus.doctor.basic.dto.warehouseV2;
 
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -24,6 +27,9 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
     private List<WarehouseStockOutDetail> details;
 
     @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class WarehouseStockOutDetail extends AbstractWarehouseStockDetail implements Serializable {
 
         private static final long serialVersionUID = -6161879769774585774L;
@@ -42,5 +48,8 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
         private Long applyPigGroupId;
 
         private String applyPigGroupName;
+
+
+        private Boolean justOut;
     }
 }

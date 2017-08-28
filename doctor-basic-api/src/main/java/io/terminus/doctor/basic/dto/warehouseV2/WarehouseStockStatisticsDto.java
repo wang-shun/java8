@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import java.io.Serializable;
+
 /**
  * Created by sunbo@terminus.io on 2017/8/26.
  */
@@ -12,9 +14,10 @@ import lombok.experimental.Builder;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class WarehouseStockStatisticsDto {
+public class WarehouseStockStatisticsDto implements Serializable{
 
 
+    private static final long serialVersionUID = -5812591844367501082L;
     /**
      * 入库金额和数量
      */

@@ -1,6 +1,9 @@
 package io.terminus.doctor.basic.dto.warehouseV2;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;

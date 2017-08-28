@@ -61,9 +61,17 @@ public class DoctorWarehouseHandlerManager {
             });
 
 
-            context.getMaterialHandle().forEach(handle -> {
+            for (DoctorWarehouseMaterialHandle handle : context.getMaterialHandle()) {
                 doctorWarehouseMaterialHandleDao.create(handle);
-            });
+            }
+            //两笔物料处理记录，只有调拨才有。
+            if (context.getMaterialHandle().size() == 2) {
+                //相互保存各自编号，方便通过一条调拨记录找到另一条
+                context.getMaterialHandle().get(0).setOtherTrasnferHandleId(context.getMaterialHandle().get(1).getId());
+                context.getMaterialHandle().get(1).setOtherTrasnferHandleId(context.getMaterialHandle().get(0).getId());
+                doctorWarehouseMaterialHandleDao.update(context.getMaterialHandle().get(0));
+                doctorWarehouseMaterialHandleDao.update(context.getMaterialHandle().get(1));
+            }
 
             if (null != context.getApply()) {
                 //出库才有
@@ -72,18 +80,6 @@ public class DoctorWarehouseHandlerManager {
             }
         });
 
-//        context.forEach((stock, purchases) -> {
-//            if (stock.getId() == null)
-//                doctorWarehouseStockDao.create(stock);
-//            else doctorWarehouseStockDao.update(stock);
-//
-//            purchases.forEach(purchase -> {
-//                if (purchase.getId() == null)
-//                    doctorWarehousePurchaseDao.create(purchase);
-//                else doctorWarehousePurchaseDao.update(purchase);
-//            });
-//
-//        });
     }
 
     @Transactional

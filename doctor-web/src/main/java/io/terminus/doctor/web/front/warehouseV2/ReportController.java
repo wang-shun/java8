@@ -35,7 +35,7 @@ import java.util.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("api/doctor/warehouseV2/report")
+@RequestMapping("api/doctor/warehouse/report")
 public class ReportController {
 
 

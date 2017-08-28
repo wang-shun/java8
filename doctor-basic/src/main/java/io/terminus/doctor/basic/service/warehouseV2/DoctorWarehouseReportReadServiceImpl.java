@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
@@ -13,9 +14,9 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.*;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,7 +25,7 @@ import java.util.stream.Stream;
  */
 @Service
 @RpcProvider
-public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseReportReadService {
+public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseReportReadService {
 
 
     private static final WarehouseMaterialHandleType[] ALL_KIND_OF_HANDLE = new WarehouseMaterialHandleType[]{
@@ -280,7 +281,7 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseRepor
         criteria.put("handleYear", handleDate.get(Calendar.YEAR));
         criteria.put("handleMonth", handleDate.get(Calendar.MONTH) + 1);
         if (null != types)
-            criteria.put("bigType", Stream.of(types).mapToInt(WarehouseMaterialHandleType::getValue));
+            criteria.put("bigType", Stream.of(types).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
 
         return doctorWarehouseMaterialHandleDao.advList(criteria);
     }
@@ -291,7 +292,7 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseRepor
         criteria.put("handleYear", handleDate.get(Calendar.YEAR));
         criteria.put("handleMonth", handleDate.get(Calendar.MONTH) + 1);
         if (null != types)
-            criteria.put("bigType", Stream.of(types).mapToInt(WarehouseMaterialHandleType::getValue));
+            criteria.put("bigType", Stream.of(types).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
 
         return doctorWarehouseMaterialHandleDao.advList(criteria);
     }
@@ -303,8 +304,9 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseRepor
         criteria.put("materialId", materialId);
         criteria.put("handleYear", handleDate.get(Calendar.YEAR));
         criteria.put("handleMonth", handleDate.get(Calendar.MONTH) + 1);
-        if (null != types)
-            criteria.put("bigType", Stream.of(types).mapToInt(WarehouseMaterialHandleType::getValue));
+        if (null != types) {
+            criteria.put("bigType", Stream.of(types).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
+        }
 
         return doctorWarehouseMaterialHandleDao.advList(criteria);
     }
@@ -317,7 +319,7 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseRepor
         criteria.put("handleMonth", handleDate.get(Calendar.MONTH) + 1);
         criteria.put("vendorName", vendorName);
         if (null != types)
-            criteria.put("bigType", Stream.of(types).mapToInt(WarehouseMaterialHandleType::getValue));
+            criteria.put("bigType", Stream.of(types).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
 
         return doctorWarehouseMaterialHandleDao.advList(criteria);
     }

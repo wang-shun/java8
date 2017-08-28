@@ -4,9 +4,18 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInDto;
+import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInventoryDto;
+import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockOutDto;
+import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockTransferDto;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleWriteService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseMaterialEventVo;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +33,7 @@ import java.util.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("api/doctor/warehouseV2/event")
+@RequestMapping("api/doctor/warehouse/event")
 public class EventController {
 
     @Autowired
@@ -32,6 +41,14 @@ public class EventController {
 
     @RpcConsumer
     private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
+
+    @RpcConsumer
+    private DoctorWarehouseMaterialHandleWriteService doctorWarehouseMaterialHandleWriteService;
+
+    @RpcConsumer
+    private DoctorWarehouseStockReadService doctorWarehouseStockReadService;
+    @RpcConsumer
+    private DoctorWarehouseStockWriteService doctorWarehouseStockWriteService;
 
     //TODO 可能需要加一个逻辑，如果物料处理记录处理的物料是仓库中最后一笔处理记录，则允许出现删除按钮，允许删除
     @RequestMapping(method = RequestMethod.GET)
@@ -76,6 +93,26 @@ public class EventController {
 
         List<WarehouseMaterialEventVo> vos = new ArrayList<>(handleResponse.getResult().getData().size());
         for (DoctorWarehouseMaterialHandle handle : handleResponse.getResult().getData()) {
+
+            boolean allowDelete = true;
+            if (WarehouseMaterialHandleType.FORMULA_IN.getValue() == handle.getType() || WarehouseMaterialHandleType.FORMULA_OUT.getValue() == handle.getType()) {
+                allowDelete = false;
+            }
+            if (WarehouseMaterialHandleType.IN.getValue() == handle.getType()
+                    || WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType()
+                    || WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()) {
+                Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.listMergeVendor(DoctorWarehouseStock.builder()
+                        .warehouseId(handle.getWarehouseId())
+                        .materialId(handle.getMaterialId())
+                        .build());
+                if (!stockResponse.isSuccess())
+                    throw new JsonResponseException(stockResponse.getError());
+                if (null == stockResponse.getResult() || stockResponse.getResult().isEmpty())
+                    allowDelete = false;
+                if (stockResponse.getResult().get(0).getQuantity().compareTo(handle.getQuantity()) < 0)
+                    allowDelete = false;
+            }
+
             vos.add(WarehouseMaterialEventVo.builder()
                     .id(handle.getId())
                     .materialName(handle.getMaterialName())
@@ -83,10 +120,11 @@ public class EventController {
                     .handleDate(handle.getHandleDate())
                     .quantity(handle.getQuantity())
                     .type(handle.getType())
-                    .unit("")//TODO 数据库添加字段
+                    .unit(handle.getUnit())
                     .unitPrice(handle.getUnitPrice())
                     .amount(handle.getQuantity().multiply(new BigDecimal(handle.getUnitPrice())).longValue())
                     .vendorName(handle.getVendorName())
+                    .allowDelete(allowDelete)
                     .build());
         }
 
@@ -148,26 +186,96 @@ public class EventController {
         DoctorWarehouseMaterialHandle handle = handleResponse.getResult();
 
 
-        //删除出库，直接逻辑删除，stock+库存，purchase+handle_quantity，改handle_flag
-        //相当于盘盈，找出最近的一笔
-
-
-        //删除入库，查询入库对应的purchase，purchase的handle_quantity是否大于0，也就是是否已出过库，出过库不允许删除
         if (WarehouseMaterialHandleType.IN.getValue() == handle.getType().intValue()) {
 
+            WarehouseStockOutDto outDto = new WarehouseStockOutDto();
+            outDto.setFarmId(handle.getFarmId());
+            outDto.setHandleDate(new Date());
+            outDto.setWarehouseId(handle.getWarehouseId());
+
+
+            WarehouseStockOutDto.WarehouseStockOutDetail detail = new WarehouseStockOutDto.WarehouseStockOutDetail();
+            detail.setMaterialId(handle.getMaterialId());
+            detail.setQuantity(handle.getQuantity());
+            detail.setJustOut(true);
+            outDto.setDetails(Collections.singletonList(detail));
+            doctorWarehouseStockWriteService.out(outDto);
+        } else if (WarehouseMaterialHandleType.OUT.getValue() == handle.getType()) {
+            WarehouseStockInDto inDto = new WarehouseStockInDto();
+            inDto.setFarmId(handle.getFarmId());
+            inDto.setWarehouseId(handle.getWarehouseId());
+            inDto.setHandleDate(new Date());
+
+            WarehouseStockInDto.WarehouseStockInDetailDto detail = new WarehouseStockInDto.WarehouseStockInDetailDto();
+            detail.setUnit(handle.getUnit());
+            detail.setUnitPrice(handle.getUnitPrice());
+            detail.setVendorName(handle.getVendorName());
+            detail.setMaterialId(handle.getMaterialId());
+            detail.setQuantity(handle.getQuantity());
+            inDto.setDetails(Collections.singletonList(detail));
+            doctorWarehouseStockWriteService.in(inDto);
+        } else if (WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()
+                || WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()) {
+
+            Response<DoctorWarehouseMaterialHandle> otherTransferHandleResponse = doctorWarehouseMaterialHandleReadService.findById(handle.getOtherTrasnferHandleId());
+            if (!otherTransferHandleResponse.isSuccess())
+                throw new JsonResponseException(otherTransferHandleResponse.getError());
+
+            Long transferOutWarehouseId, transferInWarehouseId;
+            if (WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()) {
+                transferOutWarehouseId = handle.getWarehouseId();
+                transferInWarehouseId = otherTransferHandleResponse.getResult().getWarehouseId();
+            } else {
+                transferOutWarehouseId = otherTransferHandleResponse.getResult().getWarehouseId();
+                transferInWarehouseId = handle.getWarehouseId();
+            }
+
+            WarehouseStockTransferDto transferDto = new WarehouseStockTransferDto();
+            transferDto.setFarmId(handle.getFarmId());
+            transferDto.setWarehouseId(transferOutWarehouseId);
+            transferDto.setHandleDate(new Date());
+
+            WarehouseStockTransferDto.WarehouseStockTransferDetail detail = new WarehouseStockTransferDto.WarehouseStockTransferDetail();
+            detail.setMaterialId(handle.getMaterialId());
+            detail.setQuantity(handle.getQuantity());
+            detail.setTransferInWarehouseId(transferInWarehouseId);
+            transferDto.setDetails(Collections.singletonList(detail));
+            doctorWarehouseStockWriteService.transfer(transferDto);
+        } else if (WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue() == handle.getType()
+                || WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType()) {
+
+            Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.listMergeVendor(DoctorWarehouseStock.builder()
+                    .warehouseId(handle.getWarehouseId())
+                    .materialId(handle.getMaterialId())
+                    .build());
+            if (!stockResponse.isSuccess())
+                throw new JsonResponseException(stockResponse.getError());
+
+            if (null == stockResponse.getResult() || stockResponse.getResult().isEmpty())
+                throw new JsonResponseException("stock.not.found");
+
+
+            BigDecimal newQuantity;
+            if (WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType()) {
+                newQuantity = stockResponse.getResult().get(0).getQuantity().multiply(handle.getQuantity());
+            } else
+                newQuantity = stockResponse.getResult().get(0).getQuantity().add(handle.getQuantity());
+
+            WarehouseStockInventoryDto inventoryDto = new WarehouseStockInventoryDto();
+            inventoryDto.setFarmId(handle.getFarmId());
+            inventoryDto.setHandleDate(new Date());
+            inventoryDto.setWarehouseId(handle.getWarehouseId());
+
+            WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail = new WarehouseStockInventoryDto.WarehouseStockInventoryDetail();
+            detail.setMaterialId(handle.getMaterialId());
+            detail.setQuantity(newQuantity);
+            inventoryDto.setDetails(Collections.singletonList(detail));
+            doctorWarehouseStockWriteService.inventory(inventoryDto);
         }
 
-        //删除盘点
+        handle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
+        doctorWarehouseMaterialHandleWriteService.update(handle);
 
-        //删除调拨
-
-        //删除配方生产
-
-
-        Map<String, Object> criteria = new HashMap<>();
-        criteria.put("warehouseId", handleResponse.getResult().getWarehouseId());
-        criteria.put("afterHandleDate", handleResponse.getResult().getHandleDate());
-        doctorWarehouseMaterialHandleReadService.advList(criteria);
     }
 
 

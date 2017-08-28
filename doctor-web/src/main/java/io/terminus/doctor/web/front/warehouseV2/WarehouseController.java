@@ -2,7 +2,6 @@ package io.terminus.doctor.web.front.warehouseV2;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
-import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
@@ -12,12 +11,10 @@ import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseMaterialDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
-import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.basic.service.warehouseV2.*;
@@ -52,7 +49,7 @@ import static com.google.common.base.Preconditions.checkState;
  * Created by sunbo@terminus.io on 2017/8/8.
  */
 @RestController
-@RequestMapping("api/doctor/warehouseV2")
+@RequestMapping("api/doctor/warehouse")
 public class WarehouseController {
 
 
@@ -235,6 +232,47 @@ public class WarehouseController {
                 .build());
         return vos;
     }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "type/{type}/statistics")
+    @JsonView(WarehouseVo.WarehouseView.class)
+    public List<WarehouseVo> sameTypeWarehouseStatistics(@PathVariable Integer type, @RequestParam Long farmId) {
+        Response<List<DoctorWareHouse>> wareHouseResponse = doctorWarehouseReaderService.list(DoctorWareHouse.builder()
+                .farmId(farmId)
+                .type(type)
+                .build());
+        if (!wareHouseResponse.isSuccess())
+            throw new JsonResponseException(wareHouseResponse.getError());
+
+        List<WarehouseVo> warehouseVos = new ArrayList<>();
+        for (DoctorWareHouse wareHouse : wareHouseResponse.getResult()) {
+
+            Response<List<DoctorWarehouseMaterialApply>> lastApplyResponse = doctorWarehouseMaterialApplyReadService.listOrderByHandleDate(DoctorWarehouseMaterialApply.builder()
+                    .warehouseId(wareHouse.getId())
+                    .build(), 1);
+            if (!lastApplyResponse.isSuccess())
+                throw new JsonResponseException(lastApplyResponse.getError());
+
+            Date lastApplyDate = null;
+            if (null != lastApplyResponse.getResult() && !lastApplyResponse.getResult().isEmpty()) {
+                lastApplyDate = lastApplyResponse.getResult().get(0).getApplyDate();
+            }
+
+            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countWarehouseBalance(wareHouse.getId());
+            if (!balanceResponse.isSuccess())
+                throw new JsonResponseException(balanceResponse.getError());
+
+            warehouseVos.add(WarehouseVo.builder()
+                    .id(wareHouse.getId())
+                    .name(wareHouse.getWareHouseName())
+                    .type(type)
+                    .lastApplyDate(lastApplyDate)
+                    .balanceQuantity(balanceResponse.getResult().getQuantity())
+                    .build());
+        }
+        return warehouseVos;
+    }
+
 
     /**
      * 猪厂下所有仓库，及仓库的出入库等统计信息
@@ -483,6 +521,8 @@ public class WarehouseController {
         if (!createResponse.isSuccess())
             throw new JsonResponseException(createResponse.getError());
     }
+
+
 
 
 //    @RequestMapping(method = RequestMethod.PUT, value = "in")
