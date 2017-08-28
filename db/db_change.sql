@@ -1344,7 +1344,7 @@ CREATE TABLE `doctor_warehouse_material_handle` (
   `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
   `warehouse_type` smallint(6) DEFAULT NULL COMMENT '仓库类型',
   `warehouse_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
-  `target_warehouse_id` bigint(20) DEFAULT NULL COMMENT '调拨，调入仓库编号',
+  `other_trasnfer_handle_id` bigint(20) DEFAULT NULL COMMENT '另一条调拨物料处理单的编号',
   `vendor_name` varchar(64) DEFAULT NULL COMMENT '物料供应商名称',
   `material_id` bigint(20) NOT NULL COMMENT '物料编号',
   `material_name` varchar(64) DEFAULT NULL COMMENT '物料名称',
