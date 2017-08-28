@@ -73,17 +73,17 @@ public class DoctorNewEventInputBuilder implements DoctorGroupEventInputBuilder{
         newEvent.setGroupCode(importGroupEvent.getGroupCode());
 
         DoctorGroupTrack.Sex sex = DoctorGroupTrack.Sex.from(importGroupEvent.getSexName());
-        expectTrue(notNull(sex), "sex");
+        expectTrue(notNull(sex), "sex.not.fund", importGroupEvent.getSexName());
         newEvent.setSex(sex.getValue());
 
         PigSource source = PigSource.from(importGroupEvent.getSource());
-        expectTrue(notNull(source), "source");
+        expectTrue(notNull(source), "source.not.fund", importGroupEvent.getSource());
         newEvent.setSource(source.getKey());
         newEvent.setBreedId(breedMap.get(importGroupEvent.getBreedName()));
         newEvent.setBreedName(importGroupEvent.getBreedName());
 
         DoctorBarn barn = barnMap.get(importGroupEvent.getNewBarnName());
-        expectTrue(notNull(barn), "barn");
+        expectTrue(notNull(barn), "barn.not.fund", importGroupEvent.getNewBarnName());
         newEvent.setBarnId(barn.getId());
         newEvent.setBarnName(barn.getName());
         return newEvent;

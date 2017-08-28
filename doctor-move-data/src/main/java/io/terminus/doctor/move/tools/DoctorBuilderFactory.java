@@ -1,4 +1,4 @@
-package io.terminus.doctor.move.manager;
+package io.terminus.doctor.move.tools;
 
 import io.terminus.doctor.move.builder.group.DoctorGroupEventInputBuilder;
 import io.terminus.doctor.move.builder.group.DoctorGroupEventInputBuilders;

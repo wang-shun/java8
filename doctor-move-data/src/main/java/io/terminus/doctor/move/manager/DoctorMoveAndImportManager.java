@@ -17,6 +17,9 @@ import io.terminus.doctor.move.handler.DoctorSourceDataHandler;
 import io.terminus.doctor.move.model.View_EventListBoar;
 import io.terminus.doctor.move.model.View_EventListGain;
 import io.terminus.doctor.move.model.View_EventListSow;
+import io.terminus.doctor.move.tools.DoctorImportEventExecutor;
+import io.terminus.doctor.move.tools.DoctorImportExcelAnalyzer;
+import io.terminus.doctor.move.tools.DoctorMoveEventExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +57,6 @@ public class DoctorMoveAndImportManager {
     private DoctorImportEventExecutor importEventExecutor;
     @Autowired
     private DoctorImportExcelAnalyzer importExcelAnalyzer;
-
 
     public void movePig(Long moveId, DoctorMoveBasicData moveBasicData) {
 
@@ -121,19 +123,12 @@ public class DoctorMoveAndImportManager {
 
     public void importPig(Sheet pigSheet, DoctorImportBasicData importBasicData) {
         List<DoctorImportPigEvent> importEventList = importExcelAnalyzer.getImportPigEvent(pigSheet);
-//        Map<String, List<DoctorImportPigEvent>> eventMap = importEventList.stream()
-//                .collect(Collectors.groupingBy(DoctorImportPigEvent::getEventName));
-
         log.info("pig event total:{}", importEventList.size());
 
         try {
             rollbackPig(importBasicData.getDoctorFarm().getId());
-//            eventMap.entrySet().forEach(entry ->
-//                    importEventExecutor.executePigEvent(importBasicData, entry.getValue(), entry.getKey())
-//            );
             importEventList.forEach(importPigEvent ->
                     importEventExecutor.executePigEvent(importBasicData, importPigEvent));
-
         } catch (Exception e) {
             // TODO: 17/8/25 测试暂时注释
 //            rollbackPig(moveBasicData.getDoctorFarm().getId());

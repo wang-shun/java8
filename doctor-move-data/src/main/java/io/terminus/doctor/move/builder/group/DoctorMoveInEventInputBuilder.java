@@ -93,17 +93,17 @@ public class DoctorMoveInEventInputBuilder implements DoctorGroupEventInputBuild
         builderCommonOperation.fillGroupEventCommonInput(moveIn, importGroupEvent);
 
         InType inType = InType.from(importGroupEvent.getInTypeName());
-        expectTrue(notNull(inType), "inType");
+        expectTrue(notNull(inType), "inType.not.fund", importGroupEvent.getInTypeName());
         moveIn.setInType(inType.getValue());
         moveIn.setInTypeName(importGroupEvent.getInTypeName());
 
         //来源
         PigSource source = PigSource.from(importGroupEvent.getSource());
-        expectTrue(notNull(source), "source");
+        expectTrue(notNull(source), "source.not.fund", importGroupEvent.getSource());
         moveIn.setSource(source.getKey());
 
         DoctorGroupTrack.Sex sex = DoctorGroupTrack.Sex.from(importGroupEvent.getSexName());
-        expectTrue(notNull(sex), "sex");
+        expectTrue(notNull(sex), "sex.not.fund", importGroupEvent.getSexName());
         moveIn.setSex(sex.getValue());
 
         //品种

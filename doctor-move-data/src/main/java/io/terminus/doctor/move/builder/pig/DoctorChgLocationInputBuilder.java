@@ -55,11 +55,11 @@ public class DoctorChgLocationInputBuilder implements DoctorPigEventInputBuilder
         builderCommonOperation.fillPigEventCommonInput(transBarn, importBasicData, importPigEvent);
         transBarn.setChangeLocationDate(importPigEvent.getEventAt());
         DoctorBarn fromBarn = barnMap.get(importPigEvent.getBarnName());    //来源猪舍
-        expectTrue(notNull(fromBarn), "farmBarn");
+        expectTrue(notNull(fromBarn), "farmBarn.not.fund", importPigEvent.getBarnName());
             transBarn.setChgLocationFromBarnId(fromBarn.getId());
             transBarn.setChgLocationFromBarnName(fromBarn.getName());
         DoctorBarn toBarn = barnMap.get(importPigEvent.getToBarnName());    //去往猪舍
-        expectTrue(notNull(toBarn), "toBarn");
+        expectTrue(notNull(toBarn), "toBarn.not.fund", importPigEvent.getToBarnName());
             transBarn.setChgLocationToBarnId(toBarn.getId());
             transBarn.setChgLocationToBarnName(toBarn.getName());
         return transBarn;

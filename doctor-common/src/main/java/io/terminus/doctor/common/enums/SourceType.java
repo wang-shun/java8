@@ -19,7 +19,9 @@ public enum SourceType {
     IMPORT(2, "导入数据"),
     MOVE(3, "迁移数据"),
     ADD(4, "补录事件"),
-    TRANS_FARM(5,"转场复制的事件");
+    TRANS_FARM(5,"转场复制的事件"),
+    IMPORT_OLD(6, "原导入逻辑的事件"),
+    MOVE_OLD(7, "原迁移逻辑的事件");
 
     @Getter
     private Integer value;

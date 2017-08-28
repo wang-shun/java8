@@ -1,4 +1,4 @@
-package io.terminus.doctor.move.manager;
+package io.terminus.doctor.move.tools;
 
 import com.google.common.collect.Lists;
 import io.terminus.doctor.move.dto.DoctorImportGroupEvent;

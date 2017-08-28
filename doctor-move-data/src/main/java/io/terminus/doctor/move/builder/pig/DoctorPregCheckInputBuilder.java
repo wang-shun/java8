@@ -47,7 +47,7 @@ public class DoctorPregCheckInputBuilder implements DoctorPigEventInputBuilder {
         preg.setCheckDate(importPigEvent.getEventAt());
         preg.setCheckMark(importPigEvent.getRemark());
         PregCheckResult result = PregCheckResult.from(importPigEvent.getPregCheckResult());
-        expectTrue(notNull(result), "result");
+        expectTrue(notNull(result), "result.not.fund", importPigEvent.getPregCheckResult());
         preg.setCheckResult(result.getKey());
         return preg;
     }

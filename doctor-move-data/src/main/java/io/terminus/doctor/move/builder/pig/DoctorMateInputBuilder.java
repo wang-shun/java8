@@ -66,12 +66,12 @@ public class DoctorMateInputBuilder implements DoctorPigEventInputBuilder {
         mating.setJudgePregDate(new DateTime(mating.getMatingDate()).plusDays(114).toDate());
 
         MatingType matingType = MatingType.from(importPigEvent.getMateType());
-        expectTrue(notNull(matingType), "mateType");
+        expectTrue(notNull(matingType), "mateType.not.fund", importPigEvent.getMateType());
         mating.setMatingType(matingType.getKey());
 
         DoctorPig mateBoar = doctorPigDao.findPigByFarmIdAndPigCodeAndSex(importBasicData.getDoctorFarm().getId(),
                 importPigEvent.getMateBoarCode(), DoctorPig.PigSex.BOAR.getKey());
-        expectTrue(notNull(mateBoar), "mateBoar");
+        expectTrue(notNull(mateBoar), "mateBoar.not.fund", importPigEvent.getMateBoarCode());
         mating.setMatingBoarPigId(mateBoar.getId());
         mating.setMatingBoarPigCode(mateBoar.getPigCode());
 

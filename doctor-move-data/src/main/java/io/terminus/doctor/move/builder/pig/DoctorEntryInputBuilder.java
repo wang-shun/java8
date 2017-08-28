@@ -128,12 +128,13 @@ public class DoctorEntryInputBuilder implements DoctorPigEventInputBuilder {
 
         if (Objects.equals(importPigEvent.getPigSex(), DoctorPig.PigSex.BOAR.getDesc())) {
             BoarEntryType boarEntryType = BoarEntryType.from(importPigEvent.getBoarType());
+            expectTrue(notNull(boarEntryType), "boarEntryType.not.fund", importPigEvent.getBoarType());
             farmEntryDto.setBoarType(boarEntryType.getKey());
             farmEntryDto.setBoarTypeName(boarEntryType.getDesc());
         }
 
         PigSource source = PigSource.from(importPigEvent.getSource());
-        expectTrue(notNull(source), "source");
+        expectTrue(notNull(source), "source.not.fund", importPigEvent.getSource());
         farmEntryDto.setSource(source.getKey());
 
 

@@ -1,4 +1,4 @@
-package io.terminus.doctor.move.manager;
+package io.terminus.doctor.move.tools;
 
 import com.google.common.collect.Lists;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -54,6 +54,8 @@ public class DoctorImportEventExecutor {
     private DoctorGroupDao doctorGroupDao;
     @Autowired
     private DoctorBuilderFactory doctorBuilderFactory;
+    @Autowired
+    private DoctorEventInputValidator validator;
 
     public void executePigEvent(DoctorImportBasicData importBasicData, List<DoctorImportPigEvent> importPigEventList,
                                 String eventName) {
@@ -73,7 +75,7 @@ public class DoctorImportEventExecutor {
         if (isNull(builder)) {
             return;
         }
-        BasePigEventInputDto inputDto = builder.buildFromImport(importBasicData, importPigEvent);
+        BasePigEventInputDto inputDto = validator.valid(builder.buildFromImport(importBasicData, importPigEvent));
         pigEventManager.eventHandle(inputDto, basicInputInfoDto);
     }
 
@@ -82,7 +84,7 @@ public class DoctorImportEventExecutor {
         if (isNull(builder)) {
             return;
         }
-        BaseGroupInput baseGroupInput = builder.buildFromImport(importBasicData, importGroupEvent);
+        BaseGroupInput baseGroupInput = validator.valid(builder.buildFromImport(importBasicData, importGroupEvent));
 
         if (Objects.equals(baseGroupInput.getEventType(), GroupEventType.NEW.getValue())) {
             groupManager.createNewGroup(Lists.newArrayList(), buildGroupBasicData(importBasicData, baseGroupInput),
