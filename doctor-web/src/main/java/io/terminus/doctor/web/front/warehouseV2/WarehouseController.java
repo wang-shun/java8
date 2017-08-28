@@ -177,6 +177,8 @@ public class WarehouseController {
         Response<Map<Integer, AmountAndQuantityDto>> balanceResponse = doctorWarehouseReportReadService.countBalanceEachWarehouseType(farmId);
         if (!balanceResponse.isSuccess())
             throw new JsonResponseException(balanceResponse.getError());
+        Map<Integer, AmountAndQuantityDto> balance = balanceResponse.getResult();
+
         Response<Map<Integer, DoctorWarehouseMaterialApply>> eachWarehouseTypeLastApplyResponse = doctorWarehouseMaterialApplyReadService.listEachWarehouseTypeLastApply(farmId);
         if (!eachWarehouseTypeLastApplyResponse.isSuccess())
             throw new JsonResponseException(eachWarehouseTypeLastApplyResponse.getError());
@@ -207,27 +209,32 @@ public class WarehouseController {
         List<WarehouseVo> vos = new ArrayList<>(5);
         vos.add(WarehouseVo.builder()
                 .type(WareHouseType.FEED.getKey())
-                .balanceQuantity(balanceResponse.getResult().get(WareHouseType.FEED.getKey()).getQuantity())
+                .balanceQuantity(balance.containsKey(WareHouseType.FEED.getKey()) ?
+                        balanceResponse.getResult().get(WareHouseType.FEED.getKey()).getQuantity() : new BigDecimal(0))
                 .lastApplyDate(feedLastApplyDate)
                 .build());
         vos.add(WarehouseVo.builder()
                 .type(WareHouseType.MATERIAL.getKey())
-                .balanceQuantity(balanceResponse.getResult().get(WareHouseType.MATERIAL.getKey()).getQuantity())
+                .balanceQuantity(balance.containsKey(WareHouseType.MATERIAL.getKey()) ?
+                        balanceResponse.getResult().get(WareHouseType.MATERIAL.getKey()).getQuantity() : new BigDecimal(0))
                 .lastApplyDate(materialLastApplyDate)
                 .build());
         vos.add(WarehouseVo.builder()
                 .type(WareHouseType.VACCINATION.getKey())
-                .balanceQuantity(balanceResponse.getResult().get(WareHouseType.VACCINATION.getKey()).getQuantity())
+                .balanceQuantity(balance.containsKey(WareHouseType.VACCINATION.getKey()) ?
+                        balanceResponse.getResult().get(WareHouseType.VACCINATION.getKey()).getQuantity() : new BigDecimal(0))
                 .lastApplyDate(vaccinationLastApplyDate)
                 .build());
         vos.add(WarehouseVo.builder()
                 .type(WareHouseType.MEDICINE.getKey())
-                .balanceQuantity(balanceResponse.getResult().get(WareHouseType.MEDICINE.getKey()).getQuantity())
+                .balanceQuantity(balance.containsKey(WareHouseType.MEDICINE.getKey()) ?
+                        balanceResponse.getResult().get(WareHouseType.MEDICINE.getKey()).getQuantity() : new BigDecimal(0))
                 .lastApplyDate(medicineLastApplyDate)
                 .build());
         vos.add(WarehouseVo.builder()
                 .type(WareHouseType.CONSUME.getKey())
-                .balanceQuantity(balanceResponse.getResult().get(WareHouseType.CONSUME.getKey()).getQuantity())
+                .balanceQuantity(balance.containsKey(WareHouseType.CONSUME.getKey()) ?
+                        balanceResponse.getResult().get(WareHouseType.CONSUME.getKey()).getQuantity() : new BigDecimal(0))
                 .lastApplyDate(consumeLastApplyDate)
                 .build());
         return vos;
