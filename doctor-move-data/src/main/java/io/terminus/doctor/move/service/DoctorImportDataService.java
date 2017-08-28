@@ -241,9 +241,9 @@ public class DoctorImportDataService {
             Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap2(farm.getId());
             Map<String, Long> breedMap = doctorMoveBasicService.getBreedMap();
 
-            importBoar(farm, barnMap, breedMap, shit.getBoar());
-            importGroup(farm, barnMap, shit.getGroup());
-            importSow(farm, barnMap, breedMap, shit.getSow());
+//            importBoar(farm, barnMap, breedMap, shit.getBoar());
+            importGroup(farm, barnMap, shit.getGroupEvent());
+//            importSow(farm, barnMap, breedMap, shit.getImportPigEvent());
 
             //刷新npd
             doctorMoveDataService.flushNpd(farm.getId());
@@ -300,7 +300,7 @@ public class DoctorImportDataService {
     }
 
     @Transactional
-    private Object[] importOrgFarmUser(Sheet farmShit, Sheet staffShit) {
+    public Object[] importOrgFarmUser(Sheet farmShit, Sheet staffShit) {
         Object[] result = this.importOrgFarm(farmShit);
         User primaryUser = (User) result[0];
         DoctorFarm farm = (DoctorFarm) result[1];
@@ -664,7 +664,7 @@ public class DoctorImportDataService {
      * 导入猪舍
      */
     @Transactional
-    private void importBarn(DoctorFarm farm, Map<String, Long> userMap, Sheet shit) {
+    public void importBarn(DoctorFarm farm, Map<String, Long> userMap, Sheet shit) {
         List<DoctorBarn> barns = Lists.newArrayList();
         shit.forEach(row -> {
             //第一行是表头，跳过
@@ -699,7 +699,7 @@ public class DoctorImportDataService {
     }
 
     @Transactional
-    private void importBreed(Sheet shit) {
+     void importBreed(Sheet shit) {
         List<String> breeds = doctorBasicDao.findByType(DoctorBasic.Type.BREED.getValue()).stream()
                 .map(DoctorBasic::getName).collect(Collectors.toList());
         shit.forEach(row -> {

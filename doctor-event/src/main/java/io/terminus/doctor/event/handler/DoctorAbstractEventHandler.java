@@ -109,11 +109,12 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         doctorEventInfoList.add(doctorEventInfo);
 
 
-        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())
-                && Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
+        if (Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
             //7.更新日记录
             updateDailyForNew(executeEvent);
+        }
 
+        if (!Objects.equals(executeEvent.getEventSource(), SourceType.MOVE.getValue())) {
             //8.触发事件
             triggerEvent(doctorEventInfoList, executeEvent, toTrack);
         }
@@ -245,7 +246,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
      * @param barnName 猪舍名
      * @return 猪群号
      */
-    protected String grateGroupCode(String barnName, Date eventAt) {
+    public static String grateGroupCode(String barnName, Date eventAt) {
         expectTrue(notEmpty(barnName), "generate.code.barn.name.not.null");
         return barnName + "(" +DateUtil.toDateString(eventAt) + ")";
     }

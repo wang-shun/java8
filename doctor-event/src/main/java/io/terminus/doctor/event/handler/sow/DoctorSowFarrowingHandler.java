@@ -88,7 +88,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 //        }
         doctorPigEvent.setExtraMap(extra);
 
-        //迁移与导入获取groupId方式
+        //迁移获取groupId方式
         doctorPigEvent.setGroupId(farrowingDto.getGroupId());
         return doctorPigEvent;
     }

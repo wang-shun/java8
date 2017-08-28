@@ -45,7 +45,7 @@ public class DoctorRemoveInputBuilder implements DoctorPigEventInputBuilder {
         Map<String, DoctorBarn> barnMap = moveBasicData.getBarnMap();
 
         DoctorRemovalDto remove = new DoctorRemovalDto();
-        builderCommonOperation.fillPigEventCommonInputFromMove(remove, moveBasicData, pigRawEvent);
+        builderCommonOperation.fillPigEventCommonInput(remove, moveBasicData, pigRawEvent);
 
         remove.setRemovalDate(event.getEventAt());
         //变动类型, 变动原因
@@ -80,7 +80,7 @@ public class DoctorRemoveInputBuilder implements DoctorPigEventInputBuilder {
         Map<String, DoctorBarn> barnMap = moveBasicData.getBarnMap();
 
         DoctorRemovalDto remove = new DoctorRemovalDto();
-        builderCommonOperation.fillPigEventCommonInputFromMove(remove, moveBasicData, pigRawEvent);
+        builderCommonOperation.fillPigEventCommonInput(remove, moveBasicData, pigRawEvent);
 
         remove.setRemovalDate(event.getEventAt());
         //变动类型, 变动原因

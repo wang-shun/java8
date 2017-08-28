@@ -32,7 +32,7 @@ public class DoctorPigLetsChgInputBuilder implements DoctorPigEventInputBuilder{
         Map<String, DoctorCustomer> customerMap = moveBasicData.getCustomerMap();
 
         DoctorPigletsChgDto change = new DoctorPigletsChgDto();
-        builderCommonOperation.fillPigEventCommonInputFromMove(change, moveBasicData, pigRawEvent);
+        builderCommonOperation.fillPigEventCommonInput(change, moveBasicData, pigRawEvent);
 
         change.setPigletsChangeDate(event.getEventAt());               // 仔猪变动日期
         change.setPigletsCount(event.getChgCount());                   // 仔猪数量

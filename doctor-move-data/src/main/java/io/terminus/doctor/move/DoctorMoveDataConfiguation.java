@@ -10,6 +10,7 @@ import io.terminus.doctor.move.builder.group.DoctorChangeEventInputBuilder;
 import io.terminus.doctor.move.builder.group.DoctorCloseEventInputBuilder;
 import io.terminus.doctor.move.builder.group.DoctorGroupEventInputBuilder;
 import io.terminus.doctor.move.builder.group.DoctorGroupEventInputBuilders;
+import io.terminus.doctor.move.builder.group.DoctorGroupWeanEventInputBuilder;
 import io.terminus.doctor.move.builder.group.DoctorMoveInEventInputBuilder;
 import io.terminus.doctor.move.builder.group.DoctorNewEventInputBuilder;
 import io.terminus.doctor.move.builder.group.DoctorTransGroupEventInputBuilder;
@@ -95,13 +96,15 @@ public class DoctorMoveDataConfiguation extends WebMvcConfigurerAdapter {
                                                                     DoctorCloseEventInputBuilder closeEventInputBuilder,
                                                                     DoctorMoveInEventInputBuilder moveInEventInputBuilder,
                                                                     DoctorNewEventInputBuilder newEventInputBuilder,
-                                                                    DoctorTransGroupEventInputBuilder transGroupEventInputBuilder) {
+                                                                    DoctorTransGroupEventInputBuilder transGroupEventInputBuilder,
+                                                                    DoctorGroupWeanEventInputBuilder groupWeanEventInputBuilder) {
         Map<String, DoctorGroupEventInputBuilder> groupEventInputBuilderMap = Maps.newHashMap();
         groupEventInputBuilderMap.put(GroupEventType.CHANGE.getDesc(), changeEventInputBuilder);
         groupEventInputBuilderMap.put(GroupEventType.CLOSE.getDesc(), closeEventInputBuilder);
         groupEventInputBuilderMap.put(GroupEventType.MOVE_IN.getDesc(), moveInEventInputBuilder);
         groupEventInputBuilderMap.put(GroupEventType.NEW.getDesc(), newEventInputBuilder);
         groupEventInputBuilderMap.put(GroupEventType.TRANS_GROUP.getDesc(), transGroupEventInputBuilder);
+        groupEventInputBuilderMap.put(GroupEventType.WEAN.getDesc(), groupWeanEventInputBuilder);
         return new DoctorGroupEventInputBuilders(groupEventInputBuilderMap);
     }
 }

@@ -13,9 +13,11 @@ import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.service.DoctorGroupBatchFlushService;
 import io.terminus.doctor.move.service.DoctorImportDataService;
+import io.terminus.doctor.move.service.DoctorMoveAndImportService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
 import io.terminus.doctor.move.util.ImportExcelUtils;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorFarmExport;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.pubsub.Subscriber;
@@ -70,6 +72,8 @@ public class DoctorImportDataController {
     private DoctorMoveDataService doctorMoveDataService;
     @Autowired
     private DoctorDailyGroupWriteService doctorDailyGroupWriteService;
+    @Autowired
+    private DoctorMoveAndImportService doctorMoveAndImportService;
 
     @PostConstruct
     public void init () throws Exception{
@@ -149,15 +153,14 @@ public class DoctorImportDataController {
         sheet.setStaff(getSheet(workbook, "员工"));
         sheet.setBarn(getSheet(workbook, "1.猪舍"));
         sheet.setBreed(getSheet(workbook, "2.品种"));
-        sheet.setSow(getSheet(workbook, "3.母猪信息"));
-        sheet.setBoar(getSheet(workbook, "4.公猪信息"));
-        sheet.setGroup(getSheet(workbook, "5.商品猪（猪群）信息"));
-        sheet.setWarehouse(getSheet(workbook, "6.仓库"));
-        sheet.setMedicine(getSheet(workbook, "7.药品"));
-        sheet.setVacc(getSheet(workbook, "8.疫苗"));
-        sheet.setMaterial(getSheet(workbook, "9.原料"));
-        sheet.setFeed(getSheet(workbook, "10.饲料"));
-        sheet.setConsume(getSheet(workbook, "11.易耗品"));
+        sheet.setPigEvent(getSheet(workbook, "3.猪事件"));
+        sheet.setGroupEvent(getSheet(workbook, "4.商品猪（猪群）事件"));
+        sheet.setWarehouse(getSheet(workbook, "5.仓库"));
+        sheet.setMedicine(getSheet(workbook, "6.药品"));
+        sheet.setVacc(getSheet(workbook, "7.疫苗"));
+        sheet.setMaterial(getSheet(workbook, "8.原料"));
+        sheet.setFeed(getSheet(workbook, "9.饲料"));
+        sheet.setConsume(getSheet(workbook, "10.易耗品"));
         Stopwatch watch = Stopwatch.createStarted();
 
         //创建导入记录
@@ -171,7 +174,7 @@ public class DoctorImportDataController {
         checkImportData(sheet);
 
         //导入数据
-        this.generateReport(doctorImportDataService.importAll(sheet).getId());
+        this.generateReport(doctorMoveAndImportService.importData(sheet));
 
         //更新导入状态
         DoctorFarmExport updateFarmExport = new DoctorFarmExport();
@@ -199,6 +202,32 @@ public class DoctorImportDataController {
             }).start();
         } catch (Exception e) {
             log.error("generate report error. farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+        }
+    }
+
+    @RequestMapping(value = "/importPig", method = RequestMethod.GET)
+    public void importPig(@RequestParam String path, @RequestParam Long farmId) {
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+        try {
+            Workbook workbook = new HSSFWorkbook(new FileInputStream(new File(path)));
+            Sheet pigSheet = workbook.getSheet("3.猪事件");
+            doctorMoveAndImportService.importPig( pigSheet,
+                    doctorMoveAndImportService.packageImportBasicData(farm));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RequestMapping(value = "/importGroup", method = RequestMethod.GET)
+    public void importGroup(@RequestParam String path, @RequestParam Long farmId) {
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+        try {
+            Workbook workbook = new HSSFWorkbook(new FileInputStream(new File(path)));
+            Sheet pigSheet = workbook.getSheet("4.商品猪（猪群）事件");
+            doctorMoveAndImportService.importGroup( pigSheet,
+                    doctorMoveAndImportService.packageImportBasicData(farm));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

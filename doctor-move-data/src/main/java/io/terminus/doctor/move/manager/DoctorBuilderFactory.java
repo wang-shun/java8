@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Created by xjn on 17/8/9.
- * 生成构建器
+ * 获取数据输入的构建器
  */
 @Slf4j
 @Component

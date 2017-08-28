@@ -103,8 +103,9 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         DoctorTurnSeedGroupInput turnSeed = (DoctorTurnSeedGroupInput) input;
         DoctorBarn toBarn = getBarnById(turnSeed.getToBarnId());
 
-        doctorModifyGroupTurnSeedEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(), DateUtil.toDate(turnSeed.getEventAt()), -1);
-
+        if (Objects.equals(turnSeed.getEventSource(), SourceType.INPUT.getValue())) {
+            doctorModifyGroupTurnSeedEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(), DateUtil.toDate(turnSeed.getEventAt()), -1);
+        }
         //0. 校验数据
         checkQuantity(groupTrack.getQuantity(), 1); // 确保 原数量 >= 1
         checkTurnSeedData(group.getPigType(), toBarn.getPigType());
@@ -135,16 +136,18 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
         updateGroupTrack(groupTrack, event);
 
-        updateDailyForNew(event);
+        if (Objects.equals(turnSeed.getEventSource(), SourceType.INPUT.getValue())) {
+            updateDailyForNew(event);
 
-        //5.判断猪群数量, 如果=0 触发关闭猪群事件, 同时生成批次总结
-        if (Objects.equals(groupTrack.getQuantity(), 0)) {
-            doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, turnSeed, event.getEventAt(), turnSeed.getFcrFeed());
+            //5.判断猪群数量, 如果=0 触发关闭猪群事件, 同时生成批次总结
+            if (Objects.equals(groupTrack.getQuantity(), 0)) {
+                doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, turnSeed, event.getEventAt(), turnSeed.getFcrFeed());
 
+            }
+
+            //6.判断公母猪, 触发进场事件
+            doctorCommonGroupEventHandler.autoPigEntryEvent(eventInfoList, sex, turnSeed, group, toBarn);
         }
-
-        //6.判断公母猪, 触发进场事件
-        doctorCommonGroupEventHandler.autoPigEntryEvent(eventInfoList, sex, turnSeed, group, toBarn);
     }
 
     @Override

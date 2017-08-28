@@ -4,9 +4,12 @@ import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
+import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.move.builder.DoctorBuilderCommonOperation;
+import io.terminus.doctor.move.dto.DoctorImportBasicData;
+import io.terminus.doctor.move.dto.DoctorImportPigEvent;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
 import io.terminus.doctor.move.model.View_EventListBoar;
 import io.terminus.doctor.move.model.View_EventListPig;
@@ -16,6 +19,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Objects;
+
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by xjn on 17/8/4.
@@ -42,7 +48,7 @@ public class DoctorEntryInputBuilder implements DoctorPigEventInputBuilder {
         Map<Integer, Map<String, DoctorBasic>> basicMap = moveBasicData.getBasicMap();
 
         DoctorFarmEntryDto entry = new DoctorFarmEntryDto();
-        builderCommonOperation.fillPigEventCommonInputFromMove(entry, moveBasicData, pigRawEvent);
+        builderCommonOperation.fillPigEventCommonInput(entry, moveBasicData, pigRawEvent);
 
         entry.setPigOutId(event.getPigOutId());
         entry.setEarCode(event.getPigCode());                        //耳号取猪号
@@ -80,7 +86,7 @@ public class DoctorEntryInputBuilder implements DoctorPigEventInputBuilder {
         Map<Integer, Map<String, DoctorBasic>> basicMap = moveBasicData.getBasicMap();
 
         DoctorFarmEntryDto entry = new DoctorFarmEntryDto();
-        builderCommonOperation.fillPigEventCommonInputFromMove(entry, moveBasicData, pigRawEvent);
+        builderCommonOperation.fillPigEventCommonInput(entry, moveBasicData, pigRawEvent);
 
         entry.setPigOutId(event.getPigOutId());
         BoarEntryType type = BoarEntryType.from(event.getBoarType());
@@ -110,4 +116,34 @@ public class DoctorEntryInputBuilder implements DoctorPigEventInputBuilder {
         entry.setBreedTypeName(event.getGenetic()); //品系名称
         return entry;
     }
+
+    @Override
+    public BasePigEventInputDto buildFromImport(DoctorImportBasicData importBasicData,
+                                                DoctorImportPigEvent importPigEvent) {
+        DoctorFarmEntryDto farmEntryDto = new DoctorFarmEntryDto();
+        builderCommonOperation.fillPigEventCommonInput(farmEntryDto, importBasicData, importPigEvent);
+
+        farmEntryDto.setInFarmDate(importPigEvent.getEventAt());
+        farmEntryDto.setBirthday(importPigEvent.getBirthday());
+
+        if (Objects.equals(importPigEvent.getPigSex(), DoctorPig.PigSex.BOAR.getDesc())) {
+            BoarEntryType boarEntryType = BoarEntryType.from(importPigEvent.getBoarType());
+            farmEntryDto.setBoarType(boarEntryType.getKey());
+            farmEntryDto.setBoarTypeName(boarEntryType.getDesc());
+        }
+
+        PigSource source = PigSource.from(importPigEvent.getSource());
+        expectTrue(notNull(source), "source");
+        farmEntryDto.setSource(source.getKey());
+
+
+        farmEntryDto.setBreed(importBasicData.getBreedMap().get(importPigEvent.getBreedName()));
+        farmEntryDto.setBreedName(importPigEvent.getBreedName());
+//        farmEntryDto.setBreedType();
+//        farmEntryDto.setBreedTypeName();
+
+        farmEntryDto.setParity(importPigEvent.getParity());
+        return farmEntryDto;
+    }
+
 }

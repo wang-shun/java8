@@ -1,17 +1,24 @@
 package io.terminus.doctor.move.builder.pig;
 
+import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.move.builder.DoctorBuilderCommonOperation;
+import io.terminus.doctor.move.dto.DoctorImportBasicData;
+import io.terminus.doctor.move.dto.DoctorImportPigEvent;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
 import io.terminus.doctor.move.model.View_EventListPig;
 import io.terminus.doctor.move.model.View_EventListSow;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by xjn on 17/8/4.
@@ -21,6 +28,8 @@ import java.util.Map;
 public class DoctorMateInputBuilder implements DoctorPigEventInputBuilder {
     @Autowired
     private DoctorBuilderCommonOperation builderCommonOperation;
+    @Autowired
+    private DoctorPigDao doctorPigDao;
 
     @Override
     public BasePigEventInputDto buildFromMove(DoctorMoveBasicData moveBasicData,
@@ -30,7 +39,7 @@ public class DoctorMateInputBuilder implements DoctorPigEventInputBuilder {
         Map<String, DoctorPig> boarMap = moveBasicData.getBoarMap();
 
         DoctorMatingDto mating = new DoctorMatingDto();
-        builderCommonOperation.fillPigEventCommonInputFromMove(mating, moveBasicData, pigRawEvent);
+        builderCommonOperation.fillPigEventCommonInput(mating, moveBasicData, pigRawEvent);
 
         mating.setMatingDate(event.getEventAt());                 // 配种日期
         mating.setOperatorName(event.getStaffName());             // 配种人员
@@ -46,6 +55,26 @@ public class DoctorMateInputBuilder implements DoctorPigEventInputBuilder {
         DoctorPig matingPig = boarMap.get(event.getBoarCode());
         mating.setMatingBoarPigId(matingPig == null ? null : matingPig.getId());
         mating.setMatingBoarPigCode(event.getBoarCode());
+        return mating;
+    }
+
+    @Override
+    public BasePigEventInputDto buildFromImport(DoctorImportBasicData importBasicData, DoctorImportPigEvent importPigEvent) {
+        DoctorMatingDto mating = new DoctorMatingDto();
+        builderCommonOperation.fillPigEventCommonInput(mating, importBasicData, importPigEvent);
+        mating.setMatingDate(importPigEvent.getEventAt());
+        mating.setJudgePregDate(new DateTime(mating.getMatingDate()).plusDays(114).toDate());
+
+        MatingType matingType = MatingType.from(importPigEvent.getMateType());
+        expectTrue(notNull(matingType), "mateType");
+        mating.setMatingType(matingType.getKey());
+
+        DoctorPig mateBoar = doctorPigDao.findPigByFarmIdAndPigCodeAndSex(importBasicData.getDoctorFarm().getId(),
+                importPigEvent.getMateBoarCode(), DoctorPig.PigSex.BOAR.getKey());
+        expectTrue(notNull(mateBoar), "mateBoar");
+        mating.setMatingBoarPigId(mateBoar.getId());
+        mating.setMatingBoarPigCode(mateBoar.getPigCode());
+
         return mating;
     }
 }

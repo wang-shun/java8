@@ -7,6 +7,8 @@ import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.move.builder.DoctorBuilderCommonOperation;
+import io.terminus.doctor.move.dto.DoctorImportBasicData;
+import io.terminus.doctor.move.dto.DoctorImportGroupEvent;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
 import io.terminus.doctor.move.model.View_EventListGain;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by xjn on 17/8/9.
@@ -33,7 +37,7 @@ public class DoctorNewEventInputBuilder implements DoctorGroupEventInputBuilder{
         Map<String, DoctorBarn> barnMap = moveBasicData.getBarnMap();
 
         DoctorNewGroupInput newEvent = new DoctorNewGroupInput();
-        builderCommonOperation.fillGroupEventCommonInputFromMove(newEvent, groupRawEvent);
+        builderCommonOperation.fillGroupEventCommonInput(newEvent, groupRawEvent);
         newEvent.setFarmId(moveBasicData.getDoctorFarm().getId());
         newEvent.setGroupCode(groupRawEvent.getGroupCode());
         DoctorGroupTrack.Sex sex = DoctorGroupTrack.Sex.from(groupRawEvent.getSexName());
@@ -53,6 +57,35 @@ public class DoctorNewEventInputBuilder implements DoctorGroupEventInputBuilder{
         newEvent.setBarnId(barn.getId());
         newEvent.setBarnName(barn.getName());
         newEvent.setGroupOutId(groupRawEvent.getGroupOutId());
+        return newEvent;
+    }
+
+    @Override
+    public BaseGroupInput buildFromImport(DoctorImportBasicData importBasicData, DoctorImportGroupEvent importGroupEvent) {
+
+        Map<String, DoctorBarn> barnMap = importBasicData.getBarnMap();
+        Map<String, Long> breedMap = importBasicData.getBreedMap();
+
+        DoctorNewGroupInput newEvent = new DoctorNewGroupInput();
+        builderCommonOperation.fillGroupEventCommonInput(newEvent, importGroupEvent);
+
+        newEvent.setFarmId(importBasicData.getDoctorFarm().getId());
+        newEvent.setGroupCode(importGroupEvent.getGroupCode());
+
+        DoctorGroupTrack.Sex sex = DoctorGroupTrack.Sex.from(importGroupEvent.getSexName());
+        expectTrue(notNull(sex), "sex");
+        newEvent.setSex(sex.getValue());
+
+        PigSource source = PigSource.from(importGroupEvent.getSource());
+        expectTrue(notNull(source), "source");
+        newEvent.setSource(source.getKey());
+        newEvent.setBreedId(breedMap.get(importGroupEvent.getBreedName()));
+        newEvent.setBreedName(importGroupEvent.getBreedName());
+
+        DoctorBarn barn = barnMap.get(importGroupEvent.getNewBarnName());
+        expectTrue(notNull(barn), "barn");
+        newEvent.setBarnId(barn.getId());
+        newEvent.setBarnName(barn.getName());
         return newEvent;
     }
 }

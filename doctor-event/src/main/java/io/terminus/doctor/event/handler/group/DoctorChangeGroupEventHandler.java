@@ -59,8 +59,9 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         input.setEventType(GroupEventType.CHANGE.getValue());
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
 
-        doctorModifyGroupChangeEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(), DateUtil.toDate(change.getEventAt()), -change.getQuantity());
-
+        if (Objects.equals(change.getEventSource(), SourceType.INPUT.getValue())) {
+            doctorModifyGroupChangeEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(), DateUtil.toDate(change.getEventAt()), -change.getQuantity());
+        }
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
 
@@ -113,12 +114,14 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
             groupTrack.setUnweanQty(groupTrack.getUnweanQty() - change.getQuantity());
         }
         updateGroupTrack(groupTrack, event);
+        if (Objects.equals(event.getEventSource(), SourceType.INPUT.getValue())) {
 
-        updateDailyForNew(event);
+            updateDailyForNew(event);
 
-        //5.判断变动数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
-        if (Objects.equals(oldQuantity, change.getQuantity())) {
-            doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, change, event.getEventAt(), change.getFcrFeed());
+            //5.判断变动数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
+            if (Objects.equals(oldQuantity, change.getQuantity())) {
+                doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, change, event.getEventAt(), change.getFcrFeed());
+            }
         }
 
         //发布统计事件
@@ -193,7 +196,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setPrice(change.getPrice());          //销售单价(分)(基础价)
         event.setBaseWeight(change.getBaseWeight());//基础重量
         event.setOverPrice(change.getOverPrice());  //超出价格(分/kg)
-        if (change.getChangeTypeId() == DoctorBasicEnums.SALE.getId()) {
+        if (Objects.equals(change.getChangeTypeId(), DoctorBasicEnums.SALE.getId())) {
 
             //保育猪的特殊逻辑, 其他猪类的销售 金额 = 重量 * 单价
             if (Objects.equals(PigType.NURSERY_PIGLET.getValue(), pigType)) {

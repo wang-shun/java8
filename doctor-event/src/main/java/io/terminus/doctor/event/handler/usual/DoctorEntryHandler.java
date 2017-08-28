@@ -75,8 +75,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         specialHandle(executeEvent, toTrack);
 
         //4.创建镜像
-        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())
-                && Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
+        if (Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
             updateDailyForNew(executeEvent);
         }
 

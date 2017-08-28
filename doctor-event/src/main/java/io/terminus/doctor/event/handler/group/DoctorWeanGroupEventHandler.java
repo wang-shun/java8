@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
@@ -93,8 +95,9 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         groupTrack.setWeanWeight(EventUtil.plusDouble(groupTrack.getWeanWeight(), weanInput.getPartWeanAvgWeight() * weanInput.getPartWeanPigletsCount()));
 
         updateGroupTrack(groupTrack, event);
-
-        updateDailyForNew(event);
+        if (Objects.equals(event.getEventSource(), SourceType.INPUT.getValue())) {
+            updateDailyForNew(event);
+        }
 
     }
 

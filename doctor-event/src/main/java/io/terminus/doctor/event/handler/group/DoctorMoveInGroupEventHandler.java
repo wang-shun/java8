@@ -87,8 +87,9 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
             groupTrack.setBirthWeight(EventUtil.plusDouble(groupTrack.getBirthWeight(), moveIn.getAvgWeight() * moveIn.getQuantity()));
         }
         updateGroupTrack(groupTrack, event);
-
-        updateDailyForNew(event);
+        if (Objects.equals(event.getEventSource(), SourceType.INPUT.getValue())) {
+            updateDailyForNew(event);
+        }
     }
 
     @Override

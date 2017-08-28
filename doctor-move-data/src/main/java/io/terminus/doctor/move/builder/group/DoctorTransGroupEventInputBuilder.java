@@ -1,7 +1,6 @@
 package io.terminus.doctor.move.builder.group;
 
 import io.terminus.doctor.basic.model.DoctorBasic;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -34,8 +33,7 @@ public class DoctorTransGroupEventInputBuilder implements DoctorGroupEventInputB
         Map<String, DoctorGroup> groupMap = moveBasicData.getGroupMap();
 
         DoctorTransGroupInput transGroup = new DoctorTransGroupInput();
-        builderCommonOperation.fillGroupEventCommonInputFromMove(transGroup, groupRawEvent);
-        transGroup.setEventAt(DateUtil.toDateTimeString(groupRawEvent.getEventAt()));
+        builderCommonOperation.fillGroupEventCommonInput(transGroup, groupRawEvent);
 
         //来源猪舍 猪群
         DoctorGroup fromGroup = groupMap.get(groupRawEvent.getGroupOutId());
@@ -81,6 +79,8 @@ public class DoctorTransGroupEventInputBuilder implements DoctorGroupEventInputB
 
         transGroup.setBoarQty(groupRawEvent.getBoarQty());
         transGroup.setSowQty(groupRawEvent.getSowQty());
+        transGroup.setQuantity(groupRawEvent.getQuantity());
+        transGroup.setAvgWeight(groupRawEvent.getAvgWeight());
         transGroup.setSowEvent(Objects.equals(transGroup.getIsAuto(), IsOrNot.YES.getValue()));
         return transGroup;
     }

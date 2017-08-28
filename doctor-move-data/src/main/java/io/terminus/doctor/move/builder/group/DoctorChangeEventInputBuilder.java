@@ -6,6 +6,7 @@ import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.SaleBaseWeight;
 import io.terminus.doctor.move.builder.DoctorBuilderCommonOperation;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
 import io.terminus.doctor.move.model.View_EventListGain;
@@ -33,7 +34,7 @@ public class DoctorChangeEventInputBuilder implements DoctorGroupEventInputBuild
         Map<String, DoctorCustomer> customerMap = moveBasicData.getCustomerMap();
 
         DoctorChangeGroupInput change = new DoctorChangeGroupInput();
-        builderCommonOperation.fillGroupEventCommonInputFromMove(change, groupRawEvent);
+        builderCommonOperation.fillGroupEventCommonInput(change, groupRawEvent);
         //变动类型, 原因, 品种, 客户
         DoctorBasic changeType = basicMap.get(DoctorBasic.Type.CHANGE_TYPE.getValue()).get(groupRawEvent.getChangTypeName());
         change.setChangeTypeId(changeType == null ? null : changeType.getId());
@@ -53,9 +54,16 @@ public class DoctorChangeEventInputBuilder implements DoctorGroupEventInputBuild
 
         //单价 金额 数量
         change.setPrice(groupRawEvent.getPrice());
+
+        // TODO: 17/8/24  不知道从哪取 默认单价吧, 基础中也默认10吧
+        change.setOverPrice(groupRawEvent.getPrice());
+        change.setBaseWeight(SaleBaseWeight.BASE_10.getWeight());
+
         change.setAmount(groupRawEvent.getAmount());
+        change.setWeight(groupRawEvent.getWeight());
         change.setBoarQty(groupRawEvent.getBoarQty());
         change.setSowQty(groupRawEvent.getSowQty());
+        change.setQuantity(groupRawEvent.getQuantity());
         change.setSowEvent(Objects.equals(change.getIsAuto(), IsOrNot.YES.getValue()));
         return change;
     }
