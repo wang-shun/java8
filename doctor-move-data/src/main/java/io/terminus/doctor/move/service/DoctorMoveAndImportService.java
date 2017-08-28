@@ -6,6 +6,8 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
+import io.terminus.doctor.move.dto.DoctorImportBasicData;
+import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
 import io.terminus.doctor.move.manager.DoctorMoveAndImportManager;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -50,11 +52,11 @@ public class DoctorMoveAndImportService {
             //3.打包事件依赖基础数据
             DoctorMoveBasicData moveBasicData = packageMoveBasicData(doctorFarm);
 
-            //4.猪
-            movePig(moveId, moveBasicData);
+            //4.猪群
+            moveGroup(moveId, moveBasicData);
 
-            //5.猪群
-            moveGroup();
+            //5.猪
+            movePig(moveId, moveBasicData);
 
             //6.仓库
             moveWareHouse();
@@ -66,8 +68,81 @@ public class DoctorMoveAndImportService {
         generateReport();
     }
 
-    public void importData() {
-        // TODO: 17/8/4
+    public Long importData(DoctorImportSheet sheet) {
+        log.info("import data starting");
+
+        //导入猪场和用户
+        DoctorFarm farm = importFarmAndUser(sheet.getFarm(), sheet.getStaff());
+
+        //导入基础数据
+        importBasic(farm, sheet.getBarn(), sheet.getBreed());
+
+        //打包数据
+        DoctorImportBasicData importBasicData = packageImportBasicData(farm);
+
+        //导入猪事件
+        importPig(sheet.getPigEvent(), importBasicData);
+
+        //导入猪群事件
+        importGroup(sheet.getGroupEvent(), importBasicData);
+
+        //导入仓库
+        importWareHouse();
+
+        //基础数据与猪场关联
+        importFarmBasics(farm.getId());
+
+        log.info("import data end");
+        return farm.getId();
+    }
+
+    private DoctorFarm importFarmAndUser(Sheet farmShit, Sheet staffShit) {
+        log.info("import farm and user staring");
+        Object[] results = importDataService.importOrgFarmUser(farmShit, staffShit);
+        log.info("import farm and user end");
+        return (DoctorFarm) results[1];
+    }
+
+    public DoctorImportBasicData packageImportBasicData(DoctorFarm farm) {
+        log.info("package import basic staring");
+        Map<String, Long> userMap = moveBasicService.getSubMap(farm.getOrgId());
+        Map<String, DoctorBarn> barnMap = moveBasicService.getBarnMap2(farm.getId());
+        Map<String, Long> breedMap = moveBasicService.getBreedMap();
+        return DoctorImportBasicData.builder().doctorFarm(farm).userMap(userMap)
+                .barnMap(barnMap).breedMap(breedMap).build();
+    }
+
+    private void importBasic(DoctorFarm farm, Sheet barnSheet, Sheet breedSheet) {
+        log.info("import basic staring");
+        Map<String, Long> userMap = moveBasicService.getSubMap(farm.getOrgId());
+        importDataService.importBarn(farm, userMap, barnSheet);
+        userInitService.updatePermissionBarn(farm.getId());
+        importDataService.importBreed(breedSheet);
+        log.info("import basic end");
+    }
+
+    public void importPig(Sheet pigSheet, DoctorImportBasicData importBasicData) {
+        log.info("import pig staring");
+        moveAndImportManager.importPig(pigSheet, importBasicData);
+        log.info("import pig end");
+    }
+
+    public void importGroup(Sheet groupSheet, DoctorImportBasicData importBasicData) {
+        log.info("import group staring");
+        moveAndImportManager.importGroup(groupSheet, importBasicData);
+        log.info("import group end");
+
+    }
+
+    public void importWareHouse() {
+        // TODO: 17/8/28 导入仓库暂定,等待仓库重写
+
+    }
+
+    public void importFarmBasics(Long farmId) {
+        log.info("import from basics staring");
+        importDataService.importFarmBasics(farmId);
+        log.info("import from basics end");
     }
 
     public List<DoctorFarm> moveFarmAndUser(Long moveId, Sheet sheet) {
@@ -111,6 +186,11 @@ public class DoctorMoveAndImportService {
         }
     }
 
+    /**
+     * 注意!!! 猪会依赖猪群,所以迁移猪时确保猪群已经迁移或存在
+     * @param moveId 迁移数据源id
+     * @param moveBasicData 基础数据
+     */
     public void movePig(Long moveId, DoctorMoveBasicData moveBasicData) {
         log.info("move pig starting");
         try {
@@ -121,8 +201,14 @@ public class DoctorMoveAndImportService {
         }
     }
 
-    public void moveGroup() {
-        // TODO: 17/8/4
+    public void moveGroup(Long moveId, DoctorMoveBasicData moveBasicData) {
+        log.info("move group starting");
+        try {
+            moveAndImportManager.moveGroup(moveId, moveBasicData);
+        } catch (Exception e) {
+            log.error("move group error");
+            throw e;
+        }
     }
 
     public void moveWareHouse() {
