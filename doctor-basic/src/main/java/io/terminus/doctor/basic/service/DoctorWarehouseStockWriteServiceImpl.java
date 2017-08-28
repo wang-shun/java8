@@ -796,14 +796,15 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         return stocks;
     }
 
-    private DoctorWarehousePurchase copyPurchase(DoctorWarehousePurchase source, Calendar handleDate, Long warehouseID, String warehouseName, BigDecimal quantity) {
+    private DoctorWarehousePurchase copyPurchase(DoctorWarehousePurchase source, Calendar handleDate, DoctorWareHouse targetWarehouse, BigDecimal quantity) {
         DoctorWarehousePurchase purchase = new DoctorWarehousePurchase();
         purchase.setHandleDate(handleDate.getTime());
         purchase.setHandleYear(handleDate.get(Calendar.YEAR));
         purchase.setHandleMonth(handleDate.get(Calendar.MONTH) + 1);
 
-        purchase.setWarehouseId(warehouseID);
-        purchase.setWarehouseName(warehouseName);
+        purchase.setWarehouseId(targetWarehouse.getId());
+        purchase.setWarehouseName(targetWarehouse.getWareHouseName());
+        purchase.setWarehouseType(targetWarehouse.getType());
         purchase.setMaterialId(source.getMaterialId());
         purchase.setVendorName(source.getVendorName());
         purchase.setQuantity(quantity);
@@ -900,7 +901,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 List<DoctorWarehousePurchase> transferOutPurchase = stockAndPurchases.get(stock);
                 List<DoctorWarehousePurchase> transferInPurchase = new ArrayList<>(transferOutPurchase.size());
                 for (DoctorWarehousePurchase purchase : transferOutPurchase) {
-                    transferInPurchase.add(copyPurchase(purchase, handleDate, targetWarehouse.getId(), targetWarehouse.getWareHouseName(), stockChangedQuantity.get(stock)));
+                    transferInPurchase.add(copyPurchase(purchase, handleDate, targetWarehouse, stockChangedQuantity.get(stock)));
                 }
 
                 stockAndPurchases.put(transferInStock, transferInPurchase);
