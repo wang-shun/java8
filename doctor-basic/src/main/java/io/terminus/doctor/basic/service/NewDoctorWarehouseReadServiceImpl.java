@@ -11,6 +11,7 @@ import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.service.warehouseV2.NewDoctorWarehouseReaderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.HashedMap;

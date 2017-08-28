@@ -9,6 +9,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehousePurchaseReadService;
 import lombok.extern.slf4j.Slf4j;
 
