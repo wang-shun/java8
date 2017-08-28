@@ -24,10 +24,7 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.warehouseV2.dto.WarehouseDto;
-import io.terminus.doctor.web.front.warehouseV2.vo.FarmWarehouseVo;
-import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStatisticsVo;
-import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStockVo;
-import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseVo;
+import io.terminus.doctor.web.front.warehouseV2.vo.*;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
@@ -424,6 +421,51 @@ public class WarehouseController {
     }
 
 
+    @RequestMapping(method = RequestMethod.GET, value = "{id}/material/{materialId}/statistics")
+    public WarehouseStockStatisticsVo materialStatistics(@PathVariable Long id, @PathVariable Long materialId) {
+        Calendar now = Calendar.getInstance();
+
+        Response<WarehouseStockStatisticsDto> statisticsDtoResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterial(id, materialId, now,
+                WarehouseMaterialHandleType.IN,
+                WarehouseMaterialHandleType.OUT,
+                WarehouseMaterialHandleType.TRANSFER_OUT,
+                WarehouseMaterialHandleType.TRANSFER_IN);
+        if (!statisticsDtoResponse.isSuccess())
+            throw new JsonResponseException(statisticsDtoResponse.getError());
+        Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(id, materialId);
+        if (!balanceResponse.isSuccess())
+            throw new JsonResponseException(balanceResponse.getError());
+
+        Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.listMergeVendor(DoctorWarehouseStock.builder()
+                .warehouseId(id)
+                .materialId(materialId)
+                .build());
+        if (!stockResponse.isSuccess())
+            throw new JsonResponseException(stockResponse.getError());
+        if (null == stockResponse.getResult() || stockResponse.getResult().isEmpty())
+            throw new JsonResponseException("stock.not.found");
+
+        WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
+        vo.setId(stockResponse.getResult().get(0).getId());
+        vo.setMaterialId(stockResponse.getResult().get(0).getMaterialId());
+        vo.setMaterialName(stockResponse.getResult().get(0).getMaterialName());
+        vo.setUnit(stockResponse.getResult().get(0).getUnit());
+
+        vo.setOutQuantity(statisticsDtoResponse.getResult().getOut().getQuantity());
+        vo.setOutAmount(statisticsDtoResponse.getResult().getOut().getAmount());
+        vo.setInAmount(statisticsDtoResponse.getResult().getIn().getAmount());
+        vo.setInQuantity(statisticsDtoResponse.getResult().getIn().getQuantity());
+        vo.setTransferInAmount(statisticsDtoResponse.getResult().getTransferIn().getAmount());
+        vo.setTransferInQuantity(statisticsDtoResponse.getResult().getTransferIn().getQuantity());
+        vo.setTransferOutAmount(statisticsDtoResponse.getResult().getTransferOut().getAmount());
+        vo.setTransferOutQuantity(statisticsDtoResponse.getResult().getTransferOut().getQuantity());
+
+        vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
+        vo.setBalanceAmount(balanceResponse.getResult().getAmount());
+
+        return vo;
+    }
+
     /**
      * 仓库可以添加的物料列表
      */
@@ -529,33 +571,6 @@ public class WarehouseController {
         if (!createResponse.isSuccess())
             throw new JsonResponseException(createResponse.getError());
     }
-
-
-//    @RequestMapping(method = RequestMethod.PUT, value = "in")
-//    public void in(@RequestBody @Validated(WarehouseStockDto.InWarehouseValid.class) WarehouseStockDto dto) {
-//
-//        dto.setType(WarehouseMaterialHandleType.IN.getValue());
-//        newDoctorWarehouseWriterService.handler(dto);
-//    }
-//
-//
-//    @RequestMapping(method = RequestMethod.PUT, value = "out")
-//    public void out(@RequestBody @Validated(WarehouseStockDto.OutWarehouseValid.class) WarehouseStockDto dto) {
-//        dto.setType(WarehouseMaterialHandleType.OUT.getValue());
-//        newDoctorWarehouseWriterService.handler(dto);
-//    }
-//
-//    @RequestMapping(method = RequestMethod.PUT, value = "inventory")
-//    public void inventory(@RequestBody @Validated(WarehouseStockDto.InventoryWarehouseValid.class) WarehouseStockDto dto) {
-//        dto.setType(WarehouseMaterialHandleType.INVENTORY.getValue());
-//        newDoctorWarehouseWriterService.handler(dto);
-//    }
-//
-//    @RequestMapping(method = RequestMethod.PUT, value = "transfer")
-//    public void transfer(@RequestBody @Validated(WarehouseStockDto.TransferWarehouseValid.class) WarehouseStockDto dto) {
-//        dto.setType(WarehouseMaterialHandleType.TRANSFER.getValue());
-//        newDoctorWarehouseWriterService.handler(dto);
-//    }
 
 
 }
