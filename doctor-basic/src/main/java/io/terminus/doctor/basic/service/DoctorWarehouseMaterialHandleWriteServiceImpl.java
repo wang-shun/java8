@@ -6,7 +6,8 @@ import io.terminus.common.model.Response;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleWriteService;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +33,8 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
             doctorWarehouseMaterialHandleDao.create(doctorWarehouseMaterialHandle);
             return Response.ok(doctorWarehouseMaterialHandle.getId());
         }catch (Exception e){
-            log.error("failed to create doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.create.fail");
+            log.error("failed to create doctor warehouseV2 material handle, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.handle.create.fail");
         }
     }
 
@@ -42,8 +43,8 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
         try{
             return Response.ok(doctorWarehouseMaterialHandleDao.update(doctorWarehouseMaterialHandle));
         }catch (Exception e){
-            log.error("failed to update doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.update.fail");
+            log.error("failed to update doctor warehouseV2 material handle, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.handle.update.fail");
         }
     }
 
@@ -52,8 +53,8 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
         try{
             return Response.ok(doctorWarehouseMaterialHandleDao.delete(id));
         }catch (Exception e){
-            log.error("failed to delete doctor warehouse material handle by id:{}, cause:{}", id,  Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.delete.fail");
+            log.error("failed to delete doctor warehouseV2 material handle by id:{}, cause:{}", id,  Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.handle.delete.fail");
         }
     }
 

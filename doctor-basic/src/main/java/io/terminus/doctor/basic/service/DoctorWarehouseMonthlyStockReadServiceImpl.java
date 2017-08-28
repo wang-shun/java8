@@ -6,7 +6,7 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMonthlyStockDao;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMonthlyStock;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMonthlyStock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,8 +33,8 @@ public class DoctorWarehouseMonthlyStockReadServiceImpl implements DoctorWarehou
         try{
             return Response.ok(doctorWarehouseMonthlyStockDao.findById(id));
         }catch (Exception e){
-            log.error("failed to find doctor warehouse monthly stock by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.monthly.stock.find.fail");
+            log.error("failed to find doctor warehouseV2 monthly stock by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.monthly.stock.find.fail");
         }
     }
 
@@ -44,8 +44,8 @@ public class DoctorWarehouseMonthlyStockReadServiceImpl implements DoctorWarehou
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseMonthlyStockDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         }catch (Exception e){
-            log.error("failed to paging doctor warehouse monthly stock by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.monthly.stock.paging.fail");
+            log.error("failed to paging doctor warehouseV2 monthly stock by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.monthly.stock.paging.fail");
         }
     }
 
@@ -54,8 +54,8 @@ public class DoctorWarehouseMonthlyStockReadServiceImpl implements DoctorWarehou
         try{
             return Response.ok(doctorWarehouseMonthlyStockDao.list(criteria));
         }catch (Exception e){
-            log.error("failed to list doctor warehouse monthly stock, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.monthly.stock.list.fail");
+            log.error("failed to list doctor warehouseV2 monthly stock, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.monthly.stock.list.fail");
         }
     }
 

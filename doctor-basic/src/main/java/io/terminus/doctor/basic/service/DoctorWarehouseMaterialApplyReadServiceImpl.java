@@ -6,13 +6,17 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialApply;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialApplyReadService;
+import io.terminus.doctor.common.enums.WareHouseType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Desc:
@@ -33,8 +37,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         try {
             return Response.ok(doctorWarehouseMaterialApplyDao.findById(id));
         } catch (Exception e) {
-            log.error("failed to find doctor warehouse material apply by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.apply.find.fail");
+            log.error("failed to find doctor warehouseV2 material apply by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.apply.find.fail");
         }
     }
 
@@ -44,8 +48,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseMaterialApplyDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
-            log.error("failed to paging doctor warehouse material apply by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.apply.paging.fail");
+            log.error("failed to paging doctor warehouseV2 material apply by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.apply.paging.fail");
         }
     }
 
@@ -54,8 +58,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         try {
             return Response.ok(doctorWarehouseMaterialApplyDao.list(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouse material apply, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.apply.list.fail");
+            log.error("failed to list doctor warehouseV2 material apply, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.apply.list.fail");
         }
     }
 
@@ -64,18 +68,34 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         try {
             return Response.ok(doctorWarehouseMaterialApplyDao.list(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouse material apply, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.apply.list.fail");
+            log.error("failed to list doctor warehouseV2 material apply, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.apply.list.fail");
         }
     }
 
     @Override
-    public Response<List<DoctorWarehouseMaterialApply>> listOrderByHandleDate(DoctorWarehouseMaterialApply criteria,Integer limit) {
+    public Response<List<DoctorWarehouseMaterialApply>> listOrderByHandleDate(DoctorWarehouseMaterialApply criteria, Integer limit) {
         try {
-            return Response.ok(doctorWarehouseMaterialApplyDao.listAndOrderByHandleDate(criteria,limit));
+            return Response.ok(doctorWarehouseMaterialApplyDao.listAndOrderByHandleDate(criteria, limit));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouse material apply, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.apply.list.fail");
+            log.error("failed to list doctor warehouseV2 material apply, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.apply.list.fail");
         }
+    }
+
+    @Override
+    public Response<Map<Integer, DoctorWarehouseMaterialApply>> listEachWarehouseTypeLastApply(Long farmId) {
+
+        Map<Integer, DoctorWarehouseMaterialApply> eachWarehouseTypeLastApply = new HashMap<>();
+        Stream.of(WareHouseType.values()).mapToInt(WareHouseType::getKey).forEach(type -> {
+            List<DoctorWarehouseMaterialApply> lastApply = doctorWarehouseMaterialApplyDao.listAndOrderByHandleDate(DoctorWarehouseMaterialApply.builder().build(), 1);
+            if (null == lastApply || lastApply.isEmpty())
+                eachWarehouseTypeLastApply.put(type, null);
+            else
+                eachWarehouseTypeLastApply.put(type, lastApply.get(0));
+        });
+
+
+        return Response.ok(eachWarehouseTypeLastApply);
     }
 }

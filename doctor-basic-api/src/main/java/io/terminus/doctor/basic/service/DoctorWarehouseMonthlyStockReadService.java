@@ -2,7 +2,7 @@ package io.terminus.doctor.basic.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMonthlyStock;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMonthlyStock;
 
 import java.util.List;
 import java.util.Map;

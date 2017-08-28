@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-08-21 22:58:24
+ ~ Date: 2017-08-27 12:08:23
  ~ Created by [ your name ]
 -->
 
@@ -13,6 +13,7 @@
         <result property="farmId" column="farm_id"/>
         <result property="warehouseId" column="warehouse_id"/>
         <result property="warehouseName" column="warehouse_name"/>
+        <result property="warehouseType" column="warehouse_type"/>
         <result property="materialId" column="material_id"/>
         <result property="vendorName" column="vendor_name"/>
         <result property="unitPrice" column="unit_price"/>
@@ -36,12 +37,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `warehouse_id`, `warehouse_name`, `material_id`, `vendor_name`, `unit_price`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `handle_quantity`, `handle_finish_flag`, 
+        `farm_id`, `warehouse_id`, `warehouse_name`, `warehouse_type`, `material_id`, `vendor_name`, `unit_price`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `handle_quantity`, `handle_finish_flag`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{warehouseId}, #{warehouseName}, #{materialId}, #{vendorName}, #{unitPrice}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{handleQuantity}, #{handleFinishFlag}, 
+        #{farmId}, #{warehouseId}, #{warehouseName}, #{warehouseType}, #{materialId}, #{vendorName}, #{unitPrice}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{handleQuantity}, #{handleFinishFlag}, 
         now(), now()
     </sql>
 
@@ -50,6 +51,7 @@
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
+            <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
             <if test="materialId != null">AND `material_id` = #{materialId}</if>
             <if test="vendorName != null">AND `vendor_name` = #{vendorName}</if>
             <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
@@ -98,6 +100,7 @@
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
             <if test="warehouseName != null">`warehouse_name` = #{warehouseName},</if>
+            <if test="warehouseType != null">`warehouse_type` = #{warehouseType},</if>
             <if test="materialId != null">`material_id` = #{materialId},</if>
             <if test="vendorName != null">`vendor_name` = #{vendorName},</if>
             <if test="unitPrice != null">`unit_price` = #{unitPrice},</if>

@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialApply;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,7 +22,6 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
 
     public List<DoctorWarehouseMaterialApply> listAndOrderByHandleDate(DoctorWarehouseMaterialApply criteria, Integer limit) {
 
-
         Map<String, Object> params = Maps.newHashMap();
         if (criteria != null) {
             Map<String, Object> objMap = (Map) JsonMapper.nonDefaultMapper().getMapper().convertValue(criteria, Map.class);
@@ -33,5 +32,6 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
 
         return sqlSession.selectList(sqlId("listAndOrderByHandleDate"), params);
     }
+
 }
 

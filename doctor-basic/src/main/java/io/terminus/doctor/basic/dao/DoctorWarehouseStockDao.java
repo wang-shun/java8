@@ -5,7 +5,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
@@ -29,7 +29,8 @@ public class DoctorWarehouseStockDao extends MyBatisDao<DoctorWarehouseStock> {
             params.putAll(objMap);
         }
 
-        Long total = (Long) this.sqlSession.selectOne(this.sqlId("countMergeVendor"), criteria);
+
+        Long total = (Long) this.sqlSession.selectOne(this.sqlId("countMergeVendor"), params);
         if (total.longValue() <= 0L) {
             return new Paging(0L, Collections.emptyList());
         } else {

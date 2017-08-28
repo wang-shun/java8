@@ -2,24 +2,21 @@ package io.terminus.doctor.basic.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
 import io.terminus.doctor.basic.dao.DoctorWarehousePurchaseDao;
-import io.terminus.doctor.basic.dto.AmountAndQuantityDto;
+import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehousePurchase;
+import io.terminus.doctor.basic.service.warehouseV2.NewDoctorWarehouseReaderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.stereotype.Service;
 
-import java.awt.event.WindowAdapter;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -57,8 +54,8 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
         try {
             return Response.ok(doctorWareHouseDao.list(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouse, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.list.fail");
+            log.error("failed to list doctor warehouseV2, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.list.fail");
         }
     }
 
@@ -67,8 +64,8 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
         try {
             return Response.ok(doctorWareHouseDao.findByFarmId(farmId));
         } catch (Exception e) {
-            log.error("failed to find doctor warehouse, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.find.fail");
+            log.error("failed to find doctor warehouseV2, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.find.fail");
         }
     }
 
@@ -78,8 +75,8 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
         try {
             return Response.ok(doctorWareHouseDao.findById(warehouseId));
         } catch (Exception e) {
-            log.error("failed to find doctor warehouse, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.find.fail");
+            log.error("failed to find doctor warehouseV2, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.find.fail");
         }
     }
 

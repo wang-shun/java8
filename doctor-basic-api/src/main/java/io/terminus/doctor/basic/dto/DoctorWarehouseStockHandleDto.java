@@ -1,7 +1,7 @@
 package io.terminus.doctor.basic.dto;
 
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStockHandlerDetail;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandlerDetail;
 import lombok.Data;
 
 import java.io.Serializable;

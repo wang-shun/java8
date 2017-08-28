@@ -4,7 +4,7 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMonthlyStockDao;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMonthlyStock;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMonthlyStock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,8 +29,8 @@ public class DoctorWarehouseMonthlyStockWriteServiceImpl implements DoctorWareho
             doctorWarehouseMonthlyStockDao.create(doctorWarehouseMonthlyStock);
             return Response.ok(doctorWarehouseMonthlyStock.getId());
         }catch (Exception e){
-            log.error("failed to create doctor warehouse monthly stock, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.monthly.stock.create.fail");
+            log.error("failed to create doctor warehouseV2 monthly stock, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.monthly.stock.create.fail");
         }
     }
 
@@ -39,8 +39,8 @@ public class DoctorWarehouseMonthlyStockWriteServiceImpl implements DoctorWareho
         try{
             return Response.ok(doctorWarehouseMonthlyStockDao.update(doctorWarehouseMonthlyStock));
         }catch (Exception e){
-            log.error("failed to update doctor warehouse monthly stock, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.monthly.stock.update.fail");
+            log.error("failed to update doctor warehouseV2 monthly stock, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.monthly.stock.update.fail");
         }
     }
 
@@ -49,8 +49,8 @@ public class DoctorWarehouseMonthlyStockWriteServiceImpl implements DoctorWareho
         try{
             return Response.ok(doctorWarehouseMonthlyStockDao.delete(id));
         }catch (Exception e){
-            log.error("failed to delete doctor warehouse monthly stock by id:{}, cause:{}", id,  Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.monthly.stock.delete.fail");
+            log.error("failed to delete doctor warehouseV2 monthly stock by id:{}, cause:{}", id,  Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.monthly.stock.delete.fail");
         }
     }
 

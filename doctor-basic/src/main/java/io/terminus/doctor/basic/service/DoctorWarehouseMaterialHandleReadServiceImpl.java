@@ -7,7 +7,8 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         try {
             return Response.ok(doctorWarehouseMaterialHandleDao.findById(id));
         } catch (Exception e) {
-            log.error("failed to find doctor warehouse material handle by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.find.fail");
+            log.error("failed to find doctor warehouseV2 material handle by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.handle.find.fail");
         }
     }
 
@@ -47,8 +48,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseMaterialHandleDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
-            log.error("failed to paging doctor warehouse material handle by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.paging.fail");
+            log.error("failed to paging doctor warehouseV2 material handle by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.handle.paging.fail");
         }
     }
 
@@ -59,8 +60,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseMaterialHandleDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
-            log.error("failed to paging doctor warehouse material handle by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.paging.fail");
+            log.error("failed to paging doctor warehouseV2 material handle by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.handle.paging.fail");
         }
     }
 
@@ -71,8 +72,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseMaterialHandleDao.advPaging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
-            log.error("failed to paging doctor warehouse material handle by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.paging.fail");
+            log.error("failed to paging doctor warehouseV2 material handle by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.handle.paging.fail");
         }
     }
 
@@ -81,8 +82,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         try {
             return Response.ok(doctorWarehouseMaterialHandleDao.list(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.list.fail");
+            log.error("failed to list doctor warehouseV2 material handle, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.handle.list.fail");
         }
     }
 
@@ -92,8 +93,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         try {
             return Response.ok(doctorWarehouseMaterialHandleDao.advList(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.list.fail");
+            log.error("failed to list doctor warehouseV2 material handle, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.handle.list.fail");
         }
     }
 
@@ -102,8 +103,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         try {
             return Response.ok(doctorWarehouseMaterialHandleDao.list(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.list.fail");
+            log.error("failed to list doctor warehouseV2 material handle, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.material.handle.list.fail");
         }
     }
 

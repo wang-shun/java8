@@ -6,7 +6,8 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
-import io.terminus.doctor.basic.model.warehouse.DoctorWarehouseStock;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,8 +34,8 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
         try {
             return Response.ok(doctorWarehouseStockDao.findById(id));
         } catch (Exception e) {
-            log.error("failed to find doctor warehouse stock by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.stock.find.fail");
+            log.error("failed to find doctor warehouseV2 stock by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.stock.find.fail");
         }
     }
 
@@ -44,8 +45,8 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseStockDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
-            log.error("failed to paging doctor warehouse stock by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.stock.paging.fail");
+            log.error("failed to paging doctor warehouseV2 stock by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.stock.paging.fail");
         }
     }
 
@@ -55,8 +56,8 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseStockDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
-            log.error("failed to paging doctor warehouse stock by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.stock.paging.fail");
+            log.error("failed to paging doctor warehouseV2 stock by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.stock.paging.fail");
         }
     }
 
@@ -66,8 +67,8 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseStockDao.pagingMergeVendor(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
-            log.error("failed to paging doctor warehouse stock by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.stock.paging.fail");
+            log.error("failed to paging doctor warehouseV2 stock by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.stock.paging.fail");
         }
     }
 
@@ -77,8 +78,8 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseStockDao.pagingMergeVendor(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
-            log.error("failed to paging doctor warehouse stock by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.stock.paging.fail");
+            log.error("failed to paging doctor warehouseV2 stock by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.stock.paging.fail");
         }
     }
 
@@ -87,8 +88,8 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
         try {
             return Response.ok(doctorWarehouseStockDao.list(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouse stock, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.stock.list.fail");
+            log.error("failed to list doctor warehouseV2 stock, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.stock.list.fail");
         }
     }
 
@@ -97,8 +98,8 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
         try {
             return Response.ok(doctorWarehouseStockDao.listMergeVendor(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouse stock, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.stock.list.fail");
+            log.error("failed to list doctor warehouseV2 stock, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.stock.list.fail");
         }
     }
 
@@ -111,8 +112,8 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
             criteria.setMaterialId(materialID);
             return Response.ok(doctorWarehouseStockDao.list(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouse stock, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.stock.list.fail");
+            log.error("failed to list doctor warehouseV2 stock, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.stock.list.fail");
         }
     }
 
