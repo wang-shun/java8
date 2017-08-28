@@ -137,7 +137,7 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
         long totalAmount = 0;
         BigDecimal totalQuantity = new BigDecimal(0);
         for (DoctorWarehousePurchase purchase : purchases) {
-            BigDecimal leftQuantity = purchase.getQuantity().multiply(purchase.getHandleQuantity());
+            BigDecimal leftQuantity = purchase.getQuantity().subtract(purchase.getHandleQuantity());
             totalQuantity = leftQuantity.add(totalQuantity);
             totalAmount += leftQuantity.multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
         }
