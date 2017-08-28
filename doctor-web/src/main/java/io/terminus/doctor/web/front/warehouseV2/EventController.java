@@ -19,6 +19,7 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteSer
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseMaterialEventVo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.impl.execchain.TunnelRefusedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -172,7 +173,7 @@ public class EventController {
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
-    public void delete(@PathVariable Long id) {
+    public boolean delete(@PathVariable Long id) {
 
 
         Response<DoctorWarehouseMaterialHandle> handleResponse = doctorWarehouseMaterialHandleReadService.findById(id);
@@ -180,7 +181,7 @@ public class EventController {
             throw new JsonResponseException(handleResponse.getError());
         if (null == handleResponse.getResult()) {
             log.info("物料处理明细不存在,忽略仓库事件删除操作,id[{}]", id);
-            return;
+            return true;
         }
 
         DoctorWarehouseMaterialHandle handle = handleResponse.getResult();
@@ -275,7 +276,7 @@ public class EventController {
 
         handle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
         doctorWarehouseMaterialHandleWriteService.update(handle);
-
+        return true;
     }
 
 

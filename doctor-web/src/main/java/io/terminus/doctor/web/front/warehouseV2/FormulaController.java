@@ -134,7 +134,7 @@ public class FormulaController {
 
 
     @RequestMapping(method = RequestMethod.POST, value = "produce")
-    public void produce(@RequestParam("farmId") Long farmId,
+    public boolean produce(@RequestParam("farmId") Long farmId,
                         @RequestParam("warehouseId") Long warehouseId,
                         @RequestParam("feedFormulaId") Long feedFormulaId,
                         @RequestParam("materialProduceJson") String materialProduceJson) {
@@ -176,7 +176,7 @@ public class FormulaController {
         Response<Boolean> response = doctorWarehouseStockWriteService.formula(formulaDto);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
-
+        return true;
 //        //入库
 //        List<DoctorWarehouseStockHandleDto> inStockHandle = new ArrayList<>();
 //        //出库

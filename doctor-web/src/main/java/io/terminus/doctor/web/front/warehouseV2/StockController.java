@@ -42,16 +42,18 @@ public class StockController {
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
 
     @RequestMapping(method = RequestMethod.PUT, value = "in")
-    public void in(@RequestBody @Validated WarehouseStockInDto stockIn, Errors errors) {
+    public boolean in(@RequestBody @Validated WarehouseStockInDto stockIn, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
         Response<Boolean> response = doctorWarehouseStockWriteService.in(stockIn);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
+
+        return true;
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "out")
-    public void out(@RequestBody @Validated WarehouseStockOutDto stockOut, Errors errors) {
+    public boolean out(@RequestBody @Validated WarehouseStockOutDto stockOut, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -66,34 +68,41 @@ public class StockController {
         Response<Boolean> response = doctorWarehouseStockWriteService.out(stockOut);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
+
+        return true;
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "inventory")
-    public void inventory(@RequestBody @Validated WarehouseStockInventoryDto stockInventory, Errors errors) {
+    public boolean inventory(@RequestBody @Validated WarehouseStockInventoryDto stockInventory, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
         Response<Boolean> response = doctorWarehouseStockWriteService.inventory(stockInventory);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
+
+        return true;
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "transfer")
-    public void transfer(@RequestBody @Validated WarehouseStockTransferDto stockTransfer, Errors errors) {
+    public boolean transfer(@RequestBody @Validated WarehouseStockTransferDto stockTransfer, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
         Response<Boolean> response = doctorWarehouseStockWriteService.transfer(stockTransfer);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
+
+        return true;
     }
 
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
-    public void delete(@PathVariable Long id) {
+    public boolean delete(@PathVariable Long id) {
         Response<Boolean> response = doctorWarehouseStockWriteService.delete(id);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
+        return true;
     }
 
 
@@ -153,4 +162,6 @@ public class StockController {
 
         return result;
     }
+
+
 }

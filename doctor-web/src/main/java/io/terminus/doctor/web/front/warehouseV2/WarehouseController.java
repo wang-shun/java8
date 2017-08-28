@@ -99,7 +99,7 @@ public class WarehouseController {
      * @param errors
      */
     @RequestMapping(method = RequestMethod.POST)
-    public void create(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
+    public boolean create(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
 
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
@@ -125,7 +125,10 @@ public class WarehouseController {
                 .address(warehouseDto.getAddress()).type(warehouseDto.getType())
                 .creatorId(currentUser.getId()).creatorName(currentUser.getName())
                 .build();
-        doctorWareHouseWriteService.createWareHouse(doctorWareHouse);
+        Response<Long> warehouseCreateResponse = doctorWareHouseWriteService.createWareHouse(doctorWareHouse);
+        if (!warehouseCreateResponse.isSuccess())
+            throw new JsonResponseException(warehouseCreateResponse.getError());
+        return true;
     }
 
 
@@ -518,9 +521,9 @@ public class WarehouseController {
      * @param warehouseMaterialDto
      */
     @RequestMapping(method = RequestMethod.POST, value = "{id}/material")
-    public void material(@PathVariable Long id,
-                         @RequestBody @Valid WarehouseMaterialDto warehouseMaterialDto,
-                         Errors errors) {
+    public boolean material(@PathVariable Long id,
+                            @RequestBody @Valid WarehouseMaterialDto warehouseMaterialDto,
+                            Errors errors) {
 
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
@@ -570,6 +573,7 @@ public class WarehouseController {
 
         if (!createResponse.isSuccess())
             throw new JsonResponseException(createResponse.getError());
+        return true;
     }
 
 
