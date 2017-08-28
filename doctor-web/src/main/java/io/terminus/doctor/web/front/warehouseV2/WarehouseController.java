@@ -337,6 +337,7 @@ public class WarehouseController {
                 vo.setBalanceAmount(balance.getAmount());
                 vo.setBalanceQuantity(balance.getQuantity());
             }
+            vos.add(vo);
         });
 
         return vos;
@@ -521,8 +522,6 @@ public class WarehouseController {
         if (!createResponse.isSuccess())
             throw new JsonResponseException(createResponse.getError());
     }
-
-
 
 
 //    @RequestMapping(method = RequestMethod.PUT, value = "in")
