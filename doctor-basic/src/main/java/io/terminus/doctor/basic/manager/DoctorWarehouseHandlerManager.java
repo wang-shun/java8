@@ -10,10 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/11.
@@ -239,6 +236,9 @@ public class DoctorWarehouseHandlerManager {
 
 
         public void addMaterialHandle(DoctorWarehouseMaterialHandle handle) {
+            if (null == this.materialHandle)
+                this.materialHandle = new ArrayList<>();
+
             this.materialHandle.add(handle);
         }
 

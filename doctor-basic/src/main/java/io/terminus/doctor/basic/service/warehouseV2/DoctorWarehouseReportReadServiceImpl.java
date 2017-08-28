@@ -3,6 +3,7 @@ package io.terminus.doctor.basic.service.warehouseV2;
 import ch.qos.logback.core.net.SyslogOutputStream;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.dao.DoctorWarehousePurchaseDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
@@ -11,6 +12,7 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
+import io.terminus.doctor.common.enums.WareHouseType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +44,6 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
 
     @Autowired
     private DoctorWarehousePurchaseDao doctorWarehousePurchaseDao;
-
 
     @Override
     public Response<AmountAndQuantityDto> countFarmBalance(Long farmId) {
@@ -100,6 +101,7 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
                 .build()).stream().collect(Collectors.groupingBy(DoctorWarehousePurchase::getWarehouseId));
 
 
+        //如果仓库没有余额和余量，则为null
         Map<Long, AmountAndQuantityDto> eachWarehouseBalance = new HashMap<>();
         for (Long warehouseId : warehousePurchases.keySet()) {
             eachWarehouseBalance.put(warehouseId, countBalance(warehousePurchases.get(warehouseId)).getResult());
