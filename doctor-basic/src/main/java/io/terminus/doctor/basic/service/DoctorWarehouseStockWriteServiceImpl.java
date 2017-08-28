@@ -250,10 +250,11 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     purchase.setHandleDate(stockInventory.getHandleDate());
                     purchase.setWarehouseId(stockInventory.getWarehouseId());
                     purchase.setWarehouseName(context.getWareHouse().getWareHouseName());
+                    purchase.setWarehouseType(context.getWareHouse().getType());
                     purchase.setMaterialId(detail.getMaterialId());
                     purchase.setVendorName(lastPurchase.getVendorName());
                     purchase.setQuantity(changedQuantity);
-                    purchase.setHandleFinishFlag(1);
+                    purchase.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
                     purchase.setHandleQuantity(new BigDecimal(0));
                     purchase.setUnitPrice(lastPurchase.getUnitPrice());
                     purchase.setHandleMonth(c.get(Calendar.MONTH) + 1);
