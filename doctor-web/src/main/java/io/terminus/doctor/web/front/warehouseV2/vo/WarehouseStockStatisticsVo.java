@@ -1,6 +1,9 @@
 package io.terminus.doctor.web.front.warehouseV2.vo;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.math.BigDecimal;
 
@@ -8,10 +11,22 @@ import java.math.BigDecimal;
  * Created by sunbo@terminus.io on 2017/8/22.
  */
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class WarehouseStockStatisticsVo {
 
 
     private Long id;
+
+
+    private Long farmId;
+
+    private Long warehouseId;
+
+    private String warehouseName;
+
+    private Integer warehouseType;
 
     private Long materialId;
 
