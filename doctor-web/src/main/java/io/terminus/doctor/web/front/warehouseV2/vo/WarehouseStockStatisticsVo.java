@@ -45,44 +45,64 @@ public class WarehouseStockStatisticsVo {
     private String unit;
 
     /**
-     * 本月入库数量
+     * 入库数量
      */
     private BigDecimal inQuantity;
 
     /**
-     * 本月入库金额
+     * 入库金额
      */
     private long inAmount;
 
     /**
-     * 本月出库数量
+     * 出库数量
      */
     private BigDecimal outQuantity;
 
     /**
-     * 本月出库金额
+     * 出库金额
      */
     private long outAmount;
 
     /**
-     * 本月调拨出数量
+     * 调拨出数量
      */
     private BigDecimal transferOutQuantity;
 
     /**
-     * 本月调拨出金额
+     * 调拨出金额
      */
     private long transferOutAmount;
 
 
     /**
-     * 本月调拨入数量
+     * 调拨入数量
      */
     private BigDecimal transferInQuantity;
 
     /**
-     * 本月调拨入金额
+     * 调拨入金额
      */
     private long transferInAmount;
+
+    /**
+     * 盘亏金额
+     */
+    private long inventoryDeficitAmount;
+
+    /**
+     * 盘亏数量
+     */
+    private BigDecimal inventoryDeficitQuantity;
+
+    /**
+     * 盘盈金额
+     */
+    private long inventoryProfitAmount;
+
+    /**
+     * 盘盈数量
+     */
+    private BigDecimal inventoryProfitQuantity;
 
 }

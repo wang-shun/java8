@@ -6,6 +6,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseMaterialDto;
@@ -13,8 +14,11 @@ import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
+import io.terminus.doctor.basic.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.basic.service.warehouseV2.*;
@@ -29,15 +33,19 @@ import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+import sun.nio.cs.FastCharsetProvider;
 
 import javax.validation.Valid;
 
 import java.math.BigDecimal;
+import java.sql.Ref;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -587,6 +595,285 @@ public class WarehouseController {
         if (!createResponse.isSuccess())
             throw new JsonResponseException(createResponse.getError());
         return true;
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "statistics")
+    public List<WarehouseStockStatisticsVo> statistics(@RequestParam Long farmId,
+                                                       @RequestParam(required = false) String group,
+                                                       @RequestParam(required = false) Integer warehouseType,
+                                                       @RequestParam(required = false) Long warehouseId,
+                                                       @RequestParam(required = false) Long materialId,
+                                                       @RequestParam(required = false) String vendorName,
+                                                       @RequestParam(required = false) String types,
+                                                       @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
+
+
+        if (null == date)
+            date = Calendar.getInstance();//本月
+
+
+        List<WarehouseStockStatisticsVo> result = new ArrayList<>();
+        //统计猪厂下，1跳
+        //统计猪厂下，每个仓库的
+        //统计猪下，，每个仓库类型，5条
+        //统计猪厂下，指定仓库类型的，1条
+        //统计猪厂下，指定仓库类型，每个仓库，
+        //统计猪厂下，指定仓库，1条
+
+        if (null != materialId && null == warehouseId)
+            throw new JsonResponseException("warehouse.id.null");
+        if (StringUtils.isNotBlank(vendorName)) {
+            if (null == materialId)
+                throw new JsonResponseException("stock.material.id.null");
+            if (null == warehouseId) throw new JsonResponseException("warehouse.id.null");
+        }
+
+        WarehouseMaterialHandleType[] handleTypes = null;
+        if (StringUtils.isNotBlank(types)) {
+            List<Integer> intTypes = Splitters.splitToInteger(types, Splitters.UNDERSCORE);
+            handleTypes = new WarehouseMaterialHandleType[intTypes.size()];
+            for (int i = 0; i < intTypes.size(); i++) {
+                handleTypes[i] = WarehouseMaterialHandleType.fromValue(intTypes.get(i));
+            }
+        }
+
+
+        if (StringUtils.isBlank(group)) {
+            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countBalance(farmId, warehouseType, warehouseId, materialId, vendorName);
+            if (!balanceResponse.isSuccess())
+                throw new JsonResponseException(balanceResponse.getError());
+
+            Response<WarehouseStockStatisticsDto> statisticsDtoResponse = doctorWarehouseReportReadService.countMaterialHandleStatistics(farmId, warehouseType, warehouseId, materialId, vendorName, date, handleTypes);
+            if (!statisticsDtoResponse.isSuccess())
+                throw new JsonResponseException(statisticsDtoResponse.getError());
+
+            String warehouseName = null;
+            if (null != warehouseId) {
+                Response<DoctorWareHouse> wareHouseResponse = doctorWarehouseReaderService.findById(warehouseId);
+                if (!wareHouseResponse.isSuccess())
+                    throw new JsonResponseException(wareHouseResponse.getError());
+                if (null == wareHouseResponse.getResult())
+                    throw new JsonResponseException("warehouse.not.found");
+                warehouseName = wareHouseResponse.getResult().getWareHouseName();
+                warehouseType = wareHouseResponse.getResult().getType();
+            }
+            String materialName = null;
+            if (null != materialId) {
+
+                Response<DoctorBasicMaterial> materialResponse = doctorBasicMaterialReadService.findBasicMaterialById(materialId);
+                if (!materialResponse.isSuccess())
+                    throw new JsonResponseException(materialResponse.getError());
+                if (null == materialResponse.getResult()) {
+                    throw new JsonResponseException("material.not.found");
+                }
+                materialName = materialResponse.getResult().getName();
+            }
+
+            result.add(WarehouseStockStatisticsVo.builder()
+                    .farmId(farmId)
+                    .warehouseId(warehouseId)
+                    .warehouseName(warehouseName)
+                    .warehouseType(warehouseType)
+                    .materialId(materialId)
+                    .materialName(materialName)
+                    .inAmount(statisticsDtoResponse.getResult().getIn().getAmount())
+                    .inQuantity(statisticsDtoResponse.getResult().getIn().getQuantity())
+                    .outAmount(statisticsDtoResponse.getResult().getOut().getAmount())
+                    .outQuantity(statisticsDtoResponse.getResult().getOut().getQuantity())
+                    .transferInAmount(statisticsDtoResponse.getResult().getTransferIn().getAmount())
+                    .transferInQuantity(statisticsDtoResponse.getResult().getTransferIn().getQuantity())
+                    .transferOutAmount(statisticsDtoResponse.getResult().getTransferOut().getAmount())
+                    .transferOutQuantity(statisticsDtoResponse.getResult().getTransferOut().getQuantity())
+                    .inventoryDeficitAmount(statisticsDtoResponse.getResult().getInventoryDeficit().getAmount())
+                    .inventoryDeficitQuantity(statisticsDtoResponse.getResult().getInventoryDeficit().getQuantity())
+                    .inventoryProfitAmount(statisticsDtoResponse.getResult().getInventoryProfit().getAmount())
+                    .inventoryProfitQuantity(statisticsDtoResponse.getResult().getInventoryProfit().getQuantity())
+                    .balanceAmount(balanceResponse.getResult().getAmount())
+                    .balanceQuantity(balanceResponse.getResult().getQuantity())
+                    .build());
+
+        } else {
+
+            if ("warehouseType".equals(group)) {
+                Response<Map<Integer/*warehouseType*/, AmountAndQuantityDto>> balanceResponse = doctorWarehouseReportReadService.countBalanceEachWarehouseType(farmId);
+                if (!balanceResponse.isSuccess())
+                    throw new JsonResponseException(balanceResponse.getError());
+                Response<Map<Integer, WarehouseStockStatisticsDto>> statisticsDtoResponse = doctorWarehouseReportReadService.countMaterialHandleByFarmAndWarehouseType(farmId, date, handleTypes);
+                if (!statisticsDtoResponse.isSuccess())
+                    throw new JsonResponseException(statisticsDtoResponse.getError());
+                for (WareHouseType type : WareHouseType.values()) {
+                    WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
+                    vo.setFarmId(farmId);
+                    vo.setWarehouseType(type.getKey());
+
+                    AmountAndQuantityDto balance = balanceResponse.getResult().get(type.getKey());
+                    if (null == balance) {
+                        vo.setBalanceAmount(0);
+                        vo.setBalanceQuantity(new BigDecimal(0));
+                    } else {
+                        vo.setBalanceAmount(balance.getAmount());
+                        vo.setBalanceQuantity(balance.getQuantity());
+                    }
+                    WarehouseStockStatisticsDto statistics = statisticsDtoResponse.getResult().get(type.getKey());
+                    if (null == statistics) {
+                        vo.setInQuantity(new BigDecimal(0));
+                        vo.setInAmount(0);
+                        vo.setOutAmount(0);
+                        vo.setOutQuantity(new BigDecimal(0));
+                        vo.setInventoryDeficitAmount(0);
+                        vo.setInventoryDeficitQuantity(new BigDecimal(0));
+                        vo.setInventoryProfitAmount(0);
+                        vo.setInventoryProfitQuantity(new BigDecimal(0));
+                        vo.setTransferOutQuantity(new BigDecimal(0));
+                        vo.setTransferOutAmount(0);
+                        vo.setTransferInQuantity(new BigDecimal(0));
+                        vo.setTransferInAmount(0);
+                    } else {
+                        vo.setInQuantity(statistics.getIn().getQuantity());
+                        vo.setInAmount(statistics.getIn().getAmount());
+                        vo.setOutAmount(statistics.getOut().getAmount());
+                        vo.setOutQuantity(statistics.getOut().getQuantity());
+                        vo.setInventoryDeficitAmount(statistics.getInventoryDeficit().getAmount());
+                        vo.setInventoryDeficitQuantity(statistics.getInventoryDeficit().getQuantity());
+                        vo.setInventoryProfitAmount(statistics.getInventoryProfit().getAmount());
+                        vo.setInventoryProfitQuantity(statistics.getInventoryProfit().getQuantity());
+                        vo.setTransferOutQuantity(statistics.getTransferOut().getQuantity());
+                        vo.setTransferOutAmount(statistics.getTransferOut().getAmount());
+                        vo.setTransferInQuantity(statistics.getTransferIn().getQuantity());
+                        vo.setTransferInAmount(statistics.getTransferIn().getAmount());
+                    }
+                    result.add(vo);
+                }
+
+            } else if ("warehouse".equals(group)) {
+
+                Response<Map<Long/*warehouseId*/, AmountAndQuantityDto>> balanceResponse = doctorWarehouseReportReadService.countEachWarehouseBalance(farmId);
+                if (!balanceResponse.isSuccess())
+                    throw new JsonResponseException(balanceResponse.getError());
+                Response<Map<Long, WarehouseStockStatisticsDto>> statisticsDtoResponse = doctorWarehouseReportReadService.countMaterialHandleByFarm(farmId, date, handleTypes);
+                if (!statisticsDtoResponse.isSuccess())
+                    throw new JsonResponseException(statisticsDtoResponse.getError());
+                Response<List<DoctorWareHouse>> warehouseResponse = doctorWarehouseReaderService.findByFarmId(farmId);
+                if (!warehouseResponse.isSuccess())
+                    throw new JsonResponseException(warehouseResponse.getError());
+                for (DoctorWareHouse warehouse : warehouseResponse.getResult()) {
+                    WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
+                    vo.setFarmId(farmId);
+                    vo.setWarehouseId(warehouse.getId());
+                    vo.setWarehouseType(warehouse.getType());
+                    vo.setWarehouseName(warehouse.getWareHouseName());
+
+                    AmountAndQuantityDto balance = balanceResponse.getResult().get(warehouse.getId());
+                    if (null == balance) {
+                        vo.setBalanceAmount(0);
+                        vo.setBalanceQuantity(new BigDecimal(0));
+                    } else {
+                        vo.setBalanceAmount(balance.getAmount());
+                        vo.setBalanceQuantity(balance.getQuantity());
+                    }
+                    WarehouseStockStatisticsDto statistics = statisticsDtoResponse.getResult().get(warehouse.getId());
+                    if (null == statistics) {
+                        vo.setInQuantity(new BigDecimal(0));
+                        vo.setInAmount(0);
+                        vo.setOutAmount(0);
+                        vo.setOutQuantity(new BigDecimal(0));
+                        vo.setInventoryDeficitAmount(0);
+                        vo.setInventoryDeficitQuantity(new BigDecimal(0));
+                        vo.setInventoryProfitAmount(0);
+                        vo.setInventoryProfitQuantity(new BigDecimal(0));
+                        vo.setTransferOutQuantity(new BigDecimal(0));
+                        vo.setTransferOutAmount(0);
+                        vo.setTransferInQuantity(new BigDecimal(0));
+                        vo.setTransferInAmount(0);
+                    } else {
+                        vo.setInQuantity(statistics.getIn().getQuantity());
+                        vo.setInAmount(statistics.getIn().getAmount());
+                        vo.setOutAmount(statistics.getOut().getAmount());
+                        vo.setOutQuantity(statistics.getOut().getQuantity());
+                        vo.setInventoryDeficitAmount(statistics.getInventoryDeficit().getAmount());
+                        vo.setInventoryDeficitQuantity(statistics.getInventoryDeficit().getQuantity());
+                        vo.setInventoryProfitAmount(statistics.getInventoryProfit().getAmount());
+                        vo.setInventoryProfitQuantity(statistics.getInventoryProfit().getQuantity());
+                        vo.setTransferOutQuantity(statistics.getTransferOut().getQuantity());
+                        vo.setTransferOutAmount(statistics.getTransferOut().getAmount());
+                        vo.setTransferInQuantity(statistics.getTransferIn().getQuantity());
+                        vo.setTransferInAmount(statistics.getTransferIn().getAmount());
+                    }
+                    result.add(vo);
+                }
+
+            } else if ("material".equals(group)) {
+                Response<Map<Long/*materialId*/, AmountAndQuantityDto>> balanceResponse = doctorWarehouseReportReadService.countEachMaterialBalance(farmId, warehouseId);
+                if (!balanceResponse.isSuccess())
+                    throw new JsonResponseException(balanceResponse.getError());
+                Response<Map<Long, WarehouseStockStatisticsDto>> statisticsDtoResponse = doctorWarehouseReportReadService.countMaterialHandleByWarehouse(farmId, warehouseId, date, handleTypes);
+                if (!statisticsDtoResponse.isSuccess())
+                    throw new JsonResponseException(statisticsDtoResponse.getError());
+
+                Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.listMergeVendor(DoctorWarehouseStock.builder()
+                        .warehouseId(warehouseId)
+                        .materialId(materialId)
+                        .build());
+                if (!stockResponse.isSuccess())
+                    throw new JsonResponseException(stockResponse.getError());
+                for (DoctorWarehouseStock stock : stockResponse.getResult()) {
+                    WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
+                    vo.setFarmId(farmId);
+                    vo.setWarehouseId(warehouseId);
+                    vo.setWarehouseName(stock.getWarehouseName());
+                    vo.setWarehouseType(stock.getWarehouseType());
+                    vo.setMaterialId(stock.getMaterialId());
+                    vo.setMaterialName(stock.getMaterialName());
+                    vo.setUnit(stock.getUnit());
+
+
+                    AmountAndQuantityDto balance = balanceResponse.getResult().get(stock.getMaterialId());
+                    if (null == balance) {
+                        vo.setBalanceAmount(0);
+                        vo.setBalanceQuantity(new BigDecimal(0));
+                    } else {
+                        vo.setBalanceAmount(balance.getAmount());
+                        vo.setBalanceQuantity(balance.getQuantity());
+                    }
+                    WarehouseStockStatisticsDto statistics = statisticsDtoResponse.getResult().get(stock.getMaterialId());
+                    if (null == statistics) {
+                        vo.setInQuantity(new BigDecimal(0));
+                        vo.setInAmount(0);
+                        vo.setOutAmount(0);
+                        vo.setOutQuantity(new BigDecimal(0));
+                        vo.setInventoryDeficitAmount(0);
+                        vo.setInventoryDeficitQuantity(new BigDecimal(0));
+                        vo.setInventoryProfitAmount(0);
+                        vo.setInventoryProfitQuantity(new BigDecimal(0));
+                        vo.setTransferOutQuantity(new BigDecimal(0));
+                        vo.setTransferOutAmount(0);
+                        vo.setTransferInQuantity(new BigDecimal(0));
+                        vo.setTransferInAmount(0);
+                    } else {
+                        vo.setInQuantity(statistics.getIn().getQuantity());
+                        vo.setInAmount(statistics.getIn().getAmount());
+                        vo.setOutAmount(statistics.getOut().getAmount());
+                        vo.setOutQuantity(statistics.getOut().getQuantity());
+                        vo.setInventoryDeficitAmount(statistics.getInventoryDeficit().getAmount());
+                        vo.setInventoryDeficitQuantity(statistics.getInventoryDeficit().getQuantity());
+                        vo.setInventoryProfitAmount(statistics.getInventoryProfit().getAmount());
+                        vo.setInventoryProfitQuantity(statistics.getInventoryProfit().getQuantity());
+                        vo.setTransferOutQuantity(statistics.getTransferOut().getQuantity());
+                        vo.setTransferOutAmount(statistics.getTransferOut().getAmount());
+                        vo.setTransferInQuantity(statistics.getTransferIn().getQuantity());
+                        vo.setTransferInAmount(statistics.getTransferIn().getAmount());
+                    }
+                    result.add(vo);
+                }
+
+            } else
+                throw new JsonResponseException("group.type.not.support");
+
+
+        }
+        return result;
+
     }
 
 

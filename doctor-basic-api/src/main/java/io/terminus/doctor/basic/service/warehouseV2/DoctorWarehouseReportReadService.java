@@ -4,9 +4,11 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,6 +58,8 @@ public interface DoctorWarehouseReportReadService {
      */
     Response<Map<Long, AmountAndQuantityDto>> countEachWarehouseBalance(Long farmId);
 
+    Response<Map<Long/*materialID*/, AmountAndQuantityDto>> countEachMaterialBalance(Long farmId, Long warehouId);
+
     /**
      * 统计仓库下某一物料的余额和余量
      *
@@ -75,6 +79,10 @@ public interface DoctorWarehouseReportReadService {
      */
     Response<AmountAndQuantityDto> countMaterialBalance(Long warehouseId, Long materialId, String vendorName);
 
+
+    Response<AmountAndQuantityDto> countBalance(List<DoctorWarehousePurchase> purchases);
+
+    Response<AmountAndQuantityDto> countBalance(Long farmId, Integer warehouseType, Long warehouseId, Long materialId, String vendorName);
 
     /**
      * 统计猪厂某一月份的物料处理总量和总金额
@@ -115,6 +123,8 @@ public interface DoctorWarehouseReportReadService {
 
     Response<Map<Long, WarehouseStockStatisticsDto>> countMaterialHandleByFarm(Long farmId, Calendar handleDate, WarehouseMaterialHandleType... types);
 
+    Response<Map<Long, WarehouseStockStatisticsDto>> countMaterialHandleByWarehouse(Long farmId, Long warehouseId, Calendar handleDate, WarehouseMaterialHandleType... types);
+
 
     /**
      * 统计仓库某一个月份，指定物料操作类型的总数量和总金额
@@ -138,5 +148,15 @@ public interface DoctorWarehouseReportReadService {
     Response<WarehouseStockStatisticsDto> countMaterialHandleByMaterial(Long warehouseId, Long materialId, Calendar handleDate, WarehouseMaterialHandleType... types);
 
     Response<WarehouseStockStatisticsDto> countMaterialHandleByMaterialVendor(Long warehouseId, Long materialId, String vendorName, Calendar handleDate, WarehouseMaterialHandleType... types);
+
+    Response<WarehouseStockStatisticsDto> countMaterialHandleStatistics(
+            Long farmId,
+            Integer warehouseType,
+            Long warehouseId,
+            Long materialId,
+            String vendorName,
+            Calendar date,
+            WarehouseMaterialHandleType... types
+    );
 
 }

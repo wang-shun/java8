@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.enums;
 
+import io.terminus.common.exception.ServiceException;
 import lombok.Getter;
 
 import java.util.stream.Stream;
@@ -85,7 +86,7 @@ public enum WarehouseMaterialHandleType {
 
 
     public static WarehouseMaterialHandleType fromValue(int value) {
-        return Stream.of(WarehouseMaterialHandleType.values()).parallel().filter(t -> t.value == value).findFirst().orElse(UNKNOWN);
+        return Stream.of(WarehouseMaterialHandleType.values()).parallel().filter(t -> t.value == value).findFirst().orElseThrow(() -> new ServiceException("unknown.warehouse.material.handle.flag"));
     }
 
 }

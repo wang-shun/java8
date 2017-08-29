@@ -8,6 +8,7 @@ import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.dao.DoctorWarehousePurchaseDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
@@ -111,6 +112,21 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
     }
 
     @Override
+    public Response<Map<Long, AmountAndQuantityDto>> countEachMaterialBalance(Long farmId, Long warehouId) {
+        Map<Long, List<DoctorWarehousePurchase>> materialPurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
+                .farmId(farmId)
+                .warehouseId(warehouId)
+                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+                .build()).stream().collect(Collectors.groupingBy(DoctorWarehousePurchase::getMaterialId));
+        Map<Long, AmountAndQuantityDto> eachMaterialBalance = new HashMap<>();
+        for (Long materialId : materialPurchases.keySet()) {
+            eachMaterialBalance.put(materialId, countBalance(materialPurchases.get(materialId)).getResult());
+        }
+
+        return Response.ok(eachMaterialBalance);
+    }
+
+    @Override
     public Response<AmountAndQuantityDto> countMaterialBalance(Long warehouseId, Long materialId) {
         return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
                 .warehouseId(warehouseId)
@@ -129,7 +145,21 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
                 .build()));
     }
 
-    private Response<AmountAndQuantityDto> countBalance(List<DoctorWarehousePurchase> purchases) {
+    @Override
+    public Response<AmountAndQuantityDto> countBalance(Long farmId, Integer warehouseType, Long warehouseId, Long materialId, String vendorName) {
+
+        return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
+                .farmId(farmId)
+                .warehouseType(warehouseType)
+                .warehouseId(warehouseId)
+                .materialId(materialId)
+                .vendorName(vendorName)
+                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+                .build()));
+    }
+
+    @Override
+    public Response<AmountAndQuantityDto> countBalance(List<DoctorWarehousePurchase> purchases) {
         if (null == purchases || purchases.isEmpty())
             return Response.ok(new AmountAndQuantityDto(0, new BigDecimal(0)));
 
@@ -197,6 +227,17 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
     }
 
     @Override
+    public Response<Map<Long, WarehouseStockStatisticsDto>> countMaterialHandleByWarehouse(Long farmId, Long warehouseId, Calendar handleDate, WarehouseMaterialHandleType... types) {
+        Map<Long, WarehouseStockStatisticsDto> statistics = new HashMap<>();
+        Map<Long, List<DoctorWarehouseMaterialHandle>> handleGroupByMaterial = findMaterialHandleByWarehouse(warehouseId, handleDate, types).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getMaterialId));
+        for (Long materialId : handleGroupByMaterial.keySet()) {
+            statistics.put(materialId, countMaterialHandle(handleGroupByMaterial.get(materialId)));
+        }
+
+        return Response.ok(statistics);
+    }
+
+    @Override
     public Response<WarehouseStockStatisticsDto> countMaterialHandleByWarehouse(Long warehouseId, Calendar handleDate, WarehouseMaterialHandleType... types) {
 
         return Response.ok(countMaterialHandle(findMaterialHandleByWarehouse(warehouseId, handleDate, types)));
@@ -211,7 +252,29 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
 
     @Override
     public Response<WarehouseStockStatisticsDto> countMaterialHandleByMaterialVendor(Long warehouseId, Long materialId, String vendorName, Calendar handleDate, WarehouseMaterialHandleType... types) {
-        return Response.ok(countMaterialHandle(findMaterialHandleByMaterialVendor(warehouseId, materialId, vendorName, handleDate, types)));
+        return Response.ok(countMaterialHandle(findMaterialHandleByMaterialVendor(null, warehouseId, materialId, vendorName, handleDate, types)));
+    }
+
+    @Override
+    public Response<WarehouseStockStatisticsDto> countMaterialHandleStatistics(Long farmId, Integer warehouseType, Long warehouseId, Long materialId, String vendorName, Calendar date, WarehouseMaterialHandleType... types) {
+
+
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("farmId", farmId);
+        criteria.put("warehouseType", warehouseType);
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("materialId", materialId);
+        criteria.put("handleYear", date.get(Calendar.YEAR));
+        criteria.put("handleMonth", date.get(Calendar.MONTH) + 1);
+        criteria.put("vendorName", vendorName);
+        if (null == types)
+            criteria.put("bigType", Stream.of(ALL_KIND_OF_HANDLE).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
+        else
+            criteria.put("bigType", Stream.of(types).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
+
+        List<DoctorWarehouseMaterialHandle> handles = doctorWarehouseMaterialHandleDao.advList(criteria);
+
+        return Response.ok(countMaterialHandle(handles));
     }
 
     private WarehouseStockStatisticsDto countMaterialHandle(List<DoctorWarehouseMaterialHandle> handles) {
@@ -278,49 +341,30 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
 
     private List<DoctorWarehouseMaterialHandle> findMaterialHandleByFarm(Long farmId, Calendar handleDate, WarehouseMaterialHandleType... types) {
 
-        Map<String, Object> criteria = new HashMap<>();
-        criteria.put("farmId", farmId);
-        criteria.put("handleYear", handleDate.get(Calendar.YEAR));
-        criteria.put("handleMonth", handleDate.get(Calendar.MONTH) + 1);
-        if (null != types)
-            criteria.put("bigType", Stream.of(types).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
-
-        return doctorWarehouseMaterialHandleDao.advList(criteria);
+        return findMaterialHandleByMaterialVendor(farmId, null, null, null, handleDate, types);
     }
 
     private List<DoctorWarehouseMaterialHandle> findMaterialHandleByWarehouse(Long warehouseId, Calendar handleDate, WarehouseMaterialHandleType... types) {
-        Map<String, Object> criteria = new HashMap<>();
-        criteria.put("warehouseId", warehouseId);
-        criteria.put("handleYear", handleDate.get(Calendar.YEAR));
-        criteria.put("handleMonth", handleDate.get(Calendar.MONTH) + 1);
-        if (null != types)
-            criteria.put("bigType", Stream.of(types).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
-
-        return doctorWarehouseMaterialHandleDao.advList(criteria);
+        return findMaterialHandleByMaterialVendor(null, warehouseId, null, null, handleDate, types);
     }
 
 
     private List<DoctorWarehouseMaterialHandle> findMaterialHandleByMaterial(Long warehouseId, Long materialId, Calendar handleDate, WarehouseMaterialHandleType... types) {
-        Map<String, Object> criteria = new HashMap<>();
-        criteria.put("warehouseId", warehouseId);
-        criteria.put("materialId", materialId);
-        criteria.put("handleYear", handleDate.get(Calendar.YEAR));
-        criteria.put("handleMonth", handleDate.get(Calendar.MONTH) + 1);
-        if (null != types) {
-            criteria.put("bigType", Stream.of(types).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
-        }
-
-        return doctorWarehouseMaterialHandleDao.advList(criteria);
+        return findMaterialHandleByMaterialVendor(null, warehouseId, materialId, null, handleDate, types);
     }
 
-    private List<DoctorWarehouseMaterialHandle> findMaterialHandleByMaterialVendor(Long warehouseId, Long materialId, String vendorName, Calendar handleDate, WarehouseMaterialHandleType... types) {
+    private List<DoctorWarehouseMaterialHandle> findMaterialHandleByMaterialVendor(Long farmId, Long warehouseId, Long materialId, String vendorName, Calendar handleDate, WarehouseMaterialHandleType... types) {
         Map<String, Object> criteria = new HashMap<>();
+        criteria.put("farmId", farmId);
         criteria.put("warehouseId", warehouseId);
         criteria.put("materialId", materialId);
         criteria.put("handleYear", handleDate.get(Calendar.YEAR));
         criteria.put("handleMonth", handleDate.get(Calendar.MONTH) + 1);
+        criteria.put("deleteFlag", WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
         criteria.put("vendorName", vendorName);
-        if (null != types)
+        if (null == types)
+            criteria.put("bigType", Stream.of(ALL_KIND_OF_HANDLE).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
+        else
             criteria.put("bigType", Stream.of(types).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
 
         return doctorWarehouseMaterialHandleDao.advList(criteria);
