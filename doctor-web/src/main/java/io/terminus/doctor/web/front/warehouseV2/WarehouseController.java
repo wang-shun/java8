@@ -435,6 +435,7 @@ public class WarehouseController {
                 WarehouseMaterialHandleType.TRANSFER_IN);
         if (!statisticsDtoResponse.isSuccess())
             throw new JsonResponseException(statisticsDtoResponse.getError());
+
         Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(id, materialId);
         if (!balanceResponse.isSuccess())
             throw new JsonResponseException(balanceResponse.getError());
@@ -448,7 +449,19 @@ public class WarehouseController {
         if (null == stockResponse.getResult() || stockResponse.getResult().isEmpty())
             throw new JsonResponseException("stock.not.found");
 
+
+        Response<DoctorWareHouse> wareHouseResponse = doctorWarehouseReaderService.findById(id);
+        if (!wareHouseResponse.isSuccess())
+            throw new JsonResponseException(wareHouseResponse.getError());
+        if (null == wareHouseResponse.getResult())
+            throw new JsonResponseException("warehouse.not.found");
+
         WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
+
+        vo.setWarehouseId(id);
+        vo.setWarehouseName(wareHouseResponse.getResult().getWareHouseName());
+        vo.setWarehouseType(wareHouseResponse.getResult().getType());
+
         vo.setId(stockResponse.getResult().get(0).getId());
         vo.setMaterialId(stockResponse.getResult().get(0).getMaterialId());
         vo.setMaterialName(stockResponse.getResult().get(0).getMaterialName());
