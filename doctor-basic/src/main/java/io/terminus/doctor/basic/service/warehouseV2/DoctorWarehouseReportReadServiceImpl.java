@@ -1,9 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.dao.DoctorWarehousePurchaseDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
@@ -13,13 +11,11 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
-import io.terminus.doctor.common.enums.WareHouseType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

@@ -9,9 +9,13 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.basic.service.warehouseV2.*;
+import io.terminus.doctor.user.service.DoctorUserProfileReadService;
+import io.terminus.doctor.web.front.controller.UserProfiles;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStockStatisticsVo;
+import io.terminus.parana.user.model.UserProfile;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -39,12 +43,24 @@ public class StockController {
     private DoctorGroupWebService doctorGroupWebService;
 
     @RpcConsumer
+    private DoctorUserProfileReadService doctorUserProfileReadService;
+
+    @RpcConsumer
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
 
     @RequestMapping(method = RequestMethod.PUT, value = "in")
     public boolean in(@RequestBody @Validated WarehouseStockInDto stockIn, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
+
+        Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockIn.getOperatorId());
+        if (!userResponse.isSuccess())
+            throw new JsonResponseException(userResponse.getError());
+        if (null == userResponse.getResult())
+            throw new JsonResponseException("user.not.found");
+        stockIn.setOperatorName(userResponse.getResult().getRealName());
+
+
         Response<Boolean> response = doctorWarehouseStockWriteService.in(stockIn);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
@@ -57,6 +73,13 @@ public class StockController {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
+
+        Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockOut.getOperatorId());
+        if (!userResponse.isSuccess())
+            throw new JsonResponseException(userResponse.getError());
+        if (null == userResponse.getResult())
+            throw new JsonResponseException("user.not.found");
+        stockOut.setOperatorName(userResponse.getResult().getRealName());
 
         stockOut.getDetails().forEach(detail -> {
             Response<String> realNameResponse = doctorGroupWebService.findRealName(detail.getApplyStaffId());
@@ -77,6 +100,14 @@ public class StockController {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
+
+        Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockInventory.getOperatorId());
+        if (!userResponse.isSuccess())
+            throw new JsonResponseException(userResponse.getError());
+        if (null == userResponse.getResult())
+            throw new JsonResponseException("user.not.found");
+        stockInventory.setOperatorName(userResponse.getResult().getRealName());
+
         Response<Boolean> response = doctorWarehouseStockWriteService.inventory(stockInventory);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
@@ -88,6 +119,13 @@ public class StockController {
     public boolean transfer(@RequestBody @Validated WarehouseStockTransferDto stockTransfer, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
+
+        Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockTransfer.getOperatorId());
+        if (!userResponse.isSuccess())
+            throw new JsonResponseException(userResponse.getError());
+        if (null == userResponse.getResult())
+            throw new JsonResponseException("user.not.found");
+        stockTransfer.setOperatorName(userResponse.getResult().getRealName());
 
         Response<Boolean> response = doctorWarehouseStockWriteService.transfer(stockTransfer);
         if (!response.isSuccess())

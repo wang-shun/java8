@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * Desc:
  * Mail: [ your email ]
- * Date: 2017-08-28 10:22:54
+ * Date: 2017-08-29 22:04:30
  * Created by [ your name ]
  */
 @Data
@@ -20,7 +20,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class DoctorWarehouseMaterialHandle implements Serializable {
 
-    private static final long serialVersionUID = 4487094125372765248L;
+    private static final long serialVersionUID = 4518511555849990074L;
 
     /**
      * 自增主键
@@ -106,6 +106,16 @@ public class DoctorWarehouseMaterialHandle implements Serializable {
      * 处理月
      */
     private Integer handleMonth;
+    
+    /**
+     * 操作人编号
+     */
+    private Long operatorId;
+    
+    /**
+     * 操作人名
+     */
+    private String operatorName;
     
     /**
      * 创建时间

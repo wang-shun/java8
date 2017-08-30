@@ -1369,4 +1369,10 @@ CREATE TABLE `doctor_warehouse_stock` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8 COMMENT='仓库物料库存表';
 
+--2017-08-29 物料处理表添加操作人字段
+ALTER TABLE `doctor_warehouse_material_handle`
+ADD COLUMN `operator_id` BIGINT(20) NULL COMMENT '操作人编号' AFTER `handle_month`,
+ADD COLUMN `operator_name` VARCHAR(64) NULL COMMENT '操作人名' AFTER `operator_id`;
+
+
 

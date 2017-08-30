@@ -19,7 +19,6 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteSer
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseMaterialEventVo;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.impl.execchain.TunnelRefusedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -57,6 +56,7 @@ public class EventController {
     public Paging<WarehouseMaterialEventVo> paging(
             @RequestParam Long farmId,
             @RequestParam(required = false) Integer type,//1入库2出库
+            @RequestParam(required = false) Long materialId,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
             @RequestParam(required = false) Integer pageNo,
@@ -65,16 +65,40 @@ public class EventController {
 
         List<Integer> types = new ArrayList<>();
         if (type != null) {
-            if (1 == type) {
-                types.add(WarehouseMaterialHandleType.IN.getValue());
-                types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
-                types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
-            } else if (2 == type) {
-                types.add(WarehouseMaterialHandleType.OUT.getValue());
-                types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
-                types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
-            } else
-                throw new JsonResponseException("warehouse.event.type.not.support");
+            switch (type) {
+                case 1:
+                    types.add(WarehouseMaterialHandleType.IN.getValue());
+                    types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
+                    types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
+                    break;
+                case 2:
+                    types.add(WarehouseMaterialHandleType.OUT.getValue());
+                    types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
+                    types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
+                    break;
+                case 3:
+                    types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
+                    types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
+                    break;
+                case 4:
+                    types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
+                    types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
+                    break;
+                case 9:
+                    types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
+                    break;
+                case 10:
+                    types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
+                    break;
+                case 7:
+                    types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
+                    break;
+                case 8:
+                    types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
+                    break;
+                default:
+                    throw new JsonResponseException("warehouse.event.type.not.support");
+            }
         }
 
         if (null != startDate && null == endDate)
@@ -87,6 +111,7 @@ public class EventController {
         criteria.put("startDate", startDate);
         criteria.put("endDate", endDate);
         criteria.put("bigType", types);
+        criteria.put("materialId", materialId);
 
         Response<Paging<DoctorWarehouseMaterialHandle>> handleResponse = doctorWarehouseMaterialHandleReadService.advPaging(pageNo, pageSize, criteria);
         if (!handleResponse.isSuccess())
@@ -126,6 +151,8 @@ public class EventController {
                     .amount(handle.getQuantity().multiply(new BigDecimal(handle.getUnitPrice())).longValue())
                     .vendorName(handle.getVendorName())
                     .allowDelete(allowDelete)
+                    .operatorId(handle.getOperatorId())
+                    .operatorName(handle.getOperatorName())
                     .build());
         }
 

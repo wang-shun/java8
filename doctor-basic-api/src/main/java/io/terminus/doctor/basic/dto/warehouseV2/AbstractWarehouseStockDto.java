@@ -22,4 +22,6 @@ public class AbstractWarehouseStockDto {
 
     @NotNull(message = "warehouse.stock.operator.id.null")
     private Long operatorId;
+
+    private String operatorName;
 }

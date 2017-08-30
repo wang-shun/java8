@@ -41,4 +41,8 @@ public class WarehouseMaterialEventVo {
 
     private boolean allowDelete;
 
+    private Long operatorId;
+
+    private String operatorName;
+
 }

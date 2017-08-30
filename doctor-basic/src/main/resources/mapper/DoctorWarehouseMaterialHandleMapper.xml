@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-08-28 10:22:54
+ ~ Date: 2017-08-29 22:04:30
  ~ Created by [ your name ]
 -->
 
@@ -26,6 +26,8 @@
         <result property="handleDate" column="handle_date"/>
         <result property="handleYear" column="handle_year"/>
         <result property="handleMonth" column="handle_month"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -40,12 +42,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_trasnfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `quantity`, `handle_date`, `handle_year`, `handle_month`, 
+        `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_trasnfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTrasnferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, 
+        #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTrasnferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, 
         now(), now()
     </sql>
 
@@ -67,6 +69,8 @@
             <if test="handleDate != null">AND `handle_date` = #{handleDate}</if>
             <if test="handleYear != null">AND `handle_year` = #{handleYear}</if>
             <if test="handleMonth != null">AND `handle_month` = #{handleMonth}</if>
+            <if test="operatorId != null">AND `operator_id` = #{operatorId}</if>
+            <if test="operatorName != null">AND `operator_name` = #{operatorName}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
@@ -89,6 +93,8 @@
             <if test="handleDate != null">AND `handle_date` = #{handleDate}</if>
             <if test="handleYear != null">AND `handle_year` = #{handleYear}</if>
             <if test="handleMonth != null">AND `handle_month` = #{handleMonth}</if>
+            <if test="operatorId != null">AND `operator_id` = #{operatorId}</if>
+            <if test="operatorName != null">AND `operator_name` = #{operatorName}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
             <if test="bigType != null and bigType.size() > 0">
@@ -149,6 +155,8 @@
             <if test="handleDate != null">`handle_date` = #{handleDate},</if>
             <if test="handleYear != null">`handle_year` = #{handleYear},</if>
             <if test="handleMonth != null">`handle_month` = #{handleMonth},</if>
+            <if test="operatorId != null">`operator_id` = #{operatorId},</if>
+            <if test="operatorName != null">`operator_name` = #{operatorName},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}
@@ -184,9 +192,6 @@
         SELECT COUNT(1)
         FROM <include refid="tb"/>
         <include refid="adv_criteria"/>
-        <where>
-
-        </where>
     </select>
 
     <select id="advPaging" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">

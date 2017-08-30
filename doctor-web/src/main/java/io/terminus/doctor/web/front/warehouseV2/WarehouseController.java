@@ -14,11 +14,8 @@ import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
-import io.terminus.doctor.basic.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.basic.service.warehouseV2.*;
@@ -38,14 +35,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
-import sun.nio.cs.FastCharsetProvider;
 
 import javax.validation.Valid;
 
 import java.math.BigDecimal;
-import java.sql.Ref;
 import java.util.*;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
