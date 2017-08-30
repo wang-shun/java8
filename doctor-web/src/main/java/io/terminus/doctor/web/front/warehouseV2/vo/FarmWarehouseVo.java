@@ -16,6 +16,8 @@ public class FarmWarehouseVo {
 
     private Integer type;
 
+    private Long managerId;
+
     private String managerName;
 
     /**

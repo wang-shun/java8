@@ -318,6 +318,7 @@ public class WarehouseController {
             vo.setName(wareHouse.getWareHouseName());
             vo.setType(wareHouse.getType());
             vo.setManagerName(wareHouse.getManagerName());
+            vo.setManagerId(wareHouse.getManagerId());
 
             WarehouseStockStatisticsDto warehouseStatistics = statisticsResponse.getResult().get(wareHouse.getId());
             if (null == warehouseStatistics) {
