@@ -135,9 +135,9 @@ public class FormulaController {
 
     @RequestMapping(method = RequestMethod.POST, value = "produce")
     public boolean produce(@RequestParam("farmId") Long farmId,
-                        @RequestParam("warehouseId") Long warehouseId,
-                        @RequestParam("feedFormulaId") Long feedFormulaId,
-                        @RequestParam("materialProduceJson") String materialProduceJson) {
+                           @RequestParam("warehouseId") Long warehouseId,
+                           @RequestParam("feedFormulaId") Long feedFormulaId,
+                           @RequestParam("materialProduceJson") String materialProduceJson) {
 
         FeedFormula feedFormula = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(feedFormulaId));
 
@@ -171,6 +171,7 @@ public class FormulaController {
             detail.setMaterialId(entry.getMaterialId());
             detail.setMaterialName(entry.getMaterialName());
             detail.setQuantity(new BigDecimal(entry.getMaterialCount()));
+            details.add(detail);
         }
         formulaDto.setDetails(details);
         Response<Boolean> response = doctorWarehouseStockWriteService.formula(formulaDto);
