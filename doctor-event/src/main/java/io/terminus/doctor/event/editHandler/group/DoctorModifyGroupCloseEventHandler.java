@@ -4,6 +4,7 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -28,7 +29,8 @@ public class DoctorModifyGroupCloseEventHandler extends DoctorAbstractModifyGrou
                 return false;
             }
         }
-        return true;
+        DoctorBarn doctorBarn = doctorBarnDao.findById(deleteGroupEvent.getBarnId());
+        return Objects.equals(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue());
     }
 
     @Override

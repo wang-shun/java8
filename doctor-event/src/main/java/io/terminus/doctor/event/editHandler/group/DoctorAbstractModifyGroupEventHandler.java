@@ -8,6 +8,7 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
@@ -22,6 +23,7 @@ import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
@@ -61,6 +63,8 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
     @Autowired
     protected DoctorDailyReportManager doctorDailyReportManager;
+    @Autowired
+    protected DoctorBarnDao doctorBarnDao;
 
     @Autowired
     protected DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
@@ -232,6 +236,10 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         DoctorGroupEvent closeEvent = doctorGroupEventDao.findCloseGroupByGroupId(groupTrack.getGroupId());
         //1.数量不为0,却已关闭
         if (!Objects.equals(groupTrack.getQuantity(), 0) && notNull(closeEvent)) {
+            DoctorBarn doctorBarn = doctorBarnDao.findById(closeEvent.getBarnId());
+            expectTrue(Objects.equals(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue())
+                    , "barn.is.not.used", doctorBarn.getName());
+
             DoctorGroup group = doctorGroupDao.findById(groupTrack.getGroupId());
             if (Objects.equals(group.getPigType(), PigType.DELIVER_SOW.getValue())) {
                 List<DoctorGroup> groupList = doctorGroupDao.findByCurrentBarnId(group.getCurrentBarnId());
