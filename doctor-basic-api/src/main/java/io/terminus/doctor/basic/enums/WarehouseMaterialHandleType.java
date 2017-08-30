@@ -1,8 +1,14 @@
 package io.terminus.doctor.basic.enums;
 
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -87,6 +93,49 @@ public enum WarehouseMaterialHandleType {
 
     public static WarehouseMaterialHandleType fromValue(int value) {
         return Stream.of(WarehouseMaterialHandleType.values()).parallel().filter(t -> t.value == value).findFirst().orElseThrow(() -> new ServiceException("unknown.warehouse.material.handle.flag"));
+    }
+
+    public static List<Integer> getGroupType(Integer type) {
+        if (null == type)
+            return Collections.emptyList();
+
+        List<Integer> types = new ArrayList<>();
+
+        switch (type) {
+            case 1:
+                types.add(WarehouseMaterialHandleType.IN.getValue());
+                types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
+                types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
+                break;
+            case 2:
+                types.add(WarehouseMaterialHandleType.OUT.getValue());
+                types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
+                types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
+                break;
+            case 3:
+                types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
+                types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
+                break;
+            case 4:
+                types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
+                types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
+                break;
+            case 9:
+                types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
+                break;
+            case 10:
+                types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
+                break;
+            case 7:
+                types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
+                break;
+            case 8:
+                types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
+                break;
+            default:
+                throw new JsonResponseException("warehouse.event.type.not.support");
+        }
+        return types;
     }
 
 }
