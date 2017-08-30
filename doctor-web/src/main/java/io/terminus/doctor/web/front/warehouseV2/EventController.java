@@ -63,43 +63,7 @@ public class EventController {
             @RequestParam(required = false) Integer pageSize) {
 
 
-        List<Integer> types = new ArrayList<>();
-        if (type != null) {
-            switch (type) {
-                case 1:
-                    types.add(WarehouseMaterialHandleType.IN.getValue());
-                    types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
-                    types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
-                    break;
-                case 2:
-                    types.add(WarehouseMaterialHandleType.OUT.getValue());
-                    types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
-                    types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
-                    break;
-                case 3:
-                    types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
-                    types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
-                    break;
-                case 4:
-                    types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
-                    types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
-                    break;
-                case 9:
-                    types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
-                    break;
-                case 10:
-                    types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
-                    break;
-                case 7:
-                    types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
-                    break;
-                case 8:
-                    types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
-                    break;
-                default:
-                    throw new JsonResponseException("warehouse.event.type.not.support");
-            }
-        }
+        List<Integer> types = WarehouseMaterialHandleType.getGroupType(type);
 
         if (null != startDate && null == endDate)
             endDate = new Date();
@@ -165,6 +129,7 @@ public class EventController {
     @RequestMapping(method = RequestMethod.GET, value = "export")
     public void export(@RequestParam Long farmId,
                        @RequestParam(required = false) Integer type,//1入库2出库
+                       @RequestParam(required = false) Long materialId,
                        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
                        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
                        HttpServletRequest request,
@@ -175,23 +140,15 @@ public class EventController {
         if (null != startDate && null != endDate && startDate.after(endDate))
             throw new JsonResponseException("start.date.after.end.date");
 
+        List<Integer> types = WarehouseMaterialHandleType.getGroupType(type);
+
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("farmId", farmId);
         criteria.put("startDate", startDate);
         criteria.put("endDate", endDate);
-        List<Integer> types = new ArrayList<>();
-        if (null != type) {
-            if (1 == type) {
-                types.add(WarehouseMaterialHandleType.IN.getValue());
-                types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
-                types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
-            } else if (2 == type) {
-                types.add(WarehouseMaterialHandleType.OUT.getValue());
-                types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
-                types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
-            } else
-                throw new JsonResponseException("warehouse.event.type.not.support");
-        }
+        criteria.put("bigType", types);
+        criteria.put("materialId", materialId);
+
         Response<List<DoctorWarehouseMaterialHandle>> handleResponse = doctorWarehouseMaterialHandleReadService.advList(criteria);
         if (!handleResponse.isSuccess())
             throw new JsonResponseException(handleResponse.getError());
