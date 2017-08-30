@@ -476,7 +476,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 materialHandle.setUnit(stocks.get(0).getUnit());
                 handleContext.setMaterialHandle(Collections.singletonList(materialHandle));
 
-                if(!detail.getJustOut()) {
+                if (!detail.getJustOut()) {
                     DoctorWarehouseMaterialApply materialApply = new DoctorWarehouseMaterialApply();
                     materialApply.setWarehouseId(stockOut.getWarehouseId());
                     materialApply.setFarmId(stockOut.getFarmId());
@@ -719,7 +719,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             throw new JsonResponseException(wareHouseResponse.getError());
         DoctorWareHouse wareHouse = wareHouseResponse.getResult();
         if (null == wareHouse)
-            throw new JsonResponseException("warehouse.not.found");
+            throw new ServiceException("warehouse.not.found");
 
         //先过滤一遍。
         details.forEach(detail -> {
@@ -727,6 +727,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 throw new ServiceException("material.not.allow.in.this.warehouse");
         });
 
+        if (details.isEmpty())
+            throw new ServiceException("stock.material.id.null");
 
         List<DoctorBasicMaterial> supportedMaterials = doctorBasicMaterialDao.findByIdsAndType(wareHouse.getType().longValue(), details.stream().map(AbstractWarehouseStockDetail::getMaterialId).collect(Collectors.toList()));
         if (null == supportedMaterials)
