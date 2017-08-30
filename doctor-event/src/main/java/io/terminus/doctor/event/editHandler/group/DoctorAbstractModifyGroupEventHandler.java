@@ -244,6 +244,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             //(2).更新猪群状态
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
             doctorGroupDao.update(group);
+
+            groupTrack.setCloseAt(DateUtil.toDate("1970-01-01"));
+            doctorGroupTrackDao.update(groupTrack);
             return;
         }
 
