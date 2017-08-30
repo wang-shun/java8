@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.dto.warehouseV2;
 
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,6 +16,8 @@ public class WarehouseFormulaDto extends AbstractWarehouseStockDto implements Se
     private static final long serialVersionUID = 7140313825441452732L;
 
     private Long feedMaterialId;
+
+    private DoctorBasicMaterial feedMaterial;
 
     private BigDecimal feedMaterialQuantity;
 

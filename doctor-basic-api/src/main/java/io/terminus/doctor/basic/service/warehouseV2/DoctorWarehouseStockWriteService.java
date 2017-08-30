@@ -88,6 +88,8 @@ public interface DoctorWarehouseStockWriteService {
     Response<Boolean> formula(WarehouseFormulaDto formulaDto);
 
 
+
+
     @Deprecated
     Response<Boolean> outAndIn(List<DoctorWarehouseStockHandleDto> inHandles, List<DoctorWarehouseStockHandleDto> outHandles, DoctorWarehouseStockHandler handle);
 

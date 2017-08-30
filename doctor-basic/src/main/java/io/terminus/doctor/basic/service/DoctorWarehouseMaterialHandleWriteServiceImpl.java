@@ -8,6 +8,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleWriteService;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +62,16 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
                 return Response.ok(true);
             }
 
+            if (WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType() ||
+                    WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType() ||
+                    WarehouseMaterialHandleType.IN.getValue() == handle.getType()) {
+
+            } else if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType() ||
+                    WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue() == handle.getType() ||
+                    WarehouseMaterialHandleType.OUT.getValue() == handle.getType()) {
+
+            } else
+                return Response.fail("not.support.material.handle.type");
 
 
             handle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());

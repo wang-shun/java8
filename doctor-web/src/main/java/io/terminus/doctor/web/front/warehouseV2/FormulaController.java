@@ -156,13 +156,16 @@ public class FormulaController {
         checkState(Objects.equals(wareHouse.getType(), feed.getType()), "produce.targetWarehouseType.fail");
 
 
+
         List<FeedFormula.MaterialProduceEntry> totalOut = new ArrayList<>(feedProduce.getMaterialProduceEntries());
-        totalOut.addAll(feedProduce.getMedicalProduceEntries());
+        if (null != feedProduce.getMedicalProduceEntries() && !feedProduce.getMedicalProduceEntries().isEmpty())
+            totalOut.addAll(feedProduce.getMedicalProduceEntries());
 
         WarehouseFormulaDto formulaDto = new WarehouseFormulaDto();
         formulaDto.setFarmId(farmId);
         formulaDto.setWarehouseId(warehouseId);
         formulaDto.setHandleDate(new Date());
+        formulaDto.setFeedMaterial(feed);
         formulaDto.setFeedMaterialId(feed.getId());
         formulaDto.setFeedMaterialQuantity(new BigDecimal(feedProduce.getTotal()));
         List<WarehouseFormulaDto.WarehouseFormulaDetail> details = new ArrayList<>();
