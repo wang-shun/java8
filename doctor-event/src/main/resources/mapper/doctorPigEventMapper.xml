@@ -1017,7 +1017,7 @@
         ifnull(round(AVG (live_count), 2), 0) avgPigLetCount,
         ifnull(round(AVG (wean_count), 2), 0) avgWeanCount,
         ifnull(round(sum(farrow_weight) / sum(live_count), 2), 0) avgBirthWeight,
-        ifnull(round(AVG (wean_count * wean_avg_weight), 2), 0) avgWeanWeight,
+        ifnull(round(AVG (wean_avg_weight), 2), 0) avgWeanWeight,
         ifnull(round(AVG (health_count), 2), 0) avgHealthCount,
         ifnull(round(AVG (weak_count), 2), 0) avgWeakCount,
         ifnull(round(AVG (dead_count), 2), 0) avgDeadCount,
