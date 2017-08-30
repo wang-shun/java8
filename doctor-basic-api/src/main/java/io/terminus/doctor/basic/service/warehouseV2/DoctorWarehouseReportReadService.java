@@ -56,7 +56,7 @@ public interface DoctorWarehouseReportReadService {
      * @param farmId
      * @return
      */
-    Response<Map<Long, AmountAndQuantityDto>> countEachWarehouseBalance(Long farmId);
+    Response<Map<Long, AmountAndQuantityDto>> countEachWarehouseBalance(Long farmId,Integer warehouseType);
 
     Response<Map<Long/*materialID*/, AmountAndQuantityDto>> countEachMaterialBalance(Long farmId, Long warehouId);
 
@@ -121,7 +121,7 @@ public interface DoctorWarehouseReportReadService {
 
     Response<Map<Integer, WarehouseStockStatisticsDto>> countMaterialHandleByFarmAndWarehouseType(Long farmId, Calendar handleDate, WarehouseMaterialHandleType... types);
 
-    Response<Map<Long, WarehouseStockStatisticsDto>> countMaterialHandleByFarm(Long farmId, Calendar handleDate, WarehouseMaterialHandleType... types);
+    Response<Map<Long, WarehouseStockStatisticsDto>> countMaterialHandleByFarm(Long farmId,Integer warehouseType, Calendar handleDate, WarehouseMaterialHandleType... types);
 
     Response<Map<Long, WarehouseStockStatisticsDto>> countMaterialHandleByWarehouse(Long farmId, Long warehouseId, Calendar handleDate, WarehouseMaterialHandleType... types);
 

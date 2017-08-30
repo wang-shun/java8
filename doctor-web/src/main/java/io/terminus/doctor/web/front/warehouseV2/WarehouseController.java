@@ -297,7 +297,7 @@ public class WarehouseController {
             throw new JsonResponseException(warehouseResponse.getError());
 
         Calendar now = Calendar.getInstance();
-        Response<Map<Long, WarehouseStockStatisticsDto>> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByFarm(farmId, now,
+        Response<Map<Long, WarehouseStockStatisticsDto>> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByFarm(farmId, null,now,
                 WarehouseMaterialHandleType.IN,
                 WarehouseMaterialHandleType.OUT,
                 WarehouseMaterialHandleType.TRANSFER_IN,
@@ -305,7 +305,7 @@ public class WarehouseController {
         if (!statisticsResponse.isSuccess())
             throw new JsonResponseException(statisticsResponse.getError());
 
-        Response<Map<Long, AmountAndQuantityDto>> warehouseBalanceResponse = doctorWarehouseReportReadService.countEachWarehouseBalance(farmId);
+        Response<Map<Long, AmountAndQuantityDto>> warehouseBalanceResponse = doctorWarehouseReportReadService.countEachWarehouseBalance(farmId,null);
         if (!warehouseBalanceResponse.isSuccess())
             throw new JsonResponseException(warehouseBalanceResponse.getError());
 
@@ -742,13 +742,16 @@ public class WarehouseController {
 
             } else if ("warehouse".equals(group)) {
 
-                Response<Map<Long/*warehouseId*/, AmountAndQuantityDto>> balanceResponse = doctorWarehouseReportReadService.countEachWarehouseBalance(farmId);
+                Response<Map<Long/*warehouseId*/, AmountAndQuantityDto>> balanceResponse = doctorWarehouseReportReadService.countEachWarehouseBalance(farmId, warehouseType);
                 if (!balanceResponse.isSuccess())
                     throw new JsonResponseException(balanceResponse.getError());
-                Response<Map<Long, WarehouseStockStatisticsDto>> statisticsDtoResponse = doctorWarehouseReportReadService.countMaterialHandleByFarm(farmId, date, handleTypes);
+                Response<Map<Long, WarehouseStockStatisticsDto>> statisticsDtoResponse = doctorWarehouseReportReadService.countMaterialHandleByFarm(farmId, warehouseType, date, handleTypes);
                 if (!statisticsDtoResponse.isSuccess())
                     throw new JsonResponseException(statisticsDtoResponse.getError());
-                Response<List<DoctorWareHouse>> warehouseResponse = doctorWarehouseReaderService.findByFarmId(farmId);
+                Response<List<DoctorWareHouse>> warehouseResponse = doctorWarehouseReaderService.list(DoctorWareHouse.builder()
+                        .farmId(farmId)
+                        .type(warehouseType)
+                        .build());
                 if (!warehouseResponse.isSuccess())
                     throw new JsonResponseException(warehouseResponse.getError());
                 for (DoctorWareHouse warehouse : warehouseResponse.getResult()) {

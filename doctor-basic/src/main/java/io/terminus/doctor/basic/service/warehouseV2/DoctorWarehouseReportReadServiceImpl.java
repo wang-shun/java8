@@ -90,10 +90,11 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
     }
 
     @Override
-    public Response<Map<Long, AmountAndQuantityDto>> countEachWarehouseBalance(Long farmId) {
+    public Response<Map<Long, AmountAndQuantityDto>> countEachWarehouseBalance(Long farmId, Integer warehouseType) {
 
         Map<Long, List<DoctorWarehousePurchase>> warehousePurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
                 .farmId(farmId)
+                .warehouseType(warehouseType)
                 .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
                 .build()).stream().collect(Collectors.groupingBy(DoctorWarehousePurchase::getWarehouseId));
 
@@ -188,20 +189,20 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
     @Override
     public Response<Map<Long, WarehouseStockStatisticsDto>> countMaterialHandleEveryWarehouse(Long farmId, Calendar handleDate) {
 
-        return countMaterialHandleByFarm(farmId, handleDate, ALL_KIND_OF_HANDLE);
+        return countMaterialHandleByFarm(farmId, null, handleDate, ALL_KIND_OF_HANDLE);
     }
 
     @Override
     public Response<WarehouseStockStatisticsDto> countMaterialHandle(Long farmId, Calendar handleDate, WarehouseMaterialHandleType... types) {
 
-        return Response.ok(countMaterialHandle(findMaterialHandleByFarm(farmId, handleDate, types)));
+        return Response.ok(countMaterialHandle(findMaterialHandleByFarm(farmId, null, handleDate, types)));
     }
 
     @Override
     public Response<Map<Integer, WarehouseStockStatisticsDto>> countMaterialHandleByFarmAndWarehouseType(Long farmId, Calendar handleDate, WarehouseMaterialHandleType... types) {
 
         Map<Integer/*warehouse type*/, WarehouseStockStatisticsDto> statistics = new HashMap<>(5);
-        Map<Integer, List<DoctorWarehouseMaterialHandle>> handleGroupByWarehouseType = findMaterialHandleByFarm(farmId, handleDate, types).stream().
+        Map<Integer, List<DoctorWarehouseMaterialHandle>> handleGroupByWarehouseType = findMaterialHandleByFarm(farmId, null, handleDate, types).stream().
                 collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getType));
         for (Integer type : handleGroupByWarehouseType.keySet()) {
             statistics.put(type, countMaterialHandle(handleGroupByWarehouseType.get(type)));
@@ -211,10 +212,10 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
     }
 
     @Override
-    public Response<Map<Long, WarehouseStockStatisticsDto>> countMaterialHandleByFarm(Long farmId, Calendar handleDate, WarehouseMaterialHandleType... types) {
+    public Response<Map<Long, WarehouseStockStatisticsDto>> countMaterialHandleByFarm(Long farmId, Integer warehouseType, Calendar handleDate, WarehouseMaterialHandleType... types) {
 
         Map<Long, WarehouseStockStatisticsDto> statistics = new HashMap<>();
-        Map<Long, List<DoctorWarehouseMaterialHandle>> handleGroupByWarehouse = findMaterialHandleByFarm(farmId, handleDate, types).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getWarehouseId));
+        Map<Long, List<DoctorWarehouseMaterialHandle>> handleGroupByWarehouse = findMaterialHandleByFarm(farmId, warehouseType, handleDate, types).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getWarehouseId));
         for (Long warehouseId : handleGroupByWarehouse.keySet()) {
             statistics.put(warehouseId, countMaterialHandle(handleGroupByWarehouse.get(warehouseId)));
         }
@@ -248,7 +249,7 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
 
     @Override
     public Response<WarehouseStockStatisticsDto> countMaterialHandleByMaterialVendor(Long warehouseId, Long materialId, String vendorName, Calendar handleDate, WarehouseMaterialHandleType... types) {
-        return Response.ok(countMaterialHandle(findMaterialHandleByMaterialVendor(null, warehouseId, materialId, vendorName, handleDate, types)));
+        return Response.ok(countMaterialHandle(findMaterialHandleByMaterialVendor(null, null, warehouseId, materialId, vendorName, handleDate, types)));
     }
 
     @Override
@@ -335,25 +336,26 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
                 .build();
     }
 
-    private List<DoctorWarehouseMaterialHandle> findMaterialHandleByFarm(Long farmId, Calendar handleDate, WarehouseMaterialHandleType... types) {
+    private List<DoctorWarehouseMaterialHandle> findMaterialHandleByFarm(Long farmId, Integer warehouseType, Calendar handleDate, WarehouseMaterialHandleType... types) {
 
-        return findMaterialHandleByMaterialVendor(farmId, null, null, null, handleDate, types);
+        return findMaterialHandleByMaterialVendor(farmId, warehouseType, null, null, null, handleDate, types);
     }
 
     private List<DoctorWarehouseMaterialHandle> findMaterialHandleByWarehouse(Long warehouseId, Calendar handleDate, WarehouseMaterialHandleType... types) {
-        return findMaterialHandleByMaterialVendor(null, warehouseId, null, null, handleDate, types);
+        return findMaterialHandleByMaterialVendor(null, null, warehouseId, null, null, handleDate, types);
     }
 
 
     private List<DoctorWarehouseMaterialHandle> findMaterialHandleByMaterial(Long warehouseId, Long materialId, Calendar handleDate, WarehouseMaterialHandleType... types) {
-        return findMaterialHandleByMaterialVendor(null, warehouseId, materialId, null, handleDate, types);
+        return findMaterialHandleByMaterialVendor(null, null, warehouseId, materialId, null, handleDate, types);
     }
 
-    private List<DoctorWarehouseMaterialHandle> findMaterialHandleByMaterialVendor(Long farmId, Long warehouseId, Long materialId, String vendorName, Calendar handleDate, WarehouseMaterialHandleType... types) {
+    private List<DoctorWarehouseMaterialHandle> findMaterialHandleByMaterialVendor(Long farmId, Integer warehouseType, Long warehouseId, Long materialId, String vendorName, Calendar handleDate, WarehouseMaterialHandleType... types) {
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("farmId", farmId);
         criteria.put("warehouseId", warehouseId);
         criteria.put("materialId", materialId);
+        criteria.put("warehouseType", warehouseType);
         criteria.put("handleYear", handleDate.get(Calendar.YEAR));
         criteria.put("handleMonth", handleDate.get(Calendar.MONTH) + 1);
         criteria.put("deleteFlag", WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
