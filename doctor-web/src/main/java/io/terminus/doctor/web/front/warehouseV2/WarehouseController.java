@@ -275,6 +275,8 @@ public class WarehouseController {
                     .id(wareHouse.getId())
                     .name(wareHouse.getWareHouseName())
                     .type(type)
+                    .managerId(wareHouse.getManagerId())
+                    .managerName(wareHouse.getManagerName())
                     .lastApplyDate(lastApplyDate)
                     .balanceQuantity(balanceResponse.getResult().getQuantity())
                     .build());
