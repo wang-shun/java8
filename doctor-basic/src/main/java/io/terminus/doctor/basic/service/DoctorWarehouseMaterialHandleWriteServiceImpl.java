@@ -1,20 +1,26 @@
 package io.terminus.doctor.basic.service;
 
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 
 import io.terminus.common.model.Response;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
+import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleWriteService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Desc:
@@ -29,6 +35,8 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
 
     @Autowired
     private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
+    @Autowired
+    private DoctorWarehouseStockDao doctorWarehouseStockDao;
 
     @Override
     public Response<Long> create(DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle) {
@@ -62,13 +70,25 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
                 return Response.ok(true);
             }
 
-            if (WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType() ||
-                    WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType() ||
+            if (WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType() ||
                     WarehouseMaterialHandleType.IN.getValue() == handle.getType()) {
 
-            } else if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType() ||
-                    WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue() == handle.getType() ||
+
+            } else if (WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue() == handle.getType() ||
                     WarehouseMaterialHandleType.OUT.getValue() == handle.getType()) {
+
+                List<DoctorWarehouseStock> stock = doctorWarehouseStockDao.list(DoctorWarehouseStock.builder()
+                        .warehouseId(handle.getWarehouseId())
+                        .materialId(handle.getMaterialId())
+                        .vendorName(handle.getVendorName())
+                        .build());
+                if (null == stock || stock.isEmpty())
+                    throw new ServiceException("stock.not.found");
+                //出库，可能出多个供应商的库。应该入哪个供应商的？
+
+
+            } else if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()
+                    || WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()) {
 
             } else
                 return Response.fail("not.support.material.handle.type");
