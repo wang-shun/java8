@@ -97,7 +97,7 @@ public class DoctorBuilderCommonOperation {
 
         //事件
         PigEvent pigEvent = PigEvent.from(importPigEvent.getEventName());
-        expectTrue(notNull(pigEvent), "pigEvent");
+        expectTrue(notNull(pigEvent), "pigEvent.not.fund", importPigEvent.getEventName());
         inputDto.setEventName(pigEvent.getName());
         inputDto.setEventDesc(pigEvent.getDesc());
         inputDto.setEventType(pigEvent.getKey());
@@ -105,7 +105,7 @@ public class DoctorBuilderCommonOperation {
 
         //猪
         DoctorPig.PigSex pigSex = DoctorPig.PigSex.from(importPigEvent.getPigSex());
-        expectTrue(notNull(pigSex), "pigSex");
+        expectTrue(notNull(pigSex), "pigSex.not.fund", importPigEvent.getPigSex());
         if (!Objects.equals(pigEvent.getKey(), PigEvent.ENTRY.getKey())) {
             DoctorFarm farm = importBasicData.getDoctorFarm();
             DoctorPig pig = doctorPigDao.findPigByFarmIdAndPigCodeAndSex(farm.getId()

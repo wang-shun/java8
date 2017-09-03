@@ -1,12 +1,13 @@
 package io.terminus.doctor.move.aspect;
 
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.move.tools.DoctorMessageConverter;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintViolation;
@@ -23,18 +24,12 @@ import java.util.Set;
 @Component
 public class InvalidExceptionResolver {
     @Autowired
-    private MessageSource messageSource;
-//    private final static String ATTACH = ",猪号/猪群号:";
-//
-//    @AfterThrowing(value = "execution(* io.terminus.doctor.web.front.event.controller.*.*(..))", throwing = "ex")
-//    public void invalidException(final JoinPoint point, InvalidException ex) throws Exception {
-//
-//        String errorMessage = messageSource.getMessage(ex.getError(), ex.getParams(), Locale.CHINA);
-//        if (ex.isBatchEvent()) {
-//            errorMessage = errorMessage.concat(ATTACH).concat(ex.getAttach());
-//        }
-//        throw new JsonResponseException(errorMessage);
-//    }
+    private DoctorMessageConverter converter;
+
+    @AfterThrowing(value = "execution(* io.terminus.doctor.move.service.DoctorMoveAndImportService.*(..))", throwing = "ex")
+    public void invalidException(final JoinPoint point, InvalidException ex) throws Exception {
+        throw converter.convert(ex);
+    }
 
     @Before("execution(* io.terminus.doctor.move.tools.DoctorEventInputValidator.valid(..))")
     public void validate(final JoinPoint point) {

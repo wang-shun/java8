@@ -153,14 +153,15 @@ public class DoctorImportDataController {
         sheet.setStaff(getSheet(workbook, "员工"));
         sheet.setBarn(getSheet(workbook, "1.猪舍"));
         sheet.setBreed(getSheet(workbook, "2.品种"));
-        sheet.setPigEvent(getSheet(workbook, "3.猪事件"));
-        sheet.setGroupEvent(getSheet(workbook, "4.商品猪（猪群）事件"));
-        sheet.setWarehouse(getSheet(workbook, "5.仓库"));
-        sheet.setMedicine(getSheet(workbook, "6.药品"));
-        sheet.setVacc(getSheet(workbook, "7.疫苗"));
-        sheet.setMaterial(getSheet(workbook, "8.原料"));
-        sheet.setFeed(getSheet(workbook, "9.饲料"));
-        sheet.setConsume(getSheet(workbook, "10.易耗品"));
+        sheet.setSow(getSheet(workbook, "3.母猪信息"));
+        sheet.setBoar(getSheet(workbook, "4.公猪信息"));
+        sheet.setGroup(getSheet(workbook, "5.商品猪（猪群）信息"));
+        sheet.setWarehouse(getSheet(workbook, "6.仓库"));
+        sheet.setMedicine(getSheet(workbook, "7.药品"));
+        sheet.setVacc(getSheet(workbook, "8.疫苗"));
+        sheet.setMaterial(getSheet(workbook, "9.原料"));
+        sheet.setFeed(getSheet(workbook, "10.饲料"));
+        sheet.setConsume(getSheet(workbook, "11.易耗品"));
         Stopwatch watch = Stopwatch.createStarted();
 
         //创建导入记录
@@ -210,8 +211,9 @@ public class DoctorImportDataController {
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
         try {
             Workbook workbook = new HSSFWorkbook(new FileInputStream(new File(path)));
-            Sheet pigSheet = workbook.getSheet("3.猪事件");
-            doctorMoveAndImportService.importPig( pigSheet,
+            Sheet sowSheet = workbook.getSheet("3.母猪信息");
+            Sheet boarSheet = workbook.getSheet("4.公猪信息");
+            doctorMoveAndImportService.importPig(boarSheet, sowSheet,
                     doctorMoveAndImportService.packageImportBasicData(farm));
         } catch (IOException e) {
             e.printStackTrace();
@@ -223,8 +225,8 @@ public class DoctorImportDataController {
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
         try {
             Workbook workbook = new HSSFWorkbook(new FileInputStream(new File(path)));
-            Sheet pigSheet = workbook.getSheet("4.商品猪（猪群）事件");
-            doctorMoveAndImportService.importGroup( pigSheet,
+            Sheet groupSheet = workbook.getSheet("5.商品猪（猪群）信息");
+            doctorMoveAndImportService.importGroup(groupSheet,
                     doctorMoveAndImportService.packageImportBasicData(farm));
         } catch (IOException e) {
             e.printStackTrace();

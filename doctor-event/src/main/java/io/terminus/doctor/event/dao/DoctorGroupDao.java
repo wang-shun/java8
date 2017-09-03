@@ -149,6 +149,10 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
      * @param farmId 猪场id
      */
     public void deleteByFarmId(Long farmId) {
-        getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
+        deleteByFarmId(farmId, null);
+    }
+
+    public void deleteByFarmId(Long farmId, List<Integer> pigTypes)  {
+        getSqlSession().delete(sqlId("deleteByFarmId"), ImmutableMap.of("farmId", farmId, "pigTypes", pigTypes));
     }
 }

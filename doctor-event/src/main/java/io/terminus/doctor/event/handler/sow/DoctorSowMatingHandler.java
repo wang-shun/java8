@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -99,11 +100,13 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         super.specialHandle(doctorPigEvent, doctorPigTrack);
 
         Long boarId = JSON_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorMatingDto.class).getMatingBoarPigId();
-        DoctorPigTrack boarPigTrack = this.doctorPigTrackDao.findByPigId(boarId);
-        expectTrue(notNull(boarPigTrack), "boar.track.not.null", boarId);
-        Integer currentBoarParity = MoreObjects.firstNonNull(boarPigTrack.getCurrentParity(), 0) + 1;
-        boarPigTrack.setCurrentParity(currentBoarParity);
-        doctorPigTrackDao.update(boarPigTrack);
+        if (Objects.equals(doctorPigEvent.getSource(), SourceType.INPUT.getValue())) {
+            DoctorPigTrack boarPigTrack = this.doctorPigTrackDao.findByPigId(boarId);
+            expectTrue(notNull(boarPigTrack), "boar.track.not.null", boarId);
+            Integer currentBoarParity = MoreObjects.firstNonNull(boarPigTrack.getCurrentParity(), 0) + 1;
+            boarPigTrack.setCurrentParity(currentBoarParity);
+            doctorPigTrackDao.update(boarPigTrack);
+        }
     }
 
     @Override

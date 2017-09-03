@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * Created by xjn on 17/8/25.
- * 迁移基础数据
+ * Excel导入基础数据
  */
 @Data
 @Builder
@@ -19,8 +19,34 @@ import java.util.Map;
 @NoArgsConstructor
 public class DoctorImportBasicData {
 
+    /**
+     * 导入猪场
+     */
     private DoctorFarm doctorFarm;
+
+    /**
+     * 用户map,key:用户名、value:用户id
+     */
     private Map<String, Long> userMap;
+
+    /**
+     * 猪舍map,key:猪舍名,value:猪舍
+     */
     private Map<String, DoctorBarn> barnMap;
+
+    /**
+     * 品种map,key:品种名,value:品种id
+     */
     private Map<String, Long> breedMap;
+
+    /**
+     * 历史胎次默认妊娠舍
+     */
+    private DoctorBarn defaultPregBarn;
+
+    /**
+     * 历史胎次默认产房
+     */
+    private DoctorBarn defaultFarrowBarn;
+
 }

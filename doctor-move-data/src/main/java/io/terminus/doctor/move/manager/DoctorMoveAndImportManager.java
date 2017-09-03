@@ -1,6 +1,8 @@
 package io.terminus.doctor.move.manager;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -19,6 +21,7 @@ import io.terminus.doctor.move.model.View_EventListGain;
 import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.tools.DoctorImportEventExecutor;
 import io.terminus.doctor.move.tools.DoctorImportExcelAnalyzer;
+import io.terminus.doctor.move.tools.DoctorImportInputSplitter;
 import io.terminus.doctor.move.tools.DoctorMoveEventExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -57,6 +60,8 @@ public class DoctorMoveAndImportManager {
     private DoctorImportEventExecutor importEventExecutor;
     @Autowired
     private DoctorImportExcelAnalyzer importExcelAnalyzer;
+    @Autowired
+    private DoctorImportInputSplitter importInputSplitter;
 
     public void movePig(Long moveId, DoctorMoveBasicData moveBasicData) {
 
@@ -105,7 +110,7 @@ public class DoctorMoveAndImportManager {
         log.info("move group total:{}, event total:{}", newEventList.size(), allRawGroupEvent.size());
 
         try {
-            rollbackGroup(moveBasicData.getDoctorFarm().getId());
+            rollbackGroupForMove(moveBasicData.getDoctorFarm().getId());
 
             moveEventExecutor.executeNewGroupEvent(moveBasicData, newEventList);
             List<DoctorGroup> groupList = doctorGroupDao.findByFarmId(moveBasicData.getDoctorFarm().getId());
@@ -121,12 +126,15 @@ public class DoctorMoveAndImportManager {
         }
     }
 
-    public void importPig(Sheet pigSheet, DoctorImportBasicData importBasicData) {
-        List<DoctorImportPigEvent> importEventList = importExcelAnalyzer.getImportPigEvent(pigSheet);
+    public void importPig(Sheet boarSheet, Sheet sowSheet, DoctorImportBasicData importBasicData) {
+
+        List<DoctorImportPigEvent> importEventList = importInputSplitter
+                .splitForBoar(importExcelAnalyzer.getImportBoar(boarSheet));
+        importEventList.addAll(importInputSplitter.splitForSow(importExcelAnalyzer.getImportSow(sowSheet), importBasicData));
         log.info("pig event total:{}", importEventList.size());
 
         try {
-            rollbackPig(importBasicData.getDoctorFarm().getId());
+            rollbackPigForImport(importBasicData.getDoctorFarm().getId());
             importEventList.forEach(importPigEvent ->
                     importEventExecutor.executePigEvent(importBasicData, importPigEvent));
         } catch (Exception e) {
@@ -137,11 +145,13 @@ public class DoctorMoveAndImportManager {
     }
 
     public void importGroup(Sheet groupSheet, DoctorImportBasicData importBasicData) {
-        List<DoctorImportGroupEvent> importEventList = importExcelAnalyzer.getImportGroupEvent(groupSheet);
+        List<DoctorImportGroupEvent> importEventList = importInputSplitter
+                .splitForGroup(importExcelAnalyzer.getImportGroup(groupSheet));
+
         log.info("group event total:{}", importEventList.size());
 
         try {
-            rollbackGroup(importBasicData.getDoctorFarm().getId());
+            rollbackGroupForImport(importBasicData.getDoctorFarm().getId());
             importEventList.forEach(importGroupEvent ->
                     importEventExecutor.executeGroupEvent(importBasicData, importGroupEvent));
         } catch (Exception e) {
@@ -152,6 +162,10 @@ public class DoctorMoveAndImportManager {
 
     }
 
+    private void rollbackPigForImport(Long farmId) {
+        rollbackPig(farmId);
+        rollbackGroup(farmId, Lists.newArrayList(PigType.DELIVER_SOW.getValue()));
+    }
     private void rollbackPig(Long farmId) {
         //1、删除pig
         doctorPigDao.deleteByFarmId(farmId);
@@ -163,7 +177,7 @@ public class DoctorMoveAndImportManager {
         doctorPigEventDao.deleteByFarmId(farmId);
     }
 
-    private void rollbackGroup(Long farmId) {
+    private void rollbackGroupForMove(Long farmId) {
         //1、删除group
         doctorGroupDao.deleteByFarmId(farmId);
 
@@ -171,5 +185,21 @@ public class DoctorMoveAndImportManager {
 
         //3、删除groupEvent
         doctorGroupEventDao.deleteByFarmId(farmId);
+    }
+
+    private void rollbackGroupForImport(Long farmId) {
+        List<Integer> includePigTypes  = Lists.newArrayList(PigType.NURSERY_PIGLET.getValue(),
+                PigType.FATTEN_PIG.getValue(), PigType.RESERVE.getValue());
+        rollbackGroup(farmId, includePigTypes);
+    }
+
+    private void rollbackGroup(Long farmId, List<Integer> includePigTypes ) {
+        //1、删除group
+        doctorGroupDao.deleteByFarmId(farmId, includePigTypes);
+
+        //2、删除groupTrack // TODO: 17/8/23 暂不删除因为groupTrack表里没有farmId
+
+        //3、删除groupEvent
+        doctorGroupEventDao.deleteByFarmId(farmId, includePigTypes);
     }
 }

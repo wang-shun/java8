@@ -338,9 +338,15 @@
         AND out_id = #{OutId}
     </select>
 
-    <delete id="deleteByFarmId" parameterType="long" >
+    <delete id="deleteByFarmId" parameterType="map" >
         DELETE
         FROM <include refid="tb"/>
         WHERE farm_id = #{farmId}
+        <if test="pigTypes != null &amp;&amp; pigTypes.size()>0">
+            AND pig_type IN
+            <foreach collection="pigTypes" item="pigType" open="(" separator="," close=")" >
+                #{pigType}
+            </foreach>
+        </if>
     </delete>
 </mapper>

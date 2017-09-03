@@ -241,9 +241,9 @@ public class DoctorImportDataService {
             Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap2(farm.getId());
             Map<String, Long> breedMap = doctorMoveBasicService.getBreedMap();
 
-//            importBoar(farm, barnMap, breedMap, shit.getBoar());
-            importGroup(farm, barnMap, shit.getGroupEvent());
-//            importSow(farm, barnMap, breedMap, shit.getImportPigEvent());
+            importBoar(farm, barnMap, breedMap, shit.getBoar());
+            importGroup(farm, barnMap, shit.getGroup());
+            importSow(farm, barnMap, breedMap, shit.getSow());
 
             //刷新npd
             doctorMoveDataService.flushNpd(farm.getId());

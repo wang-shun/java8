@@ -32,11 +32,15 @@ public class DoctorImportPigEvent {
     private String mateBoarCode;          //配种公猪号
     private String mateOperator;          //配种员
     private String pregCheckResult;       //妊娠检查结果
-    private String toBarnName;            //去去分娩产房猪舍名
+    private String toBarnName;            //去分娩产房猪舍名
     private String farrowingType;         //分娩类型
     private Double birthNestAvg;          //出生窝重
     private Integer healthyCount;         //健仔数量(断奶事件校验对应的母猪状态信息)
     private Integer weakCount;            //弱仔数量
+    private Integer jixingCount;          //畸形
+    private Integer deadCount;            //死仔
+    private Integer mummyCount;           //木乃伊
+    private Integer blackCount;           //黑胎
     private Integer partWeanPigletsCount; //部分断奶数量
     private Double partWeanAvgWeight;     //断奶平均重量
     private String weanToBarn;            //断奶转入猪舍

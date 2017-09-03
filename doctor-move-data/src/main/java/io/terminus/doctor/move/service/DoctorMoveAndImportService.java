@@ -4,6 +4,7 @@ import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.dto.DoctorImportBasicData;
@@ -18,7 +19,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by xjn on 17/8/4.
@@ -81,10 +87,10 @@ public class DoctorMoveAndImportService {
         DoctorImportBasicData importBasicData = packageImportBasicData(farm);
 
         //导入猪事件
-        importPig(sheet.getPigEvent(), importBasicData);
+        importPig(sheet.getBoar(), sheet.getSow(), importBasicData);
 
         //导入猪群事件
-        importGroup(sheet.getGroupEvent(), importBasicData);
+        importGroup(sheet.getGroup(), importBasicData);
 
         //导入仓库
         importWareHouse();
@@ -108,8 +114,21 @@ public class DoctorMoveAndImportService {
         Map<String, Long> userMap = moveBasicService.getSubMap(farm.getOrgId());
         Map<String, DoctorBarn> barnMap = moveBasicService.getBarnMap2(farm.getId());
         Map<String, Long> breedMap = moveBasicService.getBreedMap();
-        return DoctorImportBasicData.builder().doctorFarm(farm).userMap(userMap)
-                .barnMap(barnMap).breedMap(breedMap).build();
+        DoctorBarn defaultPregBarn = null;
+        DoctorBarn defaultFarrowBarn = null;
+        for (DoctorBarn barn : barnMap.values()) {
+            if (isNull(defaultPregBarn)
+                    && Objects.equals(barn.getPigType(), PigType.PREG_SOW.getValue())) {
+                defaultPregBarn = barn;
+            }
+            if (isNull(defaultFarrowBarn)
+                    && Objects.equals(barn.getPigType(), PigType.DELIVER_SOW.getValue())) {
+                defaultFarrowBarn = barn;
+            }
+        }
+        expectTrue(notNull(defaultPregBarn) && notNull(defaultFarrowBarn), "default.barn.not.null");
+        return DoctorImportBasicData.builder().doctorFarm(farm).userMap(userMap).barnMap(barnMap)
+                .breedMap(breedMap).defaultPregBarn(defaultPregBarn).defaultFarrowBarn(defaultFarrowBarn).build();
     }
 
     private void importBasic(DoctorFarm farm, Sheet barnSheet, Sheet breedSheet) {
@@ -121,9 +140,9 @@ public class DoctorMoveAndImportService {
         log.info("import basic end");
     }
 
-    public void importPig(Sheet pigSheet, DoctorImportBasicData importBasicData) {
+    public void importPig(Sheet boarSheet, Sheet sowSheet, DoctorImportBasicData importBasicData) {
         log.info("import pig staring");
-        moveAndImportManager.importPig(pigSheet, importBasicData);
+        moveAndImportManager.importPig(boarSheet, sowSheet, importBasicData);
         log.info("import pig end");
     }
 

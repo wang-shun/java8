@@ -1,5 +1,6 @@
 package io.terminus.doctor.move.builder.pig;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.enums.FarrowingType;
@@ -64,11 +65,15 @@ public class DoctorFarrowInputBuilder implements DoctorPigEventInputBuilder {
         DoctorFarrowingDto farrow = new DoctorFarrowingDto();
         builderCommonOperation.fillPigEventCommonInput(farrow, importBasicData, importPigEvent);
 
-        farrow.setFarrowingDate(importPigEvent.getEventAt());           // 分娩日期
-        farrow.setWeakCount(importPigEvent.getWeakCount());             // 弱崽数量
-        farrow.setHealthCount(importPigEvent.getHealthyCount());        // 健仔数量
-        farrow.setFarrowingLiveCount(importPigEvent.getHealthyCount() +
-                importPigEvent.getWeakCount());                         //活仔数 = 健 + 弱
+        farrow.setFarrowingDate(importPigEvent.getEventAt());
+        farrow.setWeakCount(importPigEvent.getWeakCount());
+        farrow.setHealthCount(importPigEvent.getHealthyCount());
+        farrow.setJxCount(importPigEvent.getJixingCount());
+        farrow.setDeadCount(importPigEvent.getDeadCount());
+        farrow.setMnyCount(importPigEvent.getMummyCount());
+        farrow.setBlackCount(importPigEvent.getBlackCount());
+        farrow.setFarrowingLiveCount(MoreObjects.firstNonNull(importPigEvent.getHealthyCount(),0) +
+                MoreObjects.firstNonNull(importPigEvent.getWeakCount(), 0));
         farrow.setGroupCode(grateGroupCode(farrow.getBarnName(), farrow.eventAt()));                                          // 仔猪猪群Code
 
         FarrowingType farrowingType = FarrowingType.from(importPigEvent.getFarrowingType());
