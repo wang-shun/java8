@@ -25,6 +25,7 @@ import io.terminus.doctor.move.dto.DoctorImportPigEvent;
 import io.terminus.doctor.move.dto.DoctorImportSow;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -45,6 +46,9 @@ import static io.terminus.doctor.event.enums.PigEvent.*;
 @Slf4j
 @Component
 public class DoctorImportInputSplitter {
+    @Autowired
+    private DoctorImportValidator validator;
+
     private Map<String, List<PigEvent>> statusToEventMap = initStatusToEventMap();
 
     public List<DoctorImportPigEvent> splitForBoar(List<DoctorImportBoar> importBoarList) {
@@ -56,7 +60,7 @@ public class DoctorImportInputSplitter {
         preTreat(importSowList, importBasicData);
 
         List<DoctorImportPigEvent> list = Lists.newArrayList();
-        importSowList.forEach(importSow -> list.addAll(split(importSow)));
+        importSowList.forEach(importSow -> list.addAll(split(validator.valid(importSow))));
         return list;
     }
 

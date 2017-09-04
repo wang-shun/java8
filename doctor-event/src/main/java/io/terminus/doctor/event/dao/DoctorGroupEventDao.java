@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
@@ -250,7 +251,7 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      * @param farmId 猪场id
      */
     public void deleteByFarmId(Long farmId) {
-        getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
+        deleteByFarmId(farmId, Lists.newArrayList());
     }
 
     public void deleteByFarmId(Long farmId, List<Integer> pigTypes)  {

@@ -39,7 +39,7 @@ public class DoctorImportExcelAnalyzer {
         List<DoctorImportSow> importPigEventList = Lists.newArrayList();
         for (Row row : pigSheet) {
             if (row.getRowNum() > 0 && notEmpty(getString(row, 0))) {
-                importPigEventList.add(validator.valid(transSowFromExcel(row)));
+                importPigEventList.add(transSowFromExcel(row));
             }
         }
         return importPigEventList;

@@ -14,8 +14,18 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
 public class DoctorImportValidator {
 
     public DoctorImportSow valid(DoctorImportSow importSow) {
-        expectTrue(!(notNull(importSow.getPregDate()) && importSow.getPregDate().before(importSow.getMateDate()))
-                , "pregDate.before.mateDate", importSow.getLineNumber(), importSow.getSowCode());
+
+        if (notNull(importSow.getPregCheckDate())) {
+            expectTrue(!importSow.getPregCheckDate().before(importSow.getMateDate())
+                    , "pregCheckDate.before.mateDate", importSow.getLineNumber(), importSow.getSowCode());
+        }
+
+        if (notNull(importSow.getPregDate())) {
+            expectTrue(!importSow.getPregDate().before(importSow.getPregCheckDate())
+                    , "pregDate.before.pregCheckDate", importSow.getLineNumber(), importSow.getSowCode());
+        }
+
+        // TODO: 17/9/4 字段不为空校验 暂时没时间写以后再优化
         return importSow;
     }
 }
