@@ -235,10 +235,6 @@ public class DoctorImportInputSplitter {
             importSow.setInFarmDate(new DateTime(importSow.getMateDate()).minusDays(7).toDate());
         }
 
-        if (Strings.isNullOrEmpty(importSow.getBoarCode())) {
-            importSow.setBoarCode("1");
-        }
-
         if (DoctorImportSow.ParityStage.currents.contains(importSow.getParityStage())) {
             if (Objects.equals(importSow.getCurrentStatus(), PigStatus.Wean.getName())) {
                 importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());

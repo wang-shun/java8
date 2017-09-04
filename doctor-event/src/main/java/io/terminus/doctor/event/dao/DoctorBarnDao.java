@@ -92,4 +92,14 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
     public void updateFarmName(Long farmId, String farmName) {
         getSqlSession().update(sqlId("updateFarmName"), ImmutableMap.of("farmId", farmId, "farmName", farmName));
     }
+
+
+    /**
+     * 获取默认妊娠舍
+     * @param farmId 猪场id
+     * @return 默认妊娠舍
+     */
+    public DoctorBarn getDefaultPregBarn(Long farmId) {
+        return getSqlSession().selectOne(sqlId("getDefaultPregBarn"), farmId);
+    }
 }

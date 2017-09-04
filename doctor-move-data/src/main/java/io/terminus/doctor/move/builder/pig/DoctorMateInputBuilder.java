@@ -68,12 +68,12 @@ public class DoctorMateInputBuilder implements DoctorPigEventInputBuilder {
         MatingType matingType = MatingType.from(importPigEvent.getMateType());
         expectTrue(notNull(matingType), "mateType.not.fund", importPigEvent.getMateType());
         mating.setMatingType(matingType.getKey());
-
-        DoctorPig mateBoar = doctorPigDao.findPigByFarmIdAndPigCodeAndSex(importBasicData.getDoctorFarm().getId(),
-                importPigEvent.getMateBoarCode(), DoctorPig.PigSex.BOAR.getKey());
-        expectTrue(notNull(mateBoar), "mateBoar.not.fund", importPigEvent.getMateBoarCode());
-        mating.setMatingBoarPigId(mateBoar.getId());
-        mating.setMatingBoarPigCode(mateBoar.getPigCode());
+// TODO: 17/9/4 很多都不填,而且不重要,就不要了 
+//        DoctorPig mateBoar = doctorPigDao.findPigByFarmIdAndPigCodeAndSex(importBasicData.getDoctorFarm().getId(),
+//                importPigEvent.getMateBoarCode(), DoctorPig.PigSex.BOAR.getKey());
+//        expectTrue(notNull(mateBoar), "mateBoar.not.fund", importPigEvent.getMateBoarCode());
+//        mating.setMatingBoarPigId(mateBoar.getId());
+//        mating.setMatingBoarPigCode(mateBoar.getPigCode());
 
         return mating;
     }

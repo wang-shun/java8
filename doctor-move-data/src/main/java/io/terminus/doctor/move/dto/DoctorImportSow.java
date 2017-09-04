@@ -25,6 +25,7 @@ import java.util.List;
 public class DoctorImportSow implements Serializable {
     private static final long serialVersionUID = 3303665058775831200L;
 
+    private Integer lineNumber;      //excel中行号
     private String barnName;         //猪舍
     private String sowCode;          //母猪耳号
     private Integer status;          //当前状态(遗弃)

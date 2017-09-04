@@ -256,4 +256,8 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public void deleteByFarmId(Long farmId, List<Integer> pigTypes)  {
         getSqlSession().delete(sqlId("deleteByFarmId"), ImmutableMap.of("farmId", farmId, "pigTypes", pigTypes));
     }
+
+    public void deleteByGroupId(Long groupId) {
+        getSqlSession().delete(sqlId("deleteByGroupId"), groupId);
+    }
 }

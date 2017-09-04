@@ -725,4 +725,10 @@
             </foreach>
         </if>
     </delete>
+
+    <delete id="deleteByGroupId" parameterType="long" >
+        DELETE FROM
+        <include refid="tb"/>
+        WHERE group_id = #{groupId}
+    </delete>
 </mapper>

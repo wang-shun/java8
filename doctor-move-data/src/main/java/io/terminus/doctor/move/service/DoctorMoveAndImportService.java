@@ -4,7 +4,6 @@ import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
-import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.dto.DoctorImportBasicData;
@@ -16,15 +15,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notNull;
-import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by xjn on 17/8/4.
@@ -74,6 +69,7 @@ public class DoctorMoveAndImportService {
         generateReport();
     }
 
+    @Transactional
     public Long importData(DoctorImportSheet sheet) {
         log.info("import data starting");
 
@@ -109,28 +105,6 @@ public class DoctorMoveAndImportService {
         return (DoctorFarm) results[1];
     }
 
-    public DoctorImportBasicData packageImportBasicData(DoctorFarm farm) {
-        log.info("package import basic staring");
-        Map<String, Long> userMap = moveBasicService.getSubMap(farm.getOrgId());
-        Map<String, DoctorBarn> barnMap = moveBasicService.getBarnMap2(farm.getId());
-        Map<String, Long> breedMap = moveBasicService.getBreedMap();
-        DoctorBarn defaultPregBarn = null;
-        DoctorBarn defaultFarrowBarn = null;
-        for (DoctorBarn barn : barnMap.values()) {
-            if (isNull(defaultPregBarn)
-                    && Objects.equals(barn.getPigType(), PigType.PREG_SOW.getValue())) {
-                defaultPregBarn = barn;
-            }
-            if (isNull(defaultFarrowBarn)
-                    && Objects.equals(barn.getPigType(), PigType.DELIVER_SOW.getValue())) {
-                defaultFarrowBarn = barn;
-            }
-        }
-        expectTrue(notNull(defaultPregBarn) && notNull(defaultFarrowBarn), "default.barn.not.null");
-        return DoctorImportBasicData.builder().doctorFarm(farm).userMap(userMap).barnMap(barnMap)
-                .breedMap(breedMap).defaultPregBarn(defaultPregBarn).defaultFarrowBarn(defaultFarrowBarn).build();
-    }
-
     private void importBasic(DoctorFarm farm, Sheet barnSheet, Sheet breedSheet) {
         log.info("import basic staring");
         Map<String, Long> userMap = moveBasicService.getSubMap(farm.getOrgId());
@@ -138,6 +112,15 @@ public class DoctorMoveAndImportService {
         userInitService.updatePermissionBarn(farm.getId());
         importDataService.importBreed(breedSheet);
         log.info("import basic end");
+    }
+
+    public DoctorImportBasicData packageImportBasicData(DoctorFarm farm) {
+        log.info("package import basic staring");
+        Map<String, Long> userMap = moveBasicService.getSubMap(farm.getOrgId());
+        Map<String, DoctorBarn> barnMap = moveBasicService.getBarnMap2(farm.getId());
+        Map<String, Long> breedMap = moveBasicService.getBreedMap();
+        return DoctorImportBasicData.builder().doctorFarm(farm).userMap(userMap).barnMap(barnMap)
+                .breedMap(breedMap).build();
     }
 
     public void importPig(Sheet boarSheet, Sheet sowSheet, DoctorImportBasicData importBasicData) {

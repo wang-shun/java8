@@ -273,4 +273,13 @@
         WHERE
         farm_id = #{farmId}
     </update>
+    
+    <select id="getDefaultPregBarn" parameterType="long"  resultMap="DoctorBarnMap" >
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+        AND pig_type = 6
+        AND status = 1
+        limit 1
+    </select>
 </mapper>
