@@ -16,6 +16,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DoctorImportPigEvent {
+    private Integer lineNumber;            //所在Excel耳号
     private String pigCode;               //猪耳号
     private Date eventAt;                 //事件时间
     private String eventName;             //事件名称

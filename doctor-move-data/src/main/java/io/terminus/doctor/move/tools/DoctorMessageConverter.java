@@ -19,6 +19,6 @@ public class DoctorMessageConverter {
 
     public JsonResponseException convert(InvalidException e) {
         String errorMessage = messageSource.getMessage(e.getError(), e.getParams(), Locale.CHINA);
-        return new JsonResponseException(errorMessage);
+        return new JsonResponseException(errorMessage.concat(",行号:").concat(e.getAttach()));
     }
 }

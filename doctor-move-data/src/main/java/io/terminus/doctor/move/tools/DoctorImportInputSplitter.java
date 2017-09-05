@@ -89,6 +89,7 @@ public class DoctorImportInputSplitter {
         List<PigEvent> executeEvents = getExecuteSowEvents(importSow.getCurrentStatus(), importSow.getParityStage());
         return executeEvents.parallelStream().map(pigEvent -> {
             DoctorImportPigEvent importPigEvent = DoctorImportPigEvent.builder()
+                    .lineNumber(importSow.getLineNumber())
                     .pigCode(importSow.getSowCode())
                     .eventName(pigEvent.getName())
                     .pigSex(DoctorPig.PigSex.SOW.getDesc())

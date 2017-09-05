@@ -1,6 +1,7 @@
 package io.terminus.doctor.move.tools;
 
 import com.google.common.collect.Lists;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -70,13 +71,17 @@ public class DoctorImportEventExecutor {
     }
 
     public void executePigEvent(DoctorImportBasicData importBasicData, DoctorImportPigEvent importPigEvent) {
-        DoctorBasicInputInfoDto basicInputInfoDto = buildBasicInputInfo(importBasicData);
-        DoctorPigEventInputBuilder builder = doctorBuilderFactory.getPigBuilder(importPigEvent.getEventName());
-        if (isNull(builder)) {
-            return;
+        try {
+            DoctorBasicInputInfoDto basicInputInfoDto = buildBasicInputInfo(importBasicData);
+            DoctorPigEventInputBuilder builder = doctorBuilderFactory.getPigBuilder(importPigEvent.getEventName());
+            if (isNull(builder)) {
+                return;
+            }
+            BasePigEventInputDto inputDto = validator.valid(builder.buildFromImport(importBasicData, importPigEvent));
+            pigEventManager.eventHandle(inputDto, basicInputInfoDto);
+        } catch (InvalidException e) {
+            throw new InvalidException(true, e.getError(), importPigEvent.getLineNumber().toString(), e.getParams());
         }
-        BasePigEventInputDto inputDto = validator.valid(builder.buildFromImport(importBasicData, importPigEvent));
-        pigEventManager.eventHandle(inputDto, basicInputInfoDto);
     }
 
     public void executeGroupEvent(DoctorImportBasicData importBasicData, DoctorImportGroupEvent importGroupEvent) {

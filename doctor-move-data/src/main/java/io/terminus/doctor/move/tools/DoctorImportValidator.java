@@ -16,13 +16,13 @@ public class DoctorImportValidator {
     public DoctorImportSow valid(DoctorImportSow importSow) {
 
         if (notNull(importSow.getPregCheckDate())) {
-            expectTrue(!importSow.getPregCheckDate().before(importSow.getMateDate())
-                    , "pregCheckDate.before.mateDate", importSow.getLineNumber(), importSow.getSowCode());
+            expectTrue(!importSow.getPregCheckDate().before(importSow.getMateDate()), false
+                    ,importSow.getLineNumber().toString(), "pregCheckDate.before.mateDate", importSow.getSowCode());
         }
 
         if (notNull(importSow.getPregDate())) {
-            expectTrue(!importSow.getPregDate().before(importSow.getPregCheckDate())
-                    , "pregDate.before.pregCheckDate", importSow.getLineNumber(), importSow.getSowCode());
+            expectTrue(!importSow.getPregDate().before(importSow.getPregCheckDate()), false
+                    , importSow.getLineNumber().toString(), "pregDate.before.pregCheckDate",  importSow.getSowCode());
         }
 
         // TODO: 17/9/4 字段不为空校验 暂时没时间写以后再优化
