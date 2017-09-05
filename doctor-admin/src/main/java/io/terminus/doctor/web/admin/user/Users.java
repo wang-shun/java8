@@ -11,20 +11,18 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.common.redis.utils.JedisTemplate;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.DataEvent;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.Constants;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.events.user.LoginEvent;
 import io.terminus.doctor.web.core.events.user.LogoutEvent;
+import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.auth.core.AclLoader;
 import io.terminus.parana.auth.core.PermissionHelper;
@@ -184,8 +182,8 @@ public class Users {
     @RequestMapping(value = "/importExcel", method = RequestMethod.GET)
     public String importExcel(@RequestParam String fileUrl){
         log.info("import excel fileUrl:{}", fileUrl);
-        final int maxWaitTime = 90; // 最长等待时间，秒
-        final int sleepTime = 1; //每次沉睡多少秒
+        final int maxWaitTime = 300; // 最长等待时间，秒
+        final int sleepTime = 10; //每次沉睡多少秒
         final String redisKey = ImportExcelRedisKey + fileUrl;
         try {
             jedisTemplate.execute(jedis -> {
