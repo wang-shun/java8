@@ -4,13 +4,14 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.enums.RoleType;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.model.Sub;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.impl.service.UserReadServiceImpl;
 import io.terminus.parana.user.model.LoginType;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+
+import static io.terminus.common.utils.Arguments.isNull;
 
 /**
  * Desc:
@@ -43,6 +46,8 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
     private final DoctorStaffReadService doctorStaffReadService;
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
     private final UserProfileReadService userProfileReadService;
+    @Autowired
+    private SubDao subDao;
 
     @Autowired
     public DoctorUserReadServiceImpl(UserDao userDao, DoctorStaffReadService doctorStaffReadService,
@@ -99,19 +104,12 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
     @Override
     public Response<User> subAccountCheck(String loginId){
         try {
-            List<String> strings = Splitters.AT.splitToList(loginId);
-            if(strings.size() != 2){
-                throw new ServiceException("sub.account.not.avalid");
-            }
-            //检查主账号是否存在
-            User parentUser = userDao.findByName(strings.get(1));
-            if (parentUser == null) {
-                log.error("user(loginId={}, loginType=subaccount check puser) not found", loginId);
-                throw new ServiceException("puser.not.found");
-            }
-            //检查子账号
             User user = userDao.findByName(loginId);
-
+            Sub sub = subDao.findByUserId(user.getId());
+            //校验子账户是否关联猪场
+            if (isNull(sub) || isNull(sub.getFarmId())) {
+                throw new ServiceException("sub.relation.not.found");
+            }
             return Response.ok(user);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());

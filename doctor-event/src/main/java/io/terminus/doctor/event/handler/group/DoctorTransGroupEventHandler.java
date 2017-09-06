@@ -141,9 +141,12 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         input.setEventType(GroupEventType.TRANS_GROUP.getValue());
 
         DoctorTransGroupInput transGroup = (DoctorTransGroupInput) input;
+
         if (Objects.equals(transGroup.getEventSource(), SourceType.INPUT.getValue())) {
-            doctorModifyGroupTransGroupEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(), DateUtil.toDate(transGroup.getEventAt()), -transGroup.getQuantity());
+            doctorModifyGroupTransGroupEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(),
+                    DateUtil.toDate(transGroup.getEventAt()), -transGroup.getQuantity());
         }
+
         //同舍不可转群
         if (Objects.equals(group.getCurrentBarnId(), transGroup.getToBarnId())) {
             throw new InvalidException("same.barn.can.not.trans");

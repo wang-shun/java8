@@ -124,6 +124,13 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
     }
 
     /**
+     * 查询猪场与当前开启猪群数量映射
+     * @return
+     */
+    public List<Map<String, Object>> findFarmToGroupCount() {
+        return getSqlSession().selectList(sqlId("findFarmToGroupCount"));
+    }
+    /**
      * 查询猪群
      * @param farmId 猪场列表
      * @param pigType 猪群类型

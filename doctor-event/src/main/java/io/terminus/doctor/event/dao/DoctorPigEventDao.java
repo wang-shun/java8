@@ -635,4 +635,22 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public Integer getSowUnweanCount(Long pigId) {
         return sqlSession.selectOne(sqlId("getSowUnweanCount"), pigId);
     }
+
+    /**
+     * 修复窝号临时创建请勿使用
+     * @return
+     */
+    @Deprecated
+    public List<DoctorPigEvent> findAllFarrowNoNestCode() {
+        return sqlSession.selectList(sqlId("findAllFarrowNoNestCode"));
+    }
+    /**
+     * 修复窝号,临时创建请勿使用
+     * @return
+     */
+    @Deprecated
+    public void insertNestCode(Long farmId, String begin, String end) {
+        sqlSession.update(sqlId("insertNestCode"), ImmutableMap.of("farmId", farmId
+                , "begin", begin, "end", end));
+    }
 }

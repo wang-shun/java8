@@ -1280,3 +1280,5 @@ ALTER table doctor_daily_reports modify column `fatten_feed_amount` bigint(20) D
 -- 2017-09-05
 ALTER table doctor_farm_exports ADD column `error_reason` text DEFAULT NULL COMMENT 'Excel导入错误原因' after status;
 
+-- 2017-08-30
+ALTER TABLE doctor_group_tracks ADD COLUMN `close_at` datetime DEFAULT NULL  comment '猪群关闭事件(如果猪群关闭的话)' after updator_name;

@@ -127,7 +127,8 @@ public class DoctorDailyGroupDao extends MyBatisDao<DoctorDailyGroup> {
      * @param changeCount 变动数量
      */
     public void updateDailyGroupLiveStock(Long groupId, Date sumAt, Integer changeCount) {
-        getSqlSession().update(sqlId("updateDailyGroupLiveStock"), ImmutableMap.of("groupId", groupId, "sumAt", DateUtil.toDateString(sumAt), "changeCount", changeCount));
+        getSqlSession().update(sqlId("updateDailyGroupLiveStock"), ImmutableMap.of("groupId", groupId, "sumAt"
+                , DateUtil.toDateString(sumAt), "changeCount", changeCount));
     }
 
     public Integer findFattenWillOut(Long farmId, String sumAt) {

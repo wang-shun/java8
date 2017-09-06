@@ -20,6 +20,11 @@ public class DoctorDailyReportOpen implements Serializable{
     private String farmName;
 
     /**
+     * 用户名称
+     */
+    private String userName;
+
+    /**
      * 猪博士使用异常
      */
     private String farmStatus; //// TODO: 16/12/23 缺少

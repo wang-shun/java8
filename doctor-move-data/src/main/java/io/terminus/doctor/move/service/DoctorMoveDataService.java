@@ -2993,4 +2993,16 @@ public class DoctorMoveDataService {
         doctorPigEventDao.updates(list);
     }
 
+    public void flushNestCode() {
+        List<DoctorPigEvent> list
+                = doctorPigEventDao.findAllFarrowNoNestCode();
+
+        list.forEach(doctorPigEvent -> {
+            DateTime eventAt = new DateTime(doctorPigEvent.getEventAt());
+            doctorPigEventDao.insertNestCode(doctorPigEvent.getFarmId()
+                    , DateUtil.toDateString(eventAt.withDayOfMonth(1).toDate())
+                    , DateUtil.toDateString(eventAt.plusMonths(1).minusDays(1).toDate()));
+        });
+    }
+
 }

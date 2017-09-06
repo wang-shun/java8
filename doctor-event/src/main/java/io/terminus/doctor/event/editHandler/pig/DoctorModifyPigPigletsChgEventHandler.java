@@ -69,6 +69,7 @@ public class DoctorModifyPigPigletsChgEventHandler extends DoctorAbstractModifyP
         newEvent.setCustomerId(newDto.getPigletsCustomerId());
         newEvent.setCustomerName(newDto.getPigletsCustomerName());
         newEvent.setPrice(newDto.getPigletsPrice());
+        newEvent.setAmount(newDto.getPigletsSum());
         return newEvent;
     }
 

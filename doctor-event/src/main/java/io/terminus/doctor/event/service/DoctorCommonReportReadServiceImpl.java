@@ -208,7 +208,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 return Response.fail("find.monthly.report.data.failed");
             }
             List<DoctorCommonReportDto> commonReportDtos = Lists.newArrayList();
-            List<DoctorRangeReport> reports = doctorRangeReportDao.findBySumAt(ReportRangeType.MONTH.getValue(), sumAt);
+            List<DoctorRangeReport> reports = doctorRangeReportDao.findFarmBySumAt(ReportRangeType.MONTH.getValue(), sumAt);
             reports.forEach(report -> {
                 commonReportDtos.add(getDoctorCommonReportDto(report));
             });
@@ -256,6 +256,9 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         doctorCommonReportDto.setDate(report.getSumAt());
         DoctorDailyReportSum dailyReportSum = doctorDailyReportDao.findDailyReportSum(farmId, startAt, endAt);
         DoctorGroupChangeSum groupChangeSum = doctorDailyGroupDao.getGroupChangeSum(farmId, startAt, endAt);
+        if (isNull(groupChangeSum)) {
+            groupChangeSum = new DoctorGroupChangeSum();
+        }
 
         doctorCommonReportDto.setChangeReport(dailyReportSum);
         doctorCommonReportDto.setGroupChangeReport(groupChangeSum);
@@ -470,7 +473,6 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         //窝均分娩
         if (isNull(dto1.getFarrowNest()) || dto1.getFarrowNest() == 0) {
             dto1.setFarrowNest(0);
-            dto1.setAvgFarrowWeight(0.00D);
             dto1.setAvgFarrowLive(0.00D);
             dto1.setAvgFarrowHealth(0.00D);
             dto1.setAvgFarrowWeak(0.00D);
@@ -478,20 +480,16 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             dto1.setAvgFarrowLive(get2(dto1.getFarrowLive(), dto1.getFarrowNest()));
             dto1.setAvgFarrowHealth(get2(dto1.getFarrowHealth(), dto1.getFarrowNest()));
             dto1.setAvgFarrowWeak(get2(dto1.getFarrowWeak(), dto1.getFarrowNest()));
-            dto1.setAvgFarrowWeight(Double.parseDouble(String.format("%.2f", dto1.getFarrowWeight() / dto1.getFarrowNest())));
         }
 
         //窝均断奶
         if (isNull(dto1.getWeanNest()) || dto1.getWeanNest() == 0) {
             dto1.setWeanNest(0);
-            dto1.setNestAvgWean(0D);
+            dto1.setNestAvgWean(0.00D);
         } else {
             dto1.setNestAvgWean(get2(dto1.getWeanCount(), dto1.getWeanNest()));
         }
 
-        if (isNull(dto2)) {
-            return dto1;
-        }
         //销售
         if (notNull(dto2)) {
             dto1.setHpSale(dto2.getHpSale());
@@ -509,6 +507,16 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
      */
     private Double get2(Integer total, Integer quantity) {
         return Double.parseDouble(NumberUtils.divide(total, quantity, 2));
+    }
+
+    /**
+     * 整数相除保留两位小数
+     * @param total 总数
+     * @param quantity 被除数
+     * @return
+     */
+    private Double get2(Double total, Integer quantity) {
+        return Double.parseDouble(String.format("%.2f", total / quantity));
     }
 
     /**

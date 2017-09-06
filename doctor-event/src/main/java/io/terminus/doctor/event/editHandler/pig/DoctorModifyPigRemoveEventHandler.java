@@ -10,6 +10,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -52,6 +53,12 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
         EVENT_TO_STATUS.put(PigEvent.TO_FARROWING.getKey(), PigStatus.Farrow.getKey());
         EVENT_TO_STATUS.put(PigEvent.FARROWING.getKey(), PigStatus.FEED.getKey());
         EVENT_TO_STATUS.put(PigEvent.WEAN.getKey(), PigStatus.Wean.getKey());
+    }
+
+    @Override
+    protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
+        DoctorBarn doctorBarn = doctorBarnDao.findById(deletePigEvent.getBarnId());
+        return Objects.equals(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue());
     }
 
     @Override

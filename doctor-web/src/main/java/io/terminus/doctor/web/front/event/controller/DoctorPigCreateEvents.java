@@ -767,7 +767,7 @@ public class DoctorPigCreateEvents {
                 DoctorPigletsChgDto pigletsChg = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(eventInfoDtoJson, DoctorPigletsChgDto.class);
                 if (Objects.equals(pigletsChg.getPigletsChangeType(), DoctorBasicEnums.SALE.getId())) {
                     expectTrue(notNull(pigletsChg.getPigletsPrice()), "sale.price.not.null");
-                    expectTrue(notNull(pigletsChg.getPigletsCustomerId()), "sale.customer.not.null");
+                    expectTrue(notNull(pigletsChg.getPigletsCustomerName()), "sale.customer.not.null");
                 }
                 if (notNull(pigletsChg.getPigletsChangeReason())) {
                     pigletsChg.setPigletsChangeReasonName(RespHelper.orServEx(doctorBasicReadService.findChangeReasonById(pigletsChg.getPigletsChangeReason())).getReason());
