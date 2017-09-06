@@ -160,12 +160,9 @@ public class FarmController {
      * @param farmId 猪场id
      * @return 猪舍列表
      */
-    @RequestMapping(value = "/unUseBarn/{farmId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/allBarn/{farmId}", method = RequestMethod.GET)
     public List<DoctorBarn> findAllUnUse(@PathVariable Long farmId) {
-        List<DoctorBarn> allBarnList = RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId));
-        return allBarnList.stream()
-                .filter(barn -> Objects.equals(barn.getStatus(), DoctorBarn.Status.NOUSE.getValue()))
-                .collect(Collectors.toList());
+        return RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId));
     }
 
     /**
