@@ -50,7 +50,8 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
     }
 
     public List<DoctorDailyReport> findByRange(Long farmId, Date startAt, Date endAt) {
-        return getSqlSession().selectList(sqlId("findByRange"), ImmutableMap.of("farmId", farmId, "startAt", DateUtil.toDateString(startAt), "endAt", DateUtil.toDateString(endAt)));
+        return getSqlSession().selectList(sqlId("findByRange"), ImmutableMap.of("farmId", farmId
+                , "startAt", DateUtil.toDateString(startAt), "endAt", DateUtil.toDateString(endAt)));
     }
 
     /**

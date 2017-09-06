@@ -15,22 +15,27 @@ public class DoctorSaleDailyReportOpen implements Serializable {
     /**
      * 公猪
      */
-    private double boar;
+    private int boar;
 
     /**
      * 母猪
      */
-    private double sow;
+    private int sow;
 
     /**
      * 保育猪(产房 + 保育)
      */
-    private double nursery;
+    private int nursery;
 
     /**
      * 育肥猪
      */
-    private double fatten;
+    private int fatten;
+
+    /**
+     * 销售总数
+     */
+    private int saleTotal;
 
     /**
      * 销售金额

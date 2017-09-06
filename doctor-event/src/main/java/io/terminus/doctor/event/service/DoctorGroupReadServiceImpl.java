@@ -505,4 +505,18 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             return Response.fail("find.new.group.event.failed");
         }
     }
+
+    @Override
+    public Response<Map<Long, Integer>> findFarmToGroupCount() {
+        try {
+            List<Map<String, Object>> list = doctorGroupDao.findFarmToGroupCount();
+            Map<Long, Integer> map = list.stream().collect(Collectors
+                    .toMap(k -> (long)k.get("farmId"), v -> Long.valueOf((long)v.get("groupCount")).intValue()));
+            return Response.ok(map);
+
+        } catch (Exception e) {
+            log.error("find farm to group count failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.farm.to.group.count.failed");
+        }
+    }
 }

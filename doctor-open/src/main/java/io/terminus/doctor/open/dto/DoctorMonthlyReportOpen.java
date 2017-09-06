@@ -14,9 +14,9 @@ public class DoctorMonthlyReportOpen implements Serializable{
     private static final long serialVersionUID = 55475440288200390L;
 
     /**
-     * 猪场名称
+     * 用户名称
      */
-    private String farmName;
+    private String userName;
 
     /**
      * 统计时间
@@ -45,6 +45,14 @@ public class DoctorMonthlyReportOpen implements Serializable{
     private double farrowAvgHealth;           //窝均健仔数
     private double farrowAvgAll;              //窝均产仔数
     private double farrowAvgAlive;            //窝均活仔数
+
+    /**
+     * 妊娠情况
+     */
+    private int checkPositive;                //妊娠检查阳性
+    private int checkFanqing;                 //妊娠检查返情
+    private int checkAbort;                   //妊娠检查流产
+    private int checkNegtive;                 //妊娠检查阴性
 
     /**
      * 其他
@@ -85,10 +93,12 @@ public class DoctorMonthlyReportOpen implements Serializable{
     private int saleBoar;                     //公猪
     private int saleNursery;                  //保育猪（产房+保育）
     private int saleFatten;                   //育肥猪
-    private double saleAmount;                //销售金额汇总
-    private double saleFarrow;                //仔猪销售数
-    // TODO: 16/12/22  缺少字段  saleAmount saleFarrow purchaseAmount
+    private int saleTotal;                    //销售汇总(上面四个相加)
+    private int saleFarrow;                   //仔猪销售数
 
+    // TODO: 16/12/22  缺少字段  saleAmount saleFarrowAmount purchaseAmount
+    private double saleAmount;                //销售金额汇总
+    private double saleFarrowAmount;           //仔猪销售额
     private double purchaseAmount;            //采购金额
 
 
