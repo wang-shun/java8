@@ -1,7 +1,6 @@
 package io.terminus.doctor.move.tools;
 
 import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.JsonResponseException;
@@ -168,20 +167,20 @@ public class DoctorImportInputSplitter {
         switch (pigEvent) {
             case ENTRY:
                 eventAt = importSow.getInFarmDate();
-                barnName = firstNonEmpty(importSow.getPregBarn(), importSow.getBarnName());
+                barnName = importSow.getPregBarn();
                 break;
             case MATING:
                 eventAt = importSow.getMateDate();
-                barnName = firstNonEmpty(importSow.getPregBarn(), importSow.getBarnName());
+                barnName = importSow.getPregBarn();
                 break;
             case PREG_CHECK:
                 eventAt = importSow.getPregCheckDate();
-                barnName = firstNonEmpty(importSow.getPregBarn(), importSow.getBarnName());
+                barnName = importSow.getPregBarn();
                 importPigEvent.setPregCheckResult(importSow.getPregCheckResult());
                 break;
             case CHG_LOCATION:
                 eventAt = importSow.getPregCheckDate();
-                barnName = firstNonEmpty(importSow.getPregBarn(), importSow.getBarnName());
+                barnName = importSow.getPregBarn();
                 importPigEvent.setToBarnName(importSow.getFarrowBarnName());
                 break;
             case FARROWING:
@@ -241,17 +240,17 @@ public class DoctorImportInputSplitter {
         }
 
         if (DoctorImportSow.ParityStage.currents.contains(importSow.getParityStage())) {
-            if (Objects.equals(importSow.getCurrentStatus(), PigStatus.Wean.getName())) {
+            importSow.setPregBarn(importSow.getBarnName());
+            if (Objects.equals(importSow.getCurrentStatus(), PigStatus.Wean.getDesc())) {
                 importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());
                 if (Objects.equals(importSow.getFarrowBarnName(), importSow.getBarnName())) {
                     importSow.setWeanToBarn(importSow.getBarnName());
                 }
             }
 
-            if (Objects.equals(importSow.getCurrentStatus(), PigStatus.FEED.getName())) {
+            if (Objects.equals(importSow.getCurrentStatus(), PigStatus.FEED.getDesc())) {
                 importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());
             }
-            importSow.setPregBarn(importSow.getBarnName());
             if (notNull(PregCheckResult.from(importSow.getCurrentStatus()))) {
                 importSow.setPregCheckResult(importSow.getCurrentStatus());
                 if (!Objects.equals(importSow.getCurrentStatus(), PigStatus.Pregnancy.getDesc())) {
@@ -300,7 +299,6 @@ public class DoctorImportInputSplitter {
         try {
             return DateUtil.toDate(remark.substring(remark.length() - 10, remark.length()));
         } catch (Exception e) {
-            log.error("get check date by remark failed, remark:{}, cause:{}", remark, Throwables.getStackTraceAsString(e));
             throw new JsonResponseException("获取妊娠检查日期失败，请检查：" + remark);
         }
     }
