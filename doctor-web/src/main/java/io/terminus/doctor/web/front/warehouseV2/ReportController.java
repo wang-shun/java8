@@ -189,121 +189,6 @@ public class ReportController {
     public List<WarehouseMonthlyReportVo> monthlyReport(@RequestParam Long warehouseId,
                                                         @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
-//        //上月仓库出库记录
-//        DoctorWarehouseMaterialHandle lastMonthOutCriteria = new DoctorWarehouseMaterialHandle();
-//        lastMonthOutCriteria.setWarehouseId(warehouseId);
-//        lastMonthOutCriteria.setHandleMonth(date.get(Calendar.MONTH));
-//        lastMonthOutCriteria.setHandleYear(date.get(Calendar.YEAR));
-//        lastMonthOutCriteria.setType(WarehouseMaterialHandleType.OUT.getValue());
-//        Response<List<DoctorWarehouseMaterialHandle>> lastMonthOutResponse = doctorWarehouseMaterialHandleReadService.list(lastMonthOutCriteria);
-//        if (!lastMonthOutResponse.isSuccess())
-//            throw new JsonResponseException(lastMonthOutResponse.getError());
-//
-//        //统计月初余额和余量
-//        Map<String, BigDecimal> stockEaryOutQuantity = new HashMap<>();
-//        Map<String, Long> stockEaryOutMoney = new HashMap<>();
-//        for (DoctorWarehouseMaterialHandle outHandle : lastMonthOutResponse.getResult()) {
-//            String key = outHandle.getMaterialId() + "|" + outHandle.getVendorName();
-//            if (!stockEaryOutQuantity.containsKey(key)) {
-//                stockEaryOutQuantity.put(key, outHandle.getQuantity());
-//            } else {
-//                BigDecimal quantity = stockEaryOutQuantity.get(key);
-//                stockEaryOutQuantity.put(key, quantity.add(outHandle.getQuantity()));
-//            }
-//            BigDecimal money = new BigDecimal(outHandle.getUnitPrice()).multiply(outHandle.getQuantity());
-//            if (!stockEaryOutMoney.containsKey(key)) {
-//                stockEaryOutMoney.put(key, money.longValue());
-//            } else {
-//                long m = stockEaryOutMoney.get(key);
-//                stockEaryOutMoney.put(key, money.longValue() + m);
-//            }
-//        }
-
-//        DoctorWarehouseMaterialHandle lastMonthInCriteria = new DoctorWarehouseMaterialHandle();
-//        lastMonthInCriteria.setWarehouseId(warehouseId);
-//        lastMonthInCriteria.setHandleMonth(date.get(Calendar.MONTH));
-//        lastMonthInCriteria.setHandleYear(date.get(Calendar.YEAR));
-//        lastMonthInCriteria.setType(WarehouseMaterialHandleType.IN.getValue());
-//        Response<List<DoctorWarehouseMaterialHandle>> lastMonthInResponse = doctorWarehouseMaterialHandleReadService.list(lastMonthInCriteria);
-//        if (!lastMonthInResponse.isSuccess())
-//            throw new JsonResponseException(lastMonthInResponse.getError());
-//
-//        Map<String, BigDecimal> stockEaryInQuantity = new HashMap<>();
-//        Map<String, Long> stockEaryInMoney = new HashMap<>();
-//        for (DoctorWarehouseMaterialHandle inHandle : lastMonthInResponse.getResult()) {
-//            String key = inHandle.getMaterialId() + "|" + inHandle.getVendorName();
-//            if (!stockEaryInQuantity.containsKey(key)) {
-//                stockEaryInQuantity.put(key, inHandle.getQuantity());
-//            } else {
-//                BigDecimal quantity = stockEaryInQuantity.get(key);
-//                stockEaryInQuantity.put(key, quantity.add(inHandle.getQuantity()));
-//            }
-//            BigDecimal money = new BigDecimal(inHandle.getUnitPrice()).multiply(inHandle.getQuantity());
-//            if (!stockEaryInMoney.containsKey(key)) {
-//                stockEaryInMoney.put(key, money.longValue());
-//            } else {
-//                long m = stockEaryInMoney.get(key);
-//                stockEaryInMoney.put(key, money.longValue() + m);
-//            }
-//        }
-//
-//
-//        DoctorWarehouseMaterialHandle thisMonthInHandleCriteria = new DoctorWarehouseMaterialHandle();
-//        thisMonthInHandleCriteria.setWarehouseId(warehouseId);
-//        thisMonthInHandleCriteria.setHandleMonth(date.get(Calendar.MONTH) + 1);
-//        thisMonthInHandleCriteria.setHandleYear(date.get(Calendar.YEAR));
-//        thisMonthInHandleCriteria.setType(WarehouseMaterialHandleType.IN.getValue());
-//        Response<List<DoctorWarehouseMaterialHandle>> thisMonthInHandleResponse = doctorWarehouseMaterialHandleReadService.list(thisMonthInHandleCriteria);
-//        if (!thisMonthInHandleResponse.isSuccess())
-//            throw new JsonResponseException(thisMonthInHandleResponse.getError());
-//
-//        Map<String, BigDecimal> outQuantity = new HashMap<>();
-//        Map<String, Long> outMoney = new HashMap<>();
-//        Map<String, BigDecimal> inQuantity = new HashMap<>();
-//        Map<String, Long> inMoney = new HashMap<>();
-//        for (DoctorWarehouseMaterialHandle inHandle : thisMonthInHandleResponse.getResult()) {
-//            String key = inHandle.getMaterialId() + "|" + inHandle.getVendorName();
-//
-//            if (!inQuantity.containsKey(key)) {
-//                inQuantity.put(key, inHandle.getQuantity());
-//            } else {
-//                BigDecimal quantity = inQuantity.get(key);
-//                inQuantity.put(key, quantity.add(inHandle.getQuantity()));
-//            }
-//            if (!inMoney.containsKey(key)) {
-//                inMoney.put(key, inHandle.getQuantity().multiply(new BigDecimal(inHandle.getUnitPrice())).longValue());
-//            } else {
-//                long money = inHandle.getQuantity().multiply(new BigDecimal(inHandle.getUnitPrice())).longValue();
-//                long m = inMoney.get(key);
-//                inMoney.put(key, money + m);
-//            }
-//        }
-//
-//        DoctorWarehouseMaterialHandle thisMonthOutHandleCriteria = new DoctorWarehouseMaterialHandle();
-//        thisMonthOutHandleCriteria.setWarehouseId(warehouseId);
-//        thisMonthOutHandleCriteria.setHandleMonth(date.get(Calendar.MONTH) + 1);
-//        thisMonthOutHandleCriteria.setHandleYear(date.get(Calendar.YEAR));
-//        thisMonthOutHandleCriteria.setType(WarehouseMaterialHandleType.OUT.getValue());
-//        Response<List<DoctorWarehouseMaterialHandle>> thisMonthOutHandleResponse = doctorWarehouseMaterialHandleReadService.list(thisMonthOutHandleCriteria);
-//        if (!thisMonthOutHandleResponse.isSuccess())
-//            throw new JsonResponseException(thisMonthOutHandleResponse.getError());
-//        for (DoctorWarehouseMaterialHandle outHandle : thisMonthOutHandleResponse.getResult()) {
-//            String key = outHandle.getMaterialId() + "|" + outHandle.getVendorName();
-//            if (!outQuantity.containsKey(key)) {
-//                outQuantity.put(key, outHandle.getQuantity());
-//            } else {
-//                BigDecimal q = outQuantity.get(key);
-//                outQuantity.put(key, q.add(outHandle.getQuantity()));
-//            }
-//            if (!outMoney.containsKey(key)) {
-//                outMoney.put(key, outHandle.getQuantity().multiply(new BigDecimal(outHandle.getUnitPrice())).longValue());
-//            } else {
-//                long money = outHandle.getQuantity().multiply(new BigDecimal(outHandle.getUnitPrice())).longValue();
-//                long m = outMoney.get(key);
-//                outMoney.put(key, money + m);
-//            }
-//        }
-
         DoctorWarehouseStock stockCriteria = new DoctorWarehouseStock();
         stockCriteria.setWarehouseId(warehouseId);
         Response<List<DoctorWarehouseStock>> stocksResponse = doctorWarehouseStockReadService.list(stockCriteria);
@@ -312,7 +197,6 @@ public class ReportController {
 
         List<WarehouseMonthlyReportVo> report = new ArrayList<>();
         for (DoctorWarehouseStock stock : stocksResponse.getResult()) {
-//            String key = stock.getMaterialId() + "|" + stock.getVendorName();
 
             Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getMaterialId(), stock.getVendorName());
             if (!balanceResponse.isSuccess())
@@ -332,36 +216,6 @@ public class ReportController {
                 vo.setVendorName(stock.getVendorName());
             vo.setUnit(stock.getUnit());
 
-//            if (!stockEaryOutQuantity.containsKey(key))
-//                if (!stockEaryInQuantity.containsKey(key))
-//                    vo.setInitialQuantity(new BigDecimal(0));
-//                else
-//                    vo.setInitialQuantity(stockEaryInQuantity.get(key));
-//            else
-//                vo.setInitialQuantity(stockEaryInQuantity.get(key).subtract(stockEaryOutQuantity.get(key)));
-//            if (!stockEaryOutMoney.containsKey(key))
-//                if (!stockEaryInMoney.containsKey(key))
-//                    vo.setInitialAmount(0L);
-//                else
-//                    vo.setInitialAmount(stockEaryInMoney.get(key));
-//            else
-//                vo.setInitialAmount(stockEaryInMoney.get(key) - stockEaryOutMoney.get(key));
-//            if (!outMoney.containsKey(key))
-//                vo.setOutAmount(0L);
-//            else
-//                vo.setOutAmount(outMoney.get(key));
-//            if (!outQuantity.containsKey(key))
-//                vo.setOutQuantity(new BigDecimal(0));
-//            else
-//                vo.setOutQuantity(outQuantity.get(key));
-//            if (!inMoney.containsKey(key))
-//                vo.setInAmount(0L);
-//            else
-//                vo.setInAmount(inMoney.get(key));
-//            if (!inQuantity.containsKey(key))
-//                vo.setInQuantity(new BigDecimal(0));
-//            else
-//                vo.setInQuantity(inQuantity.get(key));
             vo.setBalanceAmount(balanceResponse.getResult().getAmount());
             vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
 
@@ -370,7 +224,10 @@ public class ReportController {
             vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount());
             vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity());
 
+            //TODO 这种计算方式还是会出现负数
             vo.setInitialAmount(vo.getBalanceAmount() + vo.getOutAmount() - vo.getInAmount());
+            vo.setInitialQuantity(vo.getBalanceQuantity().add(vo.getOutQuantity()).subtract(vo.getInQuantity()));
+
             vo.setInQuantity(vo.getBalanceQuantity().add(vo.getOutQuantity()).multiply(vo.getInQuantity()));
 
             report.add(vo);
@@ -448,7 +305,7 @@ public class ReportController {
     }
 
     /**
-     * 领用
+     * 猪舍领用报表
      *
      * @param pigBarnId
      * @param warehouseId
@@ -479,6 +336,15 @@ public class ReportController {
         return applyResponse.getResult();
     }
 
+    /**
+     * 猪群领用报表
+     *
+     * @param warehouseId
+     * @param pigGroupId
+     * @param materialType
+     * @param materialName
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "pigGroupApply")
     public List<WarehousePigGroupApplyVo> pigGroupApply(@RequestParam Long warehouseId,
                                                         @RequestParam Long pigGroupId,

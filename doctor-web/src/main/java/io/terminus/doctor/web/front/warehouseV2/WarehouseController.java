@@ -582,7 +582,7 @@ public class WarehouseController {
                 .warehouseId(id)
                 .warehouseName(wareHouse.getWareHouseName())
                 .warehouseType(wareHouse.getType())
-                .vendorName(DoctorWarehouseStockWriteService.DEFAULT_VENDOR_NAME)
+//                .vendorName(DoctorWarehouseStockWriteService.DEFAULT_VENDOR_NAME)
                 .materialId(warehouseMaterialDto.getMaterialId())
                 .materialName(material.getName())
                 .quantity(new BigDecimal(0))

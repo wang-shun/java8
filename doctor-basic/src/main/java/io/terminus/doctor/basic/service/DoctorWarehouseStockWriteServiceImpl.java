@@ -20,6 +20,7 @@ import io.terminus.doctor.basic.model.FeedFormula;
 import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehousePurchaseWriteService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
+import io.terminus.doctor.common.utils.DateUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.HashedMap;
@@ -27,6 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.omg.IOP.TAG_ORB_TYPE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import sun.plugin2.util.NativeLibLoader;
 
 import javax.xml.soap.Detail;
 import java.math.BigDecimal;
@@ -68,6 +71,9 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
     @Autowired
     private DoctorWarehouseMaterialApplyManager doctorWarehouseMaterialApplyManager;
+    @Autowired
+    private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
+    private Map<Long, List<DoctorWarehousePurchase>> eachWarehousePurchase;
 
 
     @Override
@@ -76,8 +82,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             doctorWarehouseStockDao.create(doctorWarehouseStock);
             return Response.ok(doctorWarehouseStock.getId());
         } catch (Exception e) {
-            log.error("failed to create doctor warehouseV2 stock, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.stock.create.fail");
+            log.error("failed to create doctor warehouse stock, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.stock.create.fail");
         }
     }
 
@@ -86,8 +92,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         try {
             return Response.ok(doctorWarehouseStockDao.update(doctorWarehouseStock));
         } catch (Exception e) {
-            log.error("failed to update doctor warehouseV2 stock, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.stock.update.fail");
+            log.error("failed to update doctor warehouse stock, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.stock.update.fail");
         }
     }
 
@@ -98,26 +104,28 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
             DoctorWarehouseStock stock = doctorWarehouseStockDao.findById(id);
 
-            DoctorWarehouseStock criteria = new DoctorWarehouseStock();
-            criteria.setWarehouseId(stock.getWarehouseId());
-            criteria.setMaterialId(stock.getMaterialId());
-            List<DoctorWarehouseStock> allVendorStocks = doctorWarehouseStockDao.list(criteria);
+//            DoctorWarehouseStock criteria = new DoctorWarehouseStock();
+//            criteria.setWarehouseId(stock.getWarehouseId());
+//            criteria.setMaterialId(stock.getMaterialId());
+//            List<DoctorWarehouseStock> allVendorStocks = doctorWarehouseStockDao.list(criteria);
+//
+//            for (DoctorWarehouseStock s : allVendorStocks) {
+//                if (s.getQuantity().compareTo(new BigDecimal(0)) > 0)
+//                    return Response.fail("stock.not.empty");
+//            }
+//
+//            for (DoctorWarehouseStock s : allVendorStocks) {
+//                Boolean result = doctorWarehouseStockDao.delete(s.getId());
+//                if (!result)
+//                    return Response.fail("doctor.warehouseV2.stock.delete.fail");
+//            }
+            if (stock.getQuantity().compareTo(new BigDecimal(0)) > 0)
+            return Response.fail("stock.not.empty");
 
-            for (DoctorWarehouseStock s : allVendorStocks) {
-                if (s.getQuantity().compareTo(new BigDecimal(0)) > 0)
-                    return Response.fail("stock.not.empty");
-            }
-
-            for (DoctorWarehouseStock s : allVendorStocks) {
-                Boolean result = doctorWarehouseStockDao.delete(s.getId());
-                if (!result)
-                    return Response.fail("doctor.warehouseV2.stock.delete.fail");
-            }
-
-            return Response.ok(true);
+            return Response.ok(doctorWarehouseStockDao.delete(id));
         } catch (Exception e) {
-            log.error("failed to delete doctor warehouseV2 stock by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.stock.delete.fail");
+            log.error("failed to delete doctor warehouse stock by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.stock.delete.fail");
         }
     }
 
@@ -125,7 +133,10 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     public Response<Boolean> in(WarehouseStockInDto stockIn) {
         try {
             StockContext context = validAndGetContext(stockIn.getFarmId(), stockIn.getWarehouseId(), stockIn.getDetails());
-            List<DoctorWarehouseHandlerManager.StockHandleContext> handleContexts = new ArrayList<>(stockIn.getDetails().size());
+
+
+            Calendar.getInstance().get(Calendar.MILLISECOND);
+
             stockIn.getDetails().forEach(detail -> {
                 DoctorWarehouseStock stock = getAvailableStock(context.getWareHouse(), detail, context.getSupportedMaterials().get(detail.getMaterialId()));
 
@@ -156,39 +167,23 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 purchase.setHandleMonth(c.get(Calendar.MONTH) + 1);
                 purchase.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
 
-                DoctorWarehouseMaterialHandle materialHandle = new DoctorWarehouseMaterialHandle();
-                materialHandle.setFarmId(stockIn.getFarmId());
-                materialHandle.setWarehouseId(stockIn.getWarehouseId());
-                materialHandle.setWarehouseName(context.getWareHouse().getWareHouseName());
-                materialHandle.setWarehouseType(context.getWareHouse().getType());
-                materialHandle.setMaterialId(detail.getMaterialId());
+                DoctorWarehouseMaterialHandle materialHandle =
+                        buildMaterialHandle(stock, stockIn, detail.getQuantity(), detail.getUnitPrice(), WarehouseMaterialHandleType.IN.getValue());
                 materialHandle.setVendorName(purchase.getVendorName());
-                materialHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
-                materialHandle.setUnitPrice(detail.getUnitPrice());
-                materialHandle.setType(WarehouseMaterialHandleType.IN.getValue());
-                materialHandle.setQuantity(detail.getQuantity());
-                materialHandle.setHandleDate(stockIn.getHandleDate());
-                materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
                 materialHandle.setUnit(stock.getUnit());
                 materialHandle.setHandleYear(c.get(Calendar.YEAR));
                 materialHandle.setHandleMonth(c.get(Calendar.MONTH) + 1);
-                materialHandle.setOperatorId(stockIn.getOperatorId());
-                materialHandle.setOperatorName(stockIn.getOperatorName());
 
-                DoctorWarehouseHandlerManager.StockHandleContext handleContext = new DoctorWarehouseHandlerManager.StockHandleContext();
-                handleContext.setStockAndPurchases(Collections.singletonMap(stock, Collections.singletonList(purchase)));
-                handleContext.setMaterialHandle(Collections.singletonList(materialHandle));
-                handleContexts.add(handleContext);
+                doctorWarehouseHandlerManager.inStock(stock, Collections.singletonList(purchase), materialHandle);
             });
 
-            doctorWarehouseHandlerManager.handle(handleContexts);
             return Response.ok(true);
         } catch (ServiceException e) {
             log.error("failed to stock in by id:{}, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("failed to stock in by id:{}, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.stock.delete.fail");
+            return Response.fail("doctor.warehouse.stock.in.fail");
         }
     }
 
@@ -198,31 +193,26 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         try {
             StockContext context = validAndGetContext(stockInventory.getFarmId(), stockInventory.getWarehouseId(), stockInventory.getDetails());
 
-//        Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> handleContext = new HashMap<>(stockInventory.getDetails().size());
-            List<DoctorWarehouseHandlerManager.StockHandleContext> handleContexts = new ArrayList<>(stockInventory.getDetails().size());
             for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : stockInventory.getDetails()) {
 
                 //找到对应库存
-                List<DoctorWarehouseStock> stocks = getStock(stockInventory.getWarehouseId(), detail.getMaterialId());
-                if (null == stocks || stocks.isEmpty())
+                DoctorWarehouseStock stock = getStock(stockInventory.getWarehouseId(), detail.getMaterialId(), null);
+                if (null == stock)
                     return Response.fail("stock.not.found");
 
-                BigDecimal totalStockQuantity = new BigDecimal(0);
-                for (DoctorWarehouseStock stock : stocks) {
-                    totalStockQuantity = totalStockQuantity.add(stock.getQuantity());
-                }
-                int compareResult = totalStockQuantity.compareTo(detail.getQuantity());
+                int compareResult = stock.getQuantity().compareTo(detail.getQuantity());
+
                 if (compareResult == 0) {
-                    log.info("盘点库存量与原库存量一致，warehouseV2[{}],material[{}]", stockInventory.getWarehouseId(), detail.getMaterialId());
+                    log.info("盘点库存量与原库存量一致，warehouse[{}],material[{}]", stockInventory.getWarehouseId(), detail.getMaterialId());
                     continue;
                 }
                 Calendar c = Calendar.getInstance();
                 c.setTime(stockInventory.getHandleDate());
 
                 DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
-                purchaseCriteria.setWarehouseId(stockInventory.getWarehouseId());
-                purchaseCriteria.setMaterialId(detail.getMaterialId());
-                purchaseCriteria.setHandleFinishFlag(1);
+                purchaseCriteria.setWarehouseId(stock.getWarehouseId());
+                purchaseCriteria.setMaterialId(stock.getMaterialId());
+                purchaseCriteria.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
                 List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.list(purchaseCriteria);
                 if (null == purchases || purchases.isEmpty())
                     throw new ServiceException("purchase.not.found");
@@ -230,28 +220,44 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 purchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
                 DoctorWarehousePurchase lastPurchase = purchases.get(purchases.size() - 1);
 
-                DoctorWarehouseHandlerManager.StockHandleContext handleContext = new DoctorWarehouseHandlerManager.StockHandleContext();
-                Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> stockAndPurchases = new HashMap<>();
-
                 DoctorWarehouseMaterialHandle materialHandle = new DoctorWarehouseMaterialHandle();
+                materialHandle.setFarmId(stockInventory.getFarmId());
+                materialHandle.setWarehouseId(stockInventory.getWarehouseId());
+                materialHandle.setWarehouseName(context.getWareHouse().getWareHouseName());
+                materialHandle.setWarehouseType(context.getWareHouse().getType());
+                materialHandle.setMaterialId(detail.getMaterialId());
+                materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
+                materialHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
+
+                materialHandle.setHandleDate(stockInventory.getHandleDate());
+                materialHandle.setHandleYear(c.get(Calendar.YEAR));
+                materialHandle.setHandleMonth(c.get(Calendar.MONTH) + 1);
+                materialHandle.setUnit(stock.getUnit());
+                materialHandle.setOperatorId(stockInventory.getOperatorId());
+                materialHandle.setOperatorName(stockInventory.getOperatorName());
+
 
                 BigDecimal changedQuantity;
                 if (compareResult > 0) {
                     //盘亏
-                    changedQuantity = totalStockQuantity.subtract(detail.getQuantity());
-                    long averagePrice = handleOutAndCalcAveragePrice(changedQuantity, purchases, stockAndPurchases, stocks, false, null, null);
-                    materialHandle.setUnitPrice(averagePrice);
+                    changedQuantity = stock.getQuantity().subtract(detail.getQuantity());
+//                    long averagePrice = handleOutAndCalcAveragePrice(changedQuantity, purchases, stockAndPurchases, stocks, false, null, null);
+                    DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(purchases, changedQuantity);
+                    materialHandle.setUnitPrice(purchaseHandleContext.getAveragePrice());
                     materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
+                    materialHandle.setQuantity(changedQuantity);
+                    stock.setQuantity(detail.getQuantity());
+                    doctorWarehouseHandlerManager.outStock(stock, purchaseHandleContext, materialHandle);
                 } else {
                     //盘盈
-                    changedQuantity = detail.getQuantity().subtract(totalStockQuantity);
+                    changedQuantity = detail.getQuantity().subtract(stock.getQuantity());
                     DoctorWarehousePurchase purchase = new DoctorWarehousePurchase();
-                    purchase.setFarmId(stockInventory.getFarmId());
+                    purchase.setFarmId(stock.getFarmId());
                     purchase.setHandleDate(stockInventory.getHandleDate());
-                    purchase.setWarehouseId(stockInventory.getWarehouseId());
-                    purchase.setWarehouseName(context.getWareHouse().getWareHouseName());
-                    purchase.setWarehouseType(context.getWareHouse().getType());
-                    purchase.setMaterialId(detail.getMaterialId());
+                    purchase.setWarehouseId(stock.getWarehouseId());
+                    purchase.setWarehouseName(stock.getWarehouseName());
+                    purchase.setWarehouseType(stock.getWarehouseType());
+                    purchase.setMaterialId(stock.getMaterialId());
                     purchase.setVendorName(lastPurchase.getVendorName());
                     purchase.setQuantity(changedQuantity);
                     purchase.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
@@ -260,49 +266,28 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     purchase.setHandleMonth(c.get(Calendar.MONTH) + 1);
                     purchase.setHandleYear(c.get(Calendar.YEAR));
 
+                    materialHandle.setQuantity(changedQuantity);
                     materialHandle.setUnitPrice(purchase.getUnitPrice());
                     materialHandle.setVendorName(purchase.getVendorName());
                     materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
-                    DoctorWarehouseStock stock = null;
-                    for (DoctorWarehouseStock s : stocks) {
-                        if (s.getMaterialId().longValue() == purchase.getMaterialId().longValue() && Objects.equals(s.getVendorName(), purchase.getVendorName())) {
-                            stock = s;
-                            break;
-                        }
-                    }
-                    if (null == stock)
-                        return Response.fail("stock.not.found");
-                    stock.setQuantity(stock.getQuantity().add(changedQuantity));
-                    stockAndPurchases.put(stock, Collections.singletonList(purchase));
+                    stock.setQuantity(detail.getQuantity());
+
+                    doctorWarehouseHandlerManager.inStock(stock, Collections.singletonList(purchase), materialHandle);
                 }
 
-                materialHandle.setFarmId(stockInventory.getFarmId());
-                materialHandle.setWarehouseId(stockInventory.getWarehouseId());
-                materialHandle.setWarehouseName(context.getWareHouse().getWareHouseName());
-                materialHandle.setWarehouseType(context.getWareHouse().getType());
-                materialHandle.setMaterialId(detail.getMaterialId());
-                materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
-                materialHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
-                materialHandle.setQuantity(changedQuantity);
-                materialHandle.setHandleDate(stockInventory.getHandleDate());
-                materialHandle.setHandleYear(c.get(Calendar.YEAR));
-                materialHandle.setHandleMonth(c.get(Calendar.MONTH) + 1);
-                materialHandle.setUnit(stocks.get(0).getUnit());
-                materialHandle.setOperatorId(stockInventory.getOperatorId());
-                materialHandle.setOperatorName(stockInventory.getOperatorName());
 
-                handleContext.setMaterialHandle(Collections.singletonList(materialHandle));
-                handleContext.setStockAndPurchases(stockAndPurchases);
-                handleContexts.add(handleContext);
+//                handleContext.setMaterialHandle(Collections.singletonList(materialHandle));
+//                handleContext.setStockAndPurchases(stockAndPurchases);
+//                handleContexts.add(handleContext);
             }
-            doctorWarehouseHandlerManager.handle(handleContexts);
+//            doctorWarehouseHandlerManager.handle(handleContexts);
             return Response.ok(true);
         } catch (ServiceException e) {
             log.error("failed to stock in by id:{}, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("failed to stock in by id:{}, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.stock.delete.fail");
+            return Response.fail("doctor.warehouse.stock.delete.fail");
         }
 
     }
@@ -327,109 +312,100 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     return Response.fail("transfer.warehouse.type.not.equals");
 
                 //找到对应库存
-                List<DoctorWarehouseStock> stocks = getStock(stockTransfer.getWarehouseId(), detail.getMaterialId());
-                if (null == stocks || stocks.isEmpty())
+                DoctorWarehouseStock stock = getStock(stockTransfer.getWarehouseId(), detail.getMaterialId(), null);
+                if (null == stock)
                     return Response.fail("stock.not.found");
 
-                BigDecimal totalStockQuantity = new BigDecimal(0);
-                for (DoctorWarehouseStock stock : stocks) {
-                    totalStockQuantity = totalStockQuantity.add(stock.getQuantity());
-                }
-                if (totalStockQuantity.compareTo(detail.getQuantity()) < 0)
+                if (stock.getQuantity().compareTo(detail.getQuantity()) < 0)
                     return Response.fail("stock.not.enough");
 
 
                 DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
                 purchaseCriteria.setWarehouseId(stockTransfer.getWarehouseId());
                 purchaseCriteria.setMaterialId(detail.getMaterialId());
-                purchaseCriteria.setHandleFinishFlag(1);
+                purchaseCriteria.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
                 List<DoctorWarehousePurchase> transferOutPurchases = doctorWarehousePurchaseDao.list(purchaseCriteria);
                 if (null == transferOutPurchases || transferOutPurchases.isEmpty())
                     throw new ServiceException("purchase.not.found");
                 transferOutPurchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
 
-                DoctorWarehouseHandlerManager.StockHandleContext handleContext = new DoctorWarehouseHandlerManager.StockHandleContext();
-                Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> stockAndPurchases = new HashMap<>();
-                handleContext.setStockAndPurchases(stockAndPurchases);
+//                DoctorWarehouseHandlerManager.StockHandleContext handleContext = new DoctorWarehouseHandlerManager.StockHandleContext();
+//                Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> stockAndPurchases = new HashMap<>();
+//                handleContext.setStockAndPurchases(stockAndPurchases);
 
                 Calendar c = Calendar.getInstance();
                 c.setTime(stockTransfer.getHandleDate());
 
-                long averagePrice = handleOutAndCalcAveragePrice(detail.getQuantity(), transferOutPurchases, stockAndPurchases, stocks, true, targetWareHouse, c);
+//                long averagePrice = handleOutAndCalcAveragePrice(detail.getQuantity(), transferOutPurchases, stockAndPurchases, stocks, true, targetWareHouse, c);
+                DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(transferOutPurchases, detail.getQuantity());
 
                 //调出
-                DoctorWarehouseMaterialHandle outHandle = new DoctorWarehouseMaterialHandle();
-                outHandle.setFarmId(stockTransfer.getFarmId());
-                outHandle.setWarehouseId(stockTransfer.getWarehouseId());
-                outHandle.setMaterialId(detail.getMaterialId());
-                outHandle.setWarehouseName(context.getWareHouse().getWareHouseName());
-                outHandle.setWarehouseType(context.getWareHouse().getType());
-                outHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
-                outHandle.setUnitPrice(averagePrice);
-                outHandle.setType(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
-                outHandle.setQuantity(detail.getQuantity());
-                outHandle.setHandleDate(stockTransfer.getHandleDate());
-                outHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
+                DoctorWarehouseMaterialHandle outHandle = buildMaterialHandle(stock, stockTransfer, detail.getQuantity(), purchaseHandleContext.getAveragePrice(), WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
                 outHandle.setHandleYear(c.get(Calendar.YEAR));
                 outHandle.setHandleMonth(c.get(Calendar.MONTH) + 1);
-                outHandle.setUnit(stocks.get(0).getUnit());
-                outHandle.setOperatorId(stockTransfer.getOperatorId());
-                outHandle.setOperatorName(stockTransfer.getOperatorName());
-                handleContext.addMaterialHandle(outHandle);
+                stock.setQuantity(stock.getQuantity().subtract(detail.getQuantity()));
+                doctorWarehouseHandlerManager.outStock(stock, purchaseHandleContext, outHandle);
+//                handleContext.addMaterialHandle(outHandle);
 
+                DoctorWarehouseStock transferInStock = getStock(targetWareHouse.getId(), stock.getMaterialId(), null);
+                if (null == transferInStock) {
+                    transferInStock = new DoctorWarehouseStock();
+                    transferInStock.setFarmId(stock.getFarmId());
+                    transferInStock.setWarehouseId(targetWareHouse.getId());
+                    transferInStock.setWarehouseName(targetWareHouse.getWareHouseName());
+                    transferInStock.setWarehouseType(targetWareHouse.getType());
+
+                    transferInStock.setMaterialId(stock.getMaterialId());
+                    transferInStock.setMaterialName(stock.getMaterialName());
+                    transferInStock.setUnit(stock.getUnit());
+
+                    transferInStock.setQuantity(detail.getQuantity());
+                } else
+                    transferInStock.setQuantity(transferInStock.getQuantity().add(detail.getQuantity()));
                 //构造调入MaterialHandle记录
-                DoctorWarehouseMaterialHandle inHandle = new DoctorWarehouseMaterialHandle();
-                inHandle.setFarmId(targetWareHouse.getFarmId());
-                inHandle.setWarehouseId(targetWareHouse.getId());
-                inHandle.setWarehouseName(targetWareHouse.getWareHouseName());
-                inHandle.setWarehouseType(targetWareHouse.getType());
-                inHandle.setMaterialId(detail.getMaterialId());
-                inHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
-                inHandle.setUnitPrice(averagePrice);
-                inHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
-                inHandle.setType(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
-                inHandle.setQuantity(detail.getQuantity());
-                inHandle.setUnit(stocks.get(0).getUnit());
-                inHandle.setHandleDate(stockTransfer.getHandleDate());
+                DoctorWarehouseMaterialHandle inHandle = buildMaterialHandle(transferInStock, stockTransfer, detail.getQuantity(), purchaseHandleContext.getAveragePrice(), WarehouseMaterialHandleType.TRANSFER_IN.getValue());
                 inHandle.setHandleYear(c.get(Calendar.YEAR));
                 inHandle.setHandleMonth(c.get(Calendar.MONTH) + 1);
-                inHandle.setOperatorId(stockTransfer.getOperatorId());
-                inHandle.setOperatorName(stockTransfer.getOperatorName());
-                handleContext.addMaterialHandle(inHandle);
+                inHandle.setOtherTrasnferHandleId(outHandle.getId());
+                List<DoctorWarehousePurchase> transferInPurchase = new ArrayList<>();
+                for (DoctorWarehousePurchase purchase : purchaseHandleContext.getPurchaseQuantity().keySet()) {
+                    transferInPurchase.add(copyPurchase(purchase, c, targetWareHouse, purchaseHandleContext.getPurchaseQuantity().get(purchase)));
+                }
+                doctorWarehouseHandlerManager.inStock(transferInStock, transferInPurchase, inHandle);
+                outHandle.setOtherTrasnferHandleId(inHandle.getId());
+                doctorWarehouseMaterialHandleDao.update(outHandle);
+//                handleContext.addMaterialHandle(inHandle);
 
-                handleContexts.add(handleContext);
+//                handleContexts.add(handleContext);
             }
-            doctorWarehouseHandlerManager.handle(handleContexts);
+//            doctorWarehouseHandlerManager.handle(handleContexts);
             return Response.ok(true);
         } catch (ServiceException e) {
             log.error("failed to stock in by id:{}, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("failed to stock in by id:{}, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.stock.delete.fail");
+            return Response.fail("doctor.warehouse.stock.delete.fail");
         }
     }
 
     @Override
+    @Transactional
     public Response<Boolean> out(WarehouseStockOutDto stockOut) {
 
         try {
             StockContext context = validAndGetContext(stockOut.getFarmId(), stockOut.getWarehouseId(), stockOut.getDetails());
             List<DoctorWarehouseHandlerManager.StockHandleContext> handleContexts = new ArrayList<>();
-//        List<DoctorWarehouseMaterialApply> materialApplies = new ArrayList<>(stockOut.getDetails().size());
             for (WarehouseStockOutDto.WarehouseStockOutDetail detail : stockOut.getDetails()) {
 
-                //无论什么供应商的都可以出库
-                List<DoctorWarehouseStock> stocks = getStock(stockOut.getWarehouseId(), detail.getMaterialId());
-                if (stocks.isEmpty())
+                DoctorWarehouseStock stock = getStock(stockOut.getWarehouseId(), detail.getMaterialId(), null);
+                if (null == stock)
                     return Response.fail("stock.not.found");
-                BigDecimal totalStockQuantity = new BigDecimal(0);
-                for (DoctorWarehouseStock stock : stocks) {
-                    totalStockQuantity = totalStockQuantity.add(stock.getQuantity());
-                }
 
-                if (totalStockQuantity.compareTo(detail.getQuantity()) < 0)
+                if (stock.getQuantity().compareTo(detail.getQuantity()) < 0)
                     return Response.fail("stock.not.enough");
+
+                stock.setQuantity(stock.getQuantity().subtract(detail.getQuantity()));
 
                 DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
                 purchaseCriteria.setWarehouseId(stockOut.getWarehouseId());
@@ -440,71 +416,34 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     return Response.fail("purchase.not.found");
                 materialPurchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
 
-//            List<DoctorWarehousePurchase> outPurchase = new ArrayList<>();
-//            long averagePrice = getNeedPurchaseAndCalcAveragePrice(outPurchase, materialPurchases, detail.getQuantity());
-                Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> stockWithPurchases = new HashMap<>();
-                long averagePrice = handleOutAndCalcAveragePrice(detail.getQuantity(), materialPurchases, stockWithPurchases, stocks, false, null, null);
-
-                DoctorWarehouseHandlerManager.StockHandleContext handleContext = new DoctorWarehouseHandlerManager.StockHandleContext();
-                handleContext.setStockAndPurchases(stockWithPurchases);
-
-
-                DoctorWarehouseMaterialHandle materialHandle = new DoctorWarehouseMaterialHandle();
-                materialHandle.setFarmId(stockOut.getFarmId());
-                materialHandle.setWarehouseId(stockOut.getWarehouseId());
-                materialHandle.setWarehouseName(context.getWareHouse().getWareHouseName());
-                materialHandle.setWarehouseType(context.getWareHouse().getType());
-                materialHandle.setMaterialId(detail.getMaterialId());
-                materialHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
-                materialHandle.setUnitPrice(averagePrice);
-                materialHandle.setType(WarehouseMaterialHandleType.OUT.getValue());
-                materialHandle.setQuantity(detail.getQuantity());
-                materialHandle.setHandleDate(stockOut.getHandleDate());
-                materialHandle.setOperatorId(stockOut.getOperatorId());
-                materialHandle.setOperatorName(stockOut.getOperatorName());
-                materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
+                DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(materialPurchases, detail.getQuantity());
 
                 Calendar c = Calendar.getInstance();
                 c.setTime(stockOut.getHandleDate());
+                DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(stock, stockOut, detail.getQuantity(), purchaseHandleContext.getAveragePrice(), WarehouseMaterialHandleType.OUT.getValue());
+
                 materialHandle.setHandleYear(c.get(Calendar.YEAR));
                 materialHandle.setHandleMonth(c.get(Calendar.MONTH) + 1);
-                materialHandle.setUnit(stocks.get(0).getUnit());
-                handleContext.setMaterialHandle(Collections.singletonList(materialHandle));
+                doctorWarehouseHandlerManager.outStock(stock, purchaseHandleContext, materialHandle);
 
-                if (!detail.getJustOut()) {
-                    DoctorWarehouseMaterialApply materialApply = new DoctorWarehouseMaterialApply();
-                    materialApply.setWarehouseId(stockOut.getWarehouseId());
-                    materialApply.setFarmId(stockOut.getFarmId());
-                    materialApply.setWarehouseName(context.getWareHouse().getWareHouseName());
-                    materialApply.setWarehouseType(context.getWareHouse().getType());
-                    materialApply.setMaterialId(detail.getMaterialId());
-                    materialApply.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
-                    materialApply.setApplyDate(stockOut.getHandleDate());
-                    materialApply.setApplyYear(c.get(Calendar.YEAR));
-                    materialApply.setApplyMonth(c.get(Calendar.MONTH) + 1);
-                    materialApply.setType(context.getWareHouse().getType());
-                    materialApply.setUnit(stocks.get(0).getUnit());//单位都是一致的
-                    materialApply.setQuantity(detail.getQuantity());
-                    materialApply.setUnitPrice(averagePrice);
-                    materialApply.setPigBarnId(detail.getApplyPigBarnId());
-                    materialApply.setPigBarnName(detail.getApplyPigBarnName());
-                    materialApply.setPigGroupId(detail.getApplyPigGroupId());
-                    materialApply.setPigGroupName(detail.getApplyPigGroupName());
-                    materialApply.setApplyStaffName(detail.getApplyStaffName());
+                DoctorWarehouseMaterialApply materialApply = buildMaterialApply(materialHandle);
+                materialApply.setMaterialHandleId(materialHandle.getId());
+                materialApply.setPigBarnId(detail.getApplyPigBarnId());
+                materialApply.setPigBarnName(detail.getApplyPigBarnName());
+                materialApply.setPigGroupId(detail.getApplyPigGroupId());
+                materialApply.setPigGroupName(detail.getApplyPigGroupName());
+                materialApply.setApplyStaffName(detail.getApplyStaffName());
+                doctorWarehouseMaterialApplyManager.create(materialApply);
 
-                    handleContext.setApply(materialApply);
-                }
-                handleContexts.add(handleContext);
             }
-            doctorWarehouseHandlerManager.handle(handleContexts);
-//        doctorWarehouseMaterialApplyManager.creates(materialApplies);
+//            doctorWarehouseHandlerManager.handle(handleContexts);
             return Response.ok(true);
         } catch (ServiceException e) {
             log.error("failed to stock out, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("failed to stock out, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.stock.out.fail");
+            return Response.fail("doctor.warehouse.stock.out.fail");
         }
     }
 
@@ -517,15 +456,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
             long totalAmount = 0;
             BigDecimal totalQuantity = new BigDecimal(0);
-//            StockContext context = validAndGetContext(formulaDto.getFarmId(), formulaDto.getWarehouseId(), formulaDto.getDetails());
-//            Map<Long, DoctorBasicMaterial> supportedMaterials = new HashMap<>();
-//            doctorBasicMaterialDao.findByIds(
-//                    formulaDto.getDetails().stream().map(AbstractWarehouseStockDetail::getMaterialId).collect(Collectors.toList())
-//            ).forEach(m -> {
-//                supportedMaterials.put(m.getId(),m);
-//            });
 
-            List<DoctorWarehouseHandlerManager.StockHandleContext> handleContexts = new ArrayList<>();
+//            List<DoctorWarehouseHandlerManager.StockHandleContext> handleContexts = new ArrayList<>();
             for (WarehouseFormulaDto.WarehouseFormulaDetail detail : formulaDto.getDetails()) {
 
                 List<DoctorWarehouseStock> stocks = getStockByFarm(formulaDto.getFarmId(), detail.getMaterialId());
@@ -548,43 +480,82 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     return Response.fail("purchase.not.found");
                 materialPurchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
 
-                Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> stockWithPurchases = new HashMap<>();
-                long averagePrice = handleOutAndCalcAveragePrice(detail.getQuantity(), materialPurchases, stockWithPurchases, stocks, false, null, null);
+                DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(materialPurchases, detail.getQuantity());
 
+                Map<Long, List<DoctorWarehousePurchase>> eachWarehousePurchase = purchaseHandleContext.getPurchaseQuantity().keySet().stream().collect(Collectors.groupingBy(DoctorWarehousePurchase::getWarehouseId));
 
-                DoctorWarehouseHandlerManager.StockHandleContext handleContext = new DoctorWarehouseHandlerManager.StockHandleContext();
-                handleContext.setStockAndPurchases(stockWithPurchases);
+                Map<Long, List<DoctorWarehouseStock>> eachWarehouseStock = stocks.stream().collect(Collectors.groupingBy(DoctorWarehouseStock::getWarehouseId));
+                for (Long warehouseId : eachWarehousePurchase.keySet()) {
 
-                for (DoctorWarehouseStock stock : stockWithPurchases.keySet()) {
-                    handleContext.addMaterialHandle(DoctorWarehouseMaterialHandle.builder()
-                            .farmId(formulaDto.getFarmId())
-                            .warehouseId(stock.getWarehouseId())
-                            .warehouseName(stock.getWarehouseName())
-                            .warehouseType(stock.getWarehouseType())
-                            .materialId(detail.getMaterialId())
-                            .materialName(stock.getMaterialName())
-                            .unitPrice(averagePrice)
+                    List<DoctorWarehousePurchase> thisWarehousePurchase = eachWarehousePurchase.get(warehouseId);
+                    Map<DoctorWarehousePurchase, BigDecimal> thisWarehousePurchaseMap = new HashMap<>();
+                    BigDecimal thisWarehouseQuantity = new BigDecimal(0);
+                    BigDecimal thisWarehouseAmount = new BigDecimal(0);
+                    for (DoctorWarehousePurchase purchase : thisWarehousePurchase) {
+                        thisWarehouseQuantity = thisWarehouseQuantity.add(purchaseHandleContext.getPurchaseQuantity().get(purchase));
+                        thisWarehouseAmount = thisWarehouseAmount.add(purchaseHandleContext.getPurchaseQuantity().get(purchase).multiply(new BigDecimal(purchase.getUnitPrice())));
+                        thisWarehousePurchaseMap.put(purchase, purchaseHandleContext.getPurchaseQuantity().get(purchase));
+                    }
+
+                    List<DoctorWarehouseStock> stock = eachWarehouseStock.get(warehouseId);
+                    if (stock.isEmpty())
+                        throw new ServiceException("stock.not.found");
+                    stock.get(0).setQuantity(stock.get(0).getQuantity().subtract(thisWarehouseQuantity));
+                    DoctorWarehouseHandlerManager.PurchaseHandleContext thisWarehousePurchaseContext = new DoctorWarehouseHandlerManager.PurchaseHandleContext();
+                    thisWarehousePurchaseContext.setStock(stock.get(0));
+                    thisWarehousePurchaseContext.setPurchaseQuantity(thisWarehousePurchaseMap);
+                    long thisWarehouseAveragePrice = thisWarehouseAmount.divide(thisWarehouseQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
+                    doctorWarehouseHandlerManager.outStock(stock.get(0), thisWarehousePurchaseContext, DoctorWarehouseMaterialHandle.builder()
+                            .farmId(stock.get(0).getFarmId())
+                            .warehouseId(stock.get(0).getWarehouseId())
+                            .warehouseType(stock.get(0).getWarehouseType())
+                            .warehouseName(stock.get(0).getWarehouseName())
+                            .materialId(stock.get(0).getMaterialId())
+                            .materialName(stock.get(0).getMaterialName())
+                            .unit(stock.get(0).getUnit())
+                            .unitPrice(thisWarehouseAveragePrice)
+                            .type(WarehouseMaterialHandleType.FORMULA_OUT.getValue())
+                            .quantity(thisWarehouseQuantity)
+                            .operatorId(formulaDto.getOperatorId())
                             .deleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue())
+                            .operatorName(formulaDto.getOperatorName())
                             .handleDate(formulaDto.getHandleDate())
                             .handleYear(c.get(Calendar.YEAR))
-                            .unit(stocks.get(0).getUnit())
                             .handleMonth(c.get(Calendar.MONTH) + 1)
-                            .type(WarehouseMaterialHandleType.FORMULA_OUT.getValue())
-                            .quantity(detail.getQuantity())
-                            .operatorId(formulaDto.getOperatorId())
-                            .operatorName(formulaDto.getOperatorName())
                             .build());
+                    log.debug("仓库{}出库{}，物料{}", warehouseId, thisWarehouseQuantity, stock.get(0).getMaterialId());
                 }
 
-                handleContexts.add(handleContext);
+//                for (DoctorWarehouseStock stock : stockWithPurchases.keySet()) {
+//                    handleContext.addMaterialHandle(DoctorWarehouseMaterialHandle.builder()
+//                            .farmId(formulaDto.getFarmId())
+//                            .warehouseId(stock.getWarehouseId())
+//                            .warehouseName(stock.getWarehouseName())
+//                            .warehouseType(stock.getWarehouseType())
+//                            .materialId(detail.getMaterialId())
+//                            .materialName(stock.getMaterialName())
+//                            .unitPrice(averagePrice)
+//                            .deleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue())
+//                            .handleDate(formulaDto.getHandleDate())
+//                            .handleYear(c.get(Calendar.YEAR))
+//                            .unit(stocks.get(0).getUnit())
+//                            .handleMonth(c.get(Calendar.MONTH) + 1)
+//                            .type(WarehouseMaterialHandleType.FORMULA_OUT.getValue())
+//                            .quantity(detail.getQuantity())
+//                            .operatorId(formulaDto.getOperatorId())
+//                            .operatorName(formulaDto.getOperatorName())
+//                            .build());
+//                }
 
-                totalAmount += detail.getQuantity().multiply(new BigDecimal(averagePrice)).longValue();
+//                handleContexts.add(handleContext);
+
+                totalAmount += detail.getQuantity().multiply(new BigDecimal(purchaseHandleContext.getAveragePrice())).longValue();
                 totalQuantity = totalQuantity.add(detail.getQuantity());
             }
 
 
-            DoctorWarehouseHandlerManager.StockHandleContext handleContext = new DoctorWarehouseHandlerManager.StockHandleContext();
-            Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> stockWithPurchase = new HashMap<>();
+//            DoctorWarehouseHandlerManager.StockHandleContext handleContext = new DoctorWarehouseHandlerManager.StockHandleContext();
+//            Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> stockWithPurchase = new HashMap<>();
 
             //生产出的饲料的仓库编号
             DoctorWareHouse wareHouse = doctorWareHouseDao.findById(formulaDto.getWarehouseId());
@@ -601,103 +572,96 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 stock.setWarehouseType(wareHouse.getType());
                 stock.setMaterialId(formulaDto.getFeedMaterialId());
                 stock.setMaterialName(formulaDto.getFeedMaterial().getName());
-                stock.setVendorName(DEFAULT_VENDOR_NAME);
                 stock.setUnit(formulaDto.getFeedUnit());
                 stock.setQuantity(formulaDto.getFeedMaterialQuantity());
             } else
                 stock.setQuantity(stock.getQuantity().add(formulaDto.getFeedMaterialQuantity()));
 
             long unitPrice = new BigDecimal(totalAmount).divide(totalQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
-            handleContext.addMaterialHandle(DoctorWarehouseMaterialHandle.builder()
-                    .farmId(formulaDto.getFarmId())
-                    .warehouseId(wareHouse.getId())
-                    .warehouseName(wareHouse.getWareHouseName())
-                    .warehouseType(wareHouse.getType())
-                    .materialId(formulaDto.getFeedMaterialId())
-                    .materialName(formulaDto.getFeedMaterial().getName())
+
+            doctorWarehouseHandlerManager.inStock(stock, Collections.singletonList(DoctorWarehousePurchase.builder()
+                    .farmId(stock.getFarmId())
+                    .warehouseId(stock.getWarehouseId())
+                    .warehouseType(stock.getWarehouseType())
+                    .warehouseName(stock.getWarehouseName())
+                    .materialId(stock.getMaterialId())
+                    .vendorName(DoctorWarehouseStockWriteService.DEFAULT_VENDOR_NAME)
+                    .handleDate(formulaDto.getHandleDate())
+                    .handleMonth(c.get(Calendar.MONTH) + 1)
+                    .handleYear(c.get(Calendar.YEAR))
+                    .quantity(formulaDto.getFeedMaterialQuantity())
+                    .unitPrice(unitPrice)
+                    .handleQuantity(new BigDecimal(0))
+                    .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+                    .build()), DoctorWarehouseMaterialHandle.builder()
+                    .farmId(stock.getFarmId())
+                    .warehouseId(stock.getWarehouseId())
+                    .warehouseName(stock.getWarehouseName())
+                    .warehouseType(stock.getWarehouseType())
+                    .materialId(stock.getMaterialId())
+                    .materialName(stock.getMaterialName())
                     .unitPrice(unitPrice)
                     .handleDate(formulaDto.getHandleDate())
                     .handleYear(c.get(Calendar.YEAR))
-                    .deleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue())
                     .handleMonth(c.get(Calendar.MONTH) + 1)
+                    .deleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue())
                     .unit(stock.getUnit())
                     .type(WarehouseMaterialHandleType.FORMULA_IN.getValue())
                     .quantity(formulaDto.getFeedMaterialQuantity())
                     .operatorId(formulaDto.getOperatorId())
                     .operatorName(formulaDto.getOperatorName())
                     .build());
+//            handleContext.addMaterialHandle(DoctorWarehouseMaterialHandle.builder()
+//                    .farmId(formulaDto.getFarmId())
+//                    .warehouseId(wareHouse.getId())
+//                    .warehouseName(wareHouse.getWareHouseName())
+//                    .warehouseType(wareHouse.getType())
+//                    .materialId(formulaDto.getFeedMaterialId())
+//                    .materialName(formulaDto.getFeedMaterial().getName())
+//                    .unitPrice(unitPrice)
+//                    .handleDate(formulaDto.getHandleDate())
+//                    .handleYear(c.get(Calendar.YEAR))
+//                    .deleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue())
+//                    .handleMonth(c.get(Calendar.MONTH) + 1)
+//                    .unit(stock.getUnit())
+//                    .type(WarehouseMaterialHandleType.FORMULA_IN.getValue())
+//                    .quantity(formulaDto.getFeedMaterialQuantity())
+//                    .operatorId(formulaDto.getOperatorId())
+//                    .operatorName(formulaDto.getOperatorName())
+//                    .build());
 
-            stockWithPurchase.put(stock, Collections.singletonList(DoctorWarehousePurchase.builder()
-                    .farmId(formulaDto.getFarmId())
-                    .warehouseId(formulaDto.getWarehouseId())
-                    .warehouseName(wareHouse.getWareHouseName())
-                    .warehouseType(wareHouse.getType())
-                    .vendorName(DoctorWarehouseStockWriteService.DEFAULT_VENDOR_NAME)
-                    .handleDate(formulaDto.getHandleDate())
-                    .handleYear(c.get(Calendar.YEAR))
-                    .handleMonth(c.get(Calendar.MONTH) + 1)
-                    .handleQuantity(new BigDecimal(0))
-                    .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
-                    .quantity(formulaDto.getFeedMaterialQuantity())
-                    .unitPrice(unitPrice)
-                    .build()));
-            handleContext.setStockAndPurchases(stockWithPurchase);
-            handleContexts.add(handleContext);
+//            stockWithPurchase.put(stock, Collections.singletonList(DoctorWarehousePurchase.builder()
+//                    .farmId(formulaDto.getFarmId())
+//                    .warehouseId(formulaDto.getWarehouseId())
+//                    .warehouseName(wareHouse.getWareHouseName())
+//                    .warehouseType(wareHouse.getType())
+//                    .vendorName(DoctorWarehouseStockWriteService.DEFAULT_VENDOR_NAME)
+//                    .handleDate(formulaDto.getHandleDate())
+//                    .handleYear(c.get(Calendar.YEAR))
+//                    .handleMonth(c.get(Calendar.MONTH) + 1)
+//                    .handleQuantity(new BigDecimal(0))
+//                    .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+//                    .quantity(formulaDto.getFeedMaterialQuantity())
+//                    .unitPrice(unitPrice)
+//                    .build()));
+//            handleContext.setStockAndPurchases(stockWithPurchase);
+//            handleContexts.add(handleContext);
 
-            doctorWarehouseHandlerManager.handle(handleContexts);
+//            doctorWarehouseHandlerManager.handle(handleContexts);
             return Response.ok(true);
         } catch (ServiceException e) {
             log.error("failed to produce formula, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("failed to produce formula, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.produce.formula.fail");
+            return Response.fail("doctor.warehouse.produce.formula.fail");
         }
     }
 
 
-    //    private void getHnaldeOut(Long warehouseID, Long materialID, String vendorName) {
-//        DoctorWarehouseMaterialHandle inHandleCriteria = new DoctorWarehouseMaterialHandle();
-//        inHandleCriteria.setWarehouseId(warehouseID);
-//        inHandleCriteria.setMarterialId(materialID);
-//        inHandleCriteria.setType(WarehouseMaterialHandleType.IN.getValue());
-//        inHandleCriteria.setVendorName(vendorName);
-//        List<DoctorWarehouseMaterialHandle> inhandles = doctorWarehouseMaterialHandleDao.list(inHandleCriteria);
-//        if (null == inhandles || inhandles.isEmpty())
-//            throw new ServiceException("stock.in.not.found");
-//        //先入库的先出库
-//        inhandles.sort(Comparator.comparing(DoctorWarehouseMaterialHandle::getHandleDate));
-//
-//        DoctorWarehouseMaterialHandle outHandleCriteria = new DoctorWarehouseMaterialHandle();
-//        outHandleCriteria.setWarehouseId(warehouseID);
-//        outHandleCriteria.setMarterialId(materialID);
-//        outHandleCriteria.setType(WarehouseMaterialHandleType.OUT.getValue());
-//        outHandleCriteria.setVendorName(vendorName);
-//        List<DoctorWarehouseMaterialHandle> outHandles = doctorWarehouseMaterialHandleDao.list(outHandleCriteria);
-//        Map<String, BigDecimal> alreadyOut = new HashMap<>();
-//        if (null != outHandles) {
-//            for (DoctorWarehouseMaterialHandle outHandle : outHandles) {
-//                String key = outHandle.getWarehouseId() + "|" + outHandle.getMarterialId() + "|" + outHandle.getVendorName();
-//                if (alreadyOut.containsKey(key)) {
-//
-//                }
-//            }
-//        }
-//    }
+    private void innerOut(DoctorWarehouseStock stock, List<DoctorWarehousePurchase> purchases) {
 
-
-    //    @Override
-//    public Response<Boolean> out(List<DoctorWarehouseStockHandleDto> dtos, DoctorWarehouseStockHandler handle) {
-//
-//        try {
-//            doctorWarehouseHandlerManager.outStock(dtos, handle);
-//        } catch (Exception e) {
-//            log.error("failed to out of stock,cause:{}", Throwables.getStackTraceAsString(e));
-//            return Response.fail("doctor.warehouseV2.stock.out.fail");
-//        }
-//
-//        return Response.ok(true);
-//    }
+    }
 
     @Override
     public Response<Boolean> outAndIn(List<DoctorWarehouseStockHandleDto> inHandles, List<DoctorWarehouseStockHandleDto> outHandles, DoctorWarehouseStockHandler handle) {
@@ -771,10 +735,10 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             stock.setWarehouseType(wareHouse.getType());
             stock.setMaterialId(detail.getMaterialId());
             stock.setMaterialName(materialName);
-            if (StringUtils.isBlank(detail.getVendorName()))
-                stock.setVendorName(DEFAULT_VENDOR_NAME);
-            else
-                stock.setVendorName(detail.getVendorName());
+//            if (StringUtils.isBlank(detail.getVendorName()))
+//                stock.setVendorName(DEFAULT_VENDOR_NAME);
+//            else
+//                stock.setVendorName(detail.getVendorName());
             stock.setUnit(detail.getUnit());
             stock.setQuantity(detail.getQuantity());
             return stock;
@@ -786,9 +750,9 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         DoctorWarehouseStock criteria = new DoctorWarehouseStock();
         criteria.setWarehouseId(warehouseID);
         criteria.setMaterialId(materialID);
-        if (StringUtils.isNotBlank(vendorName))
-            criteria.setVendorName(vendorName);
-        else criteria.setVendorName(DEFAULT_VENDOR_NAME);
+//        if (StringUtils.isNotBlank(vendorName))
+//            criteria.setVendorName(vendorName);
+//        else criteria.setVendorName(DEFAULT_VENDOR_NAME);
 
         List<DoctorWarehouseStock> stocks = doctorWarehouseStockDao.list(criteria);
         if (null == stocks || stocks.isEmpty())
@@ -834,9 +798,48 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         purchase.setQuantity(quantity);
         purchase.setHandleQuantity(new BigDecimal(0));
         purchase.setUnitPrice(source.getUnitPrice());
-        purchase.setHandleFinishFlag(1);
+        purchase.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
         purchase.setFarmId(source.getFarmId());
         return purchase;
+    }
+
+    private DoctorWarehouseMaterialHandle buildMaterialHandle(DoctorWarehouseStock stock, AbstractWarehouseStockDto
+            stockDto, BigDecimal quantity, long price, int type) {
+        DoctorWarehouseMaterialHandle materialHandle = new DoctorWarehouseMaterialHandle();
+        materialHandle.setFarmId(stock.getFarmId());
+        materialHandle.setWarehouseId(stock.getWarehouseId());
+        materialHandle.setWarehouseName(stock.getWarehouseName());
+        materialHandle.setWarehouseType(stock.getWarehouseType());
+        materialHandle.setMaterialId(stock.getMaterialId());
+        materialHandle.setMaterialName(stock.getMaterialName());
+        materialHandle.setUnitPrice(price);
+        materialHandle.setType(type);
+        materialHandle.setQuantity(quantity);
+        materialHandle.setHandleDate(stockDto.getHandleDate());
+        materialHandle.setOperatorId(stockDto.getOperatorId());
+        materialHandle.setOperatorName(stockDto.getOperatorName());
+        materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
+        materialHandle.setUnit(stock.getUnit());
+        return materialHandle;
+    }
+
+    private DoctorWarehouseMaterialApply buildMaterialApply(DoctorWarehouseMaterialHandle handle) {
+        DoctorWarehouseMaterialApply materialApply = new DoctorWarehouseMaterialApply();
+        materialApply.setWarehouseId(handle.getWarehouseId());
+        materialApply.setFarmId(handle.getFarmId());
+        materialApply.setWarehouseName(handle.getWarehouseName());
+        materialApply.setWarehouseType(handle.getWarehouseType());
+        materialApply.setMaterialId(handle.getMaterialId());
+        materialApply.setMaterialName(handle.getMaterialName());
+
+        materialApply.setType(handle.getWarehouseType());
+        materialApply.setUnit(handle.getUnit());
+        materialApply.setQuantity(handle.getQuantity());
+        materialApply.setUnitPrice(handle.getUnitPrice());
+        materialApply.setApplyDate(handle.getHandleDate());
+        materialApply.setApplyYear(handle.getHandleYear());
+        materialApply.setApplyMonth(handle.getHandleMonth());
+        return materialApply;
     }
 
     private long handleOutAndCalcAveragePrice(BigDecimal totalNeedOutQuantity,
@@ -936,10 +939,13 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         return new BigDecimal(totalHandleMoney).divide(totalHandleQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
     }
 
-    private long getNeedPurchaseAndCalcAveragePrice(List<DoctorWarehousePurchase> needHandlePurchase, List<DoctorWarehousePurchase> purchases, BigDecimal totalQuantity) {
+    private DoctorWarehouseHandlerManager.PurchaseHandleContext getNeedPurchase(List<DoctorWarehousePurchase> purchases, BigDecimal totalQuantity) {
+
+        DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = new DoctorWarehouseHandlerManager.PurchaseHandleContext();
+        if (null == purchases || purchases.isEmpty())
+            return purchaseHandleContext;
 
         BigDecimal needPurchaseQuantity = totalQuantity;
-
         BigDecimal totalHandleQuantity = new BigDecimal(0);
         long totalHandleMoney = 0L;
         for (DoctorWarehousePurchase purchase : purchases) {
@@ -955,14 +961,17 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             purchase.setHandleQuantity(purchase.getHandleQuantity().add(actualCutDownQuantity));
             if (purchase.getHandleQuantity().compareTo(purchase.getQuantity()) >= 0)
                 purchase.setHandleFinishFlag(0);
-            needHandlePurchase.add(purchase);
+
+            purchaseHandleContext.getPurchaseQuantity().put(purchase, actualCutDownQuantity);
+
             totalHandleMoney += actualCutDownQuantity.multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
             totalHandleQuantity = totalHandleQuantity.add(actualCutDownQuantity);
 
             needPurchaseQuantity = needPurchaseQuantity.subtract(actualCutDownQuantity);
         }
         //去除小数部分，四舍五入
-        return new BigDecimal(totalHandleMoney).divide(totalHandleQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
+        purchaseHandleContext.setAveragePrice(new BigDecimal(totalHandleMoney).divide(totalHandleQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue());
+        return purchaseHandleContext;
     }
 
 

@@ -29,6 +29,8 @@ import java.util.*;
 @RequestMapping("api/doctor/warehouse/stock")
 public class StockController {
 
+    //TODO 单据编号。猪厂下，年月日是分秒毫秒
+    //TODO 物料编号（根据物料+厂家带出来）。记录的时候需要校验
 
     @RpcConsumer
     private DoctorWarehouseStockWriteService doctorWarehouseStockWriteService;
@@ -152,15 +154,16 @@ public class StockController {
 
         Calendar now = Calendar.getInstance();
 
-        DoctorWarehouseStock stockCriteria = new DoctorWarehouseStock();
-        stockCriteria.setWarehouseId(warehouseId);
-        if (StringUtils.isNotBlank(materialName))
-            stockCriteria.setMaterialName(materialName);
-        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.pagingMergeVendor(pageNo, pageSize, stockCriteria);
+        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.paging(pageNo, pageSize, DoctorWarehouseStock.builder()
+                .warehouseId(warehouseId)
+                .materialName(materialName)
+                .build());
+
         if (!stockResponse.isSuccess())
             throw new JsonResponseException(stockResponse.getError());
         if (null == stockResponse.getResult().getData())
             throw new JsonResponseException("stock.not.found");
+
 
         Paging<WarehouseStockStatisticsVo> result = new Paging<>();
         result.setTotal(stockResponse.getResult().getTotal());

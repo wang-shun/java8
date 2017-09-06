@@ -38,6 +38,9 @@ public class DoctorWarehouseHandlerManager {
     @Autowired
     private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
 
+    @Autowired
+    private DoctorWarehouseHandleDetailDao doctorWarehouseHandleDetailDao;
+
 
     @Transactional
     public void handle(List<StockHandleContext> contexts) {
@@ -45,21 +48,33 @@ public class DoctorWarehouseHandlerManager {
 
         contexts.forEach(context -> {
 
-            context.getStockAndPurchases().forEach((stock, purchases) -> {
+//            context.getStockAndPurchases().forEach((stock, purchases) -> {
+//
+//                if (stock.getId() == null)
+//                    doctorWarehouseStockDao.create(stock);
+//                else doctorWarehouseStockDao.update(stock);
+//                purchases.forEach(purchase -> {
+//                    if (purchase.getId() == null)
+//                        doctorWarehousePurchaseDao.create(purchase);
+//                    else doctorWarehousePurchaseDao.update(purchase);
+//                });
+//            });
 
-                if (stock.getId() == null)
-                    doctorWarehouseStockDao.create(stock);
-                else doctorWarehouseStockDao.update(stock);
-                purchases.forEach(purchase -> {
+            context.getPurchaseHandleContext().forEach(p -> {
+                if (p.getStock().getId() == null)
+                    doctorWarehouseStockDao.create(p.getStock());
+                else doctorWarehouseStockDao.update(p.getStock());
+                for (DoctorWarehousePurchase purchase : p.getPurchaseQuantity().keySet()) {
                     if (purchase.getId() == null)
                         doctorWarehousePurchaseDao.create(purchase);
                     else doctorWarehousePurchaseDao.update(purchase);
-                });
+                }
             });
 
-
             for (DoctorWarehouseMaterialHandle handle : context.getMaterialHandle()) {
+
                 doctorWarehouseMaterialHandleDao.create(handle);
+
             }
             //两笔物料处理记录，只有调拨才有。
             if (context.getMaterialHandle().size() == 2) {
@@ -80,13 +95,48 @@ public class DoctorWarehouseHandlerManager {
     }
 
     @Transactional
-    public void inStock(List<DoctorWarehouseStockHandleDto> handleDtos) {
+    public void inStock(DoctorWarehouseStock stock, List<DoctorWarehousePurchase> purchases, DoctorWarehouseMaterialHandle handle) {
+        if (null == stock.getId())
+            doctorWarehouseStockDao.create(stock);
+        else
+            doctorWarehouseStockDao.update(stock);
 
+        if (null != handle)
+            doctorWarehouseMaterialHandleDao.create(handle);
+        for (DoctorWarehousePurchase purchase : purchases) {
+            if (purchase.getId() != null)
+                doctorWarehousePurchaseDao.update(purchase);
+            else
+                doctorWarehousePurchaseDao.create(purchase);
+
+            if (null != handle) {
+                DoctorWarehouseHandleDetail outDetail = new DoctorWarehouseHandleDetail();
+                outDetail.setMaterialHandleId(handle.getId());
+                outDetail.setMaterialPurchaseId(purchase.getId());
+                outDetail.setQuantity(purchase.getQuantity());
+                doctorWarehouseHandleDetailDao.create(outDetail);
+            }
+        }
     }
 
     @Transactional
-    public void outStock(List<DoctorWarehouseStockHandleDto> handleDtos, DoctorWarehouseStockHandler handle) {
-        inAndOutStock(Collections.emptyList(), handleDtos, handle);
+    public void outStock(DoctorWarehouseStock stock, PurchaseHandleContext purchaseHandleContext, DoctorWarehouseMaterialHandle handle) {
+
+        doctorWarehouseStockDao.update(stock);
+        if (null != handle)
+            doctorWarehouseMaterialHandleDao.create(handle);
+        for (DoctorWarehousePurchase purchase : purchaseHandleContext.getPurchaseQuantity().keySet()) {
+            doctorWarehousePurchaseDao.update(purchase);
+
+            if (null != handle) {
+                DoctorWarehouseHandleDetail outDetail = new DoctorWarehouseHandleDetail();
+                outDetail.setMaterialHandleId(handle.getId());
+                outDetail.setMaterialPurchaseId(purchase.getId());
+                outDetail.setQuantity(purchaseHandleContext.getPurchaseQuantity().get(purchase));
+                doctorWarehouseHandleDetailDao.create(outDetail);
+            }
+        }
+
     }
 
     @Transactional
@@ -228,6 +278,8 @@ public class DoctorWarehouseHandlerManager {
 
         private Map<DoctorWarehouseStock, List<DoctorWarehousePurchase>> stockAndPurchases;
 
+        private List<PurchaseHandleContext> purchaseHandleContext;
+
         private List<DoctorWarehouseMaterialHandle> materialHandle;
 
         private DoctorWarehouseMaterialApply apply;
@@ -242,6 +294,17 @@ public class DoctorWarehouseHandlerManager {
             this.materialHandle.add(handle);
         }
 
+    }
+
+    @Data
+    public static class PurchaseHandleContext {
+
+        //均价
+        private long averagePrice;
+
+        private DoctorWarehouseStock stock;
+
+        private Map<DoctorWarehousePurchase, BigDecimal> purchaseQuantity = new HashMap<>();
     }
 
 

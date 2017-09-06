@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -24,6 +25,11 @@ public class DoctorWarehouseMaterialApplyManager {
         materialApplies.forEach(apply ->
                 doctorWarehouseMaterialApplyDao.create(apply)
         );
+    }
+
+    @Transactional
+    public void create(DoctorWarehouseMaterialApply materialApply){
+        creates(Collections.singletonList(materialApply));
     }
 
 }
