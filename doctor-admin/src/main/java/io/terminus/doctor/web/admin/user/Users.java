@@ -7,6 +7,7 @@ package io.terminus.doctor.web.admin.user;
 import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
 import com.google.common.eventbus.EventBus;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
@@ -15,8 +16,11 @@ import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.DataEvent;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
+import io.terminus.doctor.user.model.DoctorFarmExport;
 import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.doctor.user.service.DoctorFarmExportReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.web.core.Constants;
 import io.terminus.doctor.web.core.component.MobilePattern;
@@ -47,6 +51,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.terminus.common.utils.Arguments.isNull;
@@ -70,6 +75,8 @@ public class Users {
     private final Publisher publisher;
     private final JedisTemplate jedisTemplate;
     private final DoctorUserMaker doctorUserMaker;
+    @RpcConsumer
+    private DoctorFarmExportReadService doctorFarmExportReadService;
 
     @Autowired
     public Users(DoctorUserReadService doctorUserReadService,
@@ -179,46 +186,22 @@ public class Users {
         }
     }
 
+    /**
+     * excel导入
+     * @param fileUrl Excel文件地址
+     */
     @RequestMapping(value = "/importExcel", method = RequestMethod.GET)
-    public String importExcel(@RequestParam String fileUrl){
+    public void importExcel(@RequestParam String fileUrl){
         log.info("import excel fileUrl:{}", fileUrl);
-        final int maxWaitTime = 300; // 最长等待时间，秒
-        final int sleepTime = 10; //每次沉睡多少秒
-        final String redisKey = ImportExcelRedisKey + fileUrl;
         try {
-            jedisTemplate.execute(jedis -> {
-                jedis.set(redisKey, "null");
-            });
-
             publisher.publish(DataEvent.toBytes(DataEventType.ImportExcel.getKey(), fileUrl));
-
-            int plusTime = 0; //已累计等待时间，秒
-            while (true) {
-                String result = jedisTemplate.execute(jedis -> {
-                    return jedis.get(redisKey);
-                });
-                if ("null".equals(result)) {
-                    if (plusTime >= maxWaitTime) {
-                        throw new JsonResponseException("time out " + maxWaitTime + " seconds");
-                    }
-                    Thread.sleep(1000L * sleepTime);
-                    plusTime += sleepTime;
-                } else if ("true".equals(result)) {
-                    return "true";
-                } else {
-                    return "导入猪场失败，您可以将此错误信息发送给工程师以帮您分析错误原因\n" + result;
-                }
-            }
-        } catch (JsonResponseException e){
-            throw e;
         } catch (Exception e) {
-            log.error(Throwables.getStackTraceAsString(e));
-            return "导入猪场失败，您可以将此错误信息发送给工程师以帮您分析错误原因\n" + Throwables.getStackTraceAsString(e);
-        } finally {
-            jedisTemplate.execute(jedis -> {
-                jedis.del(redisKey);
-            });
+            log.info("import excel failed", Throwables.getStackTraceAsString(e));
         }
     }
 
+    @RequestMapping(value = "/list/farmExport", method = RequestMethod.GET)
+    public List<DoctorFarmExport> findFarmExportRecord(@RequestParam(required = false) String farmName) {
+        return RespHelper.or500(doctorFarmExportReadService.findFarmExportRecord(farmName));
+    }
 }

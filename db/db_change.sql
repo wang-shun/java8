@@ -1276,3 +1276,7 @@ update doctor_orgs set parent_id = 0, type = 1;
 
 -- 2017-07-21
 ALTER table doctor_daily_reports modify column `fatten_feed_amount` bigint(20) DEFAULT NULL COMMENT '育肥猪饲料消耗金额';
+
+-- 2017-09-05
+ALTER table doctor_farm_exports ADD column `error_reason` text DEFAULT NULL COMMENT 'Excel导入错误原因' after status;
+

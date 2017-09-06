@@ -168,19 +168,25 @@ public class DoctorImportDataController {
         Row farmRow = sheet.getFarm().getRow(1);
         String farmName = ImportExcelUtils.getStringOrThrow(farmRow, 1).replaceAll(" ", "");
         DoctorFarmExport farmExport = DoctorFarmExport.builder().farmName(farmName).url(path).build();
-        farmExport.setStatus(DoctorFarmExport.Status.FAILED.getValue());
+        farmExport.setStatus(DoctorFarmExport.Status.HANDLING.getValue());
         doctorImportDataService.createFarmExport(farmExport);
 
-        //数据校验
-        checkImportData(sheet);
-
         //导入数据
-        this.generateReport(doctorMoveAndImportService.importData(sheet));
+        Integer status;
+        String errorReason = null;
+        try {
+            doctorMoveAndImportService.importData(sheet);
+            status = DoctorFarmExport.Status.SUCCESS.getValue();
+        } catch (Exception e) {
+            status = DoctorFarmExport.Status.FAILED.getValue();
+            errorReason = e.getMessage();
+        }
 
         //更新导入状态
         DoctorFarmExport updateFarmExport = new DoctorFarmExport();
         updateFarmExport.setId(farmExport.getId());
-        updateFarmExport.setStatus(DoctorFarmExport.Status.SUCCESS.getValue());
+        updateFarmExport.setStatus(status);
+        updateFarmExport.setErrorReason(errorReason);
         doctorImportDataService.updateFarmExport(updateFarmExport);
 
         watch.stop();
@@ -244,19 +250,11 @@ public class DoctorImportDataController {
             throw new ServiceException("file.type.error");
         }
         InputStream inputStream = null;
-        final String redisKey = ImportExcelRedisKey + fileURL;
         try {
             inputStream = new URL(fileURL.replace("https", "http")).openConnection().getInputStream();
             importByInputStream(inputStream, fileType, fileURL);
-            //  成功
-            jedisTemplate.execute(jedis -> {
-               jedis.set(redisKey, "true");
-            });
         } catch (Exception e) {
             log.error(Throwables.getStackTraceAsString(e));
-            jedisTemplate.execute(jedis -> {
-                jedis.set(redisKey, e.getMessage());
-            });
         } finally {
             if(inputStream != null){
                 try {
@@ -381,11 +379,4 @@ public class DoctorImportDataController {
         return true;
     }
 
-    /**
-     * 导入数据校验
-     * @param sheet 表中数据集合
-     */
-    private void checkImportData(DoctorImportSheet sheet) {
-        // TODO: 17/3/24  暂时还不知道要添加什么校验,先放在这 
-    }
 }
