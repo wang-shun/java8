@@ -7,6 +7,8 @@ import io.terminus.common.model.BaseUser;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.PrimaryUser;
@@ -52,6 +54,8 @@ public class FarmController {
     private final DoctorInitFarmService doctorInitFarmService;
     @RpcConsumer
     private PrimaryUserReadService primaryUserReadService;
+    @RpcConsumer
+    private DoctorBarnReadService doctorBarnReadService;
 
     @Autowired
     public FarmController(DoctorFarmReadService doctorFarmReadService,
@@ -149,6 +153,19 @@ public class FarmController {
     @RequestMapping(value = "/staff/{farmId}", method = RequestMethod.GET)
     public List<FarmStaff> findStaffByFarmId(@PathVariable Long farmId) {
         return transformStaffs(farmId);
+    }
+
+    /**
+     * 获取猪场下不再用的猪舍
+     * @param farmId 猪场id
+     * @return 猪舍列表
+     */
+    @RequestMapping(value = "/unUseBarn/{farmId}", method = RequestMethod.GET)
+    public List<DoctorBarn> findAllUnUse(@PathVariable Long farmId) {
+        List<DoctorBarn> allBarnList = RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId));
+        return allBarnList.stream()
+                .filter(barn -> Objects.equals(barn.getStatus(), DoctorBarn.Status.NOUSE.getValue()))
+                .collect(Collectors.toList());
     }
 
     /**
