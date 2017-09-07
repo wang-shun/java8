@@ -245,7 +245,7 @@ public class DoctorImportInputSplitter {
             importSow.setPregCheckResult(PregCheckResult.YANG.getDesc());
             if (Objects.equals(importSow.getCurrentStatus(), PigStatus.Wean.getDesc())) {
                 importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());
-                if (Objects.equals(importSow.getFarrowBarnName(), importSow.getBarnName())) {
+                if (!Objects.equals(importSow.getFarrowBarnName(), importSow.getBarnName())) {
                     importSow.setWeanToBarn(importSow.getBarnName());
                 }
             }
