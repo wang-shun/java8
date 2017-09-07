@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -45,6 +46,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isNull;
@@ -241,7 +243,8 @@ public class DoctorMoveAndImportManager {
     private void initFarrowGroup(DoctorImportBasicData importBasicData,
                                  List<DoctorImportSow> importSowList) {
         Map<String, List<DoctorImportSow>> map = importSowList.stream().filter(importSow ->
-                !Strings.isNullOrEmpty(importSow.getFarrowBarnName()))
+                !Strings.isNullOrEmpty(importSow.getFarrowBarnName())
+                        && Objects.equals(importSow.getCurrentStatus(), PigStatus.FEED.getDesc()))
                 .collect(Collectors.groupingBy(DoctorImportSow::getFarrowBarnName));
         map.entrySet().forEach(entry -> {
             Date newGroupDate = entry.getValue().stream().
