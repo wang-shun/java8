@@ -66,22 +66,24 @@ public class DoctorImportSow implements Serializable {
 
     public enum ParityStage {
         FIRST(1, "首胎"),
-        LAST_FIRST(2, "首胎"),
+        LAST_FIRST(2, "首胎并且是当前胎次前一个"),
         MIDDLE(3, "中间胎次"),
-        LAST_MIDDLE(4, "当前胎次前一个"),
+        LAST_MIDDLE(4, "中间胎次并且是当前胎次前一个"),
         CURRENT(5, "当前胎次"),
         FIRST_CURRENT(6, "首胎也是当前胎次");
 
         ParityStage(Integer value, String name) {
             this.value = value;
-            this.name = name;
+            this.desc = name;
         }
         @Getter
         private Integer value;
         @Getter
-        private String name;
+        private String desc;
 
         public static List<Integer> firsts = Lists.newArrayList(FIRST.getValue(), LAST_FIRST.getValue(), FIRST_CURRENT.getValue());
         public static List<Integer> currents = Lists.newArrayList(CURRENT.getValue(), FIRST_CURRENT.getValue());
+        public static List<Integer> lasts = Lists.newArrayList(LAST_FIRST.getValue(), LAST_MIDDLE.getValue());
+
     }
 }
