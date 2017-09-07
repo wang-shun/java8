@@ -34,4 +34,19 @@ public class DoctorMoveBasicData {
     private Map<String, DoctorBasicMaterial> vaccMap;
     private Map<String, DoctorPig> boarMap;
     private Map<String, DoctorGroup> groupMap;
+
+    /**
+     * 配怀舍为空时默认配怀舍
+     */
+    private DoctorBarn defaultPregBarn;
+
+    /**
+     * 产房为空时默认产房
+     */
+    private DoctorBarn defaultFarrowBarn;
+
+    /**
+     * 产房仔猪群为空时默认猪群
+     */
+    private DoctorGroup defaultFarrowGroup;
 }
