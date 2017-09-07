@@ -80,26 +80,33 @@ public class DoctorImportEventExecutor {
             BasePigEventInputDto inputDto = validator.valid(builder.buildFromImport(importBasicData, importPigEvent));
             pigEventManager.eventHandle(inputDto, basicInputInfoDto);
         } catch (InvalidException e) {
-            throw new InvalidException(true, e.getError(), importPigEvent.getLineNumber().toString(), e.getParams());
+            e.setAttach(assembleErrorAttach(e.getAttach(), importPigEvent.getLineNumber()));
+            throw e;
         }
     }
 
     public void executeGroupEvent(DoctorImportBasicData importBasicData, DoctorImportGroupEvent importGroupEvent) {
-        DoctorGroupEventInputBuilder builder = doctorBuilderFactory.getGroupBuilder(importGroupEvent.getEventName());
-        if (isNull(builder)) {
-            return;
-        }
-        BaseGroupInput baseGroupInput = validator.valid(builder.buildFromImport(importBasicData, importGroupEvent));
+        try {
+            DoctorGroupEventInputBuilder builder = doctorBuilderFactory.getGroupBuilder(importGroupEvent.getEventName());
+            if (isNull(builder)) {
+                return;
+            }
+            BaseGroupInput baseGroupInput = validator.valid(builder.buildFromImport(importBasicData, importGroupEvent));
 
-        if (Objects.equals(baseGroupInput.getEventType(), GroupEventType.NEW.getValue())) {
-            groupManager.createNewGroup(Lists.newArrayList(), buildGroupBasicData(importBasicData, baseGroupInput),
-                    (DoctorNewGroupInput) baseGroupInput);
-            return;
-        }
+            if (Objects.equals(baseGroupInput.getEventType(), GroupEventType.NEW.getValue())) {
+                groupManager.createNewGroup(Lists.newArrayList(), buildGroupBasicData(importBasicData, baseGroupInput),
+                        (DoctorNewGroupInput) baseGroupInput);
+                return;
+            }
 
-        DoctorGroupInputInfo groupInputInfo = new DoctorGroupInputInfo(buildGroupDetail(importBasicData, importGroupEvent),
-                baseGroupInput);
-        groupEventManager.batchHandleEvent(Lists.newArrayList(groupInputInfo), baseGroupInput.getEventType());
+            DoctorGroupInputInfo groupInputInfo = new DoctorGroupInputInfo(buildGroupDetail(importBasicData, importGroupEvent),
+                    baseGroupInput);
+            groupEventManager.batchHandleEvent(Lists.newArrayList(groupInputInfo), baseGroupInput.getEventType());
+
+        } catch (InvalidException e) {
+            e.setAttach(assembleErrorAttach(e.getAttach(), importGroupEvent.getLineNumber()));
+            throw e;
+        }
     }
 
     private DoctorGroup buildGroupBasicData(DoctorImportBasicData importBasicData, BaseGroupInput baseGroupInput) {
@@ -136,5 +143,10 @@ public class DoctorImportEventExecutor {
                 .staffId(-1L)
                 .staffName("")
                 .build();
+    }
+
+    private String assembleErrorAttach(String  attach, Integer lineNumber) {
+        String line = isNull(lineNumber) ? "" : ",行号:".concat(lineNumber.toString());
+        return isNull(attach) ? line : attach.concat(line);
     }
 }

@@ -4,6 +4,7 @@ import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.dto.DoctorImportBasicData;
@@ -19,7 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.isNull;
 
 /**
  * Created by xjn on 17/8/4.
@@ -178,9 +182,20 @@ public class DoctorMoveAndImportService {
             Map<String, DoctorChangeReason> changeReasonMap = moveBasicService.getReasonMap();
             Map<String, DoctorCustomer> customerMap = moveBasicService.getCustomerMap(farm.getId());
             Map<String, DoctorBasicMaterial> vaccMap = moveBasicService.getVaccMap();
+            DoctorBarn defaultPregBarn = null;
+            DoctorBarn defaultFarrowBarn = null;
+            for(DoctorBarn doctorBarn : barnMap.values()) {
+                if (isNull(defaultPregBarn) && Objects.equals(doctorBarn.getPigType(), PigType.PREG_SOW.getValue())) {
+                    defaultPregBarn = doctorBarn;
+                }
+                if (isNull(defaultFarrowBarn) && Objects.equals(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
+                    defaultFarrowBarn = doctorBarn;
+                }
+            }
 
             return DoctorMoveBasicData.builder().doctorFarm(farm).barnMap(barnMap).basicMap(basicMap).subMap(subMap)
                     .changeReasonMap(changeReasonMap).customerMap(customerMap).vaccMap(vaccMap)
+                    .defaultPregBarn(defaultPregBarn).defaultFarrowBarn(defaultFarrowBarn)
                     .build();
         } catch (Exception e) {
             log.error("package move basic data error -- farm:{}", farm);

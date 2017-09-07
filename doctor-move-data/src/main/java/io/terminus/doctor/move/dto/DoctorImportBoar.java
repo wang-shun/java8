@@ -16,6 +16,8 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DoctorImportBoar {
+
+    private Integer lineNumber;            //所在Excel耳号
     private String barnName;        //猪舍
     private String boarCode;        //公猪号
     private Date inFarmIn;          //进场如期

@@ -40,6 +40,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -174,12 +175,18 @@ public class DoctorImportDataController {
         //导入数据
         Integer status;
         String errorReason = null;
+        Long farmId = null;
         try {
-            doctorMoveAndImportService.importData(sheet);
+            farmId = doctorMoveAndImportService.importData(sheet);
             status = DoctorFarmExport.Status.SUCCESS.getValue();
         } catch (Exception e) {
             status = DoctorFarmExport.Status.FAILED.getValue();
-            errorReason = e.getMessage();
+            if (e instanceof JsonResponseException) {
+                errorReason = e.getMessage();
+            } else {
+                errorReason = Throwables.getStackTraceAsString(e);
+            }
+            throw e;
         }
 
         //更新导入状态
@@ -192,7 +199,11 @@ public class DoctorImportDataController {
         watch.stop();
         int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
         log.warn("database data inserted successfully, elapsed {} minutes", minute);
-        log.warn("all data moved successfully, CONGRATULATIONS!!!");
+        log.warn("all data moved succelly, CONGRATULATIONS!!!");
+
+        if (Objects.equals(status, DoctorFarmExport.Status.SUCCESS.getValue())) {
+            generateReport(farmId);
+        }
     }
 
     //生成一年的报表

@@ -16,6 +16,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DoctorImportGroup {
+    private Integer lineNumber;            //所在Excel耳号
     private String groupCode;             //猪群号
     private String barnName;              //猪舍
     private String sex;                   //性别

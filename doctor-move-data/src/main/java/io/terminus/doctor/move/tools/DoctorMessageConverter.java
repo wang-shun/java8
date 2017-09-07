@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 /**
  * Created by xjn on 17/8/28.
  * 错误消息转换器
@@ -19,6 +21,9 @@ public class DoctorMessageConverter {
 
     public JsonResponseException convert(InvalidException e) {
         String errorMessage = messageSource.getMessage(e.getError(), e.getParams(), Locale.CHINA);
-        return new JsonResponseException(errorMessage.concat(",行号:").concat(e.getAttach()));
+        if (notNull(e.getAttach())) {
+            errorMessage = errorMessage.concat(e.getAttach());
+        }
+        return new JsonResponseException(errorMessage);
     }
 }

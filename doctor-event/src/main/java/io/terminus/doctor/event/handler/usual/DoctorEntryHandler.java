@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
@@ -49,6 +50,11 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        expectTrue((Objects.equals(executeEvent.getKind(), DoctorPig.PigSex.SOW.getKey())
+                        && PigType.MATING_TYPES.contains(executeEvent.getBarnType()))
+                || (Objects.equals(executeEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())
+                        && Objects.equals(executeEvent.getBarnType(), PigType.BOAR.getValue()))
+                , "entry.barn.type.error", PigType.from(executeEvent.getBarnType()));
     }
 
     @Override

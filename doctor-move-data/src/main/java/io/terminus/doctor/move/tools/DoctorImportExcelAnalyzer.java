@@ -6,7 +6,6 @@ import io.terminus.doctor.move.dto.DoctorImportGroup;
 import io.terminus.doctor.move.dto.DoctorImportSow;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,9 +20,6 @@ import static io.terminus.doctor.move.util.ImportExcelUtils.*;
  */
 @Component
 public class DoctorImportExcelAnalyzer {
-
-    @Autowired
-    private DoctorImportValidator validator;
 
     public List<DoctorImportBoar> getImportBoar(Sheet pigSheet) {
         List<DoctorImportBoar> importPigEventList = Lists.newArrayList();
@@ -66,6 +62,7 @@ public class DoctorImportExcelAnalyzer {
                 .breedName(getString(row, 6))
                 .source(getString(row, 7))
                 .boarType(getString(row, 8))
+                .lineNumber(row.getRowNum() + 1)
                 .build();
     }
 
@@ -114,6 +111,7 @@ public class DoctorImportExcelAnalyzer {
                 .avgDayAge(getInt(row, 4))
                 .avgWeight(getDouble(row, 5))
                 .newGroupDate(getDate(row, 6))
+                .lineNumber(row.getRowNum() + 1)
                 .build();
     }
 }

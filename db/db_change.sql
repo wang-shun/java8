@@ -1282,3 +1282,20 @@ ALTER table doctor_farm_exports ADD column `error_reason` text DEFAULT NULL COMM
 
 -- 2017-08-30
 ALTER TABLE doctor_group_tracks ADD COLUMN `close_at` datetime DEFAULT NULL  comment '猪群关闭事件(如果猪群关闭的话)' after updator_name;
+
+-- 2017-09-05 旧场迁移错误记录表
+drop table if exists `doctor_farm_move_errors`;
+create table `doctor_farm_move_errors` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `farm_name` VARCHAR(40)  DEFAULT NULL COMMENT '猪场名',
+  `code` VARCHAR(255)  DEFAULT NULL COMMENT '猪/猪群code',
+  `out_id` VARCHAR(255)  DEFAULT NULL COMMENT '源目标id',
+  `event_name` VARCHAR(40)  DEFAULT NULL COMMENT '事件名称',
+  `event_At` DATE  DEFAULT NULL COMMENT '事件时间',
+  `event_out_id` VARCHAR(255)  DEFAULT NULL COMMENT '源事件id',
+  `error` text  DEFAULT NULL COMMENT '错误原因',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='旧场迁移错误记录表';

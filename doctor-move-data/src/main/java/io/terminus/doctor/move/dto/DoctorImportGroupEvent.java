@@ -17,6 +17,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class DoctorImportGroupEvent {
 
+    private Integer lineNumber;            //所在Excel耳号
     private String groupCode;             //猪群code
     private Date eventAt;                 //事件时间
     private String eventName;             //事件名称

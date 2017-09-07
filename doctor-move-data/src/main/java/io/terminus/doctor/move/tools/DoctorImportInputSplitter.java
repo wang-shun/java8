@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -241,6 +242,7 @@ public class DoctorImportInputSplitter {
 
         if (DoctorImportSow.ParityStage.currents.contains(importSow.getParityStage())) {
             importSow.setPregBarn(importSow.getBarnName());
+            importSow.setPregCheckResult(PregCheckResult.YANG.getDesc());
             if (Objects.equals(importSow.getCurrentStatus(), PigStatus.Wean.getDesc())) {
                 importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());
                 if (Objects.equals(importSow.getFarrowBarnName(), importSow.getBarnName())) {
@@ -256,9 +258,12 @@ public class DoctorImportInputSplitter {
                 importSow.setPregCheckResult(importSow.getCurrentStatus());
                 if (!Objects.equals(importSow.getCurrentStatus(), PigStatus.Pregnancy.getDesc())) {
                     importSow.setCurrentStatus(PigStatus.KongHuai.getDesc());
+                } else if (Objects.equals(importBasicData.getBarnMap().get(importSow.getBarnName()).getPigType()
+                        , PigType.DELIVER_SOW.getValue())){
+                    importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());
+                    importSow.setCurrentStatus(PigStatus.Farrow.getDesc());
+                    importSow.setFarrowBarnName(importSow.getBarnName());
                 }
-            } else {
-                importSow.setPregCheckResult(PregCheckResult.YANG.getDesc());
             }
         } else {
             importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());

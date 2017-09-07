@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -33,6 +34,7 @@ import io.terminus.doctor.move.tools.DoctorImportEventExecutor;
 import io.terminus.doctor.move.tools.DoctorImportExcelAnalyzer;
 import io.terminus.doctor.move.tools.DoctorImportInputSplitter;
 import io.terminus.doctor.move.tools.DoctorMoveEventExecutor;
+import io.terminus.doctor.user.dao.DoctorFarmMoveErrorDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -45,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.grateGroupCode;
 
@@ -80,6 +83,8 @@ public class DoctorMoveAndImportManager {
     private DoctorImportExcelAnalyzer importExcelAnalyzer;
     @Autowired
     private DoctorImportInputSplitter importInputSplitter;
+    @Autowired
+    private DoctorFarmMoveErrorDao doctorFarmMoveErrorDao;
 
     public void movePig(Long moveId, DoctorMoveBasicData moveBasicData) {
 
@@ -98,7 +103,7 @@ public class DoctorMoveAndImportManager {
 
         //循环执行事件
         try {
-            rollbackPig(moveBasicData.getDoctorFarm().getId());
+            rollbackPigForMove(moveBasicData.getDoctorFarm().getId());
 
             boarOutIdToRawEventMap.entrySet().parallelStream().forEach(entry ->
                     moveEventExecutor.executePigEvent(moveBasicData, entry.getValue()));
@@ -107,6 +112,12 @@ public class DoctorMoveAndImportManager {
             doctorPigDao.findPigsByFarmIdAndPigType(moveBasicData.getDoctorFarm().getId(), DoctorPig.PigSex.BOAR.getKey())
                     .forEach(boar -> boarMap.put(boar.getPigCode(), boar));
             moveBasicData.setBoarMap(boarMap);
+            if (isNull(moveBasicData.getGroupMap())) {
+                List<DoctorGroup> farrowGroupList = doctorGroupDao
+                        .findByFarmIdAndPigTypeAndStatus(moveBasicData.getDoctorFarm().getId(),
+                                PigType.DELIVER_SOW.getValue(), DoctorGroup.Status.CREATED.getValue());
+                moveBasicData.setGroupMap(farrowGroupList.stream().collect(Collectors.toMap(DoctorGroup::getOutId, v -> v)));
+            }
 
             sowOutIdToRawEventMap.entrySet().parallelStream().forEach(entry ->
                     moveEventExecutor.executePigEvent(moveBasicData, entry.getValue()));
@@ -135,7 +146,7 @@ public class DoctorMoveAndImportManager {
             Map<String, DoctorGroup> groupMap = groupList.stream().collect(Collectors.toMap(DoctorGroup::getOutId, v -> v));
             moveBasicData.setGroupMap(groupMap);
 
-            groupOutIdToRawEventMap.entrySet().forEach(entry ->
+            groupOutIdToRawEventMap.entrySet().parallelStream().forEach(entry ->
                     moveEventExecutor.executeGroupEvent(moveBasicData, entry.getValue()));
         } catch (Exception e) {
             // TODO: 17/8/8 测试暂时注释
@@ -145,41 +156,43 @@ public class DoctorMoveAndImportManager {
     }
 
     public void importPig(Sheet boarSheet, Sheet sowSheet, DoctorImportBasicData importBasicData) {
-        rollbackPigForImport(importBasicData);
-        List<DoctorImportSow> importSowList = importExcelAnalyzer.getImportSow(sowSheet);
-        List<DoctorImportBoar> importBoarList = importExcelAnalyzer.getImportBoar(boarSheet);
-
-        beforeImportPigEvent(importBasicData, importSowList);
-        List<DoctorImportPigEvent> importEventList = importInputSplitter.splitForBoar(importBoarList);
-        importEventList.addAll(importInputSplitter.splitForSow(importSowList, importBasicData));
-        log.info("pig event total:{}", importEventList.size());
-
         try {
-            importEventList.forEach(importPigEvent ->
+            List<DoctorImportBoar> importBoarList = importExcelAnalyzer.getImportBoar(boarSheet);
+            List<DoctorImportPigEvent> importBoarEventList = importInputSplitter.splitForBoar(importBoarList);
+            log.info("boar pig event total:{}", importBoarEventList.size());
+            importBoarEventList.forEach(importPigEvent ->
                     importEventExecutor.executePigEvent(importBasicData, importPigEvent));
-        } catch (Exception e) {
-            rollbackPigForImport(importBasicData);
+
+        } catch (InvalidException e) {
+            e.setAttach(assembleErrorAttach(e.getAttach(), boarSheet.getSheetName()));
             throw e;
         }
-        afterImportPigEvent(importBasicData);
+
+        try {
+            List<DoctorImportSow> importSowList = importExcelAnalyzer.getImportSow(sowSheet);
+            beforeImportPigEvent(importBasicData, importSowList);
+            List<DoctorImportPigEvent> importSowEventList = importInputSplitter.splitForSow(importSowList, importBasicData);
+            log.info("sow pig event total:{}", importSowEventList.size());
+            importSowEventList.forEach(importPigEvent ->
+                    importEventExecutor.executePigEvent(importBasicData, importPigEvent));
+            afterImportPigEvent(importBasicData);
+        } catch (InvalidException e) {
+            e.setAttach(assembleErrorAttach(e.getAttach(), sowSheet.getSheetName()));
+            throw e;
+        }
     }
 
     public void importGroup(Sheet groupSheet, DoctorImportBasicData importBasicData) {
-        List<DoctorImportGroupEvent> importEventList = importInputSplitter
-                .splitForGroup(importExcelAnalyzer.getImportGroup(groupSheet));
-
-        log.info("group event total:{}", importEventList.size());
-
         try {
-            rollbackGroupForImport(importBasicData.getDoctorFarm().getId());
+            List<DoctorImportGroupEvent> importEventList = importInputSplitter
+                    .splitForGroup(importExcelAnalyzer.getImportGroup(groupSheet));
+            log.info("group event total:{}", importEventList.size());
             importEventList.forEach(importGroupEvent ->
                     importEventExecutor.executeGroupEvent(importBasicData, importGroupEvent));
-        } catch (Exception e) {
-            // TODO: 17/8/28 测试暂时注释
-//            rollbackGroup(moveBasicData.getDoctorFarm().getId());
+        } catch (InvalidException e) {
+            e.setAttach(assembleErrorAttach(e.getAttach(), groupSheet.getSheetName()));
             throw e;
         }
-
     }
 
     private void beforeImportPigEvent(DoctorImportBasicData importBasicData,
@@ -254,6 +267,11 @@ public class DoctorMoveAndImportManager {
         }
     }
 
+    private void rollbackPigForMove(Long farmId) {
+        rollbackPig(farmId);
+        doctorFarmMoveErrorDao.deleteAll();
+    }
+
     private void rollbackPig(Long farmId) {
         //1、删除pig
         doctorPigDao.deleteByFarmId(farmId);
@@ -263,6 +281,7 @@ public class DoctorMoveAndImportManager {
 
         //3、删除pigEvent
         doctorPigEventDao.deleteByFarmId(farmId);
+
     }
 
     private void rollbackGroupForMove(Long farmId) {
@@ -273,6 +292,8 @@ public class DoctorMoveAndImportManager {
 
         //3、删除groupEvent
         doctorGroupEventDao.deleteByFarmId(farmId);
+
+        doctorFarmMoveErrorDao.deleteAll();
     }
 
     private void rollbackGroupForImport(Long farmId) {
@@ -289,5 +310,9 @@ public class DoctorMoveAndImportManager {
 
         //3、删除groupEvent
         doctorGroupEventDao.deleteByFarmId(farmId, includePigTypes);
+    }
+
+    private String assembleErrorAttach(String attach, String sheetName) {
+        return isNull(attach) ? sheetName : attach.concat(",页名:" + sheetName);
     }
 }
