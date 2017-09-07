@@ -1,4 +1,4 @@
-package io.terminus.doctor.basic.service;
+package io.terminus.doctor.basic.service.warehouseV2;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -18,6 +18,7 @@ import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.FeedFormula;
 import io.terminus.doctor.basic.model.warehouseV2.*;
+import io.terminus.doctor.basic.service.DoctorFarmBasicReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehousePurchaseWriteService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
 import io.terminus.doctor.common.utils.DateUtil;

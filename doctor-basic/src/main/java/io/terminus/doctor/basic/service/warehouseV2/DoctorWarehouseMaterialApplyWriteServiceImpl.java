@@ -1,4 +1,4 @@
-package io.terminus.doctor.basic.service;
+package io.terminus.doctor.basic.service.warehouseV2;
 
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
 

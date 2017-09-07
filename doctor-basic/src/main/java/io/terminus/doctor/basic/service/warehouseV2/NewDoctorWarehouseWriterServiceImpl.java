@@ -1,4 +1,4 @@
-package io.terminus.doctor.basic.service;
+package io.terminus.doctor.basic.service.warehouseV2;
 
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -18,6 +18,8 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMonthlyStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandler;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandlerDetail;
+import io.terminus.doctor.basic.service.DoctorFarmBasicReadService;
+import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.warehouseV2.NewDoctorWarehouseWriterService;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;

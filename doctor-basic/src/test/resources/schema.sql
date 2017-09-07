@@ -118,3 +118,134 @@ CREATE TABLE `doctor_material_price_in_ware_houses` (
   UNIQUE KEY `provider_id_UNIQUE` (`provider_id`),
   KEY `ware_house_id_index` (`ware_house_id`)
 ) COMMENT='仓库中各物料每次入库的剩余量';
+
+
+
+CREATE TABLE `doctor_basic_materials` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `type` smallint(6) DEFAULT NULL COMMENT '物料类型',
+  `sub_type` bigint(20) unsigned DEFAULT NULL COMMENT '物料的子类别，关联 doctor_basics 表的id',
+  `name` varchar(128) DEFAULT NULL COMMENT '物料名称',
+  `srm` varchar(32) DEFAULT NULL,
+  `is_valid` smallint(6) NOT NULL DEFAULT '1' COMMENT '逻辑删除字段, -1 表示删除, 1 表示可用',
+  `unit_group_id` bigint(20) unsigned DEFAULT NULL COMMENT '单位组id',
+  `unit_group_name` varchar(64) DEFAULT NULL COMMENT '单位组名称',
+  `unit_id` bigint(20) unsigned DEFAULT NULL COMMENT '单位id',
+  `unit_name` varchar(64) DEFAULT NULL COMMENT '单位名称',
+  `default_consume_count` int(11) DEFAULT NULL COMMENT '默认消耗数量',
+  `price` bigint(20) DEFAULT NULL COMMENT '价格(元)',
+  `remark` text COMMENT '标注',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='基础物料表';
+
+CREATE TABLE `doctor_farm_basics` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `basic_ids` text COMMENT '基础数据ids, 逗号分隔',
+  `reason_ids` text COMMENT '变动原因ids, 逗号分隔',
+  `material_ids` text COMMENT '物料基础数据ids',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_doctor_farm_basics_farm_id` (`farm_id`)
+)  COMMENT='猪场基础数据关联表';
+
+CREATE TABLE `doctor_ware_houses` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `manager_id` bigint(20) unsigned DEFAULT NULL COMMENT '管理员Id',
+  `manager_name` varchar(64) DEFAULT NULL COMMENT '管理人员姓名',
+  `address` varchar(64) DEFAULT NULL COMMENT '地址信息',
+  `type` smallint(6) DEFAULT NULL COMMENT '仓库类型，一个仓库只能属于一个',
+  `extra` text COMMENT '扩展信息',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `doctor_ware_houses_farm_id` (`farm_id`)
+) COMMENT='仓库信息数据表';
+
+-- 库存表
+CREATE TABLE `doctor_warehouse_stock` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `warehouse_id` bigint(20) DEFAULT NULL COMMENT '仓库编号',
+  `warehouse_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `warehouse_type` smallint(6) DEFAULT NULL COMMENT '仓库类型，冗余，方便查询',
+  `vendor_name` varchar(64) DEFAULT NULL COMMENT '物料供应商',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪厂编号',
+  `manager_id` bigint(20) DEFAULT NULL COMMENT '管理员编号',
+  `material_name` varchar(64) DEFAULT NULL COMMENT '物料名称',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '物料编号',
+  `quantity` decimal(23,2) DEFAULT NULL COMMENT '数量',
+  `unit` varchar(45) DEFAULT NULL COMMENT '单位',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='仓库物料库存表';
+
+CREATE TABLE `doctor_warehouse_purchase` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪厂编号',
+  `warehouse_id` bigint(20) DEFAULT NULL COMMENT '仓库编号',
+  `warehouse_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `warehouse_type` smallint(6) DEFAULT NULL COMMENT '仓库类型',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '物料编号',
+  `vendor_name` varchar(64) DEFAULT NULL COMMENT '物料供应商名称',
+  `unit_price` bigint(20) DEFAULT NULL COMMENT '单价，单位分',
+  `quantity` decimal(23,2) DEFAULT NULL COMMENT '数量',
+  `handle_date` date DEFAULT NULL COMMENT '处理日期',
+  `handle_year` smallint(12) DEFAULT NULL COMMENT '处理年',
+  `handle_month` tinyint(4) DEFAULT NULL COMMENT '处理月份',
+  `handle_quantity` decimal(23,2) DEFAULT NULL COMMENT '已出库的数量',
+  `handle_finish_flag` tinyint(2) DEFAULT NULL COMMENT '是否该批入库已出库完。0出库完，1未出库完。handle_quantity=quantity就表示出库完',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) COMMENT='仓库物料入库表';
+
+CREATE TABLE `doctor_warehouse_material_handle` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪厂编号',
+  `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
+  `warehouse_type` smallint(6) DEFAULT NULL COMMENT '仓库类型',
+  `warehouse_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `other_trasnfer_handle_id` bigint(20) DEFAULT NULL COMMENT '另一条调拨物料处理单的编号',
+  `vendor_name` varchar(64) DEFAULT NULL COMMENT '物料供应商名称',
+  `material_id` bigint(20) NOT NULL COMMENT '物料编号',
+  `material_name` varchar(64) DEFAULT NULL COMMENT '物料名称',
+  `type` tinyint(4) NOT NULL COMMENT '处理类别，入库，出库，调拨，盘点',
+  `unit_price` bigint(20) NOT NULL COMMENT '单价，单位分',
+  `unit` varchar(64) DEFAULT NULL COMMENT '单位',
+  `delete_flag` tinyint(2) DEFAULT NULL COMMENT '删除标志，0正常，1删除',
+  `quantity` decimal(23,2) NOT NULL COMMENT '数量',
+  `handle_date` date DEFAULT NULL COMMENT '处理日期',
+  `handle_year` smallint(12) NOT NULL COMMENT '处理年',
+  `handle_month` tinyint(4) NOT NULL COMMENT '处理月',
+  `operator_id` bigint(20) DEFAULT NULL COMMENT '操作人编号',
+  `operator_name` varchar(64) DEFAULT NULL COMMENT '操作人名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)  COMMENT='仓库物料处理表';
+
+CREATE TABLE `doctor_warehouse_handle_detail` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '明细编号',
+  `material_purchase_id` bigint(20) NOT NULL COMMENT '物料采购记录编号',
+  `material_handle_id` bigint(20) NOT NULL COMMENT '物料处理记录编号',
+  `handle_year` smallint(6) DEFAULT NULL,
+  `handle_month` tinyint(2) DEFAULT NULL,
+  `quantity` decimal(23,2) NOT NULL COMMENT '处理数量',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_material_handle_id` (`material_handle_id`)
+) COMMENT='仓库物料处理明细';

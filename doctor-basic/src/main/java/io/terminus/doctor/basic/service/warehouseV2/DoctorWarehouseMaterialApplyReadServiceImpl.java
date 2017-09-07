@@ -1,4 +1,4 @@
-package io.terminus.doctor.basic.service;
+package io.terminus.doctor.basic.service.warehouseV2;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
