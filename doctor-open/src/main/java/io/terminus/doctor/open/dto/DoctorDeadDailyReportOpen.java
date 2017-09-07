@@ -36,4 +36,9 @@ public class DoctorDeadDailyReportOpen implements Serializable{
      * 育肥猪
      */
     private int fatten;
+
+    /**
+     * 死亡总数
+     */
+    private int deadTotal;
 }

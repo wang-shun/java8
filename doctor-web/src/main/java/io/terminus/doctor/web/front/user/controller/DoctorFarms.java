@@ -212,4 +212,13 @@ public class DoctorFarms {
         return RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
     }
 
+    /**
+     *查询所有猪场
+     * @return 猪场列表
+     */
+    @RequestMapping(value = "/findAllFarm", method = RequestMethod.GET)
+    public List<DoctorFarm> findAllFarm() {
+        return RespHelper.or500(doctorFarmReadService.findAllFarms());
+    }
+
 }

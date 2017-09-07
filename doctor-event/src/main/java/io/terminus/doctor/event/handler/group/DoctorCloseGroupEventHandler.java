@@ -74,6 +74,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         //创建关联关系
         //createEventRelation(event);
 
+        groupTrack.setCloseAt(event.getEventAt());
         updateGroupTrack(groupTrack, event);
 
         //4.猪群状态改为关闭

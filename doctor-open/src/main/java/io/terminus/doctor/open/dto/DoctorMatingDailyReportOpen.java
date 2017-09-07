@@ -31,4 +31,9 @@ public class DoctorMatingDailyReportOpen implements Serializable{
      * 流产
      */
     private int liuchan;
+
+    /**
+     * 配种总数
+     */
+    private int matingTotal;
 }

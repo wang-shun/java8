@@ -33,4 +33,9 @@ public class DoctorCheckPregDailyReport implements Serializable {
      * 流产
      */
     private int liuchan;
+
+    /**
+     * 妊娠检查总数
+     */
+    private int pregTotal;
 }

@@ -271,4 +271,10 @@ public interface DoctorGroupReadService {
      * @return 新建猪群事件
      */
     Response<DoctorGroupEvent> findNewGroupEvent(@NotNull(message = "groupId.not.null") Long groupId);
+
+    /**
+     * 查询猪场与当前开启猪群数量映射
+     * @return
+     */
+    Response<Map<Long, Integer>> findFarmToGroupCount();
 }

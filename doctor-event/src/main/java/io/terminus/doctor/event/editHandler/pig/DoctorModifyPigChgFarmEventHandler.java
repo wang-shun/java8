@@ -4,6 +4,7 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -37,7 +38,9 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
     protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
         DoctorPigEvent chgFarmInEvent = doctorPigEventDao.findByRelPigEventId(deletePigEvent.getId());
         DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(deletePigEvent.getPigId());
+        DoctorBarn doctorBarn = doctorBarnDao.findById(deletePigEvent.getBarnId());
         return notNull(lastEvent)
+                && Objects.equals(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue())
                 && Objects.equals(deletePigEvent.getId(), lastEvent.getId())
                 && modifyPigChgFarmInEventHandler.rollbackHandleCheck(chgFarmInEvent);
     }

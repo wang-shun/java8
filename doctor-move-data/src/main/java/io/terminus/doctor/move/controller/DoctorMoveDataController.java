@@ -1399,4 +1399,16 @@ public class DoctorMoveDataController {
         log.info("flush sow parity ending");
         return Boolean.TRUE;
     }
+
+    /**
+     * 刷新窝号
+     * @return
+     */
+    @RequestMapping(value = "/flushNestCode", method = RequestMethod.GET)
+    public Boolean flushNestCode() {
+        log.info("flush nest code starting");
+        doctorMoveDataService.flushNestCode();
+        log.info("flush nest code ending");
+        return Boolean.TRUE;
+    }
 }

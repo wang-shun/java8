@@ -137,7 +137,12 @@ public class DoctorGroupTrack implements Serializable {
      * 更新人name
      */
     private String updatorName;
-    
+
+    /**
+     * 猪群关闭事件(如果猪群关闭的话)
+     */
+    private Date closeAt;
+
     /**
      * 创建时间
      */
@@ -149,7 +154,14 @@ public class DoctorGroupTrack implements Serializable {
     private Date updatedAt;
 
     public Integer getAvgDayAge() {
-        return notNull(birthDate) ? DateUtil.getDeltaDays(birthDate, new Date()) : avgDayAge;
+        if (notNull(closeAt)
+                && !java.util.Objects.equals(closeAt, DateUtil.toDate("1970-01-01"))
+                && notNull(birthDate) ) {
+            avgDayAge = DateUtil.getDeltaDays(birthDate, closeAt);
+        } else if (notNull(birthDate)) {
+            avgDayAge = DateUtil.getDeltaDays(birthDate, new Date());
+        }
+        return avgDayAge < 0 ? 0 : avgDayAge;
     }
 
     public enum Sex {

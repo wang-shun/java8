@@ -1277,6 +1277,7 @@ update doctor_orgs set parent_id = 0, type = 1;
 -- 2017-07-21
 ALTER table doctor_daily_reports modify column `fatten_feed_amount` bigint(20) DEFAULT NULL COMMENT '育肥猪饲料消耗金额';
 
+<<<<<<< HEAD
 --2017-08-28 仓库模块重构表结构
 
 DROP TABLE IF EXISTS `doctor_warehouse_material_apply`;
@@ -1376,3 +1377,7 @@ ADD COLUMN `operator_name` VARCHAR(64) NULL COMMENT '操作人名' AFTER `operat
 
 
 
+=======
+-- 2017-08-30
+ALTER TABLE doctor_group_tracks ADD COLUMN `close_at` datetime DEFAULT NULL  comment '猪群关闭事件(如果猪群关闭的话)' after updator_name;
+>>>>>>> develop

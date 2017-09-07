@@ -8,6 +8,7 @@ import io.terminus.doctor.user.model.Sub;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 主账号读服务
@@ -109,5 +110,11 @@ public interface PrimaryUserReadService {
     Response<PrimaryUser> findPrimaryByFarmId(@NotNull(message = "farm.id.not.null") Long farmId);
 
     Response<PrimaryUser> findPrimaryByFarmIdAndStatus(@NotNull(message = "farm.id.not.null") Long farmId, Integer status);
+
+    /**
+     * 获取所有猪场id与username映射
+     * @return 映射map
+     */
+    Response<Map<Long, String>> findFarmIdToUserName();
 
 }

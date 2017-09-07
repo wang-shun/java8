@@ -54,7 +54,14 @@ public class DoctorRangeReportDao extends MyBatisDao<DoctorRangeReport> {
         return getSqlSession().selectOne(sqlId("findRangeReport"), ImmutableMap.of("farmId", farmId, "type", type, "sumAt", sumAt));
     }
 
-    public List<DoctorRangeReport> findBySumAt(Integer type, String sumAt) {
-        return getSqlSession().selectList(sqlId("findBySumAt"), ImmutableMap.of("type", type, "sumAt", sumAt));
+    /**
+     * 根据统计日期查询猪场的指标数据
+     * @see io.terminus.doctor.event.enums.ReportRangeType
+     * @param type 类行
+     * @param sumAt 统计时间
+     * @return 指标数据
+     */
+    public List<DoctorRangeReport> findFarmBySumAt(Integer type, String sumAt) {
+        return getSqlSession().selectList(sqlId("findFarmBySumAt"), ImmutableMap.of("type", type, "sumAt", sumAt));
     }
 }

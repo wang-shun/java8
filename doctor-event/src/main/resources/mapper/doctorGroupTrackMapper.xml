@@ -30,6 +30,7 @@
         <result column="creator_name" property="creatorName"/>
         <result column="updator_id" property="updatorId"/>
         <result column="updator_name" property="updatorName"/>
+        <result column="close_at" property="closeAt"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
@@ -66,6 +67,7 @@
         creator_name,
         updator_id,
         updator_name,
+        close_at,
         created_at,
         updated_at
 
@@ -95,6 +97,7 @@
         #{creatorName},
         #{updatorId},
         #{updatorName},
+        #{closeAt},
         now(),
         now()
 
@@ -140,6 +143,7 @@
             <if test="creatorName != null">creator_name = #{creatorName},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
             <if test="updatorName != null">updator_name = #{updatorName},</if>
+            <if test="closeAt != null">close_at = #{closeAt},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -213,6 +217,7 @@
             #{item.creatorName},
             #{item.updatorId},
             #{item.updatorName},
+            #{item.closeAt},
             now(),
             now()
             )
