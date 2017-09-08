@@ -124,7 +124,8 @@ public class DoctorMoveAndImportService {
         Map<String, DoctorBarn> barnMap = moveBasicService.getBarnMap2(farm.getId());
         Map<String, Long> breedMap = moveBasicService.getBreedMap();
         return DoctorImportBasicData.builder().doctorFarm(farm).userMap(userMap).barnMap(barnMap)
-                .breedMap(breedMap).build();
+                .breedMap(breedMap).defaultUser(moveAndImportManager.getPrimaryUser(farm.getId()))
+                .build();
     }
 
     public void importPig(Sheet boarSheet, Sheet sowSheet, DoctorImportBasicData importBasicData) {
@@ -196,7 +197,7 @@ public class DoctorMoveAndImportService {
             return DoctorMoveBasicData.builder().doctorFarm(farm).barnMap(barnMap).basicMap(basicMap).subMap(subMap)
                     .changeReasonMap(changeReasonMap).customerMap(customerMap).vaccMap(vaccMap)
                     .defaultPregBarn(defaultPregBarn).defaultFarrowBarn(defaultFarrowBarn)
-                    .build();
+                    .defaultUser(moveAndImportManager.getPrimaryUser(farm.getId())).build();
         } catch (Exception e) {
             log.error("package move basic data error -- farm:{}", farm);
             throw e;

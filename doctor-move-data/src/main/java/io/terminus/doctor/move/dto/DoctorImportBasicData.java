@@ -2,6 +2,7 @@ package io.terminus.doctor.move.dto;
 
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.PrimaryUser;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -48,5 +49,10 @@ public class DoctorImportBasicData {
      * 历史胎次默认产房
      */
     private DoctorBarn defaultFarrowBarn;
+
+    /**
+     * 默认操作人(猪场主账户)
+     */
+    private PrimaryUser defaultUser;
 
 }

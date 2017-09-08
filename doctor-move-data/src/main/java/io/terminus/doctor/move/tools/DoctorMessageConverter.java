@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -25,5 +26,14 @@ public class DoctorMessageConverter {
             errorMessage = errorMessage.concat(e.getAttach());
         }
         return new JsonResponseException(errorMessage);
+    }
+
+    public static String assembleErrorAttach(String attach, String sheetName) {
+        return isNull(attach) ? sheetName : attach.concat(",页名:" + sheetName);
+    }
+
+    public static String assembleErrorAttach(String  attach, Integer lineNumber) {
+        String line = isNull(lineNumber) ? "" : ",行号:".concat(lineNumber.toString());
+        return isNull(attach) ? line : attach.concat(line);
     }
 }

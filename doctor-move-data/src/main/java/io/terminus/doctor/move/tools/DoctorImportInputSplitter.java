@@ -274,12 +274,15 @@ public class DoctorImportInputSplitter {
                 importSow.setPregCheckDate(getCheckDateByRemark(importSow.getRemark()));
             } else {
                 importSow.setPregCheckResult(PregCheckResult.YANG.getDesc());
-                if (DoctorImportSow.ParityStage.lasts.contains(importSow.getParityStage())
-                        && PigType.MATING_TYPES.contains(importBasicData.getBarnMap().get(importSow.getBarnName()).getPigType())
-                        && !Objects.equals(importSow.getCurrentStatus(), PigStatus.Wean.getDesc())) {
-                    importSow.setWeanToBarn(importSow.getBarnName());
-                } else {
-                    importSow.setWeanToBarn(importBasicData.getDefaultPregBarn().getName());
+                if (DoctorImportSow.ParityStage.lasts.contains(importSow.getParityStage())) {
+                    expectTrue(notNull(importSow.getPregDate()), false, importSow.getLineNumber().toString()
+                            , "not.support.export");
+                    if (PigType.MATING_TYPES.contains(importBasicData.getBarnMap().get(importSow.getBarnName()).getPigType())
+                            && !Objects.equals(importSow.getCurrentStatus(), PigStatus.Wean.getDesc())) {
+                        importSow.setWeanToBarn(importSow.getBarnName());
+                    } else {
+                        importSow.setWeanToBarn(importBasicData.getDefaultPregBarn().getName());
+                    }
                 }
                 importSow.setCurrentStatus(PigStatus.Wean.getDesc());
                 importSow.setFarrowBarnName(importBasicData.getDefaultFarrowBarn().getName());

@@ -36,7 +36,10 @@ import io.terminus.doctor.move.tools.DoctorImportExcelAnalyzer;
 import io.terminus.doctor.move.tools.DoctorImportInputSplitter;
 import io.terminus.doctor.move.tools.DoctorMoveEventExecutor;
 import io.terminus.doctor.user.dao.DoctorFarmMoveErrorDao;
+import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.PrimaryUser;
+import io.terminus.parana.user.impl.dao.UserProfileDao;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +55,7 @@ import java.util.stream.Collectors;
 import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.grateGroupCode;
+import static io.terminus.doctor.move.tools.DoctorMessageConverter.assembleErrorAttach;
 
 /**
  * Created by xjn on 17/8/4.
@@ -87,6 +91,10 @@ public class DoctorMoveAndImportManager {
     private DoctorImportInputSplitter importInputSplitter;
     @Autowired
     private DoctorFarmMoveErrorDao doctorFarmMoveErrorDao;
+    @Autowired
+    private PrimaryUserDao primaryUserDao;
+    @Autowired
+    private UserProfileDao userProfileDao;
 
     public void movePig(Long moveId, DoctorMoveBasicData moveBasicData) {
 
@@ -195,6 +203,15 @@ public class DoctorMoveAndImportManager {
             e.setAttach(assembleErrorAttach(e.getAttach(), groupSheet.getSheetName()));
             throw e;
         }
+    }
+
+    /**
+     * 获取猪场主账户个人信息
+     * @param farmId 猪场id
+     * @return 个人信息
+     */
+    public PrimaryUser getPrimaryUser(Long farmId) {
+        return primaryUserDao.findPrimaryByFarmId(farmId);
     }
 
     private void beforeImportPigEvent(DoctorImportBasicData importBasicData,
@@ -315,7 +332,4 @@ public class DoctorMoveAndImportManager {
         doctorGroupEventDao.deleteByFarmId(farmId, includePigTypes);
     }
 
-    private String assembleErrorAttach(String attach, String sheetName) {
-        return isNull(attach) ? sheetName : attach.concat(",页名:" + sheetName);
-    }
 }

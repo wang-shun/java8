@@ -34,6 +34,7 @@ import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.common.utils.BeanMapper.map;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
+import static io.terminus.doctor.move.tools.DoctorMessageConverter.assembleErrorAttach;
 
 /**
  * Created by xjn on 17/8/25.
@@ -135,18 +136,13 @@ public class DoctorImportEventExecutor {
 
     private DoctorBasicInputInfoDto buildBasicInputInfo(DoctorImportBasicData importBasicData) {
         DoctorFarm farm = importBasicData.getDoctorFarm();
-        // TODO: 17/8/25 录入人暂时随便设置一个
         return DoctorBasicInputInfoDto.builder().farmId(farm.getId())
                 .farmName(farm.getName())
                 .orgId(farm.getOrgId())
                 .orgName(farm.getOrgName())
-                .staffId(-1L)
-                .staffName("")
+                .staffId(importBasicData.getDefaultUser().getUserId())
+                .staffName(importBasicData.getDefaultUser().getRealName())
                 .build();
     }
 
-    private String assembleErrorAttach(String  attach, Integer lineNumber) {
-        String line = isNull(lineNumber) ? "" : ",行号:".concat(lineNumber.toString());
-        return isNull(attach) ? line : attach.concat(line);
-    }
 }
