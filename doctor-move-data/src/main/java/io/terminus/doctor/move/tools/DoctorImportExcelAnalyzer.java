@@ -94,7 +94,7 @@ public class DoctorImportExcelAnalyzer {
                 .remark(getString(row, 23))
                 .breed(getString(row, 24))
                 .weanWeight(getDouble(row, 25))
-                .weakCount(getInt(row, 26))
+                .weanCount(getInt(row, 26))
                 .fatherCode(getString(row, 27))
                 .motherCode(getString(row, 28))
                 .inFarmDate(getDate(row, 29))
