@@ -8,6 +8,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.PrimaryUser;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -49,4 +50,9 @@ public class DoctorMoveBasicData {
      * 产房仔猪群为空时默认猪群
      */
     private DoctorGroup defaultFarrowGroup;
+
+    /**
+     * 默认操作人(猪场主账户)
+     */
+    private PrimaryUser defaultUser;
 }
