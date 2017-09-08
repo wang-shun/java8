@@ -54,7 +54,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
                         && PigType.MATING_TYPES.contains(executeEvent.getBarnType()))
                 || (Objects.equals(executeEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())
                         && Objects.equals(executeEvent.getBarnType(), PigType.BOAR.getValue()))
-                , "entry.barn.type.error", PigType.from(executeEvent.getBarnType()));
+                , "entry.barn.type.error", PigType.from(executeEvent.getBarnType()).getDesc());
     }
 
     @Override
@@ -81,7 +81,8 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         specialHandle(executeEvent, toTrack);
 
         //4.创建镜像
-        if (Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
+        if (isNull(executeEvent.getEventSource())
+                || Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
             updateDailyForNew(executeEvent);
         }
 

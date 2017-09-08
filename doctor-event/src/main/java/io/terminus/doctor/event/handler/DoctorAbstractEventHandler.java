@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
@@ -109,7 +110,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         doctorEventInfoList.add(doctorEventInfo);
 
 
-        if (Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
+        if (isNull(executeEvent.getEventSource()) || Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
             //7.更新日记录
             updateDailyForNew(executeEvent);
         }
