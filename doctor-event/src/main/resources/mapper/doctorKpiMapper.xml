@@ -1071,18 +1071,17 @@
         -
         (
         SELECT
-        ifnull(sum(case type when 7 then 1 when 14 then 1 else 0 end ), 0) -
+        ifnull(sum(case type when 20 then 1 when 14 then 1 else 0 end ), 0) -
         ifnull(sum(case type when 6 then 1 when 10 then 1 when 12 then 1 else 0 end ), 0)
         FROM doctor_pig_events a
-        left join doctor_barns b on a.barn_id = b.id
         WHERE
         a.farm_id = #{farmId} AND
         a.event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
         a.kind = 1 AND
-        ((a.type IN (2, 6, 7, 10, 12) AND b.pig_type = 7) OR a.type = 14) AND
-        a.status = 1 AND
+        (a.barn_type = 7 or type = 14) and
+        a.status = 1 and
         a.event_source != 5
-        )
+        );
     </select>
 
     <select id="realTimeLiveStockPHSow" parameterType="map" resultType="int">
@@ -1341,15 +1340,9 @@
     <!--存栏变动月报: 断奶转入-->
     <select id="getMonthlyLiveStockChangeWeanIn" parameterType="map" resultType="int">
         SELECT ifnull(count(1), 0)
-        FROM
-        (
-            SELECT barn_id
-            FROM  doctor_pig_events
-            WHERE `type` = 12  -- 转入配种舍事件
-              <include refid="criteria"/>
-        ) a
-        LEFT JOIN doctor_barns b ON a.barn_id = b.id
-        WHERE b.pig_type = 7
+        FROM doctor_pig_events
+        WHERE `type` = 12 -- 转入配种舍事件
+        <include refid="criteria"/>
     </select>
 
     <!--存栏变动月报: 配怀转产房-->
