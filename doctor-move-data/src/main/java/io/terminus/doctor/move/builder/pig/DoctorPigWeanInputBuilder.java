@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.doctor.move.builder.DoctorBuilderCommonOperation;
 import io.terminus.doctor.move.dto.DoctorImportBasicData;
 import io.terminus.doctor.move.dto.DoctorImportPigEvent;
@@ -35,7 +36,8 @@ public class DoctorPigWeanInputBuilder implements DoctorPigEventInputBuilder {
         wean.setPartWeanDate(event.getEventAt());           //断奶日期
         wean.setPartWeanRemark(event.getRemark());
         wean.setPartWeanPigletsCount(event.getWeanCount()); //断奶数量
-        wean.setPartWeanAvgWeight(event.getWeanWeight());   //断奶平均重量
+        wean.setFarrowingLiveCount(event.getWeanCount());
+        wean.setPartWeanAvgWeight(EventUtil.getAvgWeight(event.getWeanWeight(), event.getWeanCount()));   //断奶平均重量
         return wean;
     }
 

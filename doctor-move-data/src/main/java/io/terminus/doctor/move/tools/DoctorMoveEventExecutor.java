@@ -1,7 +1,9 @@
 package io.terminus.doctor.move.tools;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -21,7 +23,9 @@ import io.terminus.doctor.move.builder.pig.DoctorPigEventInputBuilder;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
 import io.terminus.doctor.move.model.View_EventListGain;
 import io.terminus.doctor.move.model.View_EventListPig;
+import io.terminus.doctor.user.dao.DoctorFarmMoveErrorDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmMoveError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -51,24 +55,47 @@ public class DoctorMoveEventExecutor {
     private DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired
     private DoctorBuilderFactory doctorBuilderFactory;
+    @Autowired
+    private DoctorFarmMoveErrorDao doctorFarmMoveErrorDao;
+    @Autowired
+    private DoctorMessageConverter converter;
 
     public void executePigEvent(DoctorMoveBasicData moveBasicData, List<? extends View_EventListPig> rawEventList) {
         DoctorBasicInputInfoDto basicInputInfoDto = buildBasicInputInfo(moveBasicData);
-        rawEventList.forEach(rawPigEvent -> {
-            try {
-                DoctorPigEventInputBuilder builder = doctorBuilderFactory.getPigBuilder(rawPigEvent.getEventName());
-                if (notNull(builder)) {
-                    //1.构建事件所需数据
-                    BasePigEventInputDto pigEventInputDto = builder.buildFromMove(moveBasicData, rawPigEvent);
+        try {
+            rawEventList.forEach(rawPigEvent -> {
+                try {
+                    DoctorPigEventInputBuilder builder = doctorBuilderFactory.getPigBuilder(rawPigEvent.getEventName());
+                    if (notNull(builder)) {
+                        //1.构建事件所需数据
+                        BasePigEventInputDto pigEventInputDto = builder.buildFromMove(moveBasicData, rawPigEvent);
 
-                    //2.执行事件
-                    pigEventManager.eventHandle(pigEventInputDto, basicInputInfoDto);
+                        //2.执行事件
+                        pigEventManager.eventHandle(pigEventInputDto, basicInputInfoDto);
+                    }
+                } catch (Exception e) {
+                    String error;
+                    if (e instanceof InvalidException) {
+                        error = converter.convert((InvalidException) e).getMessage();
+                    } else {
+                        error = Throwables.getStackTraceAsString(e);
+                    }
+                    log.error("pigOutId:{}, eventOutId:{}", rawPigEvent.getPigOutId(), rawPigEvent.getEventOutId());
+                    DoctorFarmMoveError doctorFarmMoveError = DoctorFarmMoveError.builder()
+                            .farmName(moveBasicData.getDoctorFarm().getName())
+                            .code(rawPigEvent.getPigCode())
+                            .outId(rawPigEvent.getPigOutId())
+                            .eventName(rawPigEvent.getEventName())
+                            .eventAt(rawPigEvent.getEventAt())
+                            .eventOutId(rawPigEvent.getEventOutId())
+                            .error(error)
+                            .build();
+                    doctorFarmMoveErrorDao.create(doctorFarmMoveError);
+                    throw e;
                 }
-            } catch (Exception e) {
-                log.error("pigOutId:{}, eventOutId:{}", rawPigEvent.getPigOutId(), rawPigEvent.getEventOutId());
-                throw e;
-            }
-        });
+            });
+        } catch (Exception e) {
+        }
     }
 
     public void executeNewGroupEvent(DoctorMoveBasicData moveBasicData, List<View_EventListGain> rawEventList) {
@@ -81,36 +108,52 @@ public class DoctorMoveEventExecutor {
     }
 
     public void executeGroupEvent(DoctorMoveBasicData moveBasicData, List<View_EventListGain> rawEventList) {
-        rawEventList.forEach(rawGroupEvent -> {
-            try {
-                DoctorGroupEventInputBuilder builder = doctorBuilderFactory.getGroupBuilder(rawGroupEvent.getEventTypeName());
-                if (notNull(builder)) {
-                    BaseGroupInput groupInput = builder.buildFromMove(moveBasicData, rawGroupEvent);
-                    //1.构建事件所需数据
-                    DoctorGroupDetail groupDetail = buildGroupDetail(moveBasicData, rawGroupEvent);
-                    GroupEventType groupEventType = GroupEventType.from(rawGroupEvent.getEventTypeName());
+        try {
+            rawEventList.forEach(rawGroupEvent -> {
+                try {
+                    DoctorGroupEventInputBuilder builder = doctorBuilderFactory.getGroupBuilder(rawGroupEvent.getEventTypeName());
+                    if (notNull(builder)) {
+                        BaseGroupInput groupInput = builder.buildFromMove(moveBasicData, rawGroupEvent);
+                        //1.构建事件所需数据
+                        DoctorGroupDetail groupDetail = buildGroupDetail(moveBasicData, rawGroupEvent);
+                        GroupEventType groupEventType = GroupEventType.from(rawGroupEvent.getEventTypeName());
 
-                    //2.执行事件
-                    groupEventManager.batchHandleEvent(Lists.newArrayList(new DoctorGroupInputInfo(groupDetail, groupInput))
-                            , groupEventType.getValue());
+                        //2.执行事件
+                        groupEventManager.batchHandleEvent(Lists.newArrayList(new DoctorGroupInputInfo(groupDetail, groupInput))
+                                , groupEventType.getValue());
+                    }
+                } catch (Exception e) {
+                    log.error("groupOutId:{}, eventOutId:{}", rawGroupEvent.getGroupOutId(), rawGroupEvent.getGroupEventOutId());
+                    String error;
+                    if (e instanceof InvalidException) {
+                        error = converter.convert((InvalidException) e).getMessage();
+                    } else {
+                        error = Throwables.getStackTraceAsString(e);
+                    }
+                    DoctorFarmMoveError doctorFarmMoveError = DoctorFarmMoveError.builder()
+                            .farmName(moveBasicData.getDoctorFarm().getName())
+                            .code(rawGroupEvent.getGroupCode())
+                            .outId(rawGroupEvent.getGroupOutId())
+                            .eventName(rawGroupEvent.getEventTypeName())
+                            .eventAt(rawGroupEvent.getEventAt())
+                            .eventOutId(rawGroupEvent.getGroupEventOutId())
+                            .error(error)
+                            .build();
+                    doctorFarmMoveErrorDao.create(doctorFarmMoveError);
+                    throw e;
                 }
-            } catch (Exception e) {
-                log.error("groupOutId:{}, eventOutId:{}", rawGroupEvent.getGroupOutId(), rawGroupEvent.getGroupEventOutId());
-                throw e;
-            }
-        });
-
+            });
+        }catch (Exception e){}
     }
 
     private DoctorBasicInputInfoDto buildBasicInputInfo(DoctorMoveBasicData moveBasicData) {
         DoctorFarm farm = moveBasicData.getDoctorFarm();
-        // TODO: 17/8/4 录入人暂时随便设置一个
         return DoctorBasicInputInfoDto.builder().farmId(farm.getId())
                 .farmName(farm.getName())
                 .orgId(farm.getOrgId())
                 .orgName(farm.getOrgName())
-                .staffId(-1L)
-                .staffName("")
+                .staffId(moveBasicData.getDefaultUser().getUserId())
+                .staffName(moveBasicData.getDefaultUser().getRealName())
                 .build();
     }
 
@@ -136,7 +179,6 @@ public class DoctorMoveEventExecutor {
         group.setFarmName(farm.getName());
         group.setOrgId(farm.getOrgId());
         group.setOrgName(farm.getOrgName());
-
         return group;
     }
 

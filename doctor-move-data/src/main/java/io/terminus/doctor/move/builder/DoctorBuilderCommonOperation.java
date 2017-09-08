@@ -1,5 +1,6 @@
 package io.terminus.doctor.move.builder;
 
+import com.google.common.collect.Lists;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -21,10 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
@@ -38,6 +39,12 @@ public class DoctorBuilderCommonOperation {
     @Autowired
     private DoctorPigDao doctorPigDao;
 
+    private List<String> pregEventList = Lists.newArrayList(PigEvent.ENTRY.getName(),
+            PigEvent.MATING.getName(), PigEvent.PREG_CHECK.getName());
+
+    private List<String> farrowEventList = Lists.newArrayList(PigEvent.FARROWING.getName(),
+            PigEvent.PIGLETS_CHG.getName(), PigEvent.FOSTERS.getName(), PigEvent.WEAN.getName());
+
     public void fillPigEventCommonInput(BasePigEventInputDto inputDto,
                                         DoctorMoveBasicData moveBasicData,
                                         View_EventListPig rawPigEvent) {
@@ -45,12 +52,7 @@ public class DoctorBuilderCommonOperation {
         //事件发生猪舍
         Map<String, DoctorBarn> barnMap = moveBasicData.getBarnMap();
         DoctorBarn barn = barnMap.get(rawPigEvent.getBarnOutId());
-        // TODO: 17/8/8 临时操作
-        if (isNull(barn)) {
-//            throw InvalidException();
-            barn = moveBasicData.getBarnMap().get("4f5d0051-a4c4-4bfb-9a9e-d1c3e1317c45");
-        }
-
+//        barn = nullToDefaultBarn(moveBasicData, barn, rawPigEvent.getEventName());
         inputDto.setBarnId(barn.getId());
         inputDto.setBarnName(barn.getName());
         inputDto.setBarnType(barn.getPigType());
@@ -125,6 +127,22 @@ public class DoctorBuilderCommonOperation {
         groupInput.setRemark(importGroupEvent.getRemark());
         groupInput.setEventSource(SourceType.IMPORT.getValue());
         groupInput.setIsAuto(IsOrNot.NO.getValue());
+    }
+
+    private DoctorBarn nullToDefaultBarn(DoctorMoveBasicData moveBasicData,
+                                         DoctorBarn barn, String eventName) {
+        if (notNull(barn)) {
+            return barn;
+        }
+
+        if (pregEventList.contains(eventName)) {
+            return moveBasicData.getDefaultPregBarn();
+        }
+
+        if (farrowEventList.contains(eventName)) {
+            return moveBasicData.getDefaultFarrowBarn();
+        }
+        return null;
     }
 
 }

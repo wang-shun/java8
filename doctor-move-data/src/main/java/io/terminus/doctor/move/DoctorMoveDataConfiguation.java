@@ -18,6 +18,8 @@ import io.terminus.doctor.move.builder.group.DoctorTurnSeedEventInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorChgLocationInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorEntryInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorFarrowInputBuilder;
+import io.terminus.doctor.move.builder.pig.DoctorFosterByInputBuilder;
+import io.terminus.doctor.move.builder.pig.DoctorFosterInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorMateInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorPigEventInputBuilder;
 import io.terminus.doctor.move.builder.pig.DoctorPigEventInputBuilders;
@@ -79,7 +81,9 @@ public class DoctorMoveDataConfiguation extends WebMvcConfigurerAdapter {
                                                                  DoctorPigLetsChgInputBuilder pigLetsChgInputBuilder,
                                                                  DoctorPigWeanInputBuilder pigWeanInputBuilder,
                                                                  DoctorPregCheckInputBuilder pregCheckInputBuilder,
-                                                                 DoctorRemoveInputBuilder removeInputBuilder) {
+                                                                 DoctorRemoveInputBuilder removeInputBuilder,
+                                                                 DoctorFosterInputBuilder fosterInputBuilder,
+                                                                 DoctorFosterByInputBuilder fosterByInputBuilder) {
         Map<String, DoctorPigEventInputBuilder> pigEventInputBuilderMap = Maps.newHashMap();
         pigEventInputBuilderMap.put(PigEvent.CHG_LOCATION.getName(), chgLocationInputBuilder);
         pigEventInputBuilderMap.put(PigEvent.ENTRY.getName(), entryInputBuilder);
@@ -89,6 +93,8 @@ public class DoctorMoveDataConfiguation extends WebMvcConfigurerAdapter {
         pigEventInputBuilderMap.put(PigEvent.WEAN.getName(), pigWeanInputBuilder);
         pigEventInputBuilderMap.put(PigEvent.PREG_CHECK.getName(), pregCheckInputBuilder);
         pigEventInputBuilderMap.put(PigEvent.REMOVAL.getName(), removeInputBuilder);
+        pigEventInputBuilderMap.put(PigEvent.FOSTERS.getName(), fosterInputBuilder);
+        pigEventInputBuilderMap.put(PigEvent.FOSTERS_BY.getName(), fosterByInputBuilder);
         return new DoctorPigEventInputBuilders(pigEventInputBuilderMap);
     }
 

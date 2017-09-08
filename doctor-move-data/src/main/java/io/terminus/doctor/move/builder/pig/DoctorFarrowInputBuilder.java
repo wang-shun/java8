@@ -51,7 +51,9 @@ public class DoctorFarrowInputBuilder implements DoctorPigEventInputBuilder {
         farrow.setFarrowStaff1(event.getStaffName());      //接生员1
         farrow.setFarrowStaff2(event.getStaffName());      //接生员2
         farrow.setFarrowIsSingleManager(event.getIsSingleManage());    //是否个体管理
-        farrow.setGroupId(groupMap.get(event.getToGroupOutId()).getId());
+        Long groupId = notNull(groupMap.get(event.getToGroupOutId()))
+                ? groupMap.get(event.getToGroupOutId()).getId() : -2L;
+        farrow.setGroupId(groupId);
         farrow.setGroupCode(event.getToGroupCode());       // 仔猪猪群Code
         farrow.setNestCode(event.getNestCode());           // 窝号
         FarrowingType farrowingType = FarrowingType.from(event.getFarrowType());
