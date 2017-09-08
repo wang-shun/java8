@@ -18,6 +18,7 @@ public interface DoctorPigEventWriteService {
 
     /**
      * 创建事件(临时使用)
+     *
      * @param doctorPigEvent
      * @return
      */
@@ -25,6 +26,7 @@ public interface DoctorPigEventWriteService {
 
     /**
      * 更新事件(临时使用)
+     *
      * @param doctorPigEvent
      * @return
      */
@@ -32,6 +34,7 @@ public interface DoctorPigEventWriteService {
 
     /**
      * 更新事件(临时使用)
+     *
      * @param doctorPigEvent
      * @return
      */
@@ -39,6 +42,7 @@ public interface DoctorPigEventWriteService {
 
     /**
      * 猪事件接口
+     *
      * @param inputDto
      * @param basic
      * @return
@@ -47,9 +51,19 @@ public interface DoctorPigEventWriteService {
 
     /**
      * 批量猪事件接口
+     *
      * @param inputDtos
      * @param basic
      * @return
      */
     RespWithEx<Boolean> batchPigEventHandle(List<BasePigEventInputDto> inputDtos, DoctorBasicInputInfoDto basic);
+
+
+    /**
+     * 删除猪事件
+     *
+     * @param id
+     * @return
+     */
+    RespWithEx<Boolean> delete(Long id);
 }

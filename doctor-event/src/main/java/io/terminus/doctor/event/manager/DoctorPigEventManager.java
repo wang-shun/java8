@@ -8,6 +8,8 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.Checks;
+import io.terminus.doctor.common.utils.ToJsonMapper;
+import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
@@ -29,9 +31,7 @@ import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.DoctorPigsByEventSelector;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.model.*;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,13 +65,17 @@ public class DoctorPigEventManager {
     @Autowired
     private DoctorModifyPigEventHandlers modifyPigEventHandlers;
 
+    @Autowired
+    private DoctorEventModifyLogDao doctorEventModifyLogDao;
+
     /**
      * 事件处理
+     *
      * @param inputDto 事件信息数据
-     * @param basic 基础数据
+     * @param basic    基础数据
      */
     @Transactional
-    public List<DoctorEventInfo> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
+    public List<DoctorEventInfo> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         log.info("pig event handle starting, inputDto:{}, basic:{}", inputDto, basic);
 
         final List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
@@ -91,7 +95,8 @@ public class DoctorPigEventManager {
 
     /**
      * 构建编辑事件
-     * @param basic 基础数据
+     *
+     * @param basic    基础数据
      * @param inputDto 输入事件
      * @return 编辑事件
      */
@@ -102,8 +107,9 @@ public class DoctorPigEventManager {
 
     /**
      * 构建事件执行后track
+     *
      * @param executeEvent 需要执行事件
-     * @param fromTrack 执行前track
+     * @param fromTrack    执行前track
      * @return 事件执行后track
      */
     public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -118,9 +124,10 @@ public class DoctorPigEventManager {
 
     /**
      * 猪事件编辑错误时回滚
+     *
      * @param doctorEventInfoList 新事件列表
-     * @param pigOldEventIdList 原事件id列
-     * @param fromTrack 事件编辑前猪track
+     * @param pigOldEventIdList   原事件id列
+     * @param fromTrack           事件编辑前猪track
      */
     @Transactional
     public void modifyPidEventRollback(List<DoctorEventInfo> doctorEventInfoList, List<Long> pigOldEventIdList, DoctorPigTrack fromTrack, DoctorPig oldPig) {
@@ -170,7 +177,7 @@ public class DoctorPigEventManager {
                 //处理事件
                 handler.handle(eventInfos, executeEvent, fromTrack);
             } catch (InvalidException e) {
-               throw new InvalidException(true, e.getError(), inputDto.getPigCode(), e.getParams());
+                throw new InvalidException(true, e.getError(), inputDto.getPigCode(), e.getParams());
             }
         });
         log.info("batch pig event handle ending, event type:{}", eventInputs.get(0).getEventType());
@@ -179,8 +186,9 @@ public class DoctorPigEventManager {
 
     /**
      * 猪事件编辑处理
-     * @param inputDto 编辑输入
-     * @param eventId 事件id
+     *
+     * @param inputDto  编辑输入
+     * @param eventId   事件id
      * @param eventType 事件输入
      */
     @Transactional
@@ -196,17 +204,19 @@ public class DoctorPigEventManager {
 
     /**
      * 根据事件类型获取时间处理器
+     *
      * @param eventType 事件类型
      * @return 事件处理器
      */
     public DoctorPigEventHandler getHandler(Integer eventType) {
-       return Checks.expectNotNull(pigEventHandlers.getEventHandlerMap().get(eventType), "get.pig.handler.failed", eventType);
+        return Checks.expectNotNull(pigEventHandlers.getEventHandlerMap().get(eventType), "get.pig.handler.failed", eventType);
 
     }
+
     /**
      * 校验携带数据正确性，发布事件
      */
-    public static void  checkAndPublishEvent(List<DoctorEventInfo> dtos, CoreEventDispatcher coreEventDispatcher, Publisher publisher) {
+    public static void checkAndPublishEvent(List<DoctorEventInfo> dtos, CoreEventDispatcher coreEventDispatcher, Publisher publisher) {
         try {
             if (notEmpty(dtos)) {
                 //checkFarmIdAndEventAt(dtos);
@@ -232,7 +242,7 @@ public class DoctorPigEventManager {
         //1.发布猪事件
         List<DoctorEventInfo> pigEventList = eventInfoMap.get(DoctorEventInfo.Business_Type.PIG.getValue());
         if (!Arguments.isNullOrEmpty(pigEventList)) {
-           publishPigEvent(pigEventList, orgId, farmId, coreEventDispatcher, publisher);
+            publishPigEvent(pigEventList, orgId, farmId, coreEventDispatcher, publisher);
         }
 
         //2.发布猪群事件
@@ -245,11 +255,12 @@ public class DoctorPigEventManager {
 
     /**
      * 发布猪事件
+     *
      * @param eventInfoList 猪事件列表
-     * @param orgId 公司id
-     * @param farmId 猪场id
+     * @param orgId         公司id
+     * @param farmId        猪场id
      */
-    private static void publishPigEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId, CoreEventDispatcher coreEventDispatcher, Publisher publisher){
+    private static void publishPigEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId, CoreEventDispatcher coreEventDispatcher, Publisher publisher) {
         log.info("publish pig event starting");
 
         //猪事件触发更新消息(zk)
@@ -280,9 +291,10 @@ public class DoctorPigEventManager {
 
     /**
      * 发布猪群事件
+     *
      * @param eventInfoList 猪群事件列表
-     * @param orgId 公司id
-     * @param farmId 猪场id
+     * @param orgId         公司id
+     * @param farmId        猪场id
      */
     private static void publishGroupEvent(List<DoctorEventInfo> eventInfoList, Long orgId, Long farmId, CoreEventDispatcher coreEventDispatcher, Publisher publisher) {
         log.info("publish group event starting");
@@ -317,8 +329,9 @@ public class DoctorPigEventManager {
 
     /**
      * 猪当前可执行事件
+     *
      * @param pigStatus 猪状态
-     * @param pigType 猪舍类型
+     * @param pigType   猪舍类型
      * @return 可执行事件
      */
     public List<PigEvent> selectEvents(PigStatus pigStatus, PigType pigType) {
@@ -327,6 +340,7 @@ public class DoctorPigEventManager {
 
     /**
      * 可执行此事件的猪查询条件
+     *
      * @param eventType 事件类型
      * @return 查询track的条件
      */
@@ -336,15 +350,33 @@ public class DoctorPigEventManager {
 
     /**
      * 批量事件的重复性校验
+     *
      * @param inputList 批量事件输入
      */
     private void eventRepeatCheck(List<BasePigEventInputDto> inputList) {
         List<String> inputPigCodeList = inputList.stream().map(BasePigEventInputDto::getPigCode).sorted().collect(Collectors.toList());
 
-        for (int i = 0; i< inputPigCodeList.size()-1; i++) {
-            if (inputPigCodeList.get(i).equals(inputPigCodeList.get(i+1))) {
+        for (int i = 0; i < inputPigCodeList.size() - 1; i++) {
+            if (inputPigCodeList.get(i).equals(inputPigCodeList.get(i + 1))) {
                 throw new InvalidException("batch.event.pigCode.not.repeat", inputPigCodeList.get(i));
             }
         }
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        DoctorPigEvent pigEvent = doctorPigEventDao.findById(id);
+        if (null == pigEvent) {
+            throw new InvalidException("pig.event.not.found", id);
+        }
+        doctorPigEventDao.delete(id);
+        DoctorEventModifyLog modifyLog = DoctorEventModifyLog.builder()
+                .businessId(pigEvent.getPigId())
+                .businessCode(pigEvent.getPigCode())
+                .farmId(pigEvent.getFarmId())
+                .deleteEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(pigEvent))
+                .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .build();
+        doctorEventModifyLogDao.create(modifyLog);
     }
 }
