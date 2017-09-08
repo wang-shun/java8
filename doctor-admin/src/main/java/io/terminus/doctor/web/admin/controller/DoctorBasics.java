@@ -69,6 +69,19 @@ public class DoctorBasics {
     }
 
     /**
+     * 根据farmId 、type 获取基础数据
+     * @param farmId
+     * @param type
+     * @param srm
+     * @return
+     */
+    @RequestMapping(value = "/farm/type", method = RequestMethod.GET)
+    public List<DoctorBasic> findBasicByTypeAndSrmFilterByFarmId(@RequestParam("farmId") Long farmId,
+                                                                 @RequestParam("type") Integer type,
+                                                                 @RequestParam(value = "srm", required = false) String srm){
+        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmFilterByFarmId(farmId, type, srm));
+    }
+    /**
      * 创建或更新DoctorBasic
      * @return 是否成功
      */
