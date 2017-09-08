@@ -623,6 +623,7 @@ public class DoctorPigCreateEvents {
         inputDto.setEventName(pigEvent.getName());
         inputDto.setEventDesc(pigEvent.getDesc());
         inputDto.setIsAuto(IsOrNot.NO.getValue());
+        inputDto.setEventSource(SourceType.INPUT.getValue());
         return inputDto;
     }
 
