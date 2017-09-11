@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
-import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -216,6 +215,9 @@ public class DoctorMoveAndImportManager {
 
     private void beforeImportPigEvent(DoctorImportBasicData importBasicData,
                                       List<DoctorImportSow> importSowList) {
+        if (Arguments.isNullOrEmpty(importSowList)) {
+            return;
+        }
         importBasicData.setDefaultPregBarn(getDefaultPregBarn(importBasicData.getDoctorFarm()));
         importBasicData.setDefaultFarrowBarn(getDefaultFarrowBarn(importBasicData.getDoctorFarm()));
         importBasicData.getBarnMap().put(importBasicData.getDefaultFarrowBarn().getName(),
@@ -239,7 +241,7 @@ public class DoctorMoveAndImportManager {
     }
 
     private DoctorBarn getDefaultPregBarn(DoctorFarm farm) {
-        return Checks.expectNotNull(doctorBarnDao.getDefaultPregBarn(farm.getId()), "默认妊娠舍不存在");
+        return doctorBarnDao.getDefaultPregBarn(farm.getId());
     }
 
     private DoctorBarn getDefaultFarrowBarn(DoctorFarm farm) {
