@@ -39,7 +39,7 @@ public class DoctorImportSow implements Serializable {
     private String farrowBarnName;   //分娩猪舍(历史胎次默认产房中第一个产房)
     private String bed;              //床号
     private Date weanDate;           //断奶日期
-    private Integer liveCount;       //活仔数
+    private Integer healthyCount;     //健仔数
     private Integer jixingCount;     //畸形
     private Integer weakCount;       //弱仔数
     private Integer deadCount;       //死仔

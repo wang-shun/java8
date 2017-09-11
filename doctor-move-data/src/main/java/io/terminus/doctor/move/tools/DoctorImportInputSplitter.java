@@ -102,13 +102,13 @@ public class DoctorImportInputSplitter {
                     .mateOperator(importSow.getMateStaffName())
                     .farrowingType(FarrowingType.USUAL.getDesc())
                     .birthNestAvg(importSow.getNestWeight())
-                    .healthyCount(EventUtil.minusInt(importSow.getLiveCount(), importSow.getWeakCount()))
+                    .healthyCount(nullToZero(importSow.getHealthyCount()))
                     .weakCount(nullToZero(importSow.getWeakCount()))
                     .jixingCount(nullToZero(importSow.getJixingCount()))
                     .deadCount(nullToZero(importSow.getDeadCount()))
                     .mummyCount(nullToZero(importSow.getMummyCount()))
                     .blackCount(nullToZero(importSow.getBlackCount()))
-                    .partWeanPigletsCount(nullToZero(importSow.getLiveCount()))
+                    .partWeanPigletsCount(EventUtil.plusInt(importSow.getHealthyCount(), importSow.getWeakCount()))
                     .partWeanAvgWeight(EventUtil.getAvgWeight(importSow.getWeanWeight(), importSow.getWeakCount()))
                     .build();
             fill(importPigEvent, importSow, pigEvent);

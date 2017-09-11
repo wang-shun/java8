@@ -978,7 +978,7 @@ public class DoctorImportDataService {
             DoctorBarn barn = barnMap.get(entry.getKey());
             List<DoctorImportSow> sows = entry.getValue();
             Date openAt = sows.stream().map(sow -> sow.getPregDate() == null ? new Date() : sow.getPregDate()).min(Date::compareTo).orElse(new Date()); // 分娩日期的最小值，作为建群日期
-            Integer pigletCount = sows.stream().map(DoctorImportSow::getLiveCount).reduce((a, b) -> a + b).orElse(0); // 活仔数
+            Integer pigletCount = sows.stream().map(DoctorImportSow::getHealthyCount).reduce((a, b) -> a + b).orElse(0); // 活仔数
             Integer weak = sows.stream().map(DoctorImportSow::getWeakCount).reduce((a, b) -> a + b).orElse(0); // 弱仔数
 
             DoctorGroup group = new DoctorGroup();
@@ -1291,10 +1291,10 @@ public class DoctorImportDataService {
 
         if (Objects.equals(sowTrack.getStatus(), PigStatus.FEED.getKey())) {
             sowTrack.setGroupId(getGroup(sowTrack.getCurrentBarnId()).getId());
-            sowTrack.setFarrowQty(last.getLiveCount());
-            sowTrack.setUnweanQty(last.getLiveCount());
+            sowTrack.setFarrowQty(last.getHealthyCount());
+            sowTrack.setUnweanQty(last.getHealthyCount());
             sowTrack.setFarrowAvgWeight(MoreObjects.firstNonNull(last.getNestWeight(), 0D)
-                    / (last.getLiveCount() == 0 ? 1 : last.getLiveCount()));
+                    / (last.getHealthyCount() == 0 ? 1 : last.getHealthyCount()));
         }
 
         Map<String, Object> extra = new HashMap<>();
@@ -1496,8 +1496,8 @@ public class DoctorImportDataService {
         event.setParity(info.getParity());
         event.setPregDays(DateUtil.getDeltaDaysAbs(info.getPrePregDate(), info.getPregDate())); //日期差
         event.setFarrowWeight(info.getNestWeight());
-        event.setLiveCount(info.getLiveCount());
-        event.setHealthCount(info.getLiveCount() - info.getWeakCount());
+        event.setLiveCount(info.getHealthyCount());
+        event.setHealthCount(info.getHealthyCount() - info.getWeakCount());
         event.setWeakCount(info.getWeakCount());
         event.setMnyCount(info.getMummyCount());
         event.setJxCount(info.getJixingCount());
@@ -1553,7 +1553,7 @@ public class DoctorImportDataService {
         event.setPigStatusAfter(PigStatus.Wean.getKey());
         event.setParity(info.getParity());
         event.setFeedDays(DateUtil.getDeltaDaysAbs(beforeEvent.getEventAt(), event.getEventAt()));
-        event.setWeanCount(info.getLiveCount());
+        event.setWeanCount(info.getHealthyCount());
         event.setWeanAvgWeight(MoreObjects.firstNonNull(info.getWeanWeight(), 0D) / (event.getWeanCount() == 0 ? 1 : event.getWeanCount()));
         event.setPartweanDate(event.getEventAt());
         event.setBoarCode(info.getBoarCode());
@@ -1614,7 +1614,7 @@ public class DoctorImportDataService {
                 sow.setFarrowBarnName(ImportExcelUtils.getString(row, 9));                              //分娩猪舍
                 sow.setBed(ImportExcelUtils.getString(row, 10));                                        //床号
                 sow.setWeanDate(ImportExcelUtils.getDate(row, 11));       //断奶日期
-                sow.setLiveCount(ImportExcelUtils.getIntOrDefault(row, 12, 0) + ImportExcelUtils.getIntOrDefault(row, 14, 0)); //活仔数
+                sow.setHealthyCount(ImportExcelUtils.getIntOrDefault(row, 12, 0) + ImportExcelUtils.getIntOrDefault(row, 14, 0)); //活仔数
                 sow.setJixingCount(ImportExcelUtils.getIntOrDefault(row, 13, 0));                       //畸形
                 sow.setWeakCount(ImportExcelUtils.getIntOrDefault(row, 14, 0));                         //弱仔数
                 sow.setDeadCount(ImportExcelUtils.getIntOrDefault(row, 15, 0));                         //死仔

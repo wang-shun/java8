@@ -80,7 +80,7 @@ public class DoctorImportExcelAnalyzer {
                 .farrowBarnName(getString(row, 9))
                 .bed(getString(row, 10))
                 .weanDate(getDate(row, 11))
-                .liveCount(getInt(row, 12))
+                .healthyCount(getInt(row, 12))
                 .jixingCount(getInt(row, 13))
                 .weakCount(getInt(row, 14))
                 .deadCount(getInt(row, 15))
