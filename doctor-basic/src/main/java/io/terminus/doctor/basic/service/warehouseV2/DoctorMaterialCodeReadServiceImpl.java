@@ -27,7 +27,11 @@ public class DoctorMaterialCodeReadServiceImpl implements DoctorMaterialCodeRead
     @Override
     public Response<DoctorMaterialCode> find(Long warehouseId, Long materialId, String vendorName) {
         try {
-            List<DoctorMaterialCode> codes = doctorMaterialCodeDao.list(DoctorMaterialCode.builder().build());
+            List<DoctorMaterialCode> codes = doctorMaterialCodeDao.list(DoctorMaterialCode.builder()
+                    .warehouseId(warehouseId)
+                    .materialId(materialId)
+                    .vendorName(vendorName)
+                    .build());
             if (null == codes||codes.isEmpty())
                 return Response.ok(null);
             else return Response.ok(codes.get(0));
