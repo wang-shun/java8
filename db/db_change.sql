@@ -1277,7 +1277,7 @@ update doctor_orgs set parent_id = 0, type = 1;
 -- 2017-07-21
 ALTER table doctor_daily_reports modify column `fatten_feed_amount` bigint(20) DEFAULT NULL COMMENT '育肥猪饲料消耗金额';
 
-<<<<<<< HEAD
+
 --2017-08-28 仓库模块重构表结构
 
 DROP TABLE IF EXISTS `doctor_warehouse_material_apply`;
@@ -1370,14 +1370,44 @@ CREATE TABLE `doctor_warehouse_stock` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8 COMMENT='仓库物料库存表';
 
---2017-08-29 物料处理表添加操作人字段
+-- 2017-08-29 物料处理表添加操作人字段
 ALTER TABLE `doctor_warehouse_material_handle`
 ADD COLUMN `operator_id` BIGINT(20) NULL COMMENT '操作人编号' AFTER `handle_month`,
 ADD COLUMN `operator_name` VARCHAR(64) NULL COMMENT '操作人名' AFTER `operator_id`;
 
 
 
-=======
+
 -- 2017-08-30
 ALTER TABLE doctor_group_tracks ADD COLUMN `close_at` datetime DEFAULT NULL  comment '猪群关闭事件(如果猪群关闭的话)' after updator_name;
->>>>>>> develop
+
+-- 添加物料编码表 2017-09-11
+CREATE TABLE `doctor_material_code` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `warehouse_id` bigint(20) DEFAULT NULL COMMENT '仓库编号',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '物料编号',
+  `vendor_name` varchar(64) DEFAULT NULL COMMENT '供应商名',
+  `specification` varchar(64) DEFAULT NULL COMMENT '规格',
+  `code` varchar(64) DEFAULT NULL COMMENT '编码',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='物料编码表';
+-- 添加采购扣减明细表 2017-09-11
+CREATE TABLE `doctor_warehouse_handle_detail` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '明细编号',
+  `material_purchase_id` bigint(20) NOT NULL COMMENT '物料采购记录编号',
+  `material_handle_id` bigint(20) NOT NULL COMMENT '物料处理记录编号',
+  `handle_year` smallint(6) DEFAULT NULL,
+  `handle_month` tinyint(2) DEFAULT NULL,
+  `quantity` decimal(23,2) NOT NULL COMMENT '处理数量',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `index_material_handle_id` (`material_handle_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8 COMMENT='仓库物料处理明细';
+
+
+
