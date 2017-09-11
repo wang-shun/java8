@@ -2,6 +2,7 @@ package io.terminus.doctor.web.front.warehouseV2;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
@@ -16,6 +17,7 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorMaterialCode;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorMaterialVendor;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
@@ -96,6 +98,8 @@ public class WarehouseController {
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
     @RpcConsumer
     private DoctorMaterialCodeReadService doctorMaterialCodeReadService;
+    @RpcConsumer
+    private DoctorMaterialVendorReadService doctorMaterialVendorReadService;
 
     /**
      * 创建仓库
@@ -889,5 +893,13 @@ public class WarehouseController {
         return doctorMaterialCodeReadService.find(id, materialId, vendorName);
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "{id}/material/{materialId}/vendor")
+    public Response<List<DoctorMaterialVendor>> materialVendor(@PathVariable Long id, @PathVariable Long materialId) {
+        return doctorMaterialVendorReadService.list(DoctorMaterialVendor.builder()
+                .warehouseId(id)
+                .materialId(materialId)
+                .build());
+    }
 
 }

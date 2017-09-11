@@ -42,6 +42,8 @@ public class DoctorWarehouseHandlerManager {
     private DoctorWarehouseHandleDetailDao doctorWarehouseHandleDetailDao;
     @Autowired
     private DoctorMaterialCodeDao doctorMaterialCodeDao;
+    @Autowired
+    private DoctorMaterialVendorDao doctorMaterialVendorDao;
 
 
     @Transactional
@@ -97,7 +99,7 @@ public class DoctorWarehouseHandlerManager {
     }
 
     @Transactional
-    public void inStock(DoctorWarehouseStock stock, List<DoctorWarehousePurchase> purchases, DoctorWarehouseMaterialHandle handle, DoctorMaterialCode materialCode) {
+    public void inStock(DoctorWarehouseStock stock, List<DoctorWarehousePurchase> purchases, DoctorWarehouseMaterialHandle handle, DoctorMaterialCode materialCode, DoctorMaterialVendor vendor) {
         if (null == stock.getId())
             doctorWarehouseStockDao.create(stock);
         else
@@ -108,6 +110,8 @@ public class DoctorWarehouseHandlerManager {
 
         if (null != materialCode)
             doctorMaterialCodeDao.create(materialCode);
+        if (null != vendor)
+            doctorMaterialVendorDao.create(vendor);
 
 
         for (DoctorWarehousePurchase purchase : purchases) {

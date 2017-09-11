@@ -77,6 +77,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
     @Autowired
     private DoctorMaterialCodeDao doctorMaterialCodeDao;
+    @Autowired
+    private DoctorMaterialVendorDao doctorMaterialVendorDao;
 
 
     @Override
@@ -163,6 +165,17 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     materialCode.setSpecification(detail.getSpecification());
                     materialCode.setCode(detail.getMaterialCode());
                 }
+                DoctorMaterialVendor materialVendor = null;
+                if (StringUtils.isNotBlank(detail.getVendorName()) &&
+                        doctorMaterialVendorDao.list(DoctorMaterialVendor.builder()
+                                .warehouseId(stock.getWarehouseId())
+                                .materialId(stock.getMaterialId())
+                                .build()).isEmpty()) {
+                    materialVendor = new DoctorMaterialVendor();
+                    materialVendor.setWarehouseId(stock.getWarehouseId());
+                    materialVendor.setMaterialId(stock.getMaterialId());
+                    materialVendor.setVendorName(detail.getVendorName());
+                }
 
 
                 Calendar c = Calendar.getInstance();
@@ -194,7 +207,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 materialHandle.setHandleYear(c.get(Calendar.YEAR));
                 materialHandle.setHandleMonth(c.get(Calendar.MONTH) + 1);
 
-                doctorWarehouseHandlerManager.inStock(stock, Collections.singletonList(purchase), materialHandle, materialCode);
+                doctorWarehouseHandlerManager.inStock(stock, Collections.singletonList(purchase), materialHandle, materialCode, materialVendor);
             });
 
             return Response.ok(true);
@@ -292,7 +305,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
                     stock.setQuantity(detail.getQuantity());
 
-                    doctorWarehouseHandlerManager.inStock(stock, Collections.singletonList(purchase), materialHandle,null);
+                    doctorWarehouseHandlerManager.inStock(stock, Collections.singletonList(purchase), materialHandle, null,null);
                 }
 
 
@@ -391,7 +404,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 for (DoctorWarehousePurchase purchase : purchaseHandleContext.getPurchaseQuantity().keySet()) {
                     transferInPurchase.add(copyPurchase(purchase, c, targetWareHouse, purchaseHandleContext.getPurchaseQuantity().get(purchase)));
                 }
-                doctorWarehouseHandlerManager.inStock(transferInStock, transferInPurchase, inHandle,null);
+                doctorWarehouseHandlerManager.inStock(transferInStock, transferInPurchase, inHandle, null,null);
                 outHandle.setOtherTrasnferHandleId(inHandle.getId());
                 doctorWarehouseMaterialHandleDao.update(outHandle);
 //                handleContext.addMaterialHandle(inHandle);
@@ -630,7 +643,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     .quantity(formulaDto.getFeedMaterialQuantity())
                     .operatorId(formulaDto.getOperatorId())
                     .operatorName(formulaDto.getOperatorName())
-                    .build(),null);
+                    .build(), null,null);
 //            handleContext.addMaterialHandle(DoctorWarehouseMaterialHandle.builder()
 //                    .farmId(formulaDto.getFarmId())
 //                    .warehouseId(wareHouse.getId())

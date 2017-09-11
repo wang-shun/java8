@@ -1409,5 +1409,16 @@ CREATE TABLE `doctor_warehouse_handle_detail` (
   KEY `index_material_handle_id` (`material_handle_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8 COMMENT='仓库物料处理明细';
 
+-- 添加物料供应商表 2017-09-11
+CREATE TABLE `doctor_material_vendor` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `vendor_name` varchar(64) NOT NULL COMMENT '供应商名称',
+  `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
+  `material_id` bigint(20) NOT NULL COMMENT '物料编号',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='物料供应商表';
 
 
