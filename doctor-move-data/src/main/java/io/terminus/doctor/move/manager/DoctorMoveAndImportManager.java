@@ -227,17 +227,19 @@ public class DoctorMoveAndImportManager {
 
     private void afterImportPigEvent(DoctorImportBasicData importBasicData) {
         DoctorBarn defaultFarrowBarn = importBasicData.getDefaultFarrowBarn();
-        //删除虚拟猪群(group track event)
-        List<DoctorGroup> defaultGroupList = doctorGroupDao.findByCurrentBarnId(defaultFarrowBarn.getId());
-        if (!Arguments.isNullOrEmpty(defaultGroupList)) {
-            DoctorGroup defaultGroup = defaultGroupList.get(0);
-            doctorGroupEventDao.deleteByGroupId(defaultGroup.getId());
-            doctorGroupTrackDao.deleteByGroupId(defaultGroup.getId());
-            doctorGroupDao.delete(defaultGroup.getId());
-        }
+        if (notNull(defaultFarrowBarn)) {
+            //删除虚拟猪群(group track event)
+            List<DoctorGroup> defaultGroupList = doctorGroupDao.findByCurrentBarnId(defaultFarrowBarn.getId());
+            if (!Arguments.isNullOrEmpty(defaultGroupList)) {
+                DoctorGroup defaultGroup = defaultGroupList.get(0);
+                doctorGroupEventDao.deleteByGroupId(defaultGroup.getId());
+                doctorGroupTrackDao.deleteByGroupId(defaultGroup.getId());
+                doctorGroupDao.delete(defaultGroup.getId());
+            }
 
-        //删除虚拟猪舍
-        doctorBarnDao.delete(defaultFarrowBarn.getId());
+            //删除虚拟猪舍
+            doctorBarnDao.delete(defaultFarrowBarn.getId());
+        }
     }
 
     private DoctorBarn getDefaultPregBarn(DoctorFarm farm) {
