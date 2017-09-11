@@ -1289,6 +1289,7 @@ create table `doctor_farm_move_errors` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `farm_name` VARCHAR(40)  DEFAULT NULL COMMENT '猪场名',
   `code` VARCHAR(255)  DEFAULT NULL COMMENT '猪/猪群code',
+  `type` tinyint(4) DEFAULT NULL COMMENT '目标类型',
   `out_id` VARCHAR(255)  DEFAULT NULL COMMENT '源目标id',
   `event_name` VARCHAR(40)  DEFAULT NULL COMMENT '事件名称',
   `event_At` DATE  DEFAULT NULL COMMENT '事件时间',

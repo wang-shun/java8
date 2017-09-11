@@ -9,6 +9,7 @@
         <id column="id" property="id"/>
         <result column="farm_name" property="farmName"/>
         <result column="code" property="code"/>
+        <result column="type" property="type"/>
         <result column="out_id" property="outId"/>
         <result column="event_name" property="eventName"/>
         <result column="event_at" property="eventAt"/>
@@ -27,11 +28,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_name, code, out_id, event_name, event_at, event_out_id, error, created_at, updated_at
+        farm_name, code, type, out_id, event_name, event_at, event_out_id, error, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmName}, #{code}, #{outId}, #{eventName},#{eventAt}, #{eventOutId}, #{error}, now(), now()
+        #{farmName}, #{code}, #{type}, #{outId}, #{eventName},#{eventAt}, #{eventOutId}, #{error}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorFarmMoveError" keyProperty="id" useGeneratedKeys="true">
@@ -42,7 +43,8 @@
         (<include refid="vals" />)
     </insert>
 
-    <delete id="deleteAll" >
+    <delete id="deleteByType" >
         DELETE FROM <include refid="tb" />
+        WHERE `type` = #{type}
     </delete>
 </mapper>

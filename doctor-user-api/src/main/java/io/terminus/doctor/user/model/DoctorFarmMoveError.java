@@ -2,6 +2,7 @@ package io.terminus.doctor.user.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -22,6 +23,7 @@ public class DoctorFarmMoveError implements Serializable{
     private Long id;
     private String farmName;
     private String code;
+    private Integer type;
     private String outId;
     private String eventName;
     private Date eventAt;
@@ -29,4 +31,30 @@ public class DoctorFarmMoveError implements Serializable{
     private String error;
     private Date createdAt;
     private Date updatedAt;
+
+
+    public enum TYPE{
+        PIG(1, "猪"),
+        GROUP(2, "猪群");
+
+        TYPE(Integer value, String name) {
+            this.value = value;
+            this.name = name;
+        }
+        @Getter
+        Integer value;
+
+        @Getter
+        String name;
+
+        public TYPE from(Integer value) {
+            for (TYPE type : TYPE.values()) {
+                if (type.getValue().equals(value)) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+    }
 }

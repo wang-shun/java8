@@ -37,6 +37,7 @@ import io.terminus.doctor.move.tools.DoctorMoveEventExecutor;
 import io.terminus.doctor.user.dao.DoctorFarmMoveErrorDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmMoveError;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import lombok.extern.slf4j.Slf4j;
@@ -293,7 +294,7 @@ public class DoctorMoveAndImportManager {
 
     private void rollbackPigForMove(Long farmId) {
         rollbackPig(farmId);
-        doctorFarmMoveErrorDao.deleteAll();
+        doctorFarmMoveErrorDao.deleteByType(DoctorFarmMoveError.TYPE.PIG.getValue());
     }
 
     private void rollbackPig(Long farmId) {
@@ -317,7 +318,7 @@ public class DoctorMoveAndImportManager {
         //3、删除groupEvent
         doctorGroupEventDao.deleteByFarmId(farmId);
 
-        doctorFarmMoveErrorDao.deleteAll();
+        doctorFarmMoveErrorDao.deleteByType(DoctorFarmMoveError.TYPE.GROUP.getValue());
     }
 
     private void rollbackGroupForImport(Long farmId) {

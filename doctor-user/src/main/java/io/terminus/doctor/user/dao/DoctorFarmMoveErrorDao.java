@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class DoctorFarmMoveErrorDao extends MyBatisDao<DoctorFarmMoveError>{
-    public void deleteAll(){
-        getSqlSession().delete(sqlId("deleteAll"));
+    public void deleteByType(Integer type){
+        getSqlSession().delete(sqlId("deleteByType"), type);
     }
 }
