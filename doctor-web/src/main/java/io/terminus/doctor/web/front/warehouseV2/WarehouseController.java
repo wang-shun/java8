@@ -15,6 +15,7 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorMaterialCode;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
@@ -93,6 +94,8 @@ public class WarehouseController {
 
     @RpcConsumer
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
+    @RpcConsumer
+    private DoctorMaterialCodeReadService doctorMaterialCodeReadService;
 
     /**
      * 创建仓库
@@ -299,7 +302,7 @@ public class WarehouseController {
             throw new JsonResponseException(warehouseResponse.getError());
 
         Calendar now = Calendar.getInstance();
-        Response<Map<Long, WarehouseStockStatisticsDto>> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByFarm(farmId, null,now,
+        Response<Map<Long, WarehouseStockStatisticsDto>> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByFarm(farmId, null, now,
                 WarehouseMaterialHandleType.IN,
                 WarehouseMaterialHandleType.OUT,
                 WarehouseMaterialHandleType.TRANSFER_IN,
@@ -307,7 +310,7 @@ public class WarehouseController {
         if (!statisticsResponse.isSuccess())
             throw new JsonResponseException(statisticsResponse.getError());
 
-        Response<Map<Long, AmountAndQuantityDto>> warehouseBalanceResponse = doctorWarehouseReportReadService.countEachWarehouseBalance(farmId,null);
+        Response<Map<Long, AmountAndQuantityDto>> warehouseBalanceResponse = doctorWarehouseReportReadService.countEachWarehouseBalance(farmId, null);
         if (!warehouseBalanceResponse.isSuccess())
             throw new JsonResponseException(warehouseBalanceResponse.getError());
 
@@ -874,6 +877,16 @@ public class WarehouseController {
         }
         return result;
 
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "{id}/material/{materialId}/code")
+    public Response<DoctorMaterialCode> materialCode(@PathVariable Long id,
+                                                     @PathVariable Long materialId,
+                                                     @RequestParam String vendorName) {
+
+
+        return doctorMaterialCodeReadService.find(id, materialId, vendorName);
     }
 
 

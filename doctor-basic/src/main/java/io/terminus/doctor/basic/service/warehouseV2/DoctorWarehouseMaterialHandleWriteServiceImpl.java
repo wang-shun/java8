@@ -195,7 +195,7 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
         }
 
         stock.get(0).setQuantity(stock.get(0).getQuantity().add(handle.getQuantity()));
-        doctorWarehouseHandlerManager.inStock(stock.get(0), purchases, null);
+        doctorWarehouseHandlerManager.inStock(stock.get(0), purchases, null,null);
     }
 
 }

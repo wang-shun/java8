@@ -49,6 +49,7 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
 
         private String applyPigGroupName;
 
+        private String remark;
 
         private Boolean justOut = false;
     }

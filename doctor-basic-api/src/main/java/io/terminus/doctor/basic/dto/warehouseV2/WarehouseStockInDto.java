@@ -38,5 +38,11 @@ public class WarehouseStockInDto extends AbstractWarehouseStockDto implements Se
         @NotNull(message = "stock.unit.price.null")
         private Long unitPrice;
 
+
+        private String specification;
+
+        private String materialCode;
+
+        private String remark;
     }
 }
