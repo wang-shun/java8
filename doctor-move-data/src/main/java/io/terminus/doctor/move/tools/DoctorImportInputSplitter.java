@@ -259,6 +259,7 @@ public class DoctorImportInputSplitter {
                 importSow.setPregCheckResult(importSow.getCurrentStatus());
                 if (!Objects.equals(importSow.getCurrentStatus(), PigStatus.Pregnancy.getDesc())) {
                     importSow.setCurrentStatus(PigStatus.KongHuai.getDesc());
+                    importSow.setPregCheckDate(getCheckDateByRemark(importSow.getRemark()));
                 } else if (Objects.equals(importBasicData.getBarnMap().get(importSow.getBarnName()).getPigType()
                         , PigType.DELIVER_SOW.getValue())){
                     importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());
