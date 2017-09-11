@@ -181,30 +181,8 @@ public class DoctorMoveDataController {
                                     @RequestParam(value = "index", required = false) Integer index,
                                     @RequestParam(value = "monthIndex", required = false) Integer monthIndex) {
         try {
-            doctorMoveAndImportService.moveData(moveId, importFarmInfoExcel(path));
-//            //1.迁移猪场信息
-//            log.warn("move user farm start, mobile:{}, moveId:{}, path:{}", mobile, moveId, path);
-//            List<DoctorFarmWithMobile> farmList = userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
-//            log.warn("move user farm end");
-//            //多个猪场遍历插入
-//            farmList.forEach(farmWithMobile -> moveAllExclude(moveId, farmWithMobile.getDoctorFarm(), farmWithMobile.getMobile(), index, monthIndex));
-//
-//            //修正转场事件
-//            doctorMoveDataService.correctChgFarm(farmList.stream().map(farmWithMobile -> farmWithMobile.getDoctorFarm()
-//                    .getId()).collect(Collectors.toList()));
-//
-//            //把所有猪舍添加到所有用户的权限里去
-//            farmList.forEach(farmWithMobile -> userInitService.updatePermissionBarn(farmWithMobile.getDoctorFarm().getId()));
-//            log.warn("all data moved successfully, CONGRATULATIONS!!!");
-//
-//            //生成报表
-//            farmList.forEach(farmWithMobile -> {
-//                moveDailyReport(farmWithMobile.getDoctorFarm().getId(), DateUtil.toDateString(DateTime.now().minusYears(1).toDate())
-//                        , DateUtil.toDateString(new Date()));
-//                flushGroupDailyHistorty(farmWithMobile.getDoctorFarm().getId(), DateUtil.toDateString(DateTime.now().minusYears(1).toDate())
-//                        , DateUtil.toDateString(new Date()));
-//                moveDoctorRangeReport(farmWithMobile.getDoctorFarm().getId(), DateUtil.toDateString(DateTime.now().minusYears(1).toDate()));
-//            });
+            List<DoctorFarm> farmList = doctorMoveAndImportService.moveData(moveId, importFarmInfoExcel(path));
+            farmList.forEach(farm -> doctorMoveAndImportService.generateReport(farm.getId()));
             return true;
         } catch (Exception e) {
             log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));

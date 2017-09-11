@@ -65,12 +65,14 @@ public class DoctorImportSow implements Serializable {
     private String pregCheckResult;   //妊娠检查结果
 
     public enum ParityStage {
-        FIRST(1, "首胎"),
-        LAST_FIRST(2, "首胎并且是当前胎次前一个"),
-        MIDDLE(3, "中间胎次"),
-        LAST_MIDDLE(4, "中间胎次并且是当前胎次前一个"),
-        CURRENT(5, "当前胎次"),
-        FIRST_CURRENT(6, "首胎也是当前胎次");
+        FIRST(1, "第一条"),
+        FIRST_PRE(2, "第一条并且是当前胎次前一个"),
+        FIRST_CURRENT(3, "第一条并且是当前胎次"),
+        FIRST_CURRENT_LAST(4, "第一条并且是当前胎次最后一个"),
+        MIDDLE(5, "中间胎次"),
+        MIDDLE_PRE(6, "中间胎次并且是当前胎次前一个"),
+        CURRENT(7, "当前胎次"),
+        CURRENT_LAST(8, "当前胎次并且是最后一条");
 
         ParityStage(Integer value, String name) {
             this.value = value;
@@ -81,9 +83,10 @@ public class DoctorImportSow implements Serializable {
         @Getter
         private String desc;
 
-        public static List<Integer> firsts = Lists.newArrayList(FIRST.getValue(), LAST_FIRST.getValue(), FIRST_CURRENT.getValue());
-        public static List<Integer> currents = Lists.newArrayList(CURRENT.getValue(), FIRST_CURRENT.getValue());
-        public static List<Integer> lasts = Lists.newArrayList(LAST_FIRST.getValue(), LAST_MIDDLE.getValue());
+        public static List<Integer> firsts = Lists.newArrayList(FIRST.getValue(), FIRST_PRE.getValue(),
+                FIRST_CURRENT.getValue(), FIRST_CURRENT_LAST.getValue());
+        public static List<Integer> currentLasts = Lists.newArrayList(FIRST_CURRENT_LAST.getValue(), CURRENT_LAST.getValue());
+        public static List<Integer> pres = Lists.newArrayList(FIRST_PRE.getValue(), MIDDLE_PRE.getValue());
 
     }
 }

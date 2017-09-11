@@ -27,7 +27,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -186,6 +185,7 @@ public class DoctorImportDataController {
             } else {
                 errorReason = Throwables.getStackTraceAsString(e);
             }
+            throw e;
         }
 
         //更新导入状态
@@ -201,26 +201,11 @@ public class DoctorImportDataController {
         log.warn("all data moved succelly, CONGRATULATIONS!!!");
 
         if (Objects.equals(status, DoctorFarmExport.Status.SUCCESS.getValue())) {
-            generateReport(farmId);
+            doctorMoveAndImportService.generateReport(farmId);
         }
     }
 
-    //生成一年的报表
-    private void generateReport(Long farmId){
-        try {
-            DateTime end = DateTime.now().withTimeAtStartOfDay(); //昨天开始时间
-            DateTime begin = end.minusYears(1);
-            new Thread(() -> {
-                doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
-                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, begin.toDate(), end.toDate());
-                doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
-                doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
-                doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
-            }).start();
-        } catch (Exception e) {
-            log.error("generate report error. farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
-        }
-    }
+
 
     @RequestMapping(value = "/importPig", method = RequestMethod.GET)
     public void importPig(@RequestParam String path, @RequestParam Long farmId) {

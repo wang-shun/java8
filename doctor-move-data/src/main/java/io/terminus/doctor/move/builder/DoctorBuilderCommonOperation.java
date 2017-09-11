@@ -93,6 +93,7 @@ public class DoctorBuilderCommonOperation {
         //事件发生猪舍
         Map<String, DoctorBarn> barnMap = importBasicData.getBarnMap();
         DoctorBarn barn = barnMap.get(importPigEvent.getBarnName());
+        expectTrue(notNull(barn), "event.barn.not.null", importPigEvent.getBarnName());
         inputDto.setBarnId(barn.getId());
         inputDto.setBarnName(barn.getName());
         inputDto.setBarnType(barn.getPigType());

@@ -1,11 +1,14 @@
 package io.terminus.doctor.move.service;
 
+import com.google.common.base.Throwables;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.service.DoctorDailyGroupWriteService;
+import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.dto.DoctorImportBasicData;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
@@ -14,6 +17,7 @@ import io.terminus.doctor.move.manager.DoctorMoveAndImportManager;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,8 +46,14 @@ public class DoctorMoveAndImportService {
     public DoctorMoveBasicService moveBasicService;
     @Autowired
     public UserInitService userInitService;
+    @Autowired
+    public DoctorDailyReportWriteService doctorDailyReportWriteService;
+    @Autowired
+    public DoctorDailyGroupWriteService doctorDailyGroupWriteService;
+    @Autowired
+    public DoctorMoveReportService doctorMoveReportService;
 
-    public void moveData(Long moveId, Sheet sheet) {
+    public List<DoctorFarm> moveData(Long moveId, Sheet sheet) {
         log.info("move data starting");
 
         //1.猪场与用户
@@ -66,11 +76,8 @@ public class DoctorMoveAndImportService {
             //6.仓库
             moveWareHouse();
         });
-
         log.info("move data end");
-
-        //7.生成报表
-        generateReport();
+        return farmList;
     }
 
     @Transactional
@@ -235,6 +242,23 @@ public class DoctorMoveAndImportService {
 
     public void generateReport() {
         // TODO: 17/8/4
+    }
+
+    //生成一年的报表
+    public void generateReport(Long farmId){
+        try {
+            DateTime end = DateTime.now().withTimeAtStartOfDay(); //昨天开始时间
+            DateTime begin = end.minusYears(1);
+            new Thread(() -> {
+                doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
+                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, begin.toDate(), end.toDate());
+                doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
+                doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
+                doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
+            }).start();
+        } catch (Exception e) {
+            log.error("generate report error. farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+        }
     }
 
 }

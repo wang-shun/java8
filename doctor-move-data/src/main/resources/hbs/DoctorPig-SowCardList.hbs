@@ -27,4 +27,5 @@ SELECT
     CASE WHEN Remark = '' THEN NULL ELSE Remark END AS remark,
     HerdRemovalDate AS outFarmDate,            -- 离场日期
     TypeName AS pigType
-FROM view_SowCardList
+FROM
+view_SowCardList
