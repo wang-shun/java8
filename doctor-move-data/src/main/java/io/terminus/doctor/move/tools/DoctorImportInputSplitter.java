@@ -275,7 +275,6 @@ public class DoctorImportInputSplitter {
             } else {
                 importSow.setPregCheckResult(PregCheckResult.YANG.getDesc());
                 importSow.setWeanToBarn(importBasicData.getDefaultPregBarn().getName());
-                importSow.setCurrentStatus(PigStatus.Wean.getDesc());
                 importSow.setFarrowBarnName(importBasicData.getDefaultFarrowBarn().getName());
                 if (DoctorImportSow.ParityStage.lasts.contains(importSow.getParityStage())) {
                     expectTrue(notNull(importSow.getPregDate()), false, importSow.getLineNumber().toString()
@@ -285,6 +284,7 @@ public class DoctorImportInputSplitter {
                         importSow.setWeanToBarn(importSow.getBarnName());
                     }
                 }
+                importSow.setCurrentStatus(PigStatus.Wean.getDesc());
             }
         }
     }
