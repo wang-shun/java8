@@ -81,6 +81,19 @@ public class DoctorBasics {
                                                                  @RequestParam(value = "srm", required = false) String srm){
         return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmFilterByFarmId(farmId, type, srm));
     }
+
+    /**
+     * 根据变动类型和输入码查询
+     * @param changeTypeId 变动类型id
+     * @param srm 不区分大小写模糊匹配
+     * @return 变动原因列表
+     */
+    @RequestMapping(value = "/farm/changeReason", method = RequestMethod.GET)
+    public List<DoctorChangeReason> findChangeReasonByChangeTypeIdAndSrm(@RequestParam("farmId") Long farmId,
+                                                                         @RequestParam("changeTypeId") Long changeTypeId,
+                                                                         @RequestParam(required = false) String srm) {
+        return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeIdAndSrmFilterByFarmId(farmId, changeTypeId, srm));
+    }
     /**
      * 创建或更新DoctorBasic
      * @return 是否成功
