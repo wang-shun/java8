@@ -1421,4 +1421,16 @@ CREATE TABLE `doctor_material_vendor` (
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='物料供应商表';
 
+-- 添加库存处理表 2017-09-12
+CREATE TABLE `doctor_warehouse_stock_handle` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `farm_id` bigint(20) NOT NULL COMMENT '猪厂编号',
+  `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
+  `serial_no` varchar(45) NOT NULL COMMENT '流水号',
+  `handle_date` date NOT NULL COMMENT '处理日期',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_serial_no_warehouse_id` (`serial_no`,`warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='库存处理表';
 

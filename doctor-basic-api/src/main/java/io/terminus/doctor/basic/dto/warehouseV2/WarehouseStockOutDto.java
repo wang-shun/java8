@@ -10,8 +10,10 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -33,6 +35,13 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
     public static class WarehouseStockOutDetail extends AbstractWarehouseStockDetail implements Serializable {
 
         private static final long serialVersionUID = -6161879769774585774L;
+
+        @NotNull(message = "stock.quantity.null")
+        @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")
+        private BigDecimal quantity;
+
+        @NotNull(message = "stock.unit.price.null")
+        private Long unitPrice;
 
         @NotNull(message = "stock.apply.person.id.null")
         private Long applyStaffId;

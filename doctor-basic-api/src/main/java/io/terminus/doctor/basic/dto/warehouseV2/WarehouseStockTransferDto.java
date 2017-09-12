@@ -6,8 +6,10 @@ import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -30,6 +32,10 @@ public class WarehouseStockTransferDto extends AbstractWarehouseStockDto impleme
 
         @NotNull(message = "stock.target.warehouse.id.null")
         private Long transferInWarehouseId;
+
+        @NotNull(message = "stock.quantity.null")
+        @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")
+        private BigDecimal quantity;
 
     }
 

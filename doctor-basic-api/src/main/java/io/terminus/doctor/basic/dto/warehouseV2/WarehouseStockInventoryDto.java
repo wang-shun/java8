@@ -6,7 +6,10 @@ import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -28,6 +31,10 @@ public class WarehouseStockInventoryDto extends AbstractWarehouseStockDto implem
     public static class WarehouseStockInventoryDetail extends AbstractWarehouseStockDetail implements  Serializable{
 
         private static final long serialVersionUID = -3947299201390395960L;
+
+        @NotNull(message = "stock.quantity.null")
+        @DecimalMin(inclusive = true, value = "0", message = "stock.quantity.small.then.zero")
+        private BigDecimal quantity;
 
     }
 }

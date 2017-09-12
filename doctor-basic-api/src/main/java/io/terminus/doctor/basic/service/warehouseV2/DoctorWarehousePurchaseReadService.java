@@ -33,6 +33,16 @@ public interface DoctorWarehousePurchaseReadService {
      */
     Response<Paging<DoctorWarehousePurchase>> paging(Integer pageNo, Integer pageSize, Map<String, Object> criteria);
 
+
+    /**
+     * 分页
+     * @param pageNo
+     * @param pageSize
+     * @param criteria
+     * @return
+     */
+    Response<Paging<DoctorWarehousePurchase>> paging(Integer pageNo, Integer pageSize, DoctorWarehousePurchase criteria);
+
     /**
      * 列表
      *

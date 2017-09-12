@@ -40,8 +40,8 @@ public class DoctorWarehousePurchaseReadServiceImpl implements DoctorWarehousePu
         try {
             return Response.ok(doctorWarehousePurchaseDao.findById(id));
         } catch (Exception e) {
-            log.error("failed to find doctor warehouseV2 purchase by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.purchase.find.fail");
+            log.error("failed to find doctor warehouse purchase by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.purchase.find.fail");
         }
     }
 
@@ -51,8 +51,19 @@ public class DoctorWarehousePurchaseReadServiceImpl implements DoctorWarehousePu
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehousePurchaseDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
-            log.error("failed to paging doctor warehouseV2 purchase by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.purchase.paging.fail");
+            log.error("failed to paging doctor warehouse purchase by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.purchase.paging.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorWarehousePurchase>> paging(Integer pageNo, Integer pageSize, DoctorWarehousePurchase criteria) {
+        try {
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            return Response.ok(doctorWarehousePurchaseDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
+        } catch (Exception e) {
+            log.error("failed to paging doctor warehouse purchase by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.purchase.paging.fail");
         }
     }
 
@@ -61,8 +72,8 @@ public class DoctorWarehousePurchaseReadServiceImpl implements DoctorWarehousePu
         try {
             return Response.ok(doctorWarehousePurchaseDao.list(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouseV2 purchase, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.purchase.list.fail");
+            log.error("failed to list doctor warehouse purchase, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.purchase.list.fail");
         }
     }
 
@@ -71,8 +82,8 @@ public class DoctorWarehousePurchaseReadServiceImpl implements DoctorWarehousePu
         try {
             return Response.ok(doctorWarehousePurchaseDao.list(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouseV2 purchase, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.purchase.list.fail");
+            log.error("failed to list doctor warehouse purchase, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.purchase.list.fail");
         }
     }
 
