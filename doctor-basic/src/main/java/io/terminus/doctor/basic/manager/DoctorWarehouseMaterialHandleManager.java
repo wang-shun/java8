@@ -2,7 +2,6 @@ package io.terminus.doctor.basic.manager;
 
 import io.terminus.doctor.basic.dao.DoctorWarehouseHandleDetailDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
-import io.terminus.doctor.basic.dao.DoctorWarehousePurchaseDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -73,7 +71,7 @@ public class DoctorWarehouseMaterialHandleManager {
         materialHandle.setUnit(materialHandleContext.getStock().getUnit());
         materialHandle.setHandleYear(materialHandleContext.getStockDto().getHandleDate().get(Calendar.YEAR));
         materialHandle.setHandleMonth(materialHandleContext.getStockDto().getHandleDate().get(Calendar.MONTH) + 1);
-
+        materialHandle.setRemark(materialHandleContext.getStockDetail().getRemark());
         doctorWarehouseMaterialHandleDao.create(materialHandle);
 
         for (DoctorWarehousePurchase purchase : materialHandleContext.getPurchases().keySet()) {

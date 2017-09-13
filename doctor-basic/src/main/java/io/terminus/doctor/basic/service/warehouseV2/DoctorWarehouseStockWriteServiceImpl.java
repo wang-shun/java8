@@ -223,6 +223,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 materialHandle.setUnit(stock.getUnit());
                 materialHandle.setOperatorId(stockInventory.getOperatorId());
                 materialHandle.setOperatorName(stockInventory.getOperatorName());
+                materialHandle.setRemark(detail.getRemark());
 
 
                 BigDecimal changedQuantity;
@@ -231,7 +232,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     changedQuantity = stock.getQuantity().subtract(detail.getQuantity());
 //                    long averagePrice = handleOutAndCalcAveragePrice(changedQuantity, purchases, stockAndPurchases, stocks, false, null, null);
                     DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(purchases, changedQuantity);
-                    materialHandle.setUnitPrice(purchaseHandleContext.getAveragePrice());
+                    materialHandle.setUnitPrice(doctorWarehousePurchaseManager.calculateUnitPrice(stock.getWarehouseId(),stock.getMaterialId()));
+
                     materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
                     materialHandle.setQuantity(changedQuantity);
                     stock.setQuantity(detail.getQuantity());
@@ -315,9 +317,10 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(transferOutPurchases, detail.getQuantity());
 
                 //调出
-                DoctorWarehouseMaterialHandle outHandle = buildMaterialHandle(stock, stockTransfer, detail.getQuantity(), purchaseHandleContext.getAveragePrice(), WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
+                DoctorWarehouseMaterialHandle outHandle = buildMaterialHandle(stock, stockTransfer, detail.getQuantity(), doctorWarehousePurchaseManager.calculateUnitPrice(stock.getWarehouseId(),stock.getMaterialId()), WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
                 outHandle.setHandleYear(stockTransfer.getHandleDate().get(Calendar.YEAR));
                 outHandle.setHandleMonth(stockTransfer.getHandleDate().get(Calendar.MONTH) + 1);
+                outHandle.setRemark(detail.getRemark());
                 stock.setQuantity(stock.getQuantity().subtract(detail.getQuantity()));
                 doctorWarehouseHandlerManager.outStock(stock, purchaseHandleContext, outHandle);
 
@@ -340,6 +343,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 DoctorWarehouseMaterialHandle inHandle = buildMaterialHandle(transferInStock, stockTransfer, detail.getQuantity(), purchaseHandleContext.getAveragePrice(), WarehouseMaterialHandleType.TRANSFER_IN.getValue());
                 inHandle.setHandleYear(stockTransfer.getHandleDate().get(Calendar.YEAR));
                 inHandle.setHandleMonth(stockTransfer.getHandleDate().get(Calendar.MONTH) + 1);
+                inHandle.setRemark(detail.getRemark());
                 inHandle.setOtherTrasnferHandleId(outHandle.getId());
                 List<DoctorWarehousePurchase> transferInPurchase = new ArrayList<>();
                 for (DoctorWarehousePurchase purchase : purchaseHandleContext.getPurchaseQuantity().keySet()) {
@@ -463,7 +467,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     DoctorWarehouseHandlerManager.PurchaseHandleContext thisWarehousePurchaseContext = new DoctorWarehouseHandlerManager.PurchaseHandleContext();
                     thisWarehousePurchaseContext.setStock(stock.get(0));
                     thisWarehousePurchaseContext.setPurchaseQuantity(thisWarehousePurchaseMap);
-                    long thisWarehouseAveragePrice = thisWarehouseAmount.divide(thisWarehouseQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
+//                    long thisWarehouseAveragePrice = thisWarehouseAmount.divide(thisWarehouseQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
+                    long thisWarehouseAveragePrice = doctorWarehousePurchaseManager.calculateUnitPrice(warehouseId,stock.get(0).getMaterialId());
                     doctorWarehouseHandlerManager.outStock(stock.get(0), thisWarehousePurchaseContext, DoctorWarehouseMaterialHandle.builder()
                             .farmId(stock.get(0).getFarmId())
                             .warehouseId(stock.get(0).getWarehouseId())
@@ -481,6 +486,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                             .handleDate(formulaDto.getHandleDate().getTime())
                             .handleYear(formulaDto.getHandleDate().get(Calendar.YEAR))
                             .handleMonth(formulaDto.getHandleDate().get(Calendar.MONTH) + 1)
+                            .remark(detail.getRemark())
                             .build());
                     log.debug("仓库{}出库{}，物料{}", warehouseId, thisWarehouseQuantity, stock.get(0).getMaterialId());
                 }
@@ -552,11 +558,6 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             log.error("failed to produce formula, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.produce.formula.fail");
         }
-    }
-
-
-    private void innerOut(DoctorWarehouseStock stock, List<DoctorWarehousePurchase> purchases) {
-
     }
 
     @Override

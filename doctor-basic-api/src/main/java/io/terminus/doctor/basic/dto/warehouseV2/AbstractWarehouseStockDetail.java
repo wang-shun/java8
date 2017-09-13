@@ -18,4 +18,6 @@ public abstract class AbstractWarehouseStockDetail {
     @NotNull(message = "stock.material.id.null")
     private Long materialId;
 
+    private String remark;
+
 }

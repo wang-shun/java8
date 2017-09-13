@@ -16,7 +16,6 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseHandleDetail;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

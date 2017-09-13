@@ -36,6 +36,7 @@ public interface DoctorWarehousePurchaseReadService {
 
     /**
      * 分页
+     *
      * @param pageNo
      * @param pageSize
      * @param criteria
@@ -66,4 +67,13 @@ public interface DoctorWarehousePurchaseReadService {
      * @return
      */
     Response<Map<Long, Long>> countWarehouseBalanceAmount(Long farmId);
+
+    /**
+     * 计算单价
+     *
+     * @param warehouseId
+     * @param materialId
+     * @return
+     */
+    Response<Long> calculateUnitPrice(Long warehouseId, Long materialId);
 }

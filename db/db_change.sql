@@ -1433,4 +1433,7 @@ CREATE TABLE `doctor_warehouse_stock_handle` (
   PRIMARY KEY (`id`),
   KEY `index_serial_no_warehouse_id` (`serial_no`,`warehouse_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='库存处理表';
+-- 物料处理表添加备注字段 2017-09-13
+ALTER TABLE `doctor_warehouse_material_handle`
+ADD COLUMN `remark` VARCHAR(64) NULL COMMENT '备注' AFTER `operator_name`;
 

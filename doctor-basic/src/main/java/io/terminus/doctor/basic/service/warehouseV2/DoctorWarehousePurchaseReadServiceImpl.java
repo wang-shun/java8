@@ -1,5 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.basic.dao.DoctorWarehousePurchaseDao;
 
 import io.terminus.common.model.PageInfo;
@@ -9,6 +11,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
+import io.terminus.doctor.basic.manager.DoctorWarehousePurchaseManager;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehousePurchaseReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +37,8 @@ public class DoctorWarehousePurchaseReadServiceImpl implements DoctorWarehousePu
 
     @Autowired
     private DoctorWarehousePurchaseDao doctorWarehousePurchaseDao;
+    @Autowired
+    private DoctorWarehousePurchaseManager doctorWarehousePurchaseManager;
 
     @Override
     public Response<DoctorWarehousePurchase> findById(Long id) {
@@ -113,5 +118,18 @@ public class DoctorWarehousePurchaseReadServiceImpl implements DoctorWarehousePu
         }
 
         return Response.ok(amounts);
+    }
+
+
+    @Override
+    public Response<Long> calculateUnitPrice(Long warehouseId, Long materialId) {
+
+        try {
+            return Response.ok(doctorWarehousePurchaseManager.calculateUnitPrice(warehouseId, materialId));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            return Response.fail("doctor.warehouse.purchase.calc.unit.price.fail");
+        }
     }
 }

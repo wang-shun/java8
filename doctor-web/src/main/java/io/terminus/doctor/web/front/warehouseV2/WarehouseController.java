@@ -902,38 +902,12 @@ public class WarehouseController {
     @RequestMapping(method = RequestMethod.GET, value = "{id}/material/{materialId}/price")
     public Long materialUnitPrice(@PathVariable Long id,
                                   @PathVariable Long materialId) {
-        Calendar lastMonth = Calendar.getInstance();
-        lastMonth.add(Calendar.MONTH, -1);//上一个月
-        Response<List<DoctorWarehousePurchase>> lastMonthPurchaseResponse = doctorWarehousePurchaseReadService.list(DoctorWarehousePurchase.builder()
-                .warehouseId(id)
-                .materialId(materialId)
-                .handleYear(lastMonth.get(Calendar.YEAR))
-                .handleMonth(lastMonth.get(Calendar.MONTH) + 1)//Calendar第一个月以0开始
-                .build());
 
-        if (!lastMonthPurchaseResponse.isSuccess())
-            throw new JsonResponseException(lastMonthPurchaseResponse.getError());
+        Response<Long> unitPriceResponse = doctorWarehousePurchaseReadService.calculateUnitPrice(id, materialId);
+        if (!unitPriceResponse.isSuccess())
+            throw new ServiceException(unitPriceResponse.getError());
 
-        if (lastMonthPurchaseResponse.getResult().isEmpty()) {
-            Response<Paging<DoctorWarehousePurchase>> purchaseResponse = doctorWarehousePurchaseReadService.paging(1, 1, DoctorWarehousePurchase.builder()
-                    .warehouseId(id)
-                    .materialId(materialId)
-                    .build());
-            if (!purchaseResponse.isSuccess())
-                throw new JsonResponseException(purchaseResponse.getError());
-            if (purchaseResponse.getResult().isEmpty())
-                throw new JsonResponseException("purchase.not.found");
-            return purchaseResponse.getResult().getData().get(0).getUnitPrice();
-        } else {
-
-            long totalPrice = 0;
-            BigDecimal totalQuantity = new BigDecimal(0);
-            for (DoctorWarehousePurchase purchase : lastMonthPurchaseResponse.getResult()) {
-                totalPrice = totalPrice + purchase.getQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
-                totalQuantity = totalQuantity.add(purchase.getQuantity());
-            }
-            return new BigDecimal(totalPrice).divide(totalQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
-        }
+        return unitPriceResponse.getResult();
     }
 
 }

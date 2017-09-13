@@ -49,6 +49,5 @@ public class WarehouseStockInDto extends AbstractWarehouseStockDto implements Se
 
         private String materialCode;
 
-        private String remark;
     }
 }

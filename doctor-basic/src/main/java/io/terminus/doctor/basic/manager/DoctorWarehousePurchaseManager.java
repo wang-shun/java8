@@ -1,5 +1,10 @@
 package io.terminus.doctor.basic.manager;
 
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehousePurchaseDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
@@ -50,5 +55,47 @@ public class DoctorWarehousePurchaseManager {
         purchase.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
         doctorWarehousePurchaseDao.create(purchase);
         return purchase;
+    }
+
+
+    /**
+     * 计算单价
+     * 先去上一月物料所有的入库价格记录，加权平均算单价
+     * 如果上一月没有入库记录，取最近一次入库记录的单价
+     *
+     * @param warehouseId
+     * @param materialId
+     * @return
+     * @throws ServiceException 如果物料没有任何入库记录
+     */
+    public long calculateUnitPrice(Long warehouseId, Long materialId) {
+        Calendar lastMonth = Calendar.getInstance();
+        lastMonth.add(Calendar.MONTH, -1);//上一个月
+        List<DoctorWarehousePurchase> lastMonthPurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
+                .warehouseId(warehouseId)
+                .materialId(materialId)
+                .handleYear(lastMonth.get(Calendar.YEAR))
+                .handleMonth(lastMonth.get(Calendar.MONTH) + 1)//Calendar第一个月以0开始
+                .build());
+
+        if (lastMonthPurchases.isEmpty()) {
+            PageInfo pageInfo = new PageInfo(1, 1);
+            Paging<DoctorWarehousePurchase> lastOnePurchases = doctorWarehousePurchaseDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), DoctorWarehousePurchase.builder()
+                    .warehouseId(warehouseId)
+                    .materialId(materialId)
+                    .build());
+            if (lastOnePurchases.isEmpty())
+                throw new ServiceException("purchase.not.found");
+            return lastOnePurchases.getData().get(0).getUnitPrice();
+        } else {
+
+            long totalPrice = 0;
+            BigDecimal totalQuantity = new BigDecimal(0);
+            for (DoctorWarehousePurchase purchase : lastMonthPurchases) {
+                totalPrice = totalPrice + purchase.getQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
+                totalQuantity = totalQuantity.add(purchase.getQuantity());
+            }
+            return new BigDecimal(totalPrice).divide(totalQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
+        }
     }
 }
