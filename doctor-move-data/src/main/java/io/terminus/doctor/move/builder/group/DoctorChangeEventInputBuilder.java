@@ -52,12 +52,13 @@ public class DoctorChangeEventInputBuilder implements DoctorGroupEventInputBuild
         change.setCustomerId(customer == null ? null : customer.getId());
         change.setCustomerName(groupRawEvent.getCustomer());
 
-        //单价 金额 数量
-        change.setPrice(groupRawEvent.getPrice());
-
-        // TODO: 17/8/24  不知道从哪取 默认单价吧, 基础中也默认10吧
-        change.setOverPrice(groupRawEvent.getPrice());
-        change.setBaseWeight(SaleBaseWeight.BASE_10.getWeight());
+        if (Objects.equals(change.getChangeTypeId(), 109L)) {
+            //单价 金额 数量
+            change.setPrice(groupRawEvent.getPrice());
+            // TODO: 17/8/24  不知道从哪取 默认单价吧, 基础中也默认10吧
+            change.setOverPrice(groupRawEvent.getPrice());
+            change.setBaseWeight(SaleBaseWeight.BASE_10.getWeight());
+        }
 
         change.setAmount(groupRawEvent.getAmount());
         change.setWeight(groupRawEvent.getWeight());

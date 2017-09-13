@@ -49,11 +49,7 @@ public class DoctorNewEventInputBuilder implements DoctorGroupEventInputBuilder{
         newEvent.setBreedName(groupRawEvent.getBreed());
 
         DoctorBarn barn = barnMap.get(groupRawEvent.getToBarnOutId());
-        if (isNull(barn)) {
-            // TODO: 17/8/23 临时操作 
-//            throw InvalidException();
-            barn = moveBasicData.getBarnMap().get("0072b170-13a7-4334-bd22-219d8cf39a82");
-        }
+        expectTrue(notNull(barn), "barn.not.fund");
         newEvent.setBarnId(barn.getId());
         newEvent.setBarnName(barn.getName());
         newEvent.setGroupOutId(groupRawEvent.getGroupOutId());

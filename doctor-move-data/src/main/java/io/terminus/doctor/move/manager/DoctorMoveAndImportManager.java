@@ -39,7 +39,6 @@ import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorFarmMoveError;
 import io.terminus.doctor.user.model.PrimaryUser;
-import io.terminus.parana.user.impl.dao.UserProfileDao;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,8 +92,6 @@ public class DoctorMoveAndImportManager {
     private DoctorFarmMoveErrorDao doctorFarmMoveErrorDao;
     @Autowired
     private PrimaryUserDao primaryUserDao;
-    @Autowired
-    private UserProfileDao userProfileDao;
 
     public void movePig(Long moveId, DoctorMoveBasicData moveBasicData) {
 

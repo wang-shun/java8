@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -11,7 +12,6 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorGroupInputInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
-import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInputInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
@@ -31,11 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
-import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by xjn on 17/8/25.
@@ -101,11 +98,30 @@ public class DoctorMoveEventExecutor {
 
     public void executeNewGroupEvent(DoctorMoveBasicData moveBasicData, List<View_EventListGain> rawEventList) {
         DoctorGroupEventInputBuilder builder = doctorBuilderFactory.getGroupBuilder(GroupEventType.NEW.getDesc());
-        List<DoctorNewGroupInputInfo> list = rawEventList.stream().map(rawNewGroupEvent -> {
-            BaseGroupInput newInput = builder.buildFromMove(moveBasicData, rawNewGroupEvent);
-            return new DoctorNewGroupInputInfo(buildGroup(moveBasicData, newInput), (DoctorNewGroupInput) newInput);
-        }).collect(Collectors.toList());
-        groupManager.batchNewGroupEventHandle(list);
+        rawEventList.forEach(rawNewGroupEvent -> {
+            try {
+                BaseGroupInput newInput = builder.buildFromMove(moveBasicData, rawNewGroupEvent);
+                groupManager.createNewGroup(Lists.newArrayList(), buildGroup(moveBasicData, newInput), (DoctorNewGroupInput) newInput);
+            } catch (Exception e) {
+                String error;
+                if (e instanceof InvalidException) {
+                    error = converter.convert((InvalidException) e).getMessage();
+                } else {
+                    error = Throwables.getStackTraceAsString(e);
+                }
+                DoctorFarmMoveError doctorFarmMoveError = DoctorFarmMoveError.builder()
+                        .farmName(moveBasicData.getDoctorFarm().getName())
+                        .code(rawNewGroupEvent.getGroupCode())
+                        .type(DoctorFarmMoveError.TYPE.GROUP.getValue())
+                        .outId(rawNewGroupEvent.getGroupOutId())
+                        .eventName(rawNewGroupEvent.getEventTypeName())
+                        .eventAt(rawNewGroupEvent.getEventAt())
+                        .eventOutId(rawNewGroupEvent.getGroupEventOutId())
+                        .error(error)
+                        .build();
+                doctorFarmMoveErrorDao.create(doctorFarmMoveError);
+            }
+        });
     }
 
     public void executeGroupEvent(DoctorMoveBasicData moveBasicData, List<View_EventListGain> rawEventList) {
@@ -161,11 +177,8 @@ public class DoctorMoveEventExecutor {
 
     private DoctorGroupDetail buildGroupDetail(DoctorMoveBasicData moveBasicData,
                                                View_EventListGain rawGroupEvent) {
-        DoctorGroup group = moveBasicData.getGroupMap().get(rawGroupEvent.getGroupOutId());
-        if (isNull(group)) {
-//            throw InvalidException();
-            log.info("groupOutId:{}", rawGroupEvent.getGroupOutId());
-        }
+        DoctorGroup group = Checks.checkNotNull(moveBasicData.getGroupMap().get(rawGroupEvent.getGroupOutId()),
+                "move.group.not.fund");
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
         return new DoctorGroupDetail(group, groupTrack);
     }
@@ -177,7 +190,6 @@ public class DoctorMoveEventExecutor {
         group.setRemark(null);
         //设置猪场公司信息
         DoctorFarm farm = moveBasicData.getDoctorFarm();
-        expectTrue(notNull(farm), "farm.not.null", group.getFarmId());
         group.setFarmName(farm.getName());
         group.setOrgId(farm.getOrgId());
         group.setOrgName(farm.getOrgName());

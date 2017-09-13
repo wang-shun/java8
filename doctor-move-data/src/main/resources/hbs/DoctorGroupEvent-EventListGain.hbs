@@ -16,8 +16,8 @@ FROM
         b.FieldText AS changTypeName,       -- 猪群变动的变动类型名称
         ChgReason AS changeReasonName,      -- 变动原因名称
         MoveCategoryText AS inTypeName,     --转入猪群事件的转入类型
-        EWeight AS weight,
-        CASE WHEN EWeight = 0 OR NumberOfPigs = 0 THEN 0 ELSE  CONVERT(DECIMAL(18,2), EWeight/NumberOfPigs) END AS avgWeight,
+        EWeight AS avgWeight,
+        EWeight * NumberOfPigs AS weight,
         cast(isnull(Price, 0) * 100 AS BIGINT) as price,   -- 金额 * 100
         cast(isnull(SumJe, 0) * 100 AS BIGINT) as amount,  -- 金额 * 100
         Customer as customer,

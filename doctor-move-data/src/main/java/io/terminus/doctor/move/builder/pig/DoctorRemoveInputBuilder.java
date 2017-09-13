@@ -52,7 +52,7 @@ public class DoctorRemoveInputBuilder implements DoctorPigEventInputBuilder {
         DoctorBasic changeType = basicMap.get(DoctorBasic.Type.CHANGE_TYPE.getValue())
                 .get(event.getChangeTypeName());
         remove.setChgTypeId(changeType == null ? null : changeType.getId());
-        remove.setChgTypeName(event.getChgType());
+        remove.setChgTypeName(event.getChangeTypeName());
         DoctorChangeReason reason = changeReasonMap.get(event.getChgReason());
         remove.setChgReasonId(reason == null ? null : reason.getId());
         remove.setChgReasonName(event.getChgReason());

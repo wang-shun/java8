@@ -57,7 +57,7 @@ public class View_EventListSow extends View_EventListPig implements Serializable
     private Integer score;           // 体况得分
     private Double backFat;          // 背镖
     private Integer weanCount;       // 断奶数量
-    private Double weanWeight;       // 断奶重量
+    private Double weanWeight;       // 断奶均重
     private String nestCode;         // 断奶重量
     private String diseaseName;      // 疾病事件的疾病名称
     private String changeTypeName;   // 变动类型名称
