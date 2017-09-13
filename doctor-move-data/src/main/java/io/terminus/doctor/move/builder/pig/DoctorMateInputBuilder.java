@@ -74,7 +74,7 @@ public class DoctorMateInputBuilder implements DoctorPigEventInputBuilder {
         mating.setMatingType(matingType.getKey());
 
         if (!Strings.isNullOrEmpty(importPigEvent.getMateOperator())) {
-            mating.setOperatorId(Checks.checkNotNull(userMap.get(importPigEvent.getMateOperator()),
+            mating.setOperatorId(Checks.expectNotNull(userMap.get(importPigEvent.getMateOperator()),
                     "mate.operator.not.fund"));
             mating.setOperatorName(importPigEvent.getMateOperator());
         }
