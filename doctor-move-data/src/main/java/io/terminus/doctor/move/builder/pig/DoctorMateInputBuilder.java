@@ -81,15 +81,24 @@ public class DoctorMateInputBuilder implements DoctorPigEventInputBuilder {
             mating.setOperatorName(importPigEvent.getMateOperator());
         }
 
-        DoctorPig mateBoar = doctorPigDao.findPigByFarmIdAndPigCodeAndSex(importBasicData.getDoctorFarm().getId(),
-                importPigEvent.getMateBoarCode(), DoctorPig.PigSex.BOAR.getKey());
-        if (isNull(mateBoar)) {
-            mateBoar = importBasicData.getDefaultMateBoar();
+        Long mateBoarId;
+        String mateBoarCode;
+        if (Strings.isNullOrEmpty(importPigEvent.getMateBoarCode())) {
+            DoctorPig mateBoar = importBasicData.getDefaultMateBoar();
+            mateBoarId = mateBoar.getId();
+            mateBoarCode = mateBoar.getPigCode();
+        } else {
+            mateBoarCode = importPigEvent.getMateBoarCode();
+            DoctorPig mateBoar = doctorPigDao.findPigByFarmIdAndPigCodeAndSex(importBasicData.getDoctorFarm().getId(),
+                    importPigEvent.getMateBoarCode(), DoctorPig.PigSex.BOAR.getKey());
+            if (isNull(mateBoar)) {
+                mateBoarId = -1L;
+            } else {
+                mateBoarId = mateBoar.getId();
+            }
         }
-        expectTrue(notNull(mateBoar), "mateBoar.not.fund", importPigEvent.getMateBoarCode());
-        mating.setMatingBoarPigId(mateBoar.getId());
-        mating.setMatingBoarPigCode(mateBoar.getPigCode());
-
+        mating.setMatingBoarPigId(mateBoarId);
+        mating.setMatingBoarPigCode(mateBoarCode);
         return mating;
     }
 }

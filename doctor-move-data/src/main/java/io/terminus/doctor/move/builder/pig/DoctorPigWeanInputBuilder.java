@@ -47,7 +47,7 @@ public class DoctorPigWeanInputBuilder implements DoctorPigEventInputBuilder {
 
         wean.setPartWeanDate(importPigEvent.getEventAt());           //断奶日期
         wean.setPartWeanRemark(importPigEvent.getRemark());
-        wean.setFarrowingLiveCount(importPigEvent.getPartWeanPigletsCount());
+        wean.setFarrowingLiveCount(importPigEvent.getHealthyCount() + importPigEvent.getWeakCount());
         wean.setPartWeanPigletsCount(importPigEvent.getPartWeanPigletsCount()); //断奶数量
         wean.setPartWeanAvgWeight(importPigEvent.getPartWeanAvgWeight());   //断奶平均重量
 
