@@ -185,7 +185,6 @@ public class DoctorImportDataController {
             } else {
                 errorReason = Throwables.getStackTraceAsString(e);
             }
-            throw e;
         }
 
         //更新导入状态
