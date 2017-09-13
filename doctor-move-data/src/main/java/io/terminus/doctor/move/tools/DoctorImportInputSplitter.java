@@ -101,6 +101,7 @@ public class DoctorImportInputSplitter {
                     .mateBoarCode(importSow.getBoarCode())
                     .mateOperator(importSow.getMateStaffName())
                     .farrowingType(FarrowingType.USUAL.getDesc())
+                    .bedCode(importSow.getBed())
                     .birthNestAvg(importSow.getNestWeight())
                     .healthyCount(nullToZero(importSow.getHealthyCount()))
                     .weakCount(nullToZero(importSow.getWeakCount()))

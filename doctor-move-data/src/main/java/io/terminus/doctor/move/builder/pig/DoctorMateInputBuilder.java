@@ -1,5 +1,7 @@
 package io.terminus.doctor.move.builder.pig;
 
+import com.google.common.base.Strings;
+import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
@@ -61,6 +64,7 @@ public class DoctorMateInputBuilder implements DoctorPigEventInputBuilder {
     @Override
     public BasePigEventInputDto buildFromImport(DoctorImportBasicData importBasicData, DoctorImportPigEvent importPigEvent) {
         DoctorMatingDto mating = new DoctorMatingDto();
+        Map<String, Long> userMap = importBasicData.getUserMap();
         builderCommonOperation.fillPigEventCommonInput(mating, importBasicData, importPigEvent);
         mating.setMatingDate(importPigEvent.getEventAt());
         mating.setJudgePregDate(new DateTime(mating.getMatingDate()).plusDays(114).toDate());
@@ -68,12 +72,21 @@ public class DoctorMateInputBuilder implements DoctorPigEventInputBuilder {
         MatingType matingType = MatingType.from(importPigEvent.getMateType());
         expectTrue(notNull(matingType), "mateType.not.fund", importPigEvent.getMateType());
         mating.setMatingType(matingType.getKey());
-// TODO: 17/9/4 很多都不填,而且不重要,就不要了 
-//        DoctorPig mateBoar = doctorPigDao.findPigByFarmIdAndPigCodeAndSex(importBasicData.getDoctorFarm().getId(),
-//                importPigEvent.getMateBoarCode(), DoctorPig.PigSex.BOAR.getKey());
-//        expectTrue(notNull(mateBoar), "mateBoar.not.fund", importPigEvent.getMateBoarCode());
-//        mating.setMatingBoarPigId(mateBoar.getId());
-//        mating.setMatingBoarPigCode(mateBoar.getPigCode());
+
+        if (!Strings.isNullOrEmpty(importPigEvent.getMateOperator())) {
+            mating.setOperatorId(Checks.checkNotNull(userMap.get(importPigEvent.getMateOperator()),
+                    "mate.operator.not.fund"));
+            mating.setOperatorName(importPigEvent.getMateOperator());
+        }
+
+        DoctorPig mateBoar = doctorPigDao.findPigByFarmIdAndPigCodeAndSex(importBasicData.getDoctorFarm().getId(),
+                importPigEvent.getMateBoarCode(), DoctorPig.PigSex.BOAR.getKey());
+        if (isNull(mateBoar)) {
+            mateBoar = importBasicData.getDefaultMateBoar();
+        }
+        expectTrue(notNull(mateBoar), "mateBoar.not.fund", importPigEvent.getMateBoarCode());
+        mating.setMatingBoarPigId(mateBoar.getId());
+        mating.setMatingBoarPigCode(mateBoar.getPigCode());
 
         return mating;
     }

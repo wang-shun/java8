@@ -35,6 +35,7 @@ public class DoctorImportPigEvent {
     private String pregCheckResult;       //妊娠检查结果
     private String toBarnName;            //去分娩产房猪舍名
     private String farrowingType;         //分娩类型
+    private String bedCode;               //分娩床号
     private Double birthNestAvg;          //出生窝重
     private Integer healthyCount;         //健仔数量(断奶事件校验对应的母猪状态信息)
     private Integer weakCount;            //弱仔数量

@@ -169,7 +169,11 @@ public class DoctorMoveAndImportManager {
             log.info("boar pig event total:{}", importBoarEventList.size());
             importBoarEventList.forEach(importPigEvent ->
                     importEventExecutor.executePigEvent(importBasicData, importPigEvent));
-
+            List<DoctorPig> boarList = doctorPigDao.getPigSexList(importBasicData.getDoctorFarm().getId(),
+                    DoctorPig.PigSex.BOAR);
+            if (!Arguments.isNullOrEmpty(boarList)) {
+                importBasicData.setDefaultMateBoar(boarList.get(0));
+            }
         } catch (InvalidException e) {
             e.setAttach(assembleErrorAttach(e.getAttach(), boarSheet.getSheetName()));
             throw e;

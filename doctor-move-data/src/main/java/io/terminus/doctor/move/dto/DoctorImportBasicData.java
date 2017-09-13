@@ -1,6 +1,7 @@
 package io.terminus.doctor.move.dto;
 
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.PrimaryUser;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,7 @@ public class DoctorImportBasicData {
     private DoctorFarm doctorFarm;
 
     /**
-     * 用户map,key:用户名、value:用户id
+     * 用户map,key:用户真实姓名、value:用户id
      */
     private Map<String, Long> userMap;
 
@@ -54,5 +55,10 @@ public class DoctorImportBasicData {
      * 默认操作人(猪场主账户)
      */
     private PrimaryUser defaultUser;
+
+    /**
+     * 默认配种公猪
+     */
+    private DoctorPig defaultMateBoar;
 
 }
