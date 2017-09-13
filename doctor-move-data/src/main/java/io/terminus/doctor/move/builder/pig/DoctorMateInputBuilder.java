@@ -1,7 +1,6 @@
 package io.terminus.doctor.move.builder.pig;
 
 import com.google.common.base.Strings;
-import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -74,8 +73,11 @@ public class DoctorMateInputBuilder implements DoctorPigEventInputBuilder {
         mating.setMatingType(matingType.getKey());
 
         if (!Strings.isNullOrEmpty(importPigEvent.getMateOperator())) {
-            mating.setOperatorId(Checks.expectNotNull(userMap.get(importPigEvent.getMateOperator()),
-                    "mate.operator.not.fund"));
+            Long operatorId = userMap.get(importPigEvent.getMateOperator());
+            if (isNull(operatorId)) {
+                operatorId = -1L;
+            }
+            mating.setOperatorId(operatorId);
             mating.setOperatorName(importPigEvent.getMateOperator());
         }
 
