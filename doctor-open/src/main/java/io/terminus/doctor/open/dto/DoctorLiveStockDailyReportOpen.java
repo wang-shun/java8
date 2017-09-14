@@ -12,11 +12,11 @@ import java.io.Serializable;
 public class DoctorLiveStockDailyReportOpen implements Serializable{
     private static final long serialVersionUID = -324694216387736049L;
 
-    private int group; //// TODO: 16/12/23 缺少
-
     /**
+     * 现在后备舍没有母猪
      * 后备母猪(后备舍的母猪)
      */
+    @Deprecated
     private int houbeiSow;
 
     /**
@@ -28,6 +28,16 @@ public class DoctorLiveStockDailyReportOpen implements Serializable{
      * 产房
      */
     private int buruSow;
+
+    /**
+     * 母猪数量
+     */
+    private int sowTotal;
+
+    /**
+     * 猪群数
+     */
+    private int group;
 
     /**
      * 空怀母猪
@@ -65,4 +75,9 @@ public class DoctorLiveStockDailyReportOpen implements Serializable{
      * 当前待出栏
      */
     private int fattenOut;
+
+    /**
+     * 当前存栏总数
+     */
+    private int liveStockTotal;
 }

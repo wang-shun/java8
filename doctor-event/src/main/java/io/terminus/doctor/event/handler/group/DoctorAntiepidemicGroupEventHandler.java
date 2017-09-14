@@ -54,7 +54,6 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
         event.setVaccinResult(antiepidemic.getVaccinResult());
         event.setQuantity(antiepidemic.getQuantity());
         event.setExtraMap(antiepidemic);
-        event.setEventSource(SourceType.INPUT.getValue());
         event.setOperatorId(antiepidemic.getVaccinStaffId());
         event.setOperatorName(antiepidemic.getVaccinStaffName());
 

@@ -11,6 +11,7 @@ import java.util.Date;
 @Data
 public class View_EventListGain implements Serializable {
     private static final long serialVersionUID = 5363694163735495420L;
+    private String groupCode;
     private String diseaseName;        // 疾病名称
     private Date birthDate;
     private Date eventAt;

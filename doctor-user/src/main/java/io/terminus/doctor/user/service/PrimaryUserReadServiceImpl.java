@@ -10,6 +10,7 @@ import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
+import io.terminus.parana.user.impl.dao.UserDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by houluyao on 16/5/24.
@@ -31,10 +33,13 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
 
     private final SubDao subDao;
 
+    private final UserDao userDao;
+
     @Autowired
-    public PrimaryUserReadServiceImpl(PrimaryUserDao primaryUserDao, SubDao subDao) {
+    public PrimaryUserReadServiceImpl(PrimaryUserDao primaryUserDao, SubDao subDao, UserDao userDao) {
         this.primaryUserDao = primaryUserDao;
         this.subDao = subDao;
+        this.userDao = userDao;
     }
 
     @Override
@@ -180,4 +185,15 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
         }
     }
 
+    @Override
+    public Response<Map<Long, String>> findFarmIdToUserName() {
+        try {
+            List<PrimaryUser> primaryUsers = primaryUserDao.findAllRelFarmId();
+            return Response.ok(primaryUsers.stream().collect(Collectors.toMap(PrimaryUser::getUserId,
+                    v ->userDao.findById(v.getUserId()).getName())));
+        } catch (Exception e) {
+            log.error("find farmId to user name ,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.farmId.to.user.name");
+        }
+    }
 }

@@ -1,16 +1,12 @@
 -- 查询DoctorPigEvent的字段(View_EventListSow)
 SELECT
-    CASE WHEN a.eventNameFirst = '转舍' THEN
-        CASE
-            WHEN (barn.TypeName != '配种母猪' AND barn.TypeName != '妊娠母猪') AND (toBarn.TypeName = '配种母猪'or toBarn.TypeName = '妊娠母猪') THEN '转入配种舍'
-            WHEN barn.TypeName != '分娩母猪' AND toBarn.TypeName = '分娩母猪' THEN '去分娩'
-            ELSE a.eventNameFirst END
-    ELSE eventNameFirst END AS eventName,
+    1 as pigSex,
     a.*,
     dis.FieldText AS diseaseName,
     rm.FieldText AS changeTypeName,
     foster.FieldText AS fosterReasonName,
-    gain.PigID AS toGroupCode
+    gain.PigID AS toGroupCode,
+    gain.OID AS toGroupOutId
 FROM
 (
     SELECT
@@ -19,11 +15,10 @@ FROM
             WHEN EventName = '猪群转进' THEN '进场'
             WHEN EventName = '仔猪代哺' THEN '被拼窝'
             WHEN EventName = '仔猪拼窝' THEN '拼窝'
-            WHEN EventName = '仔猪代哺' THEN '被拼窝'
             WHEN EventName = '部分断奶' THEN '断奶'
             WHEN EventName = '转场' THEN '转场转入'
-            ELSE EventName END AS eventNameFirst,     -- 转换事件的名称, 以适应新版的事件
-        OID AS sowOutId,
+            ELSE EventName END AS eventName,     -- 转换事件的名称, 以适应新版的事件
+        OID AS pigOutId,
         FarmOID AS farmOutId,
         PigID AS pigCode,
         PigFatherID AS pigFatherCode,
@@ -94,4 +89,5 @@ FROM
     LEFT JOIN view_GainCardList AS gain ON a.toGroupOutId = gain.OID
     LEFT JOIN view_PigLocationList AS barn on a.barnOutId = barn.OID
     LEFT JOIN view_PigLocationList AS toBarn on a.toBarnOutId = toBarn.OID
-WHERE a.sowOutId IN ({{{sowOutIds}}}) order by currentParity asc,eventAt asc
+WHERE a.pigOutId IN ({{{sowOutIds}}})
+order by parity asc,eventAt asc

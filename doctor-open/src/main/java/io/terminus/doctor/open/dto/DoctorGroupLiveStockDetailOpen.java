@@ -14,9 +14,9 @@ public class DoctorGroupLiveStockDetailOpen implements Serializable {
     private static final long serialVersionUID = -7870228678226671146L;
 
     /**
-     *  猪场名称
+     *  用户名称
      */
-    private String farmName;
+    private String userName;
 
     /**
      * 统计时间

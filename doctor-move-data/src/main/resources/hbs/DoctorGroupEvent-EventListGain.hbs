@@ -5,17 +5,19 @@ SELECT
 FROM
 (
     SELECT
+        PigID as groupCode,
         BirthDate as birthDate,
         EventDate AS eventAt,
         CASE
             WHEN EventName = '猪群转舍' OR (EventName = '猪群变动' AND ChgReason = '群间转移') THEN '猪群转群'
             WHEN EventName = '猪群变动' AND ChgReason = '选后备' THEN '商品猪转为种猪'
+            WHEN EventName = '商品猪转为种猪' AND productionStage in ('育肥猪', '保育猪') then '猪群变动'
             ELSE EventName END AS eventTypeName,
         b.FieldText AS changTypeName,       -- 猪群变动的变动类型名称
         ChgReason AS changeReasonName,      -- 变动原因名称
         MoveCategoryText AS inTypeName,     --转入猪群事件的转入类型
-        EWeight AS weight,
-        CASE WHEN EWeight = 0 OR NumberOfPigs = 0 THEN 0 ELSE  CONVERT(DECIMAL(18,2), EWeight/NumberOfPigs) END AS avgWeight,
+        EWeight AS avgWeight,
+        EWeight * NumberOfPigs AS weight,
         cast(isnull(Price, 0) * 100 AS BIGINT) as price,   -- 金额 * 100
         cast(isnull(SumJe, 0) * 100 AS BIGINT) as amount,  -- 金额 * 100
         Customer as customer,
@@ -40,5 +42,7 @@ FROM
         ERemark AS remark
     FROM view_EventListGain a
     LEFT JOIN TB_FieldValue b ON a.ChgType = cast(b.ColID AS VARCHAR(16))  -- join一下, 取出变动名称, 为什么要cast一下呢? 因为ChgType不是int类型!!!
+    Where a.Status = '已建群'
 ) AS d
 LEFT JOIN TB_FieldValue c ON d.notDisease = c.ColID -- join一下, 取出疾病名称
+order by eventAt

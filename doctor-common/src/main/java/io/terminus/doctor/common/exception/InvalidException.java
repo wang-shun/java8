@@ -6,6 +6,7 @@ package io.terminus.doctor.common.exception;
 
 import com.google.common.base.MoreObjects;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Author:  <a href="mailto:i@terminus.io">jlchen</a>
@@ -24,6 +25,7 @@ public class InvalidException extends RuntimeException {
      * 附加值(批量方法使用)
      */
     @Getter
+    @Setter
     private String attach;
 
     @Getter

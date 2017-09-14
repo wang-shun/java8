@@ -107,4 +107,15 @@ public class DoctorPigDao extends MyBatisDao<DoctorPig> {
     public List<Long> findAllPigIds(){
         return getSqlSession().selectList(sqlId("findAllPigIds"));
     }
+
+    /**
+     * 通过猪场id和猪外部id获取猪
+     * @param farmId 猪场id
+     * @param outId 猪外部id
+     * @return 猪
+     */
+    public DoctorPig findPigByFarmAndOutId(Long farmId, String outId) {
+        return getSqlSession().selectOne(sqlId("findPigByFarmAndOutId"),
+                ImmutableMap.of("farmId", farmId, "outId", outId));
+    }
 }
