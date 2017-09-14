@@ -20,6 +20,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -605,6 +606,7 @@ public class DoctorPigCreateEvents {
         inputDto.setEventType(pigEvent.getKey());
         inputDto.setEventName(pigEvent.getName());
         inputDto.setEventDesc(pigEvent.getDesc());
+        inputDto.setEventSource(SourceType.INPUT.getValue());
         return inputDto;
     }
 
@@ -621,6 +623,7 @@ public class DoctorPigCreateEvents {
         inputDto.setEventName(pigEvent.getName());
         inputDto.setEventDesc(pigEvent.getDesc());
         inputDto.setIsAuto(IsOrNot.NO.getValue());
+        inputDto.setEventSource(SourceType.INPUT.getValue());
         return inputDto;
     }
 

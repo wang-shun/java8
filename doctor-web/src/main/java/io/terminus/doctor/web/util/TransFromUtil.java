@@ -110,9 +110,6 @@ public class TransFromUtil {
         if (getLong(extraMap, "toBarnId") != null) {
             extraMap.put("toBarnId", RespHelper.or500(doctorBarnReadService.findBarnById(toLong(extraMap.get("toBarnId")))).getName());
         }
-        if (getLong(extraMap, "chgLocationToBarnId") != null) {
-            extraMap.put("chgLocationToBarnName", RespHelper.or500(doctorBarnReadService.findBarnById(toLong(extraMap.get("chgLocationToBarnId")))).getName());
-        }
         if (Objects.equals(display.getType(), PigEvent.ENTRY.getKey())
                 && notNull(display.getExtraMap())
                 && display.getExtraMap().containsKey("boarType")) {

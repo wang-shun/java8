@@ -269,6 +269,7 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         input.setHealthyQty(CountUtil.getIntegerDefault0(farrowingDto.getHealthCount()));
 
         input.setRelPigEventId(pigEvent.getId());
+        input.setEventSource(pigEvent.getEventSource());
         return input;
     }
 

@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.dto.event.usual;
 
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
-import io.terminus.doctor.event.model.DoctorPig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -75,6 +74,11 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
     private Integer left;   //左乳头的数量
 
     private Integer right;  //右乳头数量
+
+    /**
+     * 迁移猪的外部Id(仅迁移用)
+     */
+    private String pigOutId;
 
     @Override
     public Map<String, String> descMap() {

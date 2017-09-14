@@ -17,6 +17,7 @@ import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
@@ -189,7 +190,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     //构造新建猪群信息
     private DoctorGroup getNewGroup(DoctorNewGroupInput newGroupInput) {
         newGroupInput.setIsAuto(IsOrNot.NO.getValue());
-
+        newGroupInput.setEventSource(SourceType.INPUT.getValue());
         newGroupInput.setBarnName(getBarnName(newGroupInput.getBarnId()));
         newGroupInput.setBreedName(getBasicName(newGroupInput.getBreedId()));
         newGroupInput.setGeneticName(getBasicName(newGroupInput.getGeneticId()));
@@ -237,6 +238,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             //4.根据不同的事件类型调用不同的录入接口
             GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
             params.put("eventType", eventType);
+            params.put("eventSource", SourceType.INPUT.getValue());
             switch (groupEventType) {
                 case MOVE_IN:
                     params.put("breedName", getBasicName(getLong(params, "breedId")));
@@ -408,6 +410,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         Long groupId = groupDetail.getGroup().getId();
         GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
         params.put("eventType", eventType);
+        params.put("eventSource", SourceType.INPUT.getValue());
         switch (groupEventType) {
             case MOVE_IN:
                 params.put("breedName", getBasicName(getLong(params, "breedId")));

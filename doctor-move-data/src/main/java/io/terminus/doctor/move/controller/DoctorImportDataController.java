@@ -13,9 +13,11 @@ import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.service.DoctorGroupBatchFlushService;
 import io.terminus.doctor.move.service.DoctorImportDataService;
+import io.terminus.doctor.move.service.DoctorMoveAndImportService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
 import io.terminus.doctor.move.util.ImportExcelUtils;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorFarmExport;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.pubsub.Subscriber;
@@ -25,7 +27,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,6 +39,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -70,6 +72,8 @@ public class DoctorImportDataController {
     private DoctorMoveDataService doctorMoveDataService;
     @Autowired
     private DoctorDailyGroupWriteService doctorDailyGroupWriteService;
+    @Autowired
+    private DoctorMoveAndImportService doctorMoveAndImportService;
 
     @PostConstruct
     public void init () throws Exception{
@@ -164,41 +168,68 @@ public class DoctorImportDataController {
         Row farmRow = sheet.getFarm().getRow(1);
         String farmName = ImportExcelUtils.getStringOrThrow(farmRow, 1).replaceAll(" ", "");
         DoctorFarmExport farmExport = DoctorFarmExport.builder().farmName(farmName).url(path).build();
-        farmExport.setStatus(DoctorFarmExport.Status.FAILED.getValue());
+        farmExport.setStatus(DoctorFarmExport.Status.HANDLING.getValue());
         doctorImportDataService.createFarmExport(farmExport);
 
-        //数据校验
-        checkImportData(sheet);
-
         //导入数据
-        this.generateReport(doctorImportDataService.importAll(sheet).getId());
+        Integer status;
+        String errorReason = null;
+        Long farmId = null;
+        try {
+            farmId = doctorMoveAndImportService.importData(sheet);
+            status = DoctorFarmExport.Status.SUCCESS.getValue();
+        } catch (Exception e) {
+            status = DoctorFarmExport.Status.FAILED.getValue();
+            if (e instanceof JsonResponseException) {
+                errorReason = e.getMessage();
+            } else {
+                errorReason = Throwables.getStackTraceAsString(e);
+            }
+        }
 
         //更新导入状态
         DoctorFarmExport updateFarmExport = new DoctorFarmExport();
         updateFarmExport.setId(farmExport.getId());
-        updateFarmExport.setStatus(DoctorFarmExport.Status.SUCCESS.getValue());
+        updateFarmExport.setStatus(status);
+        updateFarmExport.setErrorReason(errorReason);
         doctorImportDataService.updateFarmExport(updateFarmExport);
 
         watch.stop();
         int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
         log.warn("database data inserted successfully, elapsed {} minutes", minute);
-        log.warn("all data moved successfully, CONGRATULATIONS!!!");
+        log.warn("all data moved succelly, CONGRATULATIONS!!!");
+
+        if (Objects.equals(status, DoctorFarmExport.Status.SUCCESS.getValue())) {
+            doctorMoveAndImportService.generateReport(farmId);
+        }
     }
 
-    //生成一年的报表
-    private void generateReport(Long farmId){
+
+
+    @RequestMapping(value = "/importPig", method = RequestMethod.GET)
+    public void importPig(@RequestParam String path, @RequestParam Long farmId) {
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
         try {
-            DateTime end = DateTime.now().withTimeAtStartOfDay(); //昨天开始时间
-            DateTime begin = end.minusYears(1);
-            new Thread(() -> {
-                doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
-                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, begin.toDate(), end.toDate());
-                doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
-                doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
-                doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
-            }).start();
-        } catch (Exception e) {
-            log.error("generate report error. farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            Workbook workbook = new HSSFWorkbook(new FileInputStream(new File(path)));
+            Sheet sowSheet = workbook.getSheet("3.母猪信息");
+            Sheet boarSheet = workbook.getSheet("4.公猪信息");
+            doctorMoveAndImportService.importPig(boarSheet, sowSheet,
+                    doctorMoveAndImportService.packageImportBasicData(farm));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RequestMapping(value = "/importGroup", method = RequestMethod.GET)
+    public void importGroup(@RequestParam String path, @RequestParam Long farmId) {
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+        try {
+            Workbook workbook = new HSSFWorkbook(new FileInputStream(new File(path)));
+            Sheet groupSheet = workbook.getSheet("5.商品猪（猪群）信息");
+            doctorMoveAndImportService.importGroup(groupSheet,
+                    doctorMoveAndImportService.packageImportBasicData(farm));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -213,19 +244,11 @@ public class DoctorImportDataController {
             throw new ServiceException("file.type.error");
         }
         InputStream inputStream = null;
-        final String redisKey = ImportExcelRedisKey + fileURL;
         try {
             inputStream = new URL(fileURL.replace("https", "http")).openConnection().getInputStream();
             importByInputStream(inputStream, fileType, fileURL);
-            //  成功
-            jedisTemplate.execute(jedis -> {
-               jedis.set(redisKey, "true");
-            });
         } catch (Exception e) {
             log.error(Throwables.getStackTraceAsString(e));
-            jedisTemplate.execute(jedis -> {
-                jedis.set(redisKey, e.getMessage());
-            });
         } finally {
             if(inputStream != null){
                 try {
@@ -350,11 +373,4 @@ public class DoctorImportDataController {
         return true;
     }
 
-    /**
-     * 导入数据校验
-     * @param sheet 表中数据集合
-     */
-    private void checkImportData(DoctorImportSheet sheet) {
-        // TODO: 17/3/24  暂时还不知道要添加什么校验,先放在这 
-    }
 }

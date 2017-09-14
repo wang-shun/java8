@@ -42,6 +42,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc:
@@ -101,7 +102,6 @@ public class DoctorGroupManager {
 
         //2. 创建新建猪群事件
         DoctorGroupEvent groupEvent = getNewGroupEvent(group, newGroupInput);
-        groupEvent.setEventSource(SourceType.INPUT.getValue());
         groupEvent.setSowId(newGroupInput.getSowId());
         groupEvent.setSowCode(newGroupInput.getSowCode());
         doctorGroupEventDao.create(groupEvent);
@@ -132,19 +132,6 @@ public class DoctorGroupManager {
         groupTrack.setUnqQty(0);
         doctorGroupTrackDao.create(groupTrack);
 
-        //4. 创建猪群镜像
-//        DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
-//        DoctorGroupEvent shotEvent = BeanMapper.map(groupEvent, DoctorGroupEvent.class);
-//        shotEvent.setExtraMap(null);
-//        groupSnapshot.setGroupId(groupEvent.getGroupId());
-//        groupSnapshot.setFromEventId(0L);
-//        groupSnapshot.setToEventId(groupEvent.getId());
-//        groupSnapshot.setToInfo(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
-//                .group(group)
-//                .groupTrack(groupTrack)
-//                .build()));
-//        doctorGroupSnapshotDao.create(groupSnapshot);
-
         DoctorEventInfo eventInfo = DoctorEventInfo.builder()
                 .orgId(group.getOrgId())
                 .farmId(group.getFarmId())
@@ -155,8 +142,7 @@ public class DoctorGroupManager {
                 .code(group.getGroupCode())
                 .build();
         eventInfoList.add(eventInfo);
-        //发布统计事件
-        //publistGroupAndBarn(groupEvent);
+
         autoDailyGroup(groupEvent.getFarmId(), groupEvent.getGroupId(), group.getPigType(), groupEvent.getEventAt());
         return groupId;
     }
@@ -212,6 +198,8 @@ public class DoctorGroupManager {
         //建群时间与状态
         group.setOpenAt(generateEventAt(DateUtil.toDate(newGroupInput.getEventAt())));
         group.setStatus(DoctorGroup.Status.CREATED.getValue());
+
+        group.setOutId(newGroupInput.getGroupOutId());
         return group;
     }
 
@@ -247,6 +235,8 @@ public class DoctorGroupManager {
         newGroupInput.setSource(newGroupInput.getSource());
         groupEvent.setExtraMap(newGroupInput);
         groupEvent.setStatus(EventStatus.VALID.getValue());
+        groupEvent.setEventSource(notNull(newGroupInput.getEventSource()) ? newGroupInput.getEventSource()
+                : SourceType.INPUT.getValue());
         return groupEvent;
     }
 

@@ -2,8 +2,9 @@
 SELECT c.* , d.FieldText AS diseaseName
 FROM (
     SELECT
+        2 as pigSex,
+        a.OID AS pigOutId,
         FarmOID AS farmOutId,
-        a.OID AS groupOutId,
         PigID AS pigCode,
         PigFatherID AS pigFatherCode,
         PigMotherID AS pigMotherCode,
@@ -44,7 +45,8 @@ FROM (
         OutDestination AS toBarnOutId,    -- 进场事件: 进场猪舍outId
         CASE WHEN EventName = '疾病' THEN Disease ELSE NULL END AS diseaseColId,  -- 疾病的colid
         CASE WHEN EventName = '防疫' THEN Disease ELSE NULL END AS vaccName       -- 疫苗名称
-    FROM view_EventListBoar AS a
+    FROM view_EventListBoar  AS a
         LEFT JOIN TB_FieldValue AS b ON a.ChgType = b.ColID
 ) AS c
     LEFT JOIN TB_FieldValue d ON c.diseaseColId = d.ColID
+    order by eventAt asc

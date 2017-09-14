@@ -104,7 +104,6 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
         event.setExtraMap(transGroup);
-        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 
@@ -143,8 +142,10 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         DoctorTransGroupInput transGroup = (DoctorTransGroupInput) input;
 
-        doctorModifyGroupTransGroupEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(),
-                DateUtil.toDate(transGroup.getEventAt()), -transGroup.getQuantity());
+        if (Objects.equals(transGroup.getEventSource(), SourceType.INPUT.getValue())) {
+            doctorModifyGroupTransGroupEventHandler.validGroupLiveStock(group.getId(), group.getGroupCode(),
+                    DateUtil.toDate(transGroup.getEventAt()), -transGroup.getQuantity());
+        }
 
         //同舍不可转群
         if (Objects.equals(group.getCurrentBarnId(), transGroup.getToBarnId())) {
@@ -214,33 +215,34 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         }
 
         updateGroupTrack(groupTrack, event);
+        if (Objects.equals(event.getEventSource(), SourceType.INPUT.getValue())) {
 
-        updateDailyForNew(event);
+            updateDailyForNew(event);
 
-        //5.判断转群数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
-        if (Objects.equals(oldQuantity, transGroup.getQuantity())) {
-            doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, transGroup, event.getEventAt(), transGroup.getFcrFeed());
+            //5.判断转群数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
+            if (Objects.equals(oldQuantity, transGroup.getQuantity())) {
+                doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, transGroup, event.getEventAt(), transGroup.getFcrFeed());
+            }
+
+            //设置来源为本场
+            transGroup.setSource(PigSource.LOCAL.getKey());
+
+            //6.判断是否新建群,触发目标群的转入仔猪事件
+            if (Objects.equals(transGroup.getIsCreateGroup(), IsOrNot.YES.getValue())) {
+                //新建猪群
+                Long toGroupId = autoTransGroupEventNew(eventInfoList, group, groupTrack, transGroup, toBarn);
+                transGroup.setToGroupId(toGroupId);
+
+                //更新事件
+                event.setExtraMap(transGroup);
+                doctorGroupEventDao.update(event);
+
+                //转入猪群
+                doctorCommonGroupEventHandler.autoTransEventMoveIn(eventInfoList, group, groupTrack, transGroup);
+            } else {
+                doctorCommonGroupEventHandler.autoTransEventMoveIn(eventInfoList, group, groupTrack, transGroup);
+            }
         }
-
-        //设置来源为本场
-        transGroup.setSource(PigSource.LOCAL.getKey());
-
-        //6.判断是否新建群,触发目标群的转入仔猪事件
-        if (Objects.equals(transGroup.getIsCreateGroup(), IsOrNot.YES.getValue())) {
-            //新建猪群
-            Long toGroupId = autoTransGroupEventNew(eventInfoList, group, groupTrack, transGroup, toBarn);
-            transGroup.setToGroupId(toGroupId);
-
-            //更新事件
-            event.setExtraMap(transGroup);
-            doctorGroupEventDao.update(event);
-
-            //转入猪群
-            doctorCommonGroupEventHandler.autoTransEventMoveIn(eventInfoList, group, groupTrack, transGroup);
-        } else {
-            doctorCommonGroupEventHandler.autoTransEventMoveIn(eventInfoList, group, groupTrack, transGroup);
-        }
-
         //发布统计事件
         //publistGroupAndBarn(event);
     }
