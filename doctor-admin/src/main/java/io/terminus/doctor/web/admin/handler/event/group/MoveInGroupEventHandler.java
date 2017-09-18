@@ -16,15 +16,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class MoveInGroupEventHandler extends AbstractGroupEventHandler<DoctorMoveInGroupInput> {
 
-    @Autowired
-    private DoctorBasicReadService doctorBasicReadService;
-
     @Override
     protected void buildEventDto(DoctorMoveInGroupInput eventDto, DoctorGroupEvent groupEvent) {
 
-        eventDto.setBreedName(RespHelper.orServEx(doctorBasicReadService.findBasicById(eventDto.getBreedId())).getName());
+        eventDto.setBreedName(getBasicName(eventDto.getBreedId()));
         eventDto.setInTypeName(InType.from(eventDto.getInType()).getDesc());
-
 
         groupEvent.setWeight(EventUtil.getWeight(groupEvent.getAvgWeight(), groupEvent.getQuantity()));
 
