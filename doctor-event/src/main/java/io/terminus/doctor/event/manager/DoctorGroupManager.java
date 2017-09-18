@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.manager;
 
 import com.google.common.collect.Lists;
+import com.sun.tools.javac.api.ClientCodeWrapper;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
@@ -83,7 +84,8 @@ public class DoctorGroupManager {
 
     /**
      * 新建猪群
-     * @param group 猪群
+     *
+     * @param group         猪群
      * @param newGroupInput 新建猪群录入信息
      * @return 猪群id
      */
@@ -163,6 +165,7 @@ public class DoctorGroupManager {
 
     /**
      * 批量新建猪群
+     *
      * @param inputInfoList 批量事件信息
      * @return
      */
@@ -179,6 +182,12 @@ public class DoctorGroupManager {
         });
         log.info("batch new group event handle ending");
         return eventInfoList;
+    }
+
+    @Transactional
+    public void updateGroup(DoctorGroup group, DoctorGroupTrack groupTrack) {
+        doctorGroupDao.update(group);
+        doctorGroupTrackDao.update(groupTrack);
     }
 
     //产房只能有1个猪群
@@ -273,10 +282,10 @@ public class DoctorGroupManager {
                 .build());
     }
 
-    protected Date generateEventAt(Date eventAt){
-        if(eventAt != null){
+    protected Date generateEventAt(Date eventAt) {
+        if (eventAt != null) {
             Date now = new Date();
-            if(DateUtil.inSameDate(eventAt, now)){
+            if (DateUtil.inSameDate(eventAt, now)) {
                 // 如果处在今天, 则使用此刻瞬间
                 return now;
             } else {
@@ -289,7 +298,8 @@ public class DoctorGroupManager {
 
     /**
      * 自动补全dailyGroup
-     * @param farmId 猪场id
+     *
+     * @param farmId  猪场id
      * @param eventAt 事件时间
      */
     protected void autoDailyGroup(Long farmId, Long groupId, Integer pigType, Date eventAt) {

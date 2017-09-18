@@ -40,6 +40,7 @@ import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -367,6 +368,18 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             log.error("update current barn name failed, currentBarnId:{}, currentBarnName:{}, cause:{}",
                     currentBarnId, currentBarnName, Throwables.getStackTraceAsString(e));
             return Response.fail("update.current.barn.name.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> updateGroup(DoctorGroup group, DoctorGroupTrack groupTrack) {
+        try {
+            doctorGroupManager.updateGroup(group, groupTrack);
+            return Response.ok(true);
+        } catch (Exception e) {
+            log.error("update group failed, group:{}, track:{}, cause:{}",
+                    group, groupTrack, Throwables.getStackTraceAsString(e));
+            return Response.fail("update.group.failed");
         }
     }
 }

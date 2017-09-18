@@ -4,6 +4,7 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -137,5 +138,10 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
         oldDailyPig.setSowChgFarm(EventUtil.plusInt(oldDailyPig.getSowChgFarm(), changeDto.getRemoveCountChange()));
         oldDailyPig.setSowEnd(EventUtil.minusInt(oldDailyPig.getSowEnd(), changeDto.getRemoveCountChange()));
         return oldDailyPig;
+    }
+
+    @Override
+    public Class<? extends BasePigEventInputDto> getEventDtoClass() {
+        return DoctorChgFarmDto.class;
     }
 }

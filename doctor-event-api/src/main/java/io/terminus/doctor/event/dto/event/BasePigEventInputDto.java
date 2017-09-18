@@ -4,6 +4,7 @@ package io.terminus.doctor.event.dto.event;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.model.DoctorPig;
 import lombok.Data;
+import org.dozer.Mapping;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -82,5 +83,6 @@ public abstract class BasePigEventInputDto implements Serializable{
     /**
      * 转换输入数据不一致remark
      */
+    @Mapping("remark")
     public abstract String changeRemark();
 }

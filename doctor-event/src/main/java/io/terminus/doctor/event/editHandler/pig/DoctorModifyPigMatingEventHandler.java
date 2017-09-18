@@ -195,4 +195,9 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
                 "serial.mating.over.three.day", DateUtil.toDateString(firstMatingEvent.getEventAt()));
 
     }
+
+    @Override
+    public Class<? extends BasePigEventInputDto> getEventDtoClass() {
+        return DoctorMatingDto.class;
+    }
 }

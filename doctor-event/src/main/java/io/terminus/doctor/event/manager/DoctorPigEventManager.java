@@ -9,10 +9,7 @@ import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.common.utils.ToJsonMapper;
-import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -67,6 +64,8 @@ public class DoctorPigEventManager {
 
     @Autowired
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
+    @Autowired
+    private DoctorGroupEventDao doctorGroupEventDao;
 
     /**
      * 事件处理
@@ -370,6 +369,21 @@ public class DoctorPigEventManager {
             throw new InvalidException("pig.event.not.found", id);
         }
         doctorPigEventDao.delete(id);
+
+        if (PigEvent.WEAN.getKey().intValue() == pigEvent.getType().intValue()) {
+            DoctorGroupEvent groupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
+            doctorGroupEventDao.delete(groupEvent.getId());
+            //4.删除记录
+            DoctorEventModifyLog modifyLog = DoctorEventModifyLog.builder()
+                    .businessId(groupEvent.getGroupId())
+                    .businessCode(groupEvent.getGroupCode())
+                    .farmId(groupEvent.getFarmId())
+                    .deleteEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(groupEvent))
+                    .type(DoctorEventModifyRequest.TYPE.GROUP.getValue())
+                    .build();
+            doctorEventModifyLogDao.create(modifyLog);
+        }
+
         DoctorEventModifyLog modifyLog = DoctorEventModifyLog.builder()
                 .businessId(pigEvent.getPigId())
                 .businessCode(pigEvent.getPigCode())
@@ -379,4 +393,37 @@ public class DoctorPigEventManager {
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
     }
+
+    @Transactional
+    public void modifyPigEvent(DoctorPigEvent newEvent, String oldEvent) {
+
+        doctorPigEventDao.update(newEvent);
+
+        doctorEventModifyLogDao.create(DoctorEventModifyLog.builder()
+                .businessId(newEvent.getPigId())
+                .businessCode(newEvent.getPigCode())
+                .farmId(newEvent.getFarmId())
+                .fromEvent(oldEvent)
+                .toEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(newEvent))
+                .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .build());
+    }
+
+
+    @Transactional
+    public void modifyGroupEvent(DoctorGroupEvent newEvent, String oldEvent) {
+
+        doctorGroupEventDao.update(newEvent);
+
+        doctorEventModifyLogDao.create(DoctorEventModifyLog.builder()
+                .businessId(newEvent.getGroupId())
+                .businessCode(newEvent.getGroupCode())
+                .farmId(newEvent.getFarmId())
+                .fromEvent(oldEvent)
+                .toEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(newEvent))
+                .type(DoctorEventModifyRequest.TYPE.GROUP.getValue())
+                .build());
+    }
+
+
 }

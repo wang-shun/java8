@@ -11,4 +11,9 @@ import java.util.Map;
 @Data
 public class DoctorModifyPigEventHandlers {
     Map<Integer, DoctorModifyPigEventHandler> modifyPigEventHandlerMap;
+
+
+    public DoctorModifyPigEventHandler getModifyPigEventHandler(Integer eventType) {
+        return this.modifyPigEventHandlerMap.get(eventType);
+    }
 }

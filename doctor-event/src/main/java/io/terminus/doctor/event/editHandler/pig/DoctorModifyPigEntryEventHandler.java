@@ -193,4 +193,10 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
         oldDailyPig.setSowPhInFarmIn(EventUtil.plusInt(oldDailyPig.getSowPhInFarmIn(), changeDto.getEntryCountChange()));
         return oldDailyPig;
     }
+
+    @Override
+    public Class<? extends BasePigEventInputDto> getEventDtoClass() {
+        return DoctorFarmEntryDto.class;
+    }
+
 }

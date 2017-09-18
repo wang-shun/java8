@@ -12,6 +12,8 @@ import java.util.Date;
 public class PigAndPigGroup {
 
 
+    private Long id;
+
     /**
      * 状态
      */

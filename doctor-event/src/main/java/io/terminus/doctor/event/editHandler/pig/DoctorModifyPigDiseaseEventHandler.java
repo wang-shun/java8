@@ -20,4 +20,9 @@ public class DoctorModifyPigDiseaseEventHandler extends DoctorAbstractModifyPigE
         doctorPigEvent.setBasicName(diseaseDto.getDiseaseName());
         return doctorPigEvent;
     }
+
+    @Override
+    public Class<? extends BasePigEventInputDto> getEventDtoClass() {
+        return DoctorDiseaseDto.class;
+    }
 }
