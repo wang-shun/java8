@@ -33,8 +33,4 @@ public class DoctorModifyPigConditionEventHandler extends DoctorAbstractModifyPi
         return newEvent;
     }
 
-    @Override
-    public Class<? extends BasePigEventInputDto> getEventDtoClass() {
-        return DoctorConditionDto.class;
-    }
 }

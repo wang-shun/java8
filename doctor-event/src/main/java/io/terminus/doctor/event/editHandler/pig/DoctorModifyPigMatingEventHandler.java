@@ -196,8 +196,4 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
 
     }
 
-    @Override
-    public Class<? extends BasePigEventInputDto> getEventDtoClass() {
-        return DoctorMatingDto.class;
-    }
 }

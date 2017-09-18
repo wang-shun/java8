@@ -257,9 +257,5 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 ? PigStatus.Pregnancy.getKey() : PigStatus.KongHuai.getKey();
     }
 
-    @Override
-    public Class<? extends BasePigEventInputDto> getEventDtoClass() {
-        return DoctorPregChkResultDto.class;
-    }
 }
 

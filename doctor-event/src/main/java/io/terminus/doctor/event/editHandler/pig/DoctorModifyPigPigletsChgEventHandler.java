@@ -135,8 +135,4 @@ public class DoctorModifyPigPigletsChgEventHandler extends DoctorAbstractModifyP
         return doctorChangeGroupInput;
     }
 
-    @Override
-    public Class<? extends BasePigEventInputDto> getEventDtoClass() {
-        return DoctorPigletsChgDto.class;
-    }
 }

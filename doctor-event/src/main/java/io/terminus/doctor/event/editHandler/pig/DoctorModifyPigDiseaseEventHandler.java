@@ -21,8 +21,4 @@ public class DoctorModifyPigDiseaseEventHandler extends DoctorAbstractModifyPigE
         return doctorPigEvent;
     }
 
-    @Override
-    public Class<? extends BasePigEventInputDto> getEventDtoClass() {
-        return DoctorDiseaseDto.class;
-    }
 }

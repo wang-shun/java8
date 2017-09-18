@@ -140,8 +140,4 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
         return oldDailyPig;
     }
 
-    @Override
-    public Class<? extends BasePigEventInputDto> getEventDtoClass() {
-        return DoctorChgFarmDto.class;
-    }
 }
