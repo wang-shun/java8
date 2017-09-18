@@ -232,12 +232,12 @@ public class DoctorGodController {
 
     @RequestMapping(method = RequestMethod.GET, value = "status")
     public PigAndPigGroup pigAndGroupQuery(@RequestParam Long farmId,
-                                           @RequestParam int type,//0母猪，1公猪,2猪群
+                                           @RequestParam int type,//1母猪，2公猪,3猪群
                                            @RequestParam String code) {
 
         PigAndPigGroup vo = new PigAndPigGroup();
 
-        if (type == 2) {
+        if (type == 3) {
             Response<DoctorGroup> groupResponse = doctorGroupReadService.findGroupByFarmIdAndGroupCode(farmId, code);
             if (!groupResponse.isSuccess())
                 throw new JsonResponseException(groupResponse.getError());
@@ -306,14 +306,14 @@ public class DoctorGodController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "status")
     public void pigAndGroupEdit(@RequestParam Long farmId,
-                                @RequestParam int type,//0母猪，1公猪,2猪群
+                                @RequestParam int type,//1母猪，2公猪,3猪群
                                 @RequestParam long id,
                                 @Valid PigAndPigGroup pigAndPigGroup,
                                 Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
-        if (type == 0 || type == 1) {//修改猪
+        if (type == 1 || type == 2) {//修改猪
             Response<DoctorPig> pigResponse = doctorPigReadService.findPigById(id);
             if (!pigResponse.isSuccess())
                 throw new JsonResponseException(pigResponse.getError());
@@ -332,7 +332,8 @@ public class DoctorGodController {
             pig.setBreedId(pigAndPigGroup.getBreedId());
             pig.setBreedName(RespHelper.orServEx(doctorBasicReadService.findBasicById(pigAndPigGroup.getBreedId())).getName());
             pig.setGeneticId(pigAndPigGroup.getGeneticId());
-            pig.setGeneticName(RespHelper.orServEx(doctorBasicReadService.findBasicById(pigAndPigGroup.getGeneticId())).getName());
+            if (null != pigAndPigGroup.getGeneticId())
+                pig.setGeneticName(RespHelper.orServEx(doctorBasicReadService.findBasicById(pigAndPigGroup.getGeneticId())).getName());
             if (pig.getPigType().intValue() == PigType.BOAR.getValue())
                 pig.setBoarType(pigAndPigGroup.getBoarType());
             pig.setIsRemoval(pigAndPigGroup.getIsRemoval());
@@ -348,7 +349,7 @@ public class DoctorGodController {
             pigTrack.setWeanAvgWeight(pigAndPigGroup.getWeanAvgWeight());
 
             doctorPigWriteService.updatePig(pig, pigTrack);
-        } else if (pigAndPigGroup.getType() == 1) {//修改猪群
+        } else if (type == 3) {//修改猪群
 
             DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(pigAndPigGroup.getId()));
             if (null == group)

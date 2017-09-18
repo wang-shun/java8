@@ -111,7 +111,7 @@ public class PigAndPigGroup {
      */
     private Integer weakQty;
 
-    @NotNull(message = "god.pig.and.group.type.null")
-    private Integer type;
+//    @NotNull(message = "god.pig.and.group.type.null")
+//    private Integer type;
 
 }
