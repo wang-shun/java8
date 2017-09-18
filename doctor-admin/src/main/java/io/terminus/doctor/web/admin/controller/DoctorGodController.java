@@ -9,6 +9,10 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
+import io.terminus.doctor.basic.model.DoctorChangeReason;
+import io.terminus.doctor.basic.model.DoctorCustomer;
+import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
@@ -88,7 +92,8 @@ public class DoctorGodController {
     @RpcConsumer
     private DoctorPigWriteService doctorPigWriteService;
 
-
+    @RpcConsumer
+    private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
     @RpcConsumer
     private DoctorModifyEventService doctorModifyEventService;
 
@@ -377,6 +382,34 @@ public class DoctorGodController {
             throw new JsonResponseException("god.pig.and.group.type.not.support");
     }
 
+    //-----------------下拉框专区-----------------------
+
+    @RequestMapping(method = RequestMethod.GET, value = "boar")
+    public Paging<SearchedPig> boarQuery(@RequestParam Long farmId,
+                                         @RequestParam(required = false) Integer pageNo,
+                                         @RequestParam(required = false) Integer pageSize) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmId", farmId);
+        params.put("status", PigStatus.BOAR_ENTRY.getKey());
+        return RespHelper.or500(doctorPigReadService.pagingPig(params, pageNo, pageSize));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "vaccine")
+    public List<DoctorBasicMaterial> material(@RequestParam Long farmId) {
+        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialsOwned(farmId, 3L, null));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "changeReason")
+    public List<DoctorChangeReason> changeReason(@RequestParam Long farmId,
+                                                 @RequestParam Long changeTypeId) {
+        return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeIdAndSrmFilterByFarmId(farmId, changeTypeId, null));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "customer")
+    public List<DoctorCustomer> customer(@RequestParam("farmId") Long farmId) {
+        return RespHelper.or500(doctorBasicReadService.findCustomersByFarmId(farmId));
+    }
+    //-----------------下拉框专区-----------------------
 
     public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
         if (params == null || params.isEmpty()) {
