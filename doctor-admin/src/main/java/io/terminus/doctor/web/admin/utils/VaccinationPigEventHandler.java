@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.admin.utils;
 
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
@@ -20,9 +21,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class VaccinationPigEventHandler extends AbstractPigEventHandler<DoctorVaccinationDto> {
 
-    @Autowired
+    @RpcConsumer
     private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
-    @Autowired
+    @RpcConsumer
     private DoctorBasicReadService doctorBasicReadService;
 
     @Override

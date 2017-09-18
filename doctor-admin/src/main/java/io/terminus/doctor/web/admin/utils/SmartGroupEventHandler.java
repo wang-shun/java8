@@ -1,7 +1,6 @@
 package io.terminus.doctor.web.admin.utils;
 
 
-
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -9,6 +8,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +29,7 @@ public class SmartGroupEventHandler implements GroupEventHandler, ApplicationCon
     @PostConstruct
     public void init() {
         if (null == handlers || handlers.isEmpty()) {
+            handlers = new ArrayList<>();
             Map<String, GroupEventHandler> handlerBeans = ac.getBeansOfType(GroupEventHandler.class);
             for (String beanName : handlerBeans.keySet()) {
                 if (beanName.equals("smartGroupEventHandler"))

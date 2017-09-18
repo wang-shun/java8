@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.admin.utils;
 
 
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -25,7 +26,7 @@ public abstract class AbstractPigEventHandler<T extends BasePigEventInputDto> im
 
     private static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
 
-    @Autowired
+    @RpcConsumer
     private DoctorUserProfileReadService doctorUserProfileReadService;
 
     protected T parse(String eventDto, Class<T> clazz) {
