@@ -5,6 +5,7 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
+import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -142,6 +143,10 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
+        if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())
+                && !Objects.equals(oldPigEvent.getBoarType(), BoarEntryType.HGZ.getKey())) {
+            return;
+        }
         DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .pigSex(oldPigEvent.getKind())
@@ -167,6 +172,10 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
+        if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())
+                && !Objects.equals(newPigEvent.getBoarType(), BoarEntryType.HGZ.getKey())) {
+            return;
+        }
         DoctorRemovalDto newDto = (DoctorRemovalDto) inputDto;
         DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), newDto.eventAt());
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
