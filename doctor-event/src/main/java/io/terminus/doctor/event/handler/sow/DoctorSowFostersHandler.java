@@ -112,6 +112,7 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
         fosterByDto.setEventName(PigEvent.FOSTERS_BY.getName());
         fosterByDto.setEventType(PigEvent.FOSTERS_BY.getKey());
         fosterByDto.setEventDesc(PigEvent.FOSTERS_BY.getDesc());
+        fosterByDto.setEventSource(fostersDto.getEventSource());
 
         //构建basic
         DoctorBasicInputInfoDto basic = DoctorBasicInputInfoDto.builder()
