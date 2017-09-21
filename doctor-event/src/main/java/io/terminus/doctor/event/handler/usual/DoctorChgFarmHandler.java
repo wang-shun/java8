@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.enums.PigType.MATING_FARROW_TYPES;
@@ -52,7 +53,11 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
         expectTrue(notNull(doctorCurrentBarn), "barn.not.null", fromTrack.getCurrentBarnId());
         DoctorBarn doctorToBarn = doctorBarnDao.findById(chgFarmDto.getToBarnId());
         expectTrue(notNull(doctorToBarn), "barn.not.null", chgFarmDto.getToBarnId());
-        expectTrue(checkBarnTypeEqual(doctorCurrentBarn, doctorToBarn, fromTrack.getStatus()), "not.trans.barn.type", PigType.from(doctorCurrentBarn.getPigType()).getDesc(), PigType.from(doctorToBarn.getPigType()).getDesc());
+        List<Long> barns = doctorBarnDao.findByFarmId(chgFarmDto.getToFarmId())
+                .stream().map(DoctorBarn::getId).collect(Collectors.toList());
+        expectTrue(barns.contains(doctorToBarn.getId()), "toBarn.not.in.toFarm");
+        expectTrue(checkBarnTypeEqual(doctorCurrentBarn, doctorToBarn, fromTrack.getStatus()), "not.trans.barn.type",
+                PigType.from(doctorCurrentBarn.getPigType()).getDesc(), PigType.from(doctorToBarn.getPigType()).getDesc());
 
     }
 
