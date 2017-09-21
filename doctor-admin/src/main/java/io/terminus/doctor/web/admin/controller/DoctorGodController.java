@@ -207,7 +207,7 @@ public class DoctorGodController {
         return RespWithExHelper.orInvalid(doctorModifyEventService.modifyGroupEvent(oldPigEvent, groupEvent));
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "report/refresh")
+    @RequestMapping(method = RequestMethod.GET, value = "report/refresh")
     public boolean refreshReport(@RequestParam Integer type,//1猪，2猪群
                                  @RequestParam Long farmId,
                                  @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -216,12 +216,16 @@ public class DoctorGodController {
         //刷新指定日期间隔内的日报
         if (null == endDate)
             endDate = new Date();
+
+        if(1!=type||2!=type){
+            throw new JsonResponseException("refresh.target.type.not.support");
+        }
+
+        //TODO 异步
         if (1 == type) {
             doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, startDate, endDate);
-        } else if (2 == type) {
+        } else  {
             doctorDailyReportWriteService.createDailyReports(farmId, startDate, endDate);
-        } else {
-            throw new JsonResponseException("refresh.target.type.not.support");
         }
         //周报和月报
         Integer index = DateUtil.getDeltaMonthsAbs(startDate, new Date()) + 1;
@@ -313,7 +317,7 @@ public class DoctorGodController {
     public void pigAndGroupEdit(@RequestParam Long farmId,
                                 @RequestParam int type,//1母猪，2公猪,3猪群
                                 @RequestParam long id,
-                                @Valid PigAndPigGroup pigAndPigGroup,
+                                @RequestBody @Valid PigAndPigGroup pigAndPigGroup,
                                 Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
