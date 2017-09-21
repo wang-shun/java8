@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.dto.event.sow;
 
-import com.google.common.collect.Maps;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +11,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -59,8 +59,16 @@ public class DoctorFosterByDto extends BasePigEventInputDto implements Serializa
     private Long fromGroupId;
 
     @Override
-    public Map<String, String> descMap() {
-        return Maps.newLinkedHashMap();
+    public Map<String, String> descMap(){
+        Map<String, String> map = new HashMap<>();
+
+        if(fromSowCode != null){
+            map.put("拼窝母猪", fromSowCode);
+        }
+        if(fosterByCount != null){
+            map.put("拼窝仔猪数", fosterByCount.toString()+"头");
+        }
+        return map;
     }
 
     @Override
