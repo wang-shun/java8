@@ -88,9 +88,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.PigType.*;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
@@ -577,10 +575,13 @@ public class DoctorPigCreateEvents {
         try {
             DoctorFarm doctorFarm = RespHelper.orServEx(this.doctorFarmReadService.findFarmById(farmId));
             Long userId = UserUtil.getUserId();
-
+            String name = RespHelper.orServEx(doctorGroupWebService.findRealName(userId));
+            if (Strings.isNullOrEmpty(name)) {
+                name = UserUtil.getCurrentUser().getName();
+            }
             return DoctorBasicInputInfoDto.builder()
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName()).orgId(doctorFarm.getOrgId()).orgName(doctorFarm.getOrgName())
-                    .staffId(userId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(userId)))
+                    .staffId(userId).staffName(name)
                     .build();
         } catch (Exception e) {
             log.error("build basic input info dto fail, cause:{}", Throwables.getStackTraceAsString(e));
