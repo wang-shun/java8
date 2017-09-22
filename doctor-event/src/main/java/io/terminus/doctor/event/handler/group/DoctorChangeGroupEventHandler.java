@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.group;
 
-import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
@@ -89,7 +88,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setSowId(change.getSowId());
         event.setSowCode(change.getSowCode());
         //销售相关
-        setSaleEvent(event, change, group.getPigType());
+        doctorModifyGroupChangeEventHandler.setSaleEvent(event, change, group.getPigType());
 
         event.setExtraMap(change);
         doctorGroupEventDao.create(event);
@@ -143,7 +142,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setChangeTypeId(change.getChangeTypeId());   //变动类型id
 
         //销售相关
-        setSaleEvent(event, change, group.getPigType());
+        doctorModifyGroupChangeEventHandler.setSaleEvent(event, change, group.getPigType());
 
         event.setExtraMap(change);
         return event;
@@ -191,23 +190,5 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
     }
 
-    //如果是销售事件, 记录价格与重量
-    private void setSaleEvent(DoctorGroupEvent event, DoctorChangeGroupInput change, Integer pigType) {
-        event.setPrice(change.getPrice());          //销售单价(分)(基础价)
-        event.setBaseWeight(change.getBaseWeight());//基础重量
-        event.setOverPrice(change.getOverPrice());  //超出价格(分/kg)
-        if (Objects.equals(change.getChangeTypeId(), DoctorBasicEnums.SALE.getId())) {
 
-            //保育猪的特殊逻辑, 其他猪类的销售 金额 = 重量 * 单价
-            if (Objects.equals(PigType.NURSERY_PIGLET.getValue(), pigType)) {
-                //销售总额(分) = 单价 * 数量 + 超出价格 * 超出重量
-                event.setAmount((long) (change.getPrice() * change.getQuantity() +
-                        MoreObjects.firstNonNull(change.getOverPrice(), 0L) *
-                                (change.getWeight() - change.getQuantity() * MoreObjects.firstNonNull(change.getBaseWeight(), 0))));
-            } else {
-                event.setAmount((long) (change.getPrice() * change.getWeight()));
-            }
-            change.setAmount(event.getAmount());
-        }
-    }
 }
