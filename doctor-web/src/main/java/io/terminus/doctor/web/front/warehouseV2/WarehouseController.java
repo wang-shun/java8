@@ -495,7 +495,7 @@ public class WarehouseController {
      * 仓库可以添加的物料列表
      */
     @RequestMapping(method = RequestMethod.GET, value = "material")
-    public List<DoctorBasicMaterial> farmMaterail(@RequestParam Long farmId, @RequestParam Long type) {
+    public List<DoctorBasicMaterial> farmMaterial(@RequestParam Long farmId, @RequestParam Long type) {
         return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialsOwned(farmId, type, null));
     }
 
