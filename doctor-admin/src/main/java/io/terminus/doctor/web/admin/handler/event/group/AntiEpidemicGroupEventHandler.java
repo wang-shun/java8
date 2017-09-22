@@ -6,6 +6,7 @@ import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +39,6 @@ public class AntiEpidemicGroupEventHandler extends AbstractGroupEventHandler<Doc
 
     @Override
     public boolean isSupported(DoctorGroupEvent groupEvent) {
-        return false;
+        return groupEvent.getType().intValue() == GroupEventType.ANTIEPIDEMIC.getValue();
     }
 }
