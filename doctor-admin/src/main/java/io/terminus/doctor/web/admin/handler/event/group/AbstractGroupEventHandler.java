@@ -45,6 +45,7 @@ public abstract class AbstractGroupEventHandler<T extends BaseGroupInput> extend
 
         super.transfer(event, groupEvent);
 
+
         groupEvent.setDesc(event.generateEventDesc());
         groupEvent.setExtra(jsonMapper.toJson(event));
         groupEvent.setEventAt(DateUtil.toDate(event.getEventAt()));

@@ -5,6 +5,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import org.springframework.beans.BeanUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,7 +31,10 @@ public abstract class AbstractEventHandler<T, R> {
     }
 
     protected void transfer(T eventDto, R event) {
-        BeanMapper.copy(eventDto, event);
+        //TODO from string to date not work,use spring beanutils
+
+//        BeanMapper.copy(eventDto, event);
+        BeanUtils.copyProperties(eventDto, event);
     }
 
     protected abstract void buildEventDto(T eventDto, R groupEvent);
