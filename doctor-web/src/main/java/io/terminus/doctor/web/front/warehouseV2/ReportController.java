@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
@@ -251,16 +252,22 @@ public class ReportController {
                                                                 @RequestParam(required = false) Integer type,
                                                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
-        DoctorWarehouseMaterialHandle criteria = new DoctorWarehouseMaterialHandle();
-        criteria.setWarehouseId(warehouseId);
-        criteria.setHandleYear(date.get(Calendar.YEAR));
-        criteria.setHandleMonth(date.get(Calendar.MONTH) + 1);
-        if (null != type)
-            criteria.setType(type);
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("handleYear", date.get(Calendar.YEAR));
+        criteria.put("handleMonth", date.get(Calendar.MONTH) + 1);
+        if (null != type) {
+            if (4 == type) {
+                criteria.put("bigType", Lists.newArrayList(WarehouseMaterialHandleType.TRANSFER_IN.getValue(), WarehouseMaterialHandleType.TRANSFER_OUT.getValue()));
+            } else if (3 == type) {
+                criteria.put("bigType", Lists.newArrayList(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue(), WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue()));
+            } else
+                criteria.put("type", type);
+        }
         if (StringUtils.isNotBlank(materialName))
-            criteria.setMaterialName(materialName);
+            criteria.put("materialName", materialName);
 
-        Response<List<DoctorWarehouseMaterialHandle>> materialHandleResponse = doctorWarehouseMaterialHandleReadService.list(criteria);
+        Response<List<DoctorWarehouseMaterialHandle>> materialHandleResponse = doctorWarehouseMaterialHandleReadService.advList(criteria);
         if (!materialHandleResponse.isSuccess())
             throw new JsonResponseException(materialHandleResponse.getError());
 
