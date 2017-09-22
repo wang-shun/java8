@@ -78,6 +78,7 @@ public class DoctorFarrowInputBuilder implements DoctorPigEventInputBuilder {
                 MoreObjects.firstNonNull(importPigEvent.getWeakCount(), 0));
         farrow.setGroupCode(grateGroupCode(farrow.getBarnName(), farrow.eventAt()));                                          // 仔猪猪群Code
         farrow.setBedCode(importPigEvent.getBedCode());
+        farrow.setBirthNestAvg(importPigEvent.getBirthNestAvg());
 
         FarrowingType farrowingType = FarrowingType.from(importPigEvent.getFarrowingType());
         expectTrue(notNull(farrowingType), "farrowingType.not.fund", importPigEvent.getFarrowingType());

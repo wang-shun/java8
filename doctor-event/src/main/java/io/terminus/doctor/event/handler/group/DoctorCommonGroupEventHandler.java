@@ -7,6 +7,7 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -32,6 +33,7 @@ import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -98,6 +100,8 @@ public class DoctorCommonGroupEventHandler {
 
     @Autowired
     private DoctorPigTrackDao doctorPigTrackDao;
+    @Autowired
+    private DoctorGroupEventDao doctorGroupEventDao;
 
     /**
      * 系统触发的自动关闭猪群事件(先生成一发批次总结)
@@ -107,9 +111,9 @@ public class DoctorCommonGroupEventHandler {
         createGroupBatchSummaryWhenClosed(group, groupTrack, eventAt, fcrFeed);
 
         DoctorCloseGroupInput closeInput = new DoctorCloseGroupInput();
-        closeInput.setIsAuto(IsOrNot.YES.getValue());   //系统触发事件, 属于自动生成
-        closeInput.setEventAt(baseInput.getEventAt());
-        closeInput.setRelGroupEventId(baseInput.getRelGroupEventId());
+        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(group.getId());
+        closeInput.setIsAuto(IsOrNot.NO.getValue());
+        closeInput.setEventAt(DateUtil.toDateString(lastEvent.getEventAt()));
         doctorCloseGroupEventHandler.handle(eventInfoList, group, groupTrack, closeInput);
     }
 

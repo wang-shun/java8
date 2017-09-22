@@ -80,6 +80,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         newGroupEvent.setAvgWeight(newInput.getAvgWeight());
         newGroupEvent.setWeight(EventUtil.getWeight(newGroupEvent.getAvgWeight(), newGroupEvent.getQuantity()));
         newGroupEvent.setAvgDayAge(newInput.getAvgDayAge());
+        newGroupEvent.setAmount(newInput.getAmount());
         return newGroupEvent;
     }
 

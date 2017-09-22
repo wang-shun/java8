@@ -110,6 +110,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setAvgDayAge(moveIn.getAvgDayAge());
         event.setAvgWeight(moveIn.getAvgWeight());
         event.setWeight(EventUtil.getWeight(event.getAvgWeight(), event.getQuantity()));
+        event.setAmount(moveIn.getAmount());
         event.setInType(moveIn.getInType());
 
         event.setTransGroupType(DoctorGroupEvent.TransGroupType.OUT.getValue());

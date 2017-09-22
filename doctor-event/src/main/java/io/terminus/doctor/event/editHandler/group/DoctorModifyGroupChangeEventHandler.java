@@ -1,9 +1,12 @@
 package io.terminus.doctor.event.editHandler.group;
 
+import com.google.common.base.MoreObjects;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
+import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -16,9 +19,7 @@ import java.util.Date;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
-import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler.DEAD;
-import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler.SALE;
-import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler.WEED;
+import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -67,8 +68,8 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
         newGroupEvent.setChangeTypeId(newInput.getChangeTypeId());
         newGroupEvent.setQuantity(newInput.getQuantity());
         newGroupEvent.setWeight(newInput.getWeight());
-        newGroupEvent.setPrice(newInput.getPrice());
-        newGroupEvent.setOverPrice(newInput.getOverPrice());
+        newGroupEvent.setAvgWeight(EventUtil.getAvgWeight(newGroupEvent.getWeight(), newGroupEvent.getQuantity()));
+        setSaleEvent(newGroupEvent, newInput, oldGroupEvent.getPigType());
         return newGroupEvent;
     }
 
@@ -225,6 +226,26 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
             oldDailyGroup.setWeedOut(EventUtil.plusInt(oldDailyGroup.getWeedOut(), quantityChange));
         } else {
             oldDailyGroup.setOtherChange(EventUtil.plusInt(oldDailyGroup.getOtherChange(), quantityChange));
+        }
+    }
+
+    //如果是销售事件, 记录价格与重量
+    public void setSaleEvent(DoctorGroupEvent event, DoctorChangeGroupInput change, Integer pigType) {
+        event.setPrice(change.getPrice());          //销售单价(分)(基础价)
+        event.setBaseWeight(change.getBaseWeight());//基础重量
+        event.setOverPrice(change.getOverPrice());  //超出价格(分/kg)
+        if (Objects.equals(change.getChangeTypeId(), DoctorBasicEnums.SALE.getId())) {
+
+            //保育猪的特殊逻辑, 其他猪类的销售 金额 = 重量 * 单价
+            if (Objects.equals(PigType.NURSERY_PIGLET.getValue(), pigType)) {
+                //销售总额(分) = 单价 * 数量 + 超出价格 * 超出重量
+                event.setAmount((long) (change.getPrice() * change.getQuantity() +
+                        MoreObjects.firstNonNull(change.getOverPrice(), 0L) *
+                                (change.getWeight() - change.getQuantity() * MoreObjects.firstNonNull(change.getBaseWeight(), 0))));
+            } else {
+                event.setAmount((long) (change.getPrice() * change.getWeight()));
+            }
+            change.setAmount(event.getAmount());
         }
     }
 }
