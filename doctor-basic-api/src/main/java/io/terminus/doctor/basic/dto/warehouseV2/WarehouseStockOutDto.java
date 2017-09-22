@@ -40,7 +40,7 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
         @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")
         private BigDecimal quantity;
 
-        @NotNull(message = "stock.unit.price.null")
+//        @NotNull(message = "stock.unit.price.null")
         private Long unitPrice;
 
         @NotNull(message = "stock.apply.person.id.null")
