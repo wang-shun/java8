@@ -110,7 +110,7 @@ public class DoctorImportInputSplitter {
                     .mummyCount(nullToZero(importSow.getMummyCount()))
                     .blackCount(nullToZero(importSow.getBlackCount()))
                     .partWeanPigletsCount(EventUtil.plusInt(importSow.getHealthyCount(), importSow.getWeakCount()))
-                    .partWeanAvgWeight(EventUtil.getAvgWeight(importSow.getWeanWeight(), importSow.getWeakCount()))
+                    .partWeanAvgWeight(importSow.getWeanWeight())
                     .build();
             fill(importPigEvent, importSow, pigEvent);
             return importPigEvent;
