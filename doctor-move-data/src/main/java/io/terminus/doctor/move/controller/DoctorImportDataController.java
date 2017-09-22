@@ -156,12 +156,12 @@ public class DoctorImportDataController {
         sheet.setSow(getSheet(workbook, "3.母猪信息"));
         sheet.setBoar(getSheet(workbook, "4.公猪信息"));
         sheet.setGroup(getSheet(workbook, "5.商品猪（猪群）信息"));
-        sheet.setWarehouse(getSheet(workbook, "6.仓库"));
-        sheet.setMedicine(getSheet(workbook, "7.药品"));
-        sheet.setVacc(getSheet(workbook, "8.疫苗"));
-        sheet.setMaterial(getSheet(workbook, "9.原料"));
-        sheet.setFeed(getSheet(workbook, "10.饲料"));
-        sheet.setConsume(getSheet(workbook, "11.易耗品"));
+//        sheet.setWarehouse(getSheet(workbook, "6.仓库"));
+//        sheet.setMedicine(getSheet(workbook, "7.药品"));
+//        sheet.setVacc(getSheet(workbook, "8.疫苗"));
+//        sheet.setMaterial(getSheet(workbook, "9.原料"));
+//        sheet.setFeed(getSheet(workbook, "10.饲料"));
+//        sheet.setConsume(getSheet(workbook, "11.易耗品"));
         Stopwatch watch = Stopwatch.createStarted();
 
         //创建导入记录
