@@ -98,6 +98,17 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
     }
 
     @Override
+    public Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
+        DoctorPigEvent entryEvent = doctorPigEventDao.findByRelGroupEventId(deleteGroupEvent.getId());
+        Boolean isRollback = doctorModifyPigEntryEventHandler.rollbackHandleCheck(entryEvent);
+        DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventIdAndType(deleteGroupEvent.getId(), GroupEventType.CLOSE.getValue());
+        if (notNull(closeEvent)) {
+            isRollback &= modifyGroupCloseEventHandler.rollbackHandleCheck(closeEvent);
+        }
+        return isRollback;
+    }
+
+    @Override
     protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
         DoctorPigEvent entryEvent = doctorPigEventDao.findByRelGroupEventId(deleteGroupEvent.getId());
         doctorModifyPigEntryEventHandler.rollbackHandle(entryEvent, operatorId, operatorName);
