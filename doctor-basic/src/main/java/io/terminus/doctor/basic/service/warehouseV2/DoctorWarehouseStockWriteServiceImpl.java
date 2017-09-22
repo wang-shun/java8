@@ -159,6 +159,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                         .stock(stock)
                         .stockDto(stockIn)
                         .stockDetail(detail)
+                        .unitPrice(detail.getUnitPrice())
                         .vendorName(purchase.getVendorName())
                         .quantity(detail.getQuantity())
                         .purchases(Collections.singletonMap(purchase, detail.getQuantity()))
