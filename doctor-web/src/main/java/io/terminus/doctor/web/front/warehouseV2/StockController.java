@@ -154,6 +154,11 @@ public class StockController {
 
         Calendar now = Calendar.getInstance();
 
+        if (StringUtils.isBlank(materialName)) {
+            //如果传入的是空，那么将会应用上这个查询条件，导致查不出数据
+            materialName = null;
+        }
+
         Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.paging(pageNo, pageSize, DoctorWarehouseStock.builder()
                 .warehouseId(warehouseId)
                 .materialName(materialName)
