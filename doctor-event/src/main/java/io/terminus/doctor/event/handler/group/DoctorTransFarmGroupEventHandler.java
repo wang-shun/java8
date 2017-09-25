@@ -163,9 +163,10 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
             if (Objects.equals(oldQuantity, transFarm.getQuantity())) {
                 doctorCommonGroupEventHandler.autoGroupEventClose(eventInfoList, group, groupTrack, transFarm, event.getEventAt(), transFarm.getFcrFeed());
 
-                Long toGroupEventId = doctorGroupEventDao.findByRelGroupEventIdAndType(event.getId(), GroupEventType.CLOSE.getValue()).getId();
-                DoctorGroupEvent closeEvent = doctorGroupEventDao.findById(toGroupEventId);
-                transFarm.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
+                // TODO: 17/9/25 并不知道有什么用处 先注释吧
+//                Long toGroupEventId = doctorGroupEventDao.findByRelGroupEventIdAndType(event.getId(), GroupEventType.CLOSE.getValue()).getId();
+//                DoctorGroupEvent closeEvent = doctorGroupEventDao.findById(toGroupEventId);
+//                transFarm.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
             }
 
 
