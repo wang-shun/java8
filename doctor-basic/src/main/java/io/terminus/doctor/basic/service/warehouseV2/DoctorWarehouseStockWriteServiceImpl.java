@@ -315,10 +315,11 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 transferOutPurchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
 
 //                long averagePrice = handleOutAndCalcAveragePrice(detail.getQuantity(), transferOutPurchases, stockAndPurchases, stocks, true, targetWareHouse, c);
+                long averagePrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock.getWarehouseId(), stock.getMaterialId());
                 DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(transferOutPurchases, detail.getQuantity());
 
                 //调出
-                DoctorWarehouseMaterialHandle outHandle = buildMaterialHandle(stock, stockTransfer, detail.getQuantity(), doctorWarehousePurchaseManager.calculateUnitPrice(stock.getWarehouseId(), stock.getMaterialId()), WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
+                DoctorWarehouseMaterialHandle outHandle = buildMaterialHandle(stock, stockTransfer, detail.getQuantity(), averagePrice, WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
                 outHandle.setHandleYear(stockTransfer.getHandleDate().get(Calendar.YEAR));
                 outHandle.setHandleMonth(stockTransfer.getHandleDate().get(Calendar.MONTH) + 1);
                 outHandle.setRemark(detail.getRemark());
@@ -341,7 +342,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 } else
                     transferInStock.setQuantity(transferInStock.getQuantity().add(detail.getQuantity()));
                 //构造调入MaterialHandle记录
-                DoctorWarehouseMaterialHandle inHandle = buildMaterialHandle(transferInStock, stockTransfer, detail.getQuantity(), purchaseHandleContext.getAveragePrice(), WarehouseMaterialHandleType.TRANSFER_IN.getValue());
+                DoctorWarehouseMaterialHandle inHandle = buildMaterialHandle(transferInStock, stockTransfer, detail.getQuantity(), averagePrice, WarehouseMaterialHandleType.TRANSFER_IN.getValue());
                 inHandle.setHandleYear(stockTransfer.getHandleDate().get(Calendar.YEAR));
                 inHandle.setHandleMonth(stockTransfer.getHandleDate().get(Calendar.MONTH) + 1);
                 inHandle.setRemark(detail.getRemark());
