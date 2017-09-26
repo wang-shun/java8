@@ -38,6 +38,7 @@ import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.event.enums.PigEvent.*;
+import static io.terminus.doctor.move.tools.DoctorMessageConverter.assembleErrorAttach;
 
 /**
  * Created by xjn on 17/8/28.
@@ -203,12 +204,12 @@ public class DoctorImportInputSplitter {
     private void preTreat(List<DoctorImportSow> list, DoctorImportBasicData importBasicData) {
         Map<String, List<DoctorImportSow>> codeToImportSows = list.stream()
                 .collect(Collectors.groupingBy(DoctorImportSow::getSowCode));
-        codeToImportSows.entrySet().parallelStream().forEach(entry -> {
+        codeToImportSows
+                .entrySet()
+                .parallelStream()
+                .forEach(entry -> {
             List<DoctorImportSow> values = entry.getValue();
             Integer maxParity = values.stream().mapToInt(DoctorImportSow::getParity).max().getAsInt();
-            if(entry.getKey().equals("种02")) {
-                log.info("");
-            }
             for (int i = 0; i < values.size(); i++) {
                 DoctorImportSow importSow = values.get(i);
                 Integer parityStage;
@@ -280,7 +281,7 @@ public class DoctorImportInputSplitter {
             }
         } else if (Objects.equals(importSow.getParityStage(), DoctorImportSow.ParityStage.CURRENT.getValue())){
             importSow.setCurrentStatus(PigStatus.KongHuai.getDesc());
-            importSow.setPregCheckResult(getCheckResultByRemark(importSow.getRemark()).getDesc());
+            importSow.setPregCheckResult(getCheckResultByRemark(importSow).getDesc());
             importSow.setPregCheckDate(getCheckDateByRemark(importSow));
             importSow.setPregBarn(importSow.getBarnName());
             if (Objects.equals(importBasicData.getBarnMap().get(importSow.getBarnName()).getPigType()
@@ -291,7 +292,7 @@ public class DoctorImportInputSplitter {
             importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());
             if (isNull(importSow.getPregDate())) {
                 importSow.setCurrentStatus(PigStatus.KongHuai.getDesc());
-                importSow.setPregCheckResult(getCheckResultByRemark(importSow.getRemark()).getDesc());
+                importSow.setPregCheckResult(getCheckResultByRemark(importSow).getDesc());
                 importSow.setPregCheckDate(getCheckDateByRemark(importSow));
             } else {
                 importSow.setPregCheckResult(PregCheckResult.YANG.getDesc());
@@ -318,14 +319,21 @@ public class DoctorImportInputSplitter {
         return second;
     }
 
-    private static PregCheckResult getCheckResultByRemark(String remark) {
-        if (remark.contains("返情")) {
-            return PregCheckResult.FANQING;
+    private static PregCheckResult getCheckResultByRemark(DoctorImportSow importSow) {
+        String remark = importSow.getRemark();
+        try {
+            if (remark.contains("返情")) {
+                return PregCheckResult.FANQING;
+            }
+            if (remark.contains("流产")) {
+                return PregCheckResult.LIUCHAN;
+            }
+            return PregCheckResult.YING;
+        } catch (Exception e) {
+            throw new InvalidException(false, "get.preg.check.date.failed.from.remark",
+                    assembleErrorAttach(null, importSow.getLineNumber()),
+                    isNull(remark) ? "" : remark);
         }
-        if (remark.contains("流产")) {
-            return PregCheckResult.LIUCHAN;
-        }
-        return PregCheckResult.YING;
     }
 
     private static Date getCheckDateByRemark(DoctorImportSow importSow) {
@@ -334,7 +342,8 @@ public class DoctorImportInputSplitter {
             return DateUtil.toDate(remark.substring(remark.length() - 10, remark.length()));
         } catch (Exception e) {
             throw new InvalidException(false, "get.preg.check.date.failed.from.remark",
-                    importSow.getLineNumber().toString(), remark);
+                    assembleErrorAttach(null, importSow.getLineNumber()),
+                    isNull(remark) ? "" : remark);
         }
     }
 }
