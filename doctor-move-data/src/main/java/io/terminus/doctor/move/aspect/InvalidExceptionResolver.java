@@ -41,7 +41,7 @@ public class InvalidExceptionResolver {
                 .forExecutables();
         Set<ConstraintViolation<Object>> violations = validator.validateParameters(point.getTarget(), method, point.getArgs());
         if (violations.size() > 0) {
-            throw new InvalidException(violations.iterator().next().getMessage(), point.getArgs()[1]);
+            throw new InvalidException(violations.iterator().next().getMessage(), point.getArgs()[0]);
         }
     }
 }
