@@ -81,6 +81,7 @@ public class DoctorImportEventExecutor {
             BasePigEventInputDto inputDto = validator.valid(builder.buildFromImport(importBasicData, importPigEvent));
             pigEventManager.eventHandle(inputDto, basicInputInfoDto);
         } catch (InvalidException e) {
+            e.setAttach(",事件名称：" + importPigEvent.getEventName());
             e.setAttach(assembleErrorAttach(e.getAttach(), importPigEvent.getLineNumber()));
             throw e;
         }
@@ -105,6 +106,7 @@ public class DoctorImportEventExecutor {
             groupEventManager.batchHandleEvent(Lists.newArrayList(groupInputInfo), baseGroupInput.getEventType());
 
         } catch (InvalidException e) {
+            e.setAttach(",事件名称：" + importGroupEvent.getEventName());
             e.setAttach(assembleErrorAttach(e.getAttach(), importGroupEvent.getLineNumber()));
             throw e;
         }

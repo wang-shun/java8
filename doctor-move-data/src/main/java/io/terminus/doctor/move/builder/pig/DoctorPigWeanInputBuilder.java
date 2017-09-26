@@ -50,6 +50,7 @@ public class DoctorPigWeanInputBuilder implements DoctorPigEventInputBuilder {
         wean.setFarrowingLiveCount(importPigEvent.getHealthyCount() + importPigEvent.getWeakCount());
         wean.setPartWeanPigletsCount(importPigEvent.getPartWeanPigletsCount()); //断奶数量
         wean.setPartWeanAvgWeight(importPigEvent.getPartWeanAvgWeight());   //断奶平均重量
+        wean.setWeanPigletsCount(0);
 
         if (!Strings.isNullOrEmpty(importPigEvent.getWeanToBarn())) {
             Map<String, DoctorBarn> barnMap = importBasicData.getBarnMap();

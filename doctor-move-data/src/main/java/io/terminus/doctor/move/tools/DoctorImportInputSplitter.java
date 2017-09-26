@@ -103,7 +103,7 @@ public class DoctorImportInputSplitter {
                     .mateOperator(importSow.getMateStaffName())
                     .farrowingType(FarrowingType.USUAL.getDesc())
                     .bedCode(importSow.getBed())
-                    .birthNestAvg(importSow.getNestWeight())
+                    .birthNestAvg(nullToZero(importSow.getNestWeight()))
                     .healthyCount(nullToZero(importSow.getHealthyCount()))
                     .weakCount(nullToZero(importSow.getWeakCount()))
                     .jixingCount(nullToZero(importSow.getJixingCount()))
@@ -111,7 +111,7 @@ public class DoctorImportInputSplitter {
                     .mummyCount(nullToZero(importSow.getMummyCount()))
                     .blackCount(nullToZero(importSow.getBlackCount()))
                     .partWeanPigletsCount(EventUtil.plusInt(importSow.getHealthyCount(), importSow.getWeakCount()))
-                    .partWeanAvgWeight(importSow.getWeanWeight())
+                    .partWeanAvgWeight(nullToZero(importSow.getWeanWeight()))
                     .build();
             fill(importPigEvent, importSow, pigEvent);
             return importPigEvent;
@@ -315,6 +315,10 @@ public class DoctorImportInputSplitter {
 
     private Integer nullToZero(Integer value) {
         return isNull(value)? 0 : value;
+    }
+
+    private Double nullToZero(Double value) {
+        return isNull(value)? 0.0D : value;
     }
 
     private String firstNonEmpty(String first, String second) {
