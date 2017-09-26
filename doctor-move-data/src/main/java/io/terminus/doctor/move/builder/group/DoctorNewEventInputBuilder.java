@@ -63,7 +63,7 @@ public class DoctorNewEventInputBuilder implements DoctorGroupEventInputBuilder{
         Map<String, Long> breedMap = importBasicData.getBreedMap();
 
         DoctorNewGroupInput newEvent = new DoctorNewGroupInput();
-        builderCommonOperation.fillGroupEventCommonInput(newEvent, importGroupEvent);
+        builderCommonOperation.fillGroupEventCommonInput(newEvent, importGroupEvent, importBasicData);
 
         newEvent.setFarmId(importBasicData.getDoctorFarm().getId());
         newEvent.setGroupCode(importGroupEvent.getGroupCode());

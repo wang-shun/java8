@@ -120,7 +120,8 @@ public class DoctorBuilderCommonOperation {
     }
 
     public void fillGroupEventCommonInput(BaseGroupInput groupInput,
-                                          DoctorImportGroupEvent importGroupEvent) {
+                                          DoctorImportGroupEvent importGroupEvent,
+                                          DoctorImportBasicData importBasicData) {
         groupInput.setEventAt(DateUtil.toDateString(importGroupEvent.getEventAt()));
         GroupEventType groupEventType = GroupEventType.from(importGroupEvent.getEventName());
         expectTrue(notNull(groupEventType), "groupEventType");
@@ -128,6 +129,8 @@ public class DoctorBuilderCommonOperation {
         groupInput.setRemark(importGroupEvent.getRemark());
         groupInput.setEventSource(SourceType.IMPORT.getValue());
         groupInput.setIsAuto(IsOrNot.NO.getValue());
+        groupInput.setCreatorId(importBasicData.getDefaultUser().getUserId());
+        groupInput.setCreatorName(importBasicData.getDefaultUser().getRealName());
     }
 
     private DoctorBarn nullToDefaultBarn(DoctorMoveBasicData moveBasicData,

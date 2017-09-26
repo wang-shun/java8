@@ -90,7 +90,7 @@ public class DoctorMoveInEventInputBuilder implements DoctorGroupEventInputBuild
         Map<String, Long> breedMap = importBasicData.getBreedMap();
 
         DoctorMoveInGroupInput moveIn = new DoctorMoveInGroupInput();
-        builderCommonOperation.fillGroupEventCommonInput(moveIn, importGroupEvent);
+        builderCommonOperation.fillGroupEventCommonInput(moveIn, importGroupEvent, importBasicData);
 
         InType inType = InType.from(importGroupEvent.getInTypeName());
         expectTrue(notNull(inType), "inType.not.fund", importGroupEvent.getInTypeName());
