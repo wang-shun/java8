@@ -4,6 +4,8 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.*;
 import io.terminus.doctor.basic.dto.*;
@@ -201,13 +203,6 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
                 purchaseCriteria.setWarehouseId(stock.getWarehouseId());
                 purchaseCriteria.setMaterialId(stock.getMaterialId());
-                purchaseCriteria.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
-                List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.list(purchaseCriteria);
-                if (null == purchases || purchases.isEmpty())
-                    throw new ServiceException("purchase.not.found");
-                //根据处理日期倒序，找出最近一次的入库记录
-                purchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
-                DoctorWarehousePurchase lastPurchase = purchases.get(purchases.size() - 1);
 
                 DoctorWarehouseMaterialHandle materialHandle = new DoctorWarehouseMaterialHandle();
                 materialHandle.setFarmId(stockInventory.getFarmId());
@@ -226,9 +221,16 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 materialHandle.setOperatorName(stockInventory.getOperatorName());
                 materialHandle.setRemark(detail.getRemark());
 
-
                 BigDecimal changedQuantity;
                 if (compareResult > 0) {
+
+                    purchaseCriteria.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
+                    List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.list(purchaseCriteria);
+                    if (null == purchases || purchases.isEmpty())
+                        throw new ServiceException("purchase.not.found");
+                    //根据处理日期倒序，找出最近一次的入库记录
+                    purchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
+
                     //盘亏
                     changedQuantity = stock.getQuantity().subtract(detail.getQuantity());
 //                    long averagePrice = handleOutAndCalcAveragePrice(changedQuantity, purchases, stockAndPurchases, stocks, false, null, null);
@@ -240,6 +242,13 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     stock.setQuantity(detail.getQuantity());
                     doctorWarehouseHandlerManager.outStock(stock, purchaseHandleContext, materialHandle);
                 } else {
+                    PageInfo page = new PageInfo(1, 1);
+                    Paging<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.paging(page.getOffset(), page.getLimit(), purchaseCriteria);
+                    if (null == purchases || purchases.isEmpty())
+                        new ServiceException("purchase.not.found");
+
+                    DoctorWarehousePurchase lastPurchase = purchases.getData().get(0);
+
                     //盘盈
                     changedQuantity = detail.getQuantity().subtract(stock.getQuantity());
                     DoctorWarehousePurchase purchase = new DoctorWarehousePurchase();
