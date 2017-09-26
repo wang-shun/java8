@@ -241,6 +241,7 @@ public class DoctorImportInputSplitter {
     }
 
     private void setDefaultValue(DoctorImportSow importSow, DoctorImportBasicData importBasicData) {
+
         if (notNull(importSow.getMateDate())) {
             Date pregCheckDate = new DateTime(importSow.getMateDate()).plusWeeks(3).toDate();
             importSow.setPregCheckDate(pregCheckDate.after(DateTime.now().withTimeAtStartOfDay().toDate())
@@ -305,6 +306,10 @@ public class DoctorImportInputSplitter {
                 }
                 importSow.setCurrentStatus(PigStatus.Wean.getDesc());
             }
+        }
+
+        if (isNull(importSow.getBirthDate())) {
+            importSow.setBirthDate(new DateTime(importSow.getInFarmDate()).minusYears(1).toDate());
         }
     }
 

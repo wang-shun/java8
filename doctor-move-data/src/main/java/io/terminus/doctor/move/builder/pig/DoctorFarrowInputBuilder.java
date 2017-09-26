@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.grateGroupCode;
 
@@ -78,7 +79,7 @@ public class DoctorFarrowInputBuilder implements DoctorPigEventInputBuilder {
                 MoreObjects.firstNonNull(importPigEvent.getWeakCount(), 0));
         farrow.setGroupCode(grateGroupCode(farrow.getBarnName(), farrow.eventAt()));                                          // 仔猪猪群Code
         farrow.setBedCode(importPigEvent.getBedCode());
-        farrow.setBirthNestAvg(importPigEvent.getBirthNestAvg());
+        farrow.setBirthNestAvg(expectNotNull(importPigEvent.getBirthNestAvg(), "birth.nest.avg.not.null"));
 
         FarrowingType farrowingType = FarrowingType.from(importPigEvent.getFarrowingType());
         expectTrue(notNull(farrowingType), "farrowingType.not.fund", importPigEvent.getFarrowingType());
