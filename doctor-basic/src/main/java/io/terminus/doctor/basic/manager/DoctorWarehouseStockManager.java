@@ -14,6 +14,7 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteSer
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.rmi.ServerException;
@@ -33,7 +34,7 @@ public class DoctorWarehouseStockManager {
     @Autowired
     private DoctorMaterialVendorDao doctorMaterialVendorDao;
 
-    @Transactional
+//    @Transactional
     public DoctorWarehouseStock in(WarehouseStockInDto inDto, WarehouseStockInDto.WarehouseStockInDetailDto detailDto, DoctorWarehouseStockWriteServiceImpl.StockContext context) {
         //find stock
         DoctorWarehouseStock stock = getStock(inDto.getWarehouseId(), detailDto.getMaterialId()).orElseGet(() -> {
@@ -74,6 +75,7 @@ public class DoctorWarehouseStockManager {
                 doctorMaterialVendorDao.list(DoctorMaterialVendor.builder()
                         .warehouseId(stock.getWarehouseId())
                         .materialId(stock.getMaterialId())
+                        .vendorName(detailDto.getVendorName())
                         .build()).isEmpty()) {
             DoctorMaterialVendor materialVendor = new DoctorMaterialVendor();
             materialVendor.setWarehouseId(stock.getWarehouseId());
@@ -85,7 +87,7 @@ public class DoctorWarehouseStockManager {
         return stock;
     }
 
-    @Transactional
+//    @Transactional(propagation = Propagation.NESTED)
     public DoctorWarehouseStock out(WarehouseStockOutDto outDto, WarehouseStockOutDto.WarehouseStockOutDetail detailDto) {
         DoctorWarehouseStock stock = getStock(outDto.getWarehouseId(), detailDto.getMaterialId()).orElseThrow(() ->
                 new ServiceException("stock.not.found"));
