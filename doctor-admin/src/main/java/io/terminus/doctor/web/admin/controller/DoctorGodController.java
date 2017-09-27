@@ -2,6 +2,8 @@ package io.terminus.doctor.web.admin.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
@@ -36,7 +38,9 @@ import io.terminus.doctor.web.admin.dto.DoctorGroupEventDetail;
 import io.terminus.doctor.web.admin.utils.*;
 import io.terminus.doctor.web.admin.vo.PigAndPigGroup;
 import io.terminus.doctor.web.core.aspects.DoctorValidService;
+import lombok.Data;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSON;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -51,7 +55,9 @@ import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.SmartValidator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import sun.security.x509.EDIPartyName;
 
+import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.*;
@@ -64,6 +70,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Created by sunbo@terminus.io on 2017/9/8.
  */
+@Slf4j
 @Setter
 @RestController
 @RequestMapping("api/doctor/admin/god")
@@ -118,6 +125,13 @@ public class DoctorGodController {
     @Autowired
     private SmartGroupEventHandler groupEventHandler;
 
+    @Autowired
+    private EventBus eventBus;
+
+    @PostConstruct
+    public void init() {
+        eventBus.register(this);
+    }
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -222,19 +236,13 @@ public class DoctorGodController {
         }
 
         //TODO 异步
-        if (1 == type) {
-            doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, startDate, endDate);
-        } else {
-            doctorDailyReportWriteService.createDailyReports(farmId, startDate, endDate);
-        }
-        //周报和月报
-        Integer index = DateUtil.getDeltaMonthsAbs(startDate, new Date()) + 1;
-        DateUtil.getBeforeMonthEnds(DateTime.now().toDate(), MoreObjects.firstNonNull(index, 12))
-                .forEach(date -> doctorRangeReportWriteService.flushDoctorRangeReports(farmId, date));
-        DateUtil.getBeforeMonthEnds(new Date(), MoreObjects.firstNonNull(index, 12))
-                .forEach(date -> doctorParityMonthlyReportWriteService.createMonthlyReport(farmId, date));
-        DateUtil.getBeforeMonthEnds(new Date(), MoreObjects.firstNonNull(index, 12))
-                .forEach(date -> doctorBoarMonthlyReportWriteService.createMonthlyReport(farmId, date));
+        RefreshReportEvent event = new RefreshReportEvent();
+        event.setType(type);
+        event.setFarmId(farmId);
+        event.setStartDate(startDate);
+        event.setEndDate(endDate);
+        eventBus.post(event);
+
         return true;
     }
 
@@ -485,5 +493,32 @@ public class DoctorGodController {
         return new Paging<>(pagingResponse.getResult().getTotal(), groupEventDetailList);
     }
 
+
+    @Subscribe
+    public void refreshReport(RefreshReportEvent event) {
+        log.info("start to refresh report");
+        if (1 == event.getType().intValue()) {
+            doctorDailyGroupWriteService.createDailyGroupsByDateRange(event.getFarmId(), event.getStartDate(), event.getEndDate());
+        } else {
+            doctorDailyReportWriteService.createDailyReports(event.getFarmId(), event.getStartDate(), event.getEndDate());
+        }
+        //周报和月报
+        Integer index = DateUtil.getDeltaMonthsAbs(event.getStartDate(), new Date()) + 1;
+        DateUtil.getBeforeMonthEnds(DateTime.now().toDate(), MoreObjects.firstNonNull(index, 12))
+                .forEach(date -> doctorRangeReportWriteService.flushDoctorRangeReports(event.getFarmId(), date));
+        DateUtil.getBeforeMonthEnds(new Date(), MoreObjects.firstNonNull(index, 12))
+                .forEach(date -> doctorParityMonthlyReportWriteService.createMonthlyReport(event.getFarmId(), date));
+        DateUtil.getBeforeMonthEnds(new Date(), MoreObjects.firstNonNull(index, 12))
+                .forEach(date -> doctorBoarMonthlyReportWriteService.createMonthlyReport(event.getFarmId(), date));
+    }
+
+
+    @Data
+    public static class RefreshReportEvent {
+        private Integer type;
+        private Long farmId;
+        private Date startDate;
+        private Date endDate;
+    }
 
 }
