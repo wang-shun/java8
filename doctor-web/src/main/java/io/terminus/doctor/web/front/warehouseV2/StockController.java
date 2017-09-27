@@ -29,9 +29,6 @@ import java.util.*;
 @RequestMapping("api/doctor/warehouse/stock")
 public class StockController {
 
-    //TODO 单据编号。猪厂下，年月日是分秒毫秒
-    //TODO 物料编号（根据物料+厂家带出来）。记录的时候需要校验
-
     @RpcConsumer
     private DoctorWarehouseStockWriteService doctorWarehouseStockWriteService;
 
