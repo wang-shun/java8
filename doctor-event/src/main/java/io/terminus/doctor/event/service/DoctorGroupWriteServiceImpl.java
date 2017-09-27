@@ -369,4 +369,14 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             return Response.fail("update.current.barn.name.failed");
         }
     }
+
+    @Override
+    public Response<Boolean> updateStaffName(Long currentBarnId, Long staffId, String staffName) {
+        try {
+            return Response.ok(doctorGroupDao.updateStaffName(currentBarnId, staffId, staffName));
+        } catch (Exception e) {
+            log.error("update staff name failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("update.staff.name.failed");
+        }
+    }
 }

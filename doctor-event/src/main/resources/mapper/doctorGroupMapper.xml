@@ -355,4 +355,11 @@
             </foreach>
         </if>
     </delete>
+
+    <update id="updateStaffName" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        SET staff_id = #{staffId},
+        staff_name = #{staffName}
+        WHERE current_barn_id = #{currentBarnId}
+    </update>
 </mapper>

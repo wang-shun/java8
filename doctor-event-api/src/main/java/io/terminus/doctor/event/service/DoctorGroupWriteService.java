@@ -155,4 +155,13 @@ public interface DoctorGroupWriteService {
      * @return
      */
     Response<Boolean> updateCurrentBarnName(Long currentBarnId, String currentBarnName);
+
+    /**
+     * 更新猪舍下所有猪群下管理员
+     * @param currentBarnId 当前猪舍名
+     * @param staffId 新管理员id
+     * @param staffName 新管理员名
+     * @return
+     */
+    Response<Boolean> updateStaffName(Long currentBarnId, Long staffId, String staffName);
 }
