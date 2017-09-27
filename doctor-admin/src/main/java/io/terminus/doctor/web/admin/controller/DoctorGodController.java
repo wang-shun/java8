@@ -217,14 +217,14 @@ public class DoctorGodController {
         if (null == endDate)
             endDate = new Date();
 
-        if(1!=type||2!=type){
+        if (1 != type || 2 != type) {
             throw new JsonResponseException("refresh.target.type.not.support");
         }
 
         //TODO 异步
         if (1 == type) {
             doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, startDate, endDate);
-        } else  {
+        } else {
             doctorDailyReportWriteService.createDailyReports(farmId, startDate, endDate);
         }
         //周报和月报
@@ -314,11 +314,11 @@ public class DoctorGodController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "status")
-    public void pigAndGroupEdit(@RequestParam Long farmId,
-                                @RequestParam int type,//1母猪，2公猪,3猪群
-                                @RequestParam long id,
-                                @RequestBody @Valid PigAndPigGroup pigAndPigGroup,
-                                Errors errors) {
+    public boolean pigAndGroupEdit(@RequestParam Long farmId,
+                                   @RequestParam int type,//1母猪，2公猪,3猪群
+                                   @RequestParam long id,
+                                   @RequestBody @Valid PigAndPigGroup pigAndPigGroup,
+                                   Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -382,8 +382,11 @@ public class DoctorGodController {
             groupTrack.setLiveQty(pigAndPigGroup.getLiveQty());
 
             doctorGroupWriteService.updateGroup(group, groupTrack);
-        } else
+        } else {
             throw new JsonResponseException("god.pig.and.group.type.not.support");
+        }
+
+        return true;
     }
 
     //-----------------下拉框专区-----------------------
