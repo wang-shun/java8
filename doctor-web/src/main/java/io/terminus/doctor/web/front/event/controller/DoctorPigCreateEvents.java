@@ -810,13 +810,10 @@ public class DoctorPigCreateEvents {
         Map<String, Object> map = Maps.newHashMap();
         try {
             map = OBJECT_MAPPER.readValue(inputJson, Map.class);
+            return expectNotNull(map.get("pigCode"), "pig.code.not.empty").toString();
         } catch (Exception e) {
             throw new InvalidException("json.to.map.error");
         }
-        expectTrue(notEmpty((String) map.get("pigId")), "pig.id.not.null");
-        DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(Long.parseLong((String) map.get("pigId"))));
-        expectTrue(notNull(doctorPig), "pig.not.null", Long.parseLong((String) map.get("pigId")));
-        return doctorPig.getPigCode();
     }
 
     /**
