@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -39,12 +40,12 @@ public class DoctorWarehouseMaterialHandleManager {
     /**
      * 入库
      */
-    @Transactional
+//    @Transactional
     public void in(MaterialHandleContext materialHandleContext) {
         handle(materialHandleContext, WarehouseMaterialHandleType.IN);
     }
 
-    @Transactional
+//    @Transactional(propagation = Propagation.NESTED)
     public DoctorWarehouseMaterialHandle out(MaterialHandleContext materialHandleContext) {
         return handle(materialHandleContext, WarehouseMaterialHandleType.OUT);
     }

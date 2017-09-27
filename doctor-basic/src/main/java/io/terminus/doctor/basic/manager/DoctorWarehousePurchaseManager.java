@@ -17,10 +17,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -33,7 +35,7 @@ public class DoctorWarehousePurchaseManager {
     @Autowired
     private DoctorWarehousePurchaseDao doctorWarehousePurchaseDao;
 
-    @Transactional
+//    @Transactional
     public DoctorWarehousePurchase in(AbstractWarehouseStockDto stockDto, WarehouseStockInDto.WarehouseStockInDetailDto detail, DoctorWarehouseStock stock) {
 
         DoctorWarehousePurchase purchase = new DoctorWarehousePurchase();
@@ -55,6 +57,54 @@ public class DoctorWarehousePurchaseManager {
         purchase.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
         doctorWarehousePurchaseDao.create(purchase);
         return purchase;
+    }
+
+    //    @Transactional(propagation = Propagation.NESTED)
+    public DoctorWarehouseHandlerManager.PurchaseHandleContext out(Long warehouseId, Long materialId, BigDecimal quantity) {
+
+        DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
+        purchaseCriteria.setWarehouseId(warehouseId);
+        purchaseCriteria.setMaterialId(materialId);
+        purchaseCriteria.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());//未出库完的
+        List<DoctorWarehousePurchase> materialPurchases = doctorWarehousePurchaseDao.list(purchaseCriteria);
+        if (null == materialPurchases || materialPurchases.isEmpty())
+            throw new ServiceException("purchase.not.found");
+        materialPurchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
+
+        DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = new DoctorWarehouseHandlerManager.PurchaseHandleContext();
+
+        BigDecimal needPurchaseQuantity = quantity;
+        BigDecimal totalHandleQuantity = new BigDecimal(0);
+        long totalHandleMoney = 0L;
+        for (DoctorWarehousePurchase purchase : materialPurchases) {
+            if (needPurchaseQuantity.compareTo(new BigDecimal(0)) <= 0)
+                break;
+
+            BigDecimal availablePurchaseQuantity = purchase.getQuantity().subtract(purchase.getHandleQuantity());
+            BigDecimal actualCutDownQuantity = availablePurchaseQuantity;
+            if (needPurchaseQuantity.compareTo(availablePurchaseQuantity) <= 0) {
+                actualCutDownQuantity = needPurchaseQuantity;
+            }
+
+            purchase.setHandleQuantity(purchase.getHandleQuantity().add(actualCutDownQuantity));
+            if (purchase.getHandleQuantity().compareTo(purchase.getQuantity()) >= 0)
+                purchase.setHandleFinishFlag(0);
+
+            purchaseHandleContext.getPurchaseQuantity().put(purchase, actualCutDownQuantity);
+
+            totalHandleMoney += actualCutDownQuantity.multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
+            totalHandleQuantity = totalHandleQuantity.add(actualCutDownQuantity);
+
+            needPurchaseQuantity = needPurchaseQuantity.subtract(actualCutDownQuantity);
+        }
+        //去除小数部分，四舍五入
+        purchaseHandleContext.setAveragePrice(new BigDecimal(totalHandleMoney).divide(totalHandleQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue());
+
+        for (DoctorWarehousePurchase purchase : materialPurchases) {
+            doctorWarehousePurchaseDao.update(purchase);
+        }
+
+        return purchaseHandleContext;
     }
 
 

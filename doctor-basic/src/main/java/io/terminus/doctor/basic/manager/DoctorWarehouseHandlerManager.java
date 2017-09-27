@@ -98,7 +98,7 @@ public class DoctorWarehouseHandlerManager {
 
     }
 
-    @Transactional
+//    @Transactional
     public void inStock(DoctorWarehouseStock stock, List<DoctorWarehousePurchase> purchases, DoctorWarehouseMaterialHandle handle, DoctorMaterialCode materialCode, DoctorMaterialVendor vendor) {
         if (null == stock.getId())
             doctorWarehouseStockDao.create(stock);
@@ -130,7 +130,7 @@ public class DoctorWarehouseHandlerManager {
         }
     }
 
-    @Transactional
+//    @Transactional
     public void outStock(DoctorWarehouseStock stock, PurchaseHandleContext purchaseHandleContext, DoctorWarehouseMaterialHandle handle) {
 
         doctorWarehouseStockDao.update(stock);
