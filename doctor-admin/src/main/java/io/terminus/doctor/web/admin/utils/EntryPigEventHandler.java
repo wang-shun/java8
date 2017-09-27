@@ -36,11 +36,13 @@ public class EntryPigEventHandler extends AbstractPigEventHandler<DoctorFarmEntr
 
         //品种
         String breedName = RespHelper.orServEx(doctorBasicReadService.findBasicById(eventDto.getBreed())).getName();
-        //品系
-        String breedTypeName = RespHelper.orServEx(doctorBasicReadService.findBasicById(eventDto.getBreedType())).getName();
-
         eventDto.setBreedName(breedName);
-        eventDto.setBreedTypeName(breedTypeName);
+
+        //品系
+        if (null != eventDto.getBreedType()) {
+            String breedTypeName = RespHelper.orServEx(doctorBasicReadService.findBasicById(eventDto.getBreedType())).getName();
+            eventDto.setBreedTypeName(breedTypeName);
+        }
 
         DoctorBarn doctorBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(eventDto.getBarnId()));
         if (null == doctorBarn)
