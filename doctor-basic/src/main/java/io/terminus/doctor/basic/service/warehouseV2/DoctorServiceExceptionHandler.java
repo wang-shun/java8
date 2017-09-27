@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import com.google.common.base.Throwables;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -38,6 +39,11 @@ public class DoctorServiceExceptionHandler {
                 Method method = proceedingJoinPoint.getTarget().getClass().getMethod(proceedingJoinPoint.getSignature().getName(), ((MethodSignature) proceedingJoinPoint.getSignature()).getParameterTypes());
                 if (method.isAnnotationPresent(ExceptionHandle.class)) {
                     ExceptionHandle exceptionHandle = method.getDeclaredAnnotation(ExceptionHandle.class);
+
+
+                    if (throwable instanceof ServiceException)
+                        return Response.fail(throwable.getMessage());
+
                     log.error("{}, cause:{}", exceptionHandle.value(), Throwables.getStackTraceAsString(throwable));
                     return Response.fail(exceptionHandle.value());
                 } else
