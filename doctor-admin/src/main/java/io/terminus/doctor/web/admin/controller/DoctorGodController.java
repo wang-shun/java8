@@ -362,12 +362,12 @@ public class DoctorGodController {
 
             DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(pigAndPigGroup.getId()));
             if (null == group)
-                throw new JsonResponseException("");
+                throw new JsonResponseException("group.not.found");
             Response<DoctorGroupDetail> groupDetailResponse = doctorGroupReadService.findGroupDetailByGroupId(group.getId());
             if (!groupDetailResponse.isSuccess())
                 throw new JsonResponseException(groupDetailResponse.getError());
             if (null == groupDetailResponse.getResult() || null == groupDetailResponse.getResult().getGroupTrack())
-                throw new JsonResponseException("pig.group.track.not.found");
+                throw new JsonResponseException("group.track.not.found");
 
             DoctorGroupTrack groupTrack = groupDetailResponse.getResult().getGroupTrack();
 
