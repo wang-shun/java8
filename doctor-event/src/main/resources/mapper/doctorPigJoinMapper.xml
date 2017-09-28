@@ -35,6 +35,9 @@
         </if>
         <if test="pigType != null">AND a.pig_type = #{pigType}</if>
         <if test="pigCode != null">AND a.pig_code like concat('%', #{pigCode}, '%')</if>
+        <if test="precisePigCode !=null">
+            AND pig_code=#{precisePigCode}
+        </if>
         <if test="boarType != null">AND a.boar_type = #{boarType}</if>
         <if test="pigIds != null &amp;&amp; pigIds.size() > 0">AND a.id in
             <foreach collection="pigIds" item="id" open="(" separator="," close=")">
@@ -83,9 +86,6 @@
         ORDER BY
         <if test="pigCode != null">
             instr(pig_code, #{pigCode}) ASC, length(pig_code) ASC, pig_code ASC,
-        </if>
-        <if test="precisePigCode !=null">
-            pig_code=#{precisePigCode}
         </if>
         pig_code ASC
         LIMIT #{offset}, #{limit}
