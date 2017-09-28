@@ -110,8 +110,8 @@ public class DoctorWarehousePurchaseManager {
 
     /**
      * 计算单价
-     * 先去上一月物料所有的入库价格记录，加权平均算单价
-     * 如果上一月没有入库记录，取最近一次入库记录的单价
+     * 先找本月物料所有的入库价格记录，加权平均算单价
+     * 如果本月没有入库记录，取最近一次入库记录的单价
      *
      * @param warehouseId
      * @param materialId
@@ -119,16 +119,16 @@ public class DoctorWarehousePurchaseManager {
      * @throws ServiceException 如果物料没有任何入库记录
      */
     public long calculateUnitPrice(Long warehouseId, Long materialId) {
-        Calendar lastMonth = Calendar.getInstance();
-        lastMonth.add(Calendar.MONTH, -1);//上一个月
-        List<DoctorWarehousePurchase> lastMonthPurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
+        Calendar thisMonth = Calendar.getInstance();
+//        lastMonth.add(Calendar.MONTH, -1);//上一个月
+        List<DoctorWarehousePurchase> thisMonthPurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
                 .warehouseId(warehouseId)
                 .materialId(materialId)
-                .handleYear(lastMonth.get(Calendar.YEAR))
-                .handleMonth(lastMonth.get(Calendar.MONTH) + 1)//Calendar第一个月以0开始
+                .handleYear(thisMonth.get(Calendar.YEAR))
+                .handleMonth(thisMonth.get(Calendar.MONTH) + 1)//Calendar第一个月以0开始
                 .build());
 
-        if (lastMonthPurchases.isEmpty()) {
+        if (thisMonthPurchases.isEmpty()) {
             PageInfo pageInfo = new PageInfo(1, 1);
             Paging<DoctorWarehousePurchase> lastOnePurchases = doctorWarehousePurchaseDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), DoctorWarehousePurchase.builder()
                     .warehouseId(warehouseId)
@@ -141,7 +141,7 @@ public class DoctorWarehousePurchaseManager {
 
             long totalPrice = 0;
             BigDecimal totalQuantity = new BigDecimal(0);
-            for (DoctorWarehousePurchase purchase : lastMonthPurchases) {
+            for (DoctorWarehousePurchase purchase : thisMonthPurchases) {
                 totalPrice = totalPrice + purchase.getQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
                 totalQuantity = totalQuantity.add(purchase.getQuantity());
             }
