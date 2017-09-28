@@ -161,7 +161,7 @@ public class DoctorGodController {
         //只允许修改三个月之前的历史事件
         Date threeMonthAgo = DateUtils.addMonths(new Date(), -3);
         if (params.containsKey("endDate")) {
-            Date endDate = DateUtil.toDateTime(params.get("endDate").toString());
+            Date endDate = DateUtil.toDate(params.get("endDate").toString());
             if (endDate.after(threeMonthAgo)) {
                 params.put("endDate", DateUtil.toDateString(threeMonthAgo));
             }
