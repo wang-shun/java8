@@ -284,7 +284,7 @@ public class DoctorGodController {
             Map<String, Object> params = new HashMap<>();
             params.put("farmId", farmId);
             params.put("pigType", type);
-            params.put("pigCode", code);
+            params.put("precisePigCode", code);
             Response<Paging<SearchedPig>> pagingResponse = doctorPigReadService.pagingPig(params, 1, 1);
             if (!pagingResponse.isSuccess())
                 throw new JsonResponseException(pagingResponse.getError());

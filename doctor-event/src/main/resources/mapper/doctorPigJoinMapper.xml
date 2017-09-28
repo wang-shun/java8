@@ -84,6 +84,9 @@
         <if test="pigCode != null">
             instr(pig_code, #{pigCode}) ASC, length(pig_code) ASC, pig_code ASC,
         </if>
+        <if test="precisePigCode !=null">
+            pig_code=#{precisePigCode}
+        </if>
         pig_code ASC
         LIMIT #{offset}, #{limit}
     </select>
