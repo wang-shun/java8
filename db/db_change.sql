@@ -1437,3 +1437,6 @@ CREATE TABLE `doctor_warehouse_stock_handle` (
 ALTER TABLE `doctor_warehouse_material_handle`
 ADD COLUMN `remark` VARCHAR(64) NULL COMMENT '备注' AFTER `operator_name`;
 
+-- 修改物料处理表处理日期为date类型
+ALTER TABLE doctor_warehouse_material_handle MODIFY handle_date DATE COMMENT '处理日期';
+
