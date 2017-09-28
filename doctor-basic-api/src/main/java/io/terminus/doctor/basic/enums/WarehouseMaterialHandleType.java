@@ -104,13 +104,13 @@ public enum WarehouseMaterialHandleType {
         switch (type) {
             case 1:
                 types.add(WarehouseMaterialHandleType.IN.getValue());
-                types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
-                types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
+//                types.add(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
+//                types.add(WarehouseMaterialHandleType.TRANSFER_IN.getValue());
                 break;
             case 2:
                 types.add(WarehouseMaterialHandleType.OUT.getValue());
-                types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
-                types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
+//                types.add(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
+//                types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
                 break;
             case 3:
                 types.add(WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
