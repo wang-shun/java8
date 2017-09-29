@@ -13,6 +13,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorMaterialVendor;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteServiceImpl;
+import io.terminus.doctor.common.exception.InvalidException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,19 +61,29 @@ public class DoctorWarehouseStockManager {
         } else
             doctorWarehouseStockDao.create(stock);
 
-        if ((StringUtils.isNotBlank(detailDto.getSpecification()) || StringUtils.isNotBlank(detailDto.getMaterialCode())) &&
-                doctorMaterialCodeDao.list(DoctorMaterialCode.builder()
-                        .warehouseId(stock.getWarehouseId())
-                        .materialId(stock.getMaterialId())
-                        .vendorName(detailDto.getVendorName())
-                        .build()).isEmpty()) {
-            DoctorMaterialCode materialCode = new DoctorMaterialCode();
-            materialCode.setWarehouseId(stock.getWarehouseId());
-            materialCode.setMaterialId(stock.getMaterialId());
-            materialCode.setVendorName(detailDto.getVendorName());
-            materialCode.setSpecification(detailDto.getSpecification());
-            materialCode.setCode(detailDto.getMaterialCode());
-            doctorMaterialCodeDao.create(materialCode);
+        if ((StringUtils.isNotBlank(detailDto.getSpecification()) || StringUtils.isNotBlank(detailDto.getMaterialCode()))) {
+
+            List<DoctorMaterialCode> materialCodes = doctorMaterialCodeDao.list(DoctorMaterialCode.builder()
+                    .warehouseId(stock.getWarehouseId())
+                    .materialId(stock.getMaterialId())
+                    .vendorName(detailDto.getVendorName())
+                    .build());
+
+            if (!materialCodes.isEmpty()) {
+                if (!materialCodes.get(0).getSpecification().equals(detailDto.getSpecification()))
+                    throw new InvalidException("规格已存在，禁止将[{}]修改为[{}]", materialCodes.get(0).getSpecification(), detailDto.getSpecification());
+                if (!materialCodes.get(0).getCode().equals(detailDto.getMaterialCode()))
+                    throw new InvalidException("物料编码已存在，禁止将[{}]修改为[{}]", materialCodes.get(0).getCode(), detailDto.getMaterialCode());
+            }
+            if (materialCodes.isEmpty()) {
+                DoctorMaterialCode materialCode = new DoctorMaterialCode();
+                materialCode.setWarehouseId(stock.getWarehouseId());
+                materialCode.setMaterialId(stock.getMaterialId());
+                materialCode.setVendorName(detailDto.getVendorName());
+                materialCode.setSpecification(detailDto.getSpecification());
+                materialCode.setCode(detailDto.getMaterialCode());
+                doctorMaterialCodeDao.create(materialCode);
+            }
         }
 
         if (StringUtils.isNotBlank(detailDto.getVendorName()) &&
@@ -87,8 +98,6 @@ public class DoctorWarehouseStockManager {
             materialVendor.setVendorName(detailDto.getVendorName());
             doctorMaterialVendorDao.create(materialVendor);
         }
-
-
 
 
         return stock;
