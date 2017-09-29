@@ -59,6 +59,7 @@ public abstract class AbstractPigEventHandler<T extends BasePigEventInputDto> im
         event.setEventName(eventType.getName());
         event.setEventDesc(eventType.getDesc());
         event.setPigId(pigEvent.getPigId());
+        event.setPigCode(pigEvent.getPigCode());
         buildEventDto(event, pigEvent);
 
         transfer(event, pigEvent);
