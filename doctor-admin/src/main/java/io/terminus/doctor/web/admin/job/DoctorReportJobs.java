@@ -128,8 +128,8 @@ public class DoctorReportJobs {
             }
             log.info("range report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
             List<Long> farmIds = getAllFarmIds();
-            Date today = Dates.startOfDay(new Date());
-            doctorRangeReportWriteService.generateDoctorRangeReports(farmIds, today);
+            Date yesterday = DateTime.now().minusDays(1).withTimeAtStartOfDay().toDate();
+            doctorRangeReportWriteService.generateDoctorRangeReports(farmIds, yesterday);
             log.info("range report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("range report job failed, cause:{}", Throwables.getStackTraceAsString(e));
