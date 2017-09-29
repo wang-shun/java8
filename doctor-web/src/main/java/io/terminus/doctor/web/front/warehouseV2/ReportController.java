@@ -14,6 +14,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.basic.service.warehouseV2.*;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseMaterialHandleVo;
@@ -41,9 +42,6 @@ public class ReportController {
 
 
     @RpcConsumer
-    private DoctorWarehouseMonthlyStockReadService doctorWarehouseMonthlyStockReadService;
-
-    @RpcConsumer
     private DoctorWarehousePurchaseReadService doctorWarehousePurchaseReadService;
 
     @RpcConsumer
@@ -63,6 +61,8 @@ public class ReportController {
 
     @RpcConsumer
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
+    @RpcConsumer
+    private DoctorWarehouseStockMonthlyReadService doctorWarehouseStockMonthlyReadService;
 
     /**
      * 仓库报表
@@ -105,10 +105,10 @@ public class ReportController {
             if (!inAndOutAmountsResponse.isSuccess())
                 throw new JsonResponseException(inAndOutAmountsResponse.getError());
 
-            //统计猪厂下每个仓库的余额
-            Response<Map<Long, Long>> balanceAmountsResponse = doctorWarehousePurchaseReadService.countWarehouseBalanceAmount(farmId);
-            if (!balanceAmountsResponse.isSuccess())
-                throw new JsonResponseException(balanceAmountsResponse.getError());
+            //统计猪厂下每个仓库的当前余额
+//            Response<Map<Long, Long>> balanceAmountsResponse = doctorWarehousePurchaseReadService.countWarehouseBalanceAmount(farmId);
+//            if (!balanceAmountsResponse.isSuccess())
+//                throw new JsonResponseException(balanceAmountsResponse.getError());
 
             WarehouseReportVo balanceVo = new WarehouseReportVo();
             balanceVo.setMonthAndType(year + "-" + month + "结余");
@@ -124,9 +124,12 @@ public class ReportController {
             List<WarehouseReportVo.WarehouseReportMonthDetail> outDetails = new ArrayList<>(warehouseResponse.getResult().size());
             long totalBalance = 0, totalIn = 0, totalOut = 0;
             for (DoctorWareHouse wareHouse : warehouseResponse.getResult()) {
+//
+//
+                AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), year, month));
                 balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
-                        .amount(balanceAmountsResponse.getResult().containsKey(wareHouse.getId()) ? balanceAmountsResponse.getResult().get(wareHouse.getId()) : 0)
+                        .amount(balance.getAmount())
                         .build());
 
                 long inAmount;
@@ -153,7 +156,7 @@ public class ReportController {
                         .amount(outAmount)
                         .build());
 
-                totalBalance += balanceAmountsResponse.getResult().containsKey(wareHouse.getId()) ? balanceAmountsResponse.getResult().get(wareHouse.getId()) : 0;
+                totalBalance += balance.getAmount();
                 totalIn += inAmount;
                 totalOut += outAmount;
             }

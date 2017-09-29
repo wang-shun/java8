@@ -4,12 +4,14 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.basic.dao.DoctorMaterialCodeDao;
 import io.terminus.doctor.basic.dao.DoctorMaterialVendorDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseStockMonthlyDao;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockOutDto;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorMaterialCode;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorMaterialVendor;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.rmi.ServerException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +37,8 @@ public class DoctorWarehouseStockManager {
     @Autowired
     private DoctorMaterialVendorDao doctorMaterialVendorDao;
 
-//    @Transactional
+
+    //    @Transactional
     public DoctorWarehouseStock in(WarehouseStockInDto inDto, WarehouseStockInDto.WarehouseStockInDetailDto detailDto, DoctorWarehouseStockWriteServiceImpl.StockContext context) {
         //find stock
         DoctorWarehouseStock stock = getStock(inDto.getWarehouseId(), detailDto.getMaterialId()).orElseGet(() -> {
@@ -84,10 +88,13 @@ public class DoctorWarehouseStockManager {
             doctorMaterialVendorDao.create(materialVendor);
         }
 
+
+
+
         return stock;
     }
 
-//    @Transactional(propagation = Propagation.NESTED)
+    //    @Transactional(propagation = Propagation.NESTED)
     public DoctorWarehouseStock out(WarehouseStockOutDto outDto, WarehouseStockOutDto.WarehouseStockOutDetail detailDto) {
         DoctorWarehouseStock stock = getStock(outDto.getWarehouseId(), detailDto.getMaterialId()).orElseThrow(() ->
                 new ServiceException("stock.not.found"));

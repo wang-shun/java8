@@ -112,11 +112,16 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     public Response<Map<Long, Long>> countWarehouseAmount(List<DoctorWarehouseMaterialHandle> data) {
         Map<Long/*warehouseId*/, Long/*amount*/> amounts = new HashMap<>();
         for (DoctorWarehouseMaterialHandle inHandle : data) {
-            if (!amounts.containsKey(inHandle.getWarehouseId()))
-                amounts.put(inHandle.getWarehouseId(), inHandle.getQuantity().multiply(new BigDecimal(inHandle.getUnitPrice())).longValue());
-            else {
-                Long amount = amounts.get(inHandle.getWarehouseId());
-                amounts.put(inHandle.getWarehouseId(), inHandle.getQuantity().multiply(new BigDecimal(inHandle.getUnitPrice())).longValue() + amount);
+            log.debug("count material handle[{}],warehouse[{}],quantity[{}],unitPrice[{}]", inHandle.getId(), inHandle.getWarehouseId(), inHandle.getQuantity(), inHandle.getUnitPrice());
+            if (!amounts.containsKey(inHandle.getWarehouseId())) {
+                long amount = inHandle.getQuantity().multiply(new BigDecimal(inHandle.getUnitPrice())).longValue();
+                log.debug("amount[{}]", amount);
+                amounts.put(inHandle.getWarehouseId(), amount);
+            } else {
+                Long alreadyAmount = amounts.get(inHandle.getWarehouseId());
+                long amount = inHandle.getQuantity().multiply(new BigDecimal(inHandle.getUnitPrice())).longValue();
+                log.debug("amount[{}]", amount);
+                amounts.put(inHandle.getWarehouseId(), amount + alreadyAmount);
             }
         }
         return Response.ok(amounts);
@@ -130,7 +135,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         for (WarehouseMaterialHandleType type : types) {
             criteria.setType(type.getValue());
             List<DoctorWarehouseMaterialHandle> handles = doctorWarehouseMaterialHandleDao.list(criteria);
+            log.debug("count each warehouse amount for type[{}],handleYear[{}],handleMonth[{}]", type.getValue(), criteria.getHandleYear(), criteria.getHandleMonth());
             Map<Long/*warehouseId*/, Long/*amount*/> amounts = countWarehouseAmount(handles).getResult();
+            log.debug(amounts.toString());
             eachTypeAmounts.put(type, amounts);
         }
 
