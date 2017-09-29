@@ -236,7 +236,13 @@ public class ReportController {
                 throw new JsonResponseException(balanceResponse.getError());
             Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterialVendor(warehouseId, stock.getMaterialId(), stock.getVendorName(), date,
                     WarehouseMaterialHandleType.IN,
-                    WarehouseMaterialHandleType.OUT
+                    WarehouseMaterialHandleType.OUT,
+                    WarehouseMaterialHandleType.INVENTORY_PROFIT,
+                    WarehouseMaterialHandleType.INVENTORY_DEFICIT,
+                    WarehouseMaterialHandleType.FORMULA_IN,
+                    WarehouseMaterialHandleType.TRANSFER_OUT,
+                    WarehouseMaterialHandleType.FORMULA_IN,
+                    WarehouseMaterialHandleType.FORMULA_OUT
             );
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
@@ -252,16 +258,29 @@ public class ReportController {
             vo.setBalanceAmount(balanceResponse.getResult().getAmount());
             vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
 
-            vo.setInAmount(statisticsResponse.getResult().getIn().getAmount());
-            vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity());
-            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount());
-            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity());
+            vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
+                    + statisticsResponse.getResult().getInventoryProfit().getAmount()
+                    + statisticsResponse.getResult().getTransferIn().getAmount()
+                    + statisticsResponse.getResult().getFormulaIn().getAmount());
+            vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity()
+                    .add(statisticsResponse.getResult().getInventoryProfit().getQuantity())
+                    .add(statisticsResponse.getResult().getTransferIn().getQuantity())
+                    .add(statisticsResponse.getResult().getFormulaIn().getQuantity()));
 
-            //TODO 这种计算方式还是会出现负数
+            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount()
+                    + statisticsResponse.getResult().getInventoryDeficit().getAmount()
+                    + statisticsResponse.getResult().getTransferOut().getAmount()
+                    + statisticsResponse.getResult().getFormulaOut().getAmount());
+            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity()
+                    .add(statisticsResponse.getResult().getInventoryDeficit().getQuantity())
+                    .add(statisticsResponse.getResult().getTransferOut().getQuantity())
+                    .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
+
+
             vo.setInitialAmount(vo.getBalanceAmount() + vo.getOutAmount() - vo.getInAmount());
             vo.setInitialQuantity(vo.getBalanceQuantity().add(vo.getOutQuantity()).subtract(vo.getInQuantity()));
 
-            vo.setInQuantity(vo.getBalanceQuantity().add(vo.getOutQuantity()).multiply(vo.getInQuantity()));
+//            vo.setInQuantity(vo.getBalanceQuantity().add(vo.getOutQuantity()).multiply(vo.getInQuantity()));
 
             report.add(vo);
         }
