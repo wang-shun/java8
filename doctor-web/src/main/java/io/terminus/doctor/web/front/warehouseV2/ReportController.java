@@ -97,10 +97,18 @@ public class ReportController {
             //统计猪厂下每个仓库本月的入库和出库金额
             Response<Map<WarehouseMaterialHandleType, Map<Long, Long>>> inAndOutAmountsResponse = doctorWarehouseMaterialHandleReadService.
                     countWarehouseAmount(DoctorWarehouseMaterialHandle.builder()
-                            .farmId(farmId)
-                            .handleYear(year)
-                            .handleMonth(month)
-                            .build(), WarehouseMaterialHandleType.OUT, WarehouseMaterialHandleType.IN);
+                                    .farmId(farmId)
+                                    .handleYear(year)
+                                    .handleMonth(month)
+                                    .build(),
+                            WarehouseMaterialHandleType.OUT,
+                            WarehouseMaterialHandleType.IN,
+                            WarehouseMaterialHandleType.INVENTORY_PROFIT,
+                            WarehouseMaterialHandleType.INVENTORY_DEFICIT,
+                            WarehouseMaterialHandleType.TRANSFER_IN,
+                            WarehouseMaterialHandleType.TRANSFER_OUT,
+                            WarehouseMaterialHandleType.FORMULA_IN,
+                            WarehouseMaterialHandleType.FORMULA_OUT);
 
             if (!inAndOutAmountsResponse.isSuccess())
                 throw new JsonResponseException(inAndOutAmountsResponse.getError());
@@ -139,6 +147,17 @@ public class ReportController {
                     inAmount = 0;
                 else
                     inAmount = inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.IN).get(wareHouse.getId());
+                inAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.INVENTORY_PROFIT) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_PROFIT).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_PROFIT).get(wareHouse.getId()) : 0 : 0;
+                inAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.TRANSFER_IN) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_IN).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_IN).get(wareHouse.getId()) : 0 : 0;
+
+                inAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.FORMULA_IN) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_IN).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_IN).get(wareHouse.getId()) : 0 : 0;
+
                 inDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
                         .amount(inAmount)
@@ -151,6 +170,16 @@ public class ReportController {
                     outAmount = 0;
                 else
                     outAmount = inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.OUT).get(wareHouse.getId());
+
+                inAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.INVENTORY_DEFICIT) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_DEFICIT).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_DEFICIT).get(wareHouse.getId()) : 0 : 0;
+                inAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.TRANSFER_OUT) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_OUT).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_OUT).get(wareHouse.getId()) : 0 : 0;
+                inAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.FORMULA_OUT) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_OUT).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_OUT).get(wareHouse.getId()) : 0 : 0;
                 outDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
                         .amount(outAmount)
