@@ -44,4 +44,8 @@ public class DoctorEventModifyLogDao extends MyBatisDao<DoctorEventModifyLog> {
         return new Paging<>(total, datas);
     }
 
+    public List<DoctorEventModifyLog> getEventModifyLog(String startDate) {
+        return sqlSession.selectList(sqlId("getEventModifyLog"), startDate);
+    }
+
 }

@@ -6,6 +6,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorNpdExportDto;
 import io.terminus.doctor.event.dto.DoctorPigSalesExportDto;
 import io.terminus.doctor.event.dto.DoctorProfitExportDto;
@@ -634,6 +635,10 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      */
     public Integer getSowUnweanCount(Long pigId) {
         return sqlSession.selectOne(sqlId("getSowUnweanCount"), pigId);
+    }
+
+    public List<DoctorFarmEarlyEventAtDto> getFarmEarlyEventAt(String startDate)  {
+        return sqlSession.selectList(sqlId("getFarmEarlyEventAt"), startDate);
     }
 
     /**
