@@ -105,6 +105,30 @@ public class DoctorWarehouseStockMonthlyReadServiceImpl implements DoctorWarehou
             log.error("failed to count doctor warehouse stock monthly, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.stock.monthly.count.fail");
         }
+    }
 
+    @Override
+    public Response<AmountAndQuantityDto> countMaterialBalance(Long warehouseId, Long materialId, int handleYear, int handleMonth) {
+        try {
+            List<DoctorWarehouseStockMonthly> stockMonthlies = doctorWarehouseStockMonthlyDao.list(DoctorWarehouseStockMonthly.builder()
+                    .warehouseId(warehouseId)
+                    .materialId(materialId)
+                    .handleYear(handleYear)
+                    .handleMonth(handleMonth)
+                    .build());
+            if (stockMonthlies.isEmpty())
+                return Response.ok(new AmountAndQuantityDto(0, new BigDecimal(0)));
+
+            long totalAmount = 0;
+            BigDecimal totalQuantity = new BigDecimal(0);
+            for (DoctorWarehouseStockMonthly stockMonthly : stockMonthlies) {
+                totalAmount += stockMonthly.getBalacneAmount();
+                totalQuantity = totalQuantity.add(stockMonthly.getBalanceQuantity());
+            }
+            return Response.ok(new AmountAndQuantityDto(totalAmount, totalQuantity));
+        } catch (Exception e) {
+            log.error("failed to count doctor warehouse stock monthly, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.stock.monthly.count.fail");
+        }
     }
 }
