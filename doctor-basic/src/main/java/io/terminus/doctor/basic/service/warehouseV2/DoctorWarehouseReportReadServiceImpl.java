@@ -284,6 +284,8 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
                     .inventoryProfit(new AmountAndQuantityDto(0, new BigDecimal(0)))
                     .transferIn(new AmountAndQuantityDto(0, new BigDecimal(0)))
                     .transferOut(new AmountAndQuantityDto(0, new BigDecimal(0)))
+                    .formulaIn(new AmountAndQuantityDto(0, new BigDecimal(0)))
+                    .formulaOut(new AmountAndQuantityDto(0, new BigDecimal(0)))
                     .build();
 
 
@@ -293,12 +295,16 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
         long totalTransferOutAmount = 0;
         long totalInventoryDeficitAmount = 0;
         long totalInventoryProfitAmount = 0;
+        long totalFormulaInAmount = 0;
+        long totalFormulaOutAmount = 0;
         BigDecimal totalInQuantity = new BigDecimal(0);
         BigDecimal totalOutQuantity = new BigDecimal(0);
         BigDecimal totalInventoryDeficitQuantity = new BigDecimal(0);
         BigDecimal totalInventoryProfitQuantity = new BigDecimal(0);
         BigDecimal totalTransferInQuantity = new BigDecimal(0);
         BigDecimal totalTransferOutQuantity = new BigDecimal(0);
+        BigDecimal totalFormulaInQuantity = new BigDecimal(0);
+        BigDecimal totalFormulaOutQuantity = new BigDecimal(0);
 
         for (DoctorWarehouseMaterialHandle handle : handles) {
 
@@ -323,6 +329,12 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
             } else if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()) {
                 totalTransferOutAmount += amount;
                 totalTransferOutQuantity = totalTransferOutQuantity.add(quantity);
+            } else if (WarehouseMaterialHandleType.FORMULA_IN.getValue() == handle.getType()) {
+                totalFormulaInAmount += amount;
+                totalTransferInQuantity = totalFormulaInQuantity.add(quantity);
+            } else if (WarehouseMaterialHandleType.FORMULA_OUT.getValue() == handle.getType()) {
+                totalFormulaOutAmount += amount;
+                totalFormulaOutQuantity = totalFormulaOutQuantity.add(quantity);
             }
         }
 
@@ -333,6 +345,8 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
                 .inventoryDeficit(new AmountAndQuantityDto(totalInventoryDeficitAmount, totalInventoryDeficitQuantity))
                 .transferOut(new AmountAndQuantityDto(totalTransferOutAmount, totalTransferOutQuantity))
                 .transferIn(new AmountAndQuantityDto(totalTransferInAmount, totalTransferInQuantity))
+                .formulaIn(new AmountAndQuantityDto(totalFormulaInAmount, totalFormulaInQuantity))
+                .formulaOut(new AmountAndQuantityDto(totalFormulaOutAmount, totalFormulaOutQuantity))
                 .build();
     }
 
