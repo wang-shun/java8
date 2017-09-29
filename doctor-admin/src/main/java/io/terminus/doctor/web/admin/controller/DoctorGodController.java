@@ -206,7 +206,7 @@ public class DoctorGodController {
         if (pigEventHandler.isSupportedEvent(pigEvent))
             pigEventHandler.updateEvent(input, pigEvent);
 
-        return RespWithExHelper.orInvalid(doctorModifyEventService.modifyPigEvent(oldPigEvent, pigEvent));
+        return RespWithExHelper.orInvalid(doctorModifyEventService.modifyPigEvent(oldPigEvent, pigEvent, pigEventHandler));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "event/group/{id}")

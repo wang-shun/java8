@@ -10,8 +10,11 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.handler.PigEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +28,10 @@ public class EntryPigEventHandler extends AbstractPigEventHandler<DoctorFarmEntr
     private DoctorBasicReadService doctorBasicReadService;
     @Autowired
     private DoctorBarnReadService doctorBarnReadService;
+    @Autowired
+    private DoctorPigWriteService doctorPigWriteService;
+    @Autowired
+    private DoctorPigReadService doctorPigReadService;
 
     @Override
     public boolean isSupportedEvent(DoctorPigEvent pigEvent) {
@@ -52,4 +59,13 @@ public class EntryPigEventHandler extends AbstractPigEventHandler<DoctorFarmEntr
         pigEvent.setBreedId(eventDto.getBreed());
     }
 
+
+    @Override
+    public void changePig(DoctorPigEvent pigEvent) {
+        DoctorPig pig = RespHelper.orServEx(doctorPigReadService.findPigById(pigEvent.getPigId()));
+        DoctorFarmEntryDto dto = jsonMapper.fromJson(pigEvent.getExtra(), DoctorFarmEntryDto.class);
+
+        pig.setInFarmDate(dto.getInFarmDate());
+
+    }
 }

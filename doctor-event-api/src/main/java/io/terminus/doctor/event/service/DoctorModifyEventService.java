@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.admin.PigEventDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
+import io.terminus.doctor.event.handler.PigEventHandler;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -46,7 +47,7 @@ public interface DoctorModifyEventService {
      * @param pigEvent
      * @return
      */
-    RespWithEx<Boolean> modifyPigEvent(String oldPigEvent, DoctorPigEvent pigEvent);
+    RespWithEx<Boolean> modifyPigEvent(String oldPigEvent, DoctorPigEvent pigEvent, PigEventHandler pigEventHandler);
 
 
     /**

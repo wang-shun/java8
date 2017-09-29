@@ -24,7 +24,7 @@ import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
  */
 public abstract class AbstractPigEventHandler<T extends BasePigEventInputDto> implements PigEventHandler {
 
-    private static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
+    protected static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
 
     @RpcConsumer
     private DoctorUserProfileReadService doctorUserProfileReadService;
@@ -78,4 +78,9 @@ public abstract class AbstractPigEventHandler<T extends BasePigEventInputDto> im
      * @param pigEvent
      */
     abstract void buildEventDto(T eventDto, DoctorPigEvent pigEvent);
+
+    @Override
+    public void changePig(DoctorPigEvent pigEvent) {
+
+    }
 }

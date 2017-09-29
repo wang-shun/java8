@@ -88,9 +88,9 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
 
 
     @Override
-    public RespWithEx<Boolean> modifyPigEvent(String oldPigEvent, DoctorPigEvent pigEvent) {
+    public RespWithEx<Boolean> modifyPigEvent(String oldPigEvent, DoctorPigEvent pigEvent, PigEventHandler pigEventHandler) {
         try {
-            doctorPigEventManager.modifyPigEvent(pigEvent, oldPigEvent);
+            doctorPigEventManager.modifyPigEvent(pigEvent, oldPigEvent, pigEventHandler);
             return RespWithEx.ok(true);
         } catch (Exception e) {
             log.error("modify pig event failed , inputDto:{}, cause:{}", oldPigEvent, Throwables.getStackTraceAsString(e));

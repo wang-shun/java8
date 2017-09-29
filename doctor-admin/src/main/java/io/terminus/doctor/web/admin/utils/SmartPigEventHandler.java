@@ -61,4 +61,12 @@ public class SmartPigEventHandler implements PigEventHandler, ApplicationContext
                 h.updateEvent(eventDto, pigEvent);
         });
     }
+
+    @Override
+    public void changePig(DoctorPigEvent pigEvent) {
+        handlers.stream().forEach(h -> {
+            if (h.isSupportedEvent(pigEvent))
+                h.changePig(pigEvent);
+        });
+    }
 }

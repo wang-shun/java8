@@ -24,10 +24,7 @@ import io.terminus.doctor.event.event.MsgGroupPublishDto;
 import io.terminus.doctor.event.event.MsgListenedGroupEvent;
 import io.terminus.doctor.event.event.MsgListenedPigEvent;
 import io.terminus.doctor.event.event.MsgPigPublishDto;
-import io.terminus.doctor.event.handler.DoctorEventSelector;
-import io.terminus.doctor.event.handler.DoctorPigEventHandler;
-import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
-import io.terminus.doctor.event.handler.DoctorPigsByEventSelector;
+import io.terminus.doctor.event.handler.*;
 import io.terminus.doctor.event.model.*;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
@@ -395,7 +392,7 @@ public class DoctorPigEventManager {
     }
 
     @Transactional
-    public void modifyPigEvent(DoctorPigEvent newEvent, String oldEvent) {
+    public void modifyPigEvent(DoctorPigEvent newEvent, String oldEvent, PigEventHandler pigEventHandler) {
 
         doctorPigEventDao.update(newEvent);
 
@@ -407,6 +404,8 @@ public class DoctorPigEventManager {
                 .toEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(newEvent))
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .build());
+        if (pigEventHandler.isSupportedEvent(newEvent))
+            pigEventHandler.changePig(newEvent);
     }
 
 

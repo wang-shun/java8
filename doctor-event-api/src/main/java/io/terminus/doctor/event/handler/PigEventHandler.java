@@ -13,5 +13,6 @@ public interface PigEventHandler {
 
     void updateEvent(String eventDto, DoctorPigEvent pigEvent);
 
+    void changePig(DoctorPigEvent pigEvent);
 
 }
