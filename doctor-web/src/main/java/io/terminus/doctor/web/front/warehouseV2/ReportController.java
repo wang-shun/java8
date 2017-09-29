@@ -225,6 +225,7 @@ public class ReportController {
 
         Calendar lastMonth = Calendar.getInstance();
         lastMonth.set(date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DATE));
+        lastMonth.add(Calendar.MONTH, -1);
         DoctorWarehouseStock stockCriteria = new DoctorWarehouseStock();
         stockCriteria.setWarehouseId(warehouseId);
         Response<List<DoctorWarehouseStock>> stocksResponse = doctorWarehouseStockReadService.list(stockCriteria);
@@ -279,7 +280,7 @@ public class ReportController {
                     .add(statisticsResponse.getResult().getTransferOut().getQuantity())
                     .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
 
-            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getMaterialId(), date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1));
+            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getMaterialId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
             vo.setInitialAmount(initialBalance.getAmount());
             vo.setInitialQuantity(initialBalance.getQuantity());
 
