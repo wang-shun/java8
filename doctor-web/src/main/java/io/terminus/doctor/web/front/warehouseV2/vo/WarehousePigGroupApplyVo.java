@@ -18,6 +18,7 @@ import java.util.Date;
 public class WarehousePigGroupApplyVo {
 
     private Long pigGroupId;
+    private String pigGroupName;
 
     private Date openDate;
 
