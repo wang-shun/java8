@@ -1277,11 +1277,111 @@ update doctor_orgs set parent_id = 0, type = 1;
 -- 2017-07-21
 ALTER table doctor_daily_reports modify column `fatten_feed_amount` bigint(20) DEFAULT NULL COMMENT '育肥猪饲料消耗金额';
 
--- 2017-09-05
-ALTER table doctor_farm_exports ADD column `error_reason` text DEFAULT NULL COMMENT 'Excel导入错误原因' after status;
+--2017-08-28 仓库模块重构表结构
+
+DROP TABLE IF EXISTS `doctor_warehouse_material_apply`;
+CREATE TABLE `doctor_warehouse_material_apply` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `material_handle_id` bigint(20) NOT NULL COMMENT '物料处理编号',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪厂编号',
+  `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
+  `warehouse_type` smallint(6) NOT NULL COMMENT '仓库类型',
+  `warehouse_name` varchar(64) DEFAULT NULL COMMENT '仓库名',
+  `pig_barn_id` bigint(20) NOT NULL COMMENT '领用猪舍编号',
+  `pig_barn_name` varchar(64) DEFAULT NULL COMMENT '领用猪舍名称',
+  `pig_group_id` bigint(20) DEFAULT NULL COMMENT '领用猪群编号',
+  `pig_group_name` varchar(64) DEFAULT NULL COMMENT '领用猪群名称',
+  `material_id` bigint(20) NOT NULL COMMENT '物料编号',
+  `apply_date` datetime DEFAULT NULL COMMENT '领用日期',
+  `apply_staff_name` varchar(64) DEFAULT NULL COMMENT '领用人',
+  `apply_year` smallint(12) NOT NULL COMMENT '领用年',
+  `apply_month` tinyint(4) NOT NULL COMMENT '领用月',
+  `material_name` varchar(64) DEFAULT NULL COMMENT '物料名称',
+  `type` smallint(6) DEFAULT NULL COMMENT '物料类型，易耗品，原料，饲料，药品，饲料',
+  `unit` varchar(64) DEFAULT NULL COMMENT '单位',
+  `quantity` decimal(23,2) NOT NULL COMMENT '数量',
+  `unit_price` bigint(20) NOT NULL COMMENT '单价，单位分',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COMMENT='仓库物料领用表';
+DROP TABLE IF EXISTS `doctor_warehouse_material_handle`;
+CREATE TABLE `doctor_warehouse_material_handle` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪厂编号',
+  `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
+  `warehouse_type` smallint(6) DEFAULT NULL COMMENT '仓库类型',
+  `warehouse_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `other_trasnfer_handle_id` bigint(20) DEFAULT NULL COMMENT '另一条调拨物料处理单的编号',
+  `vendor_name` varchar(64) DEFAULT NULL COMMENT '物料供应商名称',
+  `material_id` bigint(20) NOT NULL COMMENT '物料编号',
+  `material_name` varchar(64) DEFAULT NULL COMMENT '物料名称',
+  `type` tinyint(4) NOT NULL COMMENT '处理类别，入库，出库，调拨，盘点',
+  `unit_price` bigint(20) NOT NULL COMMENT '单价，单位分',
+  `unit` varchar(64) DEFAULT NULL COMMENT '单位',
+  `delete_flag` tinyint(2) DEFAULT NULL COMMENT '删除标志，0正常，1删除',
+  `quantity` decimal(23,2) NOT NULL COMMENT '数量',
+  `handle_date` datetime DEFAULT NULL COMMENT '处理日期',
+  `handle_year` smallint(12) NOT NULL COMMENT '处理年',
+  `handle_month` tinyint(4) NOT NULL COMMENT '处理月',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8 COMMENT='仓库物料处理表';
+DROP TABLE IF EXISTS `doctor_warehouse_purchase`;
+CREATE TABLE `doctor_warehouse_purchase` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪厂编号',
+  `warehouse_id` bigint(20) DEFAULT NULL COMMENT '仓库编号',
+  `warehouse_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `warehouse_type` smallint(6) DEFAULT NULL COMMENT '仓库类型',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '物料编号',
+  `vendor_name` varchar(64) DEFAULT NULL COMMENT '物料供应商名称',
+  `unit_price` bigint(20) DEFAULT NULL COMMENT '单价，单位分',
+  `quantity` decimal(23,2) DEFAULT NULL COMMENT '数量',
+  `handle_date` datetime DEFAULT NULL COMMENT '处理日期',
+  `handle_year` smallint(12) DEFAULT NULL COMMENT '处理年',
+  `handle_month` tinyint(4) DEFAULT NULL COMMENT '处理月份',
+  `handle_quantity` decimal(23,2) DEFAULT NULL COMMENT '已出库的数量',
+  `handle_finish_flag` tinyint(2) DEFAULT NULL COMMENT '是否该批入库已出库完。0出库完，1未出库完。handle_quantity=quantity就表示出库完',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8 COMMENT='仓库物料入库表';
+DROP TABLE IF EXISTS `doctor_warehouse_stock`;
+CREATE TABLE `doctor_warehouse_stock` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `warehouse_id` bigint(20) DEFAULT NULL COMMENT '仓库编号',
+  `warehouse_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `warehouse_type` smallint(6) DEFAULT NULL COMMENT '仓库类型，冗余，方便查询',
+  `vendor_name` varchar(64) DEFAULT NULL COMMENT '物料供应商',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪厂编号',
+  `manager_id` bigint(20) DEFAULT NULL COMMENT '管理员编号',
+  `material_name` varchar(64) DEFAULT NULL COMMENT '物料名称',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '物料编号',
+  `quantity` decimal(23,2) DEFAULT NULL COMMENT '数量',
+  `unit` varchar(45) DEFAULT NULL COMMENT '单位',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8 COMMENT='仓库物料库存表';
+
+-- 2017-08-29 物料处理表添加操作人字段
+ALTER TABLE `doctor_warehouse_material_handle`
+ADD COLUMN `operator_id` BIGINT(20) NULL COMMENT '操作人编号' AFTER `handle_month`,
+ADD COLUMN `operator_name` VARCHAR(64) NULL COMMENT '操作人名' AFTER `operator_id`;
+
 
 -- 2017-08-30
 ALTER TABLE doctor_group_tracks ADD COLUMN `close_at` datetime DEFAULT NULL  comment '猪群关闭事件(如果猪群关闭的话)' after updator_name;
+
+
+-- 2017-09-05
+ALTER table doctor_farm_exports ADD column `error_reason` text DEFAULT NULL COMMENT 'Excel导入错误原因' after status;
+
 
 -- 2017-09-05 旧场迁移错误记录表
 drop table if exists `doctor_farm_move_errors`;
@@ -1300,3 +1400,77 @@ create table `doctor_farm_move_errors` (
   PRIMARY KEY (`id`)
 
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='旧场迁移错误记录表';
+
+-- 添加物料编码表 2017-09-11
+CREATE TABLE `doctor_material_code` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `warehouse_id` bigint(20) DEFAULT NULL COMMENT '仓库编号',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '物料编号',
+  `vendor_name` varchar(64) DEFAULT NULL COMMENT '供应商名',
+  `specification` varchar(64) DEFAULT NULL COMMENT '规格',
+  `code` varchar(64) DEFAULT NULL COMMENT '编码',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='物料编码表';
+-- 添加采购扣减明细表 2017-09-11
+CREATE TABLE `doctor_warehouse_handle_detail` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '明细编号',
+  `material_purchase_id` bigint(20) NOT NULL COMMENT '物料采购记录编号',
+  `material_handle_id` bigint(20) NOT NULL COMMENT '物料处理记录编号',
+  `handle_year` smallint(6) DEFAULT NULL,
+  `handle_month` tinyint(2) DEFAULT NULL,
+  `quantity` decimal(23,2) NOT NULL COMMENT '处理数量',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `index_material_handle_id` (`material_handle_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8 COMMENT='仓库物料处理明细';
+
+-- 添加物料供应商表 2017-09-11
+CREATE TABLE `doctor_material_vendor` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `vendor_name` varchar(64) NOT NULL COMMENT '供应商名称',
+  `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
+  `material_id` bigint(20) NOT NULL COMMENT '物料编号',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='物料供应商表';
+
+-- 添加库存处理表 2017-09-12
+CREATE TABLE `doctor_warehouse_stock_handle` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `farm_id` bigint(20) NOT NULL COMMENT '猪厂编号',
+  `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
+  `serial_no` varchar(45) NOT NULL COMMENT '流水号',
+  `handle_date` date NOT NULL COMMENT '处理日期',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_serial_no_warehouse_id` (`serial_no`,`warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='库存处理表';
+-- 物料处理表添加备注字段 2017-09-13
+ALTER TABLE `doctor_warehouse_material_handle`
+ADD COLUMN `remark` VARCHAR(64) NULL COMMENT '备注' AFTER `operator_name`;
+
+-- 修改物料处理表处理日期为date类型
+ALTER TABLE doctor_warehouse_material_handle MODIFY handle_date DATE COMMENT '处理日期';
+
+-- 添加仓库物料月度余量统计表
+CREATE TABLE `doctor_warehouse_stock_monthly` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
+  `material_id` bigint(20) NOT NULL COMMENT '物料编号',
+  `handle_year` smallint(6) NOT NULL COMMENT '处理年',
+  `handle_month` tinyint(2) NOT NULL COMMENT '处理月',
+  `balance_quantity` decimal(23,2) NOT NULL DEFAULT '0.00' COMMENT '余量',
+  `balacne_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '余额',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `warehouse_id_year_month_material_id_index` (`warehouse_id`,`handle_year`,`handle_month`,`material_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='仓库物料月度结余表';

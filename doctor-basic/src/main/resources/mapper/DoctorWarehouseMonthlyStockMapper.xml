@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ ~ Desc:
+ ~ Mail: [ your email ]
+ ~ Date: 2017-08-17 17:50:38
+ ~ Created by [ your name ]
+-->
+
+<mapper namespace="DoctorWarehouseMonthlyStock">
+    <resultMap id="DoctorWarehouseMonthlyStockMap" type="DoctorWarehouseMonthlyStock">
+        <id property="id" column="id"/>
+        <result property="warehouseId" column="warehouse_id"/>
+        <result property="warehouseName" column="warehouse_name"/>
+        <result property="warehouseType" column="warehouse_type"/>
+        <result property="materialId" column="material_id"/>
+        <result property="materialName" column="material_name"/>
+        <result property="vendorId" column="vendor_id"/>
+        <result property="year" column="year"/>
+        <result property="month" column="month"/>
+        <result property="earlyNumber" column="early_number"/>
+        <result property="earlyMoney" column="early_money"/>
+        <result property="inNumber" column="in_number"/>
+        <result property="inMoney" column="in_money"/>
+        <result property="outNumber" column="out_number"/>
+        <result property="outMoney" column="out_money"/>
+        <result property="balanceNumber" column="balance_number"/>
+        <result property="balanceMoney" column="balance_money"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="tb">
+        doctor_warehouse_monthly_stock
+    </sql>
+
+    <sql id="cols_all">
+        id,
+        <include refid="cols_exclude_id"/>
+    </sql>
+
+    <sql id="cols_exclude_id">
+        `warehouse_id`, `warehouse_name`, `warehouse_type`, `material_id`, `material_name`, `vendor_id`, `year`, `month`, `early_number`, `early_money`, `in_number`, `in_money`, `out_number`, `out_money`, `balance_number`, `balance_money`, 
+        created_at, updated_at
+    </sql>
+
+    <sql id="vals">
+        #{warehouseId}, #{warehouseName}, #{warehouseType}, #{materialId}, #{materialName}, #{vendorId}, #{year}, #{month}, #{earlyNumber}, #{earlyMoney}, #{inNumber}, #{inMoney}, #{outNumber}, #{outMoney}, #{balanceNumber}, #{balanceMoney}, 
+        now(), now()
+    </sql>
+
+    <sql id="criteria">
+        <where>
+            <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
+            <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
+            <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
+            <if test="materialId != null">AND `material_id` = #{materialId}</if>
+            <if test="materialName != null">AND `material_name` = #{materialName}</if>
+            <if test="vendorId != null">AND `vendor_id` = #{vendorId}</if>
+            <if test="year != null">AND `year` = #{year}</if>
+            <if test="month != null">AND `month` = #{month}</if>
+            <if test="earlyNumber != null">AND `early_number` = #{earlyNumber}</if>
+            <if test="earlyMoney != null">AND `early_money` = #{earlyMoney}</if>
+            <if test="inNumber != null">AND `in_number` = #{inNumber}</if>
+            <if test="inMoney != null">AND `in_money` = #{inMoney}</if>
+            <if test="outNumber != null">AND `out_number` = #{outNumber}</if>
+            <if test="outMoney != null">AND `out_money` = #{outMoney}</if>
+            <if test="balanceNumber != null">AND `balance_number` = #{balanceNumber}</if>
+            <if test="balanceMoney != null">AND `balance_money` = #{balanceMoney}</if>
+            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
+            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+        </where>
+    </sql>
+
+    <insert id="create" parameterType="DoctorWarehouseMonthlyStock" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tb"/>
+        (<include refid="cols_exclude_id"/>)
+        VALUES
+        (<include refid="vals"/>)
+    </insert>
+
+    <select id="findById" parameterType="long" resultMap="DoctorWarehouseMonthlyStockMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="findByIds" parameterType="list" resultMap="DoctorWarehouseMonthlyStockMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="update" parameterType="DoctorWarehouseMonthlyStock">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
+            <if test="warehouseName != null">`warehouse_name` = #{warehouseName},</if>
+            <if test="warehouseType != null">`warehouse_type` = #{warehouseType},</if>
+            <if test="materialId != null">`material_id` = #{materialId},</if>
+            <if test="materialName != null">`material_name` = #{materialName},</if>
+            <if test="vendorId != null">`vendor_id` = #{vendorId},</if>
+            <if test="year != null">`year` = #{year},</if>
+            <if test="month != null">`month` = #{month},</if>
+            <if test="earlyNumber != null">`early_number` = #{earlyNumber},</if>
+            <if test="earlyMoney != null">`early_money` = #{earlyMoney},</if>
+            <if test="inNumber != null">`in_number` = #{inNumber},</if>
+            <if test="inMoney != null">`in_money` = #{inMoney},</if>
+            <if test="outNumber != null">`out_number` = #{outNumber},</if>
+            <if test="outMoney != null">`out_money` = #{outMoney},</if>
+            <if test="balanceNumber != null">`balance_number` = #{balanceNumber},</if>
+            <if test="balanceMoney != null">`balance_money` = #{balanceMoney},</if>
+            updated_at = now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE id = #{id}
+    </delete>
+    
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorWarehouseMonthlyStockMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="list" parameterType="map" resultMap="DoctorWarehouseMonthlyStockMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+    </select>
+
+</mapper>

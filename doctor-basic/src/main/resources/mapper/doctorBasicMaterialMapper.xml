@@ -158,4 +158,16 @@
             </if>
         </where>
     </select>
+
+    <select id="findByIds" parameterType="list" resultMap="DoctorBasicMaterialMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <if test="list != null and list.size()>0">
+                AND id in
+                <foreach item="id" collection="list" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
 </mapper>
