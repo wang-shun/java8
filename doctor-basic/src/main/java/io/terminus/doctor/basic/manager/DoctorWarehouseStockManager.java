@@ -71,9 +71,9 @@ public class DoctorWarehouseStockManager {
 
             if (!materialCodes.isEmpty()) {
                 if (!materialCodes.get(0).getSpecification().equals(detailDto.getSpecification()))
-                    throw new InvalidException("规格已存在，禁止将[{}]修改为[{}]", materialCodes.get(0).getSpecification(), detailDto.getSpecification());
+                    throw new InvalidException("选定已有厂家时，物料编码和规格不能随意修改");
                 if (!materialCodes.get(0).getCode().equals(detailDto.getMaterialCode()))
-                    throw new InvalidException("物料编码已存在，禁止将[{}]修改为[{}]", materialCodes.get(0).getCode(), detailDto.getMaterialCode());
+                    throw new InvalidException("选定已有厂家时，物料编码和规格不能随意修改");
             }
             if (materialCodes.isEmpty()) {
                 DoctorMaterialCode materialCode = new DoctorMaterialCode();

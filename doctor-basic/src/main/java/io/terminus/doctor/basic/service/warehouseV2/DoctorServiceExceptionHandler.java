@@ -49,11 +49,11 @@ public class DoctorServiceExceptionHandler {
 
                     if (throwable instanceof ServiceException)
                         return Response.fail(throwable.getMessage());
-                    if (throwable instanceof InvalidException) {
+//                    if (throwable instanceof InvalidException) {
 //                        InvalidException invalidException = (InvalidException) throwable;
 //                        return Response.fail(messageSource.getMessage(invalidException.getError(), invalidException.getParams(), Locale.CHINA));return
-                        throw throwable;
-                    }
+//                        throw throwable;
+//                    }
 
                     log.error("{}, cause:{}", exceptionHandle.value(), Throwables.getStackTraceAsString(throwable));
                     return Response.fail(exceptionHandle.value());
