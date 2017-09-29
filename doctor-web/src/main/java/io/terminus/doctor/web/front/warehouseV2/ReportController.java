@@ -439,6 +439,7 @@ public class ReportController {
 
             vos.add(WarehousePigGroupApplyVo.builder()
                     .pigGroupId(apply.getPigGroupId())
+                    .pigGroupName(apply.getPigGroupName())
                     .openDate(groupResponse.getResult().getOpenAt())
                     .closeDate(groupResponse.getResult().getCloseAt())
                     .pigBarnName(apply.getPigBarnName())
