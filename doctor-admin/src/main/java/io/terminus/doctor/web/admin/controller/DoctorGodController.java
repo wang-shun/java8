@@ -235,7 +235,6 @@ public class DoctorGodController {
             throw new JsonResponseException("refresh.target.type.not.support");
         }
 
-        //TODO 异步
         RefreshReportEvent event = new RefreshReportEvent();
         event.setType(type);
         event.setFarmId(farmId);
