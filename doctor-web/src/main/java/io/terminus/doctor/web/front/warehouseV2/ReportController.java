@@ -222,6 +222,9 @@ public class ReportController {
     public List<WarehouseMonthlyReportVo> monthlyReport(@RequestParam Long warehouseId,
                                                         @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
+
+        Calendar lastMonth = Calendar.getInstance();
+        lastMonth.set(date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DATE));
         DoctorWarehouseStock stockCriteria = new DoctorWarehouseStock();
         stockCriteria.setWarehouseId(warehouseId);
         Response<List<DoctorWarehouseStock>> stocksResponse = doctorWarehouseStockReadService.list(stockCriteria);
@@ -276,9 +279,9 @@ public class ReportController {
                     .add(statisticsResponse.getResult().getTransferOut().getQuantity())
                     .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
 
-
-            vo.setInitialAmount(vo.getBalanceAmount() + vo.getOutAmount() - vo.getInAmount());
-            vo.setInitialQuantity(vo.getBalanceQuantity().add(vo.getOutQuantity()).subtract(vo.getInQuantity()));
+            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getMaterialId(), date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1));
+            vo.setInitialAmount(initialBalance.getAmount());
+            vo.setInitialQuantity(initialBalance.getQuantity());
 
 //            vo.setInQuantity(vo.getBalanceQuantity().add(vo.getOutQuantity()).multiply(vo.getInQuantity()));
 
@@ -405,7 +408,7 @@ public class ReportController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "pigGroupApply")
     public List<WarehousePigGroupApplyVo> pigGroupApply(@RequestParam Long warehouseId,
-                                                        @RequestParam Long pigGroupId,
+                                                        @RequestParam(required = false) Long pigGroupId,
                                                         @RequestParam(required = false) Integer materialType,
                                                         @RequestParam(required = false) String materialName) {
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(DoctorWarehouseMaterialApply.builder()
