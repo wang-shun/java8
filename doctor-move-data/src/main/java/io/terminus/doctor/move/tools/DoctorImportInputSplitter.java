@@ -249,7 +249,8 @@ public class DoctorImportInputSplitter {
         }
 
         if (isNull(importSow.getInFarmDate())) {
-            expectTrue(notNull(importSow.getMateDate()), "not.exist.when.not.entry");
+            expectTrue(notNull(importSow.getMateDate()), true,
+                    assembleErrorAttach("", importSow.getLineNumber()), "not.exist.when.not.entry");
             importSow.setInFarmDate(new DateTime(importSow.getMateDate()).minusDays(7).toDate());
         }
 
