@@ -412,6 +412,10 @@ public class ReportController {
                                                         @RequestParam(required = false) Long pigGroupId,
                                                         @RequestParam(required = false) Integer materialType,
                                                         @RequestParam(required = false) String materialName) {
+
+        if (StringUtils.isBlank(materialName))
+            materialName = null;
+
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(DoctorWarehouseMaterialApply.builder()
                 .warehouseId(warehouseId)
                 .type(materialType)

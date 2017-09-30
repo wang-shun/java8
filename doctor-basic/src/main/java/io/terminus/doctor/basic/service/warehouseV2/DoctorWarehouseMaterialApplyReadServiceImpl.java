@@ -37,8 +37,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         try {
             return Response.ok(doctorWarehouseMaterialApplyDao.findById(id));
         } catch (Exception e) {
-            log.error("failed to find doctor warehouseV2 material apply by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.material.apply.find.fail");
+            log.error("failed to find doctor warehouse material apply by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.material.apply.find.fail");
         }
     }
 
@@ -48,8 +48,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseMaterialApplyDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
-            log.error("failed to paging doctor warehouseV2 material apply by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.material.apply.paging.fail");
+            log.error("failed to paging doctor warehouse material apply by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.material.apply.paging.fail");
         }
     }
 
@@ -58,8 +58,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         try {
             return Response.ok(doctorWarehouseMaterialApplyDao.list(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouseV2 material apply, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.material.apply.list.fail");
+            log.error("failed to list doctor warehouse material apply, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.material.apply.list.fail");
         }
     }
 
@@ -68,8 +68,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         try {
             return Response.ok(doctorWarehouseMaterialApplyDao.list(criteria));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouseV2 material apply, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.material.apply.list.fail");
+            log.error("failed to list doctor warehouse material apply, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.material.apply.list.fail");
         }
     }
 
@@ -78,8 +78,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         try {
             return Response.ok(doctorWarehouseMaterialApplyDao.listAndOrderByHandleDate(criteria, limit));
         } catch (Exception e) {
-            log.error("failed to list doctor warehouseV2 material apply, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.material.apply.list.fail");
+            log.error("failed to list doctor warehouse material apply, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.material.apply.list.fail");
         }
     }
 

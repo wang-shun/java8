@@ -30,8 +30,8 @@ public class DoctorWarehousePurchaseWriteServiceImpl implements DoctorWarehouseP
             doctorWarehousePurchaseDao.create(doctorWarehousePurchase);
             return Response.ok(doctorWarehousePurchase.getId());
         }catch (Exception e){
-            log.error("failed to create doctor warehouseV2 purchase, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.purchase.create.fail");
+            log.error("failed to create doctor warehouse purchase, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.purchase.create.fail");
         }
     }
 
@@ -40,8 +40,8 @@ public class DoctorWarehousePurchaseWriteServiceImpl implements DoctorWarehouseP
         try{
             return Response.ok(doctorWarehousePurchaseDao.update(doctorWarehousePurchase));
         }catch (Exception e){
-            log.error("failed to update doctor warehouseV2 purchase, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.purchase.update.fail");
+            log.error("failed to update doctor warehouse purchase, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.purchase.update.fail");
         }
     }
 
@@ -50,8 +50,8 @@ public class DoctorWarehousePurchaseWriteServiceImpl implements DoctorWarehouseP
         try{
             return Response.ok(doctorWarehousePurchaseDao.delete(id));
         }catch (Exception e){
-            log.error("failed to delete doctor warehouseV2 purchase by id:{}, cause:{}", id,  Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.purchase.delete.fail");
+            log.error("failed to delete doctor warehouse purchase by id:{}, cause:{}", id,  Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.purchase.delete.fail");
         }
     }
 

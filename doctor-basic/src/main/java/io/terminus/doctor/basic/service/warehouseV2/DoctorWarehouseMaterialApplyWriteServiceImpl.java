@@ -33,8 +33,8 @@ public class DoctorWarehouseMaterialApplyWriteServiceImpl implements DoctorWareh
             doctorWarehouseMaterialApplyDao.create(doctorWarehouseMaterialApply);
             return Response.ok(doctorWarehouseMaterialApply.getId());
         }catch (Exception e){
-            log.error("failed to create doctor warehouseV2 material apply, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.material.apply.create.fail");
+            log.error("failed to create doctor warehouse material apply, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.material.apply.create.fail");
         }
     }
 
@@ -43,8 +43,8 @@ public class DoctorWarehouseMaterialApplyWriteServiceImpl implements DoctorWareh
         try{
             return Response.ok(doctorWarehouseMaterialApplyDao.update(doctorWarehouseMaterialApply));
         }catch (Exception e){
-            log.error("failed to update doctor warehouseV2 material apply, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.material.apply.update.fail");
+            log.error("failed to update doctor warehouse material apply, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.material.apply.update.fail");
         }
     }
 
@@ -53,8 +53,8 @@ public class DoctorWarehouseMaterialApplyWriteServiceImpl implements DoctorWareh
         try{
             return Response.ok(doctorWarehouseMaterialApplyDao.delete(id));
         }catch (Exception e){
-            log.error("failed to delete doctor warehouseV2 material apply by id:{}, cause:{}", id,  Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.material.apply.delete.fail");
+            log.error("failed to delete doctor warehouse material apply by id:{}, cause:{}", id,  Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.material.apply.delete.fail");
         }
     }
 
