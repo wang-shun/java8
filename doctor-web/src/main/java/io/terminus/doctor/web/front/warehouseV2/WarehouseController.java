@@ -513,7 +513,9 @@ public class WarehouseController {
 
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("warehouseId", id);
-        criteria.put("materialNameLike", materialName);
+        if (StringUtils.isNotBlank(materialName))
+            criteria.put("materialNameLike", materialName);
+
         Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.pagingMergeVendor(pageNo, pageSize, criteria);
 
         if (!stockResponse.isSuccess())
