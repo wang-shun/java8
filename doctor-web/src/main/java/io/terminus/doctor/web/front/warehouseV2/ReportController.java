@@ -7,6 +7,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
@@ -311,6 +312,7 @@ public class ReportController {
         criteria.put("warehouseId", warehouseId);
         criteria.put("handleYear", date.get(Calendar.YEAR));
         criteria.put("handleMonth", date.get(Calendar.MONTH) + 1);
+        criteria.put("deleteFlag", WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
         if (null != type) {
             if (4 == type) {
                 criteria.put("bigType", Lists.newArrayList(WarehouseMaterialHandleType.TRANSFER_IN.getValue(), WarehouseMaterialHandleType.TRANSFER_OUT.getValue()));
