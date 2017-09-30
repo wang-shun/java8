@@ -1475,5 +1475,6 @@ CREATE TABLE `doctor_warehouse_stock_monthly` (
   KEY `warehouse_id_year_month_material_id_index` (`warehouse_id`,`handle_year`,`handle_month`,`material_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='仓库物料月度结余表';
 
--- 仓库物料领用表饿的领用猪群名字段长度修改 2017-09-30
+-- 仓库物料领用表的领用猪群名和领用日期字段修改 2017-09-30
 ALTER TABLE doctor_warehouse_material_apply MODIFY pig_group_name VARCHAR(512) COMMENT '领用猪群名称';
+ALTER TABLE doctor_warehouse_material_apply MODIFY apply_date DATE COMMENT '领用日期';

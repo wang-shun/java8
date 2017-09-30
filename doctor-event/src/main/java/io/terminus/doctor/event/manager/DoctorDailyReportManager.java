@@ -222,8 +222,10 @@ public class DoctorDailyReportManager {
         Date startAt = DateUtil.toDate(doctorDailyReport.getSumAt());
         Date endAt = DateUtil.getDateEnd(new DateTime(startAt)).toDate();
 
-        DoctorLiveStockChangeCommonReport changeCountReport = doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId, startAt, endAt);
-        DoctorLiveStockChangeCommonReport changeAmountReport = doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId, startAt, endAt);
+//        DoctorLiveStockChangeCommonReport changeCountReport = doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId, startAt, endAt);
+//        DoctorLiveStockChangeCommonReport changeAmountReport = doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId, startAt, endAt);
+        DoctorLiveStockChangeCommonReport changeCountReport = doctorKpiDao.getMonthlyLiveStockChangeFeedCountV2(farmId, startAt, endAt);
+        DoctorLiveStockChangeCommonReport changeAmountReport = doctorKpiDao.getMonthlyLiveStockChangeMaterialAmountV2(farmId, startAt, endAt);
 
         doctorDailyReport.setFattenPrice(doctorKpiDao.getGroupSaleFattenPrice(farmId, startAt, endAt));
         doctorDailyReport.setBasePrice10(doctorKpiDao.getGroupSaleBasePrice10(farmId, startAt, endAt));
