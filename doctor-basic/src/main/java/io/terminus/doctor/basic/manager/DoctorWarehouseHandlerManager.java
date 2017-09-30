@@ -125,6 +125,9 @@ public class DoctorWarehouseHandlerManager {
                 outDetail.setMaterialHandleId(handle.getId());
                 outDetail.setMaterialPurchaseId(purchase.getId());
                 outDetail.setQuantity(purchase.getQuantity());
+                outDetail.setHandleYear(handle.getHandleYear());
+                outDetail.setHandleMonth(handle.getHandleMonth());
+
                 doctorWarehouseHandleDetailDao.create(outDetail);
             }
         }
@@ -144,6 +147,8 @@ public class DoctorWarehouseHandlerManager {
                 outDetail.setMaterialHandleId(handle.getId());
                 outDetail.setMaterialPurchaseId(purchase.getId());
                 outDetail.setQuantity(purchaseHandleContext.getPurchaseQuantity().get(purchase));
+                outDetail.setHandleYear(handle.getHandleYear());
+                outDetail.setHandleMonth(handle.getHandleMonth());
                 doctorWarehouseHandleDetailDao.create(outDetail);
             }
         }
