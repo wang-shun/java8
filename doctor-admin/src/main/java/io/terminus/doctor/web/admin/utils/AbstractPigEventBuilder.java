@@ -2,8 +2,10 @@ package io.terminus.doctor.web.admin.utils;
 
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -12,8 +14,11 @@ import io.terminus.doctor.event.handler.PigEventBuilder;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.parana.user.model.UserProfile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.Locale;
 
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 
@@ -23,6 +28,9 @@ import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> implements PigEventBuilder {
 
     protected static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @RpcConsumer
     private DoctorUserProfileReadService doctorUserProfileReadService;
@@ -58,7 +66,11 @@ public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> im
         event.setEventDesc(eventType.getDesc());
         event.setPigId(pigEvent.getPigId());
         event.setPigCode(pigEvent.getPigCode());
-        buildEventDto(event, pigEvent);
+        try {
+            buildEventDto(event, pigEvent);
+        } catch (InvalidException e) {
+            throw new ServiceException(messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault()));
+        }
 
         transfer(event, pigEvent);
     }
