@@ -18,8 +18,6 @@ public abstract class AbstractWarehouseStockDetail {
     @NotNull(message = "stock.material.id.null")
     private Long materialId;
 
-    @NotNull(message = "stock.quantity.null")
-    @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")
-    private BigDecimal quantity;
+    private String remark;
 
 }

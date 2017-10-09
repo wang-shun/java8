@@ -66,6 +66,7 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
                                 .barnId(doctorGroupDetail.getGroup().getCurrentBarnId())
                                 .barnName(doctorGroupDetail.getGroup().getCurrentBarnName())
                                 .businessType(DoctorMessage.BUSINESS_TYPE.GROUP.getValue())
+                                .businessId(doctorGroupDetail.getGroup().getId())
                                 .ruleValueId(ruleValue.getId())
                                 .quantity(doctorGroupDetail.getGroupTrack().getQuantity())
                                 .avgDayAge(doctorGroupDetail.getGroupTrack().getAvgDayAge())

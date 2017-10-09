@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.usual;
 
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
@@ -37,7 +38,9 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         super.handleCheck(executeEvent, fromTrack);
-        expectTrue(!Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey()), "removal.status.not.feed");
+        if (!Objects.equals(executeEvent.getEventSource(),SourceType.MOVE.getValue())){
+            expectTrue(!Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey()), "removal.status.not.feed");
+        }
     }
 
     @Override

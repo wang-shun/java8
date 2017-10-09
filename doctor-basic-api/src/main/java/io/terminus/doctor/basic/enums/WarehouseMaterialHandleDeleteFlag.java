@@ -11,12 +11,12 @@ import java.util.stream.Stream;
 public enum WarehouseMaterialHandleDeleteFlag {
 
     /**
-     *
+     *未删除
      */
     NOT_DELETE(0),
 
     /**
-     * 未出库完
+     * 已删除
      */
     DELETE(1);
 

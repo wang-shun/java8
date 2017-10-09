@@ -98,6 +98,11 @@ public class DoctorNewGroupInput extends BaseGroupInput implements Serializable 
      */
     private String sowCode;
 
+    /**
+     * 原系统猪群id(迁移使用)
+     */
+    private String groupOutId;
+
     @Override
     public Map<String, String> descMap() {
         Map<String, String> descMap = new HashMap<>();

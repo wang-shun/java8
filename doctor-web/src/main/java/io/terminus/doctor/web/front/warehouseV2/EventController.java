@@ -4,10 +4,6 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInDto;
-import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInventoryDto;
-import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockOutDto;
-import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockTransferDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
@@ -75,7 +71,7 @@ public class EventController {
         criteria.put("endDate", endDate);
         criteria.put("bigType", types);
         criteria.put("materialId", materialId);
-
+        criteria.put("deleteFlag", WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
         Response<Paging<DoctorWarehouseMaterialHandle>> handleResponse = doctorWarehouseMaterialHandleReadService.advPaging(pageNo, pageSize, criteria);
         if (!handleResponse.isSuccess())
             throw new JsonResponseException(handleResponse.getError());

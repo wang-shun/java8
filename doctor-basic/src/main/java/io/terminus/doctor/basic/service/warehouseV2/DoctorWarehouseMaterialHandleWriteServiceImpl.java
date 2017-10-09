@@ -4,22 +4,20 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.dao.DoctorWarehouseHandleDetailDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
-import io.terminus.doctor.basic.dao.DoctorWarehousePurchaseDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
+import io.terminus.doctor.basic.dao.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.manager.DoctorWarehouseHandlerManager;
+import io.terminus.doctor.basic.manager.DoctorWarehouseStockMonthlyManager;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseHandleDetail;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -51,6 +49,8 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
 
     @Autowired
     private DoctorWarehouseHandlerManager doctorWarehouseHandlerManager;
+    @Autowired
+    private DoctorWarehouseStockMonthlyManager doctorWarehouseStockMonthlyManager;
 
 
     @Override
@@ -75,55 +75,47 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
     }
 
     @Override
+    @Transactional
+    @ExceptionHandle("doctor.warehouse.material.handle.delete.fail")
     public Response<Boolean> delete(Long id) {
-        try {
 
+        DoctorWarehouseMaterialHandle handle = doctorWarehouseMaterialHandleDao.findById(id);
+        if (null == handle) {
+            log.info("物料处理明细不存在,忽略仓库事件删除操作,id[{}]", id);
+            return Response.ok(true);
+        }
 
-            DoctorWarehouseMaterialHandle handle = doctorWarehouseMaterialHandleDao.findById(id);
-            if (null == handle) {
-                log.info("物料处理明细不存在,忽略仓库事件删除操作,id[{}]", id);
-                return Response.ok(true);
+        if (WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType() ||
+                WarehouseMaterialHandleType.IN.getValue() == handle.getType()) {
+
+            reverseIn(handle);
+
+        } else if (WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue() == handle.getType() ||
+                WarehouseMaterialHandleType.OUT.getValue() == handle.getType()) {
+
+            reverseOut(handle);
+        } else if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()
+                || WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()) {
+            DoctorWarehouseMaterialHandle otherHandle = doctorWarehouseMaterialHandleDao.findById(handle.getOtherTrasnferHandleId());
+            if (null == otherHandle)
+                return Response.fail("other.material.handle.not.found");
+
+            if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()) {
+                reverseIn(otherHandle);
+                reverseOut(handle);
+            } else {
+                reverseIn(handle);
+                reverseOut(otherHandle);
             }
 
-            if (WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType() ||
-                    WarehouseMaterialHandleType.IN.getValue() == handle.getType()) {
+            otherHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
+            doctorWarehouseMaterialHandleDao.update(otherHandle);
 
-                reverseIn(handle);
+        } else
+            return Response.fail("not.support.material.handle.type");
 
-            } else if (WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue() == handle.getType() ||
-                    WarehouseMaterialHandleType.OUT.getValue() == handle.getType()) {
-
-                reverseOut(handle);
-            } else if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()
-                    || WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()) {
-                DoctorWarehouseMaterialHandle otherHandle = doctorWarehouseMaterialHandleDao.findById(handle.getOtherTrasnferHandleId());
-                if (null == otherHandle)
-                    return Response.fail("other.material.handle.not.found");
-
-                if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()) {
-                    reverseIn(otherHandle);
-                    reverseOut(handle);
-                } else {
-                    reverseIn(handle);
-                    reverseOut(otherHandle);
-                }
-
-                otherHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
-                doctorWarehouseMaterialHandleDao.update(otherHandle);
-
-            } else
-                return Response.fail("not.support.material.handle.type");
-
-
-            handle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
-            return Response.ok(doctorWarehouseMaterialHandleDao.update(handle));
-        } catch (ServiceException e) {
-            log.error("failed to delete doctor warehouse material handle by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
-            return Response.fail(e.getMessage());
-        } catch (Exception e) {
-            log.error("failed to delete doctor warehouse material handle by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.delete.fail");
-        }
+        handle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
+        return Response.ok(doctorWarehouseMaterialHandleDao.update(handle));
     }
 
     private void reverseIn(DoctorWarehouseMaterialHandle handle) {
@@ -160,6 +152,13 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
         purchaseHandleContext.setStock(stocks.get(0));
         purchaseHandleContext.setPurchaseQuantity(Collections.singletonMap(purchases.get(0), handle.getQuantity()));
         doctorWarehouseHandlerManager.outStock(stocks.get(0), purchaseHandleContext, null);
+        doctorWarehouseStockMonthlyManager.count(handle.getWarehouseId(),
+                handle.getMaterialId(),
+                handle.getHandleYear(),
+                handle.getHandleMonth(),
+                handle.getQuantity(),
+                handle.getUnitPrice(),
+                false);
     }
 
     private void reverseOut(DoctorWarehouseMaterialHandle handle) {
@@ -195,7 +194,14 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
         }
 
         stock.get(0).setQuantity(stock.get(0).getQuantity().add(handle.getQuantity()));
-        doctorWarehouseHandlerManager.inStock(stock.get(0), purchases, null);
+        doctorWarehouseHandlerManager.inStock(stock.get(0), purchases, null, null, null);
+        doctorWarehouseStockMonthlyManager.count(handle.getWarehouseId(),
+                handle.getMaterialId(),
+                handle.getHandleYear(),
+                handle.getHandleMonth(),
+                handle.getQuantity(),
+                handle.getUnitPrice(),
+                true);
     }
 
 }

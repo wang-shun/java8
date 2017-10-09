@@ -164,7 +164,7 @@ public class FormulaController {
         WarehouseFormulaDto formulaDto = new WarehouseFormulaDto();
         formulaDto.setFarmId(farmId);
         formulaDto.setWarehouseId(warehouseId);
-        formulaDto.setHandleDate(new Date());
+        formulaDto.setHandleDate(Calendar.getInstance());
         formulaDto.setFeedMaterial(feed);
         formulaDto.setFeedMaterialId(feed.getId());
         formulaDto.setFeedMaterialQuantity(new BigDecimal(feedProduce.getTotal()));

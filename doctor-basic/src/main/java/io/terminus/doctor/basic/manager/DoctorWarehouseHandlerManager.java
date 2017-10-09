@@ -40,6 +40,10 @@ public class DoctorWarehouseHandlerManager {
 
     @Autowired
     private DoctorWarehouseHandleDetailDao doctorWarehouseHandleDetailDao;
+    @Autowired
+    private DoctorMaterialCodeDao doctorMaterialCodeDao;
+    @Autowired
+    private DoctorMaterialVendorDao doctorMaterialVendorDao;
 
 
     @Transactional
@@ -94,8 +98,8 @@ public class DoctorWarehouseHandlerManager {
 
     }
 
-    @Transactional
-    public void inStock(DoctorWarehouseStock stock, List<DoctorWarehousePurchase> purchases, DoctorWarehouseMaterialHandle handle) {
+//    @Transactional
+    public void inStock(DoctorWarehouseStock stock, List<DoctorWarehousePurchase> purchases, DoctorWarehouseMaterialHandle handle, DoctorMaterialCode materialCode, DoctorMaterialVendor vendor) {
         if (null == stock.getId())
             doctorWarehouseStockDao.create(stock);
         else
@@ -103,6 +107,13 @@ public class DoctorWarehouseHandlerManager {
 
         if (null != handle)
             doctorWarehouseMaterialHandleDao.create(handle);
+
+        if (null != materialCode)
+            doctorMaterialCodeDao.create(materialCode);
+        if (null != vendor)
+            doctorMaterialVendorDao.create(vendor);
+
+
         for (DoctorWarehousePurchase purchase : purchases) {
             if (purchase.getId() != null)
                 doctorWarehousePurchaseDao.update(purchase);
@@ -114,12 +125,15 @@ public class DoctorWarehouseHandlerManager {
                 outDetail.setMaterialHandleId(handle.getId());
                 outDetail.setMaterialPurchaseId(purchase.getId());
                 outDetail.setQuantity(purchase.getQuantity());
+                outDetail.setHandleYear(handle.getHandleYear());
+                outDetail.setHandleMonth(handle.getHandleMonth());
+
                 doctorWarehouseHandleDetailDao.create(outDetail);
             }
         }
     }
 
-    @Transactional
+//    @Transactional
     public void outStock(DoctorWarehouseStock stock, PurchaseHandleContext purchaseHandleContext, DoctorWarehouseMaterialHandle handle) {
 
         doctorWarehouseStockDao.update(stock);
@@ -133,6 +147,8 @@ public class DoctorWarehouseHandlerManager {
                 outDetail.setMaterialHandleId(handle.getId());
                 outDetail.setMaterialPurchaseId(purchase.getId());
                 outDetail.setQuantity(purchaseHandleContext.getPurchaseQuantity().get(purchase));
+                outDetail.setHandleYear(handle.getHandleYear());
+                outDetail.setHandleMonth(handle.getHandleMonth());
                 doctorWarehouseHandleDetailDao.create(outDetail);
             }
         }

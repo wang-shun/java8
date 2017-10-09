@@ -30,7 +30,7 @@ public class DoctorSaleDailyReportOpen implements Serializable {
     /**
      * 育肥猪
      */
-    private int fatten;
+    private int fattern;
 
     /**
      * 销售总数

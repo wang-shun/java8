@@ -7,8 +7,10 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -37,6 +39,15 @@ public class WarehouseStockInDto extends AbstractWarehouseStockDto implements Se
 
         @NotNull(message = "stock.unit.price.null")
         private Long unitPrice;
+
+        @NotNull(message = "stock.quantity.null")
+        @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")
+        private BigDecimal quantity;
+
+
+        private String specification;
+
+        private String materialCode;
 
     }
 }

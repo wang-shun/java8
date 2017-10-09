@@ -2,6 +2,7 @@ package io.terminus.doctor.web.front.warehouseV2;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
@@ -15,8 +16,7 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
+import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -93,6 +93,10 @@ public class WarehouseController {
 
     @RpcConsumer
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
+    @RpcConsumer
+    private DoctorMaterialCodeReadService doctorMaterialCodeReadService;
+    @RpcConsumer
+    private DoctorMaterialVendorReadService doctorMaterialVendorReadService;
 
     /**
      * 创建仓库
@@ -299,7 +303,7 @@ public class WarehouseController {
             throw new JsonResponseException(warehouseResponse.getError());
 
         Calendar now = Calendar.getInstance();
-        Response<Map<Long, WarehouseStockStatisticsDto>> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByFarm(farmId, null,now,
+        Response<Map<Long, WarehouseStockStatisticsDto>> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByFarm(farmId, null, now,
                 WarehouseMaterialHandleType.IN,
                 WarehouseMaterialHandleType.OUT,
                 WarehouseMaterialHandleType.TRANSFER_IN,
@@ -307,7 +311,7 @@ public class WarehouseController {
         if (!statisticsResponse.isSuccess())
             throw new JsonResponseException(statisticsResponse.getError());
 
-        Response<Map<Long, AmountAndQuantityDto>> warehouseBalanceResponse = doctorWarehouseReportReadService.countEachWarehouseBalance(farmId,null);
+        Response<Map<Long, AmountAndQuantityDto>> warehouseBalanceResponse = doctorWarehouseReportReadService.countEachWarehouseBalance(farmId, null);
         if (!warehouseBalanceResponse.isSuccess())
             throw new JsonResponseException(warehouseBalanceResponse.getError());
 
@@ -491,7 +495,7 @@ public class WarehouseController {
      * 仓库可以添加的物料列表
      */
     @RequestMapping(method = RequestMethod.GET, value = "material")
-    public List<DoctorBasicMaterial> farmMaterail(@RequestParam Long farmId, @RequestParam Long type) {
+    public List<DoctorBasicMaterial> farmMaterial(@RequestParam Long farmId, @RequestParam Long type) {
         return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialsOwned(farmId, type, null));
     }
 
@@ -509,7 +513,9 @@ public class WarehouseController {
 
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("warehouseId", id);
-        criteria.put("materialNameLike", materialName);
+        if (StringUtils.isNotBlank(materialName))
+            criteria.put("materialNameLike", materialName);
+
         Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.pagingMergeVendor(pageNo, pageSize, criteria);
 
         if (!stockResponse.isSuccess())
@@ -876,5 +882,34 @@ public class WarehouseController {
 
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "{id}/material/{materialId}/code")
+    public Response<DoctorMaterialCode> materialCode(@PathVariable Long id,
+                                                     @PathVariable Long materialId,
+                                                     @RequestParam String vendorName) {
+
+
+        return doctorMaterialCodeReadService.find(id, materialId, vendorName);
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "{id}/material/{materialId}/vendor")
+    public Response<List<DoctorMaterialVendor>> materialVendor(@PathVariable Long id, @PathVariable Long materialId) {
+        return doctorMaterialVendorReadService.list(DoctorMaterialVendor.builder()
+                .warehouseId(id)
+                .materialId(materialId)
+                .build());
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "{id}/material/{materialId}/price")
+    public Long materialUnitPrice(@PathVariable Long id,
+                                  @PathVariable Long materialId) {
+
+        Response<Long> unitPriceResponse = doctorWarehousePurchaseReadService.calculateUnitPrice(id, materialId);
+        if (!unitPriceResponse.isSuccess())
+            throw new ServiceException(unitPriceResponse.getError());
+
+        return unitPriceResponse.getResult();
+    }
 
 }

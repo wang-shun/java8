@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
@@ -86,10 +87,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         //5.特殊处理
         specialHandle(executeEvent, toTrack);
 
-        //6.更新日记录
-        updateDailyForNew(executeEvent);
-
-        //7.记录发生的事件信息
+        //6.记录发生的事件信息
         DoctorBarn doctorBarn = doctorBarnDao.findById(toTrack.getCurrentBarnId());
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(executeEvent.getOrgId())
@@ -111,8 +109,14 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
 
-        //8.触发事件
-        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
+
+        if (isNull(executeEvent.getEventSource()) || Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
+            //7.更新日记录
+            updateDailyForNew(executeEvent);
+        }
+
+        if (!Objects.equals(executeEvent.getEventSource(), SourceType.MOVE.getValue())) {
+            //8.触发事件
             triggerEvent(doctorEventInfoList, executeEvent, toTrack);
         }
     }
@@ -142,7 +146,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .operatorName(StringUtils.hasText(inputDto.getOperatorName()) ? inputDto.getOperatorName() : basic.getStaffName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .isAuto(MoreObjects.firstNonNull(inputDto.getIsAuto(), IsOrNot.NO.getValue()))
-                .status(EventStatus.VALID.getValue()).eventSource(SourceType.INPUT.getValue()).isModify(IsOrNot.NO.getValue())
+                .status(EventStatus.VALID.getValue()).eventSource(inputDto.getEventSource()).isModify(IsOrNot.NO.getValue())
                 .npd(0).dpnpd(0).pfnpd(0).plnpd(0).psnpd(0).pynpd(0).ptnpd(0).jpnpd(0)
                 .build();
         doctorPigEvent.setRemark(inputDto.changeRemark());
@@ -208,6 +212,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         toInputDto.setEventName(pigEvent.getName());
         toInputDto.setEventType(pigEvent.getKey());
         toInputDto.setEventDesc(pigEvent.getDesc());
+        toInputDto.setEventSource(fromInputDto.getEventSource());
     }
 
     protected Date generateEventAt(Date eventAt){
@@ -243,7 +248,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
      * @param barnName 猪舍名
      * @return 猪群号
      */
-    protected String grateGroupCode(String barnName, Date eventAt) {
+    public static String grateGroupCode(String barnName, Date eventAt) {
         expectTrue(notEmpty(barnName), "generate.code.barn.name.not.null");
         return barnName + "(" +DateUtil.toDateString(eventAt) + ")";
     }

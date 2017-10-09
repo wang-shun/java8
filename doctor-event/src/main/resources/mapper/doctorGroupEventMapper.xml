@@ -713,4 +713,29 @@
         and status = 1
         AND group_id = #{groupId}
     </select>
+
+    <delete id="deleteByFarmId" parameterType="long" >
+        DELETE
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+        <if test="pigTypes != null &amp;&amp; pigTypes.size()>0">
+            AND pig_type IN
+            <foreach collection="pigTypes" item="pigType" open="(" separator="," close=")" >
+                 #{pigType}
+            </foreach>
+        </if>
+    </delete>
+
+    <delete id="deleteByGroupId" parameterType="long" >
+        DELETE FROM
+        <include refid="tb"/>
+        WHERE group_id = #{groupId}
+    </delete>
+
+    <select id="getFarmEarlyEventAt" parameterType="string" resultType="io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto" >
+        SELECT farm_id as farmId, min(event_at) as eventAt
+        FROM <include refid="tb"/>
+        WHERE created_at &gt;= #{startDate}
+        group by farm_id
+    </select>
 </mapper>

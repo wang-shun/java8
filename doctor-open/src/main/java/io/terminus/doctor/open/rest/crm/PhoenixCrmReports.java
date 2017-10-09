@@ -145,11 +145,11 @@ public class PhoenixCrmReports {
                     + checkPreg.getFanqing() + checkPreg.getLiuchan());
 
             doctorDailyReportOpen.getMating().setHoubei(MoreObjects.firstNonNull(pigDailyReport.getMateHb(), 0));
-            doctorDailyReportOpen.getMating().setDuannai(MoreObjects.firstNonNull(pigDailyReport.getMateDn(), 0));
+            doctorDailyReportOpen.getMating().setDuanani(MoreObjects.firstNonNull(pigDailyReport.getMateDn(), 0));
             doctorDailyReportOpen.getMating().setFanqing(MoreObjects.firstNonNull(pigDailyReport.getMateFq(), 0));
             doctorDailyReportOpen.getMating().setLiuchan(MoreObjects.firstNonNull(pigDailyReport.getMateLc(), 0));
             DoctorMatingDailyReportOpen mating = doctorDailyReportOpen.getMating();
-            mating.setMatingTotal(mating.getHoubei() + mating.getDuannai()
+            mating.setMatingTotal(mating.getHoubei() + mating.getDuanani()
                     + mating.getFanqing() + mating.getLiuchan());
 
             doctorDailyReportOpen.getLiveStock().setPeihuaiSow(MoreObjects.firstNonNull(pigDailyReport.getSowPh(), 0));
@@ -171,16 +171,16 @@ public class PhoenixCrmReports {
             doctorDailyReportOpen.getDead().setBoar(MoreObjects.firstNonNull(pigDailyReport.getBoarDead(), 0));
             doctorDailyReportOpen.getDead().setFarrow(MoreObjects.firstNonNull(groupDailyReport.getFarrowDead(), 0));
             doctorDailyReportOpen.getDead().setNursery(MoreObjects.firstNonNull(groupDailyReport.getNurseryDead(), 0));
-            doctorDailyReportOpen.getDead().setFatten(MoreObjects.firstNonNull(groupDailyReport.getFattenDead(), 0));
+            doctorDailyReportOpen.getDead().setFattern(MoreObjects.firstNonNull(groupDailyReport.getFattenDead(), 0));
             DoctorDeadDailyReportOpen dead = doctorDailyReportOpen.getDead();
-            dead.setDeadTotal(dead.getSow() + dead.getBoar() + dead.getFarrow() + dead.getNursery() + dead.getFatten());
+            dead.setDeadTotal(dead.getSow() + dead.getBoar() + dead.getFarrow() + dead.getNursery() + dead.getFattern());
 
             doctorDailyReportOpen.getSale().setSow(MoreObjects.firstNonNull(pigDailyReport.getSowSale(), 0));
             doctorDailyReportOpen.getSale().setBoar(MoreObjects.firstNonNull(pigDailyReport.getBoarSale(), 0));
             doctorDailyReportOpen.getSale().setNursery(EventUtil.plusInt(groupDailyReport.getFarrowSale(), groupDailyReport.getNurserySale()));
-            doctorDailyReportOpen.getSale().setFatten(MoreObjects.firstNonNull(groupDailyReport.getFattenSale(), 0));
+            doctorDailyReportOpen.getSale().setFattern(MoreObjects.firstNonNull(groupDailyReport.getFattenSale(), 0));
             DoctorSaleDailyReportOpen sale = doctorDailyReportOpen.getSale();
-            sale.setSaleTotal(sale.getSow() + sale.getBoar() + sale.getNursery() + sale.getFatten());
+            sale.setSaleTotal(sale.getSow() + sale.getBoar() + sale.getNursery() + sale.getFattern());
 
             return doctorDailyReportOpen;
         }).collect(Collectors.toList());

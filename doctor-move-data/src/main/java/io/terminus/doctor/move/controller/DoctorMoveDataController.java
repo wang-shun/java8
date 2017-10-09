@@ -26,9 +26,9 @@ import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.event.service.DoctorRangeReportWriteService;
-import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.move.service.DoctorImportDataService;
+import io.terminus.doctor.move.service.DoctorMoveAndImportService;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
@@ -48,7 +48,6 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -101,6 +100,7 @@ public class DoctorMoveDataController {
     private final DoctorDailyGroupWriteService doctorDailyGroupWriteService;
     private final DoctorRangeReportWriteService doctorRangeReportWriteService;
     private final DoctorOrgReadService doctorOrgReadService;
+    private final DoctorMoveAndImportService doctorMoveAndImportService;
 
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
@@ -123,7 +123,8 @@ public class DoctorMoveDataController {
                                     DoctorGroupReadService doctorGroupReadService,
                                     DoctorDailyGroupWriteService doctorDailyGroupWriteService,
                                     DoctorRangeReportWriteService doctorRangeReportWriteService,
-                                    DoctorOrgReadService doctorOrgReadService) {
+                                    DoctorOrgReadService doctorOrgReadService,
+                                    DoctorMoveAndImportService doctorMoveAndImportService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -145,6 +146,7 @@ public class DoctorMoveDataController {
         this.doctorDailyGroupWriteService = doctorDailyGroupWriteService;
         this.doctorRangeReportWriteService = doctorRangeReportWriteService;
         this.doctorOrgReadService = doctorOrgReadService;
+        this.doctorMoveAndImportService = doctorMoveAndImportService;
     }
 
     /**
@@ -164,38 +166,6 @@ public class DoctorMoveDataController {
         }
     }
 
-//    /**
-//     * 迁移全部数据
-//     * @param mobile 注册的手机号
-//     * @param moveId 数据源id
-//     * @param index  日报数据天数(默认365天)
-//     * @return 是否成功
-//     */
-//    @RequestMapping(value = "/all", method = RequestMethod.GET)
-//    public Boolean moveAll(@RequestParam("mobile") String mobile,
-//                           @RequestParam("loginName") String loginName,
-//                           @RequestParam("moveId") Long moveId,
-//                           @RequestParam(value = "index", required = false) Integer index,
-//                           @RequestParam(value = "monthIndex", required = false) Integer monthIndex) {
-//        try {
-//            //1.迁移猪场信息
-//            log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
-//            List<DoctorFarmWithMobile> farmList = userInitService.init(loginName, mobile, moveId, null);
-//            log.warn("move user farm end");
-//
-//            //多个猪场遍历插入
-//            getFarms(mobile).forEach(farm -> moveAllExclude(moveId, farm, mobile, index, monthIndex));
-//
-//            //把所有猪舍添加到所有用户的权限里去
-//            userInitService.updatePermissionBarn(mobile);
-//            log.warn("all data moved successfully, CONGRATULATIONS!!!");
-//            return true;
-//        } catch (Exception e) {
-//            log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
-//            return false;
-//        }
-//    }
-
     /**
      * 迁移全部数据
      * @param mobile 注册的手机号
@@ -211,29 +181,8 @@ public class DoctorMoveDataController {
                                     @RequestParam(value = "index", required = false) Integer index,
                                     @RequestParam(value = "monthIndex", required = false) Integer monthIndex) {
         try {
-            //1.迁移猪场信息
-            log.warn("move user farm start, mobile:{}, moveId:{}, path:{}", mobile, moveId, path);
-            List<DoctorFarmWithMobile> farmList = userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
-            log.warn("move user farm end");
-            //多个猪场遍历插入
-            farmList.forEach(farmWithMobile -> moveAllExclude(moveId, farmWithMobile.getDoctorFarm(), farmWithMobile.getMobile(), index, monthIndex));
-
-            //修正转场事件
-            doctorMoveDataService.correctChgFarm(farmList.stream().map(farmWithMobile -> farmWithMobile.getDoctorFarm()
-                    .getId()).collect(Collectors.toList()));
-
-            //把所有猪舍添加到所有用户的权限里去
-            farmList.forEach(farmWithMobile -> userInitService.updatePermissionBarn(farmWithMobile.getDoctorFarm().getId()));
-            log.warn("all data moved successfully, CONGRATULATIONS!!!");
-
-            //生成报表
-            farmList.forEach(farmWithMobile -> {
-                moveDailyReport(farmWithMobile.getDoctorFarm().getId(), DateUtil.toDateString(DateTime.now().minusYears(1).toDate())
-                        , DateUtil.toDateString(new Date()));
-                flushGroupDailyHistorty(farmWithMobile.getDoctorFarm().getId(), DateUtil.toDateString(DateTime.now().minusYears(1).toDate())
-                        , DateUtil.toDateString(new Date()));
-                moveDoctorRangeReport(farmWithMobile.getDoctorFarm().getId(), DateUtil.toDateString(DateTime.now().minusYears(1).toDate()));
-            });
+            List<DoctorFarm> farmList = doctorMoveAndImportService.moveData(moveId, importFarmInfoExcel(path));
+            farmList.forEach(farm -> doctorMoveAndImportService.generateReport(farm.getId()));
             return true;
         } catch (Exception e) {
             log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
@@ -396,22 +345,21 @@ public class DoctorMoveDataController {
 
     /**
      * 迁移猪场信息
-     * @param mobile 注册手机号
      * @param moveId 数据源id
+     * @param path excel路径
      * @return 是否成功
      */
     @RequestMapping(value = "/farm", method = RequestMethod.GET)
-    public Boolean moveUserFarm(@RequestParam("mobile") String mobile,
-                                @RequestParam("loginName") String loginName,
-                                @RequestParam("moveId") Long moveId,
+    public Boolean moveUserFarm(@RequestParam("moveId") Long moveId,
                                 @RequestParam("path") String path) {
         try {
-            log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
-            userInitService.init(loginName, mobile, moveId, importFarmInfoExcel(path));
+            log.warn("move user farm start, moveId:{}, path:{}", moveId, path);
+            doctorMoveAndImportService.moveFarmAndUser(moveId, importFarmInfoExcel(path));
             log.warn("move user farm end");
             return Boolean.TRUE;
         } catch (Exception e) {
-            log.error("move user farm failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
+            log.error("move user farm failed, moveId:{}, path:{}, cause:{}", moveId,
+                    path, Throwables.getStackTraceAsString(e));
             return Boolean.FALSE;
         }
     }
@@ -423,11 +371,12 @@ public class DoctorMoveDataController {
      * @return 是否成功
      */
     @RequestMapping(value = "/basic", method = RequestMethod.GET)
-    public Boolean moveBasic(@RequestParam("moveId") Long moveId, @RequestParam("farmId") Long farmId) {
+    public Boolean moveBasic(@RequestParam("moveId") Long moveId,
+                             @RequestParam("farmId") Long farmId) {
         try {
             DoctorFarm farm = doctorFarmDao.findById(farmId);
             log.warn("move basic start, moveId:{}", moveId);
-            doctorMoveBasicService.moveAllBasic(moveId, farm);
+            doctorMoveAndImportService.moveBasic(moveId, farm);
             log.warn("move bascic end");
             return true;
         } catch (Exception e) {
@@ -469,11 +418,10 @@ public class DoctorMoveDataController {
         try {
             DoctorFarm farm = doctorFarmDao.findById(farmId);
             log.warn("move pig start, moveId:{}", moveId);
-            doctorMoveDataService.movePig(moveId, farm, Lists.newArrayList());
+            doctorMoveAndImportService.movePig(moveId, doctorMoveAndImportService.packageMoveBasicData(farm));
             log.warn("move pig end");
             return true;
         } catch (Exception e) {
-            doctorMoveDataService.deleteAllPigs(farmId);
             log.error("move pig failed, moveId:{}, farmId:{}, cause:{}",
                     moveId, farmId, Throwables.getStackTraceAsString(e));
             return false;
@@ -491,7 +439,7 @@ public class DoctorMoveDataController {
         try {
             DoctorFarm farm = doctorFarmDao.findById(farmId);
             log.warn("move group start, moveId:{}", moveId);
-            doctorMoveDataService.moveGroup(moveId, farm, Lists.newArrayList());
+            doctorMoveAndImportService.moveGroup(moveId, doctorMoveAndImportService.packageMoveBasicData(farm));
             log.warn("move group end");
             return true;
         } catch (Exception e) {

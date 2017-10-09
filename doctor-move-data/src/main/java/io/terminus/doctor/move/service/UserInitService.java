@@ -462,7 +462,6 @@ public class UserInitService {
                 .map());
         log.info("subUser:{}", subUser);
         if(notNull(subUser.getId())) {
-            // 设置下子账号的状态和关联猪场
             Sub sub = subDao.findByUserId(subUser.getId());
             if (notNull(sub)) {
                 subDao.delete(sub.getId());
@@ -491,6 +490,9 @@ public class UserInitService {
             userWriteService.update(subUser);
         } else {
             userWriteService.create(subUser);
+            Sub sub = subDao.findByUserId(subUser.getId());
+            sub.setFarmId(farmId);
+            subDao.update(sub);
         }
         Long subUserId = subUser.getId();
 

@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -54,10 +56,13 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
                 || Objects.equals(fromTrack.getStatus(), PigStatus.Mate.getKey())
                 ,"pig.status.failed", PigEvent.from(executeEvent.getType()).getName()
                 , PigStatus.from(fromTrack.getStatus()).getName());
+        expectTrue(PigType.MATING_TYPES.contains(fromTrack.getCurrentBarnType())
+                , "current.barn.type.not.mate", PigType.from(fromTrack.getCurrentBarnType()).getDesc());
         expectTrue(fromTrack.getCurrentMatingCount() < 3, "mate.count.over");
         expectTrue(notNull(executeEvent.getOperatorId()), "mating.operator.not.null");
 
-        if (fromTrack.getCurrentMatingCount() > 0) {
+        if (fromTrack.getCurrentMatingCount() > 0
+                && !Objects.equals(executeEvent.getEventSource(), SourceType.MOVE.getValue())) {
             Integer parity = doctorPigEventDao.findLastParity(fromTrack.getPigId());
             doctorModifyPigMatingEventHandler.serialMateValid(fromTrack.getPigId()
                     , parity, executeEvent.getEventAt());
@@ -99,11 +104,13 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         super.specialHandle(doctorPigEvent, doctorPigTrack);
 
         Long boarId = JSON_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorMatingDto.class).getMatingBoarPigId();
-        DoctorPigTrack boarPigTrack = this.doctorPigTrackDao.findByPigId(boarId);
-        expectTrue(notNull(boarPigTrack), "boar.track.not.null", boarId);
-        Integer currentBoarParity = MoreObjects.firstNonNull(boarPigTrack.getCurrentParity(), 0) + 1;
-        boarPigTrack.setCurrentParity(currentBoarParity);
-        doctorPigTrackDao.update(boarPigTrack);
+        if (Objects.equals(doctorPigEvent.getSource(), SourceType.INPUT.getValue())) {
+            DoctorPigTrack boarPigTrack = this.doctorPigTrackDao.findByPigId(boarId);
+            expectTrue(notNull(boarPigTrack), "boar.track.not.null", boarId);
+            Integer currentBoarParity = MoreObjects.firstNonNull(boarPigTrack.getCurrentParity(), 0) + 1;
+            boarPigTrack.setCurrentParity(currentBoarParity);
+            doctorPigTrackDao.update(boarPigTrack);
+        }
     }
 
     @Override

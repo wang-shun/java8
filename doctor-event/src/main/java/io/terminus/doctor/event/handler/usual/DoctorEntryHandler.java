@@ -2,6 +2,8 @@ package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
@@ -48,6 +50,11 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        expectTrue((Objects.equals(executeEvent.getKind(), DoctorPig.PigSex.SOW.getKey())
+                        && PigType.MATING_TYPES.contains(executeEvent.getBarnType()))
+                || (Objects.equals(executeEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())
+                        && Objects.equals(executeEvent.getBarnType(), PigType.BOAR.getValue()))
+                , "entry.barn.type.error", PigType.from(executeEvent.getBarnType()).getDesc());
     }
 
     @Override
@@ -72,9 +79,13 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         }
         //3.特殊处理
         specialHandle(executeEvent, toTrack);
+
         //4.创建镜像
-//        createPigSnapshot(toTrack, executeEvent, 0L);
-        updateDailyForNew(executeEvent);
+        if (isNull(executeEvent.getEventSource())
+                || Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
+            updateDailyForNew(executeEvent);
+        }
+
         //5.记录发生的事件信息
         DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
                 .orgId(executeEvent.getOrgId())
@@ -125,6 +136,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
                 .remark(dto.getEntryMark())
                 .creatorId(basic.getStaffId())
                 .creatorName(basic.getStaffName())
+                .outId(dto.getPigOutId())
                 .build();
         if (Objects.equals(dto.getPigType(), DoctorPig.PigSex.SOW.getKey())) {
             // add sow pig info

@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
@@ -51,7 +52,6 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         event.setQuantity(weanInput.getPartWeanPigletsCount());
         event.setAvgWeight(weanInput.getPartWeanAvgWeight());
         event.setExtraMap(weanInput);
-        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 
@@ -95,8 +95,9 @@ public class DoctorWeanGroupEventHandler extends DoctorAbstractGroupEventHandler
         groupTrack.setWeanWeight(EventUtil.plusDouble(groupTrack.getWeanWeight(), weanInput.getPartWeanAvgWeight() * weanInput.getPartWeanPigletsCount()));
 
         updateGroupTrack(groupTrack, event);
-
-        updateDailyForNew(event);
+        if (Objects.equals(event.getEventSource(), SourceType.INPUT.getValue())) {
+            updateDailyForNew(event);
+        }
 
     }
 

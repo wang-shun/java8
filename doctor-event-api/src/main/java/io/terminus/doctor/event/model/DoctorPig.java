@@ -153,5 +153,14 @@ public class DoctorPig implements Serializable{
             }
             return null;
         }
+
+        public static PigSex from(String desc){
+            for(PigSex pigSex : PigSex.values()){
+                if(Objects.equals(pigSex.getDesc(), desc)){
+                    return pigSex;
+                }
+            }
+            return null;
+        }
     }
 }

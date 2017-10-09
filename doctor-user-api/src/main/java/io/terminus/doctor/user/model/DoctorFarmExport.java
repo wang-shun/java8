@@ -36,11 +36,20 @@ public class DoctorFarmExport implements Serializable {
      * 导入的状态
      */
     private Integer status;
+
+    private String statusName;
+
+    /**
+     * 失败原因
+     */
+    private String errorReason;
+
     private Date createdAt;
     private Date updatedAt;
 
     public enum Status {
         SUCCESS(1, "成功"),
+        HANDLING(2, "处理中"),
         FAILED(0, "失败");
 
         @Getter

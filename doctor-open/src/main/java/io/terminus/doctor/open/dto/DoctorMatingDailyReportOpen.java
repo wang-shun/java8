@@ -20,7 +20,7 @@ public class DoctorMatingDailyReportOpen implements Serializable{
     /**
      * 断奶
      */
-    private int duannai;
+    private int duanani;
 
     /**
      * 返情

@@ -3,6 +3,8 @@ package io.terminus.doctor.basic.dto.warehouseV2;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import lombok.Data;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,9 +32,11 @@ public class WarehouseFormulaDto extends AbstractWarehouseStockDto implements Se
 
         private static final long serialVersionUID = 8852999063915768802L;
 
+        @NotNull(message = "stock.quantity.null")
+        @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")
+        private BigDecimal quantity;
 
         private String materialName;    //  原料名称
-
 
         private Double percent; //原料配比信息
 

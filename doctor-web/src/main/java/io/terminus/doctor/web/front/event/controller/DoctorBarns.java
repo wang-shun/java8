@@ -369,6 +369,10 @@ public class DoctorBarns {
                 RespHelper.or500(doctorGroupWriteService.updateCurrentBarnName(barn.getId(), barn.getName()));
                 RespHelper.or500(doctorPigWriteService.updateCurrentBarnName(barn.getId(), barn.getName()));
             }
+
+            if (!Objects.equals(barn.getStaffId(), oldBarn.getStaffId())) {
+                RespHelper.or500(doctorGroupWriteService.updateStaffName(barn.getId(), barn.getStaffId(), barn.getStaffName()));
+            }
         }
         return barnId;
     }

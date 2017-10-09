@@ -20,6 +20,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -87,9 +88,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.PigType.*;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
@@ -576,10 +575,13 @@ public class DoctorPigCreateEvents {
         try {
             DoctorFarm doctorFarm = RespHelper.orServEx(this.doctorFarmReadService.findFarmById(farmId));
             Long userId = UserUtil.getUserId();
-
+            String name = RespHelper.orServEx(doctorGroupWebService.findRealName(userId));
+            if (Strings.isNullOrEmpty(name)) {
+                name = UserUtil.getCurrentUser().getName();
+            }
             return DoctorBasicInputInfoDto.builder()
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName()).orgId(doctorFarm.getOrgId()).orgName(doctorFarm.getOrgName())
-                    .staffId(userId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(userId)))
+                    .staffId(userId).staffName(name)
                     .build();
         } catch (Exception e) {
             log.error("build basic input info dto fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -605,6 +607,7 @@ public class DoctorPigCreateEvents {
         inputDto.setEventType(pigEvent.getKey());
         inputDto.setEventName(pigEvent.getName());
         inputDto.setEventDesc(pigEvent.getDesc());
+        inputDto.setEventSource(SourceType.INPUT.getValue());
         return inputDto;
     }
 
@@ -621,6 +624,7 @@ public class DoctorPigCreateEvents {
         inputDto.setEventName(pigEvent.getName());
         inputDto.setEventDesc(pigEvent.getDesc());
         inputDto.setIsAuto(IsOrNot.NO.getValue());
+        inputDto.setEventSource(SourceType.INPUT.getValue());
         return inputDto;
     }
 
@@ -806,13 +810,10 @@ public class DoctorPigCreateEvents {
         Map<String, Object> map = Maps.newHashMap();
         try {
             map = OBJECT_MAPPER.readValue(inputJson, Map.class);
+            return expectNotNull(map.get("pigCode"), "pig.code.not.empty").toString();
         } catch (Exception e) {
             throw new InvalidException("json.to.map.error");
         }
-        expectTrue(notEmpty((String) map.get("pigId")), "pig.id.not.null");
-        DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(Long.parseLong((String) map.get("pigId"))));
-        expectTrue(notNull(doctorPig), "pig.not.null", Long.parseLong((String) map.get("pigId")));
-        return doctorPig.getPigCode();
     }
 
     /**

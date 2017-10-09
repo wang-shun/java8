@@ -34,6 +34,14 @@ public class DoctorModifyGroupCloseEventHandler extends DoctorAbstractModifyGrou
     }
 
     @Override
+    public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        return DoctorEventChangeDto.builder()
+                .oldEventAt(oldGroupEvent.getEventAt())
+                .newEventAt(DateUtil.toDate(input.getEventAt()))
+                .build();
+    }
+
+    @Override
     public DoctorGroup buildNewGroup(DoctorGroup oldGroup, BaseGroupInput input) {
         oldGroup.setCloseAt(DateUtil.toDate(input.getEventAt()));
         return oldGroup;

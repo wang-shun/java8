@@ -25,7 +25,7 @@ import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGro
 public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEventHandler {
 
     @Override
-    protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
+    public boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
         List<DoctorPigEvent> list = doctorPigEventDao.findByPigId(deletePigEvent.getPigId());
         return list.size() == 1;
     }

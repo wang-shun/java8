@@ -50,4 +50,14 @@ public class WarehouseStockStatisticsDto implements Serializable{
      */
     private AmountAndQuantityDto transferOut;
 
+    /**
+     * 配方生产入
+     */
+    private AmountAndQuantityDto formulaIn;
+
+    /**
+     * 配方生产出
+     */
+    private AmountAndQuantityDto formulaOut;
+
 }

@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.group;
 
-import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -53,7 +52,6 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setAvgWeight(liveStock.getAvgWeight());
         event.setWeight(event.getQuantity() * event.getAvgWeight()); // 总活体重 = 数量 * 均重
         event.setExtraMap(liveStock);
-        event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
 

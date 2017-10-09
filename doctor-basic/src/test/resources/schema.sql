@@ -249,3 +249,36 @@ CREATE TABLE `doctor_warehouse_handle_detail` (
   PRIMARY KEY (`id`),
   KEY `index_material_handle_id` (`material_handle_id`)
 ) COMMENT='仓库物料处理明细';
+
+CREATE TABLE `doctor_material_vendor` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `vendor_name` varchar(64) NOT NULL COMMENT '供应商名称',
+  `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
+  `material_id` bigint(20) NOT NULL COMMENT '物料编号',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='物料供应商表';
+CREATE TABLE `doctor_material_code` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `warehouse_id` bigint(20) DEFAULT NULL COMMENT '仓库编号',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '物料编号',
+  `vendor_name` varchar(64) DEFAULT NULL COMMENT '供应商名',
+  `specification` varchar(64) DEFAULT NULL COMMENT '规格',
+  `code` varchar(64) DEFAULT NULL COMMENT '编码',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='物料编码表';
+
+CREATE TABLE `doctor_warehouse_stock_handle` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `farm_id` bigint(20) NOT NULL COMMENT '猪厂编号',
+  `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
+  `serial_no` varchar(45) NOT NULL COMMENT '流水号',
+  `handle_date` date NOT NULL COMMENT '处理日期',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_serial_no_warehouse_id` (`serial_no`,`warehouse_id`)
+) COMMENT='库存处理表';

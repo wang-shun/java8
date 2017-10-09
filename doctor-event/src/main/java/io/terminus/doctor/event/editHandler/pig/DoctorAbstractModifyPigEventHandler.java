@@ -433,7 +433,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @param pigEvent 猪事件事件
      * @param count    变化数量
      */
-    public void updatePhSowStatusCount(DoctorPigEvent pigEvent, int count, Integer pigStatus) {
+    protected void updatePhSowStatusCount(DoctorPigEvent pigEvent, int count, Integer pigStatus) {
         if (!PigType.MATING_TYPES.contains(pigEvent.getBarnType())) {
             return;
         }
@@ -444,6 +444,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         Checks.expectNotNull(beforeStatus, "event.before.status.is.null", pigEvent.getId());
         switch (beforeStatus) {
             case KongHuai:
+            case Wean:
             case Entry:
                 konghuai = count;
                 break;

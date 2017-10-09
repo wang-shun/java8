@@ -9,12 +9,9 @@ import java.util.Date;
  * Created by chenzenghui on 16/7/27.
  */
 @Data
-public class View_EventListSow implements Serializable {
+public class View_EventListSow extends View_EventListPig implements Serializable {
     private static final long serialVersionUID = 8185298029467518284L;
-    private String eventName;       // 转换事件的名称, 以适应新版的事件
-    private String sowOutId;
     private String farmOutId;
-    private String pigCode;
     private String pigFatherCode;
     private String pigMotherCode;
     private Integer source;
@@ -28,11 +25,7 @@ public class View_EventListSow implements Serializable {
     private Integer rightCount;
     private String breed;
     private String genetic;
-    private String eventOutId;
-    private Date eventAt;
-    private String eventDesc;       // 事件描述
     private String remark;          // 事件备注
-    private String barnOutId;       // 事件发生猪舍
     private Long price;             // 单价(分)
     private Long amount;            // 总额(分)
     private String boarCode;        // 配种事件的公猪code
@@ -57,7 +50,6 @@ public class View_EventListSow implements Serializable {
     private String chgReason;       // 转舍/拼窝/离场/妊娠检查/被拼窝/断奶/仔猪变动/分娩 复用字段, 真他妈屌啊!
     private String customer;        // 分娩事件要用到
     private String nurseSow;        // 拼窝/分娩 复用字段
-    private String toBarnOutId;     // 进场/转舍/分娩/被拼窝/断奶 复用事件 一般是outId或猪舍名称(分娩)
     private String disease;         // 防疫(疫苗名称)/仔猪变动/分娩/断奶/疾病(TB_FieldValue的ColID) 复用字段
     private String treatment;       // 防疫(防疫结果)/拼窝/被拼窝/转舍 复用字段
     private Integer netInCount;
@@ -65,10 +57,11 @@ public class View_EventListSow implements Serializable {
     private Integer score;           // 体况得分
     private Double backFat;          // 背镖
     private Integer weanCount;       // 断奶数量
-    private Double weanWeight;       // 断奶重量
+    private Double weanWeight;       // 断奶均重
     private String nestCode;         // 断奶重量
     private String diseaseName;      // 疾病事件的疾病名称
     private String changeTypeName;   // 变动类型名称
     private String fosterReasonName; // 寄养原因名称
+    private String toGroupOutId;     // 分娩转入外部id
     private String toGroupCode;      // 分娩转入猪群code
 }

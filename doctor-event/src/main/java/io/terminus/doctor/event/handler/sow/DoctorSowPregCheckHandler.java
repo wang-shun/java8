@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
@@ -53,7 +54,8 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
 //        if (Objects.equals(executeEvent.getPregCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
 //            expectTrue(notNull(pregChkResultDto.getAbortionReasonId()), "liuchan.reason.not.null", pregChkResultDto.getPigCode());
 //        }
-        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())) {
+        if (Objects.equals(executeEvent.getIsModify(), IsOrNot.NO.getValue())
+                && !Objects.equals(executeEvent.getEventSource(), SourceType.MOVE.getValue())) {
             checkCanPregCheckResult(fromTrack.getStatus(), pregChkResultDto.getCheckResult(), pregChkResultDto.getPigCode());
         }
     }
@@ -99,6 +101,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
 
         }
 
+
         //根据猪类判断, 如果是逆向: 空怀 => 阳性, 需要删掉以前的空怀事件
         if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.KongHuai.getKey())) {
             DoctorPigEvent lastPregEvent = doctorPigEventDao.queryLastPregCheck(doctorPigTrack.getPigId());
@@ -106,7 +109,9 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventHandler {
             expectTrue(PregCheckResult.KONGHUAI_RESULTS.contains(lastPregEvent.getPregCheckResult()), "preg.check.result.error",
                     lastPregEvent.getPregCheckResult(), pregChkResultDto.getPigCode());
             doctorPigEventDao.delete(lastPregEvent.getId());
-            doctorModifyPigPregCheckEventHandler.updateDailyOfDelete(lastPregEvent);
+            if (!Objects.equals(doctorPigEvent.getEventSource(), SourceType.MOVE.getValue())){
+                doctorModifyPigPregCheckEventHandler.updateDailyOfDelete(lastPregEvent);
+            }
         }
 
         return doctorPigEvent;

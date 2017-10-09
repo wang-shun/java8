@@ -7,20 +7,22 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.warehouseV2.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
-import io.terminus.doctor.basic.service.*;
-import io.terminus.doctor.basic.service.warehouseV2.*;
+import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseReportReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
-import io.terminus.doctor.web.front.controller.UserProfiles;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStockStatisticsVo;
 import io.terminus.parana.user.model.UserProfile;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/20.
@@ -28,9 +30,6 @@ import java.util.*;
 @RestController
 @RequestMapping("api/doctor/warehouse/stock")
 public class StockController {
-
-    //TODO 单据编号。猪厂下，年月日是分秒毫秒
-    //TODO 物料编号（根据物料+厂家带出来）。记录的时候需要校验
 
     @RpcConsumer
     private DoctorWarehouseStockWriteService doctorWarehouseStockWriteService;
@@ -153,6 +152,11 @@ public class StockController {
                                                      @RequestParam(required = false) Integer pageSize) {
 
         Calendar now = Calendar.getInstance();
+
+        if (StringUtils.isBlank(materialName)) {
+            //如果传入的是空，那么将会应用上这个查询条件，导致查不出数据
+            materialName = null;
+        }
 
         Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.paging(pageNo, pageSize, DoctorWarehouseStock.builder()
                 .warehouseId(warehouseId)

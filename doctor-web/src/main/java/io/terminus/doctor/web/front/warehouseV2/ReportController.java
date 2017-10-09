@@ -1,11 +1,13 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
@@ -13,6 +15,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.basic.service.warehouseV2.*;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseMaterialHandleVo;
@@ -40,9 +43,6 @@ public class ReportController {
 
 
     @RpcConsumer
-    private DoctorWarehouseMonthlyStockReadService doctorWarehouseMonthlyStockReadService;
-
-    @RpcConsumer
     private DoctorWarehousePurchaseReadService doctorWarehousePurchaseReadService;
 
     @RpcConsumer
@@ -62,6 +62,8 @@ public class ReportController {
 
     @RpcConsumer
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
+    @RpcConsumer
+    private DoctorWarehouseStockMonthlyReadService doctorWarehouseStockMonthlyReadService;
 
     /**
      * 仓库报表
@@ -96,18 +98,26 @@ public class ReportController {
             //统计猪厂下每个仓库本月的入库和出库金额
             Response<Map<WarehouseMaterialHandleType, Map<Long, Long>>> inAndOutAmountsResponse = doctorWarehouseMaterialHandleReadService.
                     countWarehouseAmount(DoctorWarehouseMaterialHandle.builder()
-                            .farmId(farmId)
-                            .handleYear(year)
-                            .handleMonth(month)
-                            .build(), WarehouseMaterialHandleType.OUT, WarehouseMaterialHandleType.IN);
+                                    .farmId(farmId)
+                                    .handleYear(year)
+                                    .handleMonth(month)
+                                    .build(),
+                            WarehouseMaterialHandleType.OUT,
+                            WarehouseMaterialHandleType.IN,
+                            WarehouseMaterialHandleType.INVENTORY_PROFIT,
+                            WarehouseMaterialHandleType.INVENTORY_DEFICIT,
+                            WarehouseMaterialHandleType.TRANSFER_IN,
+                            WarehouseMaterialHandleType.TRANSFER_OUT,
+                            WarehouseMaterialHandleType.FORMULA_IN,
+                            WarehouseMaterialHandleType.FORMULA_OUT);
 
             if (!inAndOutAmountsResponse.isSuccess())
                 throw new JsonResponseException(inAndOutAmountsResponse.getError());
 
-            //统计猪厂下每个仓库的余额
-            Response<Map<Long, Long>> balanceAmountsResponse = doctorWarehousePurchaseReadService.countWarehouseBalanceAmount(farmId);
-            if (!balanceAmountsResponse.isSuccess())
-                throw new JsonResponseException(balanceAmountsResponse.getError());
+            //统计猪厂下每个仓库的当前余额
+//            Response<Map<Long, Long>> balanceAmountsResponse = doctorWarehousePurchaseReadService.countWarehouseBalanceAmount(farmId);
+//            if (!balanceAmountsResponse.isSuccess())
+//                throw new JsonResponseException(balanceAmountsResponse.getError());
 
             WarehouseReportVo balanceVo = new WarehouseReportVo();
             balanceVo.setMonthAndType(year + "-" + month + "结余");
@@ -123,9 +133,12 @@ public class ReportController {
             List<WarehouseReportVo.WarehouseReportMonthDetail> outDetails = new ArrayList<>(warehouseResponse.getResult().size());
             long totalBalance = 0, totalIn = 0, totalOut = 0;
             for (DoctorWareHouse wareHouse : warehouseResponse.getResult()) {
+//
+//
+                AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), year, month));
                 balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
-                        .amount(balanceAmountsResponse.getResult().containsKey(wareHouse.getId()) ? balanceAmountsResponse.getResult().get(wareHouse.getId()) : 0)
+                        .amount(balance.getAmount())
                         .build());
 
                 long inAmount;
@@ -135,6 +148,17 @@ public class ReportController {
                     inAmount = 0;
                 else
                     inAmount = inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.IN).get(wareHouse.getId());
+                inAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.INVENTORY_PROFIT) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_PROFIT).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_PROFIT).get(wareHouse.getId()) : 0 : 0;
+                inAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.TRANSFER_IN) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_IN).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_IN).get(wareHouse.getId()) : 0 : 0;
+
+                inAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.FORMULA_IN) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_IN).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_IN).get(wareHouse.getId()) : 0 : 0;
+
                 inDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
                         .amount(inAmount)
@@ -147,12 +171,22 @@ public class ReportController {
                     outAmount = 0;
                 else
                     outAmount = inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.OUT).get(wareHouse.getId());
+
+                outAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.INVENTORY_DEFICIT) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_DEFICIT).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_DEFICIT).get(wareHouse.getId()) : 0 : 0;
+                outAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.TRANSFER_OUT) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_OUT).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_OUT).get(wareHouse.getId()) : 0 : 0;
+                outAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.FORMULA_OUT) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_OUT).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_OUT).get(wareHouse.getId()) : 0 : 0;
                 outDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
                         .amount(outAmount)
                         .build());
 
-                totalBalance += balanceAmountsResponse.getResult().containsKey(wareHouse.getId()) ? balanceAmountsResponse.getResult().get(wareHouse.getId()) : 0;
+                totalBalance += balance.getAmount();
                 totalIn += inAmount;
                 totalOut += outAmount;
             }
@@ -189,6 +223,10 @@ public class ReportController {
     public List<WarehouseMonthlyReportVo> monthlyReport(@RequestParam Long warehouseId,
                                                         @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
+
+        Calendar lastMonth = Calendar.getInstance();
+        lastMonth.set(date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DATE));
+        lastMonth.add(Calendar.MONTH, -1);
         DoctorWarehouseStock stockCriteria = new DoctorWarehouseStock();
         stockCriteria.setWarehouseId(warehouseId);
         Response<List<DoctorWarehouseStock>> stocksResponse = doctorWarehouseStockReadService.list(stockCriteria);
@@ -203,7 +241,13 @@ public class ReportController {
                 throw new JsonResponseException(balanceResponse.getError());
             Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterialVendor(warehouseId, stock.getMaterialId(), stock.getVendorName(), date,
                     WarehouseMaterialHandleType.IN,
-                    WarehouseMaterialHandleType.OUT
+                    WarehouseMaterialHandleType.OUT,
+                    WarehouseMaterialHandleType.INVENTORY_PROFIT,
+                    WarehouseMaterialHandleType.INVENTORY_DEFICIT,
+                    WarehouseMaterialHandleType.FORMULA_IN,
+                    WarehouseMaterialHandleType.TRANSFER_OUT,
+                    WarehouseMaterialHandleType.FORMULA_IN,
+                    WarehouseMaterialHandleType.FORMULA_OUT
             );
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
@@ -219,16 +263,29 @@ public class ReportController {
             vo.setBalanceAmount(balanceResponse.getResult().getAmount());
             vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
 
-            vo.setInAmount(statisticsResponse.getResult().getIn().getAmount());
-            vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity());
-            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount());
-            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity());
+            vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
+                    + statisticsResponse.getResult().getInventoryProfit().getAmount()
+                    + statisticsResponse.getResult().getTransferIn().getAmount()
+                    + statisticsResponse.getResult().getFormulaIn().getAmount());
+            vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity()
+                    .add(statisticsResponse.getResult().getInventoryProfit().getQuantity())
+                    .add(statisticsResponse.getResult().getTransferIn().getQuantity())
+                    .add(statisticsResponse.getResult().getFormulaIn().getQuantity()));
 
-            //TODO 这种计算方式还是会出现负数
-            vo.setInitialAmount(vo.getBalanceAmount() + vo.getOutAmount() - vo.getInAmount());
-            vo.setInitialQuantity(vo.getBalanceQuantity().add(vo.getOutQuantity()).subtract(vo.getInQuantity()));
+            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount()
+                    + statisticsResponse.getResult().getInventoryDeficit().getAmount()
+                    + statisticsResponse.getResult().getTransferOut().getAmount()
+                    + statisticsResponse.getResult().getFormulaOut().getAmount());
+            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity()
+                    .add(statisticsResponse.getResult().getInventoryDeficit().getQuantity())
+                    .add(statisticsResponse.getResult().getTransferOut().getQuantity())
+                    .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
 
-            vo.setInQuantity(vo.getBalanceQuantity().add(vo.getOutQuantity()).multiply(vo.getInQuantity()));
+            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getMaterialId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
+            vo.setInitialAmount(initialBalance.getAmount());
+            vo.setInitialQuantity(initialBalance.getQuantity());
+
+//            vo.setInQuantity(vo.getBalanceQuantity().add(vo.getOutQuantity()).multiply(vo.getInQuantity()));
 
             report.add(vo);
         }
@@ -251,16 +308,23 @@ public class ReportController {
                                                                 @RequestParam(required = false) Integer type,
                                                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
-        DoctorWarehouseMaterialHandle criteria = new DoctorWarehouseMaterialHandle();
-        criteria.setWarehouseId(warehouseId);
-        criteria.setHandleYear(date.get(Calendar.YEAR));
-        criteria.setHandleMonth(date.get(Calendar.MONTH) + 1);
-        if (null != type)
-            criteria.setType(type);
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("handleYear", date.get(Calendar.YEAR));
+        criteria.put("handleMonth", date.get(Calendar.MONTH) + 1);
+        criteria.put("deleteFlag", WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
+        if (null != type) {
+            if (4 == type) {
+                criteria.put("bigType", Lists.newArrayList(WarehouseMaterialHandleType.TRANSFER_IN.getValue(), WarehouseMaterialHandleType.TRANSFER_OUT.getValue()));
+            } else if (3 == type) {
+                criteria.put("bigType", Lists.newArrayList(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue(), WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue()));
+            } else
+                criteria.put("type", type);
+        }
         if (StringUtils.isNotBlank(materialName))
-            criteria.setMaterialName(materialName);
+            criteria.put("materialName", materialName);
 
-        Response<List<DoctorWarehouseMaterialHandle>> materialHandleResponse = doctorWarehouseMaterialHandleReadService.list(criteria);
+        Response<List<DoctorWarehouseMaterialHandle>> materialHandleResponse = doctorWarehouseMaterialHandleReadService.advList(criteria);
         if (!materialHandleResponse.isSuccess())
             throw new JsonResponseException(materialHandleResponse.getError());
 
@@ -347,9 +411,13 @@ public class ReportController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "pigGroupApply")
     public List<WarehousePigGroupApplyVo> pigGroupApply(@RequestParam Long warehouseId,
-                                                        @RequestParam Long pigGroupId,
+                                                        @RequestParam(required = false) Long pigGroupId,
                                                         @RequestParam(required = false) Integer materialType,
                                                         @RequestParam(required = false) String materialName) {
+
+        if (StringUtils.isBlank(materialName))
+            materialName = null;
+
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(DoctorWarehouseMaterialApply.builder()
                 .warehouseId(warehouseId)
                 .type(materialType)
@@ -377,6 +445,7 @@ public class ReportController {
 
             vos.add(WarehousePigGroupApplyVo.builder()
                     .pigGroupId(apply.getPigGroupId())
+                    .pigGroupName(apply.getPigGroupName())
                     .openDate(groupResponse.getResult().getOpenAt())
                     .closeDate(groupResponse.getResult().getCloseAt())
                     .pigBarnName(apply.getPigBarnName())

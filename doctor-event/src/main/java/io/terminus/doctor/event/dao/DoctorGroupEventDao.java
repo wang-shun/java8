@@ -1,9 +1,11 @@
 package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.springframework.stereotype.Repository;
@@ -243,5 +245,25 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      */
     public Boolean updateIncludeNull(DoctorGroupEvent groupEvent) {
         return getSqlSession().update(sqlId("updateIncludeNull"), groupEvent) == 1;
+    }
+
+    /**
+     * 删除猪场下的所有猪群事件
+     * @param farmId 猪场id
+     */
+    public void deleteByFarmId(Long farmId) {
+        deleteByFarmId(farmId, Lists.newArrayList());
+    }
+
+    public void deleteByFarmId(Long farmId, List<Integer> pigTypes)  {
+        getSqlSession().delete(sqlId("deleteByFarmId"), ImmutableMap.of("farmId", farmId, "pigTypes", pigTypes));
+    }
+
+    public void deleteByGroupId(Long groupId) {
+        getSqlSession().delete(sqlId("deleteByGroupId"), groupId);
+    }
+
+    public List<DoctorFarmEarlyEventAtDto> getFarmEarlyEventAt(String startDate)  {
+        return sqlSession.selectList(sqlId("getFarmEarlyEventAt"), startDate);
     }
 }
