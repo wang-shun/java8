@@ -1,17 +1,14 @@
 package io.terminus.doctor.web.admin.utils;
 
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
-import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.handler.PigEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -22,7 +19,7 @@ import org.springframework.stereotype.Component;
  * Created by sunbo@terminus.io on 2017/9/13.
  */
 @Component
-public class EntryPigEventHandler extends AbstractPigEventHandler<DoctorFarmEntryDto> {
+public class EntryPigEventBuilder extends AbstractPigEventBuilder<DoctorFarmEntryDto> {
 
     @Autowired
     private DoctorBasicReadService doctorBasicReadService;
@@ -59,13 +56,4 @@ public class EntryPigEventHandler extends AbstractPigEventHandler<DoctorFarmEntr
         pigEvent.setBreedId(eventDto.getBreed());
     }
 
-
-    @Override
-    public void changePig(DoctorPigEvent pigEvent) {
-        DoctorPig pig = RespHelper.orServEx(doctorPigReadService.findPigById(pigEvent.getPigId()));
-        DoctorFarmEntryDto dto = jsonMapper.fromJson(pigEvent.getExtra(), DoctorFarmEntryDto.class);
-
-        pig.setInFarmDate(dto.getInFarmDate());
-
-    }
 }

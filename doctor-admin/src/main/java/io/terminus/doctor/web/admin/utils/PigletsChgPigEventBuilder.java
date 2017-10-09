@@ -23,7 +23,7 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
  * Created by sunbo@terminus.io on 2017/9/15.
  */
 @Component
-public class PigletsChgPigEventHandler extends AbstractPigEventHandler<DoctorPigletsChgDto> {
+public class PigletsChgPigEventBuilder extends AbstractPigEventBuilder<DoctorPigletsChgDto> {
 
     @Autowired
     private DoctorBasicReadService doctorBasicReadService;

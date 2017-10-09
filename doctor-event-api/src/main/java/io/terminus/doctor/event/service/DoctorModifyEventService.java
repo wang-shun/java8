@@ -1,13 +1,8 @@
 package io.terminus.doctor.event.service;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.terminus.doctor.common.utils.RespWithEx;
-import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
-import io.terminus.doctor.event.dto.event.admin.PigEventDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
-import io.terminus.doctor.event.handler.PigEventHandler;
-import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
@@ -47,7 +42,7 @@ public interface DoctorModifyEventService {
      * @param pigEvent
      * @return
      */
-    RespWithEx<Boolean> modifyPigEvent(String oldPigEvent, DoctorPigEvent pigEvent, PigEventHandler pigEventHandler);
+    RespWithEx<Boolean> modifyPigEvent(String oldPigEvent, DoctorPigEvent pigEvent);
 
 
     /**

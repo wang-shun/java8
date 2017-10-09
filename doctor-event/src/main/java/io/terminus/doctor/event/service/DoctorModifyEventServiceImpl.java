@@ -2,28 +2,16 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
-import io.terminus.doctor.event.dto.event.sow.*;
-import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
-import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
-import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.handler.DoctorPigEventHandler;
-import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
-import io.terminus.doctor.event.handler.PigEventHandler;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
-import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -88,9 +76,9 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
 
 
     @Override
-    public RespWithEx<Boolean> modifyPigEvent(String oldPigEvent, DoctorPigEvent pigEvent, PigEventHandler pigEventHandler) {
+    public RespWithEx<Boolean> modifyPigEvent(String oldPigEvent, DoctorPigEvent pigEvent) {
         try {
-            doctorPigEventManager.modifyPigEvent(pigEvent, oldPigEvent, pigEventHandler);
+            doctorPigEventManager.modifyPigEvent(pigEvent, oldPigEvent);
             return RespWithEx.ok(true);
         } catch (Exception e) {
             log.error("modify pig event failed , inputDto:{}, cause:{}", oldPigEvent, Throwables.getStackTraceAsString(e));

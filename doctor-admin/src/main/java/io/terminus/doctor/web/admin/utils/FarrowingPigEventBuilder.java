@@ -9,14 +9,12 @@ import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.xml.ws.Response;
-
 /**
  * 分娩
  * Created by sunbo@terminus.io on 2017/9/14.
  */
 @Component
-public class FarrowingPigEventHandler extends AbstractPigEventHandler<DoctorFarrowingDto> {
+public class FarrowingPigEventBuilder extends AbstractPigEventBuilder<DoctorFarrowingDto> {
 
 
     @Autowired

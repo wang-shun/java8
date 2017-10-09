@@ -8,7 +8,6 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
@@ -19,51 +18,33 @@ import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.utils.*;
-import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
-import io.terminus.doctor.event.dto.event.admin.PigEventDto;
-import io.terminus.doctor.event.dto.event.sow.*;
-import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.search.SearchedPig;
-import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.handler.PigEventHandler;
 import io.terminus.doctor.event.model.*;
 import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.web.admin.dto.DoctorGroupEventDetail;
-import io.terminus.doctor.web.admin.utils.*;
+import io.terminus.doctor.web.admin.utils.SmartGroupEventHandler;
+import io.terminus.doctor.web.admin.utils.SmartPigEventBuilder;
+import io.terminus.doctor.web.admin.utils.TransFromUtil;
 import io.terminus.doctor.web.admin.vo.PigAndPigGroup;
-import io.terminus.doctor.web.core.aspects.DoctorValidService;
 import lombok.Data;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSON;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.dozer.Mapper;
 import org.joda.time.DateTime;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Role;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.Errors;
-import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.SmartValidator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import sun.security.x509.EDIPartyName;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.*;
 
-import static io.terminus.common.utils.Arguments.notNull;
-import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static java.util.stream.Collectors.toList;
 
@@ -121,7 +102,7 @@ public class DoctorGodController {
     private TransFromUtil transFromUtil;
 
     @Autowired
-    private SmartPigEventHandler pigEventHandler;
+    private SmartPigEventBuilder pigEventBuilder;
     @Autowired
     private SmartGroupEventHandler groupEventHandler;
 
@@ -137,7 +118,6 @@ public class DoctorGodController {
     public void initBinder(WebDataBinder binder) {
         validator = (SmartValidator) binder.getValidator();
     }
-
 
     @RequestMapping(method = RequestMethod.GET, value = "event")
     public Object eventPaging(@RequestParam Map<String, Object> params,
@@ -199,14 +179,14 @@ public class DoctorGodController {
         if (!pigEventResponse.isSuccess())
             throw new JsonResponseException(pigEventResponse.getError());
         if (null == pigEventResponse.getResult())
-            throw new JsonResponseException("pig.event.not.found");
+            throw new JsonResponseException("god.event.not.found");
         DoctorPigEvent pigEvent = pigEventResponse.getResult();
         String oldPigEvent = TO_JSON_MAPPER.toJson(pigEvent);
 
-        if (pigEventHandler.isSupportedEvent(pigEvent))
-            pigEventHandler.updateEvent(input, pigEvent);
+        if (pigEventBuilder.isSupportedEvent(pigEvent))
+            pigEventBuilder.buildEvent(input, pigEvent);
 
-        return RespWithExHelper.orInvalid(doctorModifyEventService.modifyPigEvent(oldPigEvent, pigEvent, pigEventHandler));
+        return RespWithExHelper.orInvalid(doctorModifyEventService.modifyPigEvent(oldPigEvent, pigEvent));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "event/group/{id}")
@@ -423,6 +403,8 @@ public class DoctorGodController {
     public List<DoctorCustomer> customer(@RequestParam("farmId") Long farmId) {
         return RespHelper.or500(doctorBasicReadService.findCustomersByFarmId(farmId));
     }
+
+
     //-----------------下拉框专区-----------------------
 
     public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {

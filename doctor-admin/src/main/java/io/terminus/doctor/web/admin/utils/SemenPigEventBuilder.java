@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * Created by sunbo@terminus.io on 2017/9/15.
  */
 @Component
-public class SemenPigEventHandler extends AbstractPigEventHandler<DoctorSemenDto> {
+public class SemenPigEventBuilder extends AbstractPigEventBuilder<DoctorSemenDto> {
 
     @Override
     void buildEventDto(DoctorSemenDto eventDto, DoctorPigEvent pigEvent) {

@@ -25,6 +25,7 @@ import io.terminus.doctor.event.event.MsgListenedGroupEvent;
 import io.terminus.doctor.event.event.MsgListenedPigEvent;
 import io.terminus.doctor.event.event.MsgPigPublishDto;
 import io.terminus.doctor.event.handler.*;
+import io.terminus.doctor.event.handler.admin.SmartPigEventHandler;
 import io.terminus.doctor.event.model.*;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,8 @@ public class DoctorPigEventManager {
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
     @Autowired
     private DoctorGroupEventDao doctorGroupEventDao;
+    @Autowired
+    private SmartPigEventHandler pigEventHandler;
 
     /**
      * 事件处理
@@ -392,7 +395,7 @@ public class DoctorPigEventManager {
     }
 
     @Transactional
-    public void modifyPigEvent(DoctorPigEvent newEvent, String oldEvent, PigEventHandler pigEventHandler) {
+    public void modifyPigEvent(DoctorPigEvent newEvent, String oldEvent) {
 
         doctorPigEventDao.update(newEvent);
 
@@ -405,7 +408,7 @@ public class DoctorPigEventManager {
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .build());
         if (pigEventHandler.isSupportedEvent(newEvent))
-            pigEventHandler.changePig(newEvent);
+            pigEventHandler.handle(newEvent);
     }
 
 

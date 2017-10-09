@@ -21,7 +21,7 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
  * Created by sunbo@terminus.io on 2017/9/15.
  */
 @Component
-public class ChgFarmPigEventHandler extends AbstractPigEventHandler<DoctorChgFarmDto> {
+public class ChgFarmPigEventBuilder extends AbstractPigEventBuilder<DoctorChgFarmDto> {
 
     @Autowired
     private DoctorFarmReadService doctorFarmReadService;

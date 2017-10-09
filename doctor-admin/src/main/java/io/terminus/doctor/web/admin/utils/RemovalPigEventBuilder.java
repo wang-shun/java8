@@ -21,16 +21,13 @@ import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
-import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by sunbo@terminus.io on 2017/9/15.
  */
 @Component
-public class RemovalPigEventHandler extends AbstractPigEventHandler<DoctorRemovalDto> {
+public class RemovalPigEventBuilder extends AbstractPigEventBuilder<DoctorRemovalDto> {
 
     @Autowired
     private DoctorBasicReadService doctorBasicReadService;

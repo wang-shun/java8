@@ -18,7 +18,7 @@ import static io.terminus.common.utils.Arguments.isNull;
  * Created by sunbo@terminus.io on 2017/9/15.
  */
 @Component
-public class ChgLocationPigEventHandler extends AbstractPigEventHandler<DoctorChgLocationDto> {
+public class ChgLocationPigEventBuilder extends AbstractPigEventBuilder<DoctorChgLocationDto> {
 
     @Autowired
     private DoctorPigReadService doctorPigReadService;

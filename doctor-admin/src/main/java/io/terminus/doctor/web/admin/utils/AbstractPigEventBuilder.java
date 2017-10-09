@@ -8,12 +8,10 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.handler.PigEventHandler;
+import io.terminus.doctor.event.handler.PigEventBuilder;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.parana.user.model.UserProfile;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.ParameterizedType;
 
@@ -22,7 +20,7 @@ import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 /**
  * Created by sunbo@terminus.io on 2017/9/13.
  */
-public abstract class AbstractPigEventHandler<T extends BasePigEventInputDto> implements PigEventHandler {
+public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> implements PigEventBuilder {
 
     protected static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
 
@@ -46,7 +44,7 @@ public abstract class AbstractPigEventHandler<T extends BasePigEventInputDto> im
 
 
     @Override
-    public void updateEvent(String eventDto, DoctorPigEvent pigEvent) {
+    public void buildEvent(String eventDto, DoctorPigEvent pigEvent) {
         Class<T> clazz = getEventDtoClass();
         T event = parse(eventDto, clazz);
         if (null != event.getOperatorId() && null == event.getOperatorName()) {
@@ -79,8 +77,4 @@ public abstract class AbstractPigEventHandler<T extends BasePigEventInputDto> im
      */
     abstract void buildEventDto(T eventDto, DoctorPigEvent pigEvent);
 
-    @Override
-    public void changePig(DoctorPigEvent pigEvent) {
-
-    }
 }

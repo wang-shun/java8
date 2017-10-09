@@ -1,6 +1,5 @@
 package io.terminus.doctor.web.admin.utils;
 
-import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -10,14 +9,13 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 /**
  * 疾病
  * Created by sunbo@terminus.io on 2017/9/15.
  */
 @Component
-public class DiseasePigEventHandler extends AbstractPigEventHandler<DoctorDiseaseDto> {
+public class DiseasePigEventBuilder extends AbstractPigEventBuilder<DoctorDiseaseDto> {
 
     @Autowired
     private DoctorBasicReadService doctorBasicReadService;
