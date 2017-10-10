@@ -32,7 +32,8 @@ public class EntryPigEventBuilder extends AbstractPigEventBuilder<DoctorFarmEntr
 
     @Override
     public boolean isSupportedEvent(DoctorPigEvent pigEvent) {
-        return pigEvent.getType().intValue() == PigEvent.ENTRY.getKey().intValue();
+        return pigEvent.getType().intValue() == PigEvent.ENTRY.getKey().intValue()
+                || pigEvent.getType().intValue() == PigEvent.CHG_FARM_IN.getKey();
     }
 
     @Override

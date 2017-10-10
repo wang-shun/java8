@@ -42,6 +42,8 @@ public class ChgLocationPigEventBuilder extends AbstractPigEventBuilder<DoctorCh
 
     @Override
     public boolean isSupportedEvent(DoctorPigEvent pigEvent) {
-        return pigEvent.getType().intValue() == PigEvent.CHG_LOCATION.getKey().intValue() || pigEvent.getType().intValue() == PigEvent.TO_MATING.getKey() || pigEvent.getType().intValue() == PigEvent.TO_FARROWING.getKey();
+        return pigEvent.getType().intValue() == PigEvent.CHG_LOCATION.getKey().intValue()
+                || pigEvent.getType().intValue() == PigEvent.TO_MATING.getKey()
+                || pigEvent.getType().intValue() == PigEvent.TO_FARROWING.getKey();
     }
 }
