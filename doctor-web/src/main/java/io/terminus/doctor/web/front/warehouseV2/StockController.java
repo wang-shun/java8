@@ -180,7 +180,9 @@ public class StockController {
                     WarehouseMaterialHandleType.IN,
                     WarehouseMaterialHandleType.OUT,
                     WarehouseMaterialHandleType.TRANSFER_IN,
-                    WarehouseMaterialHandleType.TRANSFER_OUT);
+                    WarehouseMaterialHandleType.TRANSFER_OUT,
+                    WarehouseMaterialHandleType.FORMULA_IN,
+                    WarehouseMaterialHandleType.FORMULA_OUT);
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
 
@@ -190,14 +192,31 @@ public class StockController {
             vo.setMaterialName(stock.getMaterialName());
             vo.setUnit(stock.getUnit());
 
-            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity());
-            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount());
-            vo.setInAmount(statisticsResponse.getResult().getIn().getAmount());
-            vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity());
-            vo.setTransferInAmount(statisticsResponse.getResult().getTransferIn().getAmount());
-            vo.setTransferInQuantity(statisticsResponse.getResult().getTransferIn().getQuantity());
-            vo.setTransferOutAmount(statisticsResponse.getResult().getTransferOut().getAmount());
-            vo.setTransferOutQuantity(statisticsResponse.getResult().getTransferOut().getQuantity());
+//            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity());
+//            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount());
+//            vo.setInAmount(statisticsResponse.getResult().getIn().getAmount());
+//            vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity());
+//            vo.setTransferInAmount(statisticsResponse.getResult().getTransferIn().getAmount());
+//            vo.setTransferInQuantity(statisticsResponse.getResult().getTransferIn().getQuantity());
+//            vo.setTransferOutAmount(statisticsResponse.getResult().getTransferOut().getAmount());
+//            vo.setTransferOutQuantity(statisticsResponse.getResult().getTransferOut().getQuantity());
+            vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
+                    + statisticsResponse.getResult().getInventoryProfit().getAmount()
+                    + statisticsResponse.getResult().getTransferIn().getAmount()
+                    + statisticsResponse.getResult().getFormulaIn().getAmount());
+            vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity()
+                    .add(statisticsResponse.getResult().getInventoryProfit().getQuantity())
+                    .add(statisticsResponse.getResult().getTransferIn().getQuantity())
+                    .add(statisticsResponse.getResult().getFormulaIn().getQuantity()));
+
+            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount()
+                    + statisticsResponse.getResult().getInventoryDeficit().getAmount()
+                    + statisticsResponse.getResult().getTransferOut().getAmount()
+                    + statisticsResponse.getResult().getFormulaOut().getAmount());
+            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity()
+                    .add(statisticsResponse.getResult().getInventoryDeficit().getQuantity())
+                    .add(statisticsResponse.getResult().getTransferOut().getQuantity())
+                    .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
 
             vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
             vo.setBalanceAmount(balanceResponse.getResult().getAmount());
