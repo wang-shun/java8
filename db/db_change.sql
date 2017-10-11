@@ -1478,3 +1478,6 @@ CREATE TABLE `doctor_warehouse_stock_monthly` (
 -- 仓库物料领用表的领用猪群名和领用日期字段修改 2017-09-30
 ALTER TABLE doctor_warehouse_material_apply MODIFY pig_group_name VARCHAR(512) COMMENT '领用猪群名称';
 ALTER TABLE doctor_warehouse_material_apply MODIFY apply_date DATE COMMENT '领用日期';
+
+-- 2017-10-11
+ALTER table doctor_pigs ADD column `rfid` VARCHAR(32) DEFAULT NULL COMMENT '猪rfid物联网使用' after pig_Code;

@@ -51,4 +51,19 @@ public class DoctorSowDetailDto implements Serializable {
     private Long canRollback;
 
     private List<DoctorPigEvent> doctorPigEvents;
+
+    /**
+     * 猪rfid
+     */
+    private String rfid;
+
+    /**
+     * 状态天数,母猪出入当前状态的天数
+     */
+    private Integer statusDay;
+
+    /**
+     * 母猪体重
+     */
+    private Double pigWeight;
 }

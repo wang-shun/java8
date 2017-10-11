@@ -18,6 +18,7 @@ import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
@@ -57,6 +58,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -182,7 +184,9 @@ public class DoctorSearches {
         params.put("pigType", pigType.getKey().toString());
         Map<String, Object> objectMap = transMapType(params);
         //先根据事件去查
-        boolean searchEvent = !Strings.isNullOrEmpty(params.get("types")) || !Strings.isNullOrEmpty(params.get("beginDate")) || !Strings.isNullOrEmpty(params.get("endDate"));
+        boolean searchEvent = !Strings.isNullOrEmpty(params.get("types"))
+                || !Strings.isNullOrEmpty(params.get("beginDate"))
+                || !Strings.isNullOrEmpty(params.get("endDate"));
         if (searchEvent) {
             Map<String, Object> eventCriteria = Maps.newHashMap();
             if (!Strings.isNullOrEmpty(params.get("types"))){
@@ -215,6 +219,10 @@ public class DoctorSearches {
                     searchedPig.setPigTypeName(pigSex.getDesc());
                 }
             }
+            Date eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId()
+                    , searchedPig.getStatus()));
+            Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
+            searchedPig.setStatusDay(statusDay);
         });
         return paging;
     }

@@ -47,6 +47,11 @@ public class DoctorPig implements Serializable{
 
     private String pigCode;
 
+    /**
+     * 猪rfid 物联网使用
+     */
+    private String rfid;
+
     private Integer pigType;
 
     /**

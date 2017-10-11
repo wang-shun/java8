@@ -46,4 +46,9 @@ public class DoctorBoarDetailDto implements Serializable{
 
     private List<DoctorPigEvent> doctorPigEvents;
 
+    /**
+     * 猪rfid
+     */
+    private String rfid;
+
 }

@@ -45,6 +45,7 @@
             </foreach>
         </if>
 
+        <if test="rfid != null">AND a.rfid = #{rfid}</if>
     </sql>
 
     <select id="count" parameterType="map" resultType="long" >
@@ -76,7 +77,9 @@
             b.weight AS weight,
             a.in_farm_day_age AS dayAge,
             b.current_parity AS currentParity,
-            a.boar_type as boarType
+            a.boar_type as boarType,
+            a.rfid as rfid,
+            b.weight as pigWeight
         FROM doctor_pigs a
         LEFT JOIN doctor_pig_tracks b
           ON a.id = b.pig_id
