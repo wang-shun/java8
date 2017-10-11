@@ -1,8 +1,12 @@
 package io.terminus.doctor.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
+import io.terminus.common.exception.ServiceException;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -36,6 +40,7 @@ public class IotRole implements Serializable{
      * 角色状态:
      *
      * 0. 未生效(冻结), 1. 生效, -1. 删除
+     * @see Status
      */
     private Integer status;
 
@@ -64,5 +69,30 @@ public class IotRole implements Serializable{
 
     public String getBaseRole() {
         return "IOT";
+    }
+
+    public enum Status {
+        FROZEN(0, "未生效"),
+        EFFECTED(1, "生效"),
+        DELETED(-1, "删除");
+
+        @Getter
+        private int value;
+        @Getter
+        private String desc;
+
+        Status(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static Status from(int number) {
+            return Lists.newArrayList(Status.values()).stream()
+                    .filter(s -> Objects.equal(s.value, number))
+                    .findFirst()
+                    .<ServiceException>orElseThrow(() -> {
+                        throw new ServiceException("doctor.service.review.status.error");
+                    });
+        }
     }
 }
