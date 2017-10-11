@@ -1478,3 +1478,26 @@ CREATE TABLE `doctor_warehouse_stock_monthly` (
 -- 仓库物料领用表的领用猪群名和领用日期字段修改 2017-09-30
 ALTER TABLE doctor_warehouse_material_apply MODIFY pig_group_name VARCHAR(512) COMMENT '领用猪群名称';
 ALTER TABLE doctor_warehouse_material_apply MODIFY apply_date DATE COMMENT '领用日期';
+
+-- 2017-10-11物联网角色表
+CREATE TABLE `iot_roles` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR (32) NOT NULL COMMENT '角色名',
+  `desc` VARCHAR (255) NOT NULL COMMENT '角色描述',
+  `status` tinyint(2) NOT NULL COMMENT '角色状态',
+  `allow_json` text NOT NULL COMMENT '角色允许查看页面',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='物联网角色表';
+
+-- 2017-10-11用户与物联网关联表
+CREATE TABLE `iot_user_roles` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL COMMENT '用户id',
+  `iot_role_id` bigint(20) NOT NULL COMMENT '物联网角色id',
+  `iot_role_name` smallint(6) NOT NULL COMMENT '角色名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='用户与物联网关联表';
