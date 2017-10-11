@@ -108,7 +108,7 @@ public class SearchedPig implements Serializable {
     private String rfid;
 
     /**
-     * 状态天数,母猪出入当前状态的天数
+     * 状态天数,母猪出于当前状态的天数
      */
     private Integer statusDay;
 
