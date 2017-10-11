@@ -151,8 +151,6 @@ public class StockController {
                                                      @RequestParam(required = false) Integer pageNo,
                                                      @RequestParam(required = false) Integer pageSize) {
 
-        Calendar now = Calendar.getInstance();
-
         if (StringUtils.isBlank(materialName)) {
             //如果传入的是空，那么将会应用上这个查询条件，导致查不出数据
             materialName = null;
@@ -168,6 +166,7 @@ public class StockController {
         if (null == stockResponse.getResult().getData())
             throw new JsonResponseException("stock.not.found");
 
+        Calendar now = Calendar.getInstance();
 
         Paging<WarehouseStockStatisticsVo> result = new Paging<>();
         result.setTotal(stockResponse.getResult().getTotal());
@@ -179,6 +178,8 @@ public class StockController {
             Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterial(warehouseId, stock.getMaterialId(), now,
                     WarehouseMaterialHandleType.IN,
                     WarehouseMaterialHandleType.OUT,
+                    WarehouseMaterialHandleType.INVENTORY_PROFIT,
+                    WarehouseMaterialHandleType.INVENTORY_DEFICIT,
                     WarehouseMaterialHandleType.TRANSFER_IN,
                     WarehouseMaterialHandleType.TRANSFER_OUT,
                     WarehouseMaterialHandleType.FORMULA_IN,
@@ -188,6 +189,10 @@ public class StockController {
 
             WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
             vo.setId(stock.getId());
+            vo.setFarmId(stock.getFarmId());
+            vo.setWarehouseId(stock.getWarehouseId());
+            vo.setWarehouseName(stock.getWarehouseName());
+            vo.setWarehouseType(stock.getWarehouseType());
             vo.setMaterialId(stock.getMaterialId());
             vo.setMaterialName(stock.getMaterialName());
             vo.setUnit(stock.getUnit());
