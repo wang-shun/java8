@@ -13,6 +13,7 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandl
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
 import io.terminus.doctor.web.core.export.Exporter;
+import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseEventExportVo;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseMaterialEventVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/24.
@@ -148,7 +150,17 @@ public class EventController {
         if (!handleResponse.isSuccess())
             throw new JsonResponseException(handleResponse.getError());
 
-        exporter.export(handleResponse.getResult(), "web-material-export", request, response);
+        exporter.export(handleResponse.getResult().stream().map(handle -> {
+            WarehouseEventExportVo eventExportVo = new WarehouseEventExportVo();
+            eventExportVo.setMaterialName(handle.getMaterialName());
+            eventExportVo.setWareHouseName(handle.getWarehouseName());
+            eventExportVo.setProviderFactoryName(handle.getVendorName());
+            eventExportVo.setUnitName(handle.getUnit());
+            eventExportVo.setUnitPrice(handle.getUnitPrice());
+            eventExportVo.setEventTime(handle.getHandleDate());
+            eventExportVo.setAmount(handle.getQuantity().multiply(new BigDecimal(handle.getUnitPrice())).longValue());
+            return eventExportVo;
+        }).collect(Collectors.toList()), "web-wareHouse-event", request, response);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
