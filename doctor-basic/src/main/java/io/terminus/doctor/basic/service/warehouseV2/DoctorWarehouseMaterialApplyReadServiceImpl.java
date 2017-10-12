@@ -56,7 +56,7 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
     @Override
     public Response<List<DoctorWarehouseMaterialApply>> list(Map<String, Object> criteria) {
         try {
-            return Response.ok(doctorWarehouseMaterialApplyDao.list(criteria));
+            return Response.ok(doctorWarehouseMaterialApplyDao.advList(criteria));
         } catch (Exception e) {
             log.error("failed to list doctor warehouse material apply, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.material.apply.list.fail");

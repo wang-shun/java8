@@ -61,4 +61,21 @@ public class DoctorWarehouseStockDao extends MyBatisDao<DoctorWarehouseStock> {
         return this.sqlSession.selectList(this.sqlId("listMergeVendor"), criteria);
     }
 
+
+    public Paging<DoctorWarehouseStock> advPaging(Integer offset, Integer limit, Map<String, Object> criteria) {
+        if (criteria == null) {
+            criteria = Maps.newHashMap();
+        }
+
+        Long total = (Long) this.sqlSession.selectOne(this.sqlId("advCount"), criteria);
+        if (total.longValue() <= 0L) {
+            return new Paging(0L, Collections.emptyList());
+        } else {
+            ((Map) criteria).put("offset", offset);
+            ((Map) criteria).put("limit", limit);
+            List<DoctorWarehouseStock> datas = this.sqlSession.selectList(this.sqlId("advPaging"), criteria);
+            return new Paging(total, datas);
+        }
+    }
+
 }
