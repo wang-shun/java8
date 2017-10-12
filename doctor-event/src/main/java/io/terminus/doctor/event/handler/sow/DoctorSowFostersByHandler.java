@@ -71,8 +71,10 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventHandler {
         toTrack.setUnweanQty(MoreObjects.firstNonNull(toTrack.getUnweanQty(), 0) + fosterCount);  //未断奶数
         toTrack.setWeanQty(MoreObjects.firstNonNull(toTrack.getWeanQty(), 0));    //断奶数不变
 
-        // 修改当前的母猪状态信息
+        // 修改当前的母猪状态信息和默认关联原母猪的猪群id
         toTrack.setStatus(PigStatus.FEED.getKey());
+        DoctorPigTrack fromPigTrack = doctorPigTrackDao.findByPigId(fosterByDto.getFromSowId());
+        toTrack.setGroupId(fromPigTrack.getGroupId());
         return toTrack;
     }
 

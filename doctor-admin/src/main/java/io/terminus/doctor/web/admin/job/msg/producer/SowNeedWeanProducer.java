@@ -102,8 +102,8 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                                 .url(getPigJumpUrl(pigDto))
                                 .businessId(pigDto.getPigId())
                                 .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
-                                .operatorId(farrowingEvent.getOperatorId())
-                                .operatorName(farrowingEvent.getOperatorName())
+                                .operatorId(matingEvent.getOperatorId())
+                                .operatorName(matingEvent.getOperatorName())
                                 .status(pigDto.getStatus())
                                 .statusName(pigDto.getStatusName())
                                 .build();

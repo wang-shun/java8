@@ -461,6 +461,8 @@ public class DoctorImportDataService {
             org = new DoctorOrg();
             org.setName(orgName);
             org.setMobile(mobile);
+            org.setParentId(0L);
+            org.setType(DoctorOrg.Type.CLIQUE.getValue());
             doctorOrgDao.create(org);
         }else{
             log.warn("org {} has existed, id = {}", orgName, org.getId());

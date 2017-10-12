@@ -383,6 +383,8 @@ public class UserInitService {
         org.setMobile(orgMobile);
         org.setLicense(license);
         org.setOutId(outId);
+        org.setParentId(0L);
+        org.setType(DoctorOrg.Type.CLIQUE.getValue());
         doctorOrgDao.create(org);
         return org;
     }
