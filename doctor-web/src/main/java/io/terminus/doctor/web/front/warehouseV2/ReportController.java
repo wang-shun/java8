@@ -322,7 +322,7 @@ public class ReportController {
                 criteria.put("type", type);
         }
         if (StringUtils.isNotBlank(materialName))
-            criteria.put("materialName", materialName);
+            criteria.put("materialNameLike", materialName);
 
         Response<List<DoctorWarehouseMaterialHandle>> materialHandleResponse = doctorWarehouseMaterialHandleReadService.advList(criteria);
         if (!materialHandleResponse.isSuccess())
@@ -382,17 +382,17 @@ public class ReportController {
                                                     @RequestParam(required = false) Integer type,
                                                     @RequestParam(required = false) String materialName,
                                                     @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
-        DoctorWarehouseMaterialApply criteria = new DoctorWarehouseMaterialApply();
-        criteria.setApplyYear(date.get(Calendar.YEAR));
-        criteria.setApplyMonth(date.get(Calendar.MONTH) + 1);
-        criteria.setWarehouseId(warehouseId);
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("applyYear", date.get(Calendar.YEAR));
+        criteria.put("applyMonth", date.get(Calendar.MONTH) + 1);
+        criteria.put("warehouseId", warehouseId);
 
         if (StringUtils.isNotBlank(materialName))
-            criteria.setMaterialName(materialName);
+            criteria.put("materialNameLike", materialName);
         if (null != pigBarnId)
-            criteria.setPigBarnId(pigBarnId);
+            criteria.put("pigBarnId", pigBarnId);
         if (null != type)
-            criteria.setType(type);
+            criteria.put("type", type);
 
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
         if (!applyResponse.isSuccess())
@@ -415,15 +415,14 @@ public class ReportController {
                                                         @RequestParam(required = false) Integer materialType,
                                                         @RequestParam(required = false) String materialName) {
 
-        if (StringUtils.isBlank(materialName))
-            materialName = null;
+        Map<String, Object> criteria = new HashMap<>();
+        if (StringUtils.isNotBlank(materialName))
+            criteria.put("materialNameLike", materialName);
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("type", materialType);
+        criteria.put("pigGroupId", pigGroupId);
 
-        Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(DoctorWarehouseMaterialApply.builder()
-                .warehouseId(warehouseId)
-                .type(materialType)
-                .materialName(materialName)
-                .pigGroupId(pigGroupId)
-                .build());
+        Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
 
         if (!applyResponse.isSuccess())
             throw new JsonResponseException(applyResponse.getError());

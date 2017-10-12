@@ -59,6 +59,25 @@
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
     </sql>
+    <sql id="advCriteria">
+        <where>
+            <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
+            <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
+            <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
+            <if test="vendorName != null">AND `vendor_name` = #{vendorName}</if>
+            <if test="farmId != null">AND `farm_id` = #{farmId}</if>
+            <if test="managerId != null">AND `manager_id` = #{managerId}</if>
+            <if test="materialName != null">AND `material_name` = #{materialName}</if>
+            <if test="materialId != null">AND `material_id` = #{materialId}</if>
+            <if test="quantity != null">AND `quantity` = #{quantity}</if>
+            <if test="unit != null">AND `unit` = #{unit}</if>
+            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
+            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+            <if test="materialNameLike != null">AND `material_name` like  CONCAT('%',#{materialNameLike},'%')</if>
+        </where>
+    </sql>
+
+
 
     <insert id="create" parameterType="DoctorWarehouseStock" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
@@ -176,6 +195,20 @@
         ORDER BY `id` DESC
         ) as t0
         LEFT JOIN <include refid="tb"/> as t1 on t0.id=t1.id
+    </select>
+
+    <select id="advCount" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <include refid="advCriteria"/>
+    </select>
+
+    <select id="advPaging" parameterType="map" resultMap="DoctorWarehouseStockMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="advCriteria"/>
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}
     </select>
 
 
