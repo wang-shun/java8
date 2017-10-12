@@ -298,7 +298,20 @@
                 #{i}
             </foreach>
         </if>
-
+        <if test="eventSources !=null and eventSources.size()>0">
+            AND (`event_source` IN
+            <foreach collection="eventSources" item="source" open="(" close=")" separator=",">
+                #{source}
+            </foreach>
+            OR (
+            `event_source` NOT IN
+            <foreach collection="eventSources" item="source" open="(" close=")" separator=",">
+                #{source}
+            </foreach> AND
+            <![CDATA[ event_at >= #{beginDate} ]]> AND <![CDATA[ event_at <= #{endDate} ]]>
+            )
+            )
+        </if>
         <if test="pigTypes != null &amp;&amp; pigTypes.size() > 0">
             AND `pig_type` IN
             <foreach collection="pigTypes" item="pigType" open="(" close=")" separator=",">
