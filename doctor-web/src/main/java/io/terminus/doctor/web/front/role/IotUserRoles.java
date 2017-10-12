@@ -7,9 +7,11 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.user.dto.IotUserRoleInfo;
 import io.terminus.doctor.user.model.IotRole;
+import io.terminus.doctor.user.model.IotUserRole;
 import io.terminus.doctor.user.service.IotUserRoleReadService;
 import io.terminus.doctor.user.service.IotUserRoleWriteService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,6 +50,17 @@ public class IotUserRoles {
     }
 
     /**
+     * 根据关联关系id查询用户与角色关联关系"
+     * @param id 关联关系id
+     * @return 关联关系
+     */
+    @ApiOperation("根据关联关系id查询用户与角色关联关系")
+    @RequestMapping(value = "/iotUserRole/{id}")
+    public IotUserRole findUserRoleById(@PathVariable @ApiParam("关联关系id") Long id) {
+        return null;
+    }
+
+    /**
      * 创建或更新用户与角色关系
      * @param iotUserRole 用户与角色关系
      * @return 是否成功
@@ -69,6 +82,16 @@ public class IotUserRoles {
     }
 
     /**
+     * 根据角色id查询物联网角色
+     * @param id 角色id
+     * @return 物联网角色
+     */
+    @ApiOperation("根据角色id查询物联网角色")
+    public IotRole findIotRoleById(@PathVariable @ApiParam("角色id") Long id) {
+        return null;
+    }
+
+    /**
      * 创建或更新物联网角色
      * @param iotRole 物联网角色
      * @return 是否成功
@@ -78,5 +101,4 @@ public class IotUserRoles {
     public Boolean createOrUpdateIotRole(@RequestBody @ApiParam("物联网角色") IotRole iotRole){
         return null;
     }
-
 }
