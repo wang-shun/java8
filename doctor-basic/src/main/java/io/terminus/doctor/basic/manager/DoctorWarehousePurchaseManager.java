@@ -13,6 +13,7 @@ import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
+import io.terminus.doctor.common.exception.InvalidException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,8 +35,10 @@ public class DoctorWarehousePurchaseManager {
 
     @Autowired
     private DoctorWarehousePurchaseDao doctorWarehousePurchaseDao;
+    @Autowired
+    private DoctorWarehouseStockManager doctorWarehouseStockManager;
 
-//    @Transactional
+    //    @Transactional
     public DoctorWarehousePurchase in(AbstractWarehouseStockDto stockDto, WarehouseStockInDto.WarehouseStockInDetailDto detail, DoctorWarehouseStock stock) {
 
         DoctorWarehousePurchase purchase = new DoctorWarehousePurchase();
@@ -60,15 +63,15 @@ public class DoctorWarehousePurchaseManager {
     }
 
     //    @Transactional(propagation = Propagation.NESTED)
-    public DoctorWarehouseHandlerManager.PurchaseHandleContext out(Long warehouseId, Long materialId, BigDecimal quantity) {
+    public DoctorWarehouseHandlerManager.PurchaseHandleContext out(DoctorWarehouseStock stock, BigDecimal quantity) {
 
         DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
-        purchaseCriteria.setWarehouseId(warehouseId);
-        purchaseCriteria.setMaterialId(materialId);
+        purchaseCriteria.setWarehouseId(stock.getWarehouseId());
+        purchaseCriteria.setMaterialId(stock.getMaterialId());
         purchaseCriteria.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());//未出库完的
         List<DoctorWarehousePurchase> materialPurchases = doctorWarehousePurchaseDao.list(purchaseCriteria);
         if (null == materialPurchases || materialPurchases.isEmpty())
-            throw new ServiceException("purchase.not.found");
+            throw new InvalidException("purchase.not.found", stock.getWarehouseName(), stock.getMaterialName());
         materialPurchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
 
         DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = new DoctorWarehouseHandlerManager.PurchaseHandleContext();
@@ -108,22 +111,27 @@ public class DoctorWarehousePurchaseManager {
     }
 
 
+    public long calculateUnitPrice(Long warehouseId, Long materialId) {
+        return calculateUnitPrice(doctorWarehouseStockManager.getStock(warehouseId, materialId).orElseThrow(() ->
+                new InvalidException("stock.not.found", warehouseId, materialId)
+        ));
+    }
+
     /**
      * 计算单价
      * 先找本月物料所有的入库价格记录，加权平均算单价
      * 如果本月没有入库记录，取最近一次入库记录的单价
      *
-     * @param warehouseId
-     * @param materialId
+     * @param stock
      * @return
      * @throws ServiceException 如果物料没有任何入库记录
      */
-    public long calculateUnitPrice(Long warehouseId, Long materialId) {
+    public long calculateUnitPrice(DoctorWarehouseStock stock) {
         Calendar thisMonth = Calendar.getInstance();
 //        lastMonth.add(Calendar.MONTH, -1);//上一个月
         List<DoctorWarehousePurchase> thisMonthPurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
-                .warehouseId(warehouseId)
-                .materialId(materialId)
+                .warehouseId(stock.getWarehouseId())
+                .materialId(stock.getMaterialId())
                 .handleYear(thisMonth.get(Calendar.YEAR))
                 .handleMonth(thisMonth.get(Calendar.MONTH) + 1)//Calendar第一个月以0开始
                 .build());
@@ -131,11 +139,11 @@ public class DoctorWarehousePurchaseManager {
         if (thisMonthPurchases.isEmpty()) {
             PageInfo pageInfo = new PageInfo(1, 1);
             Paging<DoctorWarehousePurchase> lastOnePurchases = doctorWarehousePurchaseDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), DoctorWarehousePurchase.builder()
-                    .warehouseId(warehouseId)
-                    .materialId(materialId)
+                    .warehouseId(stock.getWarehouseId())
+                    .materialId(stock.getMaterialId())
                     .build());
             if (lastOnePurchases.isEmpty())
-                throw new ServiceException("purchase.not.found");
+                throw new InvalidException("purchase.not.found", stock.getWarehouseName(), stock.getMaterialName());
             return lastOnePurchases.getData().get(0).getUnitPrice();
         } else {
 

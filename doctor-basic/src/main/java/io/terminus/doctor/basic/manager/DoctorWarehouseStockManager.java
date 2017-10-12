@@ -71,9 +71,9 @@ public class DoctorWarehouseStockManager {
 
             if (!materialCodes.isEmpty()) {
                 if (!materialCodes.get(0).getSpecification().equals(detailDto.getSpecification()))
-                    throw new ServiceException("选定已有厂家时，物料编码和规格不能随意修改");
+                    throw new InvalidException("material.code.or.vendor.existed", stock.getWarehouseName(), stock.getMaterialName());
                 if (!materialCodes.get(0).getCode().equals(detailDto.getMaterialCode()))
-                    throw new ServiceException("选定已有厂家时，物料编码和规格不能随意修改");
+                    throw new InvalidException("material.code.or.vendor.existed", stock.getWarehouseName(), stock.getMaterialName());
             }
             if (materialCodes.isEmpty()) {
                 DoctorMaterialCode materialCode = new DoctorMaterialCode();
@@ -104,12 +104,12 @@ public class DoctorWarehouseStockManager {
     }
 
     //    @Transactional(propagation = Propagation.NESTED)
-    public DoctorWarehouseStock out(WarehouseStockOutDto outDto, WarehouseStockOutDto.WarehouseStockOutDetail detailDto) {
+    public DoctorWarehouseStock out(WarehouseStockOutDto outDto, WarehouseStockOutDto.WarehouseStockOutDetail detailDto, DoctorWarehouseStockWriteServiceImpl.StockContext context) {
         DoctorWarehouseStock stock = getStock(outDto.getWarehouseId(), detailDto.getMaterialId()).orElseThrow(() ->
-                new ServiceException("stock.not.found"));
+                new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), context.getSupportedMaterials().get(detailDto.getMaterialId())));
 
         if (stock.getQuantity().compareTo(detailDto.getQuantity()) < 0)
-            throw new ServiceException("stock.not.enough");
+            throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getMaterialName(), stock.getQuantity(), stock.getUnit());
 
         stock.setQuantity(stock.getQuantity().subtract(detailDto.getQuantity()));
         doctorWarehouseStockDao.update(stock);

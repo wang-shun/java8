@@ -21,9 +21,11 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandler;
 import io.terminus.doctor.basic.service.DoctorFarmBasicReadService;
+import io.terminus.doctor.common.exception.InvalidException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -189,7 +191,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             //找到对应库存
             DoctorWarehouseStock stock = getStock(stockInventory.getWarehouseId(), detail.getMaterialId(), null);
             if (null == stock)
-                return Response.fail("stock.not.found");
+                throw new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), context.getSupportedMaterials().get(detail.getMaterialId()));
 
             int compareResult = stock.getQuantity().compareTo(detail.getQuantity());
 
@@ -224,7 +226,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 purchaseCriteria.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
                 List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.list(purchaseCriteria);
                 if (null == purchases || purchases.isEmpty())
-                    throw new ServiceException("purchase.not.found");
+                    throw new InvalidException("purchase.not.found", stock.getWarehouseName(), stock.getMaterialName());
                 //根据处理日期倒序，找出最近一次的入库记录
                 purchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
 
@@ -232,7 +234,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 changedQuantity = stock.getQuantity().subtract(detail.getQuantity());
 //                    long averagePrice = handleOutAndCalcAveragePrice(changedQuantity, purchases, stockAndPurchases, stocks, false, null, null);
                 DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(purchases, changedQuantity);
-                materialHandle.setUnitPrice(doctorWarehousePurchaseManager.calculateUnitPrice(stock.getWarehouseId(), stock.getMaterialId()));
+                materialHandle.setUnitPrice(doctorWarehousePurchaseManager.calculateUnitPrice(stock));
 
                 materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
                 materialHandle.setQuantity(changedQuantity);
@@ -249,7 +251,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 PageInfo page = new PageInfo(1, 1);
                 Paging<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.paging(page.getOffset(), page.getLimit(), purchaseCriteria);
                 if (null == purchases || purchases.isEmpty())
-                    new ServiceException("purchase.not.found");
+                    new InvalidException("purchase.not.found", stock.getWarehouseName(), stock.getMaterialName());
 
                 DoctorWarehousePurchase lastPurchase = purchases.getData().get(0);
 
@@ -300,22 +302,22 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         for (WarehouseStockTransferDto.WarehouseStockTransferDetail detail : stockTransfer.getDetails()) {
 
             if (detail.getTransferInWarehouseId() == stockTransfer.getWarehouseId())
-                return Response.fail("transfer.out.warehouse.equals.transfer.in.warehouse");
+                throw new InvalidException("transfer.out.warehouse.equals.transfer.in.warehouse", context.getWareHouse().getWareHouseName(), context.getSupportedMaterials().get(detail.getMaterialId()));
 
             DoctorWareHouse targetWareHouse = doctorWareHouseDao.findById(detail.getTransferInWarehouseId());
             if (null == targetWareHouse)
-                return Response.fail("warehouse.not.found");
+                throw new InvalidException("warehouse.not.found", detail.getTransferInWarehouseId());
 
             if (context.getWareHouse().getType().intValue() != targetWareHouse.getType().intValue())
-                return Response.fail("transfer.warehouse.type.not.equals");
+                throw new InvalidException("transfer.warehouse.type.not.equals", context.getWareHouse().getWareHouseName(), targetWareHouse.getWareHouseName());
 
             //找到对应库存
             DoctorWarehouseStock stock = getStock(stockTransfer.getWarehouseId(), detail.getMaterialId(), null);
             if (null == stock)
-                return Response.fail("stock.not.found");
+                throw new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), context.getSupportedMaterials().get(detail.getMaterialId()));
 
             if (stock.getQuantity().compareTo(detail.getQuantity()) < 0)
-                return Response.fail("stock.not.enough");
+                throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getMaterialName(), stock.getQuantity(), stock.getUnit());
 
 
             DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
@@ -324,11 +326,11 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             purchaseCriteria.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
             List<DoctorWarehousePurchase> transferOutPurchases = doctorWarehousePurchaseDao.list(purchaseCriteria);
             if (null == transferOutPurchases || transferOutPurchases.isEmpty())
-                throw new ServiceException("purchase.not.found");
+                throw new InvalidException("purchase.not.found", stock.getWarehouseName(), stock.getMaterialName());
             transferOutPurchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
 
 //                long averagePrice = handleOutAndCalcAveragePrice(detail.getQuantity(), transferOutPurchases, stockAndPurchases, stocks, true, targetWareHouse, c);
-            long averagePrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock.getWarehouseId(), stock.getMaterialId());
+            long averagePrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock);
             DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(transferOutPurchases, detail.getQuantity());
 
             //调出
@@ -401,7 +403,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
         for (WarehouseStockOutDto.WarehouseStockOutDetail detail : stockOut.getDetails()) {
 
-            DoctorWarehouseStock stock = doctorWarehouseStockManager.out(stockOut, detail);
+            DoctorWarehouseStock stock = doctorWarehouseStockManager.out(stockOut, detail, context);
 
 //                DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
 //                purchaseCriteria.setWarehouseId(stockOut.getWarehouseId());
@@ -413,8 +415,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //                materialPurchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
 //
 //                DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(materialPurchases, detail.getQuantity());
-            DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = doctorWarehousePurchaseManager.out(stock.getWarehouseId(), stock.getMaterialId(), detail.getQuantity());
-            long unitPrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock.getWarehouseId(), stock.getMaterialId());
+            DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = doctorWarehousePurchaseManager.out(stock, detail.getQuantity());
+            long unitPrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock);
 
             DoctorWarehouseMaterialHandle materialHandle = doctorWarehouseMaterialHandleManager.out(DoctorWarehouseMaterialHandleManager.MaterialHandleContext.builder()
                     .stock(stock)
@@ -502,7 +504,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 thisWarehousePurchaseContext.setStock(stock.get(0));
                 thisWarehousePurchaseContext.setPurchaseQuantity(thisWarehousePurchaseMap);
 //                    long thisWarehouseAveragePrice = thisWarehouseAmount.divide(thisWarehouseQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
-                long thisWarehouseAveragePrice = doctorWarehousePurchaseManager.calculateUnitPrice(warehouseId, stock.get(0).getMaterialId());
+                long thisWarehouseAveragePrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock.get(0));
                 doctorWarehouseHandlerManager.outStock(stock.get(0), thisWarehousePurchaseContext, DoctorWarehouseMaterialHandle.builder()
                         .farmId(stock.get(0).getFarmId())
                         .warehouseId(stock.get(0).getWarehouseId())
@@ -623,28 +625,29 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             throw new ServiceException(farmBasicResponse.getError());
         DoctorFarmBasic farmBasic = farmBasicResponse.getResult();
         if (null == farmBasic)
-            throw new ServiceException("farm.basic.not.found");
+            throw new InvalidException("farm.basic.not.found", farmID);
 
         List<Long> currentFarmSupportedMaterials = farmBasic.getMaterialIdList();
 
         DoctorWareHouse wareHouse = doctorWareHouseDao.findById(warehouseID);
         if (null == wareHouse)
-            throw new ServiceException("warehouse.not.found");
+            throw new InvalidException("warehouse.not.found", warehouseID);
 
         //先过滤一遍。
         details.forEach(detail -> {
             if (!currentFarmSupportedMaterials.contains(detail.getMaterialId()))
-                throw new ServiceException("material.not.allow.in.this.warehouse");
+                throw new InvalidException("material.not.allow.in.this.warehouse", detail.getMaterialId(), wareHouse.getWareHouseName());
         });
 
         if (details.isEmpty())
             throw new ServiceException("stock.material.id.null");
 
-        List<DoctorBasicMaterial> supportedMaterials = doctorBasicMaterialDao.findByIdsAndType(wareHouse.getType().longValue(), details.stream().map(AbstractWarehouseStockDetail::getMaterialId).collect(Collectors.toList()));
-        if (null == supportedMaterials)
-            throw new ServiceException("material.not.found");
-        if (supportedMaterials.isEmpty())
-            throw new ServiceException("material.not.allow.in.this.warehouse");
+        List materialIds = details.stream().map(AbstractWarehouseStockDetail::getMaterialId).collect(Collectors.toList());
+        List<DoctorBasicMaterial> supportedMaterials = doctorBasicMaterialDao.findByIdsAndType(wareHouse.getType().longValue(), materialIds);
+        if (null == supportedMaterials || supportedMaterials.isEmpty())
+            throw new InvalidException("material.not.found", StringUtils.join(materialIds, ','));
+//        if (supportedMaterials.isEmpty())
+//            throw new ServiceException("material.not.allow.in.this.warehouse");
 
         Map<Long, String> supportedMaterialIds = new HashedMap(supportedMaterials.size());
         supportedMaterials.forEach(material -> {
@@ -653,7 +656,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         //再过滤一遍，加上type类型条件
         details.forEach(detail -> {
             if (!supportedMaterialIds.containsKey(detail.getMaterialId()))
-                throw new ServiceException("material.not.allow.in.this.warehouse");
+                throw new InvalidException("material.not.allow.in.this.warehouse", detail.getMaterialId(), wareHouse.getWareHouseName());
         });
 
         StockContext context = new StockContext();
