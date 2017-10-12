@@ -55,8 +55,8 @@ public class IotUserRoles {
      * @return 关联关系
      */
     @ApiOperation("根据关联关系id查询用户与角色关联关系")
-    @RequestMapping(value = "/iotUserRole/{id}")
-    public IotUserRole findUserRoleById(@PathVariable @ApiParam("关联关系id") Long id) {
+    @RequestMapping(value = "/findIotUserRole/{id}", method = RequestMethod.GET)
+    public IotUserRole findIotUserRoleById(@PathVariable @ApiParam("关联关系id") Long id) {
         return null;
     }
 
@@ -87,6 +87,7 @@ public class IotUserRoles {
      * @return 物联网角色
      */
     @ApiOperation("根据角色id查询物联网角色")
+    @RequestMapping(value = "/findIotRole/{id}", method = RequestMethod.GET)
     public IotRole findIotRoleById(@PathVariable @ApiParam("角色id") Long id) {
         return null;
     }
