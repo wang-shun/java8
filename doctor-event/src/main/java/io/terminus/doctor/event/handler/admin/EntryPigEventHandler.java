@@ -34,10 +34,22 @@ public class EntryPigEventHandler extends AbstractPigEventHandler implements Pig
     public void handle(DoctorPigEvent pigEvent) {
 
 
-        DoctorPig pig = doctorPigDao.findById(pigEvent.getPigId());
-        DoctorFarmEntryDto dto = jsonMapper.fromJson(pigEvent.getExtra(), DoctorFarmEntryDto.class);
-
-        pig.setInFarmDate(dto.getInFarmDate());
-        doctorPigDao.update(pig);
+//        DoctorPig pig = doctorPigDao.findById(pigEvent.getPigId());
+//        DoctorFarmEntryDto dto = jsonMapper.fromJson(pigEvent.getExtra(), DoctorFarmEntryDto.class);
+//
+//        pig.setInFarmDate(dto.getInFarmDate());
+//        pig.setBirthDate(dto.getBirthday());
+//
+//        pig.setBreedId(dto.getBreed());
+//        pig.setBreedName(dto.getBreedName());
+//
+//        pig.setGeneticId(dto.getBreedType());
+//        pig.setGeneticName(dto.getBreedTypeName());
+//
+//        pig.setSource(dto.getSource());
+//        pig.setPigFatherCode(dto.getFatherCode());
+//        pig.setPigMotherCode(dto.getMotherCode());
+//
+//        doctorPigDao.update(pig);
     }
 }

@@ -24,6 +24,7 @@ public class MatingPigEventBuilder extends AbstractPigEventBuilder<DoctorMatingD
         DoctorPig boar = RespHelper.or500(doctorPigReadService.findPigById(eventDto.getMatingBoarPigId()));
         eventDto.setMatingBoarPigCode(boar.getPigCode());
         pigEvent.setBoarCode(boar.getPigCode());
+        pigEvent.setMateType(eventDto.getMatingType());
     }
 
     @Override
