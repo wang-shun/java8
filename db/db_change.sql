@@ -1478,3 +1478,19 @@ CREATE TABLE `doctor_warehouse_stock_monthly` (
 -- 仓库物料领用表的领用猪群名和领用日期字段修改 2017-09-30
 ALTER TABLE doctor_warehouse_material_apply MODIFY pig_group_name VARCHAR(512) COMMENT '领用猪群名称';
 ALTER TABLE doctor_warehouse_material_apply MODIFY apply_date DATE COMMENT '领用日期';
+
+-- 仓库添加sku表 2017-10-13
+CREATE TABLE doctor_warehouse_sku
+(
+    id BIGINT(20) PRIMARY KEY NOT NULL COMMENT '编号' AUTO_INCREMENT,
+    farm_id BIGINT(20) COMMENT '猪厂编号',
+    name VARCHAR(128) NOT NULL COMMENT '物料名称',
+    specification VARCHAR(64) COMMENT '规格',
+    code VARCHAR(64) COMMENT '编码,用于跨厂调拨',
+    unit VARCHAR(64) COMMENT '单位',
+    srm VARCHAR(32) COMMENT '短码,用于查询',
+    vendor_id BIGINT(20) COMMENT '供应商编号',
+    created_at DATETIME,
+    updated_at DATETIME
+);
+ALTER TABLE doctor_warehouse_sku COMMENT = '仓库物料表';
