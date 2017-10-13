@@ -307,8 +307,12 @@
             `event_source` NOT IN
             <foreach collection="eventSources" item="source" open="(" close=")" separator=",">
                 #{source}
-            </foreach> AND
-            <![CDATA[ event_at >= #{beginDate} ]]> AND <![CDATA[ event_at <= #{endDate} ]]>
+            </foreach>
+            <if test="beginDate != null">
+            AND
+            <![CDATA[ event_at >= #{beginDate} ]]>
+            </if>
+            AND <![CDATA[ event_at <= #{endDate} ]]>
             )
             )
         </if>
