@@ -8,6 +8,7 @@ import io.terminus.doctor.user.dao.IotUserRoleDao;
 import io.terminus.doctor.user.model.IotRole;
 import io.terminus.doctor.user.model.IotUserRole;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
@@ -21,6 +22,7 @@ public class IotUserRoleWriteServiceImpl implements IotUserRoleWriteService {
     private final IotUserRoleDao iotUserRoleDao;
     private final IotRoleDao iotRoleDao;
 
+    @Autowired
     public IotUserRoleWriteServiceImpl(IotUserRoleDao iotUserRoleDao, IotRoleDao iotRoleDao) {
         this.iotUserRoleDao = iotUserRoleDao;
         this.iotRoleDao = iotRoleDao;

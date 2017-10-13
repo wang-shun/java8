@@ -61,7 +61,7 @@
         </foreach>
     </select>
 
-    <select id="listEffected" resultType="IotRoleMap">
+    <select id="listEffected" resultMap="IotRoleMap">
         SELECT
         <include refid="cols_all"/>
         FROM
