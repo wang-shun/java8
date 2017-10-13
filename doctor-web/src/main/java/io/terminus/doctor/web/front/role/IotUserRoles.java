@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dto.IotUserRoleInfo;
 import io.terminus.doctor.user.model.IotRole;
 import io.terminus.doctor.user.model.IotUserRole;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
+import static java.util.Objects.isNull;
 
 /**
  * Created by xjn on 17/10/12.
@@ -46,7 +49,7 @@ public class IotUserRoles {
     public Paging<IotUserRoleInfo> pagingUserRole(@RequestParam(required = false) @ApiParam("用户真实姓名") String realName,
                                                   @RequestParam @ApiParam("页码") Integer pageNo,
                                                   @RequestParam @ApiParam("页大小") Integer pageSize) {
-        return null;
+        return RespHelper.or500(roleReadService.paging(realName, pageNo, pageSize));
     }
 
     /**
@@ -56,8 +59,8 @@ public class IotUserRoles {
      */
     @ApiOperation("根据关联关系id查询用户与角色关联关系")
     @RequestMapping(value = "/findIotUserRole/{id}", method = RequestMethod.GET)
-    public IotUserRole findIotUserRoleById(@PathVariable @ApiParam("关联关系id") Long id) {
-        return null;
+    public IotUserRoleInfo findIotUserRoleById(@PathVariable @ApiParam("关联关系id") Long id) {
+        return RespHelper.or500(roleReadService.findIotUserRoleById(id));
     }
 
     /**
@@ -67,8 +70,11 @@ public class IotUserRoles {
      */
     @ApiOperation("创建或更新用户与角色关系")
     @RequestMapping(value = "/createOrUpdate/iotUserRole", method = RequestMethod.POST)
-    public Boolean createOrUpdateIotUserRole(@RequestBody @ApiParam("用户与角色关系") IotUserRoles iotUserRole) {
-        return null;
+    public Boolean createOrUpdateIotUserRole(@RequestBody @ApiParam("用户与角色关系") IotUserRole iotUserRole) {
+        if (isNull(iotUserRole.getId())) {
+            return RespHelper.or500(roleWriteService.createIotUserRole(iotUserRole));
+        }
+        return RespHelper.or500(roleWriteService.createIotUserRole(iotUserRole));
     }
 
     /**
@@ -78,7 +84,7 @@ public class IotUserRoles {
     @ApiOperation("列出所有有效的角色")
     @RequestMapping(value = "/list/effectedRole", method = RequestMethod.GET)
     public List<IotRole> listEffectedRole() {
-        return null;
+        return RespHelper.or500(roleReadService.listEffected());
     }
 
     /**
@@ -89,7 +95,7 @@ public class IotUserRoles {
     @ApiOperation("根据角色id查询物联网角色")
     @RequestMapping(value = "/findIotRole/{id}", method = RequestMethod.GET)
     public IotRole findIotRoleById(@PathVariable @ApiParam("角色id") Long id) {
-        return null;
+        return RespHelper.or500(roleReadService.findIotRoleById(id));
     }
 
     /**
@@ -100,6 +106,10 @@ public class IotUserRoles {
     @ApiOperation("创建或更新物联网角色")
     @RequestMapping(value = "/createOrUpdate/iotRole", method = RequestMethod.POST)
     public Boolean createOrUpdateIotRole(@RequestBody @ApiParam("物联网角色") IotRole iotRole){
-        return null;
+        if (isNull(iotRole.getId())) {
+            return RespHelper.or500(roleWriteService.createIotRole(iotRole));
+        }
+        return RespHelper.or500(roleWriteService.updateIotRole(iotRole));
     }
+
 }

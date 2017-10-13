@@ -12,11 +12,26 @@ import java.util.List;
  */
 public interface IotUserRoleReadService {
 
-    Response<Paging<IotUserRoleInfo>> paging(String realName, String iotRoleName);
+    Response<Paging<IotUserRoleInfo>> paging(String realName, Integer pageNo, Integer pageSize);
 
     /**
      * 获取所有有效物联网角色
      * @return 所有物联网角色
      */
     Response<List<IotRole>> listEffected();
+
+    /**
+     * 根据角色id查询物联网角色
+     * @param id 角色id
+     * @return 物联网角色
+     */
+    Response<IotRole> findIotRoleById(Long id);
+
+    /**
+     * 根据关联关系id查询用户与角色关联关系"
+     * @param id 关联关系id
+     * @return 关联关系
+     */
+    Response<IotUserRoleInfo> findIotUserRoleById(Long id);
+
 }

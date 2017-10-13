@@ -101,4 +101,10 @@
             <include refid="criteria"/>
         </where>
     </select>
+
+    <update id="updateIotRoleName" parameterType="map">
+        UPDATE <include refid="tb"/>
+        set iot_role_name = #{iotRoleName}
+        where iot_role_id = #{iotRoleId}
+    </update>
 </mapper>

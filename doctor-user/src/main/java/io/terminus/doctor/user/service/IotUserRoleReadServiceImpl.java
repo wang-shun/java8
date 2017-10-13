@@ -8,6 +8,9 @@ import io.terminus.doctor.user.dao.IotRoleDao;
 import io.terminus.doctor.user.dao.IotUserRoleDao;
 import io.terminus.doctor.user.dto.IotUserRoleInfo;
 import io.terminus.doctor.user.model.IotRole;
+import io.terminus.doctor.user.model.IotUserRole;
+import io.terminus.parana.user.impl.dao.UserProfileDao;
+import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,15 +26,17 @@ import java.util.List;
 public class IotUserRoleReadServiceImpl implements IotUserRoleReadService{
     private final IotUserRoleDao iotUserRoleDao;
     private final IotRoleDao iotRoleDao;
+    private final UserProfileDao userProfileDao;
 
     @Autowired
-    public IotUserRoleReadServiceImpl(IotUserRoleDao iotUserRoleDao, IotRoleDao iotRoleDao) {
+    public IotUserRoleReadServiceImpl(IotUserRoleDao iotUserRoleDao, IotRoleDao iotRoleDao, UserProfileDao userProfileDao) {
         this.iotUserRoleDao = iotUserRoleDao;
         this.iotRoleDao = iotRoleDao;
+        this.userProfileDao = userProfileDao;
     }
 
     @Override
-    public Response<Paging<IotUserRoleInfo>> paging(String realName, String iotRoleName ) {
+    public Response<Paging<IotUserRoleInfo>> paging(String realName, Integer pageNo, Integer pageSize) {
         try {
         } catch (Exception e) {
             log.error(",cause:{}", Throwables.getStackTraceAsString(e));
@@ -46,6 +51,30 @@ public class IotUserRoleReadServiceImpl implements IotUserRoleReadService{
         } catch (Exception e) {
             log.error("list all iot role failed,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("list.all.iot.role.failed");
+        }
+    }
+
+    @Override
+    public Response<IotRole> findIotRoleById(Long id) {
+        try {
+            return Response.ok(iotRoleDao.findById(id));
+        } catch (Exception e) {
+            log.error("find iot role by id failed,id:{}, cause:{}",
+                    id, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.iot.role.by.id.failed");
+        }
+    }
+
+    @Override
+    public Response<IotUserRoleInfo> findIotUserRoleById(Long id) {
+        try {
+            IotUserRole iotUserRole = iotUserRoleDao.findById(id);
+            UserProfile userProfile = userProfileDao.findByUserId(iotUserRole.getUserId());
+            return null;
+        } catch (Exception e) {
+            log.error("find iot user role by id failed, id:{},cause:{}",
+                    id, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.iot.user.role.by.id.failed");
         }
     }
 }

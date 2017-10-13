@@ -17,9 +17,23 @@ public interface IotUserRoleWriteService {
     Response<Boolean> createIotRole(IotRole iotRole);
 
     /**
+     * 更新物联网角色
+     * @param iotRole 物联网角色
+     * @return 是否成功
+     */
+    Response<Boolean> updateIotRole(IotRole iotRole);
+
+    /**
      * 创建用户与物联网角色的关联
      * @param iotUserRole 关联
      * @return 是否成功
      */
     Response<Boolean> createIotUserRole(IotUserRole iotUserRole);
+
+    /**
+     * 更新用户与物联网角色的关联
+     * @param iotUserRole 关联
+     * @return 是否成功
+     */
+    Response<Boolean> updateIotUserRole(IotUserRole iotUserRole);
 }

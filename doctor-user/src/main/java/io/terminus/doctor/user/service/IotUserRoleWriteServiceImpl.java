@@ -38,6 +38,18 @@ public class IotUserRoleWriteServiceImpl implements IotUserRoleWriteService {
     }
 
     @Override
+    public Response<Boolean> updateIotRole(IotRole iotRole) {
+        try {
+            iotRoleDao.update(iotRole);
+            return Response.ok(iotUserRoleDao.updateIotRoleName(iotRole.getId(), iotRole.getName()));
+        } catch (Exception e) {
+            log.error("update iot role failed, iotRole:{}, cause:{}",
+                    iotRole, Throwables.getStackTraceAsString(e));
+            return Response.fail("update.iot.role.failed");
+        }
+    }
+
+    @Override
     public Response<Boolean> createIotUserRole(IotUserRole iotUserRole) {
         try {
             return Response.ok(iotUserRoleDao.create(iotUserRole));
@@ -45,6 +57,17 @@ public class IotUserRoleWriteServiceImpl implements IotUserRoleWriteService {
             log.error("create.iot.role.failed,iotUserRole:{}, cause:{}",
                     iotUserRole, Throwables.getStackTraceAsString(e));
             return Response.fail("create.iot.user.role.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> updateIotUserRole(IotUserRole iotUserRole) {
+        try {
+            return Response.ok(iotUserRoleDao.update(iotUserRole));
+        } catch (Exception e) {
+            log.error("update iot user role failed, iotUserRole:{}, cause:{}",
+                    iotUserRole, Throwables.getStackTraceAsString(e));
+            return Response.fail("update.iot.user.role.failed");
         }
     }
 }
