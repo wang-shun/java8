@@ -20,9 +20,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/20.
@@ -151,15 +149,13 @@ public class StockController {
                                                      @RequestParam(required = false) Integer pageNo,
                                                      @RequestParam(required = false) Integer pageSize) {
 
-        if (StringUtils.isBlank(materialName)) {
-            //如果传入的是空，那么将会应用上这个查询条件，导致查不出数据
-            materialName = null;
+        Map<String, Object> params = new HashMap<>();
+        params.put("warehouseId", warehouseId);
+        if (StringUtils.isNotBlank(materialName)) {
+            params.put("materialNameLike", materialName);
         }
 
-        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.paging(pageNo, pageSize, DoctorWarehouseStock.builder()
-                .warehouseId(warehouseId)
-                .materialName(materialName)
-                .build());
+        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.paging(pageNo, pageSize, params);
 
         if (!stockResponse.isSuccess())
             throw new JsonResponseException(stockResponse.getError());

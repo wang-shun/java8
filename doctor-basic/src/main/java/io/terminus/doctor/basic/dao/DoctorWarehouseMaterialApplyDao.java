@@ -33,5 +33,10 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         return sqlSession.selectList(sqlId("listAndOrderByHandleDate"), params);
     }
 
+
+    public List<DoctorWarehouseMaterialApply> advList(Map<String, Object> criteria){
+        return sqlSession.selectList(sqlId("advList"), criteria);
+    }
+
 }
 

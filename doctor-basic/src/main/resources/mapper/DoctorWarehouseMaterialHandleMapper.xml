@@ -109,6 +109,7 @@
             </if>
             <if test="startDate != null">AND handle_date between #{startDate} and #{endDate}</if>
             <if test="startDate ==null and endDate!=null">AND <![CDATA[ handle_date <= #{endDate}]]></if>
+            <if test="materialNameLike != null">AND `material_name` like CONCAT('%',#{materialNameLike},'%')</if>
         </where>
     </sql>
 
