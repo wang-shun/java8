@@ -1,7 +1,6 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import com.google.common.base.Throwables;
-import com.sun.source.tree.NewArrayTree;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
