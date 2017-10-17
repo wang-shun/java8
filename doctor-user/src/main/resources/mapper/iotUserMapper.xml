@@ -5,19 +5,24 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
-<mapper namespace="IotUserRole">
+<mapper namespace="IotUser">
 
-    <resultMap id="IotUserRoleMap" type="IotUserRole">
+    <resultMap id="IotUserMap" type="IotUser">
         <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_real_name" property="userRealName"/>
+        <result column="mobile" property="mobile"/>
         <result column="iot_role_id" property="iotRoleId"/>
         <result column="iot_role_name" property="iotRoleName"/>
+        <result column="type" property="type"/>
+        <result column="status" property="status"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
 
     <sql id="tb">
-        doctor_sub_roles
+        iot_users
     </sql>
 
     <sql id="cols_all">
@@ -26,14 +31,14 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `user_id`,`iot_role_id`, iot_role_name, created_at, updated_at
+        `user_id`, user_name, user_real_name, mobile, `iot_role_id`, iot_role_name, `type`, status, ceated_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{userId}, #{iotRoleId}, #{iotRoleName}, now(), now()
+        #{userId}, #{userName}, #{userRealName}, #{mobile}, #{iotRoleId}, #{iotRoleName}, #{type}, #{status}, now(), now()
     </sql>
 
-    <insert id="create" parameterType="IotUserRole" keyProperty="id" useGeneratedKeys="true">
+    <insert id="create" parameterType="IotUser" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb"/>
         (<include refid="cols_exclude_id"/>)
@@ -41,7 +46,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findById" parameterType="long" resultMap="IotUserRoleMap">
+    <select id="findById" parameterType="long" resultMap="IotUserMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -49,7 +54,7 @@
         WHERE id = #{id}
     </select>
 
-    <select id="findByIds" parameterType="list" resultMap="IotUserRoleMap">
+    <select id="findByIds" parameterType="list" resultMap="IotUserMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -60,12 +65,14 @@
         </foreach>
     </select>
 
-    <update id="update" parameterType="IotUserRole">
+    <update id="update" parameterType="IotUser">
         update
         <include refid="tb"/>
         <set>
             <if test="iotRoleId!=null">`iot_role_id` = #{iotRoleId},</if>
             <if test="iotRoleName!=null">`iot_role_name` = #{iotRoleName},</if>
+            <if test="mobile!=null">`mobile` = #{mobile},</if>
+            <if test="status!=null">`status` = #{status},</if>
             updated_at = now()
         </set>
         where id = #{id}
@@ -79,10 +86,19 @@
 
     <sql id="criteria">
         <if test="iotRoleName != null">AND `iot_role_name` like CONCAT('%', #{iotRoleName}, '%')</if>
+        <if test="userRealName != null">AND `user_role_name` like CONCAT('%', #{userRealName}, '%')</if>
+        <if test="type != null">AND `type` = #{type}</if>
+        <if test="status != null">AND `status` = #{status}</if>
+        <if test="statuses!=null &amp;&amp; statuses.size()>0">
+            `status` IN
+            <foreach collection="statuses" item="status" open="(" separator="," close=")" >
+                #{status}
+            </foreach>
+        </if>
     </sql>
 
 
-    <select id="paging" parameterType="map" resultMap="IotUserRoleMap">
+    <select id="paging" parameterType="map" resultMap="IotUserMap">
         select id,
         <include refid="cols_exclude_id"/>
         from

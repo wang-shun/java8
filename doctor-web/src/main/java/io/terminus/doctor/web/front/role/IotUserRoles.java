@@ -5,10 +5,11 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.user.dto.IotUserRoleInfo;
+import io.terminus.doctor.user.dto.IotUserDto;
 import io.terminus.doctor.user.model.IotRole;
-import io.terminus.doctor.user.model.IotUserRole;
+import io.terminus.doctor.user.model.IotUser;
 import io.terminus.doctor.user.service.IotUserRoleReadService;
 import io.terminus.doctor.user.service.IotUserRoleWriteService;
 import lombok.extern.slf4j.Slf4j;
@@ -46,10 +47,12 @@ public class IotUserRoles {
      */
     @ApiOperation("分页查询用户与物联网角色")
     @RequestMapping(value = "/paging/userRole", method = RequestMethod.GET)
-    public Paging<IotUserRoleInfo> pagingUserRole(@RequestParam(required = false) @ApiParam("用户真实姓名") String realName,
-                                                  @RequestParam @ApiParam("页码") Integer pageNo,
-                                                  @RequestParam @ApiParam("页大小") Integer pageSize) {
-        return RespHelper.or500(roleReadService.paging(realName, pageNo, pageSize));
+    public Paging<IotUser> pagingUserRole(@RequestParam(required = false) @ApiParam("用户真实姓名") String realName,
+                                              @RequestParam @ApiParam("状态，多个状态下划线分隔") String statuses,
+                                              @RequestParam @ApiParam("页码") Integer pageNo,
+                                              @RequestParam @ApiParam("页大小") Integer pageSize) {
+        List<Integer> statusList = Splitters.splitToInteger(statuses, Splitters.UNDERSCORE);
+        return RespHelper.or500(roleReadService.paging(realName, statusList, pageNo, pageSize));
     }
 
     /**
@@ -57,24 +60,24 @@ public class IotUserRoles {
      * @param id 关联关系id
      * @return 关联关系
      */
-    @ApiOperation("根据关联关系id查询用户与角色关联关系")
+    @ApiOperation("根据id查询物联网运营用户")
     @RequestMapping(value = "/findIotUserRole/{id}", method = RequestMethod.GET)
-    public IotUserRoleInfo findIotUserRoleById(@PathVariable @ApiParam("关联关系id") Long id) {
+    public IotUser findIotUserRoleById(@PathVariable @ApiParam("物联网运营用户id") Long id) {
         return RespHelper.or500(roleReadService.findIotUserRoleById(id));
     }
 
     /**
-     * 创建或更新用户与角色关系
-     * @param iotUserRole 用户与角色关系
+     * 创建或更新物联网运营用户"
+     * @param iotUserDto 物联网运营用户"
      * @return 是否成功
      */
-    @ApiOperation("创建或更新用户与角色关系")
+    @ApiOperation("创建或更新物联网运营用户")
     @RequestMapping(value = "/createOrUpdate/iotUserRole", method = RequestMethod.POST)
-    public Boolean createOrUpdateIotUserRole(@RequestBody @ApiParam("用户与角色关系") IotUserRole iotUserRole) {
-        if (isNull(iotUserRole.getId())) {
-            return RespHelper.or500(roleWriteService.createIotUserRole(iotUserRole));
+    public Boolean createOrUpdateIotUserRole(@RequestBody @ApiParam("物联网运营用户") IotUserDto iotUserDto) {
+        if (isNull(iotUserDto.getId())) {
+            return RespHelper.or500(roleWriteService.createIotUser(iotUserDto));
         }
-        return RespHelper.or500(roleWriteService.createIotUserRole(iotUserRole));
+        return RespHelper.or500(roleWriteService.updateIotUser(iotUserDto));
     }
 
     /**
@@ -111,5 +114,4 @@ public class IotUserRoles {
         }
         return RespHelper.or500(roleWriteService.updateIotRole(iotRole));
     }
-
 }

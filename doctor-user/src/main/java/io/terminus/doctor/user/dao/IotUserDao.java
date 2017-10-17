@@ -2,14 +2,14 @@ package io.terminus.doctor.user.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
-import io.terminus.doctor.user.model.IotUserRole;
+import io.terminus.doctor.user.model.IotUser;
 import org.springframework.stereotype.Repository;
 
 /**
  * Created by xjn on 17/10/11.
  */
 @Repository
-public class IotUserRoleDao extends MyBatisDao<IotUserRole>{
+public class IotUserDao extends MyBatisDao<IotUser>{
 
     /**
      * 更新角色名

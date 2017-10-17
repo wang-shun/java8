@@ -1492,11 +1492,16 @@ CREATE TABLE `iot_roles` (
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='物联网角色表';
 
 -- 2017-10-11用户与物联网关联表
-CREATE TABLE `iot_user_roles` (
+CREATE TABLE `iot_users` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL COMMENT '用户id',
+  `user_name` VARCHAR (32) NOT NULL COMMENT '用户名',
+  `user_real_name` VARCHAR (32) NOT NULL COMMENT '用户真实',
+  `mobile` VARCHAR (40) NOT NULL COMMENT '手机号',
   `iot_role_id` bigint(20) NOT NULL COMMENT '物联网角色id',
-  `iot_role_name` smallint(6) NOT NULL COMMENT '角色名',
+  `iot_role_name` VARCHAR (32) NOT NULL COMMENT '角色名',
+  `type` smallint(6) NOT NULL COMMENT '物联网用户类型',
+  `status` smallint(6) NOT NULL COMMENT '用户状态',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),

@@ -36,11 +36,11 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
     private final SubRoleDao subRoleDao;
     private final OperatorRoleDao operatorRoleDao;
     private final PigScoreApplyDao pigScoreApplyDao;
-    private final IotUserRoleDao iotUserRoleDao;
+    private final IotUserDao iotUserDao;
     @Autowired
-    public DoctorUserRoleLoaderReadServiceImpl(UserDao userDao, SellerDao sellerDao,  OperatorDao operatorDao,
+    public DoctorUserRoleLoaderReadServiceImpl(UserDao userDao, SellerDao sellerDao, OperatorDao operatorDao,
                                                SubDao subDao, SubRoleDao subRoleDao, OperatorRoleDao operatorRoleDao,
-                                               PigScoreApplyDao pigScoreApplyDa, IotUserRoleDao iotUserRoleDao) {
+                                               PigScoreApplyDao pigScoreApplyDa, IotUserDao iotUserDao) {
         this.userDao = userDao;
         this.sellerDao = sellerDao;
         this.operatorDao = operatorDao;
@@ -48,7 +48,7 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
         this.subRoleDao = subRoleDao;
         this.operatorRoleDao = operatorRoleDao;
         this.pigScoreApplyDao = pigScoreApplyDa;
-        this.iotUserRoleDao = iotUserRoleDao;
+        this.iotUserDao = iotUserDao;
     }
 
     @Override

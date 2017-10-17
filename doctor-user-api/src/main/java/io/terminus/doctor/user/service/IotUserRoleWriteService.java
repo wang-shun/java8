@@ -1,8 +1,8 @@
 package io.terminus.doctor.user.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.user.dto.IotUserDto;
 import io.terminus.doctor.user.model.IotRole;
-import io.terminus.doctor.user.model.IotUserRole;
 
 /**
  * Created by xjn on 17/10/11.
@@ -24,16 +24,16 @@ public interface IotUserRoleWriteService {
     Response<Boolean> updateIotRole(IotRole iotRole);
 
     /**
-     * 创建用户与物联网角色的关联
-     * @param iotUserRole 关联
+     * 创建或更新物联网运营用户"
+     * @param iotUserDto 物联网运营用户"
      * @return 是否成功
      */
-    Response<Boolean> createIotUserRole(IotUserRole iotUserRole);
+    Response<Boolean> createIotUser(IotUserDto iotUserDto);
 
     /**
      * 更新用户与物联网角色的关联
-     * @param iotUserRole 关联
+     * @param iotUserDto 关联
      * @return 是否成功
      */
-    Response<Boolean> updateIotUserRole(IotUserRole iotUserRole);
+    Response<Boolean> updateIotUser(IotUserDto iotUserDto);
 }

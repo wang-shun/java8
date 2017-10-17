@@ -6,9 +6,11 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.UserRoleUtil;
+import io.terminus.doctor.user.dao.IotUserDao;
 import io.terminus.doctor.user.dao.OperatorDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
+import io.terminus.doctor.user.dto.IotUserDto;
 import io.terminus.doctor.user.model.Operator;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
@@ -48,19 +50,22 @@ public class DoctorUserManager {
 
     private final SubRoleReadService subRoleReadService;
 
+    private final IotUserDao iotUserDao;
+
     @Autowired
     public DoctorUserManager(UserDao userDao,
                              UserProfileDao userProfileDao,
                              OperatorDao operatorDao,
                              PrimaryUserDao primaryUserDao,
                              SubDao subDao,
-                             SubRoleReadService subRoleReadService) {
+                             SubRoleReadService subRoleReadService, IotUserDao iotUserDao) {
         this.userDao = userDao;
         this.userProfileDao = userProfileDao;
         this.operatorDao = operatorDao;
         this.primaryUserDao = primaryUserDao;
         this.subDao = subDao;
         this.subRoleReadService = subRoleReadService;
+        this.iotUserDao = iotUserDao;
     }
 
     @Transactional
@@ -167,4 +172,28 @@ public class DoctorUserManager {
         return true;
     }
 
+    @Transactional
+    public User createIotUser(IotUserDto iotUserDto) {
+        User user = new User();
+        user.setName(iotUserDto.getUserName());
+        user.setPassword(iotUserDto.getPassword());
+        user.setType(UserType.IOT_OPERATOR.value());
+        user.setStatus(UserStatus.NORMAL.value());
+        user.setMobile(iotUserDto.getMobile());
+        userDao.create(user);
+
+        iotUserDao.create(iotUserDto);
+        return user;
+    }
+
+    @Transactional
+    public User updateIotUser(IotUserDto iotUserDto) {
+        User updateUser = new User();
+        updateUser.setId(iotUserDto.getUserId());
+        updateUser.setPassword(iotUserDto.getPassword());
+        userDao.update(updateUser);
+
+        iotUserDao.update(iotUserDto);
+        return updateUser;
+    }
 }

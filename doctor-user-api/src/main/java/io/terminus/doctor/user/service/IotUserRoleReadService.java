@@ -2,8 +2,8 @@ package io.terminus.doctor.user.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.user.dto.IotUserRoleInfo;
 import io.terminus.doctor.user.model.IotRole;
+import io.terminus.doctor.user.model.IotUser;
 
 import java.util.List;
 
@@ -12,7 +12,16 @@ import java.util.List;
  */
 public interface IotUserRoleReadService {
 
-    Response<Paging<IotUserRoleInfo>> paging(String realName, Integer pageNo, Integer pageSize);
+    /**
+     * 分页查询物联网用户
+     * @param realName 真实姓名
+     * @param statuses 用户状态
+     * @param pageNo 页码
+     * @param pageSize 页尺寸
+     * @return
+     */
+    Response<Paging<IotUser>> paging(String realName, List<Integer> statuses,
+                                     Integer pageNo, Integer pageSize);
 
     /**
      * 获取所有有效物联网角色
@@ -32,6 +41,6 @@ public interface IotUserRoleReadService {
      * @param id 关联关系id
      * @return 关联关系
      */
-    Response<IotUserRoleInfo> findIotUserRoleById(Long id);
+    Response<IotUser> findIotUserRoleById(Long id);
 
 }

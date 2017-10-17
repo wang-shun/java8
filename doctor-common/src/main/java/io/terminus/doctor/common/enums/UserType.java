@@ -37,7 +37,17 @@ public enum UserType {
     /**
      * 猪场子账号
      */
-    FARM_SUB(6)
+    FARM_SUB(6),
+
+    /**
+     * 物联网运营主账户
+     */
+    IOT_ADMIN(7),
+
+    /**
+     * 物联网运营子账户
+     */
+    IOT_OPERATOR(8)
     ;
 
     private final int value;
