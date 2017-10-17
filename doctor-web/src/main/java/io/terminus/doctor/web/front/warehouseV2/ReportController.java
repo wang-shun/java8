@@ -18,12 +18,10 @@ import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseMaterialHandleVo;
-import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseMonthlyReportVo;
-import io.terminus.doctor.web.front.warehouseV2.vo.WarehousePigGroupApplyVo;
-import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseReportVo;
+import io.terminus.doctor.web.front.warehouseV2.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -32,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/9.
@@ -259,11 +258,10 @@ public class ReportController {
 
             WarehouseMonthlyReportVo vo = new WarehouseMonthlyReportVo();
             vo.setMaterialName(stock.getSkuName());
-            if (DoctorWarehouseStockWriteService.DEFAULT_VENDOR_NAME.equals(sku.getVendorName()))
-                vo.setVendorName("");
-            else
-                vo.setVendorName(sku.getVendorName());
+            vo.setVendorName(sku.getVendorName());
             vo.setUnit(sku.getUnit());
+            vo.setSpecification(sku.getSpecification());
+            vo.setCode(sku.getCode());
 
             vo.setBalanceAmount(balanceResponse.getResult().getAmount());
             vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
@@ -348,6 +346,8 @@ public class ReportController {
             handleApply.put(apply.getMaterialHandleId(), apply);
         }
 
+        Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(materialHandleResponse.getResult().stream().map(DoctorWarehouseMaterialHandle::getMaterialId).collect(Collectors.toList()))).stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
+
         List<WarehouseMaterialHandleVo> vos = new ArrayList<>(materialHandleResponse.getResult().size());
         for (DoctorWarehouseMaterialHandle handle : materialHandleResponse.getResult()) {
 
@@ -367,6 +367,10 @@ public class ReportController {
                     .unitPrice(handle.getUnitPrice())
                     .pigBarnName(pigBarnName)
                     .pigGroupName(pigGroupName)
+                    .code(skuMap.get(handle.getMaterialId()).get(0).getCode())
+                    .vendorName(skuMap.get(handle.getMaterialId()).get(0).getVendorName())
+                    .specification(skuMap.get(handle.getMaterialId()).get(0).getSpecification())
+                    .unit(skuMap.get(handle.getMaterialId()).get(0).getUnit())
                     .warehouseName(handle.getWarehouseName())
                     .build());
         }
@@ -382,11 +386,11 @@ public class ReportController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "pigBarnApply")
-    public List<DoctorWarehouseMaterialApply> apply(@RequestParam(required = false) Long pigBarnId,
-                                                    @RequestParam Long warehouseId,
-                                                    @RequestParam(required = false) Integer type,
-                                                    @RequestParam(required = false) String materialName,
-                                                    @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
+    public List<WarehouseMaterialApplyVo> apply(@RequestParam(required = false) Long pigBarnId,
+                                                @RequestParam Long warehouseId,
+                                                @RequestParam(required = false) Integer type,
+                                                @RequestParam(required = false) String materialName,
+                                                @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("applyYear", date.get(Calendar.YEAR));
         criteria.put("applyMonth", date.get(Calendar.MONTH) + 1);
@@ -402,7 +406,21 @@ public class ReportController {
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
         if (!applyResponse.isSuccess())
             throw new JsonResponseException(applyResponse.getError());
-        return applyResponse.getResult();
+
+        Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(applyResponse.getResult().stream().map(DoctorWarehouseMaterialApply::getMaterialId).collect(Collectors.toList()))).stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
+
+        List<WarehouseMaterialApplyVo> vos = new ArrayList<>(applyResponse.getResult().size());
+        for (DoctorWarehouseMaterialApply apply : applyResponse.getResult()) {
+            WarehouseMaterialApplyVo vo = new WarehouseMaterialApplyVo();
+            BeanUtils.copyProperties(apply, vo);
+            vo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
+            vo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
+            vo.setVendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName());
+            vo.setSpecification(skuMap.get(apply.getMaterialId()).get(0).getSpecification());
+            vos.add(vo);
+        }
+
+        return vos;
     }
 
     /**
@@ -436,6 +454,8 @@ public class ReportController {
             return Collections.emptyList();
         }
 
+        Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(applyResponse.getResult().stream().map(DoctorWarehouseMaterialApply::getMaterialId).collect(Collectors.toList()))).stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
+
         List<WarehousePigGroupApplyVo> vos = new ArrayList<>();
         for (DoctorWarehouseMaterialApply apply : applyResponse.getResult()) {
             if (null == apply.getPigGroupId())
@@ -456,7 +476,11 @@ public class ReportController {
                     .applyStaffName(apply.getApplyStaffName())
                     .materialType(apply.getType())
                     .materialName(apply.getMaterialName())
-                    .unit(apply.getUnit())
+//                    .unit(apply.getUnit())
+                    .unit(skuMap.get(apply.getMaterialId()).get(0).getUnit())
+                    .code(skuMap.get(apply.getMaterialId()).get(0).getCode())
+                    .vendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName())
+                    .specification(skuMap.get(apply.getMaterialId()).get(0).getSpecification())
                     .quantity(apply.getQuantity())
                     .unitPrice(apply.getUnitPrice())
                     .amount(apply.getQuantity().multiply(new BigDecimal(apply.getUnitPrice())).longValue())

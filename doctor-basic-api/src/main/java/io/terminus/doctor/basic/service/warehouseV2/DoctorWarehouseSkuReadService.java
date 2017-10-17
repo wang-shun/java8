@@ -4,8 +4,8 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc:
@@ -22,6 +22,8 @@ public interface DoctorWarehouseSkuReadService {
      */
     Response<DoctorWarehouseSku> findById(Long id);
 
+    Response<List<DoctorWarehouseSku>> findByIds(List<Long> ids);
+
     /**
      * 分页
      * @param pageNo
@@ -31,10 +33,10 @@ public interface DoctorWarehouseSkuReadService {
      */
     Response<Paging<DoctorWarehouseSku>> paging(Integer pageNo, Integer pageSize, Map<String, Object> criteria);
 
-   /**
-    * 列表
-    * @param criteria
-    * @return List<DoctorWarehouseSku>
-    */
+    /**
+     * 列表
+     * @param criteria
+     * @return List<DoctorWarehouseSku>
+     */
     Response<List<DoctorWarehouseSku>> list(Map<String, Object> criteria);
 }
