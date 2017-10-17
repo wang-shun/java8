@@ -448,40 +448,46 @@ public class WarehouseController {
      * @param id
      * @return
      */
-//    @RequestMapping(method = RequestMethod.GET, value = "{id}/material")
-//    public Paging<WarehouseStockVo> material(@PathVariable Long id,
-//                                             @RequestParam(required = false) String materialName,
-//                                             @RequestParam(required = false) Integer pageNo,
-//                                             @RequestParam(required = false) Integer pageSize) {
-//
-//        Map<String, Object> criteria = new HashMap<>();
-//        criteria.put("warehouseId", id);
-//        if (StringUtils.isNotBlank(materialName))
-//            criteria.put("materialNameLike", materialName);
-//
-//        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.pagingMergeVendor(pageNo, pageSize, criteria);
-//
-//        if (!stockResponse.isSuccess())
-//            throw new JsonResponseException(stockResponse.getError());
-//
-//        Paging<WarehouseStockVo> vo = new Paging<>();
-//        List<WarehouseStockVo> data = new ArrayList<>(stockResponse.getResult().getData().size());
-//        for (DoctorWarehouseStock stock : stockResponse.getResult().getData()) {
-//            data.add(WarehouseStockVo.builder()
-//                    .materialId(stock.getMaterialId())
-//                    .materialName(stock.getMaterialName())
-//                    .quantity(stock.getQuantity())
-//                    .unit(stock.getUnit())
-//                    .build());
-//        }
-//        vo.setData(data);
-//        vo.setTotal(stockResponse.getResult().getTotal());
-//
-//        return vo;
-//    }
+    @RequestMapping(method = RequestMethod.GET, value = "{id}/material")
+    public Paging<WarehouseStockVo> material(@PathVariable Long id,
+                                             @RequestParam(required = false) String materialName,
+                                             @RequestParam(required = false) Integer pageNo,
+                                             @RequestParam(required = false) Integer pageSize) {
+
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("warehouseId", id);
+        if (StringUtils.isNotBlank(materialName))
+            criteria.put("materialNameLike", materialName);
+
+        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.paging(pageNo, pageSize, criteria);
+
+        if (!stockResponse.isSuccess())
+            throw new JsonResponseException(stockResponse.getError());
+
+        Paging<WarehouseStockVo> vo = new Paging<>();
+        List<WarehouseStockVo> data = new ArrayList<>(stockResponse.getResult().getData().size());
+        for (DoctorWarehouseStock stock : stockResponse.getResult().getData()) {
+
+            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
+
+            data.add(WarehouseStockVo.builder()
+                    .materialId(stock.getSkuId())
+                    .materialName(stock.getSkuName())
+                    .quantity(stock.getQuantity())
+                    .unit(sku.getUnit())
+                    .code(sku.getCode())
+                    .specification(sku.getSpecification())
+                    .vendorName(sku.getVendorName())
+                    .build());
+        }
+        vo.setData(data);
+        vo.setTotal(stockResponse.getResult().getTotal());
+
+        return vo;
+    }
 
 
-//    /**
+    //    /**
 //     * 仓库下添加物料
 //     *
 //     * @param id

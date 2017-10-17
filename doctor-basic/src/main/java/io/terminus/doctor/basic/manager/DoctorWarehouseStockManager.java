@@ -96,7 +96,7 @@ public class DoctorWarehouseStockManager {
     //    @Transactional(propagation = Propagation.NESTED)
     public DoctorWarehouseStock out(WarehouseStockOutDto outDto, WarehouseStockOutDto.WarehouseStockOutDetail detailDto, DoctorWarehouseStockWriteServiceImpl.StockContext context) {
         DoctorWarehouseStock stock = getStock(outDto.getWarehouseId(), detailDto.getMaterialId()).orElseThrow(() ->
-                new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), context.getSupportedMaterials().get(detailDto.getMaterialId())));
+                new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), detailDto.getMaterialId()));
 
         if (stock.getQuantity().compareTo(detailDto.getQuantity()) < 0)
             throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), stock.getQuantity());

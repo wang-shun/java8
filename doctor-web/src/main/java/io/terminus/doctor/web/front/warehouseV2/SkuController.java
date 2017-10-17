@@ -29,6 +29,7 @@ public class SkuController {
 
     @RequestMapping(method = RequestMethod.GET)
     public Paging<DoctorWarehouseSku> query(@RequestParam Long orgId,
+                                            @RequestParam(required = false) Integer type,
                                             @RequestParam(required = false) String srm,
                                             @RequestParam(required = false) Integer pageNo,
                                             @RequestParam(required = false) Integer pageSize) {
@@ -36,6 +37,8 @@ public class SkuController {
         params.put("orgId", orgId);
         if (StringUtils.isNotBlank(srm))
             params.put("srm", srm);
+        if (null != type)
+            params.put("type", type);
 
         return RespHelper.or500(doctorWarehouseSkuReadService.paging(pageNo, pageSize, params));
     }
