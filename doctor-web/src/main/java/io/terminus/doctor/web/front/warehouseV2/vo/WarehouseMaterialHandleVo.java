@@ -44,6 +44,18 @@ public class WarehouseMaterialHandleVo {
     @JsonView(MaterialHandleReportView.class)
     private String warehouseName;
 
+    @JsonView(MaterialHandleReportView.class)
+    private String vendorName;
+
+    @JsonView(MaterialHandleReportView.class)
+    private String unit;
+
+    @JsonView(MaterialHandleReportView.class)
+    private String code;
+
+    @JsonView(MaterialHandleReportView.class)
+    private String specification;
+
 
     /**
      * 默认视图

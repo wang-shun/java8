@@ -198,6 +198,9 @@ public class StockController {
             vo.setMaterialId(stock.getSkuId());
             vo.setMaterialName(stock.getSkuName());
             vo.setUnit(sku.getUnit());
+            vo.setCode(sku.getCode());
+            vo.setVendorName(sku.getVendorName());
+            vo.setSpecification(sku.getSpecification());
 
 //            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity());
 //            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount());
