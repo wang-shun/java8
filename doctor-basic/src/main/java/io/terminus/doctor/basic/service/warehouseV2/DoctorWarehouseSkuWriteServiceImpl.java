@@ -84,6 +84,12 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         if (null == item)
             throw new InvalidException("basic.material.not.found", doctorWarehouseSku.getItemId());
 
+        Map<String, Object> params = new HashMap<>();
+        params.put("orgId", doctorWarehouseSku.getOrgId());
+        params.put("code", doctorWarehouseSku.getCode());
+        if (!doctorWarehouseSkuDao.list(params).isEmpty())
+            throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getOrgId(), doctorWarehouseSku.getCode());
+
 //        DoctorFarmBasic doctorFarmBasic = doctorFarmBasicDao.findByFarmId(doctorWarehouseSku.getFarmId());
 //        if (null == doctorFarmBasic)
 //            throw new InvalidException("farm.basic.not.found", doctorWarehouseSku.getFarmId());
