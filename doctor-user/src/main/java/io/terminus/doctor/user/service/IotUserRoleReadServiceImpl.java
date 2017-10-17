@@ -41,18 +41,18 @@ public class IotUserRoleReadServiceImpl implements IotUserRoleReadService{
     }
 
     @Override
-    public Response<Paging<IotUser>> paging(String realName, List<Integer> statuses, Integer type,
+    public Response<Paging<IotUser>> paging(String realName, Integer status, Integer type,
                                             Integer pageNo, Integer pageSize) {
         try {
             PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
             Map<String, Object> criteriaMap = Maps.newHashMap();
             criteriaMap.put("userRealName", realName);
-            criteriaMap.put("statuses", statuses);
+            criteriaMap.put("status", status);
             criteriaMap.put("type", type);
             return Response.ok(iotUserDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteriaMap));
         } catch (Exception e) {
             log.error("paging iot user failed, realName, statuses, type, pageNo, pageSize, cause:{}",
-                    realName, statuses, type, pageNo, pageSize, Throwables.getStackTraceAsString(e));
+                    realName, status, type, pageNo, pageSize, Throwables.getStackTraceAsString(e));
             return Response.fail("paging.iot.user.failed");
         }
     }

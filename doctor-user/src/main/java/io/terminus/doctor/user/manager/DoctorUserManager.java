@@ -183,6 +183,11 @@ public class DoctorUserManager {
         user.setMobile(iotUserDto.getMobile());
         userDao.create(user);
 
+        UserProfile userProfile = new UserProfile();
+        userProfile.setUserId(user.getId());
+        userProfile.setRealName(iotUserDto.getUserRealName());
+        userProfileDao.create(userProfile);
+
         iotUserDto.setUserId(user.getId());
         iotUserDto.setType(IotUser.TYPE.IOT_OPERATOR.getValue());
         iotUserDto.setStatus(Sub.Status.ACTIVE.value());
@@ -191,13 +196,13 @@ public class DoctorUserManager {
     }
 
     @Transactional
-    public User updateIotUser(IotUserDto iotUserDto) {
-        User updateUser = new User();
-        updateUser.setId(iotUserDto.getUserId());
-        updateUser.setPassword(iotUserDto.getPassword());
-        userDao.update(updateUser);
+    public void updateIotUser(IotUserDto iotUserDto) {
+        UserProfile userProfile = userProfileDao.findByUserId(iotUserDto.getUserId());
+        UserProfile updateUser = new UserProfile();
+        updateUser.setId(userProfile.getId());
+        updateUser.setRealName(iotUserDto.getUserRealName());
+        userProfileDao.update(updateUser);
 
         iotUserDao.update(iotUserDto);
-        return updateUser;
     }
 }

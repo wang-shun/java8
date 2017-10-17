@@ -71,6 +71,7 @@
         <set>
             <if test="iotRoleId!=null">`iot_role_id` = #{iotRoleId},</if>
             <if test="iotRoleName!=null">`iot_role_name` = #{iotRoleName},</if>
+            <if test="userRealName!=null">`user_real_name` = #{userRealName},</if>
             <if test="mobile!=null">`mobile` = #{mobile},</if>
             <if test="status!=null">`status` = #{status},</if>
             updated_at = now()
@@ -123,4 +124,12 @@
         set iot_role_name = #{iotRoleName}
         where iot_role_id = #{iotRoleId}
     </update>
+
+    <select id="findByUserId" parameterType="long" resultMap="IotUserMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE user_id = #{userId}
+    </select>
 </mapper>

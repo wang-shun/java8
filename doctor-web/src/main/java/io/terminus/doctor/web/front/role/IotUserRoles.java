@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dto.IotUserDto;
 import io.terminus.doctor.user.model.IotRole;
@@ -30,7 +29,7 @@ import static java.util.Objects.isNull;
 @Api("物联网角色操作")
 @Slf4j
 @RestController
-@RequestMapping("/iot/user/role")
+@RequestMapping("/api/iot/user/role")
 public class IotUserRoles {
 
     @RpcConsumer
@@ -48,12 +47,10 @@ public class IotUserRoles {
     @ApiOperation("分页查询物联网运营账户")
     @RequestMapping(value = "/paging/iotUser", method = RequestMethod.GET)
     public Paging<IotUser> pagingUserRole(@RequestParam(required = false) @ApiParam("用户真实姓名") String realName,
-                                              @RequestParam @ApiParam("状态，多个状态通过下划线分隔") String statuses,
-                                              @RequestParam @ApiParam("用户类型，1->运营主账户，2->子账户") Integer type,
-                                              @RequestParam @ApiParam("页码") Integer pageNo,
-                                              @RequestParam @ApiParam("页大小") Integer pageSize) {
-        List<Integer> statusList = Splitters.splitToInteger(statuses, Splitters.UNDERSCORE);
-        return RespHelper.or500(roleReadService.paging(realName, statusList, type, pageNo, pageSize));
+                                              @RequestParam(required = false) @ApiParam("状态，多个状态通过下划线分隔") Integer status,
+                                              @RequestParam(required = false) @ApiParam("页码") Integer pageNo,
+                                              @RequestParam(required = false) @ApiParam("页大小") Integer pageSize) {
+        return RespHelper.or500(roleReadService.paging(realName, status, IotUser.TYPE.IOT_OPERATOR.getValue(), pageNo, pageSize));
     }
 
     /**
@@ -75,7 +72,7 @@ public class IotUserRoles {
     @ApiOperation("创建或更新物联网运营用户")
     @RequestMapping(value = "/createOrUpdate/iotUserRole", method = RequestMethod.POST)
     public Boolean createOrUpdateIotUserRole(@RequestBody @ApiParam("物联网运营用户") IotUserDto iotUserDto) {
-        if (isNull(iotUserDto.getId())) {
+        if (isNull(iotUserDto.getUserId())) {
             return RespHelper.or500(roleWriteService.createIotUser(iotUserDto));
         }
         return RespHelper.or500(roleWriteService.updateIotUser(iotUserDto));

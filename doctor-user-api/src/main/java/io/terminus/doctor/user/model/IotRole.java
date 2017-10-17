@@ -1,14 +1,20 @@
 package io.terminus.doctor.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.JsonMapper;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +25,9 @@ import java.util.List;
 @Data
 public class IotRole implements Serializable{
     private static final long serialVersionUID = -6001889391702598985L;
+
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.nonEmptyMapper().getMapper();
+
 
     /**
      * 主键
@@ -53,7 +62,7 @@ public class IotRole implements Serializable{
      * 角色对应资源列表 JSON, 存数据库
      */
     @Setter(AccessLevel.NONE)
-//    @JsonIgnore
+    @JsonIgnore
     private String allowJson;
 
     /**
@@ -65,6 +74,29 @@ public class IotRole implements Serializable{
      * 更新时间
      */
     private Date updatedAt;
+
+    @SneakyThrows
+    public void setAllow(List<String> allow) {
+        this.allow = allow;
+        if (allow == null) {
+            this.allowJson = null;
+        } else {
+            this.allowJson = OBJECT_MAPPER.writeValueAsString(allow);
+        }
+    }
+
+    @SneakyThrows
+    public void setAllowJson(String allowJson) {
+        this.allowJson = allowJson;
+        if (allowJson == null) {
+            this.allow = null;
+        } else if (allowJson.length() == 0) {
+            this.allow = Collections.emptyList();
+        } else {
+            this.allow = OBJECT_MAPPER.readValue(allowJson, new TypeReference<List<String>>() {
+            });
+        }
+    }
 
     public String getBaseRole() {
         return "IOT";

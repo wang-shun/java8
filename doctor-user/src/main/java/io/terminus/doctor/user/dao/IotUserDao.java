@@ -21,4 +21,8 @@ public class IotUserDao extends MyBatisDao<IotUser>{
         return getSqlSession().update(sqlId("updateIotRoleName"),
                 ImmutableMap.of("iotRoleId", iotRoleId, "iotRoleName", iotRoleName)) == 1;
     }
+
+    public IotUser findByUserId(Long userId) {
+        return getSqlSession().selectOne(sqlId("findByUserId"), userId);
+    }
 }

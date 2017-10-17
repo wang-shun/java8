@@ -79,8 +79,7 @@ public class IotUserRoleWriteServiceImpl implements IotUserRoleWriteService {
     @Override
     public Response<Boolean> updateIotUser(IotUserDto iotUserDto) {
         try {
-            User user = doctorUserManager.updateIotUser(iotUserDto);
-            userInterfaceManager.pulishZkEvent(BeanMapper.map(user, UserDto.class), EventType.CREATE, DoctorSystemCode.PIG_DOCTOR);
+            doctorUserManager.updateIotUser(iotUserDto);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("update iot user role failed, iotUser:{}, cause:{}",
