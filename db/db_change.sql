@@ -1488,7 +1488,7 @@ CREATE TABLE `iot_roles` (
   `allow_json` text NOT NULL COMMENT '角色允许查看页面',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='物联网角色表';
 
 -- 2017-10-11用户与物联网关联表
@@ -1500,9 +1500,9 @@ CREATE TABLE `iot_users` (
   `mobile` VARCHAR (40) NOT NULL COMMENT '手机号',
   `iot_role_id` bigint(20) NOT NULL COMMENT '物联网角色id',
   `iot_role_name` VARCHAR (32) NOT NULL COMMENT '角色名',
-  `type` smallint(6) NOT NULL COMMENT '物联网用户类型',
-  `status` smallint(6) NOT NULL COMMENT '用户状态',
+  `type` smallint(6) NOT NULL COMMENT '物联网用户类型,1->运营主账户，2->运营子账户',
+  `status` smallint(6) NOT NULL COMMENT '用户状态0->离职,1->正常,-1->删除',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='用户与物联网关联表';
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='物联网运营用户表';

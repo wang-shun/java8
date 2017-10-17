@@ -39,20 +39,21 @@ public class IotUserRoles {
     private IotUserRoleWriteService roleWriteService;
 
     /**
-     * 分页查询用户与物联网角色
+     * 分页查询物联网运营账户
      * @param realName 用户真实姓名
      * @param pageNo 页码
      * @param pageSize 页大小
      * @return 分页结果
      */
-    @ApiOperation("分页查询用户与物联网角色")
-    @RequestMapping(value = "/paging/userRole", method = RequestMethod.GET)
+    @ApiOperation("分页查询物联网运营账户")
+    @RequestMapping(value = "/paging/iotUser", method = RequestMethod.GET)
     public Paging<IotUser> pagingUserRole(@RequestParam(required = false) @ApiParam("用户真实姓名") String realName,
-                                              @RequestParam @ApiParam("状态，多个状态下划线分隔") String statuses,
+                                              @RequestParam @ApiParam("状态，多个状态通过下划线分隔") String statuses,
+                                              @RequestParam @ApiParam("用户类型，1->运营主账户，2->子账户") Integer type,
                                               @RequestParam @ApiParam("页码") Integer pageNo,
                                               @RequestParam @ApiParam("页大小") Integer pageSize) {
         List<Integer> statusList = Splitters.splitToInteger(statuses, Splitters.UNDERSCORE);
-        return RespHelper.or500(roleReadService.paging(realName, statusList, pageNo, pageSize));
+        return RespHelper.or500(roleReadService.paging(realName, statusList, type, pageNo, pageSize));
     }
 
     /**
