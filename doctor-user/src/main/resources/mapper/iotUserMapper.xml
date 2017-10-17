@@ -31,7 +31,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `user_id`, user_name, user_real_name, mobile, `iot_role_id`, iot_role_name, `type`, status, ceated_at, updated_at
+        `user_id`, user_name, user_real_name, mobile, `iot_role_id`, iot_role_name, `type`, status, created_at, updated_at
     </sql>
 
     <sql id="vals">
@@ -86,11 +86,11 @@
 
     <sql id="criteria">
         <if test="iotRoleName != null">AND `iot_role_name` like CONCAT('%', #{iotRoleName}, '%')</if>
-        <if test="userRealName != null">AND `user_role_name` like CONCAT('%', #{userRealName}, '%')</if>
+        <if test="userRealName != null">AND `user_real_name` like CONCAT('%', #{userRealName}, '%')</if>
         <if test="type != null">AND `type` = #{type}</if>
         <if test="status != null">AND `status` = #{status}</if>
         <if test="statuses!=null &amp;&amp; statuses.size()>0">
-            `status` IN
+            AND `status` IN
             <foreach collection="statuses" item="status" open="(" separator="," close=")" >
                 #{status}
             </foreach>

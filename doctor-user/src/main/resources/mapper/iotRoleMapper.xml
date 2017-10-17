@@ -18,7 +18,7 @@
     </resultMap>
 
     <sql id="tb">
-        doctor_sub_roles
+        iot_roles
     </sql>
 
     <sql id="cols_all">

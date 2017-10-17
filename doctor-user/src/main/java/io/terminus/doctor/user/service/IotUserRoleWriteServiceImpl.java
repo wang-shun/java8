@@ -42,6 +42,7 @@ public class IotUserRoleWriteServiceImpl implements IotUserRoleWriteService {
     @Override
     public Response<Boolean> createIotRole(IotRole iotRole) {
         try {
+            iotRole.setStatus(IotRole.Status.EFFECTED.getValue());
             return Response.ok(iotRoleDao.create(iotRole));
         } catch (Exception e) {
             log.error("create iot role failed, iotRole:{}, cause:{}",

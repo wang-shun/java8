@@ -16,11 +16,12 @@ public interface IotUserRoleReadService {
      * 分页查询物联网用户
      * @param realName 真实姓名
      * @param statuses 用户状态
+     * @param type 用户类型，1->运营主账户，2->子账户
      * @param pageNo 页码
      * @param pageSize 页尺寸
      * @return
      */
-    Response<Paging<IotUser>> paging(String realName, List<Integer> statuses,
+    Response<Paging<IotUser>> paging(String realName, List<Integer> statuses, Integer type,
                                      Integer pageNo, Integer pageSize);
 
     /**

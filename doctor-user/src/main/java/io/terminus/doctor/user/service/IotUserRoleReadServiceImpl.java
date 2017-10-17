@@ -1,7 +1,9 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.IotRoleDao;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by xjn on 17/10/11.
@@ -38,12 +41,20 @@ public class IotUserRoleReadServiceImpl implements IotUserRoleReadService{
     }
 
     @Override
-    public Response<Paging<IotUser>> paging(String realName, List<Integer> statuses, Integer pageNo, Integer pageSize) {
+    public Response<Paging<IotUser>> paging(String realName, List<Integer> statuses, Integer type,
+                                            Integer pageNo, Integer pageSize) {
         try {
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            Map<String, Object> criteriaMap = Maps.newHashMap();
+            criteriaMap.put("userRealName", realName);
+            criteriaMap.put("statuses", statuses);
+            criteriaMap.put("type", type);
+            return Response.ok(iotUserDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteriaMap));
         } catch (Exception e) {
-            log.error(",cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("paging iot user failed, realName, statuses, type, pageNo, pageSize, cause:{}",
+                    realName, statuses, type, pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.iot.user.failed");
         }
-        return null;
     }
 
     @Override

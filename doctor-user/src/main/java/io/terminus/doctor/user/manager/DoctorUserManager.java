@@ -11,6 +11,7 @@ import io.terminus.doctor.user.dao.OperatorDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dto.IotUserDto;
+import io.terminus.doctor.user.model.IotUser;
 import io.terminus.doctor.user.model.Operator;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
@@ -182,6 +183,9 @@ public class DoctorUserManager {
         user.setMobile(iotUserDto.getMobile());
         userDao.create(user);
 
+        iotUserDto.setUserId(user.getId());
+        iotUserDto.setType(IotUser.TYPE.IOT_OPERATOR.getValue());
+        iotUserDto.setStatus(Sub.Status.ACTIVE.value());
         iotUserDao.create(iotUserDto);
         return user;
     }

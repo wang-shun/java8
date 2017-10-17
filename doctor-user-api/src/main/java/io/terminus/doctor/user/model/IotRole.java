@@ -1,6 +1,5 @@
 package io.terminus.doctor.user.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
@@ -54,7 +53,7 @@ public class IotRole implements Serializable{
      * 角色对应资源列表 JSON, 存数据库
      */
     @Setter(AccessLevel.NONE)
-    @JsonIgnore
+//    @JsonIgnore
     private String allowJson;
 
     /**
