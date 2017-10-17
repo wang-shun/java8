@@ -137,8 +137,10 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
             if (null == sku)
                 throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
-            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
+            if(!sku.getType().equals(context.getWareHouse().getType()))
                 throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
+//            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
+//                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 
             DoctorWarehouseStock stock = doctorWarehouseStockManager.in(stockIn, detail, context, sku);
 
@@ -184,8 +186,10 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
             if (null == sku)
                 throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
-            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
+            if(!sku.getType().equals(context.getWareHouse().getType()))
                 throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
+//            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
+//                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 
             //找到对应库存
             DoctorWarehouseStock stock = getStock(stockInventory.getWarehouseId(), detail.getMaterialId(), null);
@@ -433,8 +437,10 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
             if (null == sku)
                 throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
-            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
+            if(!sku.getType().equals(context.getWareHouse().getType()))
                 throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
+//            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
+//                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 
             DoctorWarehouseStock stock = doctorWarehouseStockManager.out(stockOut, detail, context);
 
@@ -688,29 +694,29 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
     public StockContext getWarehouseAndSupportedBasicMaterial(Long farmId, Long warehouseId) {
         //查询基础数据，农场可添加物料
-        Response<DoctorFarmBasic> farmBasicResponse = doctorFarmBasicReadService.findFarmBasicByFarmId(farmId);
-        if (!farmBasicResponse.isSuccess())
-            throw new ServiceException(farmBasicResponse.getError());
-        DoctorFarmBasic farmBasic = farmBasicResponse.getResult();
-        if (null == farmBasic)
-            throw new InvalidException("farm.basic.not.found", farmId);
+//        Response<DoctorFarmBasic> farmBasicResponse = doctorFarmBasicReadService.findFarmBasicByFarmId(farmId);
+//        if (!farmBasicResponse.isSuccess())
+//            throw new ServiceException(farmBasicResponse.getError());
+//        DoctorFarmBasic farmBasic = farmBasicResponse.getResult();
+//        if (null == farmBasic)
+//            throw new InvalidException("farm.basic.not.found", farmId);
 
-        List<Long> currentFarmSupportedMaterials = farmBasic.getMaterialIdList();
+//        List<Long> currentFarmSupportedMaterials = farmBasic.getMaterialIdList();
 
         DoctorWareHouse wareHouse = doctorWareHouseDao.findById(warehouseId);
         if (null == wareHouse)
             throw new InvalidException("warehouse.not.found", warehouseId);
 
-        List<DoctorBasicMaterial> supportedMaterials = doctorBasicMaterialDao.findByIdsAndType(wareHouse.getType().longValue(), currentFarmSupportedMaterials);
-        if (null == supportedMaterials || supportedMaterials.isEmpty())
-            throw new InvalidException("basic.material.not.found", StringUtils.join(currentFarmSupportedMaterials, ','));
-        Map<Long, String> supportedMaterialIds = new HashedMap(supportedMaterials.size());
-        supportedMaterials.forEach(material -> {
-            supportedMaterialIds.put(material.getId(), material.getName());
-        });
+//        List<DoctorBasicMaterial> supportedMaterials = doctorBasicMaterialDao.findByIdsAndType(wareHouse.getType().longValue(), currentFarmSupportedMaterials);
+//        if (null == supportedMaterials || supportedMaterials.isEmpty())
+//            throw new InvalidException("basic.material.not.found", StringUtils.join(currentFarmSupportedMaterials, ','));
+//        Map<Long, String> supportedMaterialIds = new HashedMap(supportedMaterials.size());
+//        supportedMaterials.forEach(material -> {
+//            supportedMaterialIds.put(material.getId(), material.getName());
+//        });
 
         StockContext context = new StockContext();
-        context.setSupportedMaterials(supportedMaterialIds);
+//        context.setSupportedMaterials(supportedMaterialIds);
         context.setWareHouse(wareHouse);
         return context;
     }
