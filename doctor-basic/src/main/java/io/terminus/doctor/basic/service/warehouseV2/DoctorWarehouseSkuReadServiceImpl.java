@@ -6,6 +6,8 @@ import io.terminus.common.model.Response;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
+import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;

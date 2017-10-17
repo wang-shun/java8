@@ -1,9 +1,12 @@
 package io.terminus.doctor.basic.dao;
 
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Desc:
@@ -13,5 +16,14 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class DoctorWarehouseSkuDao extends MyBatisDao<DoctorWarehouseSku> {
+
+
+    public Optional<DoctorWarehouseSku> findByFarmIdAndCode(Long farmId, String code) {
+        List<DoctorWarehouseSku> skus = list(DoctorWarehouseSku.builder().build());
+        if (null == skus || skus.isEmpty())
+            return Optional.empty();
+        else
+            return Optional.ofNullable(skus.get(0));
+    }
 
 }

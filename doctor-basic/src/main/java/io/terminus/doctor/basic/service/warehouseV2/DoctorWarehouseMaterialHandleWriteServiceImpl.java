@@ -121,7 +121,7 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
 
         List<DoctorWarehouseStock> stocks = doctorWarehouseStockDao.list(DoctorWarehouseStock.builder()
                 .warehouseId(handle.getWarehouseId())
-                .materialId(handle.getMaterialId())
+                .skuId(handle.getMaterialId())
                 .build());
         if (null == stocks || stocks.isEmpty())
             throw new ServiceException("stock.not.found");
@@ -163,7 +163,7 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
     private void reverseOut(DoctorWarehouseMaterialHandle handle) {
         List<DoctorWarehouseStock> stock = doctorWarehouseStockDao.list(DoctorWarehouseStock.builder()
                 .warehouseId(handle.getWarehouseId())
-                .materialId(handle.getMaterialId())
+                .skuId(handle.getMaterialId())
                 .build());
         if (null == stock || stock.isEmpty())
             throw new ServiceException("stock.not.found");

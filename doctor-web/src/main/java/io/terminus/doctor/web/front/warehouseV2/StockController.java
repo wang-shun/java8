@@ -6,11 +6,14 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.warehouseV2.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseReportReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStockStatisticsVo;
@@ -46,6 +49,8 @@ public class StockController {
 
     @RpcConsumer
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
+    @RpcConsumer
+    private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
 
     @RequestMapping(method = RequestMethod.PUT, value = "in")
     public boolean in(@RequestBody @Validated WarehouseStockInDto stockIn, Errors errors) {
@@ -168,10 +173,10 @@ public class StockController {
         result.setTotal(stockResponse.getResult().getTotal());
         List<WarehouseStockStatisticsVo> vos = new ArrayList<>(stockResponse.getResult().getData().size());
         stockResponse.getResult().getData().forEach(stock -> {
-            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getMaterialId());
+            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getSkuId());
             if (!balanceResponse.isSuccess())
                 throw new JsonResponseException(balanceResponse.getError());
-            Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterial(warehouseId, stock.getMaterialId(), now,
+            Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterial(warehouseId, stock.getSkuId(), now,
                     WarehouseMaterialHandleType.IN,
                     WarehouseMaterialHandleType.OUT,
                     WarehouseMaterialHandleType.INVENTORY_PROFIT,
@@ -182,6 +187,7 @@ public class StockController {
                     WarehouseMaterialHandleType.FORMULA_OUT);
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
+            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
 
             WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
             vo.setId(stock.getId());
@@ -189,9 +195,9 @@ public class StockController {
             vo.setWarehouseId(stock.getWarehouseId());
             vo.setWarehouseName(stock.getWarehouseName());
             vo.setWarehouseType(stock.getWarehouseType());
-            vo.setMaterialId(stock.getMaterialId());
-            vo.setMaterialName(stock.getMaterialName());
-            vo.setUnit(stock.getUnit());
+            vo.setMaterialId(stock.getSkuId());
+            vo.setMaterialName(stock.getSkuName());
+            vo.setUnit(sku.getUnit());
 
 //            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity());
 //            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount());

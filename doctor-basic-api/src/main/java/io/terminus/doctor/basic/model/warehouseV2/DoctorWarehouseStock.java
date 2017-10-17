@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * Desc:
  * Mail: [ your email ]
- * Date: 2017-08-21 17:52:59
+ * Date: 2017-10-13 17:14:31
  * Created by [ your name ]
  */
 @Data
@@ -20,7 +20,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class DoctorWarehouseStock implements Serializable {
 
-    private static final long serialVersionUID = -4771297360870774453L;
+    private static final long serialVersionUID = 7498736433565620548L;
 
     /**
      * 自增主键
@@ -43,39 +43,24 @@ public class DoctorWarehouseStock implements Serializable {
     private Integer warehouseType;
     
     /**
-     * 物料供应商
-     */
-    private String vendorName;
-    
-    /**
-     * 农场编号
+     * 猪厂编号
      */
     private Long farmId;
     
     /**
-     * 管理员编号
-     */
-    private Long managerId;
-    
-    /**
      * 物料名称
      */
-    private String materialName;
+    private String skuName;
     
     /**
      * 物料编号
      */
-    private Long materialId;
+    private Long skuId;
     
     /**
      * 数量
      */
     private java.math.BigDecimal quantity;
-    
-    /**
-     * 单位
-     */
-    private String unit;
     
     /**
      * 创建时间

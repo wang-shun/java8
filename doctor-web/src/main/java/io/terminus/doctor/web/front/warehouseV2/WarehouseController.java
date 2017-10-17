@@ -97,6 +97,8 @@ public class WarehouseController {
     private DoctorMaterialCodeReadService doctorMaterialCodeReadService;
     @RpcConsumer
     private DoctorMaterialVendorReadService doctorMaterialVendorReadService;
+    @RpcConsumer
+    private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
 
     /**
      * 创建仓库
@@ -432,7 +434,114 @@ public class WarehouseController {
                 .build();
     }
 
+    /**
+     * 仓库可以添加的物料列表
+     */
+//    @RequestMapping(method = RequestMethod.GET, value = "material")
+//    public List<DoctorBasicMaterial> farmMaterial(@RequestParam Long farmId, @RequestParam Long type, @RequestParam String srm) {
+//        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialsOwned(farmId, type, srm));
+//    }
 
+    /**
+     * 仓库的已添加的物料
+     *
+     * @param id
+     * @return
+     */
+//    @RequestMapping(method = RequestMethod.GET, value = "{id}/material")
+//    public Paging<WarehouseStockVo> material(@PathVariable Long id,
+//                                             @RequestParam(required = false) String materialName,
+//                                             @RequestParam(required = false) Integer pageNo,
+//                                             @RequestParam(required = false) Integer pageSize) {
+//
+//        Map<String, Object> criteria = new HashMap<>();
+//        criteria.put("warehouseId", id);
+//        if (StringUtils.isNotBlank(materialName))
+//            criteria.put("materialNameLike", materialName);
+//
+//        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.pagingMergeVendor(pageNo, pageSize, criteria);
+//
+//        if (!stockResponse.isSuccess())
+//            throw new JsonResponseException(stockResponse.getError());
+//
+//        Paging<WarehouseStockVo> vo = new Paging<>();
+//        List<WarehouseStockVo> data = new ArrayList<>(stockResponse.getResult().getData().size());
+//        for (DoctorWarehouseStock stock : stockResponse.getResult().getData()) {
+//            data.add(WarehouseStockVo.builder()
+//                    .materialId(stock.getMaterialId())
+//                    .materialName(stock.getMaterialName())
+//                    .quantity(stock.getQuantity())
+//                    .unit(stock.getUnit())
+//                    .build());
+//        }
+//        vo.setData(data);
+//        vo.setTotal(stockResponse.getResult().getTotal());
+//
+//        return vo;
+//    }
+
+
+//    /**
+//     * 仓库下添加物料
+//     *
+//     * @param id
+//     * @param warehouseMaterialDto
+//     */
+//    @RequestMapping(method = RequestMethod.POST, value = "{id}/material")
+//    public boolean material(@PathVariable Long id,
+//                            @RequestBody @Valid WarehouseMaterialDto warehouseMaterialDto,
+//                            Errors errors) {
+//
+//        if (errors.hasErrors())
+//            throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
+//
+//        DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(warehouseMaterialDto.getMaterialId()));
+//        if (material == null) {
+//            throw new JsonResponseException("basicMaterial.not.found");
+//        }
+//        DoctorWareHouse wareHouse = RespHelper.or500(doctorWarehouseReaderService.findById(id));
+//        if (wareHouse == null) {
+//            throw new JsonResponseException("warehouse.not.found");
+//        }
+//        if (!wareHouse.getType().equals(material.getType())) {
+//            throw new JsonResponseException("warehouse.material.type.not.match"); // 仓库与物料类型不一致
+//        }
+//        Response<DoctorFarmBasic> farmBasicResponse = doctorFarmBasicReadService.findFarmBasicByFarmId(wareHouse.getFarmId());
+//        if (!farmBasicResponse.isSuccess())
+//            throw new ServiceException(farmBasicResponse.getError());
+//        DoctorFarmBasic farmBasic = farmBasicResponse.getResult();
+//        if (null == farmBasic)
+//            throw new JsonResponseException("farm.basic.not.found");
+//
+//        List<Long> currentFarmSupportedMaterials = farmBasic.getMaterialIdList();
+//        if (!currentFarmSupportedMaterials.contains(warehouseMaterialDto.getMaterialId()))
+//            throw new JsonResponseException("material.not.allow.in.this.warehouse");
+//
+//        Response<Boolean> existedResponse = doctorWarehouseStockReadService.existed(DoctorWarehouseStock.builder()
+//                .warehouseId(id)
+//                .materialId(warehouseMaterialDto.getMaterialId())
+//                .build());
+//        if (!existedResponse.isSuccess())
+//            throw new JsonResponseException(existedResponse.getError());
+//        if (existedResponse.getResult())
+//            throw new JsonResponseException("warehouse.stock.existed");
+//
+//        Response<Long> createResponse = doctorWarehouseStockWriteService.create(DoctorWarehouseStock.builder()
+//                .farmId(wareHouse.getFarmId())
+//                .warehouseId(id)
+//                .warehouseName(wareHouse.getWareHouseName())
+//                .warehouseType(wareHouse.getType())
+//                .vendorName(DoctorWarehouseStockWriteService.DEFAULT_VENDOR_NAME)
+//                .materialId(warehouseMaterialDto.getMaterialId())
+//                .materialName(material.getName())
+//                .quantity(new BigDecimal(0))
+//                .unit(warehouseMaterialDto.getUnitName())
+//                .build());
+//
+//        if (!createResponse.isSuccess())
+//            throw new JsonResponseException(createResponse.getError());
+//        return true;
+//    }
     @RequestMapping(method = RequestMethod.GET, value = "{id}/material/{materialId}/statistics")
     public WarehouseStockStatisticsVo materialStatistics(@PathVariable Long id, @PathVariable Long materialId) {
         Calendar now = Calendar.getInstance();
@@ -449,21 +558,21 @@ public class WarehouseController {
         if (!balanceResponse.isSuccess())
             throw new JsonResponseException(balanceResponse.getError());
 
-        Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.listMergeVendor(DoctorWarehouseStock.builder()
+        Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.list(DoctorWarehouseStock.builder()
                 .warehouseId(id)
-                .materialId(materialId)
+                .skuId(materialId)
                 .build());
         if (!stockResponse.isSuccess())
             throw new JsonResponseException(stockResponse.getError());
         if (null == stockResponse.getResult() || stockResponse.getResult().isEmpty())
             throw new JsonResponseException("stock.not.found");
 
-
         Response<DoctorWareHouse> wareHouseResponse = doctorWarehouseReaderService.findById(id);
         if (!wareHouseResponse.isSuccess())
             throw new JsonResponseException(wareHouseResponse.getError());
         if (null == wareHouseResponse.getResult())
             throw new JsonResponseException("warehouse.not.found");
+        DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stockResponse.getResult().get(0).getSkuId()));
 
         WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
 
@@ -472,9 +581,9 @@ public class WarehouseController {
         vo.setWarehouseType(wareHouseResponse.getResult().getType());
 
         vo.setId(stockResponse.getResult().get(0).getId());
-        vo.setMaterialId(stockResponse.getResult().get(0).getMaterialId());
-        vo.setMaterialName(stockResponse.getResult().get(0).getMaterialName());
-        vo.setUnit(stockResponse.getResult().get(0).getUnit());
+        vo.setMaterialId(stockResponse.getResult().get(0).getSkuId());
+        vo.setMaterialName(stockResponse.getResult().get(0).getSkuName());
+        vo.setUnit(sku.getUnit());
 
         vo.setOutQuantity(statisticsDtoResponse.getResult().getOut().getQuantity());
         vo.setOutAmount(statisticsDtoResponse.getResult().getOut().getAmount());
@@ -489,115 +598,6 @@ public class WarehouseController {
         vo.setBalanceAmount(balanceResponse.getResult().getAmount());
 
         return vo;
-    }
-
-    /**
-     * 仓库可以添加的物料列表
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "material")
-    public List<DoctorBasicMaterial> farmMaterial(@RequestParam Long farmId, @RequestParam Long type, @RequestParam String srm) {
-        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialsOwned(farmId, type, srm));
-    }
-
-    /**
-     * 仓库的已添加的物料
-     *
-     * @param id
-     * @return
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "{id}/material")
-    public Paging<WarehouseStockVo> material(@PathVariable Long id,
-                                             @RequestParam(required = false) String materialName,
-                                             @RequestParam(required = false) Integer pageNo,
-                                             @RequestParam(required = false) Integer pageSize) {
-
-        Map<String, Object> criteria = new HashMap<>();
-        criteria.put("warehouseId", id);
-        if (StringUtils.isNotBlank(materialName))
-            criteria.put("materialNameLike", materialName);
-
-        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.pagingMergeVendor(pageNo, pageSize, criteria);
-
-        if (!stockResponse.isSuccess())
-            throw new JsonResponseException(stockResponse.getError());
-
-        Paging<WarehouseStockVo> vo = new Paging<>();
-        List<WarehouseStockVo> data = new ArrayList<>(stockResponse.getResult().getData().size());
-        for (DoctorWarehouseStock stock : stockResponse.getResult().getData()) {
-            data.add(WarehouseStockVo.builder()
-                    .materialId(stock.getMaterialId())
-                    .materialName(stock.getMaterialName())
-                    .quantity(stock.getQuantity())
-                    .unit(stock.getUnit())
-                    .build());
-        }
-        vo.setData(data);
-        vo.setTotal(stockResponse.getResult().getTotal());
-
-        return vo;
-    }
-
-
-    /**
-     * 仓库下添加物料
-     *
-     * @param id
-     * @param warehouseMaterialDto
-     */
-    @RequestMapping(method = RequestMethod.POST, value = "{id}/material")
-    public boolean material(@PathVariable Long id,
-                            @RequestBody @Valid WarehouseMaterialDto warehouseMaterialDto,
-                            Errors errors) {
-
-        if (errors.hasErrors())
-            throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
-
-        DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(warehouseMaterialDto.getMaterialId()));
-        if (material == null) {
-            throw new JsonResponseException("basicMaterial.not.found");
-        }
-        DoctorWareHouse wareHouse = RespHelper.or500(doctorWarehouseReaderService.findById(id));
-        if (wareHouse == null) {
-            throw new JsonResponseException("warehouse.not.found");
-        }
-        if (!wareHouse.getType().equals(material.getType())) {
-            throw new JsonResponseException("warehouse.material.type.not.match"); // 仓库与物料类型不一致
-        }
-        Response<DoctorFarmBasic> farmBasicResponse = doctorFarmBasicReadService.findFarmBasicByFarmId(wareHouse.getFarmId());
-        if (!farmBasicResponse.isSuccess())
-            throw new ServiceException(farmBasicResponse.getError());
-        DoctorFarmBasic farmBasic = farmBasicResponse.getResult();
-        if (null == farmBasic)
-            throw new JsonResponseException("farm.basic.not.found");
-
-        List<Long> currentFarmSupportedMaterials = farmBasic.getMaterialIdList();
-        if (!currentFarmSupportedMaterials.contains(warehouseMaterialDto.getMaterialId()))
-            throw new JsonResponseException("material.not.allow.in.this.warehouse");
-
-        Response<Boolean> existedResponse = doctorWarehouseStockReadService.existed(DoctorWarehouseStock.builder()
-                .warehouseId(id)
-                .materialId(warehouseMaterialDto.getMaterialId())
-                .build());
-        if (!existedResponse.isSuccess())
-            throw new JsonResponseException(existedResponse.getError());
-        if (existedResponse.getResult())
-            throw new JsonResponseException("warehouse.stock.existed");
-
-        Response<Long> createResponse = doctorWarehouseStockWriteService.create(DoctorWarehouseStock.builder()
-                .farmId(wareHouse.getFarmId())
-                .warehouseId(id)
-                .warehouseName(wareHouse.getWareHouseName())
-                .warehouseType(wareHouse.getType())
-//                .vendorName(DoctorWarehouseStockWriteService.DEFAULT_VENDOR_NAME)
-                .materialId(warehouseMaterialDto.getMaterialId())
-                .materialName(material.getName())
-                .quantity(new BigDecimal(0))
-                .unit(warehouseMaterialDto.getUnitName())
-                .build());
-
-        if (!createResponse.isSuccess())
-            throw new JsonResponseException(createResponse.getError());
-        return true;
     }
 
 
@@ -817,9 +817,9 @@ public class WarehouseController {
                 if (!statisticsDtoResponse.isSuccess())
                     throw new JsonResponseException(statisticsDtoResponse.getError());
 
-                Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.listMergeVendor(DoctorWarehouseStock.builder()
+                Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.list(DoctorWarehouseStock.builder()
                         .warehouseId(warehouseId)
-                        .materialId(materialId)
+                        .skuId(materialId)
                         .build());
                 if (!stockResponse.isSuccess())
                     throw new JsonResponseException(stockResponse.getError());
@@ -829,12 +829,10 @@ public class WarehouseController {
                     vo.setWarehouseId(warehouseId);
                     vo.setWarehouseName(stock.getWarehouseName());
                     vo.setWarehouseType(stock.getWarehouseType());
-                    vo.setMaterialId(stock.getMaterialId());
-                    vo.setMaterialName(stock.getMaterialName());
-                    vo.setUnit(stock.getUnit());
-
-
-                    AmountAndQuantityDto balance = balanceResponse.getResult().get(stock.getMaterialId());
+                    vo.setMaterialId(stock.getSkuId());
+                    vo.setMaterialName(stock.getSkuName());
+//                    vo.setUnit(stock.getUnit());
+                    AmountAndQuantityDto balance = balanceResponse.getResult().get(stock.getSkuId());
                     if (null == balance) {
                         vo.setBalanceAmount(0);
                         vo.setBalanceQuantity(new BigDecimal(0));
@@ -842,7 +840,7 @@ public class WarehouseController {
                         vo.setBalanceAmount(balance.getAmount());
                         vo.setBalanceQuantity(balance.getQuantity());
                     }
-                    WarehouseStockStatisticsDto statistics = statisticsDtoResponse.getResult().get(stock.getMaterialId());
+                    WarehouseStockStatisticsDto statistics = statisticsDtoResponse.getResult().get(stock.getSkuId());
                     if (null == statistics) {
                         vo.setInQuantity(new BigDecimal(0));
                         vo.setInAmount(0);
@@ -883,6 +881,7 @@ public class WarehouseController {
     }
 
 
+    @Deprecated
     @RequestMapping(method = RequestMethod.GET, value = "{id}/material/{materialId}/code")
     public Response<DoctorMaterialCode> materialCode(@PathVariable Long id,
                                                      @PathVariable Long materialId,
@@ -893,6 +892,7 @@ public class WarehouseController {
     }
 
 
+    @Deprecated
     @RequestMapping(method = RequestMethod.GET, value = "{id}/material/{materialId}/vendor")
     public Response<List<DoctorMaterialVendor>> materialVendor(@PathVariable Long id, @PathVariable Long materialId) {
         return doctorMaterialVendorReadService.list(DoctorMaterialVendor.builder()

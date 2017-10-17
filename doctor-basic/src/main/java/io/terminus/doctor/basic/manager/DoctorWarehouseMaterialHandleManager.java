@@ -2,21 +2,19 @@ package io.terminus.doctor.basic.manager;
 
 import io.terminus.doctor.basic.dao.DoctorWarehouseHandleDetailDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseHandleDetail;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
+import io.terminus.doctor.basic.model.warehouseV2.*;
+import io.terminus.doctor.common.exception.InvalidException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -36,7 +34,6 @@ public class DoctorWarehouseMaterialHandleManager {
     @Autowired
     private DoctorWarehouseHandleDetailDao doctorWarehouseHandleDetailDao;
 
-
     /**
      * 入库
      */
@@ -45,7 +42,7 @@ public class DoctorWarehouseMaterialHandleManager {
         handle(materialHandleContext, WarehouseMaterialHandleType.IN);
     }
 
-//    @Transactional(propagation = Propagation.NESTED)
+    //    @Transactional(propagation = Propagation.NESTED)
     public DoctorWarehouseMaterialHandle out(MaterialHandleContext materialHandleContext) {
         return handle(materialHandleContext, WarehouseMaterialHandleType.OUT);
     }
@@ -58,8 +55,8 @@ public class DoctorWarehouseMaterialHandleManager {
         materialHandle.setWarehouseId(materialHandleContext.getStock().getWarehouseId());
         materialHandle.setWarehouseName(materialHandleContext.getStock().getWarehouseName());
         materialHandle.setWarehouseType(materialHandleContext.getStock().getWarehouseType());
-        materialHandle.setMaterialId(materialHandleContext.getStock().getMaterialId());
-        materialHandle.setMaterialName(materialHandleContext.getStock().getMaterialName());
+        materialHandle.setMaterialId(materialHandleContext.getStock().getSkuId());
+        materialHandle.setMaterialName(materialHandleContext.getStock().getSkuName());
         materialHandle.setUnitPrice(materialHandleContext.getUnitPrice());
         materialHandle.setType(type.getValue());
         materialHandle.setQuantity(materialHandleContext.getQuantity());
@@ -67,9 +64,8 @@ public class DoctorWarehouseMaterialHandleManager {
         materialHandle.setOperatorId(materialHandleContext.getStockDto().getOperatorId());
         materialHandle.setOperatorName(materialHandleContext.getStockDto().getOperatorName());
         materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
-        materialHandle.setUnit(materialHandleContext.getStock().getUnit());
+        materialHandle.setUnit(materialHandleContext.getSku().getUnit());
         materialHandle.setVendorName(materialHandleContext.getVendorName());
-        materialHandle.setUnit(materialHandleContext.getStock().getUnit());
         materialHandle.setHandleYear(materialHandleContext.getStockDto().getHandleDate().get(Calendar.YEAR));
         materialHandle.setHandleMonth(materialHandleContext.getStockDto().getHandleDate().get(Calendar.MONTH) + 1);
         materialHandle.setRemark(materialHandleContext.getStockDetail().getRemark());
@@ -100,5 +96,6 @@ public class DoctorWarehouseMaterialHandleManager {
         private long unitPrice;
         private String vendorName;
         private BigDecimal quantity;
+        private DoctorWarehouseSku sku;
     }
 }
