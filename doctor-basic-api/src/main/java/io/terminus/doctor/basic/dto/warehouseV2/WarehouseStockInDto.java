@@ -32,10 +32,10 @@ public class WarehouseStockInDto extends AbstractWarehouseStockDto implements Se
 
         private static final long serialVersionUID = 8853214651739196333L;
 
-        private String vendorName;
+//        private String vendorName;
 
-        @NotBlank(message = "stock.unit.null")
-        private String unit;
+//        @NotBlank(message = "stock.unit.null")
+//        private String unit;
 
         @NotNull(message = "stock.unit.price.null")
         private Long unitPrice;
@@ -45,9 +45,9 @@ public class WarehouseStockInDto extends AbstractWarehouseStockDto implements Se
         private BigDecimal quantity;
 
 
-        private String specification;
+//        private String specification;
 
-        private String materialCode;
+//        private String materialCode;
 
     }
 }

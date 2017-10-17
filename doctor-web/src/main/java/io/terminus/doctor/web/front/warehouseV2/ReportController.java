@@ -12,8 +12,8 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
-import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -64,6 +64,8 @@ public class ReportController {
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
     @RpcConsumer
     private DoctorWarehouseStockMonthlyReadService doctorWarehouseStockMonthlyReadService;
+    @RpcConsumer
+    private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
 
     /**
      * 仓库报表
@@ -236,10 +238,10 @@ public class ReportController {
         List<WarehouseMonthlyReportVo> report = new ArrayList<>();
         for (DoctorWarehouseStock stock : stocksResponse.getResult()) {
 
-            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getMaterialId(), stock.getVendorName());
+            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getSkuId(), null);
             if (!balanceResponse.isSuccess())
                 throw new JsonResponseException(balanceResponse.getError());
-            Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterialVendor(warehouseId, stock.getMaterialId(), stock.getVendorName(), date,
+            Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterialVendor(warehouseId, stock.getSkuId(), null, date,
                     WarehouseMaterialHandleType.IN,
                     WarehouseMaterialHandleType.OUT,
                     WarehouseMaterialHandleType.INVENTORY_PROFIT,
@@ -252,13 +254,16 @@ public class ReportController {
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
 
+            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
+
+
             WarehouseMonthlyReportVo vo = new WarehouseMonthlyReportVo();
-            vo.setMaterialName(stock.getMaterialName());
-            if (DoctorWarehouseStockWriteService.DEFAULT_VENDOR_NAME.equals(stock.getVendorName()))
+            vo.setMaterialName(stock.getSkuName());
+            if (DoctorWarehouseStockWriteService.DEFAULT_VENDOR_NAME.equals(sku.getVendorName()))
                 vo.setVendorName("");
             else
-                vo.setVendorName(stock.getVendorName());
-            vo.setUnit(stock.getUnit());
+                vo.setVendorName(sku.getVendorName());
+            vo.setUnit(sku.getUnit());
 
             vo.setBalanceAmount(balanceResponse.getResult().getAmount());
             vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
@@ -281,7 +286,7 @@ public class ReportController {
                     .add(statisticsResponse.getResult().getTransferOut().getQuantity())
                     .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
 
-            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getMaterialId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
+            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getSkuId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
             vo.setInitialAmount(initialBalance.getAmount());
             vo.setInitialQuantity(initialBalance.getQuantity());
 

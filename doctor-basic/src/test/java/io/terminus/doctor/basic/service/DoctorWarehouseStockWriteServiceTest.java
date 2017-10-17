@@ -75,9 +75,9 @@ public class DoctorWarehouseStockWriteServiceTest {
         doctorWarehouseStockDao.create(DoctorWarehouseStock.builder()
                 .farmId(407L)
                 .warehouseId(190L)
-                .materialId(157L)
+                .skuId(157L)
                 .quantity(new BigDecimal(10))
-                .unit("个")
+//                .unit("个")
                 .build());
 
         WarehouseStockInDto inDto = new WarehouseStockInDto();
@@ -90,13 +90,13 @@ public class DoctorWarehouseStockWriteServiceTest {
         WarehouseStockInDto.WarehouseStockInDetailDto detail = new WarehouseStockInDto.WarehouseStockInDetailDto();
         detail.setMaterialId(153L);
         detail.setQuantity(new BigDecimal(15));
-        detail.setUnit("个");
+//        detail.setUnit("个");
         detail.setUnitPrice(78990L);
 
         WarehouseStockInDto.WarehouseStockInDetailDto detail2 = new WarehouseStockInDto.WarehouseStockInDetailDto();
         detail2.setMaterialId(157L);
         detail2.setQuantity(new BigDecimal(10));
-        detail2.setUnit("件");
+//        detail2.setUnit("件");
         detail2.setUnitPrice(32810L);
 
         List<WarehouseStockInDto.WarehouseStockInDetailDto> detailDtos = new ArrayList<>(2);
@@ -107,17 +107,17 @@ public class DoctorWarehouseStockWriteServiceTest {
 
 
         List<DoctorWarehouseStock> stocks = doctorWarehouseStockDao.list(DoctorWarehouseStock.builder()
-                .materialId(153L)
+                .skuId(153L)
                 .build());
         Assert.assertEquals(1, stocks.size());
-        Assert.assertEquals(153, stocks.get(0).getMaterialId().longValue());
+        Assert.assertEquals(153, stocks.get(0).getSkuId().longValue());
         Assert.assertEquals(15, stocks.get(0).getQuantity().intValue());
 
         stocks = doctorWarehouseStockDao.list(DoctorWarehouseStock.builder()
-                .materialId(157L)
+                .skuId(157L)
                 .build());
         Assert.assertEquals(1, stocks.size());
-        Assert.assertEquals(157, stocks.get(0).getMaterialId().longValue());
+        Assert.assertEquals(157, stocks.get(0).getSkuId().longValue());
         Assert.assertEquals(20, stocks.get(0).getQuantity().intValue());
 
         List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
@@ -168,11 +168,11 @@ public class DoctorWarehouseStockWriteServiceTest {
         WarehouseStockInDto.WarehouseStockInDetailDto detail = new WarehouseStockInDto.WarehouseStockInDetailDto();
         detail.setMaterialId(153L);
         detail.setQuantity(new BigDecimal(15));
-        detail.setUnit("个");
+//        detail.setUnit("个");
         detail.setUnitPrice(78990L);
-        detail.setVendorName("白金");
-        detail.setSpecification("899个/包");
-        detail.setMaterialCode("9998847700038775");
+//        detail.setVendorName("白金");
+//        detail.setSpecification("899个/包");
+//        detail.setMaterialCode("9998847700038775");
         inDto.setDetails(Collections.singletonList(detail));
         doctorWarehouseStockWriteService.in(inDto);
 
