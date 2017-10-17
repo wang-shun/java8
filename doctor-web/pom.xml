@@ -16,15 +16,7 @@
     <artifactId>doctor-web</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-        </dependency>
 
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-        </dependency>
 
         <!-- doctor -->
         <dependency>
@@ -115,6 +107,19 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
+
+        <!-- swagger -->
+        <dependency>
+            <groupId>io.terminus.boot</groupId>
+            <artifactId>terminus-spring-boot-starter-swagger</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+
+
     </dependencies>
 
     <build>
