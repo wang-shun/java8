@@ -259,16 +259,19 @@ public class ReportController {
                 throw new JsonResponseException(statisticsResponse.getError());
 
 //            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
-            if (!skuMap.containsKey(stock.getSkuId()))
-                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
-            DoctorWarehouseSku sku = skuMap.get(stock.getSkuId()).get(0);
+//            if (!skuMap.containsKey(stock.getSkuId()))
+//                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
+//            DoctorWarehouseSku sku = skuMap.get(stock.getSkuId()).get(0);
 
             WarehouseMonthlyReportVo vo = new WarehouseMonthlyReportVo();
             vo.setMaterialName(stock.getSkuName());
-            vo.setVendorName(sku.getVendorName());
-            vo.setUnit(sku.getUnit());
-            vo.setSpecification(sku.getSpecification());
-            vo.setCode(sku.getCode());
+
+            if (skuMap.containsKey(stock.getSkuId())) {
+                vo.setVendorName(skuMap.get(stock.getSkuId()).get(0).getVendorName());
+                vo.setUnit(skuMap.get(stock.getSkuId()).get(0).getUnit());
+                vo.setSpecification(skuMap.get(stock.getSkuId()).get(0).getSpecification());
+                vo.setCode(skuMap.get(stock.getSkuId()).get(0).getCode());
+            }
 
             vo.setBalanceAmount(balanceResponse.getResult().getAmount());
             vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
@@ -366,10 +369,10 @@ public class ReportController {
                 pigGroupName = handleApply.get(handle.getId()).getPigGroupName();
             }
 
-            if (!skuMap.containsKey(handle.getMaterialId()))
-                throw new InvalidException("warehouse.sku.not.found", handle.getMaterialId());
+//            if (!skuMap.containsKey(handle.getMaterialId()))
+//                throw new InvalidException("warehouse.sku.not.found", handle.getMaterialId());
 
-            vos.add(WarehouseMaterialHandleVo.builder()
+            WarehouseMaterialHandleVo handleVo = WarehouseMaterialHandleVo.builder()
                     .materialName(handle.getMaterialName())
                     .type(handle.getType())
                     .handleDate(handle.getHandleDate())
@@ -382,7 +385,16 @@ public class ReportController {
                     .specification(skuMap.get(handle.getMaterialId()).get(0).getSpecification())
                     .unit(skuMap.get(handle.getMaterialId()).get(0).getUnit())
                     .warehouseName(handle.getWarehouseName())
-                    .build());
+                    .build();
+
+            if (skuMap.containsKey(handle.getMaterialId())) {
+                handleVo.setCode(skuMap.get(handle.getMaterialId()).get(0).getCode());
+                handleVo.setVendorName(skuMap.get(handle.getMaterialId()).get(0).getVendorName());
+                handleVo.setSpecification(skuMap.get(handle.getMaterialId()).get(0).getSpecification());
+                handleVo.setUnit(skuMap.get(handle.getMaterialId()).get(0).getUnit());
+            }
+
+            vos.add(handleVo);
         }
         return vos;
     }
@@ -421,15 +433,17 @@ public class ReportController {
 
         List<WarehouseMaterialApplyVo> vos = new ArrayList<>(applyResponse.getResult().size());
         for (DoctorWarehouseMaterialApply apply : applyResponse.getResult()) {
-            if (!skuMap.containsKey(apply.getMaterialId()))
-                throw new InvalidException("warehouse.sku.not.found");
+//            if (!skuMap.containsKey(apply.getMaterialId()))
+//                throw new InvalidException("warehouse.sku.not.found");
 
             WarehouseMaterialApplyVo vo = new WarehouseMaterialApplyVo();
             BeanUtils.copyProperties(apply, vo);
-            vo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
-            vo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
-            vo.setVendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName());
-            vo.setSpecification(skuMap.get(apply.getMaterialId()).get(0).getSpecification());
+            if (skuMap.containsKey(apply.getMaterialId())) {
+                vo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
+                vo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
+                vo.setVendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName());
+                vo.setSpecification(skuMap.get(apply.getMaterialId()).get(0).getSpecification());
+            }
             vos.add(vo);
         }
 
@@ -479,10 +493,11 @@ public class ReportController {
                 throw new JsonResponseException(groupResponse.getError());
             if (null == groupResponse.getResult())
                 throw new JsonResponseException("pig.group.not.found");
-            if (!skuMap.containsKey(apply.getMaterialId()))
-                throw new InvalidException("warehouse.sku.not.found", apply.getMaterialId());
+//            if (!skuMap.containsKey(apply.getMaterialId()))
+//                throw new InvalidException("warehouse.sku.not.found", apply.getMaterialId());
 
-            vos.add(WarehousePigGroupApplyVo.builder()
+
+            WarehousePigGroupApplyVo applyVo = WarehousePigGroupApplyVo.builder()
                     .pigGroupId(apply.getPigGroupId())
                     .pigGroupName(apply.getPigGroupName())
                     .openDate(groupResponse.getResult().getOpenAt())
@@ -492,14 +507,23 @@ public class ReportController {
                     .materialType(apply.getType())
                     .materialName(apply.getMaterialName())
 //                    .unit(apply.getUnit())
-                    .unit(skuMap.get(apply.getMaterialId()).get(0).getUnit())
-                    .code(skuMap.get(apply.getMaterialId()).get(0).getCode())
-                    .vendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName())
-                    .specification(skuMap.get(apply.getMaterialId()).get(0).getSpecification())
+//                    .unit(skuMap.get(apply.getMaterialId()).get(0).getUnit())
+//                    .code(skuMap.get(apply.getMaterialId()).get(0).getCode())
+//                    .vendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName())
+//                    .specification(skuMap.get(apply.getMaterialId()).get(0).getSpecification())
                     .quantity(apply.getQuantity())
                     .unitPrice(apply.getUnitPrice())
                     .amount(apply.getQuantity().multiply(new BigDecimal(apply.getUnitPrice())).longValue())
-                    .build());
+                    .build();
+
+            if (skuMap.containsKey(apply.getMaterialId())) {
+                applyVo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
+                applyVo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
+                applyVo.setSpecification(skuMap.get(apply.getMaterialId()).get(0).getSpecification());
+                applyVo.setVendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName());
+            }
+
+            vos.add(applyVo);
         }
 
         return vos;
