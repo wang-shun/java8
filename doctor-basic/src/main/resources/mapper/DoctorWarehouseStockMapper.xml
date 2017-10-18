@@ -65,6 +65,12 @@
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
             <if test="skuNameLike != null">AND `sku_name` like  CONCAT('%',#{skuNameLike},'%')</if>
+            <if test="skuIds != null and skuIds.size() > 0">
+                AND
+                <foreach collection="skuIds" item="t" open="(" separator="or" close=")">
+                    sku_id =#{t}
+                </foreach>
+            </if>
         </where>
     </sql>
 

@@ -46,7 +46,7 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         params.put("orgId", doctorWarehouseSku.getOrgId());
         params.put("code", doctorWarehouseSku.getCode());
         if (!doctorWarehouseSkuDao.list(params).isEmpty())
-            throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getOrgId(), doctorWarehouseSku.getCode());
+            throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getCode());
 
 //        params.clear();
 //        params.put("orgId", doctorWarehouseSku.getOrgId());
@@ -92,9 +92,9 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         List<DoctorWarehouseSku> existedSku = doctorWarehouseSkuDao.list(params);
         if (!existedSku.isEmpty()) {
             if (existedSku.size() > 1)
-                throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getOrgId(), doctorWarehouseSku.getCode());
+                throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getCode());
             if (existedSku.size() == 1 && existedSku.get(0).getId() != doctorWarehouseSku.getId())
-                throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getOrgId(), doctorWarehouseSku.getCode());
+                throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getCode());
         }
 
 //        DoctorFarmBasic doctorFarmBasic = doctorFarmBasicDao.findByFarmId(doctorWarehouseSku.getFarmId());

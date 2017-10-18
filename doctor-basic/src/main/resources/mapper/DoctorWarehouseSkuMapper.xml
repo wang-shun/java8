@@ -63,6 +63,7 @@
             <if test="specification != null">AND `specification` = #{specification}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+            <if test="nameOrSrmLike != null">AND (`name` like CONCAT('%',#{nameOrSrmLike},'%') OR `srm` like CONCAT('%',#{nameOrSrmLike},'%') )</if>
         </where>
     </sql>
 
