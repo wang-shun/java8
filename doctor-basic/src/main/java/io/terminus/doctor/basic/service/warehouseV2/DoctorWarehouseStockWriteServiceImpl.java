@@ -320,17 +320,17 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 throw new InvalidException("transfer.warehouse.manager.id.not.equals", targetWareHouse.getManagerName(), context.getWareHouse().getManagerName());
             }
 
+            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
+            if (null == sku)
+                throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
+
             //找到对应库存
             DoctorWarehouseStock stock = getStock(stockTransfer.getWarehouseId(), detail.getMaterialId(), null);
             if (null == stock)
                 throw new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), context.getSupportedMaterials().get(detail.getMaterialId()));
 
             if (stock.getQuantity().compareTo(detail.getQuantity()) < 0)
-                throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), stock.getQuantity());
-
-            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(stock.getSkuId());
-            if (null == sku)
-                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
+                throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), stock.getQuantity(), sku.getUnit());
 
 
             DoctorWarehouseSku targetSku = doctorWarehouseSkuDao.findByFarmIdAndCode(sku.getFarmId(), sku.getCode()).orElseGet(() -> {
@@ -442,7 +442,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
 //                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 
-            DoctorWarehouseStock stock = doctorWarehouseStockManager.out(stockOut, detail, context);
+            DoctorWarehouseStock stock = doctorWarehouseStockManager.out(stockOut, detail, context, sku);
 
             DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = doctorWarehousePurchaseManager.out(stock, detail.getQuantity());
             long unitPrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock);
