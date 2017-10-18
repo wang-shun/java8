@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -87,8 +88,14 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         Map<String, Object> params = new HashMap<>();
         params.put("orgId", doctorWarehouseSku.getOrgId());
         params.put("code", doctorWarehouseSku.getCode());
-        if (!doctorWarehouseSkuDao.list(params).isEmpty())
-            throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getOrgId(), doctorWarehouseSku.getCode());
+
+        List<DoctorWarehouseSku> existedSku = doctorWarehouseSkuDao.list(params);
+        if (!existedSku.isEmpty()) {
+            if (existedSku.size() > 1)
+                throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getOrgId(), doctorWarehouseSku.getCode());
+            if (existedSku.size() == 1 && existedSku.get(0).getId() != doctorWarehouseSku.getId())
+                throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getOrgId(), doctorWarehouseSku.getCode());
+        }
 
 //        DoctorFarmBasic doctorFarmBasic = doctorFarmBasicDao.findByFarmId(doctorWarehouseSku.getFarmId());
 //        if (null == doctorFarmBasic)
