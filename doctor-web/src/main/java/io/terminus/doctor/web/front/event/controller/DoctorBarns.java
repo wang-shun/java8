@@ -22,6 +22,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
@@ -127,16 +128,17 @@ public class DoctorBarns {
     @RequestMapping(method = RequestMethod.GET, value = "has-child")
     public boolean hasChildPig(@RequestParam Long barnId) {
 
+        return RespHelper.or500(doctorGroupReadService.findGroupPigQuantityByBarnId(barnId)) != 0;
 
 
-        List<DoctorPigInfoDto> pigInfoDtos = RespHelper.or500(doctorPigReadService.queryDoctorPigInfoByBarnId(barnId));
-        for (DoctorPigInfoDto pig : pigInfoDtos) {
-            if (pig.getPigType() == PigType.NURSERY_PIGLET.getValue() ||
-                    pig.getPigType() == PigType.FATTEN_PIG.getValue() ||
-                    pig.getPigType() == PigType.RESERVE.getValue())
-                return true;
-        }
-        return false;
+//        List<DoctorPigInfoDto> pigInfoDtos = RespHelper.or500(doctorPigReadService.queryDoctorPigInfoByBarnId(barnId));
+//        for (DoctorPigInfoDto pig : pigInfoDtos) {
+//            if (pig.getPigType() == PigType.NURSERY_PIGLET.getValue() ||
+//                    pig.getPigType() == PigType.FATTEN_PIG.getValue() ||
+//                    pig.getPigType() == PigType.RESERVE.getValue())
+//                return true;
+//        }
+//        return false;
     }
 
     /**
