@@ -194,7 +194,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             //找到对应库存
             DoctorWarehouseStock stock = getStock(stockInventory.getWarehouseId(), detail.getMaterialId(), null);
             if (null == stock)
-                throw new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), context.getSupportedMaterials().get(detail.getMaterialId()));
+                throw new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), sku.getName());
 
             int compareResult = stock.getQuantity().compareTo(detail.getQuantity());
 
@@ -214,7 +214,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             materialHandle.setWarehouseType(context.getWareHouse().getType());
             materialHandle.setMaterialId(detail.getMaterialId());
             materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
-            materialHandle.setMaterialName(context.getSupportedMaterials().get(detail.getMaterialId()));
+            materialHandle.setMaterialName(sku.getName());
 
             materialHandle.setHandleDate(stockInventory.getHandleDate().getTime());
             materialHandle.setHandleYear(stockInventory.getHandleDate().get(Calendar.YEAR));
@@ -306,8 +306,13 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         List<DoctorWarehouseHandlerManager.StockHandleContext> handleContexts = new ArrayList<>(stockTransfer.getDetails().size());
         for (WarehouseStockTransferDto.WarehouseStockTransferDetail detail : stockTransfer.getDetails()) {
 
+
+            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
+            if (null == sku)
+                throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
+
             if (detail.getTransferInWarehouseId() == stockTransfer.getWarehouseId())
-                throw new InvalidException("transfer.out.warehouse.equals.transfer.in.warehouse", context.getWareHouse().getWareHouseName(), context.getSupportedMaterials().get(detail.getMaterialId()));
+                throw new InvalidException("transfer.out.warehouse.equals.transfer.in.warehouse", context.getWareHouse().getWareHouseName(), sku.getName());
 
             DoctorWareHouse targetWareHouse = doctorWareHouseDao.findById(detail.getTransferInWarehouseId());
             if (null == targetWareHouse)
@@ -320,14 +325,11 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 throw new InvalidException("transfer.warehouse.manager.id.not.equals", targetWareHouse.getManagerName(), context.getWareHouse().getManagerName());
             }
 
-            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
-            if (null == sku)
-                throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
 
             //找到对应库存
             DoctorWarehouseStock stock = getStock(stockTransfer.getWarehouseId(), detail.getMaterialId(), null);
             if (null == stock)
-                throw new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), context.getSupportedMaterials().get(detail.getMaterialId()));
+                throw new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), sku.getName());
 
             if (stock.getQuantity().compareTo(detail.getQuantity()) < 0)
                 throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), stock.getQuantity(), sku.getUnit());
