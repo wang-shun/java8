@@ -33,6 +33,7 @@ import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -100,6 +101,9 @@ public class WarehouseController {
     private DoctorMaterialVendorReadService doctorMaterialVendorReadService;
     @RpcConsumer
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
+
+    @Autowired
+    private MessageSource messageSource;
 
     /**
      * 创建仓库
@@ -470,8 +474,10 @@ public class WarehouseController {
         for (DoctorWarehouseStock stock : stockResponse.getResult().getData()) {
 
             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
-            if (null == sku)
-                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
+            if (null == sku) {
+                String errorMessage = messageSource.getMessage("warehouse.sku.not.found", new Object[]{stock.getSkuName()}, Locale.getDefault());
+                throw new JsonResponseException(errorMessage);
+            }
 
 
             data.add(WarehouseStockVo.builder()

@@ -178,6 +178,10 @@ public class StockController {
         result.setTotal(stockResponse.getResult().getTotal());
         List<WarehouseStockStatisticsVo> vos = new ArrayList<>(stockResponse.getResult().getData().size());
         stockResponse.getResult().getData().forEach(stock -> {
+
+//            if (!skuMap.containsKey(stock.getSkuId()))
+//                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
+
             Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getSkuId());
             if (!balanceResponse.isSuccess())
                 throw new JsonResponseException(balanceResponse.getError());
@@ -193,9 +197,9 @@ public class StockController {
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
 //            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
-            if (!skuMap.containsKey(stock.getSkuId()))
-                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
-            DoctorWarehouseSku sku = skuMap.get(stock.getSkuId()).get(0);
+
+
+            DoctorWarehouseSku sku = skuMap.containsKey(stock.getSkuId()) ? skuMap.get(stock.getSkuId()).get(0) : null;
 
             WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
             vo.setId(stock.getId());
@@ -205,10 +209,13 @@ public class StockController {
             vo.setWarehouseType(stock.getWarehouseType());
             vo.setMaterialId(stock.getSkuId());
             vo.setMaterialName(stock.getSkuName());
-            vo.setUnit(sku.getUnit());
-            vo.setCode(sku.getCode());
-            vo.setVendorName(sku.getVendorName());
-            vo.setSpecification(sku.getSpecification());
+
+            if (null != sku) {
+                vo.setUnit(sku.getUnit());
+                vo.setCode(sku.getCode());
+                vo.setVendorName(sku.getVendorName());
+                vo.setSpecification(sku.getSpecification());
+            }
 
 //            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity());
 //            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount());
