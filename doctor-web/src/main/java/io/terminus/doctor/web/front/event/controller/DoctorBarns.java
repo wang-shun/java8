@@ -383,6 +383,7 @@ public class DoctorBarns {
         List<PrimaryUser> allPrimary = RespHelper.or500(primaryUserReadService.findAllPrimaryUser());
         List<Long> userIds = allPrimary.stream().map(PrimaryUser::getUserId).collect(Collectors.toList());
         List<DoctorUserDataPermission> permissions = RespHelper.or500(doctorUserDataPermissionReadService.findByFarmAndPrimary(farmId, userIds));
+        permissions.add(RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(10L)));
         permissions.forEach(permission -> addBarnId2DataPermission(barnId, permission));
 
     }
