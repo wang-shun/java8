@@ -13,6 +13,7 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseReportReadSer
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
@@ -24,6 +25,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/20.
@@ -169,6 +171,9 @@ public class StockController {
 
         Calendar now = Calendar.getInstance();
 
+
+        Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(stockResponse.getResult().getData().stream().map(DoctorWarehouseStock::getSkuId).collect(Collectors.toList()))).stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
+
         Paging<WarehouseStockStatisticsVo> result = new Paging<>();
         result.setTotal(stockResponse.getResult().getTotal());
         List<WarehouseStockStatisticsVo> vos = new ArrayList<>(stockResponse.getResult().getData().size());
@@ -187,7 +192,10 @@ public class StockController {
                     WarehouseMaterialHandleType.FORMULA_OUT);
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
-            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
+//            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
+            if (!skuMap.containsKey(stock.getSkuId()))
+                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
+            DoctorWarehouseSku sku = skuMap.get(stock.getSkuId()).get(0);
 
             WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
             vo.setId(stock.getId());

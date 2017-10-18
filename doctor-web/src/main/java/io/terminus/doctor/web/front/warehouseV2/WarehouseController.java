@@ -20,6 +20,7 @@ import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -469,6 +470,9 @@ public class WarehouseController {
         for (DoctorWarehouseStock stock : stockResponse.getResult().getData()) {
 
             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
+            if (null == sku)
+                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
+
 
             data.add(WarehouseStockVo.builder()
                     .materialId(stock.getSkuId())

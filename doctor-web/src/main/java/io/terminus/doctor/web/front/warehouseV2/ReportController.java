@@ -15,6 +15,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.warehouseV2.*;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -234,6 +235,10 @@ public class ReportController {
         if (!stocksResponse.isSuccess())
             throw new JsonResponseException(stocksResponse.getError());
 
+        Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(stocksResponse.getResult().stream()
+                .map(DoctorWarehouseStock::getSkuId).collect(Collectors.toList())))
+                .stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
+
         List<WarehouseMonthlyReportVo> report = new ArrayList<>();
         for (DoctorWarehouseStock stock : stocksResponse.getResult()) {
 
@@ -253,8 +258,10 @@ public class ReportController {
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
 
-            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
-
+//            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
+            if (!skuMap.containsKey(stock.getSkuId()))
+                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
+            DoctorWarehouseSku sku = skuMap.get(stock.getSkuId()).get(0);
 
             WarehouseMonthlyReportVo vo = new WarehouseMonthlyReportVo();
             vo.setMaterialName(stock.getSkuName());
@@ -359,6 +366,9 @@ public class ReportController {
                 pigGroupName = handleApply.get(handle.getId()).getPigGroupName();
             }
 
+            if (!skuMap.containsKey(handle.getMaterialId()))
+                throw new InvalidException("warehouse.sku.not.found", handle.getMaterialId());
+
             vos.add(WarehouseMaterialHandleVo.builder()
                     .materialName(handle.getMaterialName())
                     .type(handle.getType())
@@ -411,6 +421,9 @@ public class ReportController {
 
         List<WarehouseMaterialApplyVo> vos = new ArrayList<>(applyResponse.getResult().size());
         for (DoctorWarehouseMaterialApply apply : applyResponse.getResult()) {
+            if (!skuMap.containsKey(apply.getMaterialId()))
+                throw new InvalidException("warehouse.sku.not.found");
+
             WarehouseMaterialApplyVo vo = new WarehouseMaterialApplyVo();
             BeanUtils.copyProperties(apply, vo);
             vo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
@@ -466,6 +479,8 @@ public class ReportController {
                 throw new JsonResponseException(groupResponse.getError());
             if (null == groupResponse.getResult())
                 throw new JsonResponseException("pig.group.not.found");
+            if (!skuMap.containsKey(apply.getMaterialId()))
+                throw new InvalidException("warehouse.sku.not.found", apply.getMaterialId());
 
             vos.add(WarehousePigGroupApplyVo.builder()
                     .pigGroupId(apply.getPigGroupId())
