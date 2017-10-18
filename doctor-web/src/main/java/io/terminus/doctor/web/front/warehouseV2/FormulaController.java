@@ -11,7 +11,9 @@ import io.terminus.doctor.basic.dto.warehouseV2.WarehouseFormulaDto;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.FeedFormula;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.service.*;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -53,6 +55,9 @@ public class FormulaController {
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
 
+    @RpcConsumer
+    private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
+
 
     @RequestMapping(method = RequestMethod.GET)
     public Paging<FeedFormula> paging(@RequestParam("farmId") Long farmId,
@@ -68,7 +73,8 @@ public class FormulaController {
         dto.getProduce().calculateTotalPercent();
         buildProduceInfo(dto.getProduce());
         // 此配方要生产的饲料
-        DoctorBasicMaterial feed = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
+//        DoctorBasicMaterial feed = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
+        DoctorWarehouseSku feed = RespHelper.or500(doctorWarehouseSkuReadService.findById(dto.getMaterialId()));
 
         FeedFormula feedFormula = new FeedFormula();
         feedFormula.setFeedId(feed.getId());
@@ -97,7 +103,8 @@ public class FormulaController {
         dto.getProduce().calculateTotalPercent();
         buildProduceInfo(dto.getProduce());
         // 此配方要生产的饲料
-        DoctorBasicMaterial feed = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
+//        DoctorBasicMaterial feed = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
+        DoctorWarehouseSku feed = RespHelper.or500(doctorWarehouseSkuReadService.findById(dto.getMaterialId()));
 
         FeedFormula feedFormula = new FeedFormula();
         feedFormula.setId(id);
@@ -142,12 +149,12 @@ public class FormulaController {
         validateCountRange(feedProduce);
 
         // 查询对应的饲料
-        DoctorBasicMaterial feed = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(feedFormula.getFeedId()));
+//        DoctorBasicMaterial feed = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(feedFormula.getFeedId()));
+        DoctorWarehouseSku feed = RespHelper.or500(doctorWarehouseSkuReadService.findById(feedFormula.getFeedId()));
 
         // 校验生产后的入仓仓库类型
         DoctorWareHouse wareHouse = RespHelper.orServEx(doctorWareHouseReadService.findById(warehouseId));
         checkState(Objects.equals(wareHouse.getType(), feed.getType()), "produce.targetWarehouseType.fail");
-
 
 
         List<FeedFormula.MaterialProduceEntry> totalOut = new ArrayList<>(feedProduce.getMaterialProduceEntries());
@@ -279,12 +286,20 @@ public class FormulaController {
 
 
     private void buildProduceInfo(FeedFormula.FeedProduce materialProduce) {
+//        materialProduce.getMaterialProduceEntries().forEach(s -> {
+//            s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
+//        });
+//
+//        materialProduce.getMedicalProduceEntries().forEach(s -> {
+//            s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
+//        });
         materialProduce.getMaterialProduceEntries().forEach(s -> {
-            s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
+            s.setMaterialName(RespHelper.or500(doctorWarehouseSkuReadService.findById(s.getMaterialId())).getName());
         });
 
         materialProduce.getMedicalProduceEntries().forEach(s -> {
-            s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
+            s.setMaterialName(RespHelper.or500(doctorWarehouseSkuReadService.findById(s.getMaterialId())).getName());
         });
+
     }
 }
