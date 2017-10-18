@@ -137,7 +137,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
             if (null == sku)
                 throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
-            if(!sku.getType().equals(context.getWareHouse().getType()))
+            if (!sku.getType().equals(context.getWareHouse().getType()))
                 throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 //            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
 //                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
@@ -186,7 +186,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
             if (null == sku)
                 throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
-            if(!sku.getType().equals(context.getWareHouse().getType()))
+            if (!sku.getType().equals(context.getWareHouse().getType()))
                 throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 //            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
 //                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
@@ -317,7 +317,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 throw new InvalidException("transfer.warehouse.type.not.equals", context.getWareHouse().getWareHouseName(), targetWareHouse.getWareHouseName());
 
             if (!Objects.equals(context.getWareHouse().getManagerId(), targetWareHouse.getManagerId())) {
-                throw new InvalidException("transfer.warehouse.manager.id.not.equals");
+                throw new InvalidException("transfer.warehouse.manager.id.not.equals", targetWareHouse.getManagerName(), context.getWareHouse().getManagerName());
             }
 
             //找到对应库存
@@ -437,7 +437,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
             if (null == sku)
                 throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
-            if(!sku.getType().equals(context.getWareHouse().getType()))
+            if (!sku.getType().equals(context.getWareHouse().getType()))
                 throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 //            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
 //                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
