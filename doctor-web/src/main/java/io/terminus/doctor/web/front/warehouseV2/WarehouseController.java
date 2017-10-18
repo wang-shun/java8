@@ -466,14 +466,21 @@ public class WarehouseController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "{id}/material")
     public Paging<WarehouseStockVo> material(@PathVariable Long id,
+                                             @RequestParam Long orgId,
                                              @RequestParam(required = false) String materialName,
                                              @RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize) {
 
+
+        Map<String, Object> skuParams = new HashMap<>();
+        skuParams.put("orgId", orgId);
+        skuParams.put("nameOrSrmLike", materialName);
+
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("warehouseId", id);
-        if (StringUtils.isNotBlank(materialName))
-            criteria.put("materialNameLike", materialName);
+        criteria.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
+//        if (StringUtils.isNotBlank(materialName))
+//            criteria.put("materialNameLike", materialName);
 
         Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.paging(pageNo, pageSize, criteria);
 

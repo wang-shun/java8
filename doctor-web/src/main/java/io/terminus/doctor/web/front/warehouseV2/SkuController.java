@@ -31,6 +31,7 @@ public class SkuController {
     public Paging<DoctorWarehouseSku> query(@RequestParam Long orgId,
                                             @RequestParam(required = false) Integer type,
                                             @RequestParam(required = false) String srm,
+                                            @RequestParam(required = false) String srmOrName,
                                             @RequestParam(required = false) Integer pageNo,
                                             @RequestParam(required = false) Integer pageSize) {
         Map<String, Object> params = new HashMap<>();
@@ -39,6 +40,8 @@ public class SkuController {
             params.put("srm", srm);
         if (null != type)
             params.put("type", type);
+        if (StringUtils.isNotBlank(srmOrName))
+            params.put("nameOrSrmLike", srmOrName);
 
         return RespHelper.or500(doctorWarehouseSkuReadService.paging(pageNo, pageSize, params));
     }

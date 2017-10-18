@@ -317,9 +317,15 @@ public class ReportController {
     @RequestMapping(method = RequestMethod.GET, value = "material")
     @JsonView(WarehouseMaterialHandleVo.MaterialHandleReportView.class)
     public List<WarehouseMaterialHandleVo> materialHandleReport(@RequestParam Long warehouseId,
+                                                                @RequestParam Long orgId,
                                                                 @RequestParam(required = false) String materialName,
                                                                 @RequestParam(required = false) Integer type,
                                                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
+
+
+        Map<String, Object> skuParams = new HashMap<>();
+        skuParams.put("orgId", orgId);
+        skuParams.put("nameOrSrmLike", materialName);
 
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("warehouseId", warehouseId);
@@ -334,8 +340,10 @@ public class ReportController {
             } else
                 criteria.put("type", type);
         }
-        if (StringUtils.isNotBlank(materialName))
-            criteria.put("materialNameLike", materialName);
+        List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
+        criteria.put("skuIds", skuIds);
+//        if (StringUtils.isNotBlank(materialName))
+//            criteria.put("materialNameLike", materialName);
 
         Response<List<DoctorWarehouseMaterialHandle>> materialHandleResponse = doctorWarehouseMaterialHandleReadService.advList(criteria);
         if (!materialHandleResponse.isSuccess())
@@ -410,20 +418,27 @@ public class ReportController {
     @RequestMapping(method = RequestMethod.GET, value = "pigBarnApply")
     public List<WarehouseMaterialApplyVo> apply(@RequestParam(required = false) Long pigBarnId,
                                                 @RequestParam Long warehouseId,
+                                                @RequestParam Long orgId,
                                                 @RequestParam(required = false) Integer type,
                                                 @RequestParam(required = false) String materialName,
                                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
+
+        Map<String, Object> skuParams = new HashMap<>();
+        skuParams.put("orgId", orgId);
+        skuParams.put("nameOrSrmLike", materialName);
+
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("applyYear", date.get(Calendar.YEAR));
         criteria.put("applyMonth", date.get(Calendar.MONTH) + 1);
         criteria.put("warehouseId", warehouseId);
 
-        if (StringUtils.isNotBlank(materialName))
-            criteria.put("materialNameLike", materialName);
+//        if (StringUtils.isNotBlank(materialName))
+//            criteria.put("materialNameLike", materialName);
         if (null != pigBarnId)
             criteria.put("pigBarnId", pigBarnId);
         if (null != type)
             criteria.put("type", type);
+        criteria.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
 
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
         if (!applyResponse.isSuccess())
@@ -461,16 +476,22 @@ public class ReportController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "pigGroupApply")
     public List<WarehousePigGroupApplyVo> pigGroupApply(@RequestParam Long warehouseId,
+                                                        @RequestParam Long orgId,
                                                         @RequestParam(required = false) Long pigGroupId,
                                                         @RequestParam(required = false) Integer materialType,
                                                         @RequestParam(required = false) String materialName) {
 
+        Map<String, Object> skuParams = new HashMap<>();
+        skuParams.put("orgId", orgId);
+        skuParams.put("nameOrSrmLike", materialName);
+
         Map<String, Object> criteria = new HashMap<>();
-        if (StringUtils.isNotBlank(materialName))
-            criteria.put("materialNameLike", materialName);
+//        if (StringUtils.isNotBlank(materialName))
+//            criteria.put("materialNameLike", materialName);
         criteria.put("warehouseId", warehouseId);
         criteria.put("type", materialType);
         criteria.put("pigGroupId", pigGroupId);
+        criteria.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
 
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
 
