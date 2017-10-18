@@ -42,6 +42,7 @@ import javax.validation.Valid;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -160,15 +161,25 @@ public class WarehouseController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "type/{type}")
     @JsonView(WarehouseVo.WarehouseWithOutStatisticsView.class)
-    public List<WarehouseVo> sameTypeWarehouse(@PathVariable Integer type, @RequestParam Long farmId) {
-        DoctorWareHouse criteria = new DoctorWareHouse();
-        criteria.setType(type);
-        criteria.setFarmId(farmId);
-        Response<List<DoctorWareHouse>> warehouseResponse = doctorWarehouseReaderService.list(criteria);
-        if (!warehouseResponse.isSuccess())
-            throw new JsonResponseException(warehouseResponse.getError());
-        List<WarehouseVo> vos = new ArrayList<>(warehouseResponse.getResult().size());
-        warehouseResponse.getResult().forEach(wareHouse -> {
+    public List<WarehouseVo> sameTypeWarehouse(@PathVariable Integer type,
+                                               @RequestParam(required = false) Long orgId,
+                                               @RequestParam(required = false) Long farmId) {
+        if (null == orgId && null == farmId)
+            throw new JsonResponseException("missing parameter,orgId or farmId must pick one");
+
+
+        List<DoctorWareHouse> wareHouses;
+        if (null != orgId) {
+            wareHouses = RespHelper.or500(doctorWarehouseReaderService.findByOrgId(RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()), type));
+        } else {
+            DoctorWareHouse criteria = new DoctorWareHouse();
+            criteria.setType(type);
+            criteria.setFarmId(farmId);
+            wareHouses = RespHelper.or500(doctorWarehouseReaderService.list(criteria));
+        }
+
+        List<WarehouseVo> vos = new ArrayList<>(wareHouses.size());
+        wareHouses.forEach(wareHouse -> {
             WarehouseVo vo = new WarehouseVo();
             vo.setId(wareHouse.getId());
             vo.setName(wareHouse.getWareHouseName());
