@@ -163,7 +163,10 @@ public class StockController {
             Map<String, Object> skuParams = new HashMap<>();
             skuParams.put("orgId", orgId);
             skuParams.put("nameOrSrmLike", materialName);
-            params.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
+            List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
+            if (skuIds.isEmpty())
+                return Paging.empty();
+            params.put("skuIds", skuIds);
         }
 //        if (StringUtils.isNotBlank(materialName)) {
 //            params.put("materialNameLike", materialName);

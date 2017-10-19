@@ -479,7 +479,10 @@ public class WarehouseController {
             Map<String, Object> skuParams = new HashMap<>();
             skuParams.put("orgId", orgId);
             skuParams.put("nameOrSrmLike", materialName);
-            criteria.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
+            List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
+            if (skuIds.isEmpty())
+                return Paging.empty();
+            criteria.put("skuIds", skuIds);
         }
 //        if (StringUtils.isNotBlank(materialName))
 //            criteria.put("materialNameLike", materialName);
