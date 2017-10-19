@@ -381,10 +381,21 @@
             </foreach>
         </if>
         <if test="eventSources !=null and eventSources.size()>0">
-            AND `event_source` IN
+            AND (`event_source` IN
             <foreach collection="eventSources" item="source" open="(" close=")" separator=",">
                 #{source}
             </foreach>
+            OR (
+            `event_source` NOT IN
+            <foreach collection="eventSources" item="source" open="(" close=")" separator=",">
+                #{source}
+            </foreach>
+            <if test="beginDate != null">
+                AND <![CDATA[ event_at >= #{beginDate} ]]>
+            </if>
+                AND <![CDATA[ event_at <= #{endDate} ]]>
+                )
+            )
         </if>
         <if test="createdAtStart != null">AND created_at &gt;= #{createdAtStart}</if>
         <if test="createdAtEnd != null">AND created_at &lt;= #{createdAtEnd}</if>

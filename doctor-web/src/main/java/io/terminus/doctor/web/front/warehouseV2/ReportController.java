@@ -12,18 +12,17 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
-import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.basic.service.warehouseV2.*;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseMaterialHandleVo;
-import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseMonthlyReportVo;
-import io.terminus.doctor.web.front.warehouseV2.vo.WarehousePigGroupApplyVo;
-import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseReportVo;
+import io.terminus.doctor.web.front.warehouseV2.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -32,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/9.
@@ -64,6 +64,8 @@ public class ReportController {
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
     @RpcConsumer
     private DoctorWarehouseStockMonthlyReadService doctorWarehouseStockMonthlyReadService;
+    @RpcConsumer
+    private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
 
     /**
      * 仓库报表
@@ -233,13 +235,17 @@ public class ReportController {
         if (!stocksResponse.isSuccess())
             throw new JsonResponseException(stocksResponse.getError());
 
+        Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(stocksResponse.getResult().stream()
+                .map(DoctorWarehouseStock::getSkuId).collect(Collectors.toList())))
+                .stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
+
         List<WarehouseMonthlyReportVo> report = new ArrayList<>();
         for (DoctorWarehouseStock stock : stocksResponse.getResult()) {
 
-            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getMaterialId(), stock.getVendorName());
+            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getSkuId(), null);
             if (!balanceResponse.isSuccess())
                 throw new JsonResponseException(balanceResponse.getError());
-            Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterialVendor(warehouseId, stock.getMaterialId(), stock.getVendorName(), date,
+            Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterialVendor(warehouseId, stock.getSkuId(), null, date,
                     WarehouseMaterialHandleType.IN,
                     WarehouseMaterialHandleType.OUT,
                     WarehouseMaterialHandleType.INVENTORY_PROFIT,
@@ -252,13 +258,20 @@ public class ReportController {
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
 
+//            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
+//            if (!skuMap.containsKey(stock.getSkuId()))
+//                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
+//            DoctorWarehouseSku sku = skuMap.get(stock.getSkuId()).get(0);
+
             WarehouseMonthlyReportVo vo = new WarehouseMonthlyReportVo();
-            vo.setMaterialName(stock.getMaterialName());
-            if (DoctorWarehouseStockWriteService.DEFAULT_VENDOR_NAME.equals(stock.getVendorName()))
-                vo.setVendorName("");
-            else
-                vo.setVendorName(stock.getVendorName());
-            vo.setUnit(stock.getUnit());
+            vo.setMaterialName(stock.getSkuName());
+
+            if (skuMap.containsKey(stock.getSkuId())) {
+                vo.setVendorName(skuMap.get(stock.getSkuId()).get(0).getVendorName());
+                vo.setUnit(skuMap.get(stock.getSkuId()).get(0).getUnit());
+                vo.setSpecification(skuMap.get(stock.getSkuId()).get(0).getSpecification());
+                vo.setCode(skuMap.get(stock.getSkuId()).get(0).getCode());
+            }
 
             vo.setBalanceAmount(balanceResponse.getResult().getAmount());
             vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
@@ -281,7 +294,7 @@ public class ReportController {
                     .add(statisticsResponse.getResult().getTransferOut().getQuantity())
                     .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
 
-            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getMaterialId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
+            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getSkuId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
             vo.setInitialAmount(initialBalance.getAmount());
             vo.setInitialQuantity(initialBalance.getQuantity());
 
@@ -304,9 +317,15 @@ public class ReportController {
     @RequestMapping(method = RequestMethod.GET, value = "material")
     @JsonView(WarehouseMaterialHandleVo.MaterialHandleReportView.class)
     public List<WarehouseMaterialHandleVo> materialHandleReport(@RequestParam Long warehouseId,
+                                                                @RequestParam Long orgId,
                                                                 @RequestParam(required = false) String materialName,
                                                                 @RequestParam(required = false) Integer type,
                                                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
+
+
+        Map<String, Object> skuParams = new HashMap<>();
+        skuParams.put("orgId", orgId);
+        skuParams.put("nameOrSrmLike", materialName);
 
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("warehouseId", warehouseId);
@@ -321,8 +340,10 @@ public class ReportController {
             } else
                 criteria.put("type", type);
         }
-        if (StringUtils.isNotBlank(materialName))
-            criteria.put("materialName", materialName);
+        List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
+        criteria.put("skuIds", skuIds);
+//        if (StringUtils.isNotBlank(materialName))
+//            criteria.put("materialNameLike", materialName);
 
         Response<List<DoctorWarehouseMaterialHandle>> materialHandleResponse = doctorWarehouseMaterialHandleReadService.advList(criteria);
         if (!materialHandleResponse.isSuccess())
@@ -343,6 +364,8 @@ public class ReportController {
             handleApply.put(apply.getMaterialHandleId(), apply);
         }
 
+        Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(materialHandleResponse.getResult().stream().map(DoctorWarehouseMaterialHandle::getMaterialId).collect(Collectors.toList()))).stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
+
         List<WarehouseMaterialHandleVo> vos = new ArrayList<>(materialHandleResponse.getResult().size());
         for (DoctorWarehouseMaterialHandle handle : materialHandleResponse.getResult()) {
 
@@ -354,7 +377,10 @@ public class ReportController {
                 pigGroupName = handleApply.get(handle.getId()).getPigGroupName();
             }
 
-            vos.add(WarehouseMaterialHandleVo.builder()
+//            if (!skuMap.containsKey(handle.getMaterialId()))
+//                throw new InvalidException("warehouse.sku.not.found", handle.getMaterialId());
+
+            WarehouseMaterialHandleVo handleVo = WarehouseMaterialHandleVo.builder()
                     .materialName(handle.getMaterialName())
                     .type(handle.getType())
                     .handleDate(handle.getHandleDate())
@@ -362,8 +388,21 @@ public class ReportController {
                     .unitPrice(handle.getUnitPrice())
                     .pigBarnName(pigBarnName)
                     .pigGroupName(pigGroupName)
+                    .code(skuMap.get(handle.getMaterialId()).get(0).getCode())
+                    .vendorName(skuMap.get(handle.getMaterialId()).get(0).getVendorName())
+                    .specification(skuMap.get(handle.getMaterialId()).get(0).getSpecification())
+                    .unit(skuMap.get(handle.getMaterialId()).get(0).getUnit())
                     .warehouseName(handle.getWarehouseName())
-                    .build());
+                    .build();
+
+            if (skuMap.containsKey(handle.getMaterialId())) {
+                handleVo.setCode(skuMap.get(handle.getMaterialId()).get(0).getCode());
+                handleVo.setVendorName(skuMap.get(handle.getMaterialId()).get(0).getVendorName());
+                handleVo.setSpecification(skuMap.get(handle.getMaterialId()).get(0).getSpecification());
+                handleVo.setUnit(skuMap.get(handle.getMaterialId()).get(0).getUnit());
+            }
+
+            vos.add(handleVo);
         }
         return vos;
     }
@@ -377,27 +416,53 @@ public class ReportController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "pigBarnApply")
-    public List<DoctorWarehouseMaterialApply> apply(@RequestParam(required = false) Long pigBarnId,
-                                                    @RequestParam Long warehouseId,
-                                                    @RequestParam(required = false) Integer type,
-                                                    @RequestParam(required = false) String materialName,
-                                                    @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
-        DoctorWarehouseMaterialApply criteria = new DoctorWarehouseMaterialApply();
-        criteria.setApplyYear(date.get(Calendar.YEAR));
-        criteria.setApplyMonth(date.get(Calendar.MONTH) + 1);
-        criteria.setWarehouseId(warehouseId);
+    public List<WarehouseMaterialApplyVo> apply(@RequestParam(required = false) Long pigBarnId,
+                                                @RequestParam Long warehouseId,
+                                                @RequestParam Long orgId,
+                                                @RequestParam(required = false) Integer type,
+                                                @RequestParam(required = false) String materialName,
+                                                @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
-        if (StringUtils.isNotBlank(materialName))
-            criteria.setMaterialName(materialName);
+        Map<String, Object> skuParams = new HashMap<>();
+        skuParams.put("orgId", orgId);
+        skuParams.put("nameOrSrmLike", materialName);
+
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("applyYear", date.get(Calendar.YEAR));
+        criteria.put("applyMonth", date.get(Calendar.MONTH) + 1);
+        criteria.put("warehouseId", warehouseId);
+
+//        if (StringUtils.isNotBlank(materialName))
+//            criteria.put("materialNameLike", materialName);
         if (null != pigBarnId)
-            criteria.setPigBarnId(pigBarnId);
+            criteria.put("pigBarnId", pigBarnId);
         if (null != type)
-            criteria.setType(type);
+            criteria.put("type", type);
+        criteria.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
 
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
         if (!applyResponse.isSuccess())
             throw new JsonResponseException(applyResponse.getError());
-        return applyResponse.getResult();
+
+        Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(applyResponse.getResult().stream().map(DoctorWarehouseMaterialApply::getMaterialId).collect(Collectors.toList()))).stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
+
+        List<WarehouseMaterialApplyVo> vos = new ArrayList<>(applyResponse.getResult().size());
+        for (DoctorWarehouseMaterialApply apply : applyResponse.getResult()) {
+//            if (!skuMap.containsKey(apply.getMaterialId()))
+//                throw new InvalidException("warehouse.sku.not.found");
+
+            WarehouseMaterialApplyVo vo = new WarehouseMaterialApplyVo();
+            BeanUtils.copyProperties(apply, vo);
+            if (skuMap.containsKey(apply.getMaterialId())) {
+                vo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
+                vo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
+                vo.setVendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName());
+                vo.setSpecification(skuMap.get(apply.getMaterialId()).get(0).getSpecification());
+            }
+            vos.add(vo);
+        }
+
+        return vos;
     }
 
     /**
@@ -411,19 +476,24 @@ public class ReportController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "pigGroupApply")
     public List<WarehousePigGroupApplyVo> pigGroupApply(@RequestParam Long warehouseId,
+                                                        @RequestParam Long orgId,
                                                         @RequestParam(required = false) Long pigGroupId,
                                                         @RequestParam(required = false) Integer materialType,
                                                         @RequestParam(required = false) String materialName) {
 
-        if (StringUtils.isBlank(materialName))
-            materialName = null;
+        Map<String, Object> skuParams = new HashMap<>();
+        skuParams.put("orgId", orgId);
+        skuParams.put("nameOrSrmLike", materialName);
 
-        Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(DoctorWarehouseMaterialApply.builder()
-                .warehouseId(warehouseId)
-                .type(materialType)
-                .materialName(materialName)
-                .pigGroupId(pigGroupId)
-                .build());
+        Map<String, Object> criteria = new HashMap<>();
+//        if (StringUtils.isNotBlank(materialName))
+//            criteria.put("materialNameLike", materialName);
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("type", materialType);
+        criteria.put("pigGroupId", pigGroupId);
+        criteria.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
+
+        Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
 
         if (!applyResponse.isSuccess())
             throw new JsonResponseException(applyResponse.getError());
@@ -431,6 +501,8 @@ public class ReportController {
             log.info("未找到物料领用记录,warehouseId[{}],pigGroupId[{}],materialType[{}],materialName[{}]", warehouseId, pigGroupId, materialType, materialName);
             return Collections.emptyList();
         }
+
+        Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(applyResponse.getResult().stream().map(DoctorWarehouseMaterialApply::getMaterialId).collect(Collectors.toList()))).stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
 
         List<WarehousePigGroupApplyVo> vos = new ArrayList<>();
         for (DoctorWarehouseMaterialApply apply : applyResponse.getResult()) {
@@ -442,8 +514,11 @@ public class ReportController {
                 throw new JsonResponseException(groupResponse.getError());
             if (null == groupResponse.getResult())
                 throw new JsonResponseException("pig.group.not.found");
+//            if (!skuMap.containsKey(apply.getMaterialId()))
+//                throw new InvalidException("warehouse.sku.not.found", apply.getMaterialId());
 
-            vos.add(WarehousePigGroupApplyVo.builder()
+
+            WarehousePigGroupApplyVo applyVo = WarehousePigGroupApplyVo.builder()
                     .pigGroupId(apply.getPigGroupId())
                     .pigGroupName(apply.getPigGroupName())
                     .openDate(groupResponse.getResult().getOpenAt())
@@ -452,11 +527,24 @@ public class ReportController {
                     .applyStaffName(apply.getApplyStaffName())
                     .materialType(apply.getType())
                     .materialName(apply.getMaterialName())
-                    .unit(apply.getUnit())
+//                    .unit(apply.getUnit())
+//                    .unit(skuMap.get(apply.getMaterialId()).get(0).getUnit())
+//                    .code(skuMap.get(apply.getMaterialId()).get(0).getCode())
+//                    .vendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName())
+//                    .specification(skuMap.get(apply.getMaterialId()).get(0).getSpecification())
                     .quantity(apply.getQuantity())
                     .unitPrice(apply.getUnitPrice())
                     .amount(apply.getQuantity().multiply(new BigDecimal(apply.getUnitPrice())).longValue())
-                    .build());
+                    .build();
+
+            if (skuMap.containsKey(apply.getMaterialId())) {
+                applyVo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
+                applyVo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
+                applyVo.setSpecification(skuMap.get(apply.getMaterialId()).get(0).getSpecification());
+                applyVo.setVendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName());
+            }
+
+            vos.add(applyVo);
         }
 
         return vos;

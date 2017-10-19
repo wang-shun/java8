@@ -1506,3 +1506,25 @@ CREATE TABLE `iot_users` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='物联网运营用户表';
+
+-- 仓库添加sku表 2017-10-13
+CREATE TABLE `doctor_warehouse_sku` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司编号',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪厂编号',
+  `name` varchar(128) NOT NULL COMMENT '物料名称',
+  `code` varchar(64) NOT NULL COMMENT '编码,用于跨厂调拨',
+  `srm` varchar(32) DEFAULT NULL COMMENT '短码,用于查询',
+  `vendor_id` bigint(20) DEFAULT NULL COMMENT '供应商编号',
+  `unit` varchar(64) DEFAULT NULL COMMENT '单位',
+  `specification` varchar(64) DEFAULT NULL COMMENT '规格',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='仓库物料表';
+
+ALTER TABLE doctor_warehouse_stock CHANGE material_name sku_name VARCHAR(64) COMMENT '物料名称';
+ALTER TABLE doctor_warehouse_stock CHANGE material_id sku_id BIGINT(20) COMMENT '物料编号';
+ALTER TABLE doctor_warehouse_stock DROP vendor_name;
+ALTER TABLE doctor_warehouse_stock DROP manager_id;
+ALTER TABLE doctor_warehouse_stock DROP unit;

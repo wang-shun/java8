@@ -23,4 +23,10 @@ public class WarehouseStockVo {
     private BigDecimal quantity;
 
     private String unit;
+
+    private String vendorName;
+
+    private String code;
+
+    private String specification;
 }

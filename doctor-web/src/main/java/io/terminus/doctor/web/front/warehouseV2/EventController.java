@@ -88,9 +88,9 @@ public class EventController {
             if (WarehouseMaterialHandleType.IN.getValue() == handle.getType()
                     || WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType()
                     || WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()) {
-                Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.listMergeVendor(DoctorWarehouseStock.builder()
+                Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.list(DoctorWarehouseStock.builder()
                         .warehouseId(handle.getWarehouseId())
-                        .materialId(handle.getMaterialId())
+                        .skuId(handle.getMaterialId())
                         .build());
                 if (!stockResponse.isSuccess())
                     throw new JsonResponseException(stockResponse.getError());
