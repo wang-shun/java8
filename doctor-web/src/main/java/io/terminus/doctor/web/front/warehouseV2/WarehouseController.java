@@ -472,13 +472,15 @@ public class WarehouseController {
                                              @RequestParam(required = false) Integer pageSize) {
 
 
-        Map<String, Object> skuParams = new HashMap<>();
-        skuParams.put("orgId", orgId);
-        skuParams.put("nameOrSrmLike", materialName);
-
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("warehouseId", id);
-        criteria.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
+
+        if (StringUtils.isNotBlank(materialName)) {
+            Map<String, Object> skuParams = new HashMap<>();
+            skuParams.put("orgId", orgId);
+            skuParams.put("nameOrSrmLike", materialName);
+            criteria.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
+        }
 //        if (StringUtils.isNotBlank(materialName))
 //            criteria.put("materialNameLike", materialName);
 

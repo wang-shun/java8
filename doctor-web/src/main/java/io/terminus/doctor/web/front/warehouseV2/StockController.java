@@ -13,7 +13,6 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseReportReadSer
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
-import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
@@ -157,15 +156,15 @@ public class StockController {
                                                      @RequestParam(required = false) Integer pageNo,
                                                      @RequestParam(required = false) Integer pageSize) {
 
-
-        Map<String, Object> skuParams = new HashMap<>();
-        skuParams.put("orgId", orgId);
-        skuParams.put("nameOrSrmLike", materialName);
-
-
         Map<String, Object> params = new HashMap<>();
         params.put("warehouseId", warehouseId);
-        params.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
+
+        if (StringUtils.isNotBlank(materialName)) {
+            Map<String, Object> skuParams = new HashMap<>();
+            skuParams.put("orgId", orgId);
+            skuParams.put("nameOrSrmLike", materialName);
+            params.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
+        }
 //        if (StringUtils.isNotBlank(materialName)) {
 //            params.put("materialNameLike", materialName);
 //        }
