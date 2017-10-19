@@ -27,7 +27,7 @@ public class SkuController {
     @RpcConsumer
     private DoctorWarehouseSkuWriteService doctorWarehouseSkuWriteService;
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET,value = "paging")
     public Paging<DoctorWarehouseSku> query(@RequestParam Long orgId,
                                             @RequestParam(required = false) Integer type,
                                             @RequestParam(required = false) String srm,
