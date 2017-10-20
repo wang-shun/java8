@@ -37,18 +37,18 @@
         </dependency>
 
         <!-- pampas base -->
-        <dependency>
-            <groupId>io.terminus.pampas</groupId>
-            <artifactId>pampas-spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.terminus.pampas</groupId>
-            <artifactId>pampas-design</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.terminus.pampas</groupId>
-            <artifactId>pampas-engine</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>io.terminus.pampas</groupId>-->
+            <!--<artifactId>pampas-spring-boot-starter</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>io.terminus.pampas</groupId>-->
+            <!--<artifactId>pampas-design</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>io.terminus.pampas</groupId>-->
+            <!--<artifactId>pampas-engine</artifactId>-->
+        <!--</dependency>-->
 
         <!-- springboot -->
         <dependency>
