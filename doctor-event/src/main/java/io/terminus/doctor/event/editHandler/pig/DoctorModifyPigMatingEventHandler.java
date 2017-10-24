@@ -124,7 +124,7 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
                 .doctorMateType(oldPigEvent.getDoctorMateType())
                 .doctorMateTypeCountChange(-1)
                 .build();
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig1, changeDto1));
 
         //更新配种母猪数与空怀母猪数
         Integer sowPhKonghuaiChangeCount = 0;
@@ -147,7 +147,7 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
                 .doctorMateType(newPigEvent.getDoctorMateType())
                 .doctorMateTypeCountChange(1)
                 .build();
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig2, changeDto2));
 
         //更新配种母猪数与空怀母猪数
         Integer sowPhKonghuaiChangeCount = 0;

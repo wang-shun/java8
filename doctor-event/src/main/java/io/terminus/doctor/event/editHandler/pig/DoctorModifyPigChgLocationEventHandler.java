@@ -143,7 +143,7 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
             return;
         }
         DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig, changeDto));
         doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()),
                 0, matingChangeCount, farrowChangCount);
     }
@@ -175,7 +175,7 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
             return;
         }
         DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig, changeDto));
         doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
                 0, matingChangeCount, farrowChangCount);
     }

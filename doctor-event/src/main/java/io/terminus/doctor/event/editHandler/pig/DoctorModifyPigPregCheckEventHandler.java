@@ -100,7 +100,7 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                     .pregCheckResult(changeDto.getNewPregCheckResult())
                     .pregCheckResultCountChange(1)
                     .build();
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto2));
+            doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig, changeDto2));
         } else {
             updateDailyOfDelete(oldPigEvent);
             updateDailyOfNew(oldPigEvent, inputDto);
@@ -146,7 +146,7 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 .pregCheckResult(oldPigEvent.getPregCheckResult())
                 .pregCheckResultCountChange(-1)
                 .build();
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig1, changeDto1));
 
         //更新配种、空怀、怀孕母猪数量
         if (!PigType.MATING_TYPES.contains(oldPigEvent.getBarnType())) {
@@ -186,7 +186,7 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 .pregCheckResult(newDto.getCheckResult())
                 .pregCheckResultCountChange(1)
                 .build();
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig2, changeDto2));
 
         //更新配种、空怀、怀孕母猪数量
         if (!PigType.MATING_TYPES.contains(newPigEvent.getBarnType())) {

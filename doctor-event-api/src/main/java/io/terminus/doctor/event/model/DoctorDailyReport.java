@@ -59,4 +59,9 @@ public class DoctorDailyReport extends DoctorBaseReport implements Serializable 
      * 更新时间
      */
     private Date updatedAt;
+
+    /**
+     * 版本号
+     */
+    private Integer version;
 }

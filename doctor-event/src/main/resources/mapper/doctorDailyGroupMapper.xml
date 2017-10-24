@@ -31,6 +31,7 @@
         <result column="end" property="end"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="version" property="version"/>
 
     </resultMap>
 
@@ -66,8 +67,8 @@
         turn_seed,
         end,
         created_at,
-        updated_at
-
+        updated_at,
+        version
     </sql>
 
     <sql id="vals">
@@ -94,8 +95,8 @@
         #{turnSeed},
         #{end},
         now(),
-        now()
-
+        now(),
+        1
     </sql>
 
     <sql id="criteria">
@@ -157,7 +158,8 @@
                 #{item.turnSeed},
                 #{item.end},
                 now(),
-                now()
+                now(),
+                1
             )
         </foreach>
     </insert>
@@ -192,10 +194,12 @@
             <if test="toHoubei != null">to_houbei = #{toHoubei},</if>
             <if test="turnSeed != null">turn_seed = #{turnSeed},</if>
             <if test="end != null">end = #{end},</if>
+            <if test="version != null">version = version + 1,</if>
 
             updated_at=now()
         </set>
         WHERE id = #{id}
+        <if test="version != null">and version = #{version}</if>
     </update>
 
     <delete id="delete" parameterType="long">

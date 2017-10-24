@@ -112,6 +112,7 @@
         <result column="houbei_consumable_amount" property="houbeiConsumableAmount"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="version" property="version"/>
 
     </resultMap>
 
@@ -228,8 +229,8 @@
         houbei_vaccination_amount,
         houbei_consumable_amount,
         created_at,
-        updated_at
-
+        updated_at,
+        version
     </sql>
 
     <sql id="vals">
@@ -337,8 +338,8 @@
         #{houbeiVaccinationAmount},
         #{houbeiConsumableAmount},
         now(),
-        now()
-
+        now(),
+        1
     </sql>
 
     <sql id="criteria">

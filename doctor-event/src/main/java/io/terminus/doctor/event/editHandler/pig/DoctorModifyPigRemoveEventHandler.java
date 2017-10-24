@@ -114,7 +114,7 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
                     .removeCountChange(1)
                     .barnType(changeDto.getBarnType())
                     .build();
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto2));
+            doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig, changeDto2));
             return;
         }
         updateDailyOfDelete(oldPigEvent);
@@ -159,7 +159,7 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
         } else {
             changeDto1.setPhCountChange(1);
         }
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig1, changeDto1));
         if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()),
                     -changeDto1.getRemoveCountChange(), changeDto1.getPhCountChange(), changeDto1.getCfCountChange());
@@ -189,7 +189,7 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
         } else {
             changeDto2.setPhCountChange(-1);
         }
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig2, changeDto2));
         if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(newDto.eventAt()),
                     -changeDto2.getRemoveCountChange(), changeDto2.getPhCountChange(), changeDto2.getCfCountChange());

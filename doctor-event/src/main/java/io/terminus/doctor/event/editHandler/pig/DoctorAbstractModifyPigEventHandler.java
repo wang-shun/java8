@@ -19,6 +19,7 @@ import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
@@ -60,6 +61,8 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
+    @Autowired
+    protected DoctorDailyReportManager doctorDailyReportManager;
 
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
