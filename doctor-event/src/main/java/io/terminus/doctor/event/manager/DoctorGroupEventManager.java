@@ -128,7 +128,8 @@ public class DoctorGroupEventManager {
     public <I extends BaseGroupInput>
     List<DoctorEventInfo> handleEvent(DoctorGroupDetail groupDetail, I input, Class<? extends DoctorGroupEventHandler> handlerClass) {
         log.info("group event handle starting, handler class:{}", handlerClass);
-        expectTrue(doctorConcurrentControl.setKey(groupDetail.getGroup().getId().toString()), "event.concurrent.error");
+        expectTrue(doctorConcurrentControl.setKey(groupDetail.getGroup().getId().toString()),
+                "event.concurrent.error", groupDetail.getGroup().getGroupCode());
         try {
             final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
             getHandler(handlerClass).handle(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
@@ -152,7 +153,8 @@ public class DoctorGroupEventManager {
         log.info("batch group event handle starting, eventType:{}", eventType);
         final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
         inputInfoList.forEach(inputInfo -> {
-            expectTrue(doctorConcurrentControl.setKey(inputInfo.getGroupDetail().getGroup().getId().toString()), "event.concurrent.error");
+            expectTrue(doctorConcurrentControl.setKey(inputInfo.getGroupDetail().getGroup().getId().toString()),
+                    "event.concurrent.error", inputInfo.getGroupDetail().getGroup().getGroupCode());
             try {
                 getHandler(eventType)
                         .handle(eventInfoList, doctorGroupDao.findById(inputInfo.getGroupDetail().getGroup().getId()), doctorGroupTrackDao.findById(inputInfo.getGroupDetail().getGroupTrack().getId()), inputInfo.getInput());

@@ -83,7 +83,7 @@ public class DoctorPigEventManager {
         } else {
             key = inputDto.getPigId().toString();
         }
-        expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error");
+        expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", inputDto.getPigCode());
         try {
             final List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
             DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
@@ -179,7 +179,7 @@ public class DoctorPigEventManager {
             } else {
                 key = inputDto.getPigId().toString();
             }
-            expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error");
+            expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", inputDto.getPigCode());
             try {
                 //获取需要执行的事件
                 DoctorPigEvent executeEvent = handler.buildPigEvent(basic, inputDto);

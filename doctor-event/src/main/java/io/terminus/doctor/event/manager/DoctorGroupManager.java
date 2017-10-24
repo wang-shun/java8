@@ -95,7 +95,8 @@ public class DoctorGroupManager {
      */
     @Transactional
     public Long createNewGroup(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorNewGroupInput newGroupInput) {
-        expectTrue(doctorConcurrentControl.setKey(group.getFarmId() + group.getGroupCode()), "event.concurrent.error");
+        expectTrue(doctorConcurrentControl.setKey(group.getFarmId() + group.getGroupCode()),
+                "event.concurrent.error", group.getGroupCode());
         try {
             newGroupInput.setEventType(GroupEventType.NEW.getValue());
             checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId(), group.getGroupCode());
