@@ -562,12 +562,11 @@
             <if test="houbeiMedicineAmount != null">houbei_medicine_amount = #{houbeiMedicineAmount},</if>
             <if test="houbeiVaccinationAmount != null">houbei_vaccination_amount = #{houbeiVaccinationAmount},</if>
             <if test="houbeiConsumableAmount != null">houbei_consumable_amount = #{houbeiConsumableAmount},</if>
-
-
-
+            <if test="version != null">version = version + 1,</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
+        <if test="version != null">and version = #{version}</if>
     </update>
 
     <delete id="delete" parameterType="long">

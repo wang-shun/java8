@@ -30,6 +30,7 @@ import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorWeanGroupEventHandler;
+import io.terminus.doctor.event.helper.DoctorConcurrentControl;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Desc:
@@ -69,6 +72,8 @@ public class DoctorGroupEventManager {
     private DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
     @Autowired
     private DoctorModifyGroupEventHandlers modifyGroupEventHandlers;
+    @Autowired
+    private DoctorConcurrentControl doctorConcurrentControl;
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
@@ -123,10 +128,16 @@ public class DoctorGroupEventManager {
     public <I extends BaseGroupInput>
     List<DoctorEventInfo> handleEvent(DoctorGroupDetail groupDetail, I input, Class<? extends DoctorGroupEventHandler> handlerClass) {
         log.info("group event handle starting, handler class:{}", handlerClass);
-        final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
-        getHandler(handlerClass).handle(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
-        log.info("group event handle ending, handler class:{}", handlerClass);
-        return eventInfoList;
+        expectTrue(doctorConcurrentControl.setKey(groupDetail.getGroup().getId().toString()), "event.concurrent.error");
+        try {
+            final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
+            getHandler(handlerClass).handle(eventInfoList, groupDetail.getGroup(), groupDetail.getGroupTrack(), input);
+            log.info("group event handle ending, handler class:{}", handlerClass);
+            return eventInfoList;
+        }finally {
+            doctorConcurrentControl.delKey(groupDetail.getGroup().getId().toString());
+        }
+
     }
 
     /**
@@ -141,11 +152,14 @@ public class DoctorGroupEventManager {
         log.info("batch group event handle starting, eventType:{}", eventType);
         final List<DoctorEventInfo> eventInfoList = Lists.newArrayList();
         inputInfoList.forEach(inputInfo -> {
+            expectTrue(doctorConcurrentControl.setKey(inputInfo.getGroupDetail().getGroup().getId().toString()), "event.concurrent.error");
             try {
                 getHandler(eventType)
                         .handle(eventInfoList, doctorGroupDao.findById(inputInfo.getGroupDetail().getGroup().getId()), doctorGroupTrackDao.findById(inputInfo.getGroupDetail().getGroupTrack().getId()), inputInfo.getInput());
             } catch (InvalidException e) {
                 throw new InvalidException(true, e.getError(), inputInfo.getGroupDetail().getGroup().getGroupCode(), e.getParams());
+            }finally {
+                doctorConcurrentControl.delKey(inputInfo.getGroupDetail().getGroup().getId().toString());
             }
         });
         log.info("batch group event handle ending, eventType:{}", eventType);

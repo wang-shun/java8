@@ -21,3 +21,10 @@ zookeeper:
   port: 2181
   zkTopic: pig.doctor.topic
 
+redis:
+  host: 127.0.0.1
+  port: 6379
+  max-total: 10
+  max-idle: 2
+  test-on-borrow: true
+

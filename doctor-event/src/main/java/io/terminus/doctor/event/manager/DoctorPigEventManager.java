@@ -29,6 +29,7 @@ import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.DoctorPigsByEventSelector;
+import io.terminus.doctor.event.helper.DoctorConcurrentControl;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -44,6 +45,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by xjn.
@@ -64,6 +66,8 @@ public class DoctorPigEventManager {
     private DoctorPigDao doctorPigDao;
     @Autowired
     private DoctorModifyPigEventHandlers modifyPigEventHandlers;
+    @Autowired
+    private DoctorConcurrentControl doctorConcurrentControl;
 
     /**
      * 事件处理
@@ -73,20 +77,29 @@ public class DoctorPigEventManager {
     @Transactional
     public List<DoctorEventInfo> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic){
         log.info("pig event handle starting, inputDto:{}, basic:{}", inputDto, basic);
-
-        final List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
-        DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
-        //获取需要执行的事件
-        DoctorPigEvent executeEvent = handler.buildPigEvent(basic, inputDto);
-        //事件执行前的状态
-        DoctorPigTrack fromTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-        //数据校验
-        handler.handleCheck(executeEvent, fromTrack);
-        //处理事件
-        handler.handle(doctorEventInfoList, executeEvent, fromTrack);
-
-        log.info("pig event handle ending, inputDto:{}, basic:{}", inputDto, basic);
-        return doctorEventInfoList;
+        String key;
+        if (Objects.equals(inputDto.getEventType(), PigEvent.ENTRY.getKey())) {
+            key = basic.getFarmId() + inputDto.getPigType() + inputDto.getPigCode();
+        } else {
+            key = inputDto.getPigId().toString();
+        }
+        expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error");
+        try {
+            final List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
+            DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
+            //获取需要执行的事件
+            DoctorPigEvent executeEvent = handler.buildPigEvent(basic, inputDto);
+            //事件执行前的状态
+            DoctorPigTrack fromTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
+            //数据校验
+            handler.handleCheck(executeEvent, fromTrack);
+            //处理事件
+            handler.handle(doctorEventInfoList, executeEvent, fromTrack);
+            log.info("pig event handle ending, inputDto:{}, basic:{}", inputDto, basic);
+            return doctorEventInfoList;
+        }finally {
+            doctorConcurrentControl.delKey(key);
+        }
     }
 
     /**
@@ -160,6 +173,13 @@ public class DoctorPigEventManager {
         DoctorPigEventHandler handler = getHandler(eventInputs.get(0).getEventType());
         final List<DoctorEventInfo> eventInfos = Lists.newArrayList();
         eventInputs.forEach(inputDto -> {
+            String key;
+            if (Objects.equals(inputDto.getEventType(), PigEvent.ENTRY.getKey())) {
+                key = basic.getFarmId() + inputDto.getPigType() + inputDto.getPigCode();
+            } else {
+                key = inputDto.getPigId().toString();
+            }
+            expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error");
             try {
                 //获取需要执行的事件
                 DoctorPigEvent executeEvent = handler.buildPigEvent(basic, inputDto);
@@ -171,6 +191,8 @@ public class DoctorPigEventManager {
                 handler.handle(eventInfos, executeEvent, fromTrack);
             } catch (InvalidException e) {
                throw new InvalidException(true, e.getError(), inputDto.getPigCode(), e.getParams());
+            }finally {
+                doctorConcurrentControl.delKey(key);
             }
         });
         log.info("batch pig event handle ending, event type:{}", eventInputs.get(0).getEventType());
