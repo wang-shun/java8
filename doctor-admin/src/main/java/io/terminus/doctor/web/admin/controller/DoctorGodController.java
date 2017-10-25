@@ -228,12 +228,12 @@ public class DoctorGodController {
 
     @RequestMapping(method = RequestMethod.GET, value = "status")
     public PigAndPigGroup pigAndGroupQuery(@RequestParam Long farmId,
-                                           @RequestParam int type,//1母猪，2公猪,3猪群
+                                           @RequestParam int type,//1母猪，2公猪,4猪群
                                            @RequestParam String code) {
 
         PigAndPigGroup vo = new PigAndPigGroup();
 
-        if (type == 3) {
+        if (type == 4) {
             Response<DoctorGroup> groupResponse = doctorGroupReadService.findGroupByFarmIdAndGroupCode(farmId, code);
             if (!groupResponse.isSuccess())
                 throw new JsonResponseException(groupResponse.getError());
@@ -302,7 +302,7 @@ public class DoctorGodController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "status")
     public boolean pigAndGroupEdit(@RequestParam Long farmId,
-                                   @RequestParam int type,//1母猪，2公猪,3猪群
+                                   @RequestParam int type,//1母猪，2公猪,4猪群
                                    @RequestParam long id,
                                    @RequestBody @Valid PigAndPigGroup pigAndPigGroup,
                                    Errors errors) {
@@ -345,7 +345,7 @@ public class DoctorGodController {
             pigTrack.setWeanAvgWeight(pigAndPigGroup.getWeanAvgWeight());
 
             doctorPigWriteService.updatePig(pig, pigTrack);
-        } else if (type == 3) {//修改猪群
+        } else if (type == 4) {//修改猪群
 
             DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(pigAndPigGroup.getId()));
             if (null == group)
