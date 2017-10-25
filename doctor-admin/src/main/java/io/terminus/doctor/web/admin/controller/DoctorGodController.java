@@ -347,6 +347,8 @@ public class DoctorGodController {
             pigTrack.setFarrowAvgWeight(pigAndPigGroup.getFarrowAvgWeight());
             pigTrack.setWeanQty(pigAndPigGroup.getWeanQty());
             pigTrack.setWeanAvgWeight(pigAndPigGroup.getWeanAvgWeight());
+            pigTrack.setIsRemoval(pigAndPigGroup.getIsRemoval());
+            pig.setIsRemoval(pigAndPigGroup.getIsRemoval());
 
             doctorPigWriteService.updatePig(pig, pigTrack);
         } else if (type == 4) {//修改猪群
