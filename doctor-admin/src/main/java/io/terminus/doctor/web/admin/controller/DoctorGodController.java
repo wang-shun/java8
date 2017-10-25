@@ -334,6 +334,10 @@ public class DoctorGodController {
                 pig.setBoarType(pigAndPigGroup.getBoarType());
             pig.setIsRemoval(pigAndPigGroup.getIsRemoval());
 
+            if (PigStatus.BOAR_LEAVE.equals(pigAndPigGroup.getStatus()) || PigStatus.Removal.equals(pigAndPigGroup.getStatus())) {
+                pigTrack.setIsRemoval(1);
+                pig.setIsRemoval(1);
+            }
             pigTrack.setStatus(pigAndPigGroup.getStatus());
             pigTrack.setCurrentBarnId(pigAndPigGroup.getCurrentBarnId());
             pigTrack.setCurrentBarnName(RespHelper.orServEx(doctorBarnReadService.findBarnById(pigAndPigGroup.getCurrentBarnId())).getName());
@@ -343,6 +347,8 @@ public class DoctorGodController {
             pigTrack.setFarrowAvgWeight(pigAndPigGroup.getFarrowAvgWeight());
             pigTrack.setWeanQty(pigAndPigGroup.getWeanQty());
             pigTrack.setWeanAvgWeight(pigAndPigGroup.getWeanAvgWeight());
+            pigTrack.setIsRemoval(pigAndPigGroup.getIsRemoval());
+            pig.setIsRemoval(pigAndPigGroup.getIsRemoval());
 
             doctorPigWriteService.updatePig(pig, pigTrack);
         } else if (type == 4) {//修改猪群
