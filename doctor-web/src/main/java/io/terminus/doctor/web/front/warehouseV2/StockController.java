@@ -6,14 +6,18 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.warehouseV2.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
+import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseReportReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStockStatisticsVo;
@@ -52,6 +56,10 @@ public class StockController {
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
     @RpcConsumer
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
+    @RpcConsumer
+    private DoctorWareHouseReadService doctorWareHouseReadService;
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
 
     @RequestMapping(method = RequestMethod.PUT, value = "in")
     public boolean in(@RequestBody @Validated WarehouseStockInDto stockIn, Errors errors) {
@@ -151,7 +159,7 @@ public class StockController {
 
     @RequestMapping(method = RequestMethod.GET)
     public Paging<WarehouseStockStatisticsVo> paging(@RequestParam Long warehouseId,
-                                                     @RequestParam Long orgId,
+                                                     @RequestParam(required = false) Long orgId,
                                                      @RequestParam(required = false) String materialName,
                                                      @RequestParam(required = false) Integer pageNo,
                                                      @RequestParam(required = false) Integer pageSize) {
@@ -160,6 +168,17 @@ public class StockController {
         params.put("warehouseId", warehouseId);
 
         if (StringUtils.isNotBlank(materialName)) {
+
+            if (null == orgId) {
+                DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(warehouseId));
+                if (null == wareHouse)
+                    throw new JsonResponseException("warehouse.not.found");
+                DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(wareHouse.getFarmId()));
+                if (null == farm)
+                    throw new JsonResponseException("farm.not.found");
+                orgId = farm.getOrgId();
+            }
+
             Map<String, Object> skuParams = new HashMap<>();
             skuParams.put("orgId", orgId);
             skuParams.put("nameOrSrmLike", materialName);
