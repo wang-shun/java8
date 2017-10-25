@@ -28,7 +28,7 @@ public class TransGroupEventHandler extends AbstractGroupEventHandler<DoctorTran
     protected void buildEventDto(DoctorTransGroupInput eventDto, DoctorGroupEvent groupEvent) {
         eventDto.setToBarnName(getBarnName(eventDto.getToBarnId()));
 
-        eventDto.setBreedName(getBasicName(eventDto.getBreedId()));
+//        eventDto.setBreedName(getBasicName(eventDto.getBreedId()));
 
         if (eventDto.getIsCreateGroup().intValue() == IsOrNot.NO.getValue()) {
             eventDto.setToGroupCode(getGroupCode(eventDto.getToGroupId()));
