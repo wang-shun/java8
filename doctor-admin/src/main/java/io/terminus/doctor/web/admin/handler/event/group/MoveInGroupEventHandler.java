@@ -19,7 +19,7 @@ public class MoveInGroupEventHandler extends AbstractGroupEventHandler<DoctorMov
     @Override
     protected void buildEventDto(DoctorMoveInGroupInput eventDto, DoctorGroupEvent groupEvent) {
 
-        eventDto.setBreedName(getBasicName(eventDto.getBreedId()));
+//        eventDto.setBreedName(getBasicName(eventDto.getBreedId()));
         eventDto.setInTypeName(InType.from(eventDto.getInType()).getDesc());
 
         groupEvent.setWeight(EventUtil.getWeight(groupEvent.getAvgWeight(), groupEvent.getQuantity()));
