@@ -38,7 +38,7 @@ public class ChangeGroupEventHandler extends AbstractGroupEventHandler<DoctorCha
         if (null == changeReason)
             throw new InvalidException("basic.not.null", eventDto.getChangeReasonId());
         eventDto.setChangeReasonName(changeReason.getReason());
-        if (StringUtils.isBlank(eventDto.getCustomerName())) {
+        if (eventDto.getCustomerId() != null) {
             DoctorCustomer customer = RespHelper.orServEx(doctorBasicReadService.findCustomerById(eventDto.getCustomerId()));
             if (null == customer)
                 throw new InvalidException("basic.not.null", eventDto.getCustomerId());
