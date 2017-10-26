@@ -334,7 +334,7 @@ public class DoctorGodController {
                 pig.setBoarType(pigAndPigGroup.getBoarType());
             pig.setIsRemoval(pigAndPigGroup.getIsRemoval());
 
-            if (PigStatus.BOAR_LEAVE.getKey() == pigAndPigGroup.getStatus() || PigStatus.Removal.getKey() == pigAndPigGroup.getStatus()) {
+            if (PigStatus.BOAR_LEAVE.getKey().intValue() == pigAndPigGroup.getStatus() || PigStatus.Removal.getKey().intValue() == pigAndPigGroup.getStatus()) {
                 pigTrack.setIsRemoval(1);
                 pig.setIsRemoval(1);
             }
