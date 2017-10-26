@@ -1,16 +1,20 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import io.terminus.doctor.basic.dao.DoctorWarehouseVendorDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseVendorOrgDao;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 
 import io.terminus.common.model.Response;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendorOrg;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 /**
  * Desc:
@@ -25,13 +29,15 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
 
     @Autowired
     private DoctorWarehouseVendorDao doctorWarehouseVendorDao;
+    @Autowired
+    private DoctorWarehouseVendorOrgDao doctorWarehouseVendorOrgDao;
 
     @Override
     public Response<Long> create(DoctorWarehouseVendor doctorWarehouseVendor) {
-        try{
+        try {
             doctorWarehouseVendorDao.create(doctorWarehouseVendor);
             return Response.ok(doctorWarehouseVendor.getId());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("failed to create doctor warehouse vendor, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.vendor.create.fail");
         }
@@ -39,22 +45,36 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
 
     @Override
     public Response<Boolean> update(DoctorWarehouseVendor doctorWarehouseVendor) {
-        try{
+        try {
             return Response.ok(doctorWarehouseVendorDao.update(doctorWarehouseVendor));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("failed to update doctor warehouse vendor, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.vendor.update.fail");
         }
     }
 
-   @Override
+    @Override
     public Response<Boolean> delete(Long id) {
-        try{
+        try {
             return Response.ok(doctorWarehouseVendorDao.delete(id));
-        }catch (Exception e){
-            log.error("failed to delete doctor warehouse vendor by id:{}, cause:{}", id,  Throwables.getStackTraceAsString(e));
+        } catch (Exception e) {
+            log.error("failed to delete doctor warehouse vendor by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.vendor.delete.fail");
         }
     }
 
+    @Override
+    @ExceptionHandle("warehouse.vendor.bound.fail")
+    public Response<Boolean> boundToOrg(Long vendorId, Long orgId) {
+
+        Optional<DoctorWarehouseVendorOrg> vendorOrg = doctorWarehouseVendorOrgDao.findByOrgAndVendor(vendorId, orgId);
+        if (!vendorOrg.isPresent()) {
+            if (!doctorWarehouseVendorOrgDao.create(DoctorWarehouseVendorOrg.builder()
+                    .vendorId(vendorId)
+                    .orgId(orgId)
+                    .build()))
+                return Response.ok(false);
+        }
+        return Response.ok(true);
+    }
 }

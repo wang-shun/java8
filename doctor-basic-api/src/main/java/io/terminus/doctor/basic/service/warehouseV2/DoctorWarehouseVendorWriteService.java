@@ -14,6 +14,7 @@ public interface DoctorWarehouseVendorWriteService {
 
     /**
      * 创建
+     *
      * @param doctorWarehouseVendor
      * @return Boolean
      */
@@ -21,6 +22,7 @@ public interface DoctorWarehouseVendorWriteService {
 
     /**
      * 更新
+     *
      * @param doctorWarehouseVendor
      * @return Boolean
      */
@@ -28,9 +30,20 @@ public interface DoctorWarehouseVendorWriteService {
 
     /**
      * 删除
+     *
      * @param id
      * @return Boolean
      */
     Response<Boolean> delete(Long id);
+
+
+    /**
+     * 将厂家绑定到公司
+     *
+     * @param vendorId
+     * @param orgId
+     * @return
+     */
+    Response<Boolean> boundToOrg(Long vendorId, Long orgId);
 
 }

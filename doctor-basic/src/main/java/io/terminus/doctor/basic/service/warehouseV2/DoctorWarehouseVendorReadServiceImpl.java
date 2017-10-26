@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import io.terminus.doctor.basic.dao.DoctorWarehouseVendorDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseVendorOrgDao;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 
 import io.terminus.common.model.PageInfo;
@@ -9,6 +10,7 @@ import io.terminus.common.model.Response;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendorOrg;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -30,12 +33,14 @@ public class DoctorWarehouseVendorReadServiceImpl implements DoctorWarehouseVend
 
     @Autowired
     private DoctorWarehouseVendorDao doctorWarehouseVendorDao;
+    @Autowired
+    private DoctorWarehouseVendorOrgDao doctorWarehouseVendorOrgDao;
 
     @Override
     public Response<DoctorWarehouseVendor> findById(Long id) {
-        try{
+        try {
             return Response.ok(doctorWarehouseVendorDao.findById(id));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("failed to find doctor warehouse vendor by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.vendor.find.fail");
         }
@@ -43,10 +48,10 @@ public class DoctorWarehouseVendorReadServiceImpl implements DoctorWarehouseVend
 
     @Override
     public Response<Paging<DoctorWarehouseVendor>> paging(Integer pageNo, Integer pageSize, Map<String, Object> criteria) {
-        try{
+        try {
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseVendorDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("failed to paging doctor warehouse vendor by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.vendor.paging.fail");
         }
@@ -54,12 +59,26 @@ public class DoctorWarehouseVendorReadServiceImpl implements DoctorWarehouseVend
 
     @Override
     public Response<List<DoctorWarehouseVendor>> list(Map<String, Object> criteria) {
-        try{
+        try {
             return Response.ok(doctorWarehouseVendorDao.list(criteria));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("failed to list doctor warehouse vendor, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.vendor.list.fail");
         }
     }
 
+    @Override
+    public Response<List<DoctorWarehouseVendor>> findByOrg(Long orgId) {
+        try {
+
+            return Response.ok(doctorWarehouseVendorDao.findByIds(
+                    doctorWarehouseVendorOrgDao.findByOrg(orgId)
+                            .stream()
+                            .map(DoctorWarehouseVendorOrg::getVendorId)
+                            .collect(Collectors.toList())));
+        } catch (Exception e) {
+            log.error("failed to list doctor warehouse vendor, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.vendor.list.fail");
+        }
+    }
 }

@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.warehouseV2;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorWriteService;
@@ -11,6 +12,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,7 +41,7 @@ public class VendorController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public Long create(@Validated DoctorWarehouseVendor doctorWarehouseVendor, Errors errors) {
+    public Long create(@RequestBody @Validated DoctorWarehouseVendor doctorWarehouseVendor, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -47,7 +49,7 @@ public class VendorController {
     }
 
     @RequestMapping(method = RequestMethod.PUT)
-    public boolean update(@Validated DoctorWarehouseVendor doctorWarehouseVendor, Errors errors) {
+    public boolean update(@RequestBody @Validated DoctorWarehouseVendor doctorWarehouseVendor, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -59,4 +61,17 @@ public class VendorController {
     public boolean delete(@PathVariable Long id) {
         return RespHelper.or500(doctorWarehouseVendorWriteService.delete(id));
     }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "org")
+    public boolean boundToOrg(@RequestParam Long vendorId, @RequestParam Long orgId) {
+        return RespHelper.or500(doctorWarehouseVendorWriteService.boundToOrg(vendorId, orgId));
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "org/{id}")
+    public List<DoctorWarehouseVendor> queryByOrg(@PathVariable("id") Long orgId) {
+        return RespHelper.or500(doctorWarehouseVendorReadService.findByOrg(orgId));
+    }
+
 }

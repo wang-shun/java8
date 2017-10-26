@@ -17,6 +17,7 @@ public interface DoctorWarehouseVendorReadService {
 
     /**
      * 查询
+     *
      * @param id
      * @return doctorWarehouseVendor
      */
@@ -24,6 +25,7 @@ public interface DoctorWarehouseVendorReadService {
 
     /**
      * 分页
+     *
      * @param pageNo
      * @param pageSize
      * @param criteria
@@ -31,10 +33,14 @@ public interface DoctorWarehouseVendorReadService {
      */
     Response<Paging<DoctorWarehouseVendor>> paging(Integer pageNo, Integer pageSize, Map<String, Object> criteria);
 
-   /**
-    * 列表
-    * @param criteria
-    * @return List<DoctorWarehouseVendor>
-    */
+    /**
+     * 列表
+     *
+     * @param criteria
+     * @return List<DoctorWarehouseVendor>
+     */
     Response<List<DoctorWarehouseVendor>> list(Map<String, Object> criteria);
+
+
+    Response<List<DoctorWarehouseVendor>> findByOrg(Long orgId);
 }
