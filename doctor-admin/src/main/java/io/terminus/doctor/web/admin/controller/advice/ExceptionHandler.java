@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseBody
 public class ExceptionHandler {
 
+    @ResponseStatus()
     @org.springframework.web.bind.annotation.ExceptionHandler({JsonResponseException.class, ServiceException.class})
     public Response<String> DoctorExceptionHandle(Exception e) {
         return Response.fail(e.getMessage());
