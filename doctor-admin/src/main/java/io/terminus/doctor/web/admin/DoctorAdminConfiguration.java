@@ -4,6 +4,10 @@
 
 package io.terminus.doctor.web.admin;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import io.terminus.doctor.user.service.OperatorRoleReadService;
 import io.terminus.doctor.web.admin.auth.DoctorCustomRoleLoaderConfigurer;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
@@ -27,10 +31,15 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import java.util.List;
 
 /**
  * Author  : panxin
@@ -74,13 +83,13 @@ public class DoctorAdminConfiguration extends WebMvcConfigurerAdapter {
 
     @Bean
     public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
-                                        @Value("${zookeeper.zkTopic}") String cacheTopic) throws Exception{
-        return new Subscriber(zkClientFactory,cacheTopic);
+                                        @Value("${zookeeper.zkTopic}") String cacheTopic) throws Exception {
+        return new Subscriber(zkClientFactory, cacheTopic);
     }
 
     @Bean
     public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
-                                        @Value("${zookeeper.zkTopic}") String cacheTopic) throws Exception{
+                                        @Value("${zookeeper.zkTopic}") String cacheTopic) throws Exception {
         return new Publisher(zkClientFactory, cacheTopic);
     }
 
@@ -92,5 +101,20 @@ public class DoctorAdminConfiguration extends WebMvcConfigurerAdapter {
 
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
+    }
+
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        // 移除默认的 StringHttpMessageConverter 避免因为优先级的问题出现编码异常
+        Iterators.removeIf(converters.iterator(), new Predicate<HttpMessageConverter<?>>() {
+            @Override
+            public boolean apply(HttpMessageConverter<?> input) {
+                return input instanceof StringHttpMessageConverter;
+            }
+        });
+
+        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(Charsets.UTF_8);
+        stringHttpMessageConverter.setSupportedMediaTypes(Lists.newArrayList(MediaType.TEXT_PLAIN, MediaType.ALL));
+        converters.add(1, stringHttpMessageConverter);
     }
 }
