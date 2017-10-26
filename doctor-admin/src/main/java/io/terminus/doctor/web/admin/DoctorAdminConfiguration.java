@@ -10,6 +10,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import io.terminus.doctor.user.service.OperatorRoleReadService;
 import io.terminus.doctor.web.admin.auth.DoctorCustomRoleLoaderConfigurer;
+import io.terminus.doctor.web.admin.interceptors.DoctorLoginInterceptor;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
@@ -24,6 +25,7 @@ import io.terminus.zookeeper.common.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +38,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
@@ -67,6 +70,9 @@ import java.util.List;
         CommonEmailServiceConfig.class
 })
 public class DoctorAdminConfiguration extends WebMvcConfigurerAdapter {
+
+    @Autowired
+    private DoctorLoginInterceptor doctorLoginInterceptor;
 
     @Bean(autowire = Autowire.BY_NAME)
     public ConfigCenter configCenter() {
@@ -101,6 +107,11 @@ public class DoctorAdminConfiguration extends WebMvcConfigurerAdapter {
 
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(doctorLoginInterceptor);
     }
 
     @Override

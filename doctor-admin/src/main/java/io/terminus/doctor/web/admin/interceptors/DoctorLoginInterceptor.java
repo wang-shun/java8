@@ -39,6 +39,7 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
     private final LoadingCache<Long, Response<User>> userCache;
     private final DoctorUserMaker doctorUserMaker;
 
+    @Autowired
     private JedisTemplate template;
 
     @Autowired
