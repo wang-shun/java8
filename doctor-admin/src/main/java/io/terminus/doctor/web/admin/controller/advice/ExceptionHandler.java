@@ -31,21 +31,21 @@ public class ExceptionHandler {
     @ResponseStatus()
     @org.springframework.web.bind.annotation.ExceptionHandler({JsonResponseException.class, ServiceException.class})
     public String DoctorExceptionHandle(Exception e) {
-        return messageSource.getMessage(e.getMessage(), new Object[0], Locale.getDefault());
+        return messageSource.getMessage(e.getMessage(), new Object[0], Locale.CHINA);
     }
 
 
     @ResponseStatus
     @org.springframework.web.bind.annotation.ExceptionHandler(InvalidException.class)
     public String invalidExceptionHandle(InvalidException e) {
-        return messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault());
+        return messageSource.getMessage(e.getError(), e.getParams(), Locale.CHINA);
     }
 
     @ResponseStatus
     @org.springframework.web.bind.annotation.ExceptionHandler(NullPointerException.class)
     public String nullPointExceptionHandle(NullPointerException e) {
         log.error("", e);
-        return messageSource.getMessage(("null.point.exception"), new Object[0], Locale.getDefault());
+        return messageSource.getMessage(("null.point.exception"), new Object[0], Locale.CHINA);
     }
 
 }
