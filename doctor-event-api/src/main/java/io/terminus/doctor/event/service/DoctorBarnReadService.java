@@ -95,4 +95,12 @@ public interface DoctorBarnReadService {
      */
     Response<DoctorBarn> findBarnByFarmAndBarnName(@NotNull(message = "farmId.can.not.be.null") Long farmId,
                                                    @NotNull(message = "barn.name.not.empty") String barnName);
+
+    /**
+     * 模糊搜索有效猪舍
+     * @param name 模糊关键字
+     * @param count 返回的个数
+     * @return 返回满足条件的前count个
+     */
+    Response<List<DoctorBarn>> selectBarns(String name, Integer count);
 }
