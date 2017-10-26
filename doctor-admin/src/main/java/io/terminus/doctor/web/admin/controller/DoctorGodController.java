@@ -337,8 +337,10 @@ public class DoctorGodController {
             if (PigStatus.BOAR_LEAVE.getKey().intValue() == pigAndPigGroup.getStatus() || PigStatus.Removal.getKey().intValue() == pigAndPigGroup.getStatus()) {
                 pigTrack.setIsRemoval(1);
                 pig.setIsRemoval(1);
-            }else
+            } else {
                 pig.setIsRemoval(pigAndPigGroup.getIsRemoval());
+                pigTrack.setIsRemoval(pigAndPigGroup.getIsRemoval());
+            }
 
             pigTrack.setStatus(pigAndPigGroup.getStatus());
             pigTrack.setCurrentBarnId(pigAndPigGroup.getCurrentBarnId());
@@ -349,7 +351,6 @@ public class DoctorGodController {
             pigTrack.setFarrowAvgWeight(pigAndPigGroup.getFarrowAvgWeight());
             pigTrack.setWeanQty(pigAndPigGroup.getWeanQty());
             pigTrack.setWeanAvgWeight(pigAndPigGroup.getWeanAvgWeight());
-            pigTrack.setIsRemoval(pigAndPigGroup.getIsRemoval());
 
 
             doctorPigWriteService.updatePig(pig, pigTrack);
