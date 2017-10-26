@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.admin.utils;
 
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
@@ -66,9 +67,14 @@ public class RemovalPigEventBuilder extends AbstractPigEventBuilder<DoctorRemova
         if (null == doctorFarm2)
             throw new InvalidException("farm.not.null", pigEvent.getFarmId());
 
+
+        BaseUser currentUser = UserUtil.getCurrentUser();
+        if (null == currentUser)
+            throw new InvalidException("user.not.login");
+
         Long customerId1 = RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorFarm2.getId(),
                 doctorFarm2.getName(), eventDto.getCustomerId(), eventDto.getCustomerName(),
-                UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+                currentUser.getId(), currentUser.getName()));
         eventDto.setCustomerId(customerId1);
 
 

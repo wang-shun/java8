@@ -2,6 +2,7 @@ package io.terminus.doctor.web.admin.handler.event.group;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
@@ -44,6 +45,11 @@ public class ChangeGroupEventHandler extends AbstractGroupEventHandler<DoctorCha
                 throw new InvalidException("basic.not.null", eventDto.getCustomerId());
             eventDto.setCustomerName(customer.getName());
         }
+
+        BaseUser currentUser = UserUtil.getCurrentUser();
+        if (null == currentUser)
+            throw new ServiceException("user.not.login");
+
         Long customerId = orServEx(doctorBasicWriteService.addCustomerWhenInput(groupEvent.getFarmId(),
                 groupEvent.getFarmName(), eventDto.getCustomerId(), eventDto.getCustomerName(),
                 UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));

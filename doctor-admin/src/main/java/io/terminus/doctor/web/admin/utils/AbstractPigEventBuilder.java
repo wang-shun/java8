@@ -2,6 +2,7 @@ package io.terminus.doctor.web.admin.utils;
 
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
@@ -69,7 +70,7 @@ public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> im
         try {
             buildEventDto(event, pigEvent);
         } catch (InvalidException e) {
-            throw new ServiceException(messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault()));
+            throw new JsonResponseException(messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault()));
         }
 
         transfer(event, pigEvent);
