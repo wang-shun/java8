@@ -40,9 +40,6 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
     private final DoctorUserMaker doctorUserMaker;
 
     @Autowired
-    private JedisTemplate template;
-
-    @Autowired
     public DoctorLoginInterceptor(final UserReadService<User> userReadService, DoctorUserMaker doctorUserMaker) {
         userCache = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.MINUTES).maximumSize(10000).build(new CacheLoader<Long, Response<User>>() {
             @Override
@@ -57,21 +54,6 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession(false);
-
-        template.execute(new JedisTemplate.JedisActionNoResult() {
-            @Override
-            public void action(Jedis jedis) {
-                System.out.println("get user info from redis 0");
-                System.out.println(jedis.get("afsession:dZDYXn3MmThSnxyZ5QV9vBWn6IweKhOW"));
-            }
-        }, 0);
-        template.execute(new JedisTemplate.JedisActionNoResult() {
-            @Override
-            public void action(Jedis jedis) {
-                System.out.println("get user info from redis 1");
-                System.out.println(jedis.get("afsession:dZDYXn3MmThSnxyZ5QV9vBWn6IweKhOW"));
-            }
-        }, 1);
 
         if (session != null) {
             Object userIdInSession = session.getAttribute(Constants.SESSION_USER_ID);

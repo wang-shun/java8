@@ -3,6 +3,7 @@ package io.terminus.doctor.web.admin.utils;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -43,7 +44,10 @@ public class PigletsChgPigEventBuilder extends AbstractPigEventBuilder<DoctorPig
                 throw new ServiceException("sale.customer.not.null");
         }
         if (notNull(eventDto.getPigletsChangeReason())) {
-            eventDto.setPigletsChangeReasonName(RespHelper.orServEx(doctorBasicReadService.findChangeReasonById(eventDto.getPigletsChangeReason())).getReason());
+            DoctorChangeReason changeReason = RespHelper.orServEx(doctorBasicReadService.findChangeReasonById(eventDto.getPigletsChangeReason()));
+            if (null == changeReason)
+                throw new ServiceException("changeReason.not.found");
+            eventDto.setPigletsChangeReasonName(changeReason.getReason());
         }
 
         DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(eventDto.getPigletsChangeType()));
