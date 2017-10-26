@@ -4,6 +4,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.web.admin.controller.DoctorGodController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -20,8 +21,8 @@ import java.util.Locale;
  * Created by sunbo@terminus.io on 2017/10/26.
  */
 @Slf4j
-@ControllerAdvice
 @ResponseBody
+@ControllerAdvice(assignableTypes = DoctorGodController.class)
 public class ExceptionHandler {
 
     @Autowired
@@ -29,22 +30,22 @@ public class ExceptionHandler {
 
     @ResponseStatus()
     @org.springframework.web.bind.annotation.ExceptionHandler({JsonResponseException.class, ServiceException.class})
-    public Response<String> DoctorExceptionHandle(Exception e) {
-        return Response.fail(messageSource.getMessage(e.getMessage(), new Object[0], Locale.getDefault()));
+    public String DoctorExceptionHandle(Exception e) {
+        return messageSource.getMessage(e.getMessage(), new Object[0], Locale.getDefault());
     }
 
 
     @ResponseStatus
     @org.springframework.web.bind.annotation.ExceptionHandler(InvalidException.class)
-    public Response<String> invalidExceptionHandle(InvalidException e) {
-        return Response.fail(messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault()));
+    public String invalidExceptionHandle(InvalidException e) {
+        return messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault());
     }
 
     @ResponseStatus
     @org.springframework.web.bind.annotation.ExceptionHandler(NullPointerException.class)
-    public Response<String> nullPointExceptionHandle(NullPointerException e) {
+    public String nullPointExceptionHandle(NullPointerException e) {
         log.error("", e);
-        return Response.fail("null.point.exception");
+        return messageSource.getMessage(("null.point.exception"), new Object[0], Locale.getDefault());
     }
 
 }
