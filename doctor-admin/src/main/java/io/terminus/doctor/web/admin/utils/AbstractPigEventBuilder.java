@@ -67,11 +67,11 @@ public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> im
         event.setEventDesc(eventType.getDesc());
         event.setPigId(pigEvent.getPigId());
         event.setPigCode(pigEvent.getPigCode());
-        try {
+//        try {
             buildEventDto(event, pigEvent);
-        } catch (InvalidException e) {
-            throw new JsonResponseException(messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault()));
-        }
+//        } catch (InvalidException e) {
+//            throw new JsonResponseException(messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault()));
+//        }
 
         transfer(event, pigEvent);
     }
