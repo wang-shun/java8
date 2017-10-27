@@ -56,6 +56,10 @@ public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> im
     public void buildEvent(String eventDto, DoctorPigEvent pigEvent) {
         Class<T> clazz = getEventDtoClass();
         T event = parse(eventDto, clazz);
+
+        if (null == event)
+            throw new ServiceException("god.event.json.parse.fail");
+
         if (null != event.getOperatorId() && null == event.getOperatorName()) {
             UserProfile profile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(event.getOperatorId()));
             if (null != profile)
@@ -68,7 +72,7 @@ public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> im
         event.setPigId(pigEvent.getPigId());
         event.setPigCode(pigEvent.getPigCode());
 //        try {
-            buildEventDto(event, pigEvent);
+        buildEventDto(event, pigEvent);
 //        } catch (InvalidException e) {
 //            throw new JsonResponseException(messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault()));
 //        }
