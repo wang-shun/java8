@@ -271,6 +271,7 @@ public class DoctorGodController {
             params.put("farmId", farmId);
             params.put("pigType", type);
             params.put("precisePigCode", code);
+            params.put("all", "true");
             Response<Paging<SearchedPig>> pagingResponse = doctorPigReadService.pagingPig(params, 1, 1);
             if (!pagingResponse.isSuccess())
                 throw new JsonResponseException(pagingResponse.getError());
