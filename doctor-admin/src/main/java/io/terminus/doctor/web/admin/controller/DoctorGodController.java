@@ -175,6 +175,9 @@ public class DoctorGodController {
     public boolean eventEdit(@PathVariable("id") Long eventId,
                              @RequestBody String input) {
 
+        if (StringUtils.isBlank(input))
+            throw new JsonResponseException("god.event.input.blank");
+
         Response<DoctorPigEvent> pigEventResponse = doctorPigEventReadService.findById(eventId);
         if (!pigEventResponse.isSuccess())
             throw new JsonResponseException(pigEventResponse.getError());
@@ -192,6 +195,10 @@ public class DoctorGodController {
     @RequestMapping(method = RequestMethod.PUT, value = "event/group/{id}")
     public boolean groupEventEdit(@PathVariable("id") Long eventId,
                                   @RequestBody String input) {
+
+        if (StringUtils.isBlank(input))
+            throw new JsonResponseException("god.event.input.blank");
+
         DoctorGroupEvent groupEvent = expectNotNull(RespHelper.or500(doctorGroupReadService.findGroupEventById(eventId)), "group.event.not.found");
         String oldPigEvent = TO_JSON_MAPPER.toJson(groupEvent);
 
