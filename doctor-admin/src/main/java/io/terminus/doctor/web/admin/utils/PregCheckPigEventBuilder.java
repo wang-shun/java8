@@ -16,6 +16,9 @@ public class PregCheckPigEventBuilder extends AbstractPigEventBuilder<DoctorPreg
 
     @Override
     void buildEventDto(DoctorPregChkResultDto eventDto, DoctorPigEvent pigEvent) {
+
+        pigEvent.setPregCheckResult(eventDto.getCheckResult());
+
         pigEvent.setPigStatusAfter(eventDto.getCheckResult().intValue() == PregCheckResult.YANG.getKey().intValue()
                 ? PigStatus.Pregnancy.getKey() : PigStatus.KongHuai.getKey());
     }
