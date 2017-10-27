@@ -12,6 +12,7 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -265,7 +266,8 @@ public class ReportController {
             vo.setMaterialName(stock.getSkuName());
 
             if (skuMap.containsKey(stock.getSkuId())) {
-                vo.setVendorName(skuMap.get(stock.getSkuId()).get(0).getVendorName());
+                //TODO warehousevendor
+//                vo.setVendorName(skuMap.get(stock.getSkuId()).get(0).getVendorName());
                 vo.setUnit(skuMap.get(stock.getSkuId()).get(0).getUnit());
                 vo.setSpecification(skuMap.get(stock.getSkuId()).get(0).getSpecification());
                 vo.setCode(skuMap.get(stock.getSkuId()).get(0).getCode());
@@ -391,7 +393,8 @@ public class ReportController {
                     .pigBarnName(pigBarnName)
                     .pigGroupName(pigGroupName)
                     .code(skuMap.get(handle.getMaterialId()).get(0).getCode())
-                    .vendorName(skuMap.get(handle.getMaterialId()).get(0).getVendorName())
+                    //TODO warehousevendor
+//                    .vendorName(skuMap.get(handle.getMaterialId()).get(0).getVendorName())
                     .specification(skuMap.get(handle.getMaterialId()).get(0).getSpecification())
                     .unit(skuMap.get(handle.getMaterialId()).get(0).getUnit())
                     .warehouseName(handle.getWarehouseName())
@@ -399,7 +402,8 @@ public class ReportController {
 
             if (skuMap.containsKey(handle.getMaterialId())) {
                 handleVo.setCode(skuMap.get(handle.getMaterialId()).get(0).getCode());
-                handleVo.setVendorName(skuMap.get(handle.getMaterialId()).get(0).getVendorName());
+                //TODO warehousevendor
+//                handleVo.setVendorName(skuMap.get(handle.getMaterialId()).get(0).getVendorName());
                 handleVo.setSpecification(skuMap.get(handle.getMaterialId()).get(0).getSpecification());
                 handleVo.setUnit(skuMap.get(handle.getMaterialId()).get(0).getUnit());
             }
@@ -464,7 +468,8 @@ public class ReportController {
             if (skuMap.containsKey(apply.getMaterialId())) {
                 vo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
                 vo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
-                vo.setVendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName());
+                //TODO warehousevendor
+//                vo.setVendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName());
                 vo.setSpecification(skuMap.get(apply.getMaterialId()).get(0).getSpecification());
             }
             vos.add(vo);
@@ -555,7 +560,8 @@ public class ReportController {
                 applyVo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
                 applyVo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
                 applyVo.setSpecification(skuMap.get(apply.getMaterialId()).get(0).getSpecification());
-                applyVo.setVendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName());
+                //TODO warehousevendor
+//                applyVo.setVendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName());
             }
 
             vos.add(applyVo);

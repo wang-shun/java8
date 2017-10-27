@@ -10,6 +10,7 @@ import io.terminus.doctor.basic.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseFormulaDto;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.FeedFormula;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
