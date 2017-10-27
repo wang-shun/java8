@@ -20,7 +20,8 @@ public class NewGroupEventHandler extends AbstractGroupEventHandler<DoctorNewGro
         eventDto.setBarnName(getBarnName(eventDto.getBarnId()));
 
         eventDto.setBreedName(getBasicName(eventDto.getBreedId()));
-        eventDto.setGeneticName(getBasicName(eventDto.getGeneticId()));
+        if (null != eventDto.getGeneticId())
+            eventDto.setGeneticName(getBasicName(eventDto.getGeneticId()));
     }
 
     @Override
