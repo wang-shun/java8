@@ -271,7 +271,7 @@ public class DoctorGodController {
             params.put("farmId", farmId);
             params.put("pigType", type);
             params.put("precisePigCode", code);
-            params.put("all", "true");
+            params.put("all", "1");//随便设置，只要all不为null即可
             Response<Paging<SearchedPig>> pagingResponse = doctorPigReadService.pagingPig(params, 1, 1);
             if (!pagingResponse.isSuccess())
                 throw new JsonResponseException(pagingResponse.getError());
