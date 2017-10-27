@@ -494,7 +494,7 @@ public class DoctorGodController {
     @Subscribe
     public void refreshReport(RefreshReportEvent event) {
         log.info("start to refresh report,type:[{}],farm:[{}],startDate:[{}],endDate:[{}]", event.getType(), event.getFarmId(), event.getStartDate(), event.getEndDate());
-        if (1 == event.getType().intValue()) {
+        if (2 == event.getType().intValue()) {
             doctorDailyGroupWriteService.createDailyGroupsByDateRange(event.getFarmId(), event.getStartDate(), event.getEndDate());
         } else {
             doctorDailyReportWriteService.createDailyReports(event.getFarmId(), event.getStartDate(), event.getEndDate());
