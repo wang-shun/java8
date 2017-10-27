@@ -30,7 +30,7 @@ public class TransGroupEventHandler extends AbstractGroupEventHandler<DoctorTran
 
 //        eventDto.setBreedName(getBasicName(eventDto.getBreedId()));
 
-        if (eventDto.getIsCreateGroup().intValue() == IsOrNot.NO.getValue()) {
+        if (eventDto.getIsCreateGroup().intValue() == IsOrNot.NO.getValue() && null != eventDto.getToGroupId()) {
             eventDto.setToGroupCode(getGroupCode(eventDto.getToGroupId()));
         }
 
