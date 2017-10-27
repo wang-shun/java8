@@ -5,6 +5,7 @@ import io.terminus.doctor.basic.dao.DoctorMaterialVendorDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockOutDto;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteServiceImpl;
 import io.terminus.doctor.common.exception.InvalidException;

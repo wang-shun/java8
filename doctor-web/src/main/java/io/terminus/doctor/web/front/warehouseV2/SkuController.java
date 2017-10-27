@@ -4,17 +4,21 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuWriteService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.front.warehouseV2.dto.WarehouseSkuDto;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.boot.autoconfigure.web.ConditionalOnEnabledResourceChain;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import sun.font.SunFontManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +37,8 @@ public class SkuController {
     private DoctorWarehouseSkuWriteService doctorWarehouseSkuWriteService;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
+    @RpcConsumer
+    private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
 
     @RequestMapping(method = RequestMethod.GET, value = "paging")
     public Paging<WarehouseSkuDto> query(@RequestParam(required = false) Long orgId,
@@ -70,8 +76,9 @@ public class SkuController {
                     WarehouseSkuDto skuDto = new WarehouseSkuDto();
                     skuDto.copyFrom(sku);
 
-                    
-
+                    DoctorWarehouseVendor vendor = RespHelper.or500(doctorWarehouseVendorReadService.findById(sku.getVendorId()));
+                    if (null != vendor)
+                        skuDto.setVendorName(vendor.getName());
                     return skuDto;
                 }).collect(Collectors.toList()));
     }
@@ -101,5 +108,24 @@ public class SkuController {
         DoctorWarehouseSku sku = new DoctorWarehouseSku();
         BeanUtils.copyProperties(skuDto, sku);
         return null != RespHelper.or500(doctorWarehouseSkuWriteService.create(sku));
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "code")
+    public String getCode(@RequestParam(required = false) Long orgId,
+                          @RequestParam(required = false) Long farmId,
+                          @RequestParam Integer type) {
+
+        if (null == orgId && null == farmId)
+            throw new JsonResponseException("warehouse.sku.org.id.or.farm.id.not.null");
+
+        if (null == orgId) {
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+            if (null == farm)
+                throw new JsonResponseException("farm.not.found");
+            orgId = farm.getOrgId();
+        }
+
+        return RespHelper.or500(doctorWarehouseSkuWriteService.generateCode(orgId, type));
     }
 }

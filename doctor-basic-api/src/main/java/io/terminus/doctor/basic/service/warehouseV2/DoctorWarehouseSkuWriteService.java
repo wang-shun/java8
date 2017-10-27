@@ -13,6 +13,7 @@ public interface DoctorWarehouseSkuWriteService {
 
     /**
      * 创建
+     *
      * @param doctorWarehouseSku
      * @return Boolean
      */
@@ -20,6 +21,7 @@ public interface DoctorWarehouseSkuWriteService {
 
     /**
      * 更新
+     *
      * @param doctorWarehouseSku
      * @return Boolean
      */
@@ -27,9 +29,19 @@ public interface DoctorWarehouseSkuWriteService {
 
     /**
      * 删除
+     *
      * @param id
      * @return Boolean
      */
     Response<Boolean> delete(Long id);
 
+
+    /**
+     * 生成物料编码
+     *
+     * @param orgId
+     * @param type
+     * @return
+     */
+    Response<String> generateCode(Long orgId, Integer type);
 }

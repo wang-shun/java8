@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.dto.warehouseV2;
 
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import lombok.Data;
 
 import javax.validation.constraints.DecimalMin;

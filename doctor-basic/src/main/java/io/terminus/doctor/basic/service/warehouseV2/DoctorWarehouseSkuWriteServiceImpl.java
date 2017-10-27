@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
@@ -12,9 +13,11 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.zookeeper.OpResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.stream.events.ProcessingInstruction;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,6 +117,46 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
             log.error("failed to delete doctor warehouse sku by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.sku.delete.fail");
         }
+    }
+
+    @Override
+    @ExceptionHandle("doctor.warehouse.sku.generate.code.fail")
+    public Response<String> generateCode(Long orgId, Integer type) {
+
+        String prefix = null;
+        switch (type) {
+            case 1:         //饲料
+                prefix = "SL";
+                break;
+            case 2:         //原料
+                prefix = "YL";
+                break;
+            case 3:         //疫苗
+                prefix = "YM";
+                break;
+            case 4:         //药品
+                prefix = "YP";
+                break;
+            case 5:         //消耗品
+                prefix = "YHP";
+                break;
+            default:
+                throw new InvalidException("warehouse.sku.type.not.support", type);
+        }
+
+        List<DoctorWarehouseSku> skus = doctorWarehouseSkuDao.list(DoctorWarehouseSku.builder()
+                .type(type)
+                .orgId(orgId)
+                .build());
+        if (skus.isEmpty())
+            return Response.ok(prefix + 0001);
+
+        int lastCodeWithSameOrgAndType = Integer.parseInt(skus.get(0).getCode().substring(prefix.length()));
+        if (lastCodeWithSameOrgAndType >= 9999)
+            throw new InvalidException("warehouse.sku.code.out.of.range", 9999);
+
+
+        return Response.ok(prefix + (lastCodeWithSameOrgAndType + 1));
     }
 
 }

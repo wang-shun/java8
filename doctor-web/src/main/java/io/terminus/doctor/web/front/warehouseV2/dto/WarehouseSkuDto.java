@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.warehouseV2.dto;
 
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
+import lombok.Data;
 import org.apache.xmlbeans.impl.jam.mutable.MElement;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.beans.BeanUtils;
@@ -11,6 +12,7 @@ import java.util.Date;
 /**
  * Created by sunbo@terminus.io on 2017/10/26.
  */
+@Data
 public class WarehouseSkuDto extends BasicDto {
 
 
