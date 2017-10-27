@@ -42,8 +42,8 @@ public class RemovalPigEventBuilder extends AbstractPigEventBuilder<DoctorRemova
     @Override
     void buildEventDto(DoctorRemovalDto eventDto, DoctorPigEvent pigEvent) {
 
-        if (null != eventDto.getSum())
-            eventDto.setSum(eventDto.getSum() * 100);
+//        if (null != eventDto.getSum())
+//            eventDto.setSum(eventDto.getSum() * 100);
 
         if (eventDto.getChgTypeId().longValue() == DoctorBasicEnums.SALE.getId() && eventDto.getPrice() == null) {
             throw new ServiceException("sale.price.not.null");
