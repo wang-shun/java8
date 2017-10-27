@@ -363,7 +363,7 @@ public class DoctorGodController {
             doctorPigWriteService.updatePig(pig, pigTrack);
         } else if (type == 4) {//修改猪群
 
-            DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(pigAndPigGroup.getId()));
+            DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(id));
             if (null == group)
                 throw new JsonResponseException("group.not.found");
             Response<DoctorGroupDetail> groupDetailResponse = doctorGroupReadService.findGroupDetailByGroupId(group.getId());
