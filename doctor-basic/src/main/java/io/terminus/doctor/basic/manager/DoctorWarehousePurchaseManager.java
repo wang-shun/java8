@@ -8,7 +8,6 @@ import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInDto;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.common.exception.InvalidException;
 import org.springframework.beans.factory.annotation.Autowired;

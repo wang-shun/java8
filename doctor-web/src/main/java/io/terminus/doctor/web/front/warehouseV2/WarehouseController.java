@@ -104,6 +104,9 @@ public class WarehouseController {
     private DoctorMaterialVendorReadService doctorMaterialVendorReadService;
     @RpcConsumer
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
+    @RpcConsumer
+    private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
+
 
     @Autowired
     private MessageSource messageSource;
@@ -515,6 +518,10 @@ public class WarehouseController {
                 String errorMessage = messageSource.getMessage("warehouse.sku.not.found", new Object[]{stock.getSkuName()}, Locale.getDefault());
                 throw new JsonResponseException(errorMessage);
             }
+            DoctorWarehouseVendor vendor = RespHelper.or500(doctorWarehouseVendorReadService.findById(sku.getVendorId()));
+            if (null == vendor) {
+
+            }
 
 
             data.add(WarehouseStockVo.builder()
@@ -524,7 +531,7 @@ public class WarehouseController {
                     .unit(sku.getUnit())
                     .code(sku.getCode())
                     .specification(sku.getSpecification())
-                    .vendorName(sku.getVendorName())
+                    .vendorName(vendor.getName())
                     .build());
         }
         vo.setData(data);

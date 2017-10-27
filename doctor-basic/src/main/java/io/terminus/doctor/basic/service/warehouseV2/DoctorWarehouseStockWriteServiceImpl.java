@@ -335,22 +335,22 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), stock.getQuantity(), sku.getUnit());
 
 
-            DoctorWarehouseSku targetSku = doctorWarehouseSkuDao.findByFarmIdAndCode(sku.getFarmId(), sku.getCode()).orElseGet(() -> {
-                DoctorWarehouseSku newTargetSku = new DoctorWarehouseSku();
-                newTargetSku.setOrgId(sku.getOrgId());
-                newTargetSku.setFarmId(targetWareHouse.getFarmId());
-                newTargetSku.setWarehouseId(targetWareHouse.getId());
-                newTargetSku.setItemId(sku.getItemId());
-                newTargetSku.setName(sku.getName());
-                newTargetSku.setCode(sku.getCode());
-                newTargetSku.setSrm(sku.getSrm());
-                newTargetSku.setVendorName(sku.getVendorName());
-                newTargetSku.setUnit(sku.getUnit());
-                newTargetSku.setSpecification(sku.getSpecification());
-
-                doctorWarehouseSkuDao.create(newTargetSku);
-                return newTargetSku;
-            });
+//            DoctorWarehouseSku targetSku = doctorWarehouseSkuDao.findByFarmIdAndCode(sku.getFarmId(), sku.getCode()).orElseGet(() -> {
+//                DoctorWarehouseSku newTargetSku = new DoctorWarehouseSku();
+//                newTargetSku.setOrgId(sku.getOrgId());
+//                newTargetSku.setFarmId(targetWareHouse.getFarmId());
+//                newTargetSku.setWarehouseId(targetWareHouse.getId());
+//                newTargetSku.setItemId(sku.getItemId());
+//                newTargetSku.setName(sku.getName());
+//                newTargetSku.setCode(sku.getCode());
+//                newTargetSku.setSrm(sku.getSrm());
+//                newTargetSku.setVendorName(sku.getVendorName());
+//                newTargetSku.setUnit(sku.getUnit());
+//                newTargetSku.setSpecification(sku.getSpecification());
+//
+//                doctorWarehouseSkuDao.create(newTargetSku);
+//                return newTargetSku;
+//            });
 
 
             DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
@@ -381,7 +381,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     averagePrice,
                     false);
 
-            DoctorWarehouseStock transferInStock = getStock(targetWareHouse.getId(), targetSku.getId(), null);
+            DoctorWarehouseStock transferInStock = getStock(targetWareHouse.getId(), sku.getId(), null);
             if (null == transferInStock) {
                 transferInStock = new DoctorWarehouseStock();
                 transferInStock.setFarmId(targetWareHouse.getFarmId());
@@ -389,8 +389,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 transferInStock.setWarehouseName(targetWareHouse.getWareHouseName());
                 transferInStock.setWarehouseType(targetWareHouse.getType());
 
-                transferInStock.setSkuId(targetSku.getId());
-                transferInStock.setSkuName(targetSku.getName());
+                transferInStock.setSkuId(sku.getId());
+                transferInStock.setSkuName(sku.getName());
 //                transferInStock.setUnit(stock.getUnit());
                 transferInStock.setQuantity(detail.getQuantity());
             } else

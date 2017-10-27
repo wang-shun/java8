@@ -2,13 +2,11 @@ package io.terminus.doctor.basic.manager;
 
 import io.terminus.doctor.basic.dao.DoctorWarehouseHandleDetailDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.*;
-import io.terminus.doctor.common.exception.InvalidException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

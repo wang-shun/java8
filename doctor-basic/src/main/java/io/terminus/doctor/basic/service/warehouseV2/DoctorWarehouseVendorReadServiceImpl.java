@@ -14,6 +14,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendorOrg;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -37,6 +38,7 @@ public class DoctorWarehouseVendorReadServiceImpl implements DoctorWarehouseVend
     private DoctorWarehouseVendorOrgDao doctorWarehouseVendorOrgDao;
 
     @Override
+    @Cacheable("")
     public Response<DoctorWarehouseVendor> findById(Long id) {
         try {
             return Response.ok(doctorWarehouseVendorDao.findById(id));

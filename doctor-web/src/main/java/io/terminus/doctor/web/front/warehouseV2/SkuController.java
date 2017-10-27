@@ -9,13 +9,16 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuWriteServi
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.web.front.warehouseV2.dto.WarehouseSkuDto;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunbo@terminus.io on 2017/10/13.
@@ -32,13 +35,13 @@ public class SkuController {
     private DoctorFarmReadService doctorFarmReadService;
 
     @RequestMapping(method = RequestMethod.GET, value = "paging")
-    public Paging<DoctorWarehouseSku> query(@RequestParam(required = false) Long orgId,
-                                            @RequestParam(required = false) Long farmId,
-                                            @RequestParam(required = false) Integer type,
-                                            @RequestParam(required = false) String srm,
-                                            @RequestParam(required = false) String srmOrName,
-                                            @RequestParam(required = false) Integer pageNo,
-                                            @RequestParam(required = false) Integer pageSize) {
+    public Paging<WarehouseSkuDto> query(@RequestParam(required = false) Long orgId,
+                                         @RequestParam(required = false) Long farmId,
+                                         @RequestParam(required = false) Integer type,
+                                         @RequestParam(required = false) String srm,
+                                         @RequestParam(required = false) String srmOrName,
+                                         @RequestParam(required = false) Integer pageNo,
+                                         @RequestParam(required = false) Integer pageSize) {
 
         if (null == orgId && null == farmId)
             throw new JsonResponseException("warehouse.sku.org.id.or.farm.id.not.null");
@@ -60,7 +63,17 @@ public class SkuController {
         if (StringUtils.isNotBlank(srmOrName))
             params.put("nameOrSrmLike", srmOrName);
 
-        return RespHelper.or500(doctorWarehouseSkuReadService.paging(pageNo, pageSize, params));
+        Paging<DoctorWarehouseSku> skuPaging = RespHelper.or500(doctorWarehouseSkuReadService.paging(pageNo, pageSize, params));
+
+        return new Paging<WarehouseSkuDto>(skuPaging.getTotal(),
+                skuPaging.getData().stream().map(sku -> {
+                    WarehouseSkuDto skuDto = new WarehouseSkuDto();
+                    skuDto.copyFrom(sku);
+
+                    
+
+                    return skuDto;
+                }).collect(Collectors.toList()));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
@@ -70,19 +83,23 @@ public class SkuController {
 
 
     @RequestMapping(method = RequestMethod.PUT)
-    public boolean edit(@RequestBody @Validated(DoctorWarehouseSku.UpdateValid.class) DoctorWarehouseSku sku, Errors errors) {
+    public boolean edit(@RequestBody @Validated(WarehouseSkuDto.UpdateValid.class) WarehouseSkuDto skuDto, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
+        DoctorWarehouseSku sku = new DoctorWarehouseSku();
+        BeanUtils.copyProperties(skuDto, sku);
         return RespHelper.or500(doctorWarehouseSkuWriteService.update(sku));
     }
 
 
     @RequestMapping(method = RequestMethod.POST)
-    public boolean save(@RequestBody @Validated(DoctorWarehouseSku.CreateValid.class) DoctorWarehouseSku sku, Errors errors) {
+    public boolean save(@RequestBody @Validated(WarehouseSkuDto.CreateValid.class) WarehouseSkuDto skuDto, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
+        DoctorWarehouseSku sku = new DoctorWarehouseSku();
+        BeanUtils.copyProperties(skuDto, sku);
         return null != RespHelper.or500(doctorWarehouseSkuWriteService.create(sku));
     }
 }

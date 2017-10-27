@@ -8,7 +8,6 @@ import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.dao.DoctorFarmBasicDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
-import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
