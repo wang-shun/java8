@@ -40,4 +40,12 @@ public interface DoctorUserDataPermissionReadService {
      * @return
      */
     Response<List<DoctorUserDataPermission>> listAll();
+
+    /**
+     * 查询所有拥有猪场权限的账户的权限
+     * @param farmId 猪场id
+     * @param userIds 账户id
+     * @return 权限列表
+     */
+    Response<List<DoctorUserDataPermission>> findByFarmAndPrimary(Long farmId, List<Long> userIds);
 }

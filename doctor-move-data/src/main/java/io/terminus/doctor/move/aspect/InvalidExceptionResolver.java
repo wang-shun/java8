@@ -27,7 +27,7 @@ public class InvalidExceptionResolver {
     private DoctorMessageConverter converter;
 
     @AfterThrowing(value = "execution(* io.terminus.doctor.move.service.DoctorMoveAndImportService.*(..))", throwing = "ex")
-    public void invalidException(final JoinPoint point, InvalidException ex) throws Exception {
+    public void invalidException(final JoinPoint point, RuntimeException ex) throws Exception {
         throw converter.convert(ex);
     }
 

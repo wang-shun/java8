@@ -1,5 +1,6 @@
 package io.terminus.doctor.user.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import org.springframework.stereotype.Repository;
@@ -45,5 +46,15 @@ public class DoctorUserDataPermissionDao extends MyBatisDao<DoctorUserDataPermis
 
     public List<DoctorUserDataPermission> findAll() {
         return getSqlSession().selectList(sqlId("findAll"));
+    }
+
+    /**
+     * 查询所有拥有猪场权限的账户的权限
+     * @param farmId 猪场id
+     * @param userIds 账户id
+     * @return 权限列表
+     */
+    public List<DoctorUserDataPermission> findByFarmAndPrimary(Long farmId, List<Long> userIds) {
+        return getSqlSession().selectList(sqlId("findByFarmAndPrimary"), ImmutableMap.of("farmId", farmId, "userIds", userIds));
     }
 }
