@@ -5,6 +5,8 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Desc:
  * Mail: [ your email ]
@@ -13,5 +15,12 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class DoctorWarehouseUnitOrgDao extends MyBatisDao<DoctorWarehouseUnitOrg> {
+
+    public List<DoctorWarehouseUnitOrg> findByOrg(Long orgId) {
+        return this.list(DoctorWarehouseUnitOrg.builder()
+                .orgId(orgId)
+                .build());
+    }
+
 
 }
