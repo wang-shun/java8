@@ -1,10 +1,6 @@
 package io.terminus.doctor.web.admin.handler.event;
 
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.beans.BeanUtils;
 
 import java.lang.reflect.ParameterizedType;

@@ -79,7 +79,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
             DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
             changeDto.setWeanDayAge(getWeanAvgAge(oldPigEvent.getPigId(), oldPigEvent.getParity(), changeDto.getOldEventAt()));
-            doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
+            doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig, changeDto));
         } else {
             updateDailyOfDelete(oldPigEvent);
             updateDailyOfNew(oldPigEvent, inputDto);
@@ -130,7 +130,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
                 .weanNestChange(-1)
                 .weanDayAge(getWeanAvgAge(oldPigEvent.getPigId(), oldPigEvent.getParity(), oldPigEvent.getEventAt()))
                 .build();
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig1, changeDto1));
 
     }
 
@@ -144,7 +144,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
                 .weanNestChange(1)
                 .weanDayAge(getWeanAvgAge(newPigEvent.getPigId(), newPigEvent.getParity(), inputDto.eventAt()))
                 .build();
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig2, changeDto2));
 
     }
 

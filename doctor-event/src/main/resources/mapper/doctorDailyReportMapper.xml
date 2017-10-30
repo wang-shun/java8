@@ -112,6 +112,7 @@
         <result column="houbei_consumable_amount" property="houbeiConsumableAmount"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="version" property="version"/>
 
     </resultMap>
 
@@ -228,8 +229,8 @@
         houbei_vaccination_amount,
         houbei_consumable_amount,
         created_at,
-        updated_at
-
+        updated_at,
+        version
     </sql>
 
     <sql id="vals">
@@ -337,8 +338,8 @@
         #{houbeiVaccinationAmount},
         #{houbeiConsumableAmount},
         now(),
-        now()
-
+        now(),
+        1
     </sql>
 
     <sql id="criteria">
@@ -561,12 +562,11 @@
             <if test="houbeiMedicineAmount != null">houbei_medicine_amount = #{houbeiMedicineAmount},</if>
             <if test="houbeiVaccinationAmount != null">houbei_vaccination_amount = #{houbeiVaccinationAmount},</if>
             <if test="houbeiConsumableAmount != null">houbei_consumable_amount = #{houbeiConsumableAmount},</if>
-
-
-
+            <if test="version != null">version = version + 1,</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
+        <if test="version != null">and version = #{version}</if>
     </update>
 
     <delete id="delete" parameterType="long">

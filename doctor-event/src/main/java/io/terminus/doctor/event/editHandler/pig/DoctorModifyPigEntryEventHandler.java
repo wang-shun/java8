@@ -125,7 +125,7 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
                 .entryCountChange(-1)
                 .phCountChange(-1)
                 .build();
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig1, changeDto1));
         if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             //更新母猪存栏
             doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(),  getAfterDay(oldPigEvent.getEventAt()),
@@ -159,7 +159,7 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
                 .entryCountChange(1)
                 .phCountChange(1)
                 .build();
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig2, changeDto2));
         if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             //更新母猪存栏
             doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),

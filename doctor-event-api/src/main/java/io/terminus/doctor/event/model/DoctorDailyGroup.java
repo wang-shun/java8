@@ -129,4 +129,9 @@ public class DoctorDailyGroup implements Serializable {
 
     private Date updatedAt;
     private Date createdAt;
+
+    /**
+     * 版本号
+     */
+    private Integer version;
 }
