@@ -81,7 +81,7 @@ public class DoctorPigEventManager {
         if (Objects.equals(inputDto.getEventType(), PigEvent.ENTRY.getKey())) {
             key = basic.getFarmId() + inputDto.getPigType() + inputDto.getPigCode();
         } else {
-            key = inputDto.getPigId().toString();
+            key = "pig" + inputDto.getPigId().toString();
         }
         expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", inputDto.getPigCode());
         try {
@@ -177,7 +177,7 @@ public class DoctorPigEventManager {
             if (Objects.equals(inputDto.getEventType(), PigEvent.ENTRY.getKey())) {
                 key = basic.getFarmId() + inputDto.getPigType() + inputDto.getPigCode();
             } else {
-                key = inputDto.getPigId().toString();
+                key = "pig" + inputDto.getPigId().toString();
             }
             expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", inputDto.getPigCode());
             try {

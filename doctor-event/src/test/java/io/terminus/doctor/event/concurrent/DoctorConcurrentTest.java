@@ -42,8 +42,34 @@ public class DoctorConcurrentTest extends BaseServiceTest {
 
     @Test
     public void setNxTest() throws InterruptedException {
-        System.out.println(doctorConcurrentControl.setKey("9240"));
-        System.out.println(doctorConcurrentControl.setKey("9329"));
+//        for (int i = 0; i < 2; i++) {
+            new Thread(() -> {
+                System.out.println(doctorConcurrentControl.setKey("9240"));
+                System.out.println(doctorConcurrentControl.setKey("9250"));
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                doctorConcurrentControl.delKey("9250");
+                doctorConcurrentControl.delKey("9240");
+            }).start();
+
+        new Thread(() -> {
+            System.out.println(doctorConcurrentControl.setKey("9260"));
+            System.out.println(doctorConcurrentControl.setKey("9250"));
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            doctorConcurrentControl.delKey("9250");
+            doctorConcurrentControl.delKey("9260");
+        }).start();
+
+//        }
+
+        Thread.sleep(10000);
     }
 
     @Test
