@@ -13,6 +13,7 @@ import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseMaterialDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
+import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
@@ -495,6 +496,7 @@ public class WarehouseController {
 
             Map<String, Object> skuParams = new HashMap<>();
             skuParams.put("orgId", orgId);
+            skuParams.put("status", WarehouseSkuStatus.NORMAL.getValue());
             skuParams.put("nameOrSrmLike", materialName);
             List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
             if (skuIds.isEmpty())

@@ -44,6 +44,7 @@ public class SkuController {
                                          @RequestParam(required = false) Integer type,
                                          @RequestParam(required = false) String srm,
                                          @RequestParam(required = false) String srmOrName,
+                                         @RequestParam(required = false) Integer status,
                                          @RequestParam(required = false) Integer pageNo,
                                          @RequestParam(required = false) Integer pageSize) {
 
@@ -66,6 +67,8 @@ public class SkuController {
             params.put("type", type);
         if (StringUtils.isNotBlank(srmOrName))
             params.put("nameOrSrmLike", srmOrName);
+        if (null != status)
+            params.put("status", status);
 
         Paging<DoctorWarehouseSku> skuPaging = RespHelper.or500(doctorWarehouseSkuReadService.paging(pageNo, pageSize, params));
 
