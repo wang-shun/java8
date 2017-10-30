@@ -40,10 +40,10 @@ public interface DoctorWarehouseVendorWriteService {
     /**
      * 将厂家绑定到公司
      *
-     * @param vendorId
+     * @param vendorIds
      * @param orgId
      * @return
      */
-    Response<Boolean> boundToOrg(Long vendorId, Long orgId);
+    Response<Boolean> boundToOrg(String vendorIds, Long orgId);
 
 }
