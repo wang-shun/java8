@@ -81,6 +81,8 @@ public class WarehouseSkuDto extends BasicDto {
      */
     private String unit;
 
+    private Long unitId;
+
     /**
      * 规格
      */
