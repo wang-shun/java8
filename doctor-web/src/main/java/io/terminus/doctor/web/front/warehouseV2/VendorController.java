@@ -70,13 +70,13 @@ public class VendorController {
     /**
      * 绑定到公司
      *
-     * @param vendorId
+     * @param vendorIds
      * @param orgId
      * @param farmId
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "org")
-    public boolean boundToOrg(@RequestParam Long vendorId,
+    public boolean boundToOrg(@RequestParam String vendorIds,
                               @RequestParam(required = false) Long orgId,
                               @RequestParam(required = false) Long farmId) {
 
@@ -89,7 +89,7 @@ public class VendorController {
             orgId = farm.getOrgId();
         }
 
-        return RespHelper.or500(doctorWarehouseVendorWriteService.boundToOrg(vendorId, orgId));
+        return RespHelper.or500(doctorWarehouseVendorWriteService.boundToOrg(vendorIds, orgId));
     }
 
 
