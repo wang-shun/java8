@@ -14,8 +14,10 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunbo@terminus.io on 2017/10/26.
@@ -37,6 +39,11 @@ public class VendorController {
                                                @RequestParam Integer pageSize,
                                                @RequestParam Map<String, Object> params) {
         return RespHelper.or500(doctorWarehouseVendorReadService.paging(pageNo, pageSize, params));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "all")
+    public List<DoctorWarehouseVendor> query() {
+        return RespHelper.or500(doctorWarehouseVendorReadService.list(Collections.emptyMap()));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
