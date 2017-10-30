@@ -59,6 +59,7 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
     @Override
     public Response<Boolean> delete(Long id) {
         try {
+            //TODO 逻辑删除
             return Response.ok(doctorWarehouseVendorDao.delete(id));
         } catch (Exception e) {
             log.error("failed to delete doctor warehouse vendor by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));

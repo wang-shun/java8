@@ -14,11 +14,9 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.front.warehouseV2.dto.WarehouseSkuDto;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.boot.autoconfigure.web.ConditionalOnEnabledResourceChain;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import sun.font.SunFontManager;
 
 import java.util.HashMap;
 import java.util.Map;

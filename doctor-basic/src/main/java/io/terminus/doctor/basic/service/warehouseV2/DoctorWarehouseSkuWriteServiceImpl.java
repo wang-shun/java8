@@ -8,6 +8,7 @@ import com.google.common.base.Throwables;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.dao.DoctorFarmBasicDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
+import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -47,6 +48,7 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         Map<String, Object> params = new HashMap<>();
         params.put("orgId", doctorWarehouseSku.getOrgId());
         params.put("code", doctorWarehouseSku.getCode());
+        params.put("status", WarehouseSkuStatus.NORMAL.getValue());
         if (!doctorWarehouseSkuDao.list(params).isEmpty())
             throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getCode());
 
@@ -90,7 +92,7 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         Map<String, Object> params = new HashMap<>();
         params.put("orgId", doctorWarehouseSku.getOrgId());
         params.put("code", doctorWarehouseSku.getCode());
-
+        params.put("status", WarehouseSkuStatus.NORMAL.getValue());
         List<DoctorWarehouseSku> existedSku = doctorWarehouseSkuDao.list(params);
         if (!existedSku.isEmpty()) {
             if (existedSku.size() > 1)
@@ -147,6 +149,7 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         List<DoctorWarehouseSku> skus = doctorWarehouseSkuDao.list(DoctorWarehouseSku.builder()
                 .type(type)
                 .orgId(orgId)
+                .status(WarehouseSkuStatus.NORMAL.getValue())
                 .build());
         if (skus.isEmpty())
             return Response.ok(prefix + 0001);
