@@ -65,6 +65,11 @@ public class DoctorWarehouseUnitOrgReadServiceImpl implements DoctorWarehouseUni
     }
 
     @Override
+    public Response<List<DoctorBasic>> list() {
+        return null;
+    }
+
+    @Override
     public Response<List<DoctorBasic>> findByOrgId(Long orgId) {
         return null;
     }

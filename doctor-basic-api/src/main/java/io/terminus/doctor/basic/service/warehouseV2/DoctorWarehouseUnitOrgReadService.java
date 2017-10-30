@@ -43,5 +43,8 @@ public interface DoctorWarehouseUnitOrgReadService {
     Response<List<DoctorWarehouseUnitOrg>> list(Map<String, Object> criteria);
 
 
+    Response<List<DoctorBasic>> list();
+
+
     Response<List<DoctorBasic>> findByOrgId(Long orgId);
 }

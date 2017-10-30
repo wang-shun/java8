@@ -29,6 +29,12 @@ public class UnitController {
     @RpcConsumer
     private DoctorWarehouseUnitOrgWriteService doctorWarehouseUnitOrgWriteService;
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "all")
+    public List<DoctorBasic> query() {
+        return RespHelper.or500(doctorWarehouseUnitOrgReadService.list());
+    }
+
     /**
      * 绑定到公司
      *

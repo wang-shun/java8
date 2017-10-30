@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+
 /**
  * Desc:
  * Mail: [ your email ]
@@ -29,10 +31,10 @@ public class DoctorWarehouseUnitOrgWriteServiceImpl implements DoctorWarehouseUn
 
     @Override
     public Response<Long> create(DoctorWarehouseUnitOrg doctorWarehouseUnitOrg) {
-        try{
+        try {
             doctorWarehouseUnitOrgDao.create(doctorWarehouseUnitOrg);
             return Response.ok(doctorWarehouseUnitOrg.getId());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("failed to create doctor warehouse unit org, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.unit.org.create.fail");
         }
@@ -40,26 +42,34 @@ public class DoctorWarehouseUnitOrgWriteServiceImpl implements DoctorWarehouseUn
 
     @Override
     public Response<Boolean> update(DoctorWarehouseUnitOrg doctorWarehouseUnitOrg) {
-        try{
+        try {
             return Response.ok(doctorWarehouseUnitOrgDao.update(doctorWarehouseUnitOrg));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("failed to update doctor warehouse unit org, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.unit.org.update.fail");
         }
     }
 
-   @Override
+    @Override
     public Response<Boolean> delete(Long id) {
-        try{
+        try {
             return Response.ok(doctorWarehouseUnitOrgDao.delete(id));
-        }catch (Exception e){
-            log.error("failed to delete doctor warehouse unit org by id:{}, cause:{}", id,  Throwables.getStackTraceAsString(e));
+        } catch (Exception e) {
+            log.error("failed to delete doctor warehouse unit org by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.unit.org.delete.fail");
         }
     }
 
     @Override
+    @ExceptionHandle("doctor.warehouse.unit.bound.fail")
     public Response<Boolean> boundToOrg(Long orgId, String unitIds) {
-        return null;
+        for (String id : unitIds.split(",")) {
+            if (!doctorWarehouseUnitOrgDao.create(DoctorWarehouseUnitOrg.builder()
+                    .orgId(orgId)
+                    .unitId(Long.parseLong(id))
+                    .build()))
+                return Response.fail("doctor.warehouse.unit.bound.fail");
+        }
+        return Response.ok(true);
     }
 }
