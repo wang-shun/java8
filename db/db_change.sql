@@ -1500,3 +1500,31 @@ ALTER TABLE doctor_warehouse_stock CHANGE material_id sku_id BIGINT(20) COMMENT 
 ALTER TABLE doctor_warehouse_stock DROP vendor_name;
 ALTER TABLE doctor_warehouse_stock DROP manager_id;
 ALTER TABLE doctor_warehouse_stock DROP unit;
+
+
+-- 添加厂商表，厂商-公司关系表，单位-公司关系表 2017-10-30
+CREATE TABLE `doctor_warehouse_vendor` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `name` varchar(64) NOT NULL COMMENT '供应商名称',
+  `short_name` varchar(32) DEFAULT NULL COMMENT '简称',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COMMENT='物料供应商表';
+CREATE TABLE `doctor_warehouse_vendor_org` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司编号',
+  `vendor_id` bigint(20) DEFAULT NULL COMMENT '供应商编号',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='sku供应商与公司关系表';
+CREATE TABLE `doctor_warehouse_unit_org` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `org_id` BIGINT(20) NOT NULL COMMENT '公司编号',
+  `unit_id` BIGINT(20) NOT NULL COMMENT '单位编号',
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  INDEX `index_org` (`org_id` ASC));
