@@ -2,17 +2,17 @@ package io.terminus.doctor.basic.service.warehouseV2;
 
 import io.terminus.doctor.basic.dao.DoctorWarehouseVendorDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseVendorOrgDao;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 
 import io.terminus.common.model.Response;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
+import io.terminus.doctor.basic.enums.WarehouseVendorDeleteFlag;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendorOrg;
 import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,12 +59,23 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
     @Override
     public Response<Boolean> delete(Long id) {
         try {
-            //TODO 逻辑删除
             return Response.ok(doctorWarehouseVendorDao.delete(id));
         } catch (Exception e) {
             log.error("failed to delete doctor warehouse vendor by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.vendor.delete.fail");
         }
+    }
+
+    @Override
+    @ExceptionHandle("doctor.warehouse.vendor.delete.fail")
+    public Response<Boolean> logicDelete(Long id) {
+        DoctorWarehouseVendor vendor = doctorWarehouseVendorDao.findById(id);
+        if (null != vendor) {
+            vendor.setDeleteFlag(WarehouseVendorDeleteFlag.DELETE.getValue());
+            doctorWarehouseVendorDao.update(vendor);
+        }
+
+        return Response.ok(true);
     }
 
     @Override

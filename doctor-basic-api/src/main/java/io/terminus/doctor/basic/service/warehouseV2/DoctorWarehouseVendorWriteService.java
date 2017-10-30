@@ -1,8 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
-
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 
 /**
  * Desc:
@@ -36,6 +35,14 @@ public interface DoctorWarehouseVendorWriteService {
      */
     Response<Boolean> delete(Long id);
 
+
+    /**
+     * 逻辑删除
+     *
+     * @param id
+     * @return
+     */
+    Response<Boolean> logicDelete(Long id);
 
     /**
      * 将厂家绑定到公司

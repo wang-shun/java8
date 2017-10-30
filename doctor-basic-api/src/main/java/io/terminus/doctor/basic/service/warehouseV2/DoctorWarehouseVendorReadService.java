@@ -1,8 +1,8 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 
 import java.util.Map;
 import java.util.List;

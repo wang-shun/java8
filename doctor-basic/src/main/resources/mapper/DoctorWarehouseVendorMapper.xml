@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-10-26 15:57:14
+ ~ Date: 2017-10-30 18:00:26
  ~ Created by [ your name ]
 -->
 
@@ -12,6 +12,7 @@
         <id property="id" column="id"/>
         <result property="name" column="name"/>
         <result property="shortName" column="short_name"/>
+        <result property="deleteFlag" column="delete_flag"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -26,12 +27,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`, `short_name`, 
+        `name`, `short_name`, `delete_flag`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{shortName}, 
+        #{name}, #{shortName}, #{deleteFlag}, 
         now(), now()
     </sql>
 
@@ -39,6 +40,7 @@
         <where>
             <if test="name != null">AND `name` = #{name}</if>
             <if test="shortName != null">AND `short_name` = #{shortName}</if>
+            <if test="deleteFlag != null">AND `delete_flag` = #{deleteFlag}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
@@ -77,6 +79,7 @@
         <set>
             <if test="name != null">`name` = #{name},</if>
             <if test="shortName != null">`short_name` = #{shortName},</if>
+            <if test="deleteFlag != null">`delete_flag` = #{deleteFlag},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}

@@ -1528,3 +1528,8 @@ CREATE TABLE `doctor_warehouse_unit_org` (
   `updated_at` DATETIME NULL,
   PRIMARY KEY (`id`),
   INDEX `index_org` (`org_id` ASC));
+
+-- 厂商表添加删除标志字段 2017-10-30
+ALTER TABLE doctor_warehouse_vendor ADD delete_flag TINYINT NULL COMMENT '删除标志，0正常，1删除';
+ALTER TABLE doctor_warehouse_vendor
+  MODIFY COLUMN delete_flag TINYINT COMMENT '删除标志，0正常，1删除' AFTER short_name;
