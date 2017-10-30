@@ -40,24 +40,34 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
         @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")
         private BigDecimal quantity;
 
-//        @NotNull(message = "stock.unit.price.null")
-        private Long unitPrice;
+        //        @NotNull(message = "stock.unit.price.null")
+//        private Long unitPrice;
 
-        @NotNull(message = "stock.apply.person.id.null")
+        /**
+         * 饲养员编号
+         */
         private Long applyStaffId;
 
+        /**
+         * 饲养员名称
+         */
         private String applyStaffName;
 
+        /**
+         * 领用猪舍
+         */
         @NotNull(message = "stock.apply.pig.house.id.null")
         private Long applyPigBarnId;
 
         @NotBlank(message = "stock.apply.pig.house.name.null")
         private String applyPigBarnName;
 
+        /**
+         * 领用猪群
+         */
         private Long applyPigGroupId;
 
         private String applyPigGroupName;
 
-//        private Boolean justOut = false;
     }
 }

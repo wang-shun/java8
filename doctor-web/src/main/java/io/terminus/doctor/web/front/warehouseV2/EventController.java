@@ -13,6 +13,7 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandl
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
 import io.terminus.doctor.web.core.export.Exporter;
+import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseEventExportVo;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseMaterialEventVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/24.
@@ -86,9 +88,9 @@ public class EventController {
             if (WarehouseMaterialHandleType.IN.getValue() == handle.getType()
                     || WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType()
                     || WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()) {
-                Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.listMergeVendor(DoctorWarehouseStock.builder()
+                Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.list(DoctorWarehouseStock.builder()
                         .warehouseId(handle.getWarehouseId())
-                        .materialId(handle.getMaterialId())
+                        .skuId(handle.getMaterialId())
                         .build());
                 if (!stockResponse.isSuccess())
                     throw new JsonResponseException(stockResponse.getError());
@@ -148,113 +150,23 @@ public class EventController {
         if (!handleResponse.isSuccess())
             throw new JsonResponseException(handleResponse.getError());
 
-        exporter.export(handleResponse.getResult(), "web-material-export", request, response);
+        exporter.export(handleResponse.getResult().stream().map(handle -> {
+            WarehouseEventExportVo eventExportVo = new WarehouseEventExportVo();
+            eventExportVo.setMaterialName(handle.getMaterialName());
+            eventExportVo.setWareHouseName(handle.getWarehouseName());
+            eventExportVo.setProviderFactoryName(handle.getVendorName());
+            eventExportVo.setUnitName(handle.getUnit());
+            eventExportVo.setUnitPrice(handle.getUnitPrice());
+            eventExportVo.setEventTime(handle.getHandleDate());
+            eventExportVo.setAmount(handle.getQuantity().multiply(new BigDecimal(handle.getUnitPrice())).longValue());
+            return eventExportVo;
+        }).collect(Collectors.toList()), "web-wareHouse-event", request, response);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
     public boolean delete(@PathVariable Long id) {
 
 
-//        Response<DoctorWarehouseMaterialHandle> handleResponse = doctorWarehouseMaterialHandleReadService.findById(id);
-//        if (!handleResponse.isSuccess())
-//            throw new JsonResponseException(handleResponse.getError());
-//        if (null == handleResponse.getResult()) {
-//            log.info("物料处理明细不存在,忽略仓库事件删除操作,id[{}]", id);
-//            return true;
-//        }
-//
-//        DoctorWarehouseMaterialHandle handle = handleResponse.getResult();
-//
-//
-//        if (WarehouseMaterialHandleType.IN.getValue() == handle.getType().intValue()) {
-//
-//            WarehouseStockOutDto outDto = new WarehouseStockOutDto();
-//            outDto.setFarmId(handle.getFarmId());
-//            outDto.setHandleDate(new Date());
-//            outDto.setWarehouseId(handle.getWarehouseId());
-//
-//
-//            WarehouseStockOutDto.WarehouseStockOutDetail detail = new WarehouseStockOutDto.WarehouseStockOutDetail();
-//            detail.setMaterialId(handle.getMaterialId());
-//            detail.setQuantity(handle.getQuantity());
-//            detail.setJustOut(true);
-//            outDto.setDetails(Collections.singletonList(detail));
-//            doctorWarehouseStockWriteService.out(outDto);
-//        } else if (WarehouseMaterialHandleType.OUT.getValue() == handle.getType()) {
-//            WarehouseStockInDto inDto = new WarehouseStockInDto();
-//            inDto.setFarmId(handle.getFarmId());
-//            inDto.setWarehouseId(handle.getWarehouseId());
-//            inDto.setHandleDate(new Date());
-//
-//            WarehouseStockInDto.WarehouseStockInDetailDto detail = new WarehouseStockInDto.WarehouseStockInDetailDto();
-//            detail.setUnit(handle.getUnit());
-//            detail.setUnitPrice(handle.getUnitPrice());
-//            detail.setVendorName(handle.getVendorName());
-//            detail.setMaterialId(handle.getMaterialId());
-//            detail.setQuantity(handle.getQuantity());
-//            inDto.setDetails(Collections.singletonList(detail));
-//            doctorWarehouseStockWriteService.in(inDto);
-//        } else if (WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()
-//                || WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()) {
-//
-//            Response<DoctorWarehouseMaterialHandle> otherTransferHandleResponse = doctorWarehouseMaterialHandleReadService.findById(handle.getOtherTrasnferHandleId());
-//            if (!otherTransferHandleResponse.isSuccess())
-//                throw new JsonResponseException(otherTransferHandleResponse.getError());
-//
-//            Long transferOutWarehouseId, transferInWarehouseId;
-//            if (WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()) {
-//                transferOutWarehouseId = handle.getWarehouseId();
-//                transferInWarehouseId = otherTransferHandleResponse.getResult().getWarehouseId();
-//            } else {
-//                transferOutWarehouseId = otherTransferHandleResponse.getResult().getWarehouseId();
-//                transferInWarehouseId = handle.getWarehouseId();
-//            }
-//
-//            WarehouseStockTransferDto transferDto = new WarehouseStockTransferDto();
-//            transferDto.setFarmId(handle.getFarmId());
-//            transferDto.setWarehouseId(transferOutWarehouseId);
-//            transferDto.setHandleDate(new Date());
-//
-//            WarehouseStockTransferDto.WarehouseStockTransferDetail detail = new WarehouseStockTransferDto.WarehouseStockTransferDetail();
-//            detail.setMaterialId(handle.getMaterialId());
-//            detail.setQuantity(handle.getQuantity());
-//            detail.setTransferInWarehouseId(transferInWarehouseId);
-//            transferDto.setDetails(Collections.singletonList(detail));
-//            doctorWarehouseStockWriteService.transfer(transferDto);
-//        } else if (WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue() == handle.getType()
-//                || WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType()) {
-//
-//            Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.listMergeVendor(DoctorWarehouseStock.builder()
-//                    .warehouseId(handle.getWarehouseId())
-//                    .materialId(handle.getMaterialId())
-//                    .build());
-//            if (!stockResponse.isSuccess())
-//                throw new JsonResponseException(stockResponse.getError());
-//
-//            if (null == stockResponse.getResult() || stockResponse.getResult().isEmpty())
-//                throw new JsonResponseException("stock.not.found");
-//
-//
-//            BigDecimal newQuantity;
-//            if (WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType()) {
-//                newQuantity = stockResponse.getResult().get(0).getQuantity().multiply(handle.getQuantity());
-//            } else
-//                newQuantity = stockResponse.getResult().get(0).getQuantity().add(handle.getQuantity());
-//
-//            WarehouseStockInventoryDto inventoryDto = new WarehouseStockInventoryDto();
-//            inventoryDto.setFarmId(handle.getFarmId());
-//            inventoryDto.setHandleDate(new Date());
-//            inventoryDto.setWarehouseId(handle.getWarehouseId());
-//
-//            WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail = new WarehouseStockInventoryDto.WarehouseStockInventoryDetail();
-//            detail.setMaterialId(handle.getMaterialId());
-//            detail.setQuantity(newQuantity);
-//            inventoryDto.setDetails(Collections.singletonList(detail));
-//            doctorWarehouseStockWriteService.inventory(inventoryDto);
-//        }
-//
-//        handle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
-//        doctorWarehouseMaterialHandleWriteService.update(handle);
         Response<Boolean> response = doctorWarehouseMaterialHandleWriteService.delete(id);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());

@@ -78,6 +78,18 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         }
     }
 
+
+    @Override
+    public RespWithEx<Boolean> delete(Long id) {
+        try {
+            doctorPigEventManager.delete(id);
+            return RespWithEx.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("batch.pig.event.delete.failed,id:{} cause by :{}", id, Throwables.getStackTraceAsString(e));
+            return RespWithEx.fail("batch.pig.event.delete.failed");
+        }
+    }
+
     @Deprecated
     @Override
     public Response<Boolean> createPigEvent(DoctorPigEvent doctorPigEvent) {
@@ -112,4 +124,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             return Response.fail("update.pig.event.failed");
         }
     }
+
+
 }

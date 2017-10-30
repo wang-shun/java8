@@ -6,11 +6,18 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.warehouseV2.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
+import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseReportReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
+import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStockStatisticsVo;
@@ -20,9 +27,8 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/20.
@@ -48,6 +54,12 @@ public class StockController {
 
     @RpcConsumer
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
+    @RpcConsumer
+    private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
+    @RpcConsumer
+    private DoctorWareHouseReadService doctorWareHouseReadService;
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
 
     @RequestMapping(method = RequestMethod.PUT, value = "in")
     public boolean in(@RequestBody @Validated WarehouseStockInDto stockIn, Errors errors) {
@@ -147,57 +159,118 @@ public class StockController {
 
     @RequestMapping(method = RequestMethod.GET)
     public Paging<WarehouseStockStatisticsVo> paging(@RequestParam Long warehouseId,
+                                                     @RequestParam(required = false) Long orgId,
                                                      @RequestParam(required = false) String materialName,
                                                      @RequestParam(required = false) Integer pageNo,
                                                      @RequestParam(required = false) Integer pageSize) {
 
-        Calendar now = Calendar.getInstance();
+        Map<String, Object> params = new HashMap<>();
+        params.put("warehouseId", warehouseId);
 
-        if (StringUtils.isBlank(materialName)) {
-            //如果传入的是空，那么将会应用上这个查询条件，导致查不出数据
-            materialName = null;
+        if (StringUtils.isNotBlank(materialName)) {
+
+            if (null == orgId) {
+                DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(warehouseId));
+                if (null == wareHouse)
+                    throw new JsonResponseException("warehouse.not.found");
+                DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(wareHouse.getFarmId()));
+                if (null == farm)
+                    throw new JsonResponseException("farm.not.found");
+                orgId = farm.getOrgId();
+            }
+
+            Map<String, Object> skuParams = new HashMap<>();
+            skuParams.put("orgId", orgId);
+            skuParams.put("nameOrSrmLike", materialName);
+            List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
+            if (skuIds.isEmpty())
+                return Paging.empty();
+            params.put("skuIds", skuIds);
         }
+//        if (StringUtils.isNotBlank(materialName)) {
+//            params.put("materialNameLike", materialName);
+//        }
 
-        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.paging(pageNo, pageSize, DoctorWarehouseStock.builder()
-                .warehouseId(warehouseId)
-                .materialName(materialName)
-                .build());
+        Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.paging(pageNo, pageSize, params);
 
         if (!stockResponse.isSuccess())
             throw new JsonResponseException(stockResponse.getError());
         if (null == stockResponse.getResult().getData())
             throw new JsonResponseException("stock.not.found");
 
+        Calendar now = Calendar.getInstance();
+
+
+        Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(stockResponse.getResult().getData().stream().map(DoctorWarehouseStock::getSkuId).collect(Collectors.toList()))).stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
 
         Paging<WarehouseStockStatisticsVo> result = new Paging<>();
         result.setTotal(stockResponse.getResult().getTotal());
         List<WarehouseStockStatisticsVo> vos = new ArrayList<>(stockResponse.getResult().getData().size());
         stockResponse.getResult().getData().forEach(stock -> {
-            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getMaterialId());
+
+//            if (!skuMap.containsKey(stock.getSkuId()))
+//                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
+
+            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getSkuId());
             if (!balanceResponse.isSuccess())
                 throw new JsonResponseException(balanceResponse.getError());
-            Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterial(warehouseId, stock.getMaterialId(), now,
+            Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterial(warehouseId, stock.getSkuId(), now,
                     WarehouseMaterialHandleType.IN,
                     WarehouseMaterialHandleType.OUT,
+                    WarehouseMaterialHandleType.INVENTORY_PROFIT,
+                    WarehouseMaterialHandleType.INVENTORY_DEFICIT,
                     WarehouseMaterialHandleType.TRANSFER_IN,
-                    WarehouseMaterialHandleType.TRANSFER_OUT);
+                    WarehouseMaterialHandleType.TRANSFER_OUT,
+                    WarehouseMaterialHandleType.FORMULA_IN,
+                    WarehouseMaterialHandleType.FORMULA_OUT);
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
+//            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
+
+
+            DoctorWarehouseSku sku = skuMap.containsKey(stock.getSkuId()) ? skuMap.get(stock.getSkuId()).get(0) : null;
 
             WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
             vo.setId(stock.getId());
-            vo.setMaterialId(stock.getMaterialId());
-            vo.setMaterialName(stock.getMaterialName());
-            vo.setUnit(stock.getUnit());
+            vo.setFarmId(stock.getFarmId());
+            vo.setWarehouseId(stock.getWarehouseId());
+            vo.setWarehouseName(stock.getWarehouseName());
+            vo.setWarehouseType(stock.getWarehouseType());
+            vo.setMaterialId(stock.getSkuId());
+            vo.setMaterialName(stock.getSkuName());
 
-            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity());
-            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount());
-            vo.setInAmount(statisticsResponse.getResult().getIn().getAmount());
-            vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity());
-            vo.setTransferInAmount(statisticsResponse.getResult().getTransferIn().getAmount());
-            vo.setTransferInQuantity(statisticsResponse.getResult().getTransferIn().getQuantity());
-            vo.setTransferOutAmount(statisticsResponse.getResult().getTransferOut().getAmount());
-            vo.setTransferOutQuantity(statisticsResponse.getResult().getTransferOut().getQuantity());
+            if (null != sku) {
+                vo.setUnit(sku.getUnit());
+                vo.setCode(sku.getCode());
+                vo.setVendorName(sku.getVendorName());
+                vo.setSpecification(sku.getSpecification());
+            }
+
+//            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity());
+//            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount());
+//            vo.setInAmount(statisticsResponse.getResult().getIn().getAmount());
+//            vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity());
+//            vo.setTransferInAmount(statisticsResponse.getResult().getTransferIn().getAmount());
+//            vo.setTransferInQuantity(statisticsResponse.getResult().getTransferIn().getQuantity());
+//            vo.setTransferOutAmount(statisticsResponse.getResult().getTransferOut().getAmount());
+//            vo.setTransferOutQuantity(statisticsResponse.getResult().getTransferOut().getQuantity());
+            vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
+                    + statisticsResponse.getResult().getInventoryProfit().getAmount()
+                    + statisticsResponse.getResult().getTransferIn().getAmount()
+                    + statisticsResponse.getResult().getFormulaIn().getAmount());
+            vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity()
+                    .add(statisticsResponse.getResult().getInventoryProfit().getQuantity())
+                    .add(statisticsResponse.getResult().getTransferIn().getQuantity())
+                    .add(statisticsResponse.getResult().getFormulaIn().getQuantity()));
+
+            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount()
+                    + statisticsResponse.getResult().getInventoryDeficit().getAmount()
+                    + statisticsResponse.getResult().getTransferOut().getAmount()
+                    + statisticsResponse.getResult().getFormulaOut().getAmount());
+            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity()
+                    .add(statisticsResponse.getResult().getInventoryDeficit().getQuantity())
+                    .add(statisticsResponse.getResult().getTransferOut().getQuantity())
+                    .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
 
             vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
             vo.setBalanceAmount(balanceResponse.getResult().getAmount());

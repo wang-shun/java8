@@ -5,9 +5,11 @@ import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorMessageDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.msg.DoctorMessageSearchDto;
 import io.terminus.doctor.event.model.DoctorMessage;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,19 +30,23 @@ public class DoctorPigManager {
 
     private final DoctorPigDao doctorPigDao;
     private final DoctorPigEventDao doctorPigEventDao;
+    private final DoctorPigTrackDao doctorPigTrackDao;
 
     @Autowired
     private DoctorMessageDao doctorMessageDao;
 
     @Autowired
     public DoctorPigManager(DoctorPigDao doctorPigDao,
-                            DoctorPigEventDao doctorPigEventDao) {
+                            DoctorPigEventDao doctorPigEventDao,
+                            DoctorPigTrackDao doctorPigTrackDao) {
         this.doctorPigDao = doctorPigDao;
         this.doctorPigEventDao = doctorPigEventDao;
+        this.doctorPigTrackDao = doctorPigTrackDao;
     }
 
     /**
      * 批量更新pigCode
+     *
      * @param pigs 猪
      * @return 是否成功
      */
@@ -48,6 +54,14 @@ public class DoctorPigManager {
     public boolean updatePigCodes(List<DoctorPig> pigs) {
         pigs.forEach(pig -> updatePigCode(pig.getId(), pig.getPigCode()));
         return true;
+    }
+
+
+    @Transactional
+    public void updatePig(DoctorPig pig, DoctorPigTrack pigTrack) {
+
+        doctorPigDao.update(pig);
+        doctorPigTrackDao.update(pigTrack);
     }
 
     private void updatePigCode(Long pigId, String pigCode) {

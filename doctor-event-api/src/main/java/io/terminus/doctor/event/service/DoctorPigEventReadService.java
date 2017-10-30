@@ -22,6 +22,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 母猪状态信息获取母猪事件列表
+     *
      * @param statusList
      * @return
      */
@@ -29,6 +30,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 统计事件范围内的猪事件信息
+     *
      * @param farmId
      * @param pigId
      * @param beginDate
@@ -42,7 +44,8 @@ public interface DoctorPigEventReadService {
 
     /**
      * 查找一只猪(在指定时间之后)的第一个事件
-     * @param pigId 猪id, 不可为空
+     *
+     * @param pigId    猪id, 不可为空
      * @param fromDate 可为空
      * @return
      */
@@ -50,6 +53,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 查询猪舍的事件数量
+     *
      * @param barnId 猪舍id
      * @return
      */
@@ -57,6 +61,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 通过pigIds 获取操作事件内容
+     *
      * @param pigIds
      * @return
      */
@@ -64,14 +69,16 @@ public interface DoctorPigEventReadService {
 
     /**
      * 查询某一猪场可执行此事件的猪
+     *
      * @param eventType 事件类型
-     * @param farmId 猪场id
+     * @param farmId    猪场id
      * @return
      */
     Response<List<DoctorSuggestPig>> suggestPigsByEvent(Integer eventType, Long farmId, String pigCode, Integer sex);
 
     /**
      * 通过 id 获取 PigEvent
+     *
      * @param id
      * @return
      */
@@ -79,6 +86,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 母猪胎次信息总结
+     *
      * @param pigId 母猪Id
      * @return
      */
@@ -86,6 +94,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 校验母猪不处于分娩状态
+     *
      * @param pigIds
      * @return
      */
@@ -93,6 +102,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 根据条件查询事件
+     *
      * @param criteria
      * @return
      */
@@ -105,6 +115,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 判断是否是最新事件
+     *
      * @param pigId 猪id
      * @return true 是最新事件, false 不是
      */
@@ -112,6 +123,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 判断是否是最新手动事件
+     *
      * @param pigId 猪id
      * @return true 是最新事件, false 不是
      */
@@ -119,6 +131,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 查询猪回滚事件
+     *
      * @param pigId
      * @return
      */
@@ -126,6 +139,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 事件能否回滚
+     *
      * @param eventId 事件id
      * @return 能否回滚
      */
@@ -133,6 +147,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 获取猪的最新事件
+     *
      * @param pigId
      * @return
      */
@@ -140,6 +155,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 获取多个猪时的最新事件
+     *
      * @param pigIds
      * @return
      */
@@ -148,19 +164,22 @@ public interface DoctorPigEventReadService {
 
     /**
      * 事件列表(修复断奶事件暂时)
+     *
      * @return
      */
     Response<List<DoctorPigEvent>> addWeanEventAfterFosAndPigLets();
 
     /**
      * 查询母猪胎次中数据平均值
+     *
      * @param pigId
      * @return
      */
     Response<DoctorSowParityAvgDto> querySowParityAvg(@NotNull(message = "input.pigId.empty") Long pigId);
 
     /**
-     *  获取猪某一类型的最新事件
+     * 获取猪某一类型的最新事件
+     *
      * @param pigId
      * @param type
      * @return
@@ -170,16 +189,17 @@ public interface DoctorPigEventReadService {
 
     /**
      * 根据事件来获取猪id
-     * @param criteria
-     *  type      事件类型
-     *  beginAt   事件日期开始
-     *  endAt     事件日期结束
+     *
+     * @param criteria type      事件类型
+     *                 beginAt   事件日期开始
+     *                 endAt     事件日期结束
      * @return
      */
     Response<List<Long>> findPigIdsBy(Map<String, Object> criteria);
 
     /**
      * 获取母猪事件的npd
+     *
      * @param map
      * @param offset
      * @param limit
@@ -189,6 +209,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 查询猪的销售情况
+     *
      * @param map
      * @param offset
      * @param limit
@@ -198,6 +219,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 查询猪的利润情况
+     *
      * @param map
      * @return
      */
@@ -205,6 +227,7 @@ public interface DoctorPigEventReadService {
 
     /**
      * 获取最新的胎次
+     *
      * @param pigId 猪id
      * @return 最新胎次
      */
@@ -212,7 +235,8 @@ public interface DoctorPigEventReadService {
 
     /**
      * 获取某一头某一胎次下未断奶数量
-     * @param pigId 猪id
+     *
+     * @param pigId  猪id
      * @param parity 胎次
      * @return 未断奶数
      */
@@ -220,18 +244,36 @@ public interface DoctorPigEventReadService {
 
     /**
      * 获取最近一次的初配事件
+     *
      * @param pigId 猪id
      * @return 初配事件
      */
     Response<DoctorPigEvent> findLastFirstMateEvent(Long pigId);
 
     /**
-     * 获取某猪某胎次下,妊娠检查时间前最近的初配事件
-     * @param pigId 猪id
-     * @param parity 胎次
-     * @param id 妊娠检查事件id
+     * 获取指定胎次下最近一次的初配事件
      *
+     * @param pigId  猪编号
+     * @param parity 胎次
+     * @return
+     */
+    Response<DoctorPigEvent> findLastFirstMateEvent(Long pigId, Integer parity);
+
+    /**
+     * 获取某猪某胎次下,妊娠检查时间前最近的初配事件
+     *
+     * @param pigId  猪id
+     * @param parity 胎次
+     * @param id     妊娠检查事件id
      * @return 初配事件
      */
     Response<DoctorPigEvent> findFirstMatingBeforePregCheck(Long pigId, Integer parity, Long id);
+
+
+    Response<DoctorPigEvent> findById(Long eventId);
+
+
+    Response<DoctorPigEvent> getFarrowEventByParity(Long pigId, Integer parity);
+
+
 }

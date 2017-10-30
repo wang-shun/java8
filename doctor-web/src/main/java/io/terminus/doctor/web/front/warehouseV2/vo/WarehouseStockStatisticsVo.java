@@ -44,6 +44,12 @@ public class WarehouseStockStatisticsVo {
 
     private String unit;
 
+    private String vendorName;
+
+    private String code;
+
+    private String specification;
+
     /**
      * 入库数量
      */

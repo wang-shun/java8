@@ -78,6 +78,40 @@
         </where>
     </sql>
 
+    <sql id="advCriteria">
+        <where>
+            <if test="materialHandleId != null">AND `material_handle_id` = #{materialHandleId}</if>
+            <if test="farmId != null">AND `farm_id` = #{farmId}</if>
+            <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
+            <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
+            <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
+            <if test="pigBarnId != null">AND `pig_barn_id` = #{pigBarnId}</if>
+            <if test="pigBarnName != null">AND `pig_barn_name` = #{pigBarnName}</if>
+            <if test="pigGroupId != null">AND `pig_group_id` = #{pigGroupId}</if>
+            <if test="pigGroupName != null">AND `pig_group_name` = #{pigGroupName}</if>
+            <if test="materialId != null">AND `material_id` = #{materialId}</if>
+            <if test="applyDate != null">AND `apply_date` = #{applyDate}</if>
+            <if test="applyStaffName != null">AND `apply_staff_name` = #{applyStaffName}</if>
+            <if test="applyYear != null">AND `apply_year` = #{applyYear}</if>
+            <if test="applyMonth != null">AND `apply_month` = #{applyMonth}</if>
+            <if test="materialName != null">AND `material_name` = #{materialName}</if>
+            <if test="type != null">AND `type` = #{type}</if>
+            <if test="unit != null">AND `unit` = #{unit}</if>
+            <if test="quantity != null">AND `quantity` = #{quantity}</if>
+            <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
+            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
+            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+            <if test="materialNameLike != null">AND `material_name` like CONCAT('%',#{materialNameLike},'%')</if>
+            <if test="skuIds != null and skuIds.size() > 0">
+                AND
+                <foreach collection="skuIds" item="t" open="(" separator="or" close=")">
+                    material_id =#{t}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+
     <insert id="create" parameterType="DoctorWarehouseMaterialApply" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
         <include refid="tb"/>
@@ -166,5 +200,14 @@
         ORDER BY `apply_date` DESC
         <if test="limit != null">limit #{limit}</if>
     </select>
+
+    <select id="advList" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="advCriteria"/>
+        ORDER BY `id` DESC
+    </select>
+
+
 
 </mapper>

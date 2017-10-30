@@ -35,7 +35,7 @@ public class DoctorWarehouseMaterialApplyManager {
         creates(Collections.singletonList(materialApply));
     }
 
-//    @Transactional(propagation = Propagation.NESTED)
+    //    @Transactional(propagation = Propagation.NESTED)
     public void apply(DoctorWarehouseMaterialHandle handle, WarehouseStockOutDto.WarehouseStockOutDetail outDetail) {
         DoctorWarehouseMaterialApply materialApply = new DoctorWarehouseMaterialApply();
         materialApply.setWarehouseId(handle.getWarehouseId());
@@ -55,8 +55,10 @@ public class DoctorWarehouseMaterialApplyManager {
         materialApply.setMaterialHandleId(handle.getId());
         materialApply.setPigBarnId(outDetail.getApplyPigBarnId());
         materialApply.setPigBarnName(outDetail.getApplyPigBarnName());
-        materialApply.setPigGroupId(outDetail.getApplyPigGroupId());
-        materialApply.setPigGroupName(outDetail.getApplyPigGroupName());
+        if (null!=outDetail.getApplyPigGroupId()&&outDetail.getApplyPigGroupId() != -1) {
+            materialApply.setPigGroupId(outDetail.getApplyPigGroupId());
+            materialApply.setPigGroupName(outDetail.getApplyPigGroupName());
+        }
         materialApply.setApplyStaffName(outDetail.getApplyStaffName());
 
         doctorWarehouseMaterialApplyDao.create(materialApply);

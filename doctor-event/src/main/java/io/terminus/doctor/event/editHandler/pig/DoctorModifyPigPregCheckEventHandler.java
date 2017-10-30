@@ -256,5 +256,6 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
         return Objects.equals(beforeStatusEvent.getPregCheckResult(), PregCheckResult.YANG.getKey())
                 ? PigStatus.Pregnancy.getKey() : PigStatus.KongHuai.getKey();
     }
+
 }
 

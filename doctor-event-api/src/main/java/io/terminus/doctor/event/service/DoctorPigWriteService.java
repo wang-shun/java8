@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.service;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 
 import java.util.List;
 
@@ -20,9 +22,20 @@ public interface DoctorPigWriteService {
 
     /**
      * 更新当前猪舍下猪的猪舍名
-     * @param currentBarnId 当前猪舍id
+     *
+     * @param currentBarnId   当前猪舍id
      * @param currentBarnName 新猪舍名
      * @return
      */
     Response<Boolean> updateCurrentBarnName(Long currentBarnId, String currentBarnName);
+
+
+    /**
+     * 更新猪的各种状态
+     *
+     * @param pig
+     * @param track
+     * @return
+     */
+    Response<Boolean> updatePig(DoctorPig pig, DoctorPigTrack track);
 }

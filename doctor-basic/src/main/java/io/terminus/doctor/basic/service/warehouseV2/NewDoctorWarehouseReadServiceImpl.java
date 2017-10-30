@@ -5,6 +5,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dao.DoctorFarmBasicDao;
 import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
 import io.terminus.doctor.basic.dao.DoctorWarehousePurchaseDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +37,7 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
 
     @Autowired
     private DoctorWarehousePurchaseDao doctorWarehousePurchaseDao;
+
 
     @Override
     public Response<Paging<DoctorWareHouse>> paging(DoctorWareHouseCriteria criteria) {
@@ -65,11 +68,32 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
         try {
             return Response.ok(doctorWareHouseDao.findByFarmId(farmId));
         } catch (Exception e) {
+            log.error("failed to find doctor warehouse, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorWareHouse>> findByOrgId(List<Long> farmIds, Integer type) {
+        try {
+
+            List<DoctorWareHouse> wareHouses = new ArrayList<>();
+            for (Long farmId : farmIds) {
+                List<DoctorWareHouse> allTypeWarehouses = doctorWareHouseDao.findByFarmId(farmId);
+                if (null != type) {
+                    for (DoctorWareHouse wareHouse : allTypeWarehouses) {
+                        if (wareHouse.getType().equals(type))
+                            wareHouses.add(wareHouse);
+                    }
+                } else
+                    wareHouses.addAll(allTypeWarehouses);
+            }
+            return Response.ok(wareHouses);
+        } catch (Exception e) {
             log.error("failed to find doctor warehouseV2, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouseV2.find.fail");
         }
     }
-
 
     @Override
     public Response<DoctorWareHouse> findById(Long warehouseId) {

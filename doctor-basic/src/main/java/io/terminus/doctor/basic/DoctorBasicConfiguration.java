@@ -17,11 +17,13 @@ import io.terminus.zookeeper.common.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 import java.util.List;
 
@@ -51,6 +53,16 @@ public class DoctorBasicConfiguration {
                                             @Value("${zookeeper.zkTopic}}") String zkTopic) throws Exception{
             return new Publisher(zkClientFactory, zkTopic);
         }
+    }
+
+    @Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasename("classpath:messages");
+        messageSource.setCacheSeconds(3600);
+        messageSource.setUseCodeAsDefaultMessage(true);
+        messageSource.setDefaultEncoding("UTF-8");
+        return messageSource;
     }
 
     @Bean

@@ -14,15 +14,17 @@ public interface DoctorModifyPigEventHandler {
 
     /**
      * 构建编辑的变化结果
+     *
      * @param oldPigEvent 原事件
-     * @param inputDto 编辑输入
+     * @param inputDto    编辑输入
      * @return 变化结果
      */
     DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto);
 
     /**
      * 构建新猪信息
-     * @param oldPig 原猪信息
+     *
+     * @param oldPig   原猪信息
      * @param inputDto 编辑输入
      * @return 新猪信息
      */
@@ -30,16 +32,18 @@ public interface DoctorModifyPigEventHandler {
 
     /**
      * 根据原事件和变化构建新事件
+     *
      * @param oldPigEvent 原事件
-     * @param inputDto 编辑后输入
+     * @param inputDto    编辑后输入
      * @return 新事件
      */
     DoctorPigEvent buildNewEvent(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto);
 
     /**
      * 根据原track和变化构建新track
+     *
      * @param oldPigTrack 原track
-     * @param changeDto 变化
+     * @param changeDto   变化
      * @return 新track
      */
     DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto);
@@ -47,28 +51,38 @@ public interface DoctorModifyPigEventHandler {
 
     /**
      * 能否编辑
+     *
      * @param oldPigEvent 原事件
      */
     Boolean canModify(DoctorPigEvent oldPigEvent);
 
     /**
      * 编辑处理
+     *
      * @param oldPigEvent 原事件
-     * @param inputDto 编辑后输入
+     * @param inputDto    编辑后输入
      */
     void modifyHandle(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto);
 
     /**
      * 能否回滚
+     *
      * @param deletePigEvent 原事件
      */
     Boolean canRollback(DoctorPigEvent deletePigEvent);
 
     /**
      * 事件回滚处理
+     *
      * @param deletePigEvent 回滚事件
-     * @param operatorId 操作人id
-     * @param operatorName 操作人姓名
+     * @param operatorId     操作人id
+     * @param operatorName   操作人姓名
      */
     void rollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName);
+
+
+//    Class<? extends BasePigEventInputDto> getEventDtoClass();
+
+//    void buildPigEvent(T eventDto, DoctorPigEvent pigEvent);
+
 }

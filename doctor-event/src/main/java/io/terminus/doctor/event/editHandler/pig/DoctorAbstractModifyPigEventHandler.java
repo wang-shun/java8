@@ -2,6 +2,7 @@ package io.terminus.doctor.event.editHandler.pig;
 
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
@@ -15,6 +16,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.SourceType.UN_MODIFY;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
@@ -45,8 +48,9 @@ import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE
  * Created by xjn on 17/4/13.
  * 猪事件编辑抽象实现
  */
+@SuppressWarnings("ALL")
 @Slf4j
-public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModifyPigEventHandler{
+public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModifyPigEventHandler {
     @Autowired
     protected DoctorPigEventDao doctorPigEventDao;
     @Autowired
@@ -123,14 +127,14 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     @Override
     public Boolean canRollback(DoctorPigEvent deletePigEvent) {
-        return  isLastManualEvent(deletePigEvent)
+        return isLastManualEvent(deletePigEvent)
                 && rollbackHandleCheck(deletePigEvent)
                 && !UN_MODIFY.contains(deletePigEvent.getEventSource());
     }
 
     @Override
     public void rollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
-       log.info("rollback handle starting, deletePigEvent:{}", deletePigEvent);
+        log.info("rollback handle starting, deletePigEvent:{}", deletePigEvent);
 
         //1.删除触发事件
         triggerEventRollbackHandle(deletePigEvent, operatorId, operatorName);
@@ -176,8 +180,9 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 默认实现
+     *
      * @param oldPigEvent 原事件
-     * @param inputDto 新输入
+     * @param inputDto    新输入
      */
     protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         //编辑的事件的时间校验
@@ -220,30 +225,36 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 更新日记录表(编辑)
+     *
      * @param oldPigEvent 原事件
-     * @param inputDto 新输入
-     * @param changeDto 变化
+     * @param inputDto    新输入
+     * @param changeDto   变化
      */
-    protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto){}
+    protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
+    }
 
     /**
      * 构建日记录
+     *
      * @param oldDailyPig 原记录
-     * @param changeDto 变化量
+     * @param changeDto   变化量
      * @return 新记录
      */
-    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto){
+    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         return expectNotNull(oldDailyPig, "daily.pig.not.null");
     }
 
     /**
      * 触发事件的处理(编辑)
+     *
      * @param newPigEvent 猪事件
      */
-    protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent){}
+    protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent) {
+    }
 
     /**
      * 子类的具体实现(删除)
+     *
      * @param deletePigEvent 删除事件
      */
     protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
@@ -252,14 +263,17 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 触发事件处理(删除)
+     *
      * @param deletePigEvent 删除事件
      */
-    protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName ){}
+    protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
+    }
 
     /**
      * 构建新猪(删除)
+     *
      * @param deletePigEvent 删除事件
-     * @param oldPig 原猪
+     * @param oldPig         原猪
      * @return 新猪
      */
     protected DoctorPig buildNewPigForRollback(DoctorPigEvent deletePigEvent, DoctorPig oldPig) {
@@ -268,38 +282,46 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 构建删除后新track(删除)
+     *
      * @param deletePigEvent 删除事件
-     * @param oldPigTrack 原track
+     * @param oldPigTrack    原track
      * @return 新track
      */
-    protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack){
+    protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack) {
         return null;
     }
 
     /**
      * 更新日记录(删除)
+     *
      * @param deletePigEvent 删除时间
      */
-    protected void updateDailyForDelete(DoctorPigEvent deletePigEvent){}
+    protected void updateDailyForDelete(DoctorPigEvent deletePigEvent) {
+    }
 
     /**
      * 删除事件更新日记录
+     *
      * @param oldPigEvent 被删除事件
      */
-    public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {}
+    public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
+    }
 
     /**
      * 新建事件更新日记录
+     *
      * @param newPigEvent 新建事件
-     * @param inputDto 新输入
+     * @param inputDto    新输入
      */
-    public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {}
+    public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
+    }
 
-        /**
-         * 是否需要更新猪(编辑)
-         * @param changeDto 变化记录
-         * @return 是否需要更新猪
-         */
+    /**
+     * 是否需要更新猪(编辑)
+     *
+     * @param changeDto 变化记录
+     * @return 是否需要更新猪
+     */
     private boolean isUpdatePig(DoctorEventChangeDto changeDto) {
         return notNull(changeDto)
                 && (notNull(changeDto.getSource())
@@ -313,8 +335,9 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 是否需要更新猪(删除)
+     *
      * @param eventType 事件类型
-     * @return  是否需要更新猪
+     * @return 是否需要更新猪
      */
     private boolean isUpdatePig(Integer eventType) {
         return EFFECT_PIG_EVENTS.contains(eventType);
@@ -322,6 +345,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 是否需要更新track(编辑)
+     *
      * @param changeDto 变化记录
      * @return 是否需要更新track
      */
@@ -331,6 +355,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 是否需要更新track(删除)
+     *
      * @param eventType 事件类型
      * @return 是否需要更新track
      */
@@ -340,6 +365,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 创建编辑记录
+     *
      * @param oldEvent 原事件
      * @param newEvent 新事件
      */
@@ -357,6 +383,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 创建删除记录
+     *
      * @param deleteEvent 删除事件
      */
     private void createModifyLog(DoctorPigEvent deleteEvent) {
@@ -372,6 +399,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 不等于空且不等于零
+     *
      * @param d
      * @return
      */
@@ -381,6 +409,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 不等于空且不等于零
+     *
      * @param d
      * @return
      */
@@ -390,6 +419,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 是否是最新事件
+     *
      * @param pigEvent 猪事件
      */
     private boolean isLastManualEvent(DoctorPigEvent pigEvent) {
@@ -402,8 +432,9 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     /**
      * 更新配怀舍各种状态母猪的数量
+     *
      * @param pigEvent 猪事件事件
-     * @param count 变化数量
+     * @param count    变化数量
      */
     protected void updatePhSowStatusCount(DoctorPigEvent pigEvent, int count, Integer pigStatus) {
         if (!PigType.MATING_TYPES.contains(pigEvent.getBarnType())) {
@@ -432,4 +463,6 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         doctorDailyPigDao.updateDailyPhStatusLiveStock(pigEvent.getFarmId(), pigEvent.getEventAt()
                 , mating, konghuai, pregnant);
     }
+
+
 }

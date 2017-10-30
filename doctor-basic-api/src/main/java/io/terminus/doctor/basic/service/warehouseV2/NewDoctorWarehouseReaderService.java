@@ -31,6 +31,8 @@ public interface NewDoctorWarehouseReaderService {
      */
     Response<List<DoctorWareHouse>> findByFarmId(Long farmId);
 
+    Response<List<DoctorWareHouse>> findByOrgId(List<Long> farmIds, Integer type);
+
     /**
      * 根据编号查询仓库
      *
@@ -48,8 +50,6 @@ public interface NewDoctorWarehouseReaderService {
      * @return
      */
     Response<AmountAndQuantityDto> countWarehouseBalance(Long warehouseId);
-
-
 
 
 }

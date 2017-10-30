@@ -31,6 +31,7 @@ public class DoctorBasicMaterials {
 
     /**
      * 根据id查询基础物料表
+     *
      * @param basicMaterialId 主键id
      * @return 基础物料表
      */
@@ -41,6 +42,7 @@ public class DoctorBasicMaterials {
 
     /**
      * 分页查询基础物料
+     *
      * @param basicMaterial 基础物料
      * @return 基础物料list
      */
@@ -49,13 +51,23 @@ public class DoctorBasicMaterials {
         return RespHelper.or500(doctorBasicMaterialReadService.pagingBasicMaterialByTypeFilterBySrm(basicMaterial));
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "/name")
+    public Paging<DoctorBasicMaterial> paging(@RequestParam String name) {
+        DoctorBasicMaterialSearchDto basicMaterial = new DoctorBasicMaterialSearchDto();
+        basicMaterial.setSize(5000);
+        basicMaterial.setName(name);
+        return RespHelper.or500(doctorBasicMaterialReadService.pagingBasicMaterialByTypeFilterBySrm(basicMaterial));
+    }
+
     /**
      * 查询全部基础物料(可以根据输入码过滤)
-     * @param type 基础物料类型
-     * @see io.terminus.doctor.common.enums.WareHouseType
-     * @param srm 输入码
+     *
+     * @param type  基础物料类型
+     * @param srm   输入码
      * @param exIds 排除掉的ids
      * @return 基础物料list
+     * @see io.terminus.doctor.common.enums.WareHouseType
      */
     @RequestMapping(value = "/type", method = RequestMethod.GET)
     public List<DoctorBasicMaterial> finaBasicMaterialByTypeFilterBySrm(@RequestParam(value = "type", required = false) Integer type,
@@ -66,6 +78,7 @@ public class DoctorBasicMaterials {
 
     /**
      * 查询全部物料数据表
+     *
      * @return 物料数据信息
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)

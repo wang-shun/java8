@@ -87,7 +87,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Response<List<DoctorGroup>> findGroupByIds(List<Long> groupIds){
+    public Response<List<DoctorGroup>> findGroupByIds(List<Long> groupIds) {
         try {
             return Response.ok(doctorGroupDao.findByIds(groupIds));
         } catch (Exception e) {
@@ -279,6 +279,20 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Response<Integer> findGroupPigQuantityByBarnId(Long barnId) {
+        try {
+            Integer quantity =
+                    doctorGroupDao.findByCurrentBarnId(barnId).stream().mapToInt(group -> doctorGroupTrackDao.findByGroupId(group.getId()).getQuantity())
+                            .sum();
+
+            return Response.ok(quantity);
+        } catch (Exception e) {
+            log.error("find group by current barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
     public Response<List<DoctorGroupEvent>> findGroupEventsByEventTypeAndDate(Long farmId, Integer eventType, Date startAt, Date endAt) {
         try {
             return Response.ok(doctorGroupEventDao.findGroupEventsByEventTypeAndDate(farmId, eventType, startAt, endAt));
@@ -323,10 +337,10 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Response<Long> countByBarnId(Long barnId){
-        try{
+    public Response<Long> countByBarnId(Long barnId) {
+        try {
             return Response.ok(doctorGroupEventDao.countByBarnId(barnId));
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("count group event by barnId fail, barnId={}", barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("count.group.event.by.barn.id.fail");
         }
@@ -412,7 +426,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             int deltaDay = DateUtil.getDeltaDays(date.withTimeAtStartOfDay().toDate(), DateTime.now().withTimeAtStartOfDay().toDate());
             List<Map<String, Object>> list = doctorGroupTrackDao.queryFattenOutBySumAt(ImmutableMap.of("sumAt", sumAt, "avgDayAge", 180 + deltaDay));
             Map<Long, Integer> fattenOutMap = Maps.newHashMap();
-            list.forEach(map -> fattenOutMap.put((long)map.get("farmId"), ((BigDecimal) map.get("fattenOut")).intValue()));
+            list.forEach(map -> fattenOutMap.put((long) map.get("farmId"), ((BigDecimal) map.get("fattenOut")).intValue()));
             return Response.ok(fattenOutMap);
         } catch (Exception e) {
             log.error("query.fatten.out.by.sumAt.failed, cause:{}", Throwables.getStackTraceAsString(e));
@@ -451,10 +465,10 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Response<List<DoctorGroupEvent>> findLinkedGroupEventsByGroupId(@NotNull(message = "groupId.not.null") Long groupId){
-        try{
+    public Response<List<DoctorGroupEvent>> findLinkedGroupEventsByGroupId(@NotNull(message = "groupId.not.null") Long groupId) {
+        try {
             return Response.ok(doctorGroupEventDao.findLinkedGroupEventsByGroupId(groupId));
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("find linked group events failed, groupId: {}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
             return Response.fail("find.linked.group.events.failed");
         }
@@ -480,7 +494,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     public Response<List<DoctorGroup>> findGroupIds(Long farmId, Date startAt, Date endAt) {
         try {
             return Response.ok(doctorGroupDao.findGroupId(farmId, startAt, endAt));
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("find.groupId.fail, cause{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.groupId.fail");
         }
@@ -511,7 +525,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         try {
             List<Map<String, Object>> list = doctorGroupDao.findFarmToGroupCount();
             Map<Long, Integer> map = list.stream().collect(Collectors
-                    .toMap(k -> (long)k.get("farmId"), v -> Long.valueOf((long)v.get("groupCount")).intValue()));
+                    .toMap(k -> (long) k.get("farmId"), v -> Long.valueOf((long) v.get("groupCount")).intValue()));
             return Response.ok(map);
 
         } catch (Exception e) {

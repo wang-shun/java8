@@ -10,6 +10,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.manager.DoctorPigManager;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,7 +59,7 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
         } catch (ServiceException e) {
             log.error("update pig code failed, pigs:{}, cause:{}", pigs, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("update pig code failed, pigs:{}, cause:{}", pigs, Throwables.getStackTraceAsString(e));
             return Response.fail("update.pig.code.fail");
         }
@@ -72,6 +73,18 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
             log.error("update current barn name failed, currentBarnId:{}, currentBarnName:{}, cause:{}",
                     currentBarnId, currentBarnName, Throwables.getStackTraceAsString(e));
             return Response.fail("update.current.barn.name.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> updatePig(DoctorPig pig, DoctorPigTrack track) {
+        try {
+            doctorPigManager.updatePig(pig, track);
+            return Response.ok(true);
+        } catch (Exception e) {
+            log.error("update pig failed, pig:{}, track:{}, cause:{}",
+                    pig, track, Throwables.getStackTraceAsString(e));
+            return Response.fail("update.pig.failed");
         }
     }
 }

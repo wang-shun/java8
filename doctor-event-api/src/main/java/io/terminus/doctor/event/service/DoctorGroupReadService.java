@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.dto.search.DoctorGroupCountDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -28,6 +29,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 根据id查询猪群卡片表
+     *
      * @param groupId 主键id
      * @return 猪群卡片表
      */
@@ -35,6 +37,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 根据id批量查询猪群卡片表
+     *
      * @param groupIds 主键id
      * @return 猪群卡片表
      */
@@ -42,6 +45,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 根据farmId查询猪群卡片表
+     *
      * @param farmId 猪场id
      * @return 猪群卡片表
      */
@@ -49,6 +53,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 查询猪群详情
+     *
      * @param groupId 猪群id
      * @return 猪群详情
      */
@@ -56,9 +61,10 @@ public interface DoctorGroupReadService {
 
     /**
      * 根据查询条件分页查询猪群
+     *
      * @param groupSearchDto 查询条件dto
-     * @param pageNo 当前页码
-     * @param size   分页大小
+     * @param pageNo         当前页码
+     * @param size           分页大小
      * @return 分页后的猪群列表
      */
     Response<Paging<DoctorGroupDetail>> pagingGroup(@Valid DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size);
@@ -75,6 +81,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 根据查询条件分页猪群
+     *
      * @param groupSearchDto 查询条件dto
      * @return 分页后的猪群列表
      */
@@ -82,6 +89,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 根据猪群id查询可以操作的事件类型
+     *
      * @param groupIds 猪群ids
      * @return 事件类型s
      */
@@ -89,46 +97,51 @@ public interface DoctorGroupReadService {
 
     /**
      * 分页查询猪群历史事件
-     * @param farmId    猪场id
-     * @param groupId   猪群id
-     * @param type      事件类型
-     * @param pageNo    分页大小
-     * @param size      当前页码
-     * @return  分页结果
+     *
+     * @param farmId  猪场id
+     * @param groupId 猪群id
+     * @param type    事件类型
+     * @param pageNo  分页大小
+     * @param size    当前页码
+     * @return 分页结果
      */
     Response<Paging<DoctorGroupEvent>> pagingGroupEvent(@NotNull(message = "farmId.not.null") Long farmId,
                                                         Long groupId, Integer type, Integer pageNo, Integer size, String startDate, String endDate);
 
     /**
      * 分页查询猪群历史事件（去除断奶）
-     * @param farmId    猪场id
-     * @param groupId   猪群id
-     * @param type      事件类型
-     * @param pageNo    分页大小
-     * @param size      当前页码
-     * @return  分页结果
+     *
+     * @param farmId  猪场id
+     * @param groupId 猪群id
+     * @param type    事件类型
+     * @param pageNo  分页大小
+     * @param size    当前页码
+     * @return 分页结果
      */
     Response<Paging<DoctorGroupEvent>> pagingGroupEventDelWean(@NotNull(message = "farmId.not.null") Long farmId,
-                                                        Long groupId, Integer type, Integer pageNo, Integer size, String startDate, String endDate);
+                                                               Long groupId, Integer type, Integer pageNo, Integer size, String startDate, String endDate);
 
 
     /**
      * 根据事件id查询猪群事件
-     * @param eventId    事件id
+     *
+     * @param eventId 事件id
      * @return 猪群事件
      */
     Response<DoctorGroupEvent> findGroupEventById(@NotNull(message = "evenId.not.null") Long eventId);
 
     /**
      * 根据猪群id查最新询猪群事件
-     * @param groupId    猪群id
+     *
+     * @param groupId 猪群id
      * @return 猪群事件
      */
     Response<DoctorGroupEvent> findLastEventByGroupId(@NotNull(message = "groupId.not.null") Long groupId);
 
     /**
      * 校验猪群号是否重复
-     * @param farmId  猪场id
+     *
+     * @param farmId    猪场id
      * @param groupCode 猪群号
      * @return true 重复, false 不重复
      */
@@ -136,13 +149,17 @@ public interface DoctorGroupReadService {
 
     /**
      * 查询当前猪舍猪群(过滤掉已关闭的群)
+     *
      * @param barnId 猪舍id
      * @return 猪群list
      */
     Response<List<DoctorGroup>> findGroupByCurrentBarnId(@NotNull(message = "barnId.not.null") Long barnId);
 
+    Response<Integer> findGroupPigQuantityByBarnId(@NotNull(message = "barnId.not.null") Long barnId);
+
     /**
      * 根据日期区间和事件类型查询事件列表
+     *
      * @param farmId    猪场id
      * @param eventType 事件类型
      * @param startAt   开始事件
@@ -154,6 +171,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 根据日期区间和事件类型查询事件列表
+     *
      * @param farmId    猪场id
      * @param groupCode 猪群号
      * @return 猪群
@@ -164,6 +182,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 查询一个猪舍累计有多少个事件
+     *
      * @param barnId 猪舍id
      * @return
      */
@@ -171,6 +190,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 根据条件查询猪群事件
+     *
      * @param criteria
      * @param pageNo
      * @param pageSize
@@ -180,6 +200,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 判断是否是最新事件
+     *
      * @param groupId 猪群id
      * @param eventId 事件id
      * @return true 是最新事件, false 不是
@@ -188,6 +209,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 查询猪群回滚事件
+     *
      * @param groupId
      * @return
      */
@@ -195,6 +217,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 事件能否回滚
+     *
      * @param eventId 事件id
      * @return 能否回滚
      */
@@ -202,6 +225,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 查询猪群的所有事件
+     *
      * @param groupId
      * @return
      */
@@ -209,6 +233,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 根据查询日期统计每个猪场的待出栏猪只数
+     *
      * @param sumAt 查询日期
      * @return
      */
@@ -221,14 +246,16 @@ public interface DoctorGroupReadService {
 
     /**
      * 查询猪群某一事件类型的最新事件
+     *
      * @param groupId 猪群id
-     * @param type 事件类型
+     * @param type    事件类型
      * @return 最新事件
      */
     Response<DoctorGroupEvent> findLastGroupEventByType(@NotNull(message = "groupId.not.null") Long groupId, @NotNull(message = "type.not.null") Integer type);
 
     /**
      * 获取初始猪群事件
+     *
      * @param groupId 猪群id
      * @return 新建猪群事件
      */
@@ -236,6 +263,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 获取猪群的所有事件,按发生日期排序
+     *
      * @param groupId
      * @return
      */
@@ -243,6 +271,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 获取猪场各个类型猪的存栏
+     *
      * @param farmId 猪场id
      * @return
      */
@@ -250,6 +279,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 获取猪在关闭时间段里面的猪群ID
+     *
      * @param farmId
      * @param startAt
      * @param endAt
@@ -259,6 +289,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 根据当前猪舍Id获取猪群
+     *
      * @param farmId
      * @param barnId
      * @return
@@ -267,6 +298,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 查询新建猪群事件
+     *
      * @param groupId 猪群id
      * @return 新建猪群事件
      */
@@ -274,6 +306,7 @@ public interface DoctorGroupReadService {
 
     /**
      * 查询猪场与当前开启猪群数量映射
+     *
      * @return
      */
     Response<Map<Long, Integer>> findFarmToGroupCount();

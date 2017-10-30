@@ -26,6 +26,7 @@ import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.dto.DoctorSuggestPig;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
+import io.terminus.doctor.event.dto.event.admin.PigEventDto;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -82,7 +83,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
     @Autowired
     public DoctorPigEventReadServiceImpl(DoctorPigEventDao doctorPigEventDao,
-                                         DoctorPigTrackDao doctorPigTrackDao){
+                                         DoctorPigTrackDao doctorPigTrackDao) {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
     }
@@ -97,41 +98,41 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     public Response<Paging<DoctorPigEvent>> queryPigDoctorEvents(Long farmId, Long pigId,
                                                                  Integer pageNo, Integer pageSize,
                                                                  Date beginDate, Date endDate) {
-        try{
+        try {
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
-            if(isNull(farmId) || isNull(pigId)){
+            if (isNull(farmId) || isNull(pigId)) {
                 return Response.fail("query.pigDoctorEvents.fail");
             }
-            Map<String,Object> criteria = Maps.newHashMap();
+            Map<String, Object> criteria = Maps.newHashMap();
             criteria.put("farmId", farmId);
             criteria.put("pigId", pigId);
-            criteria.put("beginDate",beginDate);
+            criteria.put("beginDate", beginDate);
             criteria.put("endDate", endDate);
             criteria.put("ordered", 0);
-            Paging<DoctorPigEvent> doctorPigEventPaging = doctorPigEventDao.paging(pageInfo.getOffset(),pageInfo.getLimit(), criteria);
+            Paging<DoctorPigEvent> doctorPigEventPaging = doctorPigEventDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria);
 
             return Response.ok(doctorPigEventPaging);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("query pig doctor events fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.pigEvent.fail");
         }
     }
 
     @Override
-    public Response<DoctorPigEvent> findFirstPigEvent(Long pigId, Date fromDate){
-        try{
+    public Response<DoctorPigEvent> findFirstPigEvent(Long pigId, Date fromDate) {
+        try {
             return Response.ok(doctorPigEventDao.findFirstPigEvent(pigId, fromDate));
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("findFirstPigEvent fail, pigId={}, fromDate={}, cause:{}", pigId, fromDate, Throwables.getStackTraceAsString(e));
             return Response.fail("find.first.pig.event.fail");
         }
     }
 
     @Override
-    public Response<Long> countByBarnId(Long barnId){
-        try{
+    public Response<Long> countByBarnId(Long barnId) {
+        try {
             return Response.ok(doctorPigEventDao.countByBarnId(barnId));
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("count pig event by barnId fail, barnId={}", barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("count.pig.event.by.barn.id.fail");
         }
@@ -139,7 +140,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
     @Override
     public Response<List<Integer>> queryPigEvents(List<Long> pigIds) {
-        try{
+        try {
             List<PigEvent> pigEvents = Lists.newArrayList(PigEvent.values());
             pigIds.forEach(pigId -> {
                 DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
@@ -150,7 +151,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
                 }
             });
             return Response.ok(pigEvents.stream().map(PigEvent::getKey).collect(Collectors.toList()));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("query pig events fail, pigId:{}, cause:{}", pigIds, Throwables.getStackTraceAsString(e));
             return Response.fail("query.pigEvents.fail");
         }
@@ -172,7 +173,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
     @Override
     public Response<DoctorPigEvent> queryPigEventById(Long id) {
-        try{
+        try {
             return Response.ok(doctorPigEventDao.findById(id));
         } catch (Exception e) {
             log.error("find pig event by id failed, id is {}, cause by {}", id, Throwables.getStackTraceAsString(e));
@@ -182,7 +183,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
     @Override
     public Response<List<DoctorSowParityCount>> querySowParityCount(Long pigId) {
-        try{
+        try {
             // 获取母猪Track 信息
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
             checkState(!isNull(doctorPigTrack), "pig.track.not.find");
@@ -197,10 +198,10 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
                     doctorSowParityCounts.add(DoctorSowParityCount.doctorSowParityCountConvert(parity, map.get(parity)))
             );
             return Response.ok(doctorSowParityCounts);
-        }catch (IllegalStateException se){
+        } catch (IllegalStateException se) {
             log.error("query sow parity illegal state fail, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(se));
             return Response.fail(se.getMessage());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("query sow parity fail, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
             return Response.fail("query.sowParityCount.fail");
         }
@@ -208,18 +209,18 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
     @Override
     public Response<Boolean> validatePigNotInFeed(@NotNull(message = "input.pigIds.empty") String pigIds) {
-        try{
-            Splitters.COMMA.split(pigIds).forEach(pigId->{
+        try {
+            Splitters.COMMA.split(pigIds).forEach(pigId -> {
                 Boolean hasEquals = Objects.equals(
                         doctorPigTrackDao.findByPigId(Long.valueOf(pigId)).getStatus(),
                         PigStatus.FEED.getKey());
                 checkState(!hasEquals, "pigsState.notFeedValidate.fail");
             });
-        	return Response.ok(Boolean.TRUE);
-        }catch (IllegalStateException se){
+            return Response.ok(Boolean.TRUE);
+        } catch (IllegalStateException se) {
             log.warn("validate pig not in farrowing state illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
             return Response.fail(se.getMessage());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("validate pig not in farrowing state fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("validate.pigNotIn.fail");
         }
@@ -379,7 +380,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         try {
             PageInfo pageInfo = new PageInfo(offset, limit);
             return Response.ok(doctorPigEventDao.sumNpdWeanEvent(map, pageInfo.getOffset(), pageInfo.getLimit()));
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("find.npd.event, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find npd event fail");
         }
@@ -390,7 +391,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         try {
             PageInfo pageInfo = new PageInfo(offset, limit);
             return Response.ok(doctorPigEventDao.findSalesEvent(map, pageInfo.getOffset(), pageInfo.getLimit()));
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("find.sales.event, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find sales fail");
         }
@@ -401,7 +402,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         try {
             map = Params.filterNullOrEmpty(map);
             return Response.ok(doctorPigEventDao.sumProfitPigType(map));
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("find.sum.profit.amount, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find sum profit amount");
         }
@@ -439,6 +440,16 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     }
 
     @Override
+    public Response<DoctorPigEvent> findLastFirstMateEvent(Long pigId, Integer parity) {
+        try {
+            return Response.ok(doctorPigEventDao.queryLastFirstMate(pigId, parity));
+        } catch (Exception e) {
+            log.error("find last first mate event failed, pidId:{},parity:{}, cause:{}", pigId, parity, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.last.first.mate.event.failed");
+        }
+    }
+
+    @Override
     public Response<DoctorPigEvent> findFirstMatingBeforePregCheck(Long pigId, Integer parity, Long id) {
         try {
             return Response.ok(doctorPigEventDao.getFirstMatingBeforePregCheck(pigId, parity, id));
@@ -446,6 +457,27 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             log.error("find first mating before preg check, pigId:{}, parity:{}, id:{}, cause:{}",
                     pigId, parity, id, Throwables.getStackTraceAsString(e));
             return Response.fail("find.first.mating.before.preg.check");
+        }
+    }
+
+    @Override
+    public Response<DoctorPigEvent> findById(Long eventId) {
+        try {
+            return Response.ok(doctorPigEventDao.findById(eventId));
+        } catch (Exception e) {
+            log.error("find pig event by id fail, id:{}, cause:{}", eventId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find pig event by id fail");
+        }
+
+    }
+
+    @Override
+    public Response<DoctorPigEvent> getFarrowEventByParity(Long pigId, Integer parity) {
+        try {
+            return Response.ok(doctorPigEventDao.getFarrowEventByParity(pigId, parity));
+        } catch (Exception e) {
+            log.error("get farrow event by id fail, pigID:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail("get farrow event by pigId fail");
         }
     }
 }

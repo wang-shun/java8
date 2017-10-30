@@ -11,12 +11,7 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
-import io.terminus.doctor.event.dao.DoctorGroupDao;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dao.DoctorKpiDao;
+import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInputInfo;
@@ -177,6 +172,12 @@ public class DoctorGroupManager {
         });
         log.info("batch new group event handle ending");
         return eventInfoList;
+    }
+
+    @Transactional
+    public void updateGroup(DoctorGroup group, DoctorGroupTrack groupTrack) {
+        doctorGroupDao.update(group);
+        doctorGroupTrackDao.update(groupTrack);
     }
 
     //产房只能有1个猪群

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
+import org.dozer.Mapping;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -55,6 +56,7 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
 
     private String motherCode;  // 母Code （非必填）
 
+    @Mapping("remark")
     private String entryMark;   // 非必填
 
     /**

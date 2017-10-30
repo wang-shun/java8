@@ -10,10 +10,7 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.manager.DoctorWarehouseHandlerManager;
 import io.terminus.doctor.basic.manager.DoctorWarehouseStockMonthlyManager;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseHandleDetail;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
+import io.terminus.doctor.basic.model.warehouseV2.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,6 +48,8 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
     private DoctorWarehouseHandlerManager doctorWarehouseHandlerManager;
     @Autowired
     private DoctorWarehouseStockMonthlyManager doctorWarehouseStockMonthlyManager;
+    @Autowired
+    private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
 
 
     @Override
@@ -122,7 +121,7 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
 
         List<DoctorWarehouseStock> stocks = doctorWarehouseStockDao.list(DoctorWarehouseStock.builder()
                 .warehouseId(handle.getWarehouseId())
-                .materialId(handle.getMaterialId())
+                .skuId(handle.getMaterialId())
                 .build());
         if (null == stocks || stocks.isEmpty())
             throw new ServiceException("stock.not.found");
@@ -164,7 +163,7 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
     private void reverseOut(DoctorWarehouseMaterialHandle handle) {
         List<DoctorWarehouseStock> stock = doctorWarehouseStockDao.list(DoctorWarehouseStock.builder()
                 .warehouseId(handle.getWarehouseId())
-                .materialId(handle.getMaterialId())
+                .skuId(handle.getMaterialId())
                 .build());
         if (null == stock || stock.isEmpty())
             throw new ServiceException("stock.not.found");
@@ -184,16 +183,27 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
             throw new ServiceException("purchase.not.found");
 
         for (DoctorWarehousePurchase purchase : purchases) {
-            purchase.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
             BigDecimal quantity = new BigDecimal(0);
             List<DoctorWarehouseHandleDetail> thisOut = purchaseMap.get(purchase.getId());
             for (DoctorWarehouseHandleDetail outDetail : thisOut) {
                 quantity = quantity.add(outDetail.getQuantity());
             }
+
+            purchase.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
             purchase.setHandleQuantity(purchase.getHandleQuantity().subtract(quantity));
         }
 
         stock.get(0).setQuantity(stock.get(0).getQuantity().add(handle.getQuantity()));
+
+        if (handle.getType().intValue() == WarehouseMaterialHandleType.OUT.getValue()) {
+            //还需要回滚领用记录
+            doctorWarehouseMaterialApplyDao.list(DoctorWarehouseMaterialApply.builder()
+                    .materialHandleId(handle.getId())
+                    .build()).stream().forEach(apply -> {
+                doctorWarehouseMaterialApplyDao.delete(apply.getId());
+            });
+        }
+
         doctorWarehouseHandlerManager.inStock(stock.get(0), purchases, null, null, null);
         doctorWarehouseStockMonthlyManager.count(handle.getWarehouseId(),
                 handle.getMaterialId(),

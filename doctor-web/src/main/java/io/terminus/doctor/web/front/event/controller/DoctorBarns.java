@@ -22,6 +22,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
@@ -125,6 +126,22 @@ public class DoctorBarns {
         return RespHelper.or500(doctorBarnReadService.countPigByBarnId(barnId));
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "has-child")
+    public boolean hasChildPig(@RequestParam Long barnId) {
+
+        return RespHelper.or500(doctorGroupReadService.findGroupPigQuantityByBarnId(barnId)) != 0;
+
+
+//        List<DoctorPigInfoDto> pigInfoDtos = RespHelper.or500(doctorPigReadService.queryDoctorPigInfoByBarnId(barnId));
+//        for (DoctorPigInfoDto pig : pigInfoDtos) {
+//            if (pig.getPigType() == PigType.NURSERY_PIGLET.getValue() ||
+//                    pig.getPigType() == PigType.FATTEN_PIG.getValue() ||
+//                    pig.getPigType() == PigType.RESERVE.getValue())
+//                return true;
+//        }
+//        return false;
+    }
+
     /**
      * 根据id查询猪舍表
      *
@@ -139,11 +156,11 @@ public class DoctorBarns {
     /**
      * 根据farmId查询猪舍表, 根据pigIds过滤
      *
-     * @param farmId 猪场id
+     * @param farmId     猪场id
      * @param barnStatus 筛选猪舍状态
-     *                   @see DoctorBarn.Status
-     * @param pigIds 猪id 逗号分隔
+     * @param pigIds     猪id 逗号分隔
      * @return 猪舍表列表
+     * @see DoctorBarn.Status
      */
     @RequestMapping(value = "/farmId", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmId(@RequestParam("farmId") Long farmId,
@@ -161,10 +178,10 @@ public class DoctorBarns {
     /**
      * 查询猪群的猪舍表
      *
-     * @param farmId 猪场id
+     * @param farmId     猪场id
      * @param barnStatus 筛选猪舍状态
-     *                   @see DoctorBarn.Status
      * @return 猪舍表列表
+     * @see DoctorBarn.Status
      */
     @RequestMapping(value = "/groups", method = RequestMethod.GET)
     public List<DoctorBarn> findGroupBarnsByfarmId(@RequestParam("farmId") Long farmId,
@@ -177,7 +194,7 @@ public class DoctorBarns {
      * 根据farmIds查询猪舍表, 根据pigIds过滤
      *
      * @param farmIds 猪场id
-     * @param pigIds 猪id 逗号分隔
+     * @param pigIds  猪id 逗号分隔
      * @return 猪舍表列表
      */
     @RequestMapping(value = "/farmIds", method = RequestMethod.GET)
@@ -187,9 +204,9 @@ public class DoctorBarns {
         List<DoctorBarn> barns = filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIds(farmIds)), pigIds);
         List<DoctorBarnSelect> barnSelects = BeanMapper.mapList(barns, DoctorBarnSelect.class);
 
-        if(roleId != null){
+        if (roleId != null) {
             Map<String, Object> extra = RespHelper.or500(subRoleReadService.findById(roleId)).getExtra();
-            if(extra != null && extra.get("defaultBarnType") != null){
+            if (extra != null && extra.get("defaultBarnType") != null) {
                 List<Integer> barnType = (List<Integer>) extra.get("defaultBarnType");
                 barnSelects.forEach(select -> select.setSelect(barnType.contains(select.getPigType())));
             }
@@ -253,11 +270,12 @@ public class DoctorBarns {
 
     /**
      * 猪舍批量转舍时, 根据猪id, 求一下可转猪舍的交集
+     *
      * @param farmId    猪场id
      * @param eventType 事件类型
-     * @see io.terminus.doctor.event.enums.PigEvent
      * @param pigIds    猪ids 逗号分隔
      * @return 猪舍list
+     * @see io.terminus.doctor.event.enums.PigEvent
      */
     @RequestMapping(value = "/pigTypes/trans", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndTypeWhenBatchTransBarn(@RequestParam("farmId") Long farmId,
@@ -290,18 +308,15 @@ public class DoctorBarns {
                 } else {
                     barnTypes.retainAll(PigType.MATING_TYPES);
                 }
-            }
-            else if (PigType.FARROW_TYPES.contains(pigBarn.getPigType())) {
+            } else if (PigType.FARROW_TYPES.contains(pigBarn.getPigType())) {
                 if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey())) {
                     barnTypes.retainAll(PigType.MATING_FARROW_TYPES);
                 } else {
                     barnTypes.retainAll(PigType.FARROW_TYPES);
                 }
-            }
-            else if (PigType.HOUBEI_TYPES.contains(pigBarn.getPigType())) {
+            } else if (PigType.HOUBEI_TYPES.contains(pigBarn.getPigType())) {
                 barnTypes.retainAll(PigType.HOUBEI_TYPES);
-            }
-            else {
+            } else {
                 barnTypes.retainAll(Lists.newArrayList(pigBarn.getPigType()));
             }
         }
@@ -352,15 +367,15 @@ public class DoctorBarns {
             barnId = barn.getId();
             DoctorBarn oldBarn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
             //判断猪舍是否能够停用
-            if (Objects.equals(barn.getStatus(), DoctorBarn.Status.NOUSE.getValue())){
-                if (RespHelper.or500(doctorBarnReadService.countPigByBarnId(barn.getId())) > 0){
+            if (Objects.equals(barn.getStatus(), DoctorBarn.Status.NOUSE.getValue())) {
+                if (RespHelper.or500(doctorBarnReadService.countPigByBarnId(barn.getId())) > 0) {
                     throw new JsonResponseException("barn.forbid.fail");
                 }
             }
             //判断猪舍是否允许修改类型
-            if(barn.getPigType() != null && !Objects.equals(barn.getPigType(), oldBarn.getPigType())){
-                if(!RespHelper.or500(doctorPigReadService.findActivePigTrackByCurrentBarnId(barnId)).isEmpty()
-                        || !RespHelper.or500(doctorGroupReadService.findGroupByCurrentBarnId(barnId)).isEmpty()){
+            if (barn.getPigType() != null && !Objects.equals(barn.getPigType(), oldBarn.getPigType())) {
+                if (!RespHelper.or500(doctorPigReadService.findActivePigTrackByCurrentBarnId(barnId)).isEmpty()
+                        || !RespHelper.or500(doctorGroupReadService.findGroupByCurrentBarnId(barnId)).isEmpty()) {
                     throw new JsonResponseException("barn.type.forbid.update");
                 }
             }
@@ -390,7 +405,7 @@ public class DoctorBarns {
 
     private void addBarnId2DataPermission(Long barnId, DoctorUserDataPermission permission){
         List<Long> barnIds = permission.getBarnIdsList();
-        if(barnIds == null){
+        if (barnIds == null) {
             barnIds = Lists.newArrayList();
         }
         barnIds.add(barnId);
@@ -504,28 +519,29 @@ public class DoctorBarns {
     }
 
     @RequestMapping(value = "/updateBarnName", method = RequestMethod.POST)
-    public Boolean updateBarnName(@RequestParam Long barnId, @RequestParam String barnName){
+    public Boolean updateBarnName(@RequestParam Long barnId, @RequestParam String barnName) {
         Long groupEvent = RespHelper.or500(doctorGroupReadService.countByBarnId(barnId));
         Long pigEvent = RespHelper.or500(doctorPigEventReadService.countByBarnId(barnId));
-        if(Objects.equals(groupEvent, 0L) && Objects.equals(pigEvent, 0L)){
+        if (Objects.equals(groupEvent, 0L) && Objects.equals(pigEvent, 0L)) {
             DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
-            if(barn == null){
+            if (barn == null) {
                 throw new JsonResponseException("barn.not.found");
             }
-            if(barnName == null || barnName.trim().isEmpty()){
+            if (barnName == null || barnName.trim().isEmpty()) {
                 throw new JsonResponseException("barn.name.not.null");
             }
             barn.setName(barnName);
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
             RespHelper.or500(doctorGroupWriteService.updateCurrentBarnName(barnId, barnName));
             return RespHelper.or500(doctorPigWriteService.updateCurrentBarnName(barnId, barnName));
-        }else{
+        } else {
             throw new JsonResponseException("barn.has.event.forbid.update.name");
         }
     }
 
     /**
      * 统计每种猪舍类型猪舍数量
+     *
      * @param params 查询条件
      * @return
      */
@@ -542,11 +558,12 @@ public class DoctorBarns {
 
     /**
      * 查询可转猪舍
+     *
      * @param pigIds 猪id
      * @return
      */
     @RequestMapping(value = "/selectBarns", method = RequestMethod.GET)
-    public List<DoctorBarn> selectChgLocationBarn(@RequestParam String pigIds, @RequestParam Long farmId){
+    public List<DoctorBarn> selectChgLocationBarn(@RequestParam String pigIds, @RequestParam Long farmId) {
         List<Long> pigIdList = Splitters.COMMA.splitToList(pigIds).stream().map(Long::parseLong).collect(Collectors.toList());
         if (Arguments.isNullOrEmpty(pigIdList)) {
             return Collections.emptyList();
@@ -554,9 +571,9 @@ public class DoctorBarns {
         List<Integer> barnType = Lists.newArrayList();
         barnType.addAll(PigType.PIG_TYPES);
         pigIdList.forEach(pigId -> {
-        DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
-        barnType.retainAll(DoctorEventSelector.selectBarn(PigStatus.from(pigTrack.getStatus()), PigType.from(pigTrack.getCurrentBarnType()))
-                .stream().map(PigType::getValue).collect(Collectors.toList()));
+            DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
+            barnType.retainAll(DoctorEventSelector.selectBarn(PigStatus.from(pigTrack.getStatus()), PigType.from(pigTrack.getCurrentBarnType()))
+                    .stream().map(PigType::getValue).collect(Collectors.toList()));
         });
         if (barnType.isEmpty()) {
             return Collections.emptyList();
@@ -566,6 +583,7 @@ public class DoctorBarns {
 
     /**
      * 获取断奶触发的转舍可转猪舍
+     *
      * @param farmId 猪场id
      * @return 可转猪舍列表
      */
@@ -574,6 +592,7 @@ public class DoctorBarns {
         List<Integer> barnType = Lists.newArrayList(PigType.MATING_FARROW_TYPES);
         return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, barnType, null, null, null));
     }
+
     /**
      * 获取所有猪舍
      */

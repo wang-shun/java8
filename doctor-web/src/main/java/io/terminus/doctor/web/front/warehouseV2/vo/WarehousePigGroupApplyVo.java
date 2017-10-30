@@ -35,6 +35,12 @@ public class WarehousePigGroupApplyVo {
 
     private String unit;
 
+    private String vendorName;
+
+    private String code;
+
+    private String specification;
+
     private BigDecimal quantity;
 
     private Long unitPrice;
