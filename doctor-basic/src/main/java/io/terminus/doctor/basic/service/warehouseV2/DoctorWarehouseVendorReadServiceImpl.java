@@ -1,24 +1,21 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
-import io.terminus.doctor.basic.dao.DoctorWarehouseVendorDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseVendorOrgDao;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
-
+import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.boot.rpc.common.annotation.RpcProvider;
-
-import com.google.common.base.Throwables;
+import io.terminus.doctor.basic.dao.DoctorWarehouseVendorDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseVendorOrgDao;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendorOrg;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +35,7 @@ public class DoctorWarehouseVendorReadServiceImpl implements DoctorWarehouseVend
     private DoctorWarehouseVendorOrgDao doctorWarehouseVendorOrgDao;
 
     @Override
-    @Cacheable("")
+//    @Cacheable(value = "cache_warehouse_vendor")
     public Response<DoctorWarehouseVendor> findById(Long id) {
         try {
             return Response.ok(doctorWarehouseVendorDao.findById(id));
