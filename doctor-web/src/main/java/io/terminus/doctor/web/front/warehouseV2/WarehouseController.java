@@ -57,6 +57,8 @@ public class WarehouseController {
 
     @Autowired
     private DoctorFarmReadService doctorFarmReadService;
+    @RpcConsumer
+    private DoctorWareHouseReadService doctorWareHouseReadService;
 
     @Autowired
     private UserReadService<User> userReadService;
@@ -466,19 +468,36 @@ public class WarehouseController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "{id}/material")
     public Paging<WarehouseStockVo> material(@PathVariable Long id,
-                                             @RequestParam Long orgId,
+                                             @RequestParam(required = false) Long orgId,
                                              @RequestParam(required = false) String materialName,
                                              @RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize) {
 
 
-        Map<String, Object> skuParams = new HashMap<>();
-        skuParams.put("orgId", orgId);
-        skuParams.put("nameOrSrmLike", materialName);
-
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("warehouseId", id);
-        criteria.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
+
+        if (StringUtils.isNotBlank(materialName)) {
+
+
+            if (null == orgId) {
+                DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(id));
+                if (null == wareHouse)
+                    throw new JsonResponseException("warehouse.not.found");
+                DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(wareHouse.getFarmId()));
+                if (null == farm)
+                    throw new JsonResponseException("farm.not.found");
+                orgId = farm.getOrgId();
+            }
+
+            Map<String, Object> skuParams = new HashMap<>();
+            skuParams.put("orgId", orgId);
+            skuParams.put("nameOrSrmLike", materialName);
+            List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
+            if (skuIds.isEmpty())
+                return Paging.empty();
+            criteria.put("skuIds", skuIds);
+        }
 //        if (StringUtils.isNotBlank(materialName))
 //            criteria.put("materialNameLike", materialName);
 

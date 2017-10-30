@@ -7,6 +7,8 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -26,16 +28,31 @@ public class SkuController {
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
     @RpcConsumer
     private DoctorWarehouseSkuWriteService doctorWarehouseSkuWriteService;
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
 
-    @RequestMapping(method = RequestMethod.GET)
-    public Paging<DoctorWarehouseSku> query(@RequestParam Long orgId,
+    @RequestMapping(method = RequestMethod.GET, value = "paging")
+    public Paging<DoctorWarehouseSku> query(@RequestParam(required = false) Long orgId,
+                                            @RequestParam(required = false) Long farmId,
                                             @RequestParam(required = false) Integer type,
                                             @RequestParam(required = false) String srm,
                                             @RequestParam(required = false) String srmOrName,
                                             @RequestParam(required = false) Integer pageNo,
                                             @RequestParam(required = false) Integer pageSize) {
+
+        if (null == orgId && null == farmId)
+            throw new JsonResponseException("warehouse.sku.org.id.or.farm.id.not.null");
+
         Map<String, Object> params = new HashMap<>();
-        params.put("orgId", orgId);
+        if (null != orgId)
+            params.put("orgId", orgId);
+        else {
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+            if (null == farm)
+                throw new JsonResponseException("farm.not.found");
+            params.put("orgId", farm.getOrgId());
+        }
+
         if (StringUtils.isNotBlank(srm))
             params.put("srm", srm);
         if (null != type)

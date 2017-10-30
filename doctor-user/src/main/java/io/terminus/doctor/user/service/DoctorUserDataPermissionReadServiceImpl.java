@@ -73,4 +73,15 @@ public class DoctorUserDataPermissionReadServiceImpl implements DoctorUserDataPe
             return Response.fail("list.all.failed");
         }
     }
+
+    @Override
+    public Response<List<DoctorUserDataPermission>> findByFarmAndPrimary(Long farmId, List<Long> userIds) {
+        try {
+            return Response.ok(doctorUserDataPermissionDao.findByFarmAndPrimary(farmId, userIds));
+        } catch (Exception e) {
+            log.error("find by farm and primary failed, farmId:{}, userIds:{}, cause:{}",
+                    farmId, userIds, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.by.farm.and.primary.failed");
+        }
+    }
 }

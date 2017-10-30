@@ -175,6 +175,9 @@ public class DoctorGodController {
     public boolean eventEdit(@PathVariable("id") Long eventId,
                              @RequestBody String input) {
 
+        if (StringUtils.isBlank(input))
+            throw new JsonResponseException("god.event.input.blank");
+
         Response<DoctorPigEvent> pigEventResponse = doctorPigEventReadService.findById(eventId);
         if (!pigEventResponse.isSuccess())
             throw new JsonResponseException(pigEventResponse.getError());
@@ -192,6 +195,10 @@ public class DoctorGodController {
     @RequestMapping(method = RequestMethod.PUT, value = "event/group/{id}")
     public boolean groupEventEdit(@PathVariable("id") Long eventId,
                                   @RequestBody String input) {
+
+        if (StringUtils.isBlank(input))
+            throw new JsonResponseException("god.event.input.blank");
+
         DoctorGroupEvent groupEvent = expectNotNull(RespHelper.or500(doctorGroupReadService.findGroupEventById(eventId)), "group.event.not.found");
         String oldPigEvent = TO_JSON_MAPPER.toJson(groupEvent);
 
@@ -228,12 +235,12 @@ public class DoctorGodController {
 
     @RequestMapping(method = RequestMethod.GET, value = "status")
     public PigAndPigGroup pigAndGroupQuery(@RequestParam Long farmId,
-                                           @RequestParam int type,//1母猪，2公猪,3猪群
+                                           @RequestParam int type,//1母猪，2公猪,4猪群
                                            @RequestParam String code) {
 
         PigAndPigGroup vo = new PigAndPigGroup();
 
-        if (type == 3) {
+        if (type == 4) {
             Response<DoctorGroup> groupResponse = doctorGroupReadService.findGroupByFarmIdAndGroupCode(farmId, code);
             if (!groupResponse.isSuccess())
                 throw new JsonResponseException(groupResponse.getError());
@@ -264,6 +271,7 @@ public class DoctorGodController {
             params.put("farmId", farmId);
             params.put("pigType", type);
             params.put("precisePigCode", code);
+            params.put("all", "1");//随便设置，只要all不为null即可
             Response<Paging<SearchedPig>> pagingResponse = doctorPigReadService.pagingPig(params, 1, 1);
             if (!pagingResponse.isSuccess())
                 throw new JsonResponseException(pagingResponse.getError());
@@ -302,7 +310,7 @@ public class DoctorGodController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "status")
     public boolean pigAndGroupEdit(@RequestParam Long farmId,
-                                   @RequestParam int type,//1母猪，2公猪,3猪群
+                                   @RequestParam int type,//1母猪，2公猪,4猪群
                                    @RequestParam long id,
                                    @RequestBody @Valid PigAndPigGroup pigAndPigGroup,
                                    Errors errors) {
@@ -332,7 +340,15 @@ public class DoctorGodController {
                 pig.setGeneticName(RespHelper.orServEx(doctorBasicReadService.findBasicById(pigAndPigGroup.getGeneticId())).getName());
             if (pig.getPigType().intValue() == PigType.BOAR.getValue())
                 pig.setBoarType(pigAndPigGroup.getBoarType());
-            pig.setIsRemoval(pigAndPigGroup.getIsRemoval());
+
+
+            if (PigStatus.BOAR_LEAVE.getKey().intValue() == pigAndPigGroup.getStatus() || PigStatus.Removal.getKey().intValue() == pigAndPigGroup.getStatus()) {
+                pigTrack.setIsRemoval(1);
+                pig.setIsRemoval(1);
+            } else {
+                pig.setIsRemoval(pigAndPigGroup.getIsRemoval());
+                pigTrack.setIsRemoval(pigAndPigGroup.getIsRemoval());
+            }
 
             pigTrack.setStatus(pigAndPigGroup.getStatus());
             pigTrack.setCurrentBarnId(pigAndPigGroup.getCurrentBarnId());
@@ -344,10 +360,11 @@ public class DoctorGodController {
             pigTrack.setWeanQty(pigAndPigGroup.getWeanQty());
             pigTrack.setWeanAvgWeight(pigAndPigGroup.getWeanAvgWeight());
 
-            doctorPigWriteService.updatePig(pig, pigTrack);
-        } else if (type == 3) {//修改猪群
 
-            DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(pigAndPigGroup.getId()));
+            doctorPigWriteService.updatePig(pig, pigTrack);
+        } else if (type == 4) {//修改猪群
+
+            DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(id));
             if (null == group)
                 throw new JsonResponseException("group.not.found");
             Response<DoctorGroupDetail> groupDetailResponse = doctorGroupReadService.findGroupDetailByGroupId(group.getId());
@@ -478,7 +495,7 @@ public class DoctorGodController {
     @Subscribe
     public void refreshReport(RefreshReportEvent event) {
         log.info("start to refresh report,type:[{}],farm:[{}],startDate:[{}],endDate:[{}]", event.getType(), event.getFarmId(), event.getStartDate(), event.getEndDate());
-        if (1 == event.getType().intValue()) {
+        if (2 == event.getType().intValue()) {
             doctorDailyGroupWriteService.createDailyGroupsByDateRange(event.getFarmId(), event.getStartDate(), event.getEndDate());
         } else {
             doctorDailyReportWriteService.createDailyReports(event.getFarmId(), event.getStartDate(), event.getEndDate());

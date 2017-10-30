@@ -34,6 +34,7 @@ import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
@@ -354,9 +355,10 @@ public class DoctorBarns {
             barnId = RespHelper.or500(doctorBarnWriteService.createBarn(barn));
 
             //更新 数据权限
-            this.addBarnId2DataPermission(barnId, user.getId());
-            if (Objects.equals(user.getType(), UserType.FARM_SUB.value())) {
-                this.addBarnId2DataPermission(barnId, RespHelper.or500(primaryUserReadService.findSubByUserId(user.getId())).getParentUserId());
+            this.addBarnIdDataPermissionForPrimary(barnId, barn.getFarmId());
+            if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+                DoctorUserDataPermission permission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId()));
+                this.addBarnId2DataPermission(barnId, permission);
             }
         } else {
             if (notNull(doctorBarn) && !Objects.equals(doctorBarn.getId(), barn.getId())) {
@@ -392,8 +394,16 @@ public class DoctorBarns {
         return barnId;
     }
 
-    private void addBarnId2DataPermission(Long barnId, Long userId) {
-        DoctorUserDataPermission permission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
+    private void addBarnIdDataPermissionForPrimary(Long barnId, Long farmId) {
+        List<PrimaryUser> allPrimary = RespHelper.or500(primaryUserReadService.findAllPrimaryUser());
+        List<Long> userIds = allPrimary.stream().map(PrimaryUser::getUserId).collect(Collectors.toList());
+        List<DoctorUserDataPermission> permissions = RespHelper.or500(doctorUserDataPermissionReadService.findByFarmAndPrimary(farmId, userIds));
+        permissions.add(RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(10L)));
+        permissions.forEach(permission -> addBarnId2DataPermission(barnId, permission));
+
+    }
+
+    private void addBarnId2DataPermission(Long barnId, DoctorUserDataPermission permission){
         List<Long> barnIds = permission.getBarnIdsList();
         if (barnIds == null) {
             barnIds = Lists.newArrayList();

@@ -323,10 +323,6 @@ public class ReportController {
                                                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
 
-        Map<String, Object> skuParams = new HashMap<>();
-        skuParams.put("orgId", orgId);
-        skuParams.put("nameOrSrmLike", materialName);
-
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("warehouseId", warehouseId);
         criteria.put("handleYear", date.get(Calendar.YEAR));
@@ -340,8 +336,16 @@ public class ReportController {
             } else
                 criteria.put("type", type);
         }
-        List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
-        criteria.put("skuIds", skuIds);
+
+        if (StringUtils.isNotBlank(materialName)) {
+            Map<String, Object> skuParams = new HashMap<>();
+            skuParams.put("orgId", orgId);
+            skuParams.put("nameOrSrmLike", materialName);
+            List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
+            if (skuIds.isEmpty())
+                return Collections.emptyList();
+            criteria.put("skuIds", skuIds);
+        }
 //        if (StringUtils.isNotBlank(materialName))
 //            criteria.put("materialNameLike", materialName);
 
@@ -423,9 +427,6 @@ public class ReportController {
                                                 @RequestParam(required = false) String materialName,
                                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
-        Map<String, Object> skuParams = new HashMap<>();
-        skuParams.put("orgId", orgId);
-        skuParams.put("nameOrSrmLike", materialName);
 
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("applyYear", date.get(Calendar.YEAR));
@@ -438,7 +439,16 @@ public class ReportController {
             criteria.put("pigBarnId", pigBarnId);
         if (null != type)
             criteria.put("type", type);
-        criteria.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
+
+        if (StringUtils.isNotBlank(materialName)) {
+            Map<String, Object> skuParams = new HashMap<>();
+            skuParams.put("orgId", orgId);
+            skuParams.put("nameOrSrmLike", materialName);
+            List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
+            if (skuIds.isEmpty())
+                return Collections.emptyList();
+            criteria.put("skuIds", skuIds);
+        }
 
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
         if (!applyResponse.isSuccess())
@@ -481,9 +491,6 @@ public class ReportController {
                                                         @RequestParam(required = false) Integer materialType,
                                                         @RequestParam(required = false) String materialName) {
 
-        Map<String, Object> skuParams = new HashMap<>();
-        skuParams.put("orgId", orgId);
-        skuParams.put("nameOrSrmLike", materialName);
 
         Map<String, Object> criteria = new HashMap<>();
 //        if (StringUtils.isNotBlank(materialName))
@@ -491,7 +498,16 @@ public class ReportController {
         criteria.put("warehouseId", warehouseId);
         criteria.put("type", materialType);
         criteria.put("pigGroupId", pigGroupId);
-        criteria.put("skuIds", RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList()));
+
+        if (StringUtils.isNotBlank(materialName)) {
+            Map<String, Object> skuParams = new HashMap<>();
+            skuParams.put("orgId", orgId);
+            skuParams.put("nameOrSrmLike", materialName);
+            List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
+            if (skuIds.isEmpty())
+                return Collections.emptyList();
+            criteria.put("skuIds", skuIds);
+        }
 
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
 

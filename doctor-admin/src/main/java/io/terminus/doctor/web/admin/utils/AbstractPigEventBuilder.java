@@ -2,6 +2,7 @@ package io.terminus.doctor.web.admin.utils;
 
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
@@ -55,6 +56,10 @@ public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> im
     public void buildEvent(String eventDto, DoctorPigEvent pigEvent) {
         Class<T> clazz = getEventDtoClass();
         T event = parse(eventDto, clazz);
+
+        if (null == event)
+            throw new ServiceException("god.event.json.parse.fail");
+
         if (null != event.getOperatorId() && null == event.getOperatorName()) {
             UserProfile profile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(event.getOperatorId()));
             if (null != profile)
@@ -66,11 +71,11 @@ public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> im
         event.setEventDesc(eventType.getDesc());
         event.setPigId(pigEvent.getPigId());
         event.setPigCode(pigEvent.getPigCode());
-        try {
-            buildEventDto(event, pigEvent);
-        } catch (InvalidException e) {
-            throw new ServiceException(messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault()));
-        }
+//        try {
+        buildEventDto(event, pigEvent);
+//        } catch (InvalidException e) {
+//            throw new JsonResponseException(messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault()));
+//        }
 
         transfer(event, pigEvent);
     }

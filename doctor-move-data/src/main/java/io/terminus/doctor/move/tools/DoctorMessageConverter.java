@@ -28,6 +28,14 @@ public class DoctorMessageConverter {
         return new JsonResponseException(errorMessage);
     }
 
+    public JsonResponseException convert(RuntimeException e) {
+        if (e instanceof InvalidException) {
+            return convert((InvalidException) e);
+        }
+        String errorMessage = messageSource.getMessage(e.getMessage(), new Object[]{}, Locale.CHINA);
+        return new JsonResponseException(errorMessage);
+    }
+
     public static String assembleErrorAttach(String attach, String sheetName) {
         return isNull(attach) ? sheetName : attach.concat(",页名:" + sheetName);
     }
