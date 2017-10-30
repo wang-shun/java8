@@ -1,19 +1,18 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseUnitOrgDao;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseUnitOrg;
-
-import io.terminus.common.model.Response;
-import io.terminus.boot.rpc.common.annotation.RpcProvider;
-
-import com.google.common.base.Throwables;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseUnitOrgWriteService;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendorOrg;
+import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
-
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Desc:
@@ -64,11 +63,20 @@ public class DoctorWarehouseUnitOrgWriteServiceImpl implements DoctorWarehouseUn
     @ExceptionHandle("doctor.warehouse.unit.bound.fail")
     public Response<Boolean> boundToOrg(Long orgId, String unitIds) {
         for (String id : unitIds.split(",")) {
-            if (!doctorWarehouseUnitOrgDao.create(DoctorWarehouseUnitOrg.builder()
-                    .orgId(orgId)
-                    .unitId(Long.parseLong(id))
-                    .build()))
-                return Response.fail("doctor.warehouse.unit.bound.fail");
+
+            if (!NumberUtils.isNumber(id))
+                throw new InvalidException("warehouse.unit.id.not.number", id);
+
+            Long unitId = Long.parseLong(id);
+
+            Optional<DoctorWarehouseUnitOrg> unitOrg = doctorWarehouseUnitOrgDao.findByOrgAndUnit(orgId, unitId);
+            if (!unitOrg.isPresent()) {
+                if (!doctorWarehouseUnitOrgDao.create(DoctorWarehouseUnitOrg.builder()
+                        .orgId(orgId)
+                        .unitId(Long.parseLong(id))
+                        .build()))
+                    return Response.fail("doctor.warehouse.unit.bound.fail");
+            }
         }
         return Response.ok(true);
     }

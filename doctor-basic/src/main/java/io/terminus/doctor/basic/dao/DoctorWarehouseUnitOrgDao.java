@@ -6,6 +6,7 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Desc:
@@ -22,5 +23,15 @@ public class DoctorWarehouseUnitOrgDao extends MyBatisDao<DoctorWarehouseUnitOrg
                 .build());
     }
 
+
+    public Optional<DoctorWarehouseUnitOrg> findByOrgAndUnit(Long orgId, Long unitId) {
+        List<DoctorWarehouseUnitOrg> unitOrgs = this.list(DoctorWarehouseUnitOrg.builder()
+                .orgId(orgId)
+                .unitId(unitId)
+                .build());
+        if (unitOrgs.isEmpty())
+            return Optional.empty();
+        return Optional.ofNullable(unitOrgs.get(0));
+    }
 
 }

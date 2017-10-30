@@ -9,9 +9,11 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendorOrg;
+import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -68,15 +70,20 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
     @ExceptionHandle("warehouse.vendor.bound.fail")
     public Response<Boolean> boundToOrg(String vendorIds, Long orgId) {
 
-        String[] ids = StringUtils.split(vendorIds, ",");
-        for (String id : ids) {
-            Optional<DoctorWarehouseVendorOrg> vendorOrg = doctorWarehouseVendorOrgDao.findByOrgAndVendor(Long.parseLong(id), orgId);
+        for (String id : vendorIds.split(",")) {
+
+            if (!NumberUtils.isNumber(id))
+                throw new InvalidException("warehouse.vendor.id.not.number", id);
+
+            Long vendorId = Long.parseLong(id);
+
+            Optional<DoctorWarehouseVendorOrg> vendorOrg = doctorWarehouseVendorOrgDao.findByOrgAndVendor(vendorId, orgId);
             if (!vendorOrg.isPresent()) {
-                doctorWarehouseVendorOrgDao.create(DoctorWarehouseVendorOrg.builder()
-                        .vendorId(Long.parseLong(id))
+                if (!doctorWarehouseVendorOrgDao.create(DoctorWarehouseVendorOrg.builder()
+                        .vendorId(vendorId)
                         .orgId(orgId)
-                        .build());
-//                    return Response.ok(false);
+                        .build()))
+                    return Response.fail("warehouse.vendor.bound.fail");
             }
         }
         return Response.ok(true);
