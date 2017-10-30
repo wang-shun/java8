@@ -76,7 +76,7 @@ public class VendorController {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "org")
-    public boolean boundToOrg(@RequestParam String vendorIds,
+    public boolean boundToOrg(@RequestParam String vendorIds,      //多个id以,分割
                               @RequestParam(required = false) Long orgId,
                               @RequestParam(required = false) Long farmId) {
 

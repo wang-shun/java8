@@ -23,7 +23,7 @@ public class UnitController {
     private DoctorFarmReadService doctorFarmReadService;
 
     @RequestMapping(method = RequestMethod.POST, value = "org")
-    public void boundToOrg(@RequestParam String unitIds,
+    public void boundToOrg(@RequestParam String unitIds,        //多个id以,分割
                            @RequestParam(required = false) Long orgId,
                            @RequestParam(required = false) Long farmId) {
 
