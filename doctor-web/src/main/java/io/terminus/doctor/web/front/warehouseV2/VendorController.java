@@ -8,6 +8,8 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +29,8 @@ public class VendorController {
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
     @RpcConsumer
     private DoctorWarehouseVendorWriteService doctorWarehouseVendorWriteService;
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
 
     @RequestMapping(method = RequestMethod.GET)
     public Paging<DoctorWarehouseVendor> query(@RequestParam Integer pageNo,
@@ -63,14 +67,52 @@ public class VendorController {
     }
 
 
+    /**
+     * 绑定到公司
+     *
+     * @param vendorId
+     * @param orgId
+     * @param farmId
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST, value = "org")
-    public boolean boundToOrg(@RequestParam Long vendorId, @RequestParam Long orgId) {
+    public boolean boundToOrg(@RequestParam Long vendorId,
+                              @RequestParam(required = false) Long orgId,
+                              @RequestParam(required = false) Long farmId) {
+
+        if (null == orgId && null == farmId)
+            throw new JsonResponseException("warehouse.sku.org.id.or.farm.id.not.null");
+        if (null == orgId) {
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+            if (null == farm)
+                throw new JsonResponseException("farm.not.found");
+            orgId = farm.getOrgId();
+        }
+
         return RespHelper.or500(doctorWarehouseVendorWriteService.boundToOrg(vendorId, orgId));
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "org/{id}")
-    public List<DoctorWarehouseVendor> queryByOrg(@PathVariable("id") Long orgId) {
+    /**
+     * 查询公司下的所有厂商
+     *
+     * @param orgId
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "org")
+    public List<DoctorWarehouseVendor> queryByOrg(@RequestParam(required = false) Long orgId,
+                                                  @RequestParam(required = false) Long farmId) {
+
+        if (null == orgId && null == farmId)
+            throw new JsonResponseException("warehouse.sku.org.id.or.farm.id.not.null");
+        if (null == orgId) {
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+            if (null == farm)
+                throw new JsonResponseException("farm.not.found");
+            orgId = farm.getOrgId();
+        }
+
         return RespHelper.or500(doctorWarehouseVendorReadService.findByOrg(orgId));
     }
 
