@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import com.sun.tools.javac.api.ClientCodeWrapper;
 import io.terminus.doctor.basic.dao.DoctorWarehouseVendorDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseVendorOrgDao;
 
@@ -41,24 +42,27 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
     private DoctorWarehouseVendorOrgDao doctorWarehouseVendorOrgDao;
 
     @Override
+    @Transactional
+    @ExceptionHandle("doctor.warehouse.vendor.create.fail")
     public Response<Long> create(DoctorWarehouseVendor doctorWarehouseVendor) {
-        try {
-            doctorWarehouseVendorDao.create(doctorWarehouseVendor);
-            return Response.ok(doctorWarehouseVendor.getId());
-        } catch (Exception e) {
-            log.error("failed to create doctor warehouse vendor, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.vendor.create.fail");
-        }
+
+        if (null != doctorWarehouseVendorDao.findByName(doctorWarehouseVendor.getName()))
+            throw new InvalidException("doctor.vendor.name.duplicate");
+
+        doctorWarehouseVendorDao.create(doctorWarehouseVendor);
+        return Response.ok(doctorWarehouseVendor.getId());
     }
 
     @Override
+    @Transactional
+    @ExceptionHandle("doctor.warehouse.vendor.update.fail")
     public Response<Boolean> update(DoctorWarehouseVendor doctorWarehouseVendor) {
-        try {
-            return Response.ok(doctorWarehouseVendorDao.update(doctorWarehouseVendor));
-        } catch (Exception e) {
-            log.error("failed to update doctor warehouse vendor, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.vendor.update.fail");
-        }
+
+        DoctorWarehouseVendor vendor = doctorWarehouseVendorDao.findByName(doctorWarehouseVendor.getName());
+        if (null != vendor && vendor.getId() != doctorWarehouseVendor.getId())
+            throw new InvalidException("doctor.vendor.name.duplicate");
+
+        return Response.ok(doctorWarehouseVendorDao.update(doctorWarehouseVendor));
     }
 
     @Override
