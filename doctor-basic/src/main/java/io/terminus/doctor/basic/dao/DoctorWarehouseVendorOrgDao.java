@@ -34,4 +34,8 @@ public class DoctorWarehouseVendorOrgDao extends MyBatisDao<DoctorWarehouseVendo
                 .build());
     }
 
+
+    public void deleteByOrg(Long orgId) {
+        this.sqlSession.delete(sqlId("deleteByOrg"), orgId);
+    }
 }

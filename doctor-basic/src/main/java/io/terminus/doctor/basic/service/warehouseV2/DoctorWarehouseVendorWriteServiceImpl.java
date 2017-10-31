@@ -16,8 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -80,23 +85,23 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
 
     @Override
     @ExceptionHandle("warehouse.vendor.bound.fail")
+    @Transactional
     public Response<Boolean> boundToOrg(String vendorIds, Long orgId) {
 
-        for (String id : vendorIds.split(",")) {
+        doctorWarehouseVendorOrgDao.deleteByOrg(orgId);
+
+        for (String id : Arrays.stream(vendorIds.split(",")).collect(Collectors.toSet())) {
 
             if (!NumberUtils.isNumber(id))
                 throw new InvalidException("warehouse.vendor.id.not.number", id);
 
             Long vendorId = Long.parseLong(id);
 
-            Optional<DoctorWarehouseVendorOrg> vendorOrg = doctorWarehouseVendorOrgDao.findByOrgAndVendor(vendorId, orgId);
-            if (!vendorOrg.isPresent()) {
-                if (!doctorWarehouseVendorOrgDao.create(DoctorWarehouseVendorOrg.builder()
-                        .vendorId(vendorId)
-                        .orgId(orgId)
-                        .build()))
-                    return Response.fail("warehouse.vendor.bound.fail");
-            }
+            if (!doctorWarehouseVendorOrgDao.create(DoctorWarehouseVendorOrg.builder()
+                    .vendorId(vendorId)
+                    .orgId(orgId)
+                    .build()))
+                return Response.fail("warehouse.vendor.bound.fail");
         }
         return Response.ok(true);
     }
