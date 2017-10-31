@@ -30,6 +30,12 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
     private static final long serialVersionUID = -3221757737932679045L;
 
 
+    /**
+     * 猪rfid 物联网使用
+     */
+    @NotNull(message = "rfid.not.null")
+    private String rfid;
+
     @NotNull(message = "birthday.not.null")
     private Date birthday; // 猪生日
 

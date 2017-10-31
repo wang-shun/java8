@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.util;
 
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
@@ -16,6 +17,7 @@ import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.enums.VaccinResult;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
@@ -75,6 +77,14 @@ public class TransFromUtil {
                 isRollback = booleanResponse.getResult();
             }
             display.setIsRollback(isRollback);
+
+            DoctorPig doctorPig = RespHelper.orServEx(doctorPigReadService.findPigById(display.getPigId()));
+            Map<String, Object> extraMap = display.getExtraMap();
+            if (isNull(extraMap)) {
+                extraMap = Maps.newHashMap();
+                display.setExtraMap(extraMap);
+            }
+            extraMap.put("rfid", doctorPig.getRfid());
         }
     }
 

@@ -10,6 +10,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -175,6 +176,7 @@ public class DoctorPigs {
                 .dayAge(dto.getDayAge())
                 .weight(dto.getDoctorPigTrack().getWeight())
                 .boarType(dto.getDoctorPig().getBoarType())
+                .rfid(dto.getDoctorPig().getRfid())
                 .build();
     }
 
@@ -192,6 +194,9 @@ public class DoctorPigs {
                 }
             }
             String warnMessage = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(queryPigNotifyMessages(dto.getDoctorPig().getId()));
+            Date eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(dto.getDoctorPig().getId()
+                    , dto.getDoctorPigTrack().getStatus()));
+            Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
             return DoctorSowDetailDto.builder()
                     .pigSowCode(dto.getDoctorPig().getPigCode())
                     .warnMessage(warnMessage)
@@ -205,6 +210,9 @@ public class DoctorPigs {
                     .birthDate(dto.getDoctorPig().getBirthDate())
                     .doctorPigEvents(dto.getDoctorPigEvents())
                     .pregCheckResult(pregCheckResult)
+                    .rfid(dto.getDoctorPig().getRfid())
+                    .statusDay(statusDay)
+                    .pigWeight(dto.getDoctorPigTrack().getWeight())
                     .build();
         } catch (Exception e) {
             log.error("buildSowDetailDto failed cause by {}", Throwables.getStackTraceAsString(e));

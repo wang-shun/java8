@@ -1479,6 +1479,8 @@ CREATE TABLE `doctor_warehouse_stock_monthly` (
 ALTER TABLE doctor_warehouse_material_apply MODIFY pig_group_name VARCHAR(512) COMMENT '领用猪群名称';
 ALTER TABLE doctor_warehouse_material_apply MODIFY apply_date DATE COMMENT '领用日期';
 
+-- 2017-10-11
+ALTER table doctor_pigs ADD column `rfid` VARCHAR(32) DEFAULT NULL COMMENT '猪rfid物联网使用' after pig_Code;
 -- 2017-10-11物联网角色表
 CREATE TABLE `iot_roles` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,

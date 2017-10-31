@@ -52,7 +52,7 @@ public class DoctorPigManager {
      */
     @Transactional
     public boolean updatePigCodes(List<DoctorPig> pigs) {
-        pigs.forEach(pig -> updatePigCode(pig.getId(), pig.getPigCode()));
+        pigs.forEach(pig -> updatePigCode(pig.getId(), pig.getPigCode(), pig.getRfid()));
         return true;
     }
 
@@ -64,13 +64,14 @@ public class DoctorPigManager {
         doctorPigTrackDao.update(pigTrack);
     }
 
-    private void updatePigCode(Long pigId, String pigCode) {
+    private void updatePigCode(Long pigId, String pigCode, String rfid) {
         checkCanUpdate(pigId, pigCode);
 
         //更新猪
         DoctorPig updatePig = new DoctorPig();
         updatePig.setId(pigId);
         updatePig.setPigCode(pigCode);
+        updatePig.setRfid(rfid);
         doctorPigDao.update(updatePig);
         doctorPigEventDao.updatePigCode(pigId, pigCode);
         //更新消息
