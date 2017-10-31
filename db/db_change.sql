@@ -1533,3 +1533,6 @@ CREATE TABLE `doctor_warehouse_unit_org` (
 ALTER TABLE doctor_warehouse_vendor ADD delete_flag TINYINT NULL COMMENT '删除标志，0正常，1删除';
 ALTER TABLE doctor_warehouse_vendor
   MODIFY COLUMN delete_flag TINYINT COMMENT '删除标志，0正常，1删除' AFTER short_name;
+
+-- sku表添加status字段
+ALTER TABLE doctor_warehouse_sku ADD status TINYINT NULL COMMENT '状态';
