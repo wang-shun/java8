@@ -25,8 +25,10 @@ public class WarehouseSkuDto extends BasicDto {
     /**
      * 公司编号
      */
-    @NotNull(message = "warehouse.sku.org.id.null", groups = CreateValid.class)
+//    @NotNull(message = "warehouse.sku.org.id.null", groups = CreateValid.class)
     private Long orgId;
+
+    private Long farmId;
 
     /**
      * 物料类型编号

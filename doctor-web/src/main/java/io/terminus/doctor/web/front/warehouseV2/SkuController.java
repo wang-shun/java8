@@ -95,6 +95,16 @@ public class SkuController {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
+        if (skuDto.getOrgId() == null && skuDto.getFarmId() == null) {
+            throw new JsonResponseException("warehouse.sku.org.id.or.farm.id.not.null");
+        }
+        if (skuDto.getOrgId() == null) {
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(skuDto.getFarmId()));
+            if (null == farm)
+                throw new JsonResponseException("farm.not.found");
+            skuDto.setOrgId(farm.getOrgId());
+        }
+
         DoctorWarehouseSku sku = new DoctorWarehouseSku();
         BeanUtils.copyProperties(skuDto, sku);
         return RespHelper.or500(doctorWarehouseSkuWriteService.update(sku));
@@ -106,6 +116,16 @@ public class SkuController {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
+        if (skuDto.getOrgId() == null && skuDto.getFarmId() == null) {
+            throw new JsonResponseException("warehouse.sku.org.id.or.farm.id.not.null");
+        }
+        if (skuDto.getOrgId() == null) {
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(skuDto.getFarmId()));
+            if (null == farm)
+                throw new JsonResponseException("farm.not.found");
+            skuDto.setOrgId(farm.getOrgId());
+        }
+        
         DoctorWarehouseSku sku = new DoctorWarehouseSku();
         BeanUtils.copyProperties(skuDto, sku);
         return null != RespHelper.or500(doctorWarehouseSkuWriteService.create(sku));
