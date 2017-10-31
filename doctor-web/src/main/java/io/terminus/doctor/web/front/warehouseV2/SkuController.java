@@ -3,8 +3,10 @@ package io.terminus.doctor.web.front.warehouseV2;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuWriteService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorReadService;
@@ -37,6 +39,8 @@ public class SkuController {
     private DoctorFarmReadService doctorFarmReadService;
     @RpcConsumer
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
+    @RpcConsumer
+    private DoctorBasicReadService doctorBasicReadService;
 
     @RequestMapping(method = RequestMethod.GET, value = "paging")
     public Paging<WarehouseSkuDto> query(@RequestParam(required = false) Long orgId,
@@ -76,7 +80,10 @@ public class SkuController {
                 skuPaging.getData().stream().map(sku -> {
                     WarehouseSkuDto skuDto = new WarehouseSkuDto();
                     skuDto.copyFrom(sku);
-
+                    skuDto.setUnitId(Long.parseLong(sku.getUnit()));
+                    DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(skuDto.getUnitId()));
+                    if (null != unit)
+                        skuDto.setUnit(unit.getName());
                     skuDto.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
                     return skuDto;
                 }).collect(Collectors.toList()));
@@ -105,6 +112,7 @@ public class SkuController {
 
         DoctorWarehouseSku sku = new DoctorWarehouseSku();
         BeanUtils.copyProperties(skuDto, sku);
+        sku.setUnit(skuDto.getUnitId().toString());
         return RespHelper.or500(doctorWarehouseSkuWriteService.update(sku));
     }
 
@@ -126,6 +134,7 @@ public class SkuController {
 
         DoctorWarehouseSku sku = new DoctorWarehouseSku();
         BeanUtils.copyProperties(skuDto, sku);
+        sku.setUnit(skuDto.getUnitId().toString());
         return null != RespHelper.or500(doctorWarehouseSkuWriteService.create(sku));
     }
 
