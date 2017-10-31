@@ -47,7 +47,7 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
     public Response<Long> create(DoctorWarehouseVendor doctorWarehouseVendor) {
 
         if (null != doctorWarehouseVendorDao.findByName(doctorWarehouseVendor.getName()))
-            throw new InvalidException("doctor.vendor.name.duplicate");
+            throw new InvalidException("doctor.vendor.name.duplicate", doctorWarehouseVendor.getName());
 
         doctorWarehouseVendorDao.create(doctorWarehouseVendor);
         return Response.ok(doctorWarehouseVendor.getId());
@@ -60,7 +60,7 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
 
         DoctorWarehouseVendor vendor = doctorWarehouseVendorDao.findByName(doctorWarehouseVendor.getName());
         if (null != vendor && vendor.getId() != doctorWarehouseVendor.getId())
-            throw new InvalidException("doctor.vendor.name.duplicate");
+            throw new InvalidException("doctor.vendor.name.duplicate", doctorWarehouseVendor.getName());
 
         return Response.ok(doctorWarehouseVendorDao.update(doctorWarehouseVendor));
     }
