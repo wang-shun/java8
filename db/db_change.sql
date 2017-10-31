@@ -1560,3 +1560,7 @@ ALTER TABLE doctor_warehouse_stock_handle
 ALTER TABLE doctor_warehouse_material_handle MODIFY delete_flag TINYINT(2) DEFAULT 1 COMMENT '删除标志';
 ALTER TABLE doctor_warehouse_sku ALTER COLUMN status SET DEFAULT 1;
 ALTER TABLE doctor_warehouse_vendor MODIFY delete_flag TINYINT(4) DEFAULT 1 COMMENT '删除标志';
+
+-- sku表添加item字段
+ALTER TABLE doctor_warehouse_sku ADD item_id BIGINT(20) NULL COMMENT '物料类型编号';
+ALTER TABLE doctor_warehouse_sku ADD item_name VARCHAR(128) NULL COMMENT '基础物料名称';
