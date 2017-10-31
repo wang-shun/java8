@@ -517,14 +517,9 @@ public class WarehouseController {
 
             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
             if (null == sku) {
-                String errorMessage = messageSource.getMessage("warehouse.sku.not.found", new Object[]{stock.getSkuName()}, Locale.getDefault());
+                String errorMessage = messageSource.getMessage("warehouse.sku.not.found", new Object[]{stock.getSkuName()}, Locale.CHINA);
                 throw new JsonResponseException(errorMessage);
             }
-            DoctorWarehouseVendor vendor = RespHelper.or500(doctorWarehouseVendorReadService.findById(sku.getVendorId()));
-            if (null == vendor) {
-
-            }
-
 
             data.add(WarehouseStockVo.builder()
                     .materialId(stock.getSkuId())
@@ -533,7 +528,7 @@ public class WarehouseController {
                     .unit(sku.getUnit())
                     .code(sku.getCode())
                     .specification(sku.getSpecification())
-                    .vendorName(vendor.getName())
+                    .vendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())))
                     .build());
         }
         vo.setData(data);

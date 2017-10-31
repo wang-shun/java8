@@ -12,10 +12,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseReportReadService;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
+import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -61,6 +58,8 @@ public class StockController {
     private DoctorWareHouseReadService doctorWareHouseReadService;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
+    @RpcConsumer
+    private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
 
     @RequestMapping(method = RequestMethod.PUT, value = "in")
     public boolean in(@RequestBody @Validated WarehouseStockInDto stockIn, Errors errors) {
@@ -244,8 +243,8 @@ public class StockController {
             if (null != sku) {
                 vo.setUnit(sku.getUnit());
                 vo.setCode(sku.getCode());
-                //TODO warehouseVendor
-//                vo.setVendorName(sku.getVendorName());
+
+                vo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
                 vo.setSpecification(sku.getSpecification());
             }
 

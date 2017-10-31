@@ -69,7 +69,7 @@ public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> im
         try {
             buildEventDto(event, pigEvent);
         } catch (InvalidException e) {
-            throw new ServiceException(messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault()));
+            throw new ServiceException(messageSource.getMessage(e.getError(), e.getParams(), Locale.CHINA));
         }
 
         transfer(event, pigEvent);

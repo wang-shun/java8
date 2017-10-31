@@ -30,6 +30,8 @@ public class DoctorWarehousePurchaseManager {
     private DoctorWarehousePurchaseDao doctorWarehousePurchaseDao;
     @Autowired
     private DoctorWarehouseStockManager doctorWarehouseStockManager;
+    @Autowired
+    private DoctorVendorManager doctorVendorManager;
 
     //    @Transactional
     public DoctorWarehousePurchase in(AbstractWarehouseStockDto stockDto, WarehouseStockInDto.WarehouseStockInDetailDto detail, DoctorWarehouseStock stock, DoctorWarehouseSku sku) {
@@ -40,8 +42,7 @@ public class DoctorWarehousePurchaseManager {
         purchase.setWarehouseName(stock.getWarehouseName());
         purchase.setWarehouseType(stock.getWarehouseType());
         purchase.setMaterialId(detail.getMaterialId());
-        //TODO warehousevendor
-//        purchase.setVendorName(sku.getVendorName());
+        purchase.setVendorName(doctorVendorManager.findById(sku.getVendorId()).getName());
         purchase.setQuantity(detail.getQuantity());
         purchase.setHandleQuantity(new BigDecimal(0));
         purchase.setUnitPrice(detail.getUnitPrice());

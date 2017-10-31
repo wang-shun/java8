@@ -66,6 +66,8 @@ public class ReportController {
     private DoctorWarehouseStockMonthlyReadService doctorWarehouseStockMonthlyReadService;
     @RpcConsumer
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
+    @RpcConsumer
+    private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
 
     /**
      * 仓库报表
@@ -267,8 +269,7 @@ public class ReportController {
             vo.setMaterialName(stock.getSkuName());
 
             if (skuMap.containsKey(stock.getSkuId())) {
-                //TODO warehousevendor
-//                vo.setVendorName(skuMap.get(stock.getSkuId()).get(0).getVendorName());
+                vo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(skuMap.get(stock.getSkuId()).get(0).getVendorId())));
                 vo.setUnit(skuMap.get(stock.getSkuId()).get(0).getUnit());
                 vo.setSpecification(skuMap.get(stock.getSkuId()).get(0).getSpecification());
                 vo.setCode(skuMap.get(stock.getSkuId()).get(0).getCode());
@@ -394,18 +395,16 @@ public class ReportController {
                     .unitPrice(handle.getUnitPrice())
                     .pigBarnName(pigBarnName)
                     .pigGroupName(pigGroupName)
-                    .code(skuMap.get(handle.getMaterialId()).get(0).getCode())
-                    //TODO warehousevendor
-//                    .vendorName(skuMap.get(handle.getMaterialId()).get(0).getVendorName())
-                    .specification(skuMap.get(handle.getMaterialId()).get(0).getSpecification())
-                    .unit(skuMap.get(handle.getMaterialId()).get(0).getUnit())
+//                    .code(skuMap.get(handle.getMaterialId()).get(0).getCode())
+//                    .vendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(skuMap.get(handle.getMaterialId()).get(0).getVendorId())))
+//                    .specification(skuMap.get(handle.getMaterialId()).get(0).getSpecification())
+//                    .unit(skuMap.get(handle.getMaterialId()).get(0).getUnit())
                     .warehouseName(handle.getWarehouseName())
                     .build();
 
             if (skuMap.containsKey(handle.getMaterialId())) {
                 handleVo.setCode(skuMap.get(handle.getMaterialId()).get(0).getCode());
-                //TODO warehousevendor
-//                handleVo.setVendorName(skuMap.get(handle.getMaterialId()).get(0).getVendorName());
+                handleVo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(skuMap.get(handle.getMaterialId()).get(0).getVendorId())));
                 handleVo.setSpecification(skuMap.get(handle.getMaterialId()).get(0).getSpecification());
                 handleVo.setUnit(skuMap.get(handle.getMaterialId()).get(0).getUnit());
             }
@@ -471,8 +470,7 @@ public class ReportController {
             if (skuMap.containsKey(apply.getMaterialId())) {
                 vo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
                 vo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
-                //TODO warehousevendor
-//                vo.setVendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName());
+                vo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(skuMap.get(apply.getMaterialId()).get(0).getVendorId())));
                 vo.setSpecification(skuMap.get(apply.getMaterialId()).get(0).getSpecification());
             }
             vos.add(vo);
@@ -564,8 +562,7 @@ public class ReportController {
                 applyVo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
                 applyVo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
                 applyVo.setSpecification(skuMap.get(apply.getMaterialId()).get(0).getSpecification());
-                //TODO warehousevendor
-//                applyVo.setVendorName(skuMap.get(apply.getMaterialId()).get(0).getVendorName());
+                applyVo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(skuMap.get(apply.getMaterialId()).get(0).getVendorId())));
             }
 
             vos.add(applyVo);

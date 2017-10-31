@@ -428,7 +428,6 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @ExceptionHandle("doctor.warehouse.stock.out.fail")
     public Response<Boolean> out(WarehouseStockOutDto stockOut) {
 
-        //TODO 修改领用逻辑
 //        StockContext context = validAndGetContext(stockOut.getFarmId(), stockOut.getWarehouseId(), stockOut.getDetails());
         StockContext context = getWarehouseAndSupportedBasicMaterial(stockOut.getFarmId(), stockOut.getWarehouseId());
 

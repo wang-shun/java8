@@ -77,9 +77,7 @@ public class SkuController {
                     WarehouseSkuDto skuDto = new WarehouseSkuDto();
                     skuDto.copyFrom(sku);
 
-                    DoctorWarehouseVendor vendor = RespHelper.or500(doctorWarehouseVendorReadService.findById(sku.getVendorId()));
-                    if (null != vendor)
-                        skuDto.setVendorName(vendor.getName());
+                    skuDto.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
                     return skuDto;
                 }).collect(Collectors.toList()));
     }
@@ -125,7 +123,7 @@ public class SkuController {
                 throw new JsonResponseException("farm.not.found");
             skuDto.setOrgId(farm.getOrgId());
         }
-        
+
         DoctorWarehouseSku sku = new DoctorWarehouseSku();
         BeanUtils.copyProperties(skuDto, sku);
         return null != RespHelper.or500(doctorWarehouseSkuWriteService.create(sku));

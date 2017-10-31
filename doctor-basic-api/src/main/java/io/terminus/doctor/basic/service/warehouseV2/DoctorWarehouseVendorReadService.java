@@ -23,6 +23,9 @@ public interface DoctorWarehouseVendorReadService {
      */
     Response<DoctorWarehouseVendor> findById(Long id);
 
+
+    Response<String> findNameById(Long id);
+
     /**
      * 分页
      *

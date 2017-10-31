@@ -53,6 +53,16 @@ public class DoctorWarehouseVendorReadServiceImpl implements DoctorWarehouseVend
     }
 
     @Override
+    @ExceptionHandle("doctor.warehouse.vendor.fail.fail")
+    public Response<String> findNameById(Long id) {
+        DoctorWarehouseVendor vendor = doctorWarehouseVendorDao.findById(id);
+        if (null == vendor)
+            return Response.ok("");
+
+        return Response.ok(vendor.getName());
+    }
+
+    @Override
     public Response<Paging<DoctorWarehouseVendor>> paging(Integer pageNo, Integer pageSize, Map<String, Object> criteria) {
         try {
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);

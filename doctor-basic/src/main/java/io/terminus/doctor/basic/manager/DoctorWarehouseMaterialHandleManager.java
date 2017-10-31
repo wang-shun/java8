@@ -32,6 +32,9 @@ public class DoctorWarehouseMaterialHandleManager {
     @Autowired
     private DoctorWarehouseHandleDetailDao doctorWarehouseHandleDetailDao;
 
+    @Autowired
+    private DoctorVendorManager doctorVendorManager;
+
     /**
      * 入库
      */
@@ -63,9 +66,8 @@ public class DoctorWarehouseMaterialHandleManager {
         materialHandle.setOperatorName(materialHandleContext.getStockDto().getOperatorName());
         materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
         materialHandle.setUnit(materialHandleContext.getSku().getUnit());
-        //TODO warehousevendor
-//        materialHandle.setVendorName(materialHandleContext.getSku().getVendorName());
-//        materialHandle.setVendorName(materialHandleContext.getVendorName());
+
+        materialHandle.setVendorName(doctorVendorManager.findById(materialHandleContext.getSku().getVendorId()).getName());
         materialHandle.setHandleYear(materialHandleContext.getStockDto().getHandleDate().get(Calendar.YEAR));
         materialHandle.setHandleMonth(materialHandleContext.getStockDto().getHandleDate().get(Calendar.MONTH) + 1);
         materialHandle.setRemark(materialHandleContext.getStockDetail().getRemark());
