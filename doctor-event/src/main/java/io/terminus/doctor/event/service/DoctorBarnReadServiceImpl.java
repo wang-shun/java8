@@ -178,7 +178,16 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         }
     }
 
-
+    @Override
+    public Response<List<DoctorBarn>> selectBarns(String name, Integer count) {
+        try {
+            return Response.ok(doctorBarnDao.selectBarns(name, count));
+        } catch (Exception e) {
+            log.error("select barns failed, name, count,cause:{}",
+                    name, count, Throwables.getStackTraceAsString(e));
+            return Response.fail("select.barns.failed");
+        }
+    }
 
     //校验能否转入此舍(产房 => 产房(分娩母猪舍)/保育舍，保育舍 => 保育舍/育肥舍/育种舍，同类型可以互转)
     private Boolean checkCanTransBarn(Integer pigType, Integer barnType) {

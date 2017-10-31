@@ -220,7 +220,7 @@ public class Users {
         // 存一份 http session
         request.getSession().setAttribute(Constants.SESSION_USER_ID, token.getUserId());
 
-        //将后台生成的sessionId返回给前台，用于以后的sid
+        //将后台生成的sessionId返回给前台，用于以后的SID
         return MapBuilder.<String, Object>of()
                 .put("userId", token.getUserId())
                 .put("sid", token.getSessionId())

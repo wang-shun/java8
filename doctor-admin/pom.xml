@@ -36,19 +36,28 @@
             <artifactId>parana-article-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.terminus.boot</groupId>
+            <artifactId>terminus-spring-boot-starter-swagger</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml</groupId>
+            <artifactId>classmate</artifactId>
+        </dependency>
+
         <!-- pampas base -->
-        <dependency>
-            <groupId>io.terminus.pampas</groupId>
-            <artifactId>pampas-spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.terminus.pampas</groupId>
-            <artifactId>pampas-design</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.terminus.pampas</groupId>
-            <artifactId>pampas-engine</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>io.terminus.pampas</groupId>-->
+            <!--<artifactId>pampas-spring-boot-starter</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>io.terminus.pampas</groupId>-->
+            <!--<artifactId>pampas-design</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>io.terminus.pampas</groupId>-->
+            <!--<artifactId>pampas-engine</artifactId>-->
+        <!--</dependency>-->
 
         <!-- springboot -->
         <dependency>
@@ -74,6 +83,10 @@
         <dependency>
             <groupId>io.terminus.session</groupId>
             <artifactId>terminus-session</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.boot</groupId>
+            <artifactId>spring-boot-starter-redis</artifactId>
         </dependency>
         <dependency>
             <groupId>io.terminus.boot</groupId>

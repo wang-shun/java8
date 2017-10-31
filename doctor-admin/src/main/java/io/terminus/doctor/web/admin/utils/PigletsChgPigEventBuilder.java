@@ -1,7 +1,9 @@
 package io.terminus.doctor.web.admin.utils;
 
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -42,7 +44,10 @@ public class PigletsChgPigEventBuilder extends AbstractPigEventBuilder<DoctorPig
                 throw new ServiceException("sale.customer.not.null");
         }
         if (notNull(eventDto.getPigletsChangeReason())) {
-            eventDto.setPigletsChangeReasonName(RespHelper.orServEx(doctorBasicReadService.findChangeReasonById(eventDto.getPigletsChangeReason())).getReason());
+            DoctorChangeReason changeReason = RespHelper.orServEx(doctorBasicReadService.findChangeReasonById(eventDto.getPigletsChangeReason()));
+            if (null == changeReason)
+                throw new ServiceException("changeReason.not.found");
+            eventDto.setPigletsChangeReasonName(changeReason.getReason());
         }
 
         DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(eventDto.getPigletsChangeType()));
@@ -52,6 +57,11 @@ public class PigletsChgPigEventBuilder extends AbstractPigEventBuilder<DoctorPig
         //新录入的客户要创建一把
         DoctorFarm doctorFarm1 = RespHelper.or500(doctorFarmReadService.findFarmById(pigEvent.getFarmId()));
         expectTrue(notNull(doctorFarm1), "farm.not.null", pigEvent.getFarmId());
+
+        BaseUser currentUser = UserUtil.getCurrentUser();
+        if (null == currentUser)
+            throw new ServiceException("user.not.login");
+
         Long customerId = RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorFarm1.getId(),
                 doctorFarm1.getName(), eventDto.getPigletsCustomerId(), eventDto.getPigletsCustomerName(),
                 UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));

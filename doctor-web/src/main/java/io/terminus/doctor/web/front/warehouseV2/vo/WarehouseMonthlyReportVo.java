@@ -17,6 +17,10 @@ public class WarehouseMonthlyReportVo {
 
     private String unit;
 
+    private String code;
+
+    private String specification;
+
     /**
      * 月初余量
      */

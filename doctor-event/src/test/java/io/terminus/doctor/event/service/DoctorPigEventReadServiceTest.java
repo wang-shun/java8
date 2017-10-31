@@ -2,6 +2,8 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.test.BaseServiceTest;
 import org.junit.Assert;
@@ -22,6 +24,8 @@ public class DoctorPigEventReadServiceTest extends BaseServiceTest{
     private DoctorPigEventReadService doctorPigEventReadService;
     @Autowired
     private DoctorGroupReadService doctorGroupReadService;
+    @Autowired
+    private DoctorBarnReadService doctorBarnReadService;
 
     @Test
     public void testPagingPigEvent(){
@@ -31,6 +35,12 @@ public class DoctorPigEventReadServiceTest extends BaseServiceTest{
         List<DoctorPigEvent> doctorPigEvents = response.getResult().getData();
         Assert.assertEquals(doctorPigEvents.size(), 1);
 
+    }
+
+    @Test
+    public void testSelectBarns() {
+        List<DoctorBarn> list = RespHelper.orServEx(doctorBarnReadService.selectBarns(null, 10));
+        System.out.println(list);
     }
 
     @Test

@@ -1481,3 +1481,52 @@ ALTER TABLE doctor_warehouse_material_apply MODIFY apply_date DATE COMMENT '领�
 
 -- 2017-10-11
 ALTER table doctor_pigs ADD column `rfid` VARCHAR(32) DEFAULT NULL COMMENT '猪rfid物联网使用' after pig_Code;
+-- 2017-10-11物联网角色表
+CREATE TABLE `iot_roles` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR (32) NOT NULL COMMENT '角色名',
+  `desc` VARCHAR (255) DEFAULT NULL COMMENT '角色描述',
+  `status` tinyint(2) NOT NULL COMMENT '角色状态',
+  `allow_json` text NOT NULL COMMENT '角色允许查看页面',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='物联网角色表';
+
+-- 2017-10-11用户与物联网关联表
+CREATE TABLE `iot_users` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL COMMENT '用户id',
+  `user_name` VARCHAR (32) NOT NULL COMMENT '用户名',
+  `user_real_name` VARCHAR (32) NOT NULL COMMENT '用户真实',
+  `mobile` VARCHAR (40) NOT NULL COMMENT '手机号',
+  `iot_role_id` bigint(20) DEFAULT NULL COMMENT '物联网角色id',
+  `iot_role_name` VARCHAR (32) DEFAULT NULL COMMENT '角色名',
+  `type` smallint(6) NOT NULL COMMENT '物联网用户类型,1->运营主账户，2->运营子账户',
+  `status` smallint(6) NOT NULL COMMENT '用户状态0->离职,1->正常,-1->删除',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='物联网运营用户表';
+
+-- 仓库添加sku表 2017-10-13
+CREATE TABLE `doctor_warehouse_sku` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司编号',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪厂编号',
+  `name` varchar(128) NOT NULL COMMENT '物料名称',
+  `code` varchar(64) NOT NULL COMMENT '编码,用于跨厂调拨',
+  `srm` varchar(32) DEFAULT NULL COMMENT '短码,用于查询',
+  `vendor_id` bigint(20) DEFAULT NULL COMMENT '供应商编号',
+  `unit` varchar(64) DEFAULT NULL COMMENT '单位',
+  `specification` varchar(64) DEFAULT NULL COMMENT '规格',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='仓库物料表';
+
+ALTER TABLE doctor_warehouse_stock CHANGE material_name sku_name VARCHAR(64) COMMENT '物料名称';
+ALTER TABLE doctor_warehouse_stock CHANGE material_id sku_id BIGINT(20) COMMENT '物料编号';
+ALTER TABLE doctor_warehouse_stock DROP vendor_name;
+ALTER TABLE doctor_warehouse_stock DROP manager_id;
+ALTER TABLE doctor_warehouse_stock DROP unit;

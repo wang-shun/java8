@@ -11,17 +11,16 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
-import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
-import io.terminus.doctor.user.model.DoctorFarmExport;
-import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.doctor.user.model.*;
 import io.terminus.doctor.user.service.DoctorFarmExportReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.DoctorUserRoleLoader;
 import io.terminus.doctor.web.core.Constants;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.events.user.LoginEvent;
@@ -41,11 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -73,8 +68,10 @@ public class Users {
     private final AclLoader aclLoader;
     private final PermissionHelper permissionHelper;
     private final Publisher publisher;
-    private final JedisTemplate jedisTemplate;
     private final DoctorUserMaker doctorUserMaker;
+
+    @RpcConsumer
+    private DoctorUserRoleLoader doctorUserRoleLoader;
     @RpcConsumer
     private DoctorFarmExportReadService doctorFarmExportReadService;
 
@@ -84,8 +81,7 @@ public class Users {
                  AclLoader aclLoader,
                  PermissionHelper permissionHelper,
                  MobilePattern mobilePattern,
-                 Publisher publisher,
-                 JedisTemplate jedisTemplate) {
+                 Publisher publisher) {
         this.doctorUserReadService = doctorUserReadService;
         this.doctorUserMaker = doctorUserMaker;
         this.eventBus = eventBus;
@@ -93,7 +89,6 @@ public class Users {
         this.permissionHelper = permissionHelper;
         this.mobilePattern = mobilePattern;
         this.publisher = publisher;
-        this.jedisTemplate = jedisTemplate;
     }
 
     @RequestMapping("")
@@ -163,6 +158,7 @@ public class Users {
         eventBus.post(loginEvent);
         target = !StringUtils.hasText(target)?"/":target;
         map.put("redirect",target);
+        map.put("userId", user.getId());
         return map;
     }
 
@@ -203,5 +199,26 @@ public class Users {
     @RequestMapping(value = "/list/farmExport", method = RequestMethod.GET)
     public List<DoctorFarmExport> findFarmExportRecord(@RequestParam(required = false) String farmName) {
         return RespHelper.or500(doctorFarmExportReadService.findFarmExportRecord(farmName));
+    }
+
+
+    /**
+     * for herd admin
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/getUserById/{id}",method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
+    public User getUserById(@PathVariable(value = "id") Long id) {
+        Response<User> userResponse = doctorUserReadService.findById(id);
+        if (!userResponse.isSuccess()){
+            throw new JsonResponseException(userResponse.getError());
+        }
+        return userResponse.getResult();
+    }
+
+
+    @RequestMapping(value = "/{userId}/roles", method = {RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response<DoctorRoleContent> getUserRolesByUserId(@PathVariable Long userId) {
+        return doctorUserRoleLoader.hardLoadRoles(userId);
     }
 }

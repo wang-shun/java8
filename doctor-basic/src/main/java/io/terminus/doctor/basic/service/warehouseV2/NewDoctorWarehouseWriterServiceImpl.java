@@ -20,7 +20,6 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandler;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandlerDetail;
 import io.terminus.doctor.basic.service.DoctorFarmBasicReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
-import io.terminus.doctor.basic.service.warehouseV2.NewDoctorWarehouseWriterService;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -118,12 +117,12 @@ public class NewDoctorWarehouseWriterServiceImpl implements NewDoctorWarehouseWr
                     stock.setWarehouseId(warehouseStockDto.getWarehouseID());
                     stock.setWarehouseName(wareHouse.getWareHouseName());
                     stock.setWarehouseType(wareHouse.getType());
-                    stock.setManagerId(warehouseStockDto.getOperatorID());
+//                    stock.setManagerId(warehouseStockDto.getOperatorID());
                     stock.setQuantity(detail.getNumber());
-                    stock.setUnit(detail.getUnit());
+//                    stock.setUnit(detail.getUnit());
 //                    stock.setUnitPrice(detail.getUnitPrice());
-                    stock.setMaterialId(detail.getMaterialID());
-                    stock.setMaterialName(materials.get(detail.getMaterialID()).getName());
+                    stock.setSkuId(detail.getMaterialID());
+                    stock.setSkuName(materials.get(detail.getMaterialID()).getName());
                 }
                 dto.setStock(stock);
                 inHandles.add(dto);
@@ -222,11 +221,11 @@ public class NewDoctorWarehouseWriterServiceImpl implements NewDoctorWarehouseWr
             stock.setWarehouseId(warehouseStockDto.getWarehouseID());
             stock.setWarehouseName(wareHouse.getWareHouseName());
             stock.setWarehouseType(wareHouse.getType());
-            stock.setManagerId(warehouseStockDto.getOperatorID());
+//            stock.setManagerId(warehouseStockDto.getOperatorID());
             stock.setQuantity(detail.getNumber());
-            stock.setUnit(detail.getUnit());
-            stock.setMaterialId(detail.getMaterialID());
-            stock.setMaterialName(materials.get(detail.getMaterialID()).getName());
+//            stock.setUnit(detail.getUnit());
+            stock.setSkuId(detail.getMaterialID());
+            stock.setSkuName(materials.get(detail.getMaterialID()).getName());
 //            doctorWarehouseStockDao.create(stock);
         } else {
             stock.setQuantity(detail.getNumber().add(stock.getQuantity()));
@@ -267,11 +266,11 @@ public class NewDoctorWarehouseWriterServiceImpl implements NewDoctorWarehouseWr
             stock.setWarehouseId(warehouseStockDto.getWarehouseID());
             stock.setWarehouseName(wareHouse.getWareHouseName());
             stock.setWarehouseType(wareHouse.getType());
-            stock.setManagerId(warehouseStockDto.getOperatorID());
+//            stock.setManagerId(warehouseStockDto.getOperatorID());
             stock.setQuantity(detail.getNumber());
-            stock.setUnit(detail.getUnit());
-            stock.setMaterialId(detail.getMaterialID());
-            stock.setMaterialName(materials.get(detail.getMaterialID()).getName());
+//            stock.setUnit(detail.getUnit());
+            stock.setSkuId(detail.getMaterialID());
+            stock.setSkuName(materials.get(detail.getMaterialID()).getName());
         } else {
             stock.setQuantity(detail.getNumber());
         }
@@ -297,7 +296,6 @@ public class NewDoctorWarehouseWriterServiceImpl implements NewDoctorWarehouseWr
         Map<String, Object> targetWarehouseStockCeriteria = new HashedMap();
         targetWarehouseStockCeriteria.put("warehouseId", detail.getTargetWarehouseID());
         targetWarehouseStockCeriteria.put("materialId", detail.getMaterialID());
-        //TODO vendor ID
         List<DoctorWarehouseStock> targetWarehouseStockes = doctorWarehouseStockDao.list(targetWarehouseStockCeriteria);
         if (null == targetWarehouseStockes || targetWarehouseStockes.isEmpty()) {
             throw new ServiceException("目标仓库无库存");

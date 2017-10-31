@@ -77,8 +77,6 @@ public interface DoctorWarehouseStockWriteService {
      */
     Response<Boolean> out(WarehouseStockOutDto stockOut);
 
-//    Response<Boolean> out(List<DoctorWarehouseStockHandleDto> dtos, DoctorWarehouseStockHandler handle);
-
 
     /**
      * 配方生产
@@ -86,9 +84,6 @@ public interface DoctorWarehouseStockWriteService {
      * @return
      */
     Response<Boolean> formula(WarehouseFormulaDto formulaDto);
-
-
-
 
     @Deprecated
     Response<Boolean> outAndIn(List<DoctorWarehouseStockHandleDto> inHandles, List<DoctorWarehouseStockHandleDto> outHandles, DoctorWarehouseStockHandler handle);
