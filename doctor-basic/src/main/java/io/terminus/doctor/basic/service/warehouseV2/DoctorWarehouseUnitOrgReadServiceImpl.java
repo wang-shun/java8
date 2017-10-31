@@ -82,6 +82,9 @@ public class DoctorWarehouseUnitOrgReadServiceImpl implements DoctorWarehouseUni
                         .stream()
                         .map(DoctorWarehouseUnitOrg::getUnitId)
                         .collect(Collectors.toList()))
+                .stream()
+                .filter(u -> u.getIsValid().intValue() == 1)
+                .collect(Collectors.toList())
         );
     }
 }
