@@ -13,12 +13,12 @@ public enum WarehouseVendorDeleteFlag {
     /**
      * 正常
      */
-    NORMAL(0),
+    NORMAL(1),
 
     /**
      * 删除
      */
-    DELETE(1);
+    DELETE(0);
 
     @Getter
     private int value;

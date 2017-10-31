@@ -15,12 +15,12 @@ public enum WarehouseSkuStatus {
     /**
      * 正常
      */
-    NORMAL(0),
+    NORMAL(1),
 
     /**
      * 禁用
      */
-    FORBIDDEN(1);
+    FORBIDDEN(0);
 
     @Getter
     private int value;
