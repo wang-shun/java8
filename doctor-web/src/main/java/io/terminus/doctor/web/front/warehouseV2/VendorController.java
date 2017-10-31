@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.warehouseV2;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.doctor.basic.enums.WarehouseVendorDeleteFlag;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorWriteService;
@@ -14,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +43,7 @@ public class VendorController {
 
     @RequestMapping(method = RequestMethod.GET, value = "all")
     public List<DoctorWarehouseVendor> query() {
-        return RespHelper.or500(doctorWarehouseVendorReadService.list(Collections.emptyMap()));
+        return RespHelper.or500(doctorWarehouseVendorReadService.list(new HashMap<>()));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
@@ -68,7 +70,7 @@ public class VendorController {
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
     public boolean delete(@PathVariable Long id) {
-        return RespHelper.or500(doctorWarehouseVendorWriteService.delete(id));
+        return RespHelper.or500(doctorWarehouseVendorWriteService.logicDelete(id));
     }
 
 

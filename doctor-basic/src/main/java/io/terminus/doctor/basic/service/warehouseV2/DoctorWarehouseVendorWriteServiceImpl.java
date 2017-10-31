@@ -78,6 +78,8 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
         if (null != vendor) {
             vendor.setDeleteFlag(WarehouseVendorDeleteFlag.DELETE.getValue());
             doctorWarehouseVendorDao.update(vendor);
+        } else {
+            log.warn("warehouse vendor [{}] not found,ignore logic delete");
         }
 
         return Response.ok(true);
@@ -90,7 +92,7 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
 
         doctorWarehouseVendorOrgDao.deleteByOrg(orgId);
 
-        for (String id : Arrays.stream(vendorIds.split(",")).collect(Collectors.toSet())) {
+        for (String id : Arrays.stream(vendorIds.split(",")).collect(Collectors.toSet())) { //过滤潜在重复的内容
 
             if (!NumberUtils.isNumber(id))
                 throw new InvalidException("warehouse.vendor.id.not.number", id);
