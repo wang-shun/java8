@@ -34,13 +34,13 @@ public enum WarehouseMaterialHandleType {
 
 
     /**
-     * 调拨（无用）
+     * 调拨
      */
     TRANSFER(3),
 
 
     /**
-     * 盘点（无用）
+     * 盘点
      */
     INVENTORY(4),
 

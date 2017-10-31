@@ -167,7 +167,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     true);
         });
 
-        doctorWarehouseStockHandleManager.handle(stockIn.getWarehouseId(), stockIn.getFarmId(), stockIn.getHandleDate(), serialNo);
+        doctorWarehouseStockHandleManager.handle(stockIn, context.getWareHouse(), serialNo, WarehouseMaterialHandleType.IN);
 
         return Response.ok(true);
     }
@@ -180,6 +180,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
 //        StockContext context = validAndGetContext(stockInventory.getFarmId(), stockInventory.getWarehouseId(), stockInventory.getDetails());
         StockContext context = getWarehouseAndSupportedBasicMaterial(stockInventory.getFarmId(), stockInventory.getWarehouseId());
+
+        String serialNo = "P" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
 
         for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : stockInventory.getDetails()) {
 
@@ -292,6 +294,9 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                         true);
             }
         }
+
+        doctorWarehouseStockHandleManager.handle(stockInventory, context.getWareHouse(), serialNo, WarehouseMaterialHandleType.INVENTORY);
+
         return Response.ok(true);
     }
 
@@ -302,6 +307,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
 //        StockContext context = validAndGetContext(stockTransfer.getFarmId(), stockTransfer.getWarehouseId(), stockTransfer.getDetails());
         StockContext context = getWarehouseAndSupportedBasicMaterial(stockTransfer.getFarmId(), stockTransfer.getWarehouseId());
+
+        String serialNo = "D" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
 
         List<DoctorWarehouseHandlerManager.StockHandleContext> handleContexts = new ArrayList<>(stockTransfer.getDetails().size());
         for (WarehouseStockTransferDto.WarehouseStockTransferDetail detail : stockTransfer.getDetails()) {
@@ -420,6 +427,9 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //                handleContexts.add(handleContext);
         }
 //            doctorWarehouseHandlerManager.handle(handleContexts);
+
+        doctorWarehouseStockHandleManager.handle(stockTransfer, context.getWareHouse(), serialNo, WarehouseMaterialHandleType.TRANSFER);
+
         return Response.ok(true);
     }
 
@@ -468,7 +478,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     false);
         }
 
-        doctorWarehouseStockHandleManager.handle(stockOut.getWarehouseId(), stockOut.getFarmId(), stockOut.getHandleDate(), serialNo);
+        doctorWarehouseStockHandleManager.handle(stockOut, context.getWareHouse(), serialNo, WarehouseMaterialHandleType.OUT);
         return Response.ok(true);
     }
 
