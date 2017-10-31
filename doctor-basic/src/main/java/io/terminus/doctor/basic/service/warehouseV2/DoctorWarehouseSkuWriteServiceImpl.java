@@ -1,10 +1,8 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
-import io.terminus.common.exception.ServiceException;
-import io.terminus.common.model.Response;
-import io.terminus.boot.rpc.common.annotation.RpcProvider;
-
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.dao.DoctorFarmBasicDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
@@ -13,12 +11,11 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
-
-import org.apache.zookeeper.OpResult;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.xml.stream.events.ProcessingInstruction;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,20 +143,24 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
                 throw new InvalidException("warehouse.sku.type.not.support", type);
         }
 
-        List<DoctorWarehouseSku> skus = doctorWarehouseSkuDao.list(DoctorWarehouseSku.builder()
-                .type(type)
-                .orgId(orgId)
-                .status(WarehouseSkuStatus.NORMAL.getValue())
-                .build());
-        if (skus.isEmpty())
-            return Response.ok(prefix + 0001);
+        Map<String, Object> params = new HashMap<>();
+        params.put("type", type);
+        params.put("orgId", orgId);
+        params.put("status", WarehouseSkuStatus.NORMAL.getValue());
 
-        int lastCodeWithSameOrgAndType = Integer.parseInt(skus.get(0).getCode().substring(prefix.length()));
+        List<DoctorWarehouseSku> skus = doctorWarehouseSkuDao.list(params);
+        if (skus.isEmpty())
+            return Response.ok(prefix + "0001");
+
+        String lasSkuCode = skus.get(0).getCode().substring(prefix.length());
+        if (!NumberUtils.isNumber(lasSkuCode))
+            throw new InvalidException("warehouse.sku.code.format.illegal", lasSkuCode);
+
+        int lastCodeWithSameOrgAndType = Integer.parseInt(lasSkuCode);
         if (lastCodeWithSameOrgAndType >= 9999)
             throw new InvalidException("warehouse.sku.code.out.of.range", 9999);
 
-
-        return Response.ok(prefix + (lastCodeWithSameOrgAndType + 1));
+        return Response.ok(prefix + StringUtils.leftPad(String.valueOf((lastCodeWithSameOrgAndType + 1)), 4, '0'));
     }
 
 }
