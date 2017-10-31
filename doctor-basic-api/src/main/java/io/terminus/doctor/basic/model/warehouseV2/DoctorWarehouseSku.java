@@ -59,6 +59,7 @@ public class DoctorWarehouseSku implements Serializable {
 
     /**
      * 状态
+     * @see io.terminus.doctor.basic.enums.WarehouseSkuStatus
      */
     private Integer status;
 

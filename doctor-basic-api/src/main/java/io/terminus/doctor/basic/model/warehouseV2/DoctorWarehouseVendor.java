@@ -39,6 +39,7 @@ public class DoctorWarehouseVendor implements Serializable {
     
     /**
      * 删除标志，0正常，1删除
+     * @see io.terminus.doctor.basic.enums.WarehouseVendorDeleteFlag
      */
     private Integer deleteFlag;
     
