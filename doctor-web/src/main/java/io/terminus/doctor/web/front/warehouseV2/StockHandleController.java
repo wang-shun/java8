@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleReadService;
@@ -8,8 +9,11 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockHandleRe
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleVo;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +36,11 @@ public class StockHandleController {
     @RpcConsumer
     private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
 
+    @InitBinder
+    public void init(WebDataBinder webDataBinder) {
+        webDataBinder.registerCustomEditor(Date.class, new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"), true));
+    }
+
     @RequestMapping(method = RequestMethod.GET)
     public Paging<DoctorWarehouseStockHandle> paging(@RequestParam Long farmId,
                                                      @RequestParam(required = false) Integer pageNo,
@@ -43,6 +52,8 @@ public class StockHandleController {
                                                      @RequestParam(required = false) Integer type,
                                                      @RequestParam(required = false) Integer subType) {
 
+        if (null != startDate && null != endDate && startDate.after(endDate))
+            throw new JsonResponseException("start.date.after.end.date");
 
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);

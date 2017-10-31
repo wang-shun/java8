@@ -55,6 +55,8 @@
             <if test="operatorId != null">AND `operator_id` = #{operatorId}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+            <if test="startDate != null">AND <![CDATA[handle_date >= #{startDate}]]></if>
+            <if test="endDate != null">AND <![CDATA[handle_date <= #{endDate}]]></if>
         </where>
     </sql>
 
