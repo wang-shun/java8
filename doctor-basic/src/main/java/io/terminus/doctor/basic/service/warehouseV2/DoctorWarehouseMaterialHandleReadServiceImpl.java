@@ -6,6 +6,7 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,16 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             log.error("failed to find doctor warehouse material handle by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.material.handle.find.fail");
         }
+    }
+
+    @Override
+    @ExceptionHandle("doctor.warehouse.material.handle.find.fail")
+    public Response<List<DoctorWarehouseMaterialHandle>> findByStockHandle(Long stockHandleId) {
+
+        return Response.ok(doctorWarehouseMaterialHandleDao.list(DoctorWarehouseMaterialHandle.builder()
+                .stockHandleId(stockHandleId)
+                .deleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue())
+                .build()));
     }
 
     @Override

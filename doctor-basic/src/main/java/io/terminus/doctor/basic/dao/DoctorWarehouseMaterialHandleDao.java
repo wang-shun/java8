@@ -2,9 +2,9 @@ package io.terminus.doctor.basic.dao;
 
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;

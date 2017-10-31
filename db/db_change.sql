@@ -1565,3 +1565,6 @@ ALTER TABLE doctor_warehouse_vendor MODIFY delete_flag TINYINT(4) DEFAULT 1 COMM
 ALTER TABLE doctor_warehouse_sku ADD item_id BIGINT(20) NULL COMMENT '物料类型编号';
 ALTER TABLE doctor_warehouse_sku ADD item_name VARCHAR(128) NULL COMMENT '基础物料名称';
 ALTER TABLE doctor_warehouse_sku ADD type SMALLINT(6) NULL COMMENT '基础物料类型';
+
+-- 物料处理表的批次号字段修改 2017-10-31
+ALTER TABLE doctor_warehouse_material_handle CHANGE handle_no stock_handle_id BIGINT(20) COMMENT '库存处理ID';

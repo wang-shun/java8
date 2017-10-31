@@ -3,14 +3,17 @@ package io.terminus.doctor.web.front.warehouseV2;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockHandleReadService;
 import io.terminus.doctor.common.utils.RespHelper;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleVo;
+import org.springframework.beans.BeanUtils;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 库存操作单据
@@ -24,16 +27,63 @@ import java.util.Map;
 @RequestMapping("api/doctor/warehouse/receipt")
 public class StockHandleController {
 
-
     @RpcConsumer
     private DoctorWarehouseStockHandleReadService doctorWarehouseStockHandleReadService;
+    @RpcConsumer
+    private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
 
     @RequestMapping(method = RequestMethod.GET)
-    public Paging<DoctorWarehouseStockHandle> paging(@RequestParam(required = false) Integer pageNo,
+    public Paging<DoctorWarehouseStockHandle> paging(@RequestParam Long farmId,
+                                                     @RequestParam(required = false) Integer pageNo,
                                                      @RequestParam(required = false) Integer pageSize,
-                                                     @RequestParam Map<String, Object> params) {
+                                                     @RequestParam(required = false) Date startDate,
+                                                     @RequestParam(required = false) Date endDate,
+                                                     @RequestParam(required = false) Long operatorId,
+                                                     @RequestParam(required = false) Long warehouseId,
+                                                     @RequestParam(required = false) Integer type,
+                                                     @RequestParam(required = false) Integer subType) {
 
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmId", farmId);
+        params.put("warehouseId", warehouseId);
+        params.put("operatorId", operatorId);
+        params.put("handleType", type);
+        params.put("handleSubType", subType);
+        params.put("startDate", startDate);
+        params.put("endDate", endDate);
         return RespHelper.or500(doctorWarehouseStockHandleReadService.paging(pageNo, pageSize, params));
     }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}")
+    public StockHandleVo query(@PathVariable Long id) {
+
+        DoctorWarehouseStockHandle stockHandle = RespHelper.or500(doctorWarehouseStockHandleReadService.findById(id));
+        if (null == stockHandle)
+            return null;
+
+        StockHandleVo vo = new StockHandleVo();
+        BeanUtils.copyProperties(stockHandle, vo);
+
+        vo.setDetails(
+                RespHelper.or500(doctorWarehouseMaterialHandleReadService.findByStockHandle(stockHandle.getId()))
+                        .stream()
+                        .map(mh -> {
+                            StockHandleVo.Detail detail = new StockHandleVo.Detail();
+                            BeanUtils.copyProperties(mh, detail);
+                            return detail;
+                        })
+                        .collect(Collectors.toList()));
+
+        return vo;
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "export")
+    public void export() {
+
+    }
+
 
 }

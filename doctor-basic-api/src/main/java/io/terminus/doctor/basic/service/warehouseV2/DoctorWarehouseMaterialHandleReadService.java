@@ -24,6 +24,15 @@ public interface DoctorWarehouseMaterialHandleReadService {
      */
     Response<DoctorWarehouseMaterialHandle> findById(Long id);
 
+
+    /**
+     * 根据单据查询操作明细
+     *
+     * @param stockHandleId
+     * @return
+     */
+    Response<List<DoctorWarehouseMaterialHandle>> findByStockHandle(Long stockHandleId);
+
     /**
      * 分页
      *

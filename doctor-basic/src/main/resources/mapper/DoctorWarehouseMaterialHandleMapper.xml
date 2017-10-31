@@ -3,14 +3,14 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-10-31 13:22:27
+ ~ Date: 2017-10-31 16:15:20
  ~ Created by [ your name ]
 -->
 
 <mapper namespace="DoctorWarehouseMaterialHandle">
     <resultMap id="DoctorWarehouseMaterialHandleMap" type="DoctorWarehouseMaterialHandle">
         <id property="id" column="id"/>
-        <result property="handleNo" column="handle_no"/>
+        <result property="stockHandleId" column="stock_handle_id"/>
         <result property="farmId" column="farm_id"/>
         <result property="warehouseId" column="warehouse_id"/>
         <result property="warehouseType" column="warehouse_type"/>
@@ -44,18 +44,18 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `handle_no`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_transfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, 
+        `stock_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_transfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{handleNo}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTransferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, 
+        #{stockHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTransferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, 
         now(), now()
     </sql>
 
     <sql id="criteria">
         <where>
-            <if test="handleNo != null">AND `handle_no` = #{handleNo}</if>
+            <if test="stockHandleId != null">AND `stock_handle_id` = #{stockHandleId}</if>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
@@ -82,7 +82,7 @@
 
     <sql id="adv_criteria">
         <where>
-            <if test="handleNo != null">AND `handle_no` = #{handleNo}</if>
+            <if test="stockHandleId != null">AND `stock_handle_id` = #{stockHandleId}</if>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
@@ -153,7 +153,7 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="handleNo != null">`handle_no` = #{handleNo},</if>
+            <if test="stockHandleId != null">`stock_handle_id` = #{stockHandleId},</if>
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
             <if test="warehouseType != null">`warehouse_type` = #{warehouseType},</if>
@@ -224,7 +224,5 @@
         <include refid="adv_criteria"/>
         ORDER BY `id` DESC
     </select>
-
-
 
 </mapper>
