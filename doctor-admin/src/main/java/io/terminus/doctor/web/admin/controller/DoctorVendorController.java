@@ -32,8 +32,8 @@ public class DoctorVendorController {
     private DoctorFarmReadService doctorFarmReadService;
 
     @RequestMapping(method = RequestMethod.GET)
-    public Paging<DoctorWarehouseVendor> query(@RequestParam Integer pageNo,
-                                               @RequestParam Integer pageSize,
+    public Paging<DoctorWarehouseVendor> query(@RequestParam(required = false) Integer pageNo,
+                                               @RequestParam(required = false) Integer pageSize,
                                                @RequestParam Map<String, Object> params) {
         return RespHelper.or500(doctorWarehouseVendorReadService.paging(pageNo, pageSize, params));
     }
