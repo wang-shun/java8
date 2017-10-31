@@ -21,8 +21,8 @@ public class DoctorWarehouseHandlerManager {
 
     @Autowired
     private DoctorWarehouseStockDao doctorWarehouseStockDao;
-    @Autowired
-    private DoctorWarehouseStockHandlerDao doctorWarehouseStockHandlerDao;
+//    @Autowired
+//    private DoctorWarehouseStockHandlerDao doctorWarehouseStockHandlerDao;
     @Autowired
     private DoctorWarehouseStockHandlerDetailDao doctorWarehouseStockHandlerDetailDao;
 
@@ -155,8 +155,8 @@ public class DoctorWarehouseHandlerManager {
 
     }
 
-    @Transactional
-    public void inAndOutStock(List<DoctorWarehouseStockHandleDto> handleInDtos, List<DoctorWarehouseStockHandleDto> handleOutDtos, DoctorWarehouseStockHandler handle) {
+//    @Transactional
+//    public void inAndOutStock(List<DoctorWarehouseStockHandleDto> handleInDtos, List<DoctorWarehouseStockHandleDto> handleOutDtos, DoctorWarehouseStockHandler handle) {
 
 //        List<DoctorWarehouseStockHandlerDetail> handleDetails = new ArrayList<>();
 //        for (DoctorWarehouseStockHandleDto in : handleInDtos) {
@@ -195,7 +195,7 @@ public class DoctorWarehouseHandlerManager {
 //            doctorWarehouseStockHandlerDetailDao.create(detail);
 //        }
 
-    }
+//    }
 
 
     private void handleStockMonthlyReport(DoctorWarehouseStock stock, Date handleDate, BigDecimal number, Long unitPrice, boolean in) {

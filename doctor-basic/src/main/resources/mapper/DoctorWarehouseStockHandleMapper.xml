@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-09-12 13:58:42
+ ~ Date: 2017-10-31 14:49:19
  ~ Created by [ your name ]
 -->
 
@@ -12,8 +12,13 @@
         <id property="id" column="id"/>
         <result property="farmId" column="farm_id"/>
         <result property="warehouseId" column="warehouse_id"/>
+        <result property="warehouseName" column="warehouse_name"/>
         <result property="serialNo" column="serial_no"/>
         <result property="handleDate" column="handle_date"/>
+        <result property="handleSubType" column="handle_sub_type"/>
+        <result property="handleType" column="handle_type"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="operatorId" column="operator_id"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -28,12 +33,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `warehouse_id`, `serial_no`, `handle_date`, 
+        `farm_id`, `warehouse_id`, `warehouse_name`, `serial_no`, `handle_date`, `handle_sub_type`, `handle_type`, `operator_name`, `operator_id`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{warehouseId}, #{serialNo}, #{handleDate}, 
+        #{farmId}, #{warehouseId}, #{warehouseName}, #{serialNo}, #{handleDate}, #{handleSubType}, #{handleType}, #{operatorName}, #{operatorId}, 
         now(), now()
     </sql>
 
@@ -41,8 +46,13 @@
         <where>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
+            <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
             <if test="serialNo != null">AND `serial_no` = #{serialNo}</if>
             <if test="handleDate != null">AND `handle_date` = #{handleDate}</if>
+            <if test="handleSubType != null">AND `handle_sub_type` = #{handleSubType}</if>
+            <if test="handleType != null">AND `handle_type` = #{handleType}</if>
+            <if test="operatorName != null">AND `operator_name` = #{operatorName}</if>
+            <if test="operatorId != null">AND `operator_id` = #{operatorId}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
@@ -81,8 +91,13 @@
         <set>
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
+            <if test="warehouseName != null">`warehouse_name` = #{warehouseName},</if>
             <if test="serialNo != null">`serial_no` = #{serialNo},</if>
             <if test="handleDate != null">`handle_date` = #{handleDate},</if>
+            <if test="handleSubType != null">`handle_sub_type` = #{handleSubType},</if>
+            <if test="handleType != null">`handle_type` = #{handleType},</if>
+            <if test="operatorName != null">`operator_name` = #{operatorName},</if>
+            <if test="operatorId != null">`operator_id` = #{operatorId},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}

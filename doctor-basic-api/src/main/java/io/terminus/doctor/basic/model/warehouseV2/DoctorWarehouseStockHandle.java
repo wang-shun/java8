@@ -8,13 +8,13 @@ import java.util.Date;
 /**
  * Desc:
  * Mail: [ your email ]
- * Date: 2017-09-12 13:58:42
+ * Date: 2017-10-31 14:49:19
  * Created by [ your name ]
  */
 @Data
 public class DoctorWarehouseStockHandle implements Serializable {
 
-    private static final long serialVersionUID = -551430614143675093L;
+    private static final long serialVersionUID = -4835714286773486834L;
 
     /**
      * 自增主键
@@ -32,6 +32,11 @@ public class DoctorWarehouseStockHandle implements Serializable {
     private Long warehouseId;
     
     /**
+     * 仓库名
+     */
+    private String warehouseName;
+    
+    /**
      * 流水号
      */
     private String serialNo;
@@ -40,6 +45,26 @@ public class DoctorWarehouseStockHandle implements Serializable {
      * 处理日期
      */
     private Date handleDate;
+    
+    /**
+     * 事件子类型
+     */
+    private Integer handleSubType;
+    
+    /**
+     * 事件类型
+     */
+    private Integer handleType;
+    
+    /**
+     * 创建人名
+     */
+    private String operatorName;
+    
+    /**
+     * 创建人
+     */
+    private Long operatorId;
     
     /**
      * 创建时间

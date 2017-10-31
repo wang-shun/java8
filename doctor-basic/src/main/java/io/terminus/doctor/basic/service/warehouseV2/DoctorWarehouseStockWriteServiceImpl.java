@@ -630,17 +630,17 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         return Response.ok(true);
     }
 
-    @Override
-    public Response<Boolean> outAndIn(List<DoctorWarehouseStockHandleDto> inHandles, List<DoctorWarehouseStockHandleDto> outHandles, DoctorWarehouseStockHandler handle) {
-        try {
-            doctorWarehouseHandlerManager.inAndOutStock(inHandles, outHandles, handle);
-        } catch (Exception e) {
-            log.error("failed to out of stock,cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouseV2.stock.out.fail");
-        }
-
-        return Response.ok(true);
-    }
+//    @Override
+//    public Response<Boolean> outAndIn(List<DoctorWarehouseStockHandleDto> inHandles, List<DoctorWarehouseStockHandleDto> outHandles, DoctorWarehouseStockHandler handle) {
+//        try {
+//            doctorWarehouseHandlerManager.inAndOutStock(inHandles, outHandles, handle);
+//        } catch (Exception e) {
+//            log.error("failed to out of stock,cause:{}", Throwables.getStackTraceAsString(e));
+//            return Response.fail("doctor.warehouseV2.stock.out.fail");
+//        }
+//
+//        return Response.ok(true);
+//    }
 
 
     @Deprecated

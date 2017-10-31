@@ -1,13 +1,9 @@
 package io.terminus.doctor.basic.manager;
 
 import io.terminus.doctor.basic.dao.DoctorWarehouseStockHandleDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseStockHandlerDao;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 

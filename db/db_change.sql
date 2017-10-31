@@ -1544,3 +1544,19 @@ ALTER TABLE doctor_warehouse_material_handle
 
 -- 修改物料处理明细表调入仓库编号 2017-10-31
 ALTER TABLE doctor_warehouse_material_handle CHANGE other_trasnfer_handle_id other_transfer_handle_id BIGINT(20) COMMENT '另一条调拨物料处理单的编号';
+
+-- 库存处理表添加字段 2017-10-31
+ALTER TABLE doctor_warehouse_stock_handle ADD handle_sub_type TINYINT NULL COMMENT '事件子类型';
+ALTER TABLE doctor_warehouse_stock_handle ADD handle_type TINYINT NULL COMMENT '事件类型';
+ALTER TABLE doctor_warehouse_stock_handle ADD operator_name VARCHAR(64) NULL COMMENT '创建人名';
+ALTER TABLE doctor_warehouse_stock_handle ADD operator_id BIGINT(20) NULL COMMENT '创建人';
+ALTER TABLE doctor_warehouse_stock_handle ADD warehouse_name VARCHAR(64) NULL COMMENT '仓库名';
+ALTER TABLE doctor_warehouse_stock_handle
+  MODIFY COLUMN updated_at DATETIME AFTER handle_sub_type,
+  MODIFY COLUMN created_at DATETIME AFTER handle_sub_type,
+  MODIFY COLUMN warehouse_name VARCHAR(64) COMMENT '仓库名' AFTER warehouse_id;
+
+-- 添加默认值 2017-10-31
+ALTER TABLE doctor_warehouse_material_handle MODIFY delete_flag TINYINT(2) DEFAULT 1 COMMENT '删除标志';
+ALTER TABLE doctor_warehouse_sku ALTER COLUMN status SET DEFAULT 1;
+ALTER TABLE doctor_warehouse_vendor MODIFY delete_flag TINYINT(4) DEFAULT 1 COMMENT '删除标志';

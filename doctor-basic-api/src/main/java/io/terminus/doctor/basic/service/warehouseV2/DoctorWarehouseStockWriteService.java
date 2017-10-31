@@ -5,7 +5,6 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.*;
 import io.terminus.doctor.basic.dto.warehouseV2.*;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandler;
 
 import java.util.List;
 
@@ -85,7 +84,7 @@ public interface DoctorWarehouseStockWriteService {
      */
     Response<Boolean> formula(WarehouseFormulaDto formulaDto);
 
-    @Deprecated
-    Response<Boolean> outAndIn(List<DoctorWarehouseStockHandleDto> inHandles, List<DoctorWarehouseStockHandleDto> outHandles, DoctorWarehouseStockHandler handle);
+//    @Deprecated
+//    Response<Boolean> outAndIn(List<DoctorWarehouseStockHandleDto> inHandles, List<DoctorWarehouseStockHandleDto> outHandles, DoctorWarehouseStockHandler handle);
 
 }
