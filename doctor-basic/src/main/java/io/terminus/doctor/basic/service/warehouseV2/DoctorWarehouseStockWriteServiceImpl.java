@@ -400,13 +400,13 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             inHandle.setHandleYear(stockTransfer.getHandleDate().get(Calendar.YEAR));
             inHandle.setHandleMonth(stockTransfer.getHandleDate().get(Calendar.MONTH) + 1);
             inHandle.setRemark(detail.getRemark());
-            inHandle.setOtherTrasnferHandleId(outHandle.getId());
+            inHandle.setOtherTransferHandleId(outHandle.getId());
             List<DoctorWarehousePurchase> transferInPurchase = new ArrayList<>();
             for (DoctorWarehousePurchase purchase : purchaseHandleContext.getPurchaseQuantity().keySet()) {
                 transferInPurchase.add(copyPurchase(purchase, stockTransfer.getHandleDate(), targetWareHouse, purchaseHandleContext.getPurchaseQuantity().get(purchase)));
             }
             doctorWarehouseHandlerManager.inStock(transferInStock, transferInPurchase, inHandle, null, null);
-            outHandle.setOtherTrasnferHandleId(inHandle.getId());
+            outHandle.setOtherTransferHandleId(inHandle.getId());
             doctorWarehouseMaterialHandleDao.update(outHandle);
             doctorWarehouseStockMonthlyManager.count(transferInStock.getWarehouseId(),
                     transferInStock.getSkuId(),

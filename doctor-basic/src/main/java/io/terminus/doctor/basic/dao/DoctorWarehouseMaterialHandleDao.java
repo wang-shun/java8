@@ -2,8 +2,9 @@ package io.terminus.doctor.basic.dao;
 
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
-import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.common.mysql.dao.MyBatisDao;
+
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
@@ -13,12 +14,11 @@ import java.util.Map;
 /**
  * Desc:
  * Mail: [ your email ]
- * Date: 2017-08-21 08:56:13
+ * Date: 2017-10-31 13:22:27
  * Created by [ your name ]
  */
 @Repository
 public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouseMaterialHandle> {
-
 
     /**
      * 支持bigType参数，对多个type的or查询

@@ -1534,5 +1534,13 @@ ALTER TABLE doctor_warehouse_vendor ADD delete_flag TINYINT NULL COMMENT '删除
 ALTER TABLE doctor_warehouse_vendor
   MODIFY COLUMN delete_flag TINYINT COMMENT '删除标志，0正常，1删除' AFTER short_name;
 
--- sku表添加status字段
+-- sku表添加status字段 2017-10-31
 ALTER TABLE doctor_warehouse_sku ADD status TINYINT NULL COMMENT '状态';
+
+-- 物料处理明细表添加批次号 2017-10-31
+ALTER TABLE doctor_warehouse_material_handle ADD handle_no VARCHAR(64) NULL COMMENT '物料处理批次号';
+ALTER TABLE doctor_warehouse_material_handle
+  MODIFY COLUMN handle_no VARCHAR(64) COMMENT '物料处理批次号' AFTER id;
+
+-- 修改物料处理明细表调入仓库编号 2017-10-31
+ALTER TABLE doctor_warehouse_material_handle CHANGE other_trasnfer_handle_id other_transfer_handle_id BIGINT(20) COMMENT '另一条调拨物料处理单的编号';

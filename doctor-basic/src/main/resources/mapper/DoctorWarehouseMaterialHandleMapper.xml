@@ -3,18 +3,19 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-09-13 10:09:49
+ ~ Date: 2017-10-31 13:22:27
  ~ Created by [ your name ]
 -->
 
 <mapper namespace="DoctorWarehouseMaterialHandle">
     <resultMap id="DoctorWarehouseMaterialHandleMap" type="DoctorWarehouseMaterialHandle">
         <id property="id" column="id"/>
+        <result property="handleNo" column="handle_no"/>
         <result property="farmId" column="farm_id"/>
         <result property="warehouseId" column="warehouse_id"/>
         <result property="warehouseType" column="warehouse_type"/>
         <result property="warehouseName" column="warehouse_name"/>
-        <result property="otherTrasnferHandleId" column="other_trasnfer_handle_id"/>
+        <result property="otherTransferHandleId" column="other_transfer_handle_id"/>
         <result property="vendorName" column="vendor_name"/>
         <result property="materialId" column="material_id"/>
         <result property="materialName" column="material_name"/>
@@ -43,22 +44,23 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_trasnfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, 
+        `handle_no`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_transfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTrasnferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, 
+        #{handleNo}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTransferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, 
         now(), now()
     </sql>
 
     <sql id="criteria">
         <where>
+            <if test="handleNo != null">AND `handle_no` = #{handleNo}</if>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
             <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
-            <if test="otherTrasnferHandleId != null">AND `other_trasnfer_handle_id` = #{otherTrasnferHandleId}</if>
+            <if test="otherTransferHandleId != null">AND `other_transfer_handle_id` = #{otherTransferHandleId}</if>
             <if test="vendorName != null">AND `vendor_name` = #{vendorName}</if>
             <if test="materialId != null">AND `material_id` = #{materialId}</if>
             <if test="materialName != null">AND `material_name` = #{materialName}</if>
@@ -80,11 +82,12 @@
 
     <sql id="adv_criteria">
         <where>
+            <if test="handleNo != null">AND `handle_no` = #{handleNo}</if>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
             <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
-            <if test="otherTrasnferHandleId != null">AND `other_trasnfer_handle_id` = #{otherTrasnferHandleId}</if>
+            <if test="otherTransferHandleId != null">AND `other_transfer_handle_id` = #{otherTransferHandleId}</if>
             <if test="vendorName != null">AND `vendor_name` = #{vendorName}</if>
             <if test="materialId != null">AND `material_id` = #{materialId}</if>
             <if test="materialName != null">AND `material_name` = #{materialName}</if>
@@ -150,11 +153,12 @@
         UPDATE
         <include refid="tb"/>
         <set>
+            <if test="handleNo != null">`handle_no` = #{handleNo},</if>
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
             <if test="warehouseType != null">`warehouse_type` = #{warehouseType},</if>
             <if test="warehouseName != null">`warehouse_name` = #{warehouseName},</if>
-            <if test="otherTrasnferHandleId != null">`other_trasnfer_handle_id` = #{otherTrasnferHandleId},</if>
+            <if test="otherTransferHandleId != null">`other_transfer_handle_id` = #{otherTransferHandleId},</if>
             <if test="vendorName != null">`vendor_name` = #{vendorName},</if>
             <if test="materialId != null">`material_id` = #{materialId},</if>
             <if test="materialName != null">`material_name` = #{materialName},</if>
@@ -220,6 +224,7 @@
         <include refid="adv_criteria"/>
         ORDER BY `id` DESC
     </select>
+
 
 
 </mapper>

@@ -95,7 +95,7 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
             reverseOut(handle);
         } else if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()
                 || WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()) {
-            DoctorWarehouseMaterialHandle otherHandle = doctorWarehouseMaterialHandleDao.findById(handle.getOtherTrasnferHandleId());
+            DoctorWarehouseMaterialHandle otherHandle = doctorWarehouseMaterialHandleDao.findById(handle.getOtherTransferHandleId());
             if (null == otherHandle)
                 return Response.fail("other.material.handle.not.found");
 
