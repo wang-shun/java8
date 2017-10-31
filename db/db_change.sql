@@ -1564,3 +1564,4 @@ ALTER TABLE doctor_warehouse_vendor MODIFY delete_flag TINYINT(4) DEFAULT 1 COMM
 -- sku表添加item字段
 ALTER TABLE doctor_warehouse_sku ADD item_id BIGINT(20) NULL COMMENT '物料类型编号';
 ALTER TABLE doctor_warehouse_sku ADD item_name VARCHAR(128) NULL COMMENT '基础物料名称';
+ALTER TABLE doctor_warehouse_sku ADD type SMALLINT(6) NULL COMMENT '基础物料类型';
