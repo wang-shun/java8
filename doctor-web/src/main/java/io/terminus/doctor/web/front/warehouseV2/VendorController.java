@@ -35,8 +35,8 @@ public class VendorController {
     private DoctorFarmReadService doctorFarmReadService;
 
     @RequestMapping(method = RequestMethod.GET)
-    public Paging<DoctorWarehouseVendor> query(@RequestParam Integer pageNo,
-                                               @RequestParam Integer pageSize,
+    public Paging<DoctorWarehouseVendor> query(@RequestParam(required = false) Integer pageNo,
+                                               @RequestParam(required = false) Integer pageSize,
                                                @RequestParam Map<String, Object> params) {
         return RespHelper.or500(doctorWarehouseVendorReadService.paging(pageNo, pageSize, params));
     }
@@ -51,6 +51,7 @@ public class VendorController {
         return RespHelper.or500(doctorWarehouseVendorReadService.findById(id));
     }
 
+    @Deprecated //在运营后台
     @RequestMapping(method = RequestMethod.POST)
     public Long create(@RequestBody @Validated DoctorWarehouseVendor doctorWarehouseVendor, Errors errors) {
         if (errors.hasErrors())
@@ -59,6 +60,7 @@ public class VendorController {
         return RespHelper.or500(doctorWarehouseVendorWriteService.create(doctorWarehouseVendor));
     }
 
+    @Deprecated //在运营后台
     @RequestMapping(method = RequestMethod.PUT)
     public boolean update(@RequestBody @Validated DoctorWarehouseVendor doctorWarehouseVendor, Errors errors) {
         if (errors.hasErrors())
