@@ -62,7 +62,7 @@ public class StockController {
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
 
     @RequestMapping(method = RequestMethod.PUT, value = "in")
-    public boolean in(@RequestBody @Validated WarehouseStockInDto stockIn, Errors errors) {
+    public boolean in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -82,7 +82,7 @@ public class StockController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "out")
-    public boolean out(@RequestBody @Validated WarehouseStockOutDto stockOut, Errors errors) {
+    public boolean out(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockOutDto stockOut, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -109,7 +109,8 @@ public class StockController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "inventory")
-    public boolean inventory(@RequestBody @Validated WarehouseStockInventoryDto stockInventory, Errors errors) {
+    public boolean inventory(@RequestBody @Validated(AbstractWarehouseStockDetail.StockInventoryValid.class) WarehouseStockInventoryDto stockInventory,
+                             Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -129,7 +130,7 @@ public class StockController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "transfer")
-    public boolean transfer(@RequestBody @Validated WarehouseStockTransferDto stockTransfer, Errors errors) {
+    public boolean transfer(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockTransferDto stockTransfer, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 

@@ -13,18 +13,20 @@ import java.util.Date;
 @Data
 public class AbstractWarehouseStockDto {
 
-    @NotNull(message = "farm.id.null")
+    @NotNull(message = "farm.id.null",groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
     private Long farmId;
 
-    @NotNull(message = "warehouse.stock.handle.date.null")
+    @NotNull(message = "warehouse.stock.handle.date.null",groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Calendar handleDate;
 
-    @NotNull(message = "warehouse.id.null")
+    @NotNull(message = "warehouse.id.null",groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
     private Long warehouseId;
 
-    @NotNull(message = "warehouse.stock.operator.id.null")
+    @NotNull(message = "warehouse.stock.operator.id.null",groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
     private Long operatorId;
 
     private String operatorName;
+
+    private Long stockHandleId;
 }
