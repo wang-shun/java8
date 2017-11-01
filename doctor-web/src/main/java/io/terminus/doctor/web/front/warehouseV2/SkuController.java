@@ -135,8 +135,20 @@ public class SkuController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
-    public DoctorWarehouseSku query(@PathVariable Long id) {
-        return RespHelper.or500(doctorWarehouseSkuReadService.findById(id));
+    public WarehouseSkuDto query(@PathVariable Long id) {
+        DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(id));
+        if (null == sku)
+            return null;
+
+        WarehouseSkuDto dto = new WarehouseSkuDto();
+        BeanUtils.copyProperties(sku,dto);
+
+        dto.setUnitId(Long.parseLong(sku.getUnit()));
+        DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(dto.getUnitId()));
+        if (null != unit)
+            dto.setUnit(unit.getName());
+        dto.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
+        return dto;
     }
 
 
