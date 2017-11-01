@@ -500,7 +500,7 @@
         FROM doctor_group_events
         WHERE
         change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-        pig_type = 2 -- 保育猪
+        pig_type = 3 -- 育肥猪
         <include refid="criteria"/>
         )
         /
@@ -514,7 +514,7 @@
             #{fId}
         </foreach>
         AND sum_at = date_format(#{endAt}, '%Y-%m-%d')
-        AND type = 2
+        AND type = 3
         )
         FROM dual
     </select>
