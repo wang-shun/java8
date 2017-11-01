@@ -9,6 +9,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -31,6 +32,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 猪群批次总结表读服务实现类
@@ -47,16 +49,18 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
     private final DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorKpiDao doctorKpiDao;
+    private final DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
     public DoctorGroupBatchSummaryReadServiceImpl(DoctorGroupEventDao doctorGroupEventDao,
                                                   DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao,
                                                   DoctorGroupReadService doctorGroupReadService,
-                                                  DoctorKpiDao doctorKpiDao) {
+                                                  DoctorKpiDao doctorKpiDao, DoctorGroupTrackDao doctorGroupTrackDao) {
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupBatchSummaryDao = doctorGroupBatchSummaryDao;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorKpiDao = doctorKpiDao;
+        this.doctorGroupTrackDao = doctorGroupTrackDao;
     }
 
     /**
@@ -70,6 +74,10 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         try {
             //最后一次转群后, 会把统计结果插入数据库, 如果没查到, 实时计算
             DoctorGroupBatchSummary summary = doctorGroupBatchSummaryDao.findByGroupId(groupDetail.getGroup().getId());
+            if (notNull(summary)) {
+                DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupDetail.getGroup().getId());
+                summary.setAvgDayAge(groupTrack.getAvgDayAge());
+            }
             return Response.ok(summary != null ? summary : getSummary(groupDetail.getGroup(), groupDetail.getGroupTrack(), fcrFeed));
         } catch (Exception e) {
             log.error("get group batch summary by group detail failed, groupDetail:{}, cause:{}", groupDetail, Throwables.getStackTraceAsString(e));
