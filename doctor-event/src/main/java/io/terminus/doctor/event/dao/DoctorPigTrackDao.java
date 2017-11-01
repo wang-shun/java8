@@ -169,4 +169,13 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
     public List<DoctorPigTrack> queryCurrentStatus(List<Long> list) {
         return getSqlSession().selectList(sqlId("queryCurrentStatus"), list);
     }
+
+    /**
+     * 获取猪舍下各种状态猪
+     * @param barnId
+     * @return
+     */
+//    public List<> getStatusPigForBarn(Long barnId) {
+//
+//    }
 }

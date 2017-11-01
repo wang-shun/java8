@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
@@ -15,6 +16,7 @@ import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
 import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.dto.IotBarnInfo;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -189,6 +191,11 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         }
     }
 
+    @Override
+    public Response<IotBarnInfo> findIotBarnInfo(Long barnId) {
+        return null;
+    }
+
     //校验能否转入此舍(产房 => 产房(分娩母猪舍)/保育舍，保育舍 => 保育舍/育肥舍/育种舍，同类型可以互转)
     private Boolean checkCanTransBarn(Integer pigType, Integer barnType) {
 
@@ -203,5 +210,25 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
                 //其他 => 同类型
                 || (Objects.equal(pigType, barnType));
 
+    }
+
+    private IotBarnInfo getBarnInfo(Long barnId) {
+        DoctorBarn doctorBarn = doctorBarnDao.findById(barnId);
+        IotBarnInfo info = new IotBarnInfo();
+        info.setBarnId(doctorBarn.getId());
+        info.setBarnName(doctorBarn.getName());
+        info.setCapacity(doctorBarn.getCapacity());
+        info.setStatusPigs(Maps.newHashMap());
+        fillStatusPigs(info.getStatusPigs(), doctorBarn.getPigType());
+        return info;
+    }
+
+    private void fillStatusPigs(Map<String, Integer> statusPigs, Integer type) {
+        PigType pigType = PigType.from(type);
+        switch (pigType) {
+            case NURSERY_PIGLET:
+            case FATTEN_PIG:
+            case RESERVE:
+        }
     }
 }

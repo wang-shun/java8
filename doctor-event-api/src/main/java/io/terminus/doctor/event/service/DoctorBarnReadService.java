@@ -4,6 +4,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
 import io.terminus.doctor.event.dto.DoctorBarnDto;
+import io.terminus.doctor.event.dto.IotBarnInfo;
 import io.terminus.doctor.event.model.DoctorBarn;
 
 import javax.validation.constraints.NotNull;
@@ -103,4 +104,11 @@ public interface DoctorBarnReadService {
      * @return 返回满足条件的前count个
      */
     Response<List<DoctorBarn>> selectBarns(String name, Integer count);
+
+    /**
+     * 获取物联网猪舍信息，包含其下的猪数量
+     * @param barnId 猪舍id
+     * @return 猪舍信息
+     */
+    Response<IotBarnInfo> findIotBarnInfo(Long barnId);
 }

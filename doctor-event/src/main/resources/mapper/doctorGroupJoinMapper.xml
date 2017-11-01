@@ -69,4 +69,11 @@
         group by pig_type) t;
     </select>
 
+    <select id="dayAgeListForBarn" parameterType="long" resultType="int">
+        SELECT DATEDIFF(now(), b.birth_date) -1
+        FROM doctor_groups a left join doctor_group_tracks b
+        ON a.id = b.group_id
+        WHERE a.current_barn_id = #{barnId}
+        AND a.status = 1
+    </select>
 </mapper>

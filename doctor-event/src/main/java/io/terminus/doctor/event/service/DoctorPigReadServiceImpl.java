@@ -24,6 +24,7 @@ import io.terminus.doctor.event.dao.DoctorPigJoinDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.IotPigDto;
 import io.terminus.doctor.event.dto.search.DoctorPigCountDto;
 import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
@@ -471,6 +472,38 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         } catch (Exception e) {
             log.error("query current status failed, pigIds:{}, cause:{}", pigIds, Throwables.getStackTraceAsString(e));
             return Response.fail("query.current.status.failed");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorPig>> suggestSowPig(Long farmId, String name, Integer count) {
+        try {
+            return Response.ok(doctorPigDao.suggestSowPig(farmId, name, count));
+        } catch (Exception e) {
+            log.error("suggest sow pig failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("suggest.sow.pig.failed");
+        }
+    }
+
+    @Override
+    public Response<IotPigDto> getIotPig(Long pigId) {
+        try {
+            DoctorPig doctorPig = doctorPigDao.findById(pigId);
+            IotPigDto iotPigDto = new IotPigDto();
+            iotPigDto.setPigId(doctorPig.getId());
+            iotPigDto.setPigCode(doctorPig.getPigCode());
+            iotPigDto.setRfid(doctorPig.getRfid());
+            DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigId);
+            iotPigDto.setStatus(pigTrack.getStatus());
+            if (Objects.equals(pigTrack.getStatus(), PigStatus.KongHuai.getKey())) {
+                iotPigDto.setStatus((Integer) pigTrack.getExtraMap().get("pregCheckResult"));
+            }
+            Date statusDate = doctorPigEventDao.findEventAtLeadToStatus(pigId, pigTrack.getStatus());
+            iotPigDto.setStatusDay(DateUtil.getDeltaDays(statusDate, new Date()));
+            return Response.ok(iotPigDto);
+        } catch (Exception e) {
+            log.error("get iot pig failed, pigId, cause:{}", pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail("get.iot.pig.failed");
         }
     }
 }

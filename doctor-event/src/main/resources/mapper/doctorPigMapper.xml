@@ -279,4 +279,13 @@
         FROM <include refid="tb" />
         WHERE farm_id = #{farmId} AND out_id = #{outId}
     </select>
+
+    <select id="suggestSowPig" parameterType="map" resultMap="DoctorPigMap">
+        SELECT id, pig_code
+        FROM <include refid="tb" />
+        WHERE farm_id = #{farmId} AND is_removal = 0 AND pig_type = 1
+        <if test="name != null">AND `pig_code` like concat('%', #{name}, '%')</if>
+        ORDER BY instr(`pig_code`, #{name}) ASC, length(`pig_code`) ASC, `pig_code` ASC
+        limit #{count}
+    </select>
 </mapper>

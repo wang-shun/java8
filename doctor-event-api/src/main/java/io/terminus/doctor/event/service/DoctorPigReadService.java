@@ -5,6 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.IotPigDto;
 import io.terminus.doctor.event.dto.search.DoctorPigCountDto;
 import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -174,4 +175,20 @@ public interface DoctorPigReadService {
      * @return 返回的track中只包含pigId 和 status 字段
      */
     Response<List<DoctorPigTrack>> queryCurrentStatus(List<Long> pigIds);
+
+    /**
+     * 模糊搜索pigCode猪场下符合
+     * @param farmId 猪场id
+     * @param name 模糊搜索字段
+     * @param count 返回前count
+     * @return
+     */
+    Response<List<DoctorPig>> suggestSowPig(Long farmId, String name, Integer count);
+
+    /**
+     * 根据pigId获取物联网相关猪信息
+     * @param pigId 猪id
+     * @return 猪信息
+     */
+    Response<IotPigDto> getIotPig(Long pigId);
 }

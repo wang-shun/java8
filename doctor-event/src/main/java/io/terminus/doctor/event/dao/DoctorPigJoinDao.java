@@ -51,4 +51,6 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
     public Integer findBoarPigCount(Long farmId) {
         return getSqlSession().selectOne(sqlId("findBoarPigCount"), farmId);
     }
+
+
 }
