@@ -21,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -87,6 +88,50 @@ public class SkuController {
                     skuDto.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
                     return skuDto;
                 }).collect(Collectors.toList()));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "all")
+    public List<WarehouseSkuDto> query(@RequestParam(required = false) Long orgId,
+                                       @RequestParam(required = false) Long farmId,
+                                       @RequestParam(required = false) Integer type,
+                                       @RequestParam(required = false) String srm,
+                                       @RequestParam(required = false) String srmOrName,
+                                       @RequestParam(required = false) Integer status) {
+
+        if (null == orgId && null == farmId)
+            throw new JsonResponseException("warehouse.sku.org.id.or.farm.id.not.null");
+
+        Map<String, Object> params = new HashMap<>();
+        if (null != orgId)
+            params.put("orgId", orgId);
+        else {
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+            if (null == farm)
+                throw new JsonResponseException("farm.not.found");
+            params.put("orgId", farm.getOrgId());
+        }
+
+        if (StringUtils.isNotBlank(srm))
+            params.put("srm", srm);
+        if (null != type)
+            params.put("type", type);
+        if (StringUtils.isNotBlank(srmOrName))
+            params.put("nameOrSrmLike", srmOrName);
+        if (null != status)
+            params.put("status", status);
+
+        List<DoctorWarehouseSku> skuList = RespHelper.or500(doctorWarehouseSkuReadService.list(params));
+
+        return skuList.stream().map(sku -> {
+            WarehouseSkuDto skuDto = new WarehouseSkuDto();
+            skuDto.copyFrom(sku);
+            skuDto.setUnitId(Long.parseLong(sku.getUnit()));
+            DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(skuDto.getUnitId()));
+            if (null != unit)
+                skuDto.setUnit(unit.getName());
+            skuDto.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
+            return skuDto;
+        }).collect(Collectors.toList());
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
