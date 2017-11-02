@@ -384,10 +384,31 @@ public class WarehouseController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "farm/{farmId}/material/statistics")
-    public List<WarehouseStockStatisticsVo> farmMaterialStatistics(@PathVariable Long farmId) {
-        List<DoctorWarehouseStock> stocks = RespHelper.or500(doctorWarehouseStockReadService.list(DoctorWarehouseStock.builder()
-                .farmId(farmId)
-                .build()));
+    public List<WarehouseStockStatisticsVo> farmMaterialStatistics(@PathVariable Long farmId,
+                                                                   @RequestParam(required = false) String materialName,
+                                                                   @RequestParam(required = false) Integer type) {
+
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmId", farmId);
+        params.put("warehouseType", type);
+        if (StringUtils.isNotBlank(materialName)) {
+
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+            if (null == farm)
+                throw new JsonResponseException("farm.not.found");
+
+            Map<String, Object> skuParams = new HashMap<>();
+            skuParams.put("orgId", farm.getOrgId());
+            skuParams.put("status", WarehouseSkuStatus.NORMAL.getValue());
+            skuParams.put("nameOrSrmLike", materialName);
+            List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
+            if (skuIds.isEmpty())
+                return Collections.emptyList();
+            params.put("skuIds", skuIds);
+        }
+
+        List<DoctorWarehouseStock> stocks = RespHelper.or500(doctorWarehouseStockReadService.list(params));
 
         Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.
                 findByIds(stocks.stream().map(DoctorWarehouseStock::getSkuId).collect(Collectors.toList())))
