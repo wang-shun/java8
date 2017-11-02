@@ -483,7 +483,6 @@ public class WarehouseController {
 
         if (StringUtils.isNotBlank(materialName)) {
 
-
             if (null == orgId) {
                 DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(id));
                 if (null == wareHouse)
@@ -517,6 +516,7 @@ public class WarehouseController {
 
             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
             if (null == sku) {
+                //TODO 参数没有塞进去
                 String errorMessage = messageSource.getMessage("warehouse.sku.not.found", new Object[]{stock.getSkuName()}, Locale.CHINA);
                 throw new JsonResponseException(errorMessage);
             }
@@ -535,6 +535,67 @@ public class WarehouseController {
         vo.setTotal(stockResponse.getResult().getTotal());
 
         return vo;
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "{id}/material/all")
+    public List<WarehouseStockVo> material(@PathVariable Long id,
+                                             @RequestParam(required = false) Long orgId,
+                                             @RequestParam(required = false) String materialName) {
+
+
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("warehouseId", id);
+
+        if (StringUtils.isNotBlank(materialName)) {
+
+            if (null == orgId) {
+                DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(id));
+                if (null == wareHouse)
+                    throw new JsonResponseException("warehouse.not.found");
+                DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(wareHouse.getFarmId()));
+                if (null == farm)
+                    throw new JsonResponseException("farm.not.found");
+                orgId = farm.getOrgId();
+            }
+
+            Map<String, Object> skuParams = new HashMap<>();
+            skuParams.put("orgId", orgId);
+            skuParams.put("status", WarehouseSkuStatus.NORMAL.getValue());
+            skuParams.put("nameOrSrmLike", materialName);
+            List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
+            if (skuIds.isEmpty())
+                return Collections.emptyList();
+            criteria.put("skuIds", skuIds);
+        }
+
+        Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.list(criteria);
+
+        if (!stockResponse.isSuccess())
+            throw new JsonResponseException(stockResponse.getError());
+
+        List<WarehouseStockVo> data = new ArrayList<>(stockResponse.getResult().size());
+        for (DoctorWarehouseStock stock : stockResponse.getResult()) {
+
+            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
+            if (null == sku) {
+                //TODO 参数没有塞进去
+                String errorMessage = messageSource.getMessage("warehouse.sku.not.found", new Object[]{stock.getSkuName()}, Locale.CHINA);
+                throw new JsonResponseException(errorMessage);
+            }
+
+            data.add(WarehouseStockVo.builder()
+                    .materialId(stock.getSkuId())
+                    .materialName(stock.getSkuName())
+                    .quantity(stock.getQuantity())
+                    .unit(sku.getUnit())
+                    .code(sku.getCode())
+                    .specification(sku.getSpecification())
+                    .vendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())))
+                    .build());
+        }
+
+        return data;
     }
 
 

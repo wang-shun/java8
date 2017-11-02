@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Desc:
@@ -41,4 +42,15 @@ public class DoctorWarehouseStockDao extends MyBatisDao<DoctorWarehouseStock> {
         }
     }
 
+
+    public Optional<DoctorWarehouseStock> findBySkuIdAndWarehouseId(Long skuId, Long warehouseId) {
+        List<DoctorWarehouseStock> stocks = this.list(DoctorWarehouseStock.builder()
+                .warehouseId(warehouseId)
+                .skuId(skuId)
+                .build());
+        if (stocks.isEmpty())
+            return Optional.empty();
+
+        return Optional.ofNullable(stocks.get(0));
+    }
 }
