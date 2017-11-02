@@ -383,6 +383,70 @@ public class WarehouseController {
         return vos;
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "farm/{farmId}/material/statistics")
+    public List<WarehouseStockStatisticsVo> farmMaterialStatistics(@PathVariable Long farmId) {
+        List<DoctorWarehouseStock> stocks = RespHelper.or500(doctorWarehouseStockReadService.list(DoctorWarehouseStock.builder()
+                .farmId(farmId)
+                .build()));
+
+        Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.
+                findByIds(stocks.stream().map(DoctorWarehouseStock::getSkuId).collect(Collectors.toList())))
+                .stream()
+                .collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
+
+
+        Calendar now = Calendar.getInstance();
+
+        List<WarehouseStockStatisticsVo> vos = new ArrayList<>(stocks.size());
+        for (DoctorWarehouseStock stock : stocks) {
+            WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
+            vo.setId(stock.getId());
+            vo.setMaterialId(stock.getSkuId());
+            vo.setMaterialName(stock.getSkuName());
+
+            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countFarmBalance(farmId, stock.getSkuId());
+            if (!balanceResponse.isSuccess())
+                throw new JsonResponseException(balanceResponse.getError());
+            Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByFarmAndMaterial(farmId, stock.getSkuId(), now,
+                    WarehouseMaterialHandleType.IN,
+                    WarehouseMaterialHandleType.OUT,
+                    WarehouseMaterialHandleType.INVENTORY_PROFIT,
+                    WarehouseMaterialHandleType.INVENTORY_DEFICIT,
+                    WarehouseMaterialHandleType.TRANSFER_IN,
+                    WarehouseMaterialHandleType.TRANSFER_OUT,
+                    WarehouseMaterialHandleType.FORMULA_IN,
+                    WarehouseMaterialHandleType.FORMULA_OUT);
+            if (!statisticsResponse.isSuccess())
+                throw new JsonResponseException(statisticsResponse.getError());
+
+            DoctorWarehouseSku sku = skuMap.containsKey(stock.getSkuId()) ? skuMap.get(stock.getSkuId()).get(0) : null;
+
+            vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
+                    + statisticsResponse.getResult().getInventoryProfit().getAmount()
+                    + statisticsResponse.getResult().getTransferIn().getAmount()
+                    + statisticsResponse.getResult().getFormulaIn().getAmount());
+            vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity()
+                    .add(statisticsResponse.getResult().getInventoryProfit().getQuantity())
+                    .add(statisticsResponse.getResult().getTransferIn().getQuantity())
+                    .add(statisticsResponse.getResult().getFormulaIn().getQuantity()));
+
+            vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount()
+                    + statisticsResponse.getResult().getInventoryDeficit().getAmount()
+                    + statisticsResponse.getResult().getTransferOut().getAmount()
+                    + statisticsResponse.getResult().getFormulaOut().getAmount());
+            vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity()
+                    .add(statisticsResponse.getResult().getInventoryDeficit().getQuantity())
+                    .add(statisticsResponse.getResult().getTransferOut().getQuantity())
+                    .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
+
+            vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
+            vo.setBalanceAmount(balanceResponse.getResult().getAmount());
+
+            vos.add(vo);
+        }
+        return vos;
+    }
+
     /**
      * 仓库及仓库最近一次领用信息
      *
@@ -540,8 +604,8 @@ public class WarehouseController {
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}/material/all")
     public List<WarehouseStockVo> material(@PathVariable Long id,
-                                             @RequestParam(required = false) Long orgId,
-                                             @RequestParam(required = false) String materialName) {
+                                           @RequestParam(required = false) Long orgId,
+                                           @RequestParam(required = false) String materialName) {
 
 
         Map<String, Object> criteria = new HashMap<>();

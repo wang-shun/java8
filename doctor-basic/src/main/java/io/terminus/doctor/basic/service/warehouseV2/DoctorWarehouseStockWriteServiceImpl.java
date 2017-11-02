@@ -127,11 +127,10 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @ExceptionHandle("doctor.warehouse.stock.in.fail")
     public Response<Boolean> in(WarehouseStockInDto stockIn) {
 
+
         boolean updateMode = stockIn.getStockHandleId() != null;
         if (updateMode)
             doctorWarehouseStockHandleManager.check(stockIn, stockIn.getDetails(), WarehouseMaterialHandleType.IN);
-//
-//        } else {
 
         StockContext context = getWarehouseAndSupportedBasicMaterial(stockIn.getFarmId(), stockIn.getWarehouseId());
 
@@ -999,5 +998,12 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         private DoctorWareHouse wareHouse;
         private Map<Long/*stockId*/, DoctorWarehouseStock> stockMap;
         private Map<Long, String> supportedMaterials;
+    }
+
+    @Data
+    public class SkuGroup {
+        private BigDecimal totalQuantity;
+        private List<DoctorWarehouseStock> stocks;
+        private List<AbstractWarehouseStockDetail> details;
     }
 }
