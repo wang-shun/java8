@@ -127,54 +127,58 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @ExceptionHandle("doctor.warehouse.stock.in.fail")
     public Response<Boolean> in(WarehouseStockInDto stockIn) {
 
-//        boolean updateMode = stockIn.getStockHandleId() != null;
-//        if (updateMode) {
-//
-//            doctorWarehouseStockHandleManager.update(stockIn, stockIn.getDetails());
+        boolean updateMode = stockIn.getStockHandleId() != null;
+        if (updateMode)
+            doctorWarehouseStockHandleManager.check(stockIn, stockIn.getDetails(), WarehouseMaterialHandleType.IN);
 //
 //        } else {
 
-            StockContext context = getWarehouseAndSupportedBasicMaterial(stockIn.getFarmId(), stockIn.getWarehouseId());
+        StockContext context = getWarehouseAndSupportedBasicMaterial(stockIn.getFarmId(), stockIn.getWarehouseId());
 
-            String serialNo = "R" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
+        String serialNo = "R" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
 
-            stockIn.getDetails().forEach(detail -> {
+        stockIn.getDetails().forEach(detail -> {
 
-                DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
-                if (null == sku)
-                    throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
-                if (!sku.getType().equals(context.getWareHouse().getType()))
-                    throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
+            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
+            if (null == sku)
+                throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
+            if (!sku.getType().equals(context.getWareHouse().getType()))
+                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 //            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
 //                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 
-                DoctorWarehouseStock stock = doctorWarehouseStockManager.in(stockIn, detail, context, sku);
+            DoctorWarehouseStock stock = doctorWarehouseStockManager.in(stockIn, detail, context, sku);
 
-                //记录物料采购入库的单价
-                DoctorWarehousePurchase purchase = doctorWarehousePurchaseManager.in(stockIn, detail, stock, sku);
+            //记录物料采购入库的单价
+            DoctorWarehousePurchase purchase = doctorWarehousePurchaseManager.in(stockIn, detail, stock, sku);
 
-                doctorWarehouseMaterialHandleManager.in(DoctorWarehouseMaterialHandleManager.MaterialHandleContext.builder()
-                        .stock(stock)
-                        .stockDto(stockIn)
-                        .stockDetail(detail)
-                        .sku(sku)
-                        .unitPrice(detail.getUnitPrice())
-                        .vendorName(purchase.getVendorName())
-                        .quantity(detail.getQuantity())
-                        .purchases(Collections.singletonMap(purchase, detail.getQuantity()))
-                        .build());
+            doctorWarehouseMaterialHandleManager.in(DoctorWarehouseMaterialHandleManager.MaterialHandleContext.builder()
+                    .stock(stock)
+                    .stockDto(stockIn)
+                    .stockDetail(detail)
+                    .sku(sku)
+                    .unitPrice(detail.getUnitPrice())
+                    .vendorName(purchase.getVendorName())
+                    .quantity(detail.getQuantity())
+                    .purchases(Collections.singletonMap(purchase, detail.getQuantity()))
+                    .build());
 
-                doctorWarehouseStockMonthlyManager.count(stock.getWarehouseId(),
-                        stock.getSkuId(),
-                        stockIn.getHandleDate().get(Calendar.YEAR),
-                        stockIn.getHandleDate().get(Calendar.MONTH) + 1,
-                        detail.getQuantity(),
-                        detail.getUnitPrice(),
-                        true);
-            });
+            doctorWarehouseStockMonthlyManager.count(stock.getWarehouseId(),
+                    stock.getSkuId(),
+                    stockIn.getHandleDate().get(Calendar.YEAR),
+                    stockIn.getHandleDate().get(Calendar.MONTH) + 1,
+                    detail.getQuantity(),
+                    detail.getUnitPrice(),
+                    true);
+        });
 
-            doctorWarehouseStockHandleManager.handle(stockIn, context.getWareHouse(), serialNo, WarehouseMaterialHandleType.IN);
+        doctorWarehouseStockHandleManager.handle(stockIn, context.getWareHouse(), serialNo, WarehouseMaterialHandleType.IN);
 //        }
+
+        if (updateMode) {
+            //TODO 再把原来的入库全部铲掉
+        }
+
         return Response.ok(true);
     }
 
@@ -993,6 +997,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @Data
     public class StockContext {
         private DoctorWareHouse wareHouse;
+        private Map<Long/*stockId*/, DoctorWarehouseStock> stockMap;
         private Map<Long, String> supportedMaterials;
     }
 }

@@ -1,7 +1,5 @@
 package io.terminus.doctor.basic.dto.warehouseV2;
 
-import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
-import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,10 +8,8 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
-import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.List;
 
 /**

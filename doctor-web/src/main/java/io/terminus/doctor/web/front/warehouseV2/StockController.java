@@ -73,7 +73,6 @@ public class StockController {
             throw new JsonResponseException("user.not.found");
         stockIn.setOperatorName(userResponse.getResult().getRealName());
 
-
         Response<Boolean> response = doctorWarehouseStockWriteService.in(stockIn);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
@@ -85,7 +84,6 @@ public class StockController {
     public boolean out(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockOutDto stockOut, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
-
 
         Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockOut.getOperatorId());
         if (!userResponse.isSuccess())

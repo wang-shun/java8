@@ -35,6 +35,8 @@ public class DoctorWarehouseStockHandleManager {
     private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
     @Autowired
     private DoctorWarehouseStockDao doctorWarehouseStockDao;
+    @Autowired
+    private DoctorWarehouseMaterialHandleManager doctorWarehouseMaterialHandleManager;
 
     //    @Transactional(propagation = Propagation.NESTED)
     public void handle(AbstractWarehouseStockDto stockDto, DoctorWareHouse wareHouse, String serialNo, WarehouseMaterialHandleType handleType) {
@@ -57,7 +59,7 @@ public class DoctorWarehouseStockHandleManager {
     }
 
 
-    public void update(AbstractWarehouseStockDto stockDto, List<? extends AbstractWarehouseStockDetail> details, WarehouseMaterialHandleType handleType) {
+    public void check(AbstractWarehouseStockDto stockDto, List<? extends AbstractWarehouseStockDetail> details, WarehouseMaterialHandleType handleType) {
         DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
         if (null == stockHandle)
             throw new InvalidException("warehouse.stock.handle.not.found", stockDto.getStockHandleId());
@@ -71,7 +73,7 @@ public class DoctorWarehouseStockHandleManager {
         if (handleType.getValue() == WarehouseMaterialHandleType.IN.getValue()
                 || handleType.getValue() == WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()) {
 
-            Map<Long, List<DoctorWarehouseMaterialHandle>> handleMap = materialHandles.stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getMaterialId));
+            Map<Long/*skuId*/, List<DoctorWarehouseMaterialHandle>> handleMap = materialHandles.stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getMaterialId));
 
             for (Long skuId : handleMap.keySet()) {
                 BigDecimal needOutOfStockQuantity = new BigDecimal(0);
@@ -96,7 +98,16 @@ public class DoctorWarehouseStockHandleManager {
                 || handleType.getValue() == WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue()) {
 
         }
+    }
 
+    public void destroyMaterialHandle(Long stockHandleId) {
+        List<DoctorWarehouseMaterialHandle> materialHandles = doctorWarehouseMaterialHandleDao.list(DoctorWarehouseMaterialHandle.builder()
+                .stockHandleId(stockHandleId)
+                .deleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue())
+                .build());
 
+        for (DoctorWarehouseMaterialHandle handle : materialHandles) {
+            doctorWarehouseMaterialHandleManager.delete(handle);
+        }
     }
 }
