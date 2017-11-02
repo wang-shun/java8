@@ -384,9 +384,11 @@ public class WarehouseController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "farm/{farmId}/material/statistics")
-    public List<WarehouseStockStatisticsVo> farmMaterialStatistics(@PathVariable Long farmId,
-                                                                   @RequestParam(required = false) String materialName,
-                                                                   @RequestParam(required = false) Integer type) {
+    public Paging<WarehouseStockStatisticsVo> farmMaterialStatistics(@PathVariable Long farmId,
+                                                                     @RequestParam(required = false) String materialName,
+                                                                     @RequestParam(required = false) Integer type,
+                                                                     @RequestParam(required = false) Integer pageNo,
+                                                                     @RequestParam(required = false) Integer pageSize) {
 
 
         Map<String, Object> params = new HashMap<>();
@@ -404,22 +406,22 @@ public class WarehouseController {
             skuParams.put("nameOrSrmLike", materialName);
             List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
             if (skuIds.isEmpty())
-                return Collections.emptyList();
+                return Paging.empty();
             params.put("skuIds", skuIds);
         }
 
-        List<DoctorWarehouseStock> stocks = RespHelper.or500(doctorWarehouseStockReadService.list(params));
+        Paging<DoctorWarehouseStock> stocks = RespHelper.or500(doctorWarehouseStockReadService.paging(pageNo, pageSize, params));
 
         Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.
-                findByIds(stocks.stream().map(DoctorWarehouseStock::getSkuId).collect(Collectors.toList())))
+                findByIds(stocks.getData().stream().map(DoctorWarehouseStock::getSkuId).collect(Collectors.toList())))
                 .stream()
                 .collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
 
 
         Calendar now = Calendar.getInstance();
 
-        List<WarehouseStockStatisticsVo> vos = new ArrayList<>(stocks.size());
-        for (DoctorWarehouseStock stock : stocks) {
+        List<WarehouseStockStatisticsVo> vos = new ArrayList<>(stocks.getData().size());
+        for (DoctorWarehouseStock stock : stocks.getData()) {
             WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
             vo.setId(stock.getId());
             vo.setMaterialId(stock.getSkuId());
@@ -465,7 +467,7 @@ public class WarehouseController {
 
             vos.add(vo);
         }
-        return vos;
+        return new Paging<WarehouseStockStatisticsVo>(stocks.getTotal(), vos);
     }
 
     /**
