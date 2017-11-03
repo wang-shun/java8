@@ -146,7 +146,7 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         Map<String, Object> params = new HashMap<>();
         params.put("type", type);
         params.put("orgId", orgId);
-        params.put("status", WarehouseSkuStatus.NORMAL.getValue());
+//        params.put("status", WarehouseSkuStatus.NORMAL.getValue());
 
         List<DoctorWarehouseSku> skus = doctorWarehouseSkuDao.list(params);
         if (skus.isEmpty())

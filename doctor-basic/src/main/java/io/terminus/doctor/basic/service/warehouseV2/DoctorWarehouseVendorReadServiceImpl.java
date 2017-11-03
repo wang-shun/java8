@@ -10,10 +10,13 @@ import io.terminus.doctor.basic.dao.DoctorWarehouseVendorOrgDao;
 import io.terminus.doctor.basic.enums.WarehouseVendorDeleteFlag;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendorOrg;
+import io.terminus.doctor.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -100,5 +103,22 @@ public class DoctorWarehouseVendorReadServiceImpl implements DoctorWarehouseVend
             log.error("failed to list doctor warehouse vendor, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.vendor.list.fail");
         }
+    }
+
+    @Override
+    @ExceptionHandle("doctor.warehouse.vendor.list.fail")
+    public Response<List<DoctorWarehouseVendor>> suggest(Long orgId, String name) {
+
+        List<Long> ids = doctorWarehouseVendorOrgDao.findByOrg(orgId).stream().map(DoctorWarehouseVendorOrg::getVendorId).collect(Collectors.toList());
+        if (ids.isEmpty())
+            return Response.ok(Collections.emptyList());
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("orgId", orgId);
+        params.put("ids", ids);
+        params.put("nameLike", name);
+        params.put("deleteFlag", WarehouseVendorDeleteFlag.NORMAL.getValue());
+
+        return Response.ok(doctorWarehouseVendorDao.list(params));
     }
 }

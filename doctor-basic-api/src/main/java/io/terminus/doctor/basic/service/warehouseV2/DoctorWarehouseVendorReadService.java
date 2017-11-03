@@ -46,4 +46,6 @@ public interface DoctorWarehouseVendorReadService {
 
 
     Response<List<DoctorWarehouseVendor>> findByOrg(Long orgId);
+
+    Response<List<DoctorWarehouseVendor>> suggest(Long orgId, String name);
 }

@@ -5,6 +5,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.enums.WarehouseVendorDeleteFlag;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendorOrg;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -131,5 +132,15 @@ public class VendorController {
 
         return RespHelper.or500(doctorWarehouseVendorReadService.findByOrg(orgId)).stream().map(DoctorWarehouseVendor::getId).collect(Collectors.toList());
     }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "suggest")
+    public List<DoctorWarehouseVendor> suggest(@RequestParam Long orgId,
+                                               @RequestParam(required = false) String name) {
+
+
+        return RespHelper.or500(doctorWarehouseVendorReadService.suggest(orgId, name));
+    }
+
 
 }

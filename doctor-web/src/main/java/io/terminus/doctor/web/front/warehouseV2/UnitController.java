@@ -3,12 +3,14 @@ package io.terminus.doctor.web.front.warehouseV2;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseUnitOrgReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseUnitOrgWriteService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import net.sf.json.JSON;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -28,6 +30,8 @@ public class UnitController {
     private DoctorWarehouseUnitOrgReadService doctorWarehouseUnitOrgReadService;
     @RpcConsumer
     private DoctorWarehouseUnitOrgWriteService doctorWarehouseUnitOrgWriteService;
+    @RpcConsumer
+    private DoctorBasicReadService doctorBasicReadService;
 
 
     @RequestMapping(method = RequestMethod.GET, value = "all")
@@ -80,6 +84,22 @@ public class UnitController {
         }
 
         return RespHelper.or500(doctorWarehouseUnitOrgReadService.findByOrgId(orgId));
+    }
+
+
+    /**
+     * 查询公司的第一个猪厂的单位
+     *
+     * @param orgId
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "org/first")
+    public List<DoctorBasic> queryByOrg(@RequestParam Long orgId) {
+        List<DoctorFarm> farms = RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(orgId));
+        if (farms.isEmpty())
+            throw new JsonResponseException("farm.not.found");
+        Long firstFarmId = farms.get(0).getId();
+        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmFilterByFarmId(firstFarmId, DoctorBasic.Type.UNIT.getValue(), null));
     }
 
 }

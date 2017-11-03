@@ -27,12 +27,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`, `short_name`, `delete_flag`, 
+        `name`, `short_name`, `delete_flag`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{shortName}, #{deleteFlag}, 
+        #{name}, #{shortName}, #{deleteFlag},
         now(), now()
     </sql>
 
@@ -43,6 +43,13 @@
             <if test="deleteFlag != null">AND `delete_flag` = #{deleteFlag}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+            <if test="ids != null and ids.size() > 0">
+                AND
+                <foreach collection="ids" item="id" open="(" separator="or" close=")">
+                    id =#{id}
+                </foreach>
+            </if>
+            <if test="nameLike !=null">AND `name` like concat('%', #{nameLike}, '%')</if>
         </where>
     </sql>
 
@@ -86,27 +93,33 @@
     </update>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM <include refid="tb"/>
+        DELETE FROM
+        <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-    
+
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorWarehouseVendorMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
     <select id="list" parameterType="map" resultMap="DoctorWarehouseVendorMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>
