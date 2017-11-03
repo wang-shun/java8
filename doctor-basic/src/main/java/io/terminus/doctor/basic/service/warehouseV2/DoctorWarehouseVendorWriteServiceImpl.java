@@ -42,6 +42,7 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
         if (null != doctorWarehouseVendorDao.findByName(doctorWarehouseVendor.getName()))
             throw new InvalidException("doctor.vendor.name.duplicate", doctorWarehouseVendor.getName());
 
+        doctorWarehouseVendor.setDeleteFlag(WarehouseVendorDeleteFlag.NORMAL.getValue());
         doctorWarehouseVendorDao.create(doctorWarehouseVendor);
         return Response.ok(doctorWarehouseVendor.getId());
     }
@@ -55,6 +56,7 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
         if (null != vendor && vendor.getId() != doctorWarehouseVendor.getId())
             throw new InvalidException("doctor.vendor.name.duplicate", doctorWarehouseVendor.getName());
 
+        doctorWarehouseVendor.setDeleteFlag(WarehouseVendorDeleteFlag.NORMAL.getValue());
         return Response.ok(doctorWarehouseVendorDao.update(doctorWarehouseVendor));
     }
 
