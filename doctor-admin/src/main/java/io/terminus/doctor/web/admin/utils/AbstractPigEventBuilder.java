@@ -71,19 +71,11 @@ public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> im
         event.setEventDesc(eventType.getDesc());
         event.setPigId(pigEvent.getPigId());
         event.setPigCode(pigEvent.getPigCode());
-<<<<<<< HEAD
-        try {
-            buildEventDto(event, pigEvent);
-        } catch (InvalidException e) {
-            throw new ServiceException(messageSource.getMessage(e.getError(), e.getParams(), Locale.CHINA));
-        }
-=======
 //        try {
         buildEventDto(event, pigEvent);
 //        } catch (InvalidException e) {
 //            throw new JsonResponseException(messageSource.getMessage(e.getError(), e.getParams(), Locale.getDefault()));
 //        }
->>>>>>> develop
 
         transfer(event, pigEvent);
     }
@@ -94,7 +86,7 @@ public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> im
     }
 
     /**
-     * 从eventDto构建pigEvent
+     * 从eventDto构建pigEvents
      * 同名的字段不需要处理，自动转移
      *
      * @param eventDto
