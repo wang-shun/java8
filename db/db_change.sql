@@ -1568,3 +1568,14 @@ ALTER TABLE doctor_warehouse_sku ADD type SMALLINT(6) NULL COMMENT '基础物料
 
 -- 物料处理表的批次号字段修改 2017-10-31
 ALTER TABLE doctor_warehouse_material_handle CHANGE handle_no stock_handle_id BIGINT(20) COMMENT '库存处理ID';
+
+-- 添加物料与公司关系表 2017-11-3
+CREATE TABLE `doctor_warehouse_item_org` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `item_id` bigint(20) NOT NULL COMMENT '物料类目编号',
+  `org_id` bigint(20) NOT NULL COMMENT '公司编号',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_org` (`org_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='物料公司关系表';
