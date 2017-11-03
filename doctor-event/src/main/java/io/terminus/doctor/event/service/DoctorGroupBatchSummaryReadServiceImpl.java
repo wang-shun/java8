@@ -183,10 +183,15 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
 
     //获取销售金额
     private static long getSaleAmount(List<DoctorGroupEvent> events) {
-        return CountUtil.longStream(events, DoctorGroupEvent::getAmount,
-                event -> Objects.equals(GroupEventType.CHANGE.getValue(), event.getType()) &&
-                        Objects.equals(DoctorBasicEnums.SALE.getId(), event.getChangeTypeId()))
-                .sum();
+        try {
+            return CountUtil.longStream(events, DoctorGroupEvent::getAmount,
+                    event -> Objects.equals(GroupEventType.CHANGE.getValue(), event.getType()) &&
+                            Objects.equals(DoctorBasicEnums.SALE.getId(), event.getChangeTypeId()))
+                    .sum();
+        } catch (Exception e) {
+            log.error("get sale amount failed");
+        }
+        return 0;
     }
 
     //阶段转

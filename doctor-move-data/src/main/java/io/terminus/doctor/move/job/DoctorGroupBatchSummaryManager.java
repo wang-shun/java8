@@ -41,8 +41,10 @@ public class DoctorGroupBatchSummaryManager {
     private DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
 
     public void createAllGroupSummary() {
+        log.info("create all group summary starting");
         List<DoctorGroup> groups = doctorGroupDao.listAll();
         groups.forEach(this::createGroupSummary);
+        log.info("create all group summary end");
     }
 
     public void createGroupSummary(DoctorGroup group) {
