@@ -46,7 +46,7 @@ public interface DoctorBasicMaterialReadService {
      * 查询所有的物料数据
      * @return
      */
-    Response<List<DoctorBasicMaterial>> findAllBasicMaterials();
+    Response<List<DoctorBasicMaterial>> findAllBasicMaterials(boolean useNameSort);
 
     /**
      * 查询猪场有权限的物料数据

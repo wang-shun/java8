@@ -74,7 +74,7 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
     @Override
     public Response<List<DoctorWarehouseStock>> list(Map<String, Object> criteria) {
         try {
-            return Response.ok(doctorWarehouseStockDao.list(criteria));
+            return Response.ok(doctorWarehouseStockDao.advList(criteria));
         } catch (Exception e) {
             log.error("failed to list doctor warehouse stock, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.stock.list.fail");

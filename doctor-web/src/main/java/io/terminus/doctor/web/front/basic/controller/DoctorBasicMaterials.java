@@ -82,7 +82,8 @@ public class DoctorBasicMaterials {
      * @return 物料数据信息
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
-    public List<DoctorBasicMaterial> findAllBasicMaterials() {
-        return RespHelper.or500(doctorBasicMaterialReadService.findAllBasicMaterials());
+    public List<DoctorBasicMaterial> findAllBasicMaterials(@RequestParam(required = false, defaultValue = "false") boolean useNameSort) {
+
+        return RespHelper.or500(doctorBasicMaterialReadService.findAllBasicMaterials(useNameSort));
     }
 }

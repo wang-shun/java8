@@ -19,7 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isNullOrEmpty;
@@ -91,11 +93,15 @@ public class DoctorBasicMaterialReadServiceImpl implements DoctorBasicMaterialRe
     }
 
     @Override
-    public Response<List<DoctorBasicMaterial>> findAllBasicMaterials() {
-        try{
-            List<DoctorBasicMaterial> basicMaterials = doctorBasicMaterialDao.list( MapBuilder.<String, Integer>of().put("isValid", 1).map());
+    public Response<List<DoctorBasicMaterial>> findAllBasicMaterials(boolean useNameSort) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("isValid", 1);
+            params.put("nameSort", useNameSort);
+
+            List<DoctorBasicMaterial> basicMaterials = doctorBasicMaterialDao.list(params);
             return Response.ok(basicMaterials);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("find basicMaterial all failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("basicMaterial.find.fail");
         }
@@ -103,11 +109,11 @@ public class DoctorBasicMaterialReadServiceImpl implements DoctorBasicMaterialRe
 
     @Override
     public Response<List<DoctorBasicMaterial>> findBasicMaterialsOwned(Long farmId, Long type, String srm) {
-        try{
+        try {
             List<DoctorBasicMaterial> doctorBasicMaterialList = Lists.newArrayList();
             DoctorFarmBasic doctorFarmBasic = doctorFarmBasicDao.findByFarmId(farmId);
             List idList = doctorFarmBasic.getMaterialIdList();
-            if(isNullOrEmpty(idList)){
+            if (isNullOrEmpty(idList)) {
                 return Response.ok(doctorBasicMaterialList);
             }
             doctorBasicMaterialList = doctorBasicMaterialDao.findByIdsAndType(type, idList);
@@ -117,7 +123,7 @@ public class DoctorBasicMaterialReadServiceImpl implements DoctorBasicMaterialRe
                         .collect(Collectors.toList());
             }
             return Response.ok(doctorBasicMaterialList);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("find basicMaterials failed, farmId:{}, type:{}, cause:{}", farmId, type, Throwables.getStackTraceAsString(e));
             return Response.fail("basicMaterial.find.fail");
         }

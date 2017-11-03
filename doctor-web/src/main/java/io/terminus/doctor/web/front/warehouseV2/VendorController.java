@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunbo@terminus.io on 2017/10/26.
@@ -123,6 +124,12 @@ public class VendorController {
         }
 
         return RespHelper.or500(doctorWarehouseVendorReadService.findByOrg(orgId));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "org/id")
+    public List<Long> queryByOrg(@RequestParam Long orgId) {
+
+        return RespHelper.or500(doctorWarehouseVendorReadService.findByOrg(orgId)).stream().map(DoctorWarehouseVendor::getId).collect(Collectors.toList());
     }
 
 }

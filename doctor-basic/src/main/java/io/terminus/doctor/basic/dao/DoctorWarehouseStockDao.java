@@ -43,6 +43,11 @@ public class DoctorWarehouseStockDao extends MyBatisDao<DoctorWarehouseStock> {
     }
 
 
+    public List<DoctorWarehouseStock> advList(Map<String, Object> criteria) {
+        return this.sqlSession.selectList(this.sqlId("advList"), criteria);
+    }
+
+
     public Optional<DoctorWarehouseStock> findBySkuIdAndWarehouseId(Long skuId, Long warehouseId) {
         List<DoctorWarehouseStock> stocks = this.list(DoctorWarehouseStock.builder()
                 .warehouseId(warehouseId)
