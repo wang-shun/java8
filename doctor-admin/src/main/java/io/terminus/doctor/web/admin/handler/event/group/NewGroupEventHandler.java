@@ -3,6 +3,7 @@ package io.terminus.doctor.web.admin.handler.event.group;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,7 +15,13 @@ public class NewGroupEventHandler extends AbstractGroupEventHandler<DoctorNewGro
 
     @Override
     protected void buildEventDto(DoctorNewGroupInput eventDto, DoctorGroupEvent groupEvent) {
+        eventDto.setFarmId(groupEvent.getFarmId());
 
+        eventDto.setBarnName(getBarnName(eventDto.getBarnId()));
+
+        eventDto.setBreedName(getBasicName(eventDto.getBreedId()));
+        if (null != eventDto.getGeneticId())
+            eventDto.setGeneticName(getBasicName(eventDto.getGeneticId()));
     }
 
     @Override

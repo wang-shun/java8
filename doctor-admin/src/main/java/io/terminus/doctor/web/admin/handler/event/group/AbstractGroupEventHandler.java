@@ -76,6 +76,7 @@ public abstract class AbstractGroupEventHandler<T extends BaseGroupInput> extend
         return group.getGroupCode();
     }
 
+
     protected String getName(Long userId) {
         UserProfile user = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(userId));
         if (null == user)

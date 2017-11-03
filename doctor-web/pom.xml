@@ -40,6 +40,16 @@
             <artifactId>parana-article-api</artifactId>
         </dependency>
 
+        <!-- swagger -->
+        <dependency>
+            <groupId>io.terminus.boot</groupId>
+            <artifactId>terminus-spring-boot-starter-swagger</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml</groupId>
+            <artifactId>classmate</artifactId>
+        </dependency>
+
         <!-- pamas -->
         <dependency>
             <groupId>io.terminus.pampas</groupId>

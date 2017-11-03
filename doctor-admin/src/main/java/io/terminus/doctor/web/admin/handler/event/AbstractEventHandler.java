@@ -22,7 +22,10 @@ public abstract class AbstractEventHandler<T, R> {
     private static ConcurrentHashMap<Class<? extends AbstractEventHandler>, Class<?>> eventDtoClassCache = new ConcurrentHashMap();
 
     protected Class<T> getEventDtoClass() {
-        return (Class<T>) eventDtoClassCache.putIfAbsent(this.getClass(), (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]);
+        Class<T> result = (Class<T>) eventDtoClassCache.putIfAbsent(this.getClass(), (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]);
+        if (null == result)
+            return (Class<T>) eventDtoClassCache.get(this.getClass());
+        return result;
 //        return (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
 

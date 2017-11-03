@@ -1,20 +1,11 @@
 package io.terminus.doctor.web.admin.handler.event.group;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
-import io.terminus.doctor.basic.model.DoctorBasic;
-import io.terminus.doctor.basic.service.DoctorBasicReadService;
-import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
-import io.terminus.doctor.common.exception.InvalidException;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi;
+import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,15 +15,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class TransGroupEventHandler extends AbstractGroupEventHandler<DoctorTransGroupInput> {
 
+    @RpcConsumer
+    private DoctorGroupWriteService doctorGroupWriteService;
+
     @Override
     protected void buildEventDto(DoctorTransGroupInput eventDto, DoctorGroupEvent groupEvent) {
         eventDto.setToBarnName(getBarnName(eventDto.getToBarnId()));
 
-        eventDto.setBreedName(getBasicName(eventDto.getBreedId()));
+//        eventDto.setBreedName(getBasicName(eventDto.getBreedId()));
 
         if (eventDto.getIsCreateGroup().intValue() == IsOrNot.NO.getValue()) {
-            eventDto.setToGroupCode(getGroupCode(eventDto.getToGroupId()));
+            if (null != eventDto.getToGroupId())
+                eventDto.setToGroupCode(getGroupCode(eventDto.getToGroupId()));
         }
+
 
         eventDto.setFcrFeed(getFcrFeed(groupEvent.getGroupId()));
     }
