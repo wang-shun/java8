@@ -2,26 +2,23 @@ package io.terminus.doctor.web.front.warehouseV2;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
-import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Splitters;
-import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
-import io.terminus.doctor.basic.dto.warehouseV2.WarehouseMaterialDto;
+import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
-import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.basic.service.*;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.enums.WareHouseType;
-import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -33,6 +30,7 @@ import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -40,12 +38,10 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -63,6 +59,8 @@ public class WarehouseController {
 
     @Autowired
     private UserReadService<User> userReadService;
+    @RpcConsumer
+    private DoctorBasicReadService doctorBasicReadService;
 
     @Autowired
     private DoctorWareHouseWriteService doctorWareHouseWriteService;
@@ -608,11 +606,15 @@ public class WarehouseController {
                 throw new JsonResponseException(errorMessage);
             }
 
+            DoctorBasic unit = null;
+            if (NumberUtils.isNumber(sku.getUnit()))
+                unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(sku.getUnit())));
+
             data.add(WarehouseStockVo.builder()
                     .materialId(stock.getSkuId())
                     .materialName(stock.getSkuName())
                     .quantity(stock.getQuantity())
-                    .unit(sku.getUnit())
+                    .unit(null == unit ? "" : unit.getName())
                     .code(sku.getCode())
                     .specification(sku.getSpecification())
                     .vendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())))
