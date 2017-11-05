@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
+import com.google.api.client.util.Charsets;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
@@ -15,16 +16,30 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorReadSer
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.web.core.export.Exporter;
+import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleExportVo;
 import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleVo;
+import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseEventExportVo;
+import lombok.val;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.boot.autoconfigure.web.ConditionalOnEnabledResourceChain;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -39,6 +54,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("api/doctor/warehouse/receipt")
 public class StockHandleController {
+
+    @Autowired
+    private Exporter exporter;
 
     @RpcConsumer
     private DoctorWarehouseStockHandleReadService doctorWarehouseStockHandleReadService;
@@ -131,9 +149,85 @@ public class StockHandleController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "export")
-    public void export() {
+    @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}/export")
+    public void export(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) {
 
+        List<StockHandleExportVo> exportVos = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findByStockHandle(id))
+                .stream()
+                .map(mh -> {
+                    StockHandleExportVo vo = new StockHandleExportVo();
+                    BeanUtils.copyProperties(mh, vo);
+
+                    DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
+                    if (null != sku) {
+                        DoctorWarehouseVendor vendor = RespHelper.or500(doctorWarehouseVendorReadService.findById(sku.getVendorId()));
+                        if (vendor != null)
+                            vo.setVendorName(vendor.getName());
+                        vo.setMaterialCode(sku.getCode());
+                        vo.setMaterialSpecification(sku.getSpecification());
+                    }
+                    vo.setUnitPrice(new BigDecimal(mh.getUnitPrice()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
+                    vo.setAmount(new BigDecimal(mh.getUnitPrice()).multiply(vo.getQuantity()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
+                    return vo;
+                })
+                .collect(Collectors.toList());
+
+
+        try {
+            exporter.setHttpServletResponse(request, response, "仓库单据");
+
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+                Sheet sheet = workbook.createSheet();
+                Row title = sheet.createRow(0);
+                title.createCell(0).setCellValue("物料名称");
+                title.createCell(1).setCellValue("厂家");
+                title.createCell(2).setCellValue("物料编码");
+                title.createCell(3).setCellValue("规格");
+                title.createCell(4).setCellValue("单位");
+                title.createCell(5).setCellValue("数量");
+                title.createCell(6).setCellValue("单价（元）");
+                title.createCell(7).setCellValue("金额（元）");
+                title.createCell(8).setCellValue("备注");
+
+                int pos = 1;
+                for (StockHandleExportVo vo : exportVos) {
+                    Row row = sheet.createRow(pos++);
+                    row.createCell(0).setCellValue(vo.getMaterialName());
+                    row.createCell(1).setCellValue(vo.getVendorName());
+                    row.createCell(2).setCellValue(vo.getMaterialCode());
+                    row.createCell(3).setCellValue(vo.getMaterialSpecification());
+                    row.createCell(4).setCellValue(vo.getUnit());
+                    row.createCell(5).setCellValue(vo.getQuantity().doubleValue());
+                    row.createCell(6).setCellValue(vo.getUnitPrice());
+                    row.createCell(7).setCellValue(vo.getAmount());
+                    row.createCell(8).setCellValue(vo.getRemark());
+                }
+
+                workbook.write(response.getOutputStream());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+//        exporter.export(RespHelper.or500(doctorWarehouseMaterialHandleReadService.findByStockHandle(id))
+//                .stream()
+//                .map(mh -> {
+//                    StockHandleExportVo vo = new StockHandleExportVo();
+//                    BeanUtils.copyProperties(mh, vo);
+//
+//                    DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
+//                    if (null != sku) {
+//                        DoctorWarehouseVendor vendor = RespHelper.or500(doctorWarehouseVendorReadService.findById(sku.getVendorId()));
+//                        if (vendor != null)
+//                            vo.setVendorName(vendor.getName());
+//                        vo.setMaterialCode(sku.getCode());
+//                        vo.setMaterialSpecification(sku.getSpecification());
+//                    }
+//                    vo.setUnitPrice(new BigDecimal(mh.getUnitPrice()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
+//                    vo.setAmount(new BigDecimal(mh.getUnitPrice()).multiply(vo.getQuantity()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
+//                    return vo;
+//                })
+//                .collect(Collectors.toList()), "web-wareHouse-stock-handle", request, response);
     }
 
 
