@@ -12,10 +12,20 @@ import java.util.List;
 @Data
 public class StockHandleVo extends DoctorWarehouseStockHandle {
 
+    private String farmName;
+
+    private Integer warehouseType;
+
+    private String warehouseManagerName;
+
     private List<Detail> details;
 
-
+    @Data
     public static class Detail extends DoctorWarehouseMaterialHandle {
+
+        private String materialCode;
+
+        private String materialSpecification;
 
     }
 }

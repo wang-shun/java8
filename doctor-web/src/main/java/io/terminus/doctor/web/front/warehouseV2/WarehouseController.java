@@ -311,6 +311,11 @@ public class WarehouseController {
     }
 
 
+    @RequestMapping(method = RequestMethod.GET, value = "farm/all")
+    public List<DoctorWareHouse> queryAll(@RequestParam Long farmId) {
+        return RespHelper.or500(doctorWarehouseReaderService.findByFarmId(farmId));
+    }
+
     /**
      * 猪厂下所有仓库，及仓库的出入库等统计信息
      *

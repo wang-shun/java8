@@ -3,10 +3,16 @@ package io.terminus.doctor.web.front.warehouseV2;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
+import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockHandleReadService;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -35,6 +41,12 @@ public class StockHandleController {
     private DoctorWarehouseStockHandleReadService doctorWarehouseStockHandleReadService;
     @RpcConsumer
     private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
+    @RpcConsumer
+    private DoctorWareHouseReadService doctorWareHouseReadService;
+    @RpcConsumer
+    private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
 
     @InitBinder
     public void init(WebDataBinder webDataBinder) {
@@ -83,10 +95,30 @@ public class StockHandleController {
                         .map(mh -> {
                             StockHandleVo.Detail detail = new StockHandleVo.Detail();
                             BeanUtils.copyProperties(mh, detail);
+
+
+                            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
+                            if (null != sku) {
+                                detail.setMaterialCode(sku.getCode());
+                                detail.setMaterialSpecification(sku.getSpecification());
+                            }
+
                             return detail;
                         })
                         .collect(Collectors.toList()));
 
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(vo.getFarmId()));
+        if (farm != null)
+            vo.setFarmName(farm.getName());
+
+        DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(vo.getWarehouseId()));
+        if (wareHouse != null) {
+            vo.setWarehouseManagerName(wareHouse.getManagerName());
+        }
+
+        if (!vo.getDetails().isEmpty()) {
+            vo.setWarehouseType(vo.getDetails().get(0).getWarehouseType());
+        }
         return vo;
     }
 
