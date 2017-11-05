@@ -6,16 +6,19 @@ import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockHandleReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.boot.autoconfigure.web.ConditionalOnEnabledResourceChain;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,6 +50,8 @@ public class StockHandleController {
     private DoctorWareHouseReadService doctorWareHouseReadService;
     @RpcConsumer
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
+    @RpcConsumer
+    private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
 
     @InitBinder
     public void init(WebDataBinder webDataBinder) {
@@ -99,6 +104,9 @@ public class StockHandleController {
 
                             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
                             if (null != sku) {
+                                DoctorWarehouseVendor vendor = RespHelper.or500(doctorWarehouseVendorReadService.findById(sku.getVendorId()));
+                                if (vendor != null)
+                                    detail.setVendorName(vendor.getName());
                                 detail.setMaterialCode(sku.getCode());
                                 detail.setMaterialSpecification(sku.getSpecification());
                             }
