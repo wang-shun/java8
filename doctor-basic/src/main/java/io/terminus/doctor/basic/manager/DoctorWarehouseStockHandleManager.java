@@ -39,7 +39,7 @@ public class DoctorWarehouseStockHandleManager {
     private DoctorWarehouseMaterialHandleManager doctorWarehouseMaterialHandleManager;
 
     //    @Transactional(propagation = Propagation.NESTED)
-    public void handle(AbstractWarehouseStockDto stockDto, DoctorWareHouse wareHouse, String serialNo, WarehouseMaterialHandleType handleType) {
+    public DoctorWarehouseStockHandle handle(AbstractWarehouseStockDto stockDto, DoctorWareHouse wareHouse, String serialNo, WarehouseMaterialHandleType handleType) {
 
         DoctorWarehouseStockHandle handle = new DoctorWarehouseStockHandle();
         handle.setFarmId(stockDto.getFarmId());
@@ -56,6 +56,7 @@ public class DoctorWarehouseStockHandleManager {
         handle.setHandleSubType(handleType.getValue());
 
         doctorWarehouseStockHandleDao.create(handle);
+        return handle;
     }
 
 

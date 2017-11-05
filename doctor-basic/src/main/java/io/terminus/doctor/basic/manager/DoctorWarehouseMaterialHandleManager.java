@@ -86,6 +86,9 @@ public class DoctorWarehouseMaterialHandleManager {
         materialHandle.setHandleYear(materialHandleContext.getStockDto().getHandleDate().get(Calendar.YEAR));
         materialHandle.setHandleMonth(materialHandleContext.getStockDto().getHandleDate().get(Calendar.MONTH) + 1);
         materialHandle.setRemark(materialHandleContext.getStockDetail().getRemark());
+
+        materialHandle.setStockHandleId(materialHandleContext.getStockHandle().getId());
+
         doctorWarehouseMaterialHandleDao.create(materialHandle);
 
         for (DoctorWarehousePurchase purchase : materialHandleContext.getPurchases().keySet()) {
@@ -245,5 +248,6 @@ public class DoctorWarehouseMaterialHandleManager {
         private String vendorName;
         private BigDecimal quantity;
         private DoctorWarehouseSku sku;
+        private DoctorWarehouseStockHandle stockHandle;
     }
 }
