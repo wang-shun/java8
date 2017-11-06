@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-10-31 16:15:20
+ ~ Date: 2017-11-06 11:09:25
  ~ Created by [ your name ]
 -->
 
@@ -23,6 +23,7 @@
         <result property="unitPrice" column="unit_price"/>
         <result property="unit" column="unit"/>
         <result property="deleteFlag" column="delete_flag"/>
+        <result property="beforeInventoryQuantity" column="before_inventory_quantity"/>
         <result property="quantity" column="quantity"/>
         <result property="handleDate" column="handle_date"/>
         <result property="handleYear" column="handle_year"/>
@@ -44,12 +45,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `stock_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_transfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, 
+        `stock_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_transfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `before_inventory_quantity`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{stockHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTransferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, 
+        #{stockHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTransferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{beforeInventoryQuantity}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, 
         now(), now()
     </sql>
 
@@ -68,6 +69,7 @@
             <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
             <if test="unit != null">AND `unit` = #{unit}</if>
             <if test="deleteFlag != null">AND `delete_flag` = #{deleteFlag}</if>
+            <if test="beforeInventoryQuantity != null">AND `before_inventory_quantity` = #{beforeInventoryQuantity}</if>
             <if test="quantity != null">AND `quantity` = #{quantity}</if>
             <if test="handleDate != null">AND `handle_date` = #{handleDate}</if>
             <if test="handleYear != null">AND `handle_year` = #{handleYear}</if>
@@ -95,6 +97,7 @@
             <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
             <if test="unit != null">AND `unit` = #{unit}</if>
             <if test="deleteFlag != null">AND `delete_flag` = #{deleteFlag}</if>
+            <if test="beforeInventoryQuantity != null">AND `before_inventory_quantity` = #{beforeInventoryQuantity}</if>
             <if test="quantity != null">AND `quantity` = #{quantity}</if>
             <if test="handleDate != null">AND `handle_date` = #{handleDate}</if>
             <if test="handleYear != null">AND `handle_year` = #{handleYear}</if>
@@ -166,6 +169,7 @@
             <if test="unitPrice != null">`unit_price` = #{unitPrice},</if>
             <if test="unit != null">`unit` = #{unit},</if>
             <if test="deleteFlag != null">`delete_flag` = #{deleteFlag},</if>
+            <if test="beforeInventoryQuantity != null">`before_inventory_quantity` = #{beforeInventoryQuantity},</if>
             <if test="quantity != null">`quantity` = #{quantity},</if>
             <if test="handleDate != null">`handle_date` = #{handleDate},</if>
             <if test="handleYear != null">`handle_year` = #{handleYear},</if>

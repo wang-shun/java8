@@ -33,5 +33,15 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
         private String materialSpecification;
 
+        private String applyPigBarnName;
+
+        private String applyPigGroupName;
+
+        private String applyStaffName;
+
+        private String transferInFarmName;
+
+        private String transferInWarehouseName;
+
     }
 }

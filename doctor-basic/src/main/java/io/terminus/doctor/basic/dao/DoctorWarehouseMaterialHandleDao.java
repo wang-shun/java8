@@ -5,7 +5,6 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
-import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import org.springframework.stereotype.Repository;
 

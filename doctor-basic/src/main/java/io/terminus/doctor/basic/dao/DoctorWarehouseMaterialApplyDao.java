@@ -34,9 +34,18 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
     }
 
 
-    public List<DoctorWarehouseMaterialApply> advList(Map<String, Object> criteria){
+    public List<DoctorWarehouseMaterialApply> advList(Map<String, Object> criteria) {
         return sqlSession.selectList(sqlId("advList"), criteria);
     }
 
+    public DoctorWarehouseMaterialApply findMaterialHandle(Long materialHandleId) {
+        List<DoctorWarehouseMaterialApply> applies = this.list(DoctorWarehouseMaterialApply.builder()
+                .materialHandleId(materialHandleId)
+                .build());
+        if (applies.isEmpty())
+            return null;
+
+        return applies.get(0);
+    }
 }
 

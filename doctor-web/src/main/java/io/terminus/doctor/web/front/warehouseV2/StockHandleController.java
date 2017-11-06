@@ -5,14 +5,12 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialHandleReadService;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockHandleReadService;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorReadService;
+import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -20,6 +18,7 @@ import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleExportVo;
 import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleVo;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseEventExportVo;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -51,6 +50,7 @@ import java.util.stream.Collectors;
  * 盘点
  * Created by sunbo@terminus.io on 2017/10/31.
  */
+@Slf4j
 @RestController
 @RequestMapping("api/doctor/warehouse/receipt")
 public class StockHandleController {
@@ -70,6 +70,8 @@ public class StockHandleController {
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
     @RpcConsumer
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
+    @RpcConsumer
+    private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
 
     @InitBinder
     public void init(WebDataBinder webDataBinder) {
@@ -126,7 +128,23 @@ public class StockHandleController {
                                     detail.setVendorName(vendor.getShortName());
                                 detail.setMaterialCode(sku.getCode());
                                 detail.setMaterialSpecification(sku.getSpecification());
+                            } else {
+                                log.warn("sku not found,{}", mh.getMaterialId());
                             }
+                            DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getId()));
+                            if (null != apply) {
+                                detail.setApplyPigBarnName(apply.getPigBarnName());
+                                detail.setApplyPigGroupName(apply.getPigGroupName());
+                                detail.setApplyStaffName(apply.getApplyStaffName());
+                            } else
+                                log.warn("material apply not found,by material handle {}", mh.getId());
+
+                            DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(mh.getOtherTransferHandleId()));
+                            if (wareHouse != null) {
+                                detail.setTransferInWarehouseName(wareHouse.getWareHouseName());
+                                detail.setTransferInFarmName(wareHouse.getFarmName());
+                            } else
+                                log.warn("warehouse not found,{}", mh.getOtherTransferHandleId());
 
                             return detail;
                         })
