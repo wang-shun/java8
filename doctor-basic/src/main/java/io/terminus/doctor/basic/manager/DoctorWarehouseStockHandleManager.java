@@ -39,6 +39,15 @@ public class DoctorWarehouseStockHandleManager {
     private DoctorWarehouseMaterialHandleManager doctorWarehouseMaterialHandleManager;
 
     //    @Transactional(propagation = Propagation.NESTED)
+
+    /**
+     * 处理
+     * @param stockDto
+     * @param wareHouse
+     * @param serialNo
+     * @param handleType
+     * @return
+     */
     public DoctorWarehouseStockHandle handle(AbstractWarehouseStockDto stockDto, DoctorWareHouse wareHouse, String serialNo, WarehouseMaterialHandleType handleType) {
 
         DoctorWarehouseStockHandle handle = new DoctorWarehouseStockHandle();

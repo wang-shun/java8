@@ -12,11 +12,17 @@ import java.util.List;
 @Data
 public class StockHandleVo extends DoctorWarehouseStockHandle {
 
+    private String orgName;
+
     private String farmName;
 
     private Integer warehouseType;
 
     private String warehouseManagerName;
+
+    private Double totalAmount;
+
+    private Double totalQuantity;
 
     private List<Detail> details;
 

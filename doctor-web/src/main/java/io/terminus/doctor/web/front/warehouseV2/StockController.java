@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
+import com.sun.xml.internal.messaging.saaj.soap.ver1_1.Detail1_1Impl;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
@@ -112,6 +113,20 @@ public class StockController {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
+        Collections.reverse(stockInventory.getDetails());
+        List<WarehouseStockInventoryDto.WarehouseStockInventoryDetail> removedRepeat = new ArrayList<>();
+        for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : stockInventory.getDetails()) {
+            boolean existed = false;
+            for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail1 : removedRepeat) {
+                if (detail.getMaterialId().equals(detail1.getMaterialId())) {
+                    existed = true;
+                    break;
+                }
+            }
+            if (!existed)
+                removedRepeat.add(detail);
+        }
+        stockInventory.setDetails(removedRepeat);
 
         Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockInventory.getOperatorId());
         if (!userResponse.isSuccess())
@@ -145,7 +160,6 @@ public class StockController {
 
         return true;
     }
-
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
     public boolean delete(@PathVariable Long id) {

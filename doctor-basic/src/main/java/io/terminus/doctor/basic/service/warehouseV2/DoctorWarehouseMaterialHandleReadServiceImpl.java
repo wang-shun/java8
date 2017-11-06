@@ -46,10 +46,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     @ExceptionHandle("doctor.warehouse.material.handle.find.fail")
     public Response<List<DoctorWarehouseMaterialHandle>> findByStockHandle(Long stockHandleId) {
 
-        return Response.ok(doctorWarehouseMaterialHandleDao.list(DoctorWarehouseMaterialHandle.builder()
-                .stockHandleId(stockHandleId)
-                .deleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue())
-                .build()));
+        return Response.ok(doctorWarehouseMaterialHandleDao.findByStockHandle(stockHandleId));
     }
 
     @Override

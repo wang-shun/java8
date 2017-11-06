@@ -119,7 +119,6 @@ public class StockHandleController {
                             StockHandleVo.Detail detail = new StockHandleVo.Detail();
                             BeanUtils.copyProperties(mh, detail);
 
-
                             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
                             if (null != sku) {
                                 DoctorWarehouseVendor vendor = RespHelper.or500(doctorWarehouseVendorReadService.findById(sku.getVendorId()));
@@ -134,8 +133,10 @@ public class StockHandleController {
                         .collect(Collectors.toList()));
 
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(vo.getFarmId()));
-        if (farm != null)
+        if (farm != null) {
             vo.setFarmName(farm.getName());
+            vo.setOrgName(farm.getOrgName());
+        }
 
         DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(vo.getWarehouseId()));
         if (wareHouse != null) {
@@ -145,6 +146,16 @@ public class StockHandleController {
         if (!vo.getDetails().isEmpty()) {
             vo.setWarehouseType(vo.getDetails().get(0).getWarehouseType());
         }
+
+        BigDecimal totalQuantity = new BigDecimal(0);
+        long totalUnitPrice = 0L;
+        for (StockHandleVo.Detail detail : vo.getDetails()) {
+            totalQuantity = totalQuantity.add(detail.getQuantity());
+            totalUnitPrice += detail.getUnitPrice();
+        }
+        vo.setTotalQuantity(totalQuantity.doubleValue());
+        vo.setTotalAmount(totalQuantity.multiply(new BigDecimal(totalUnitPrice)).doubleValue());
+
         return vo;
     }
 
