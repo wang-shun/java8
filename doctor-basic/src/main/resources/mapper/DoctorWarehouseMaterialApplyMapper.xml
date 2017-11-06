@@ -108,6 +108,12 @@
                     material_id =#{t}
                 </foreach>
             </if>
+            <if test="pigGroupIds != null and pigGroupIds.size() > 0">
+                AND
+                <foreach collection="pigGroupIds" item="t" open="(" separator="or" close=")">
+                    pigGroupId =#{t}
+                </foreach>
+            </if>
         </where>
     </sql>
 

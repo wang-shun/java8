@@ -17,6 +17,8 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
+import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.web.front.warehouseV2.vo.*;
@@ -492,16 +494,49 @@ public class ReportController {
     public List<WarehousePigGroupApplyVo> pigGroupApply(@RequestParam Long warehouseId,
                                                         @RequestParam Long orgId,
                                                         @RequestParam(required = false) Long pigGroupId,
+                                                        @RequestParam(required = false) Long pigBarnId,
                                                         @RequestParam(required = false) Integer materialType,
-                                                        @RequestParam(required = false) String materialName) {
+                                                        @RequestParam(required = false) String materialName,
+                                                        @RequestParam(required = false) Date pigGroupCreateDateStart,
+                                                        @RequestParam(required = false) Date pigGroupCreateDateEnd,
+                                                        @RequestParam(required = false) Date pigGroupCloseDateStart,
+                                                        @RequestParam(required = false) Date pigGroupCloseDateEnd) {
 
+
+        if (null != pigGroupCreateDateStart && null != pigGroupCreateDateEnd
+                && pigGroupCreateDateStart.before(pigGroupCreateDateEnd)) {
+            throw new JsonResponseException("start.date.after.end.date");
+        }
+        if (null != pigGroupCloseDateStart && null != pigGroupCloseDateEnd
+                && pigGroupCloseDateStart.before(pigGroupCloseDateEnd))
+            throw new JsonResponseException("start.date.after.end.date");
+
+        List<Long> pigGroupIds = null;
+        if (null != pigGroupCreateDateStart || null != pigGroupCreateDateEnd || null != pigGroupCloseDateStart || null != pigGroupCloseDateEnd) {
+
+            DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(warehouseId));
+            if (null == wareHouse)
+                throw new JsonResponseException("warehouse.not.found");
+
+            DoctorGroupSearchDto groupSearchDto = new DoctorGroupSearchDto();
+            groupSearchDto.setStartOpenAt(pigGroupCreateDateStart);
+            groupSearchDto.setEndOpenAt(pigGroupCreateDateEnd);
+            groupSearchDto.setStartCloseAt(pigGroupCloseDateStart);
+            groupSearchDto.setEndCloseAt(pigGroupCloseDateEnd);
+            groupSearchDto.setFarmId(wareHouse.getFarmId());
+            pigGroupIds = RespHelper.or500(doctorGroupReadService.pagingGroup(groupSearchDto, 1, 5000)).getData().stream().map(g -> g.getGroup().getId()).collect(Collectors.toList());
+        }
 
         Map<String, Object> criteria = new HashMap<>();
 //        if (StringUtils.isNotBlank(materialName))
 //            criteria.put("materialNameLike", materialName);
         criteria.put("warehouseId", warehouseId);
         criteria.put("type", materialType);
-        criteria.put("pigGroupId", pigGroupId);
+        criteria.put("pigBarnId", pigBarnId);
+        if (null != pigGroupIds && !pigGroupIds.isEmpty())
+            criteria.put("pigGroupIds", pigGroupIds);
+        else
+            criteria.put("pigGroupId", pigGroupId);
 
         if (StringUtils.isNotBlank(materialName)) {
             Map<String, Object> skuParams = new HashMap<>();
