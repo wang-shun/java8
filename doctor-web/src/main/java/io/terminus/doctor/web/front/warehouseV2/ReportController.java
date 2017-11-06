@@ -423,7 +423,7 @@ public class ReportController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "pigBarnApply")
-    public List<WarehouseMaterialApplyVo> apply(@RequestParam(required = false, value = "barnId") Long pigBarnId,
+    public List<WarehouseMaterialApplyVo> apply(@RequestParam(required = false) Long pigBarnId,
                                                 @RequestParam Long warehouseId,
                                                 @RequestParam Long orgId,
                                                 @RequestParam(required = false) Integer type,
