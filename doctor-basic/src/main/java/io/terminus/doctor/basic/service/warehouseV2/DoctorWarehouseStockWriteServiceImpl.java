@@ -223,9 +223,14 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
             int compareResult = stock.getQuantity().compareTo(detail.getQuantity());
 
-            if (compareResult == 0) {
+            if (!updateMode && compareResult == 0) {
                 log.info("盘点库存量与原库存量一致，warehouse[{}],material[{}]", stockInventory.getWarehouseId(), detail.getMaterialId());
                 continue;
+            }
+
+            DoctorWarehouseMaterialHandle oldHandle = null;
+            if (updateMode && skuHandle.containsKey(detail.getMaterialId())) {
+                oldHandle = skuHandle.get(detail.getMaterialId()).get(0);
             }
 
             DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
@@ -256,11 +261,11 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             BigDecimal changedQuantity;
             if (compareResult > 0) {  //盘亏
 
-                if (updateMode) {
-                    if (skuHandle.containsKey(detail.getMaterialId())) {
-                        DoctorWarehouseMaterialHandle oldHandle = skuHandle.get(detail.getMaterialId()).get(0);
-
-                    }
+                if (updateMode
+                        && null != oldHandle
+                        && oldHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())
+                        && stock.getQuantity().compareTo(oldHandle.getQuantity()) < 0) {
+                    throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), stock.getQuantity(), sku.getUnit());
                 }
 
                 purchaseCriteria.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
@@ -288,6 +293,11 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                         materialHandle.getUnitPrice(),
                         false);
             } else {
+
+                if (updateMode && null != oldHandle && oldHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())
+                        && detail.getQuantity().compareTo(oldHandle.getQuantity()) < 0)
+                    throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), detail.getQuantity(), sku.getUnit());
+
                 PageInfo page = new PageInfo(1, 1);
                 Paging<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.paging(page.getOffset(), page.getLimit(), purchaseCriteria);
                 if (null == purchases || purchases.isEmpty())
@@ -327,7 +337,11 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                         materialHandle.getUnitPrice(),
                         true);
             }
+
         }
+
+        doctorWarehouseStockHandleManager.delete(stockInventory.getStockHandleId());
+
         return Response.ok(true);
     }
 
@@ -361,9 +375,9 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             if (context.getWareHouse().getType().intValue() != targetWareHouse.getType().intValue())
                 throw new InvalidException("transfer.warehouse.type.not.equals", context.getWareHouse().getWareHouseName(), targetWareHouse.getWareHouseName());
 
-            if (!Objects.equals(context.getWareHouse().getManagerId(), targetWareHouse.getManagerId())) {
-                throw new InvalidException("transfer.warehouse.manager.id.not.equals", targetWareHouse.getManagerName(), context.getWareHouse().getManagerName());
-            }
+//            if (!Objects.equals(context.getWareHouse().getManagerId(), targetWareHouse.getManagerId())) {
+//                throw new InvalidException("transfer.warehouse.manager.id.not.equals", targetWareHouse.getManagerName(), context.getWareHouse().getManagerName());
+//            }
 
 
             //找到对应库存

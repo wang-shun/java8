@@ -42,6 +42,7 @@ public class DoctorWarehouseStockHandleManager {
 
     /**
      * 处理
+     *
      * @param stockDto
      * @param wareHouse
      * @param serialNo
@@ -53,6 +54,7 @@ public class DoctorWarehouseStockHandleManager {
         DoctorWarehouseStockHandle handle = new DoctorWarehouseStockHandle();
         handle.setFarmId(stockDto.getFarmId());
         handle.setWarehouseId(stockDto.getWarehouseId());
+        handle.setWarehouseType(wareHouse.getType());
         handle.setWarehouseName(wareHouse.getWareHouseName());
 
         handle.setOperatorId(stockDto.getOperatorId());
@@ -68,6 +70,17 @@ public class DoctorWarehouseStockHandleManager {
         return handle;
     }
 
+
+    public void delete(Long oldStockHandleId) {
+
+        if (null != oldStockHandleId) {
+//            doctorWarehouseStockHandleDao.delete(oldStockHandleId);
+
+            doctorWarehouseMaterialHandleDao.findByStockHandle(oldStockHandleId).stream().forEach(m -> {
+                doctorWarehouseMaterialHandleManager.delete(m);
+            });
+        }
+    }
 
     public void check(AbstractWarehouseStockDto stockDto, List<? extends AbstractWarehouseStockDetail> details, WarehouseMaterialHandleType handleType) {
         DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
