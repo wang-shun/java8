@@ -258,6 +258,10 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
         try{
             Date startAt = DateUtil.monthStart(date);
             Date endAt = DateUtil.monthEnd(date);
+            Date current = new Date();
+            if (endAt.after(current)) {
+                endAt = current;
+            }
             String month = DateUtil.getYearMonth(date);
             log.info("generate DoctorMonthlyReports start, farmId: {}, start: {}, end: {}, now: {}", farmId, DateUtil.toDateString(startAt), DateUtil.toDateString(endAt), DateUtil.toDateTimeString(new Date()));
             createDoctorRangeReport(farmId, ReportRangeType.MONTH.getValue(), month, startAt, endAt);
