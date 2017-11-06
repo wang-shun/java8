@@ -123,7 +123,7 @@ public class StockHandleController {
                             if (null != sku) {
                                 DoctorWarehouseVendor vendor = RespHelper.or500(doctorWarehouseVendorReadService.findById(sku.getVendorId()));
                                 if (vendor != null)
-                                    detail.setVendorName(vendor.getName());
+                                    detail.setVendorName(vendor.getShortName());
                                 detail.setMaterialCode(sku.getCode());
                                 detail.setMaterialSpecification(sku.getSpecification());
                             }
