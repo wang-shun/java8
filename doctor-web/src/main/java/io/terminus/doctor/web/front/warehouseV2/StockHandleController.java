@@ -20,8 +20,12 @@ import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseEventExportVo;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -246,6 +250,8 @@ public class StockHandleController {
                     title.createCell(8).setCellValue("备注");
 
                     int pos = 1;
+                    BigDecimal totalQuantity = new BigDecimal(0);
+                    double totalAmount = 0L;
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
                         row.createCell(0).setCellValue(vo.getMaterialName());
@@ -257,7 +263,25 @@ public class StockHandleController {
                         row.createCell(6).setCellValue(vo.getUnitPrice());
                         row.createCell(7).setCellValue(vo.getAmount());
                         row.createCell(8).setCellValue(vo.getRemark());
+
+                        totalQuantity = totalQuantity.add(vo.getQuantity());
+                        totalAmount += vo.getAmount();
                     }
+
+                    Row countRow = sheet.createRow(pos);
+
+                    CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 4);
+                    sheet.addMergedRegion(cra);
+
+                    Cell countCell = countRow.createCell(0);
+                    CellStyle style = workbook.createCellStyle();
+                    style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                    countCell.setCellStyle(style);
+                    countCell.setCellValue("合计");
+
+                    countRow.createCell(5).setCellValue(totalQuantity.doubleValue());
+                    countRow.createCell(7).setCellValue(totalAmount);
+
                 } else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
                     title.createCell(0).setCellValue("物料名称");
                     title.createCell(1).setCellValue("物料编码");
@@ -273,6 +297,8 @@ public class StockHandleController {
                     title.createCell(11).setCellValue("备注");
 
                     int pos = 1;
+                    BigDecimal totalQuantity = new BigDecimal(0);
+                    double totalAmount = 0L;
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
                         row.createCell(0).setCellValue(vo.getMaterialName());
@@ -287,7 +313,25 @@ public class StockHandleController {
                         row.createCell(9).setCellValue(vo.getUnitPrice());
                         row.createCell(10).setCellValue(vo.getAmount());
                         row.createCell(11).setCellValue(vo.getRemark());
+
+                        totalQuantity = totalQuantity.add(vo.getQuantity());
+                        totalAmount += vo.getAmount();
                     }
+
+                    Row countRow = sheet.createRow(pos);
+
+                    CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 7);
+                    sheet.addMergedRegion(cra);
+
+                    Cell countCell = countRow.createCell(0);
+                    CellStyle style = workbook.createCellStyle();
+                    style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                    countCell.setCellStyle(style);
+                    countCell.setCellValue("合计");
+
+                    countRow.createCell(8).setCellValue(totalQuantity.doubleValue());
+                    countRow.createCell(10).setCellValue(totalAmount);
+
                 } else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.INVENTORY.getValue())) {
                     title.createCell(0).setCellValue("物料名称");
                     title.createCell(1).setCellValue("物料编码");
