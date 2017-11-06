@@ -13,10 +13,12 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
 import io.terminus.doctor.basic.manager.*;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.*;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorFarmBasicReadService;
 import io.terminus.doctor.common.exception.InvalidException;
 import lombok.Data;
@@ -83,6 +85,9 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     private DoctorWarehouseStockHandleManager doctorWarehouseStockHandleManager;
     @Autowired
     private DoctorWarehouseStockMonthlyManager doctorWarehouseStockMonthlyManager;
+
+    @Autowired
+    private DoctorBasicDao doctorBasicDao;
 
     @Override
     public Response<Long> create(DoctorWarehouseStock doctorWarehouseStock) {
@@ -240,7 +245,10 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             materialHandle.setHandleDate(stockInventory.getHandleDate().getTime());
             materialHandle.setHandleYear(stockInventory.getHandleDate().get(Calendar.YEAR));
             materialHandle.setHandleMonth(stockInventory.getHandleDate().get(Calendar.MONTH) + 1);
-            materialHandle.setUnit(sku.getUnit());
+            DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
+            if (null != unit)
+                materialHandle.setUnit(unit.getName());
+            materialHandle.setBeforeInventoryQuantity(stock.getQuantity());
             materialHandle.setOperatorId(stockInventory.getOperatorId());
             materialHandle.setOperatorName(stockInventory.getOperatorName());
             materialHandle.setRemark(detail.getRemark());
@@ -251,7 +259,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 if (updateMode) {
                     if (skuHandle.containsKey(detail.getMaterialId())) {
                         DoctorWarehouseMaterialHandle oldHandle = skuHandle.get(detail.getMaterialId()).get(0);
-                        
+
                     }
                 }
 
@@ -397,12 +405,17 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             long averagePrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock);
             DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(transferOutPurchases, detail.getQuantity());
 
+
             //调出
             DoctorWarehouseMaterialHandle outHandle = buildMaterialHandle(stock, stockTransfer, detail.getQuantity(), averagePrice, WarehouseMaterialHandleType.TRANSFER_OUT.getValue());
             outHandle.setStockHandleId(stockHandle.getId());
             outHandle.setHandleYear(stockTransfer.getHandleDate().get(Calendar.YEAR));
             outHandle.setHandleMonth(stockTransfer.getHandleDate().get(Calendar.MONTH) + 1);
             outHandle.setRemark(detail.getRemark());
+            DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
+            if (null != unit)
+                outHandle.setUnit(unit.getName());
+            outHandle.setBeforeInventoryQuantity(stock.getQuantity());
             stock.setQuantity(stock.getQuantity().subtract(detail.getQuantity()));
             doctorWarehouseHandlerManager.outStock(stock, purchaseHandleContext, outHandle);
             doctorWarehouseStockMonthlyManager.count(stock.getWarehouseId(),
@@ -431,7 +444,10 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             DoctorWarehouseMaterialHandle inHandle = buildMaterialHandle(transferInStock, stockTransfer, detail.getQuantity(), averagePrice, WarehouseMaterialHandleType.TRANSFER_IN.getValue());
             inHandle.setHandleYear(stockTransfer.getHandleDate().get(Calendar.YEAR));
             inHandle.setHandleMonth(stockTransfer.getHandleDate().get(Calendar.MONTH) + 1);
+            if (null != unit)
+                inHandle.setUnit(unit.getName());
             inHandle.setRemark(detail.getRemark());
+            inHandle.setBeforeInventoryQuantity(stock.getQuantity());
             inHandle.setOtherTransferHandleId(outHandle.getId());
             List<DoctorWarehousePurchase> transferInPurchase = new ArrayList<>();
             for (DoctorWarehousePurchase purchase : purchaseHandleContext.getPurchaseQuantity().keySet()) {

@@ -5,10 +5,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
+import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -139,12 +136,16 @@ public class StockHandleController {
                             } else
                                 log.warn("material apply not found,by material handle {}", mh.getId());
 
-                            DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(mh.getOtherTransferHandleId()));
-                            if (wareHouse != null) {
-                                detail.setTransferInWarehouseName(wareHouse.getWareHouseName());
-                                detail.setTransferInFarmName(wareHouse.getFarmName());
+                            DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getOtherTransferHandleId()));
+                            if (transferInHandle != null) {
+                                DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(transferInHandle.getWarehouseId()));
+                                if (wareHouse != null) {
+                                    detail.setTransferInWarehouseName(wareHouse.getWareHouseName());
+                                    detail.setTransferInFarmName(wareHouse.getFarmName());
+                                } else
+                                    log.warn("warehouse not found,{}", transferInHandle.getWarehouseId());
                             } else
-                                log.warn("warehouse not found,{}", mh.getOtherTransferHandleId());
+                                log.warn("other transfer in handle not found,{}", mh.getOtherTransferHandleId());
 
                             return detail;
                         })

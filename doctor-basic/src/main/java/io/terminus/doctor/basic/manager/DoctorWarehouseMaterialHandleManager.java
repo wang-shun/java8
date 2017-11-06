@@ -8,6 +8,7 @@ import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.warehouseV2.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,6 +51,9 @@ public class DoctorWarehouseMaterialHandleManager {
     @Autowired
     private DoctorWarehouseHandlerManager doctorWarehouseHandlerManager;
 
+    @Autowired
+    private DoctorBasicDao doctorBasicDao;
+
     /**
      * 入库
      */
@@ -80,7 +84,9 @@ public class DoctorWarehouseMaterialHandleManager {
         materialHandle.setOperatorId(materialHandleContext.getStockDto().getOperatorId());
         materialHandle.setOperatorName(materialHandleContext.getStockDto().getOperatorName());
         materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
-        materialHandle.setUnit(materialHandleContext.getSku().getUnit());
+        DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(materialHandleContext.getSku().getUnit()));
+        if (null != unit)
+            materialHandle.setUnit(unit.getName());
 
         materialHandle.setVendorName(doctorVendorManager.findById(materialHandleContext.getSku().getVendorId()).getName());
         materialHandle.setHandleYear(materialHandleContext.getStockDto().getHandleDate().get(Calendar.YEAR));
