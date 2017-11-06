@@ -153,14 +153,19 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
             return Response.ok(prefix + "0001");
 
         String lasSkuCode = skus.get(0).getCode().substring(prefix.length());
-        if (!NumberUtils.isNumber(lasSkuCode))
+//        if (!NumberUtils.isNumber(lasSkuCode))
+//            throw new InvalidException("warehouse.sku.code.format.illegal", lasSkuCode);
+
+        try {
+            int lastCodeWithSameOrgAndType = Integer.parseInt(lasSkuCode);
+            if (lastCodeWithSameOrgAndType >= 9999)
+                throw new InvalidException("warehouse.sku.code.out.of.range", 9999);
+
+            return Response.ok(prefix + StringUtils.leftPad(String.valueOf((lastCodeWithSameOrgAndType + 1)), 4, '0'));
+        } catch (NumberFormatException e) {
             throw new InvalidException("warehouse.sku.code.format.illegal", lasSkuCode);
+        }
 
-        int lastCodeWithSameOrgAndType = Integer.parseInt(lasSkuCode);
-        if (lastCodeWithSameOrgAndType >= 9999)
-            throw new InvalidException("warehouse.sku.code.out.of.range", 9999);
-
-        return Response.ok(prefix + StringUtils.leftPad(String.valueOf((lastCodeWithSameOrgAndType + 1)), 4, '0'));
     }
 
 }
