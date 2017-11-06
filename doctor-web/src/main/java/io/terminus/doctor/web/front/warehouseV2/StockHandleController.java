@@ -4,6 +4,8 @@ import com.google.api.client.util.Charsets;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
@@ -182,6 +184,10 @@ public class StockHandleController {
     @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}/export")
     public void export(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) {
 
+        DoctorWarehouseStockHandle stockHandle = RespHelper.or500(doctorWarehouseStockHandleReadService.findById(id));
+        if (null == stockHandle)
+            throw new JsonResponseException("warehouse.stock.handle.not.found");
+
         List<StockHandleExportVo> exportVos = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findByStockHandle(id))
                 .stream()
                 .map(mh -> {
@@ -196,6 +202,25 @@ public class StockHandleController {
                         vo.setMaterialCode(sku.getCode());
                         vo.setMaterialSpecification(sku.getSpecification());
                     }
+                    DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getId()));
+                    if (null != apply) {
+                        vo.setApplyPigBarnName(apply.getPigBarnName());
+                        vo.setApplyPigGroupName(apply.getPigGroupName());
+                        vo.setApplyStaffName(apply.getApplyStaffName());
+                    } else
+                        log.warn("material apply not found,by material handle {}", mh.getId());
+
+                    DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getOtherTransferHandleId()));
+                    if (transferInHandle != null) {
+                        DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(transferInHandle.getWarehouseId()));
+                        if (wareHouse != null) {
+                            vo.setTransferInWarehouseName(wareHouse.getWareHouseName());
+                            vo.setTransferInFarmName(wareHouse.getFarmName());
+                        } else
+                            log.warn("warehouse not found,{}", transferInHandle.getWarehouseId());
+                    } else
+                        log.warn("other transfer in handle not found,{}", mh.getOtherTransferHandleId());
+
                     vo.setUnitPrice(new BigDecimal(mh.getUnitPrice()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
                     vo.setAmount(new BigDecimal(mh.getUnitPrice()).multiply(vo.getQuantity()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
                     return vo;
@@ -209,28 +234,108 @@ public class StockHandleController {
             try (XSSFWorkbook workbook = new XSSFWorkbook()) {
                 Sheet sheet = workbook.createSheet();
                 Row title = sheet.createRow(0);
-                title.createCell(0).setCellValue("物料名称");
-                title.createCell(1).setCellValue("厂家");
-                title.createCell(2).setCellValue("物料编码");
-                title.createCell(3).setCellValue("规格");
-                title.createCell(4).setCellValue("单位");
-                title.createCell(5).setCellValue("数量");
-                title.createCell(6).setCellValue("单价（元）");
-                title.createCell(7).setCellValue("金额（元）");
-                title.createCell(8).setCellValue("备注");
+                if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.IN.getValue())) {
+                    title.createCell(0).setCellValue("物料名称");
+                    title.createCell(1).setCellValue("厂家");
+                    title.createCell(2).setCellValue("物料编码");
+                    title.createCell(3).setCellValue("规格");
+                    title.createCell(4).setCellValue("单位");
+                    title.createCell(5).setCellValue("数量");
+                    title.createCell(6).setCellValue("单价（元）");
+                    title.createCell(7).setCellValue("金额（元）");
+                    title.createCell(8).setCellValue("备注");
 
-                int pos = 1;
-                for (StockHandleExportVo vo : exportVos) {
-                    Row row = sheet.createRow(pos++);
-                    row.createCell(0).setCellValue(vo.getMaterialName());
-                    row.createCell(1).setCellValue(vo.getVendorName());
-                    row.createCell(2).setCellValue(vo.getMaterialCode());
-                    row.createCell(3).setCellValue(vo.getMaterialSpecification());
-                    row.createCell(4).setCellValue(vo.getUnit());
-                    row.createCell(5).setCellValue(vo.getQuantity().doubleValue());
-                    row.createCell(6).setCellValue(vo.getUnitPrice());
-                    row.createCell(7).setCellValue(vo.getAmount());
-                    row.createCell(8).setCellValue(vo.getRemark());
+                    int pos = 1;
+                    for (StockHandleExportVo vo : exportVos) {
+                        Row row = sheet.createRow(pos++);
+                        row.createCell(0).setCellValue(vo.getMaterialName());
+                        row.createCell(1).setCellValue(vo.getVendorName());
+                        row.createCell(2).setCellValue(vo.getMaterialCode());
+                        row.createCell(3).setCellValue(vo.getMaterialSpecification());
+                        row.createCell(4).setCellValue(vo.getUnit());
+                        row.createCell(5).setCellValue(vo.getQuantity().doubleValue());
+                        row.createCell(6).setCellValue(vo.getUnitPrice());
+                        row.createCell(7).setCellValue(vo.getAmount());
+                        row.createCell(8).setCellValue(vo.getRemark());
+                    }
+                } else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
+                    title.createCell(0).setCellValue("物料名称");
+                    title.createCell(1).setCellValue("物料编码");
+                    title.createCell(2).setCellValue("厂家");
+                    title.createCell(3).setCellValue("规格");
+                    title.createCell(4).setCellValue("单位");
+                    title.createCell(5).setCellValue("领用猪舍");
+                    title.createCell(6).setCellValue("领用猪群");
+                    title.createCell(7).setCellValue("饲养员");
+                    title.createCell(8).setCellValue("数量");
+                    title.createCell(9).setCellValue("单价（元）");
+                    title.createCell(10).setCellValue("金额（元）");
+                    title.createCell(11).setCellValue("备注");
+
+                    int pos = 1;
+                    for (StockHandleExportVo vo : exportVos) {
+                        Row row = sheet.createRow(pos++);
+                        row.createCell(0).setCellValue(vo.getMaterialName());
+                        row.createCell(2).setCellValue(vo.getVendorName());
+                        row.createCell(1).setCellValue(vo.getMaterialCode());
+                        row.createCell(3).setCellValue(vo.getMaterialSpecification());
+                        row.createCell(4).setCellValue(vo.getUnit());
+                        row.createCell(5).setCellValue(vo.getApplyPigBarnName());
+                        row.createCell(6).setCellValue(vo.getApplyPigGroupName());
+                        row.createCell(7).setCellValue(vo.getApplyStaffName());
+                        row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
+                        row.createCell(9).setCellValue(vo.getUnitPrice());
+                        row.createCell(10).setCellValue(vo.getAmount());
+                        row.createCell(11).setCellValue(vo.getRemark());
+                    }
+                } else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.INVENTORY.getValue())) {
+                    title.createCell(0).setCellValue("物料名称");
+                    title.createCell(1).setCellValue("物料编码");
+                    title.createCell(2).setCellValue("厂家");
+                    title.createCell(3).setCellValue("规格");
+                    title.createCell(4).setCellValue("单位");
+                    title.createCell(5).setCellValue("当前数量");
+                    title.createCell(6).setCellValue("盘点数量");
+                    title.createCell(7).setCellValue("备注");
+
+                    int pos = 1;
+                    for (StockHandleExportVo vo : exportVos) {
+                        Row row = sheet.createRow(pos++);
+                        row.createCell(0).setCellValue(vo.getMaterialName());
+                        row.createCell(2).setCellValue(vo.getVendorName());
+                        row.createCell(1).setCellValue(vo.getMaterialCode());
+                        row.createCell(3).setCellValue(vo.getMaterialSpecification());
+                        row.createCell(4).setCellValue(vo.getUnit());
+                        row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
+                        row.createCell(6).setCellValue(vo.getQuantity().doubleValue());
+                        row.createCell(7).setCellValue(vo.getRemark());
+                    }
+                } else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.TRANSFER.getValue())) {
+                    title.createCell(0).setCellValue("物料名称");
+                    title.createCell(1).setCellValue("物料编码");
+                    title.createCell(2).setCellValue("厂家");
+                    title.createCell(3).setCellValue("规格");
+                    title.createCell(4).setCellValue("单位");
+                    title.createCell(5).setCellValue("当前数量");
+                    title.createCell(6).setCellValue("调入猪场");
+                    title.createCell(7).setCellValue("调入仓库");
+                    title.createCell(8).setCellValue("数量");
+                    title.createCell(9).setCellValue("备注");
+
+                    int pos = 1;
+                    for (StockHandleExportVo vo : exportVos) {
+                        Row row = sheet.createRow(pos++);
+                        row.createCell(0).setCellValue(vo.getMaterialName());
+                        row.createCell(2).setCellValue(vo.getVendorName());
+                        row.createCell(1).setCellValue(vo.getMaterialCode());
+                        row.createCell(3).setCellValue(vo.getMaterialSpecification());
+                        row.createCell(4).setCellValue(vo.getUnit());
+                        row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
+                        row.createCell(6).setCellValue(vo.getTransferInFarmName());
+                        row.createCell(7).setCellValue(vo.getTransferInWarehouseName());
+                        row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
+                        row.createCell(9).setCellValue(vo.getRemark());
+                    }
                 }
 
                 workbook.write(response.getOutputStream());

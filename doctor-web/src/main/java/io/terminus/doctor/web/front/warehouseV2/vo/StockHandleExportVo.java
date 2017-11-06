@@ -28,4 +28,16 @@ public class StockHandleExportVo {
     private Double amount;
 
     private String remark;
+
+    private String applyPigBarnName;
+
+    private String applyPigGroupName;
+
+    private String applyStaffName;
+
+    private String transferInFarmName;
+
+    private String transferInWarehouseName;
+
+    private BigDecimal beforeInventoryQuantity;
 }
