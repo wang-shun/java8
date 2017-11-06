@@ -1,6 +1,5 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
-import com.sun.xml.internal.messaging.saaj.soap.ver1_1.Detail1_1Impl;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
