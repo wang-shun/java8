@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.beans.BeanUtils;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 /**
@@ -50,6 +51,7 @@ public class WarehouseSkuDto extends BasicDto {
      * 物料名称
      */
     @NotBlank(message = "warehouse.sku.name.null", groups = CreateValid.class)
+    @Size(message = "warehouse.sku.name.too.long", max = 120, groups = CreateValid.class)
     private String name;
 
     /**
@@ -66,6 +68,7 @@ public class WarehouseSkuDto extends BasicDto {
     /**
      * 短码,用于查询
      */
+    @Size(message = "warehouse.sku.srm.too.lang", max = 30, groups = CreateValid.class)
     private String srm;
 
     /**
@@ -88,6 +91,7 @@ public class WarehouseSkuDto extends BasicDto {
     /**
      * 规格
      */
+    @Size(message = "warehouse.sku.specification.too.lang", max = 60, groups = CreateValid.class)
     private String specification;
 
     /**
