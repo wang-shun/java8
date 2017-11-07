@@ -332,6 +332,8 @@ public class WarehouseController {
         Calendar now = Calendar.getInstance();
         Response<Map<Long, WarehouseStockStatisticsDto>> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByFarm(farmId, null, now,
                 WarehouseMaterialHandleType.IN,
+                WarehouseMaterialHandleType.INVENTORY_PROFIT,
+                WarehouseMaterialHandleType.INVENTORY_DEFICIT,
                 WarehouseMaterialHandleType.OUT,
                 WarehouseMaterialHandleType.TRANSFER_IN,
                 WarehouseMaterialHandleType.TRANSFER_OUT);
@@ -362,10 +364,10 @@ public class WarehouseController {
                 vo.setTransferOutAmount(0);
                 vo.setTransferOutQuantity(new BigDecimal(0));
             } else {
-                vo.setInAmount(warehouseStatistics.getIn().getAmount());
-                vo.setInQuantity(warehouseStatistics.getIn().getQuantity());
-                vo.setOutAmount(warehouseStatistics.getOut().getAmount());
-                vo.setOutQuantity(warehouseStatistics.getOut().getQuantity());
+                vo.setInAmount(warehouseStatistics.getIn().getAmount() + warehouseStatistics.getInventoryProfit().getAmount());
+                vo.setInQuantity(warehouseStatistics.getIn().getQuantity().add(warehouseStatistics.getInventoryProfit().getQuantity()));
+                vo.setOutAmount(warehouseStatistics.getOut().getAmount() + warehouseStatistics.getInventoryDeficit().getAmount());
+                vo.setOutQuantity(warehouseStatistics.getOut().getQuantity().add(warehouseStatistics.getInventoryDeficit().getQuantity()));
                 vo.setTransferOutAmount(warehouseStatistics.getTransferOut().getAmount());
                 vo.setTransferOutQuantity(warehouseStatistics.getTransferOut().getQuantity());
                 vo.setTransferInAmount(warehouseStatistics.getTransferIn().getAmount());
