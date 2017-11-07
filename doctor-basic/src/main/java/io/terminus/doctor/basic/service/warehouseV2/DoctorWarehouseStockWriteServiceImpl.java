@@ -379,6 +379,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //                throw new InvalidException("transfer.warehouse.manager.id.not.equals", targetWareHouse.getManagerName(), context.getWareHouse().getManagerName());
 //            }
 
+            DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
 
             //找到对应库存
             DoctorWarehouseStock stock = getStock(stockTransfer.getWarehouseId(), detail.getMaterialId(), null);
@@ -386,7 +387,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 throw new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), sku.getName());
 
             if (stock.getQuantity().compareTo(detail.getQuantity()) < 0)
-                throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), stock.getQuantity(), sku.getUnit());
+                throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), stock.getQuantity(), unit.getName());
 
 
 //            DoctorWarehouseSku targetSku = doctorWarehouseSkuDao.findByFarmIdAndCode(sku.getFarmId(), sku.getCode()).orElseGet(() -> {
