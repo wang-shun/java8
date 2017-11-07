@@ -1582,3 +1582,4 @@ CREATE TABLE `doctor_warehouse_item_org` (
 
 -- 添加仓库类型 2017-11-07
 ALTER TABLE doctor_warehouse_stock_handle ADD warehouse_type TINYINT(4) NULL COMMENT '仓库类型';
+ALTER TABLE doctor_warehouse_material_handle ADD before_inventory_quantity DECIMAL(23,2) NULL COMMENT '盘点前库存数量';
