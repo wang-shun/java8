@@ -250,9 +250,12 @@ public class ReportController {
         List<WarehouseMonthlyReportVo> report = new ArrayList<>();
         for (DoctorWarehouseStock stock : stocksResponse.getResult()) {
 
-            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getSkuId(), null);
-            if (!balanceResponse.isSuccess())
-                throw new JsonResponseException(balanceResponse.getError());
+//            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getSkuId(), null);
+//            if (!balanceResponse.isSuccess())
+//                throw new JsonResponseException(balanceResponse.getError());
+
+            AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getSkuId(), date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1));
+
             Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterialVendor(warehouseId, stock.getSkuId(), null, date,
                     WarehouseMaterialHandleType.IN,
                     WarehouseMaterialHandleType.OUT,
@@ -284,8 +287,8 @@ public class ReportController {
                 vo.setCode(skuMap.get(stock.getSkuId()).get(0).getCode());
             }
 
-            vo.setBalanceAmount(balanceResponse.getResult().getAmount());
-            vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
+            vo.setBalanceAmount(balance.getAmount());
+            vo.setBalanceQuantity(balance.getQuantity());
 
             vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
                     + statisticsResponse.getResult().getInventoryProfit().getAmount()
