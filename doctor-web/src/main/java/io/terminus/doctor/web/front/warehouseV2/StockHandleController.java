@@ -10,6 +10,8 @@ import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
+import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -20,6 +22,7 @@ import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseEventExportVo;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -38,6 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -192,6 +196,30 @@ public class StockHandleController {
         if (null == stockHandle)
             throw new JsonResponseException("warehouse.stock.handle.not.found");
 
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(stockHandle.getFarmId()));
+        if (null == farm)
+            throw new JsonResponseException("farm.not.found");
+        DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(stockHandle.getWarehouseId()));
+        if (null == wareHouse)
+            throw new JsonResponseException("warehouse.not.found");
+
+        String farmName = farm.getName();
+        String operatorTypeName = "";
+        switch (stockHandle.getHandleType()) {
+            case 1:
+                operatorTypeName = "入库单";
+                break;
+            case 2:
+                operatorTypeName = "出库单";
+                break;
+            case 3:
+                operatorTypeName = "调拨单";
+                break;
+            case 4:
+                operatorTypeName = "盘点单";
+                break;
+        }
+
         List<StockHandleExportVo> exportVos = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findByStockHandle(id))
                 .stream()
                 .map(mh -> {
@@ -216,10 +244,10 @@ public class StockHandleController {
 
                     DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getOtherTransferHandleId()));
                     if (transferInHandle != null) {
-                        DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(transferInHandle.getWarehouseId()));
-                        if (wareHouse != null) {
-                            vo.setTransferInWarehouseName(wareHouse.getWareHouseName());
-                            vo.setTransferInFarmName(wareHouse.getFarmName());
+                        DoctorWareHouse transferInWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(transferInHandle.getWarehouseId()));
+                        if (transferInWarehouse != null) {
+                            vo.setTransferInWarehouseName(transferInWarehouse.getWareHouseName());
+                            vo.setTransferInFarmName(transferInWarehouse.getFarmName());
                         } else
                             log.warn("warehouse not found,{}", transferInHandle.getWarehouseId());
                     } else
@@ -237,7 +265,22 @@ public class StockHandleController {
 
             try (XSSFWorkbook workbook = new XSSFWorkbook()) {
                 Sheet sheet = workbook.createSheet();
-                Row title = sheet.createRow(0);
+
+                sheet.createRow(0).createCell(0).setCellValue(farmName + operatorTypeName);
+                Row head = sheet.createRow(1);
+                head.createCell(0).setCellValue(operatorTypeName + "时间");
+                head.createCell(1).setCellValue(DateUtil.toDateString(stockHandle.getHandleDate()));
+                head.createCell(2).setCellValue("仓库类型");
+                head.createCell(3).setCellValue(WareHouseType.from(stockHandle.getWarehouseType()).getDesc() + "仓库");
+                head.createCell(4).setCellValue("仓库名称");
+                head.createCell(5).setCellValue(stockHandle.getWarehouseName());
+                head.createCell(6).setCellValue("单据编号");
+                head.createCell(7).setCellValue(stockHandle.getSerialNo());
+
+                Row title = sheet.createRow(2);
+
+                int pos = 3;
+
                 if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.IN.getValue())) {
                     title.createCell(0).setCellValue("物料名称");
                     title.createCell(1).setCellValue("厂家");
@@ -249,7 +292,6 @@ public class StockHandleController {
                     title.createCell(7).setCellValue("金额（元）");
                     title.createCell(8).setCellValue("备注");
 
-                    int pos = 1;
                     BigDecimal totalQuantity = new BigDecimal(0);
                     double totalAmount = 0L;
                     for (StockHandleExportVo vo : exportVos) {
@@ -270,8 +312,8 @@ public class StockHandleController {
 
                     Row countRow = sheet.createRow(pos);
 
-                    CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 4);
-                    sheet.addMergedRegion(cra);
+                    CellRangeAddress countRange = new CellRangeAddress(pos, pos, 0, 4);
+                    sheet.addMergedRegion(countRange);
 
                     Cell countCell = countRow.createCell(0);
                     CellStyle style = workbook.createCellStyle();
@@ -281,6 +323,8 @@ public class StockHandleController {
 
                     countRow.createCell(5).setCellValue(totalQuantity.doubleValue());
                     countRow.createCell(7).setCellValue(totalAmount);
+
+                    pos++;
 
                 } else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
                     title.createCell(0).setCellValue("物料名称");
@@ -296,7 +340,6 @@ public class StockHandleController {
                     title.createCell(10).setCellValue("金额（元）");
                     title.createCell(11).setCellValue("备注");
 
-                    int pos = 1;
                     BigDecimal totalQuantity = new BigDecimal(0);
                     double totalAmount = 0L;
                     for (StockHandleExportVo vo : exportVos) {
@@ -332,6 +375,8 @@ public class StockHandleController {
                     countRow.createCell(8).setCellValue(totalQuantity.doubleValue());
                     countRow.createCell(10).setCellValue(totalAmount);
 
+                    pos++;
+
                 } else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.INVENTORY.getValue())) {
                     title.createCell(0).setCellValue("物料名称");
                     title.createCell(1).setCellValue("物料编码");
@@ -342,7 +387,6 @@ public class StockHandleController {
                     title.createCell(6).setCellValue("盘点数量");
                     title.createCell(7).setCellValue("备注");
 
-                    int pos = 1;
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
                         row.createCell(0).setCellValue(vo.getMaterialName());
@@ -366,7 +410,7 @@ public class StockHandleController {
                     title.createCell(8).setCellValue("数量");
                     title.createCell(9).setCellValue("备注");
 
-                    int pos = 1;
+
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
                         row.createCell(0).setCellValue(vo.getMaterialName());
@@ -381,6 +425,14 @@ public class StockHandleController {
                         row.createCell(9).setCellValue(vo.getRemark());
                     }
                 }
+
+                Row foot = sheet.createRow(pos);
+                foot.createCell(0).setCellValue("仓管员");
+                foot.createCell(1).setCellValue(wareHouse.getManagerName());
+                foot.createCell(2).setCellValue("操作人");
+                foot.createCell(3).setCellValue(stockHandle.getOperatorName());
+                foot.createCell(4).setCellValue("所属公司");
+                foot.createCell(5).setCellValue(farm.getOrgName());
 
                 workbook.write(response.getOutputStream());
             }
