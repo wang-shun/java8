@@ -427,7 +427,6 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             outHandle.setHandleYear(stockTransfer.getHandleDate().get(Calendar.YEAR));
             outHandle.setHandleMonth(stockTransfer.getHandleDate().get(Calendar.MONTH) + 1);
             outHandle.setRemark(detail.getRemark());
-            DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
             if (null != unit)
                 outHandle.setUnit(unit.getName());
             outHandle.setBeforeInventoryQuantity(stock.getQuantity());
