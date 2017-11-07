@@ -509,7 +509,9 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
 //                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 
-            DoctorWarehouseStock stock = doctorWarehouseStockManager.out(stockOut, detail, context, sku);
+            DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
+
+            DoctorWarehouseStock stock = doctorWarehouseStockManager.out(stockOut, detail, context, sku, unit);
 
             DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = doctorWarehousePurchaseManager.out(stock, detail.getQuantity());
             long unitPrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock);
