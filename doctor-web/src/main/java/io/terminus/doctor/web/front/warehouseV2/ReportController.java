@@ -10,11 +10,13 @@ import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -70,6 +72,8 @@ public class ReportController {
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
     @RpcConsumer
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
+    @RpcConsumer
+    private DoctorBasicReadService doctorBasicReadService;
 
     /**
      * 仓库报表
@@ -272,7 +276,10 @@ public class ReportController {
 
             if (skuMap.containsKey(stock.getSkuId())) {
                 vo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(skuMap.get(stock.getSkuId()).get(0).getVendorId())));
-                vo.setUnit(skuMap.get(stock.getSkuId()).get(0).getUnit());
+
+                DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(skuMap.get(stock.getSkuId()).get(0).getUnit())));
+                if (null != unit)
+                    vo.setUnit(unit.getName());
                 vo.setSpecification(skuMap.get(stock.getSkuId()).get(0).getSpecification());
                 vo.setCode(skuMap.get(stock.getSkuId()).get(0).getCode());
             }
