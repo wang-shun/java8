@@ -71,9 +71,9 @@ public class DoctorBasicMaterialReadServiceImpl implements DoctorBasicMaterialRe
     }
 
     @Override
-    public Response<List<DoctorBasicMaterial>> findBasicMaterialByTypeFilterBySrm(Integer type, String srm, String exIds) {
+    public Response<List<DoctorBasicMaterial>> findBasicMaterialByTypeFilterBySrm(Integer type, String srm, String exIds, boolean userNameSort) {
         try {
-            List<DoctorBasicMaterial> basicMaterials = doctorBasicMaterialDao.findByType(type);
+            List<DoctorBasicMaterial> basicMaterials = doctorBasicMaterialDao.findByType(type, userNameSort);
             if (notEmpty(srm)) {
                 basicMaterials = basicMaterials.stream()
                         .filter(basic -> notEmpty(basic.getSrm()) && basic.getSrm().toLowerCase().contains(srm.toLowerCase()))

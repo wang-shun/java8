@@ -78,6 +78,9 @@
         FROM <include refid="tb" />
         where is_valid = 1
         <if test="type != null"> and type = #{type}</if>
+        <if test="nameSort">
+            ORDER BY CONVERT(name USING gbk)
+        </if>
     </select>
 
     <select id="findByTypeAndName" parameterType="map" resultMap="DoctorBasicMaterialMap" >

@@ -8,7 +8,9 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.common.enums.WareHouseType;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 基础物料表Dao类
@@ -19,8 +21,13 @@ import java.util.List;
 @Repository
 public class DoctorBasicMaterialDao extends MyBatisDao<DoctorBasicMaterial> {
 
-    public List<DoctorBasicMaterial> findByType(Integer type) {
-        return getSqlSession().selectList(sqlId("findByType"), MapBuilder.<String, Integer>of().put("type", type).map());
+    public List<DoctorBasicMaterial> findByType(Integer type, boolean useNameSort) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("type", type);
+        params.put("userNameSort", useNameSort);
+
+        return getSqlSession().selectList(sqlId("findByType"), params);
     }
 
     /**
@@ -45,11 +52,11 @@ public class DoctorBasicMaterialDao extends MyBatisDao<DoctorBasicMaterial> {
                 ImmutableMap.of("lastId", lastId, "limit", limit, "since", since));
     }
 
-    public DoctorBasicMaterial findByTypeAndName(WareHouseType type, String name){
+    public DoctorBasicMaterial findByTypeAndName(WareHouseType type, String name) {
         return sqlSession.selectOne(sqlId("findByTypeAndName"), ImmutableMap.of("type", type.getKey(), "name", name));
     }
 
-    public List<DoctorBasicMaterial> findByIdsAndType(Long type, List idList){
+    public List<DoctorBasicMaterial> findByIdsAndType(Long type, List idList) {
         return sqlSession.selectList(sqlId("findByIdsAndType"), MapBuilder.<String, Object>of().put("type", type).put("ids", idList).map());
     }
 }
