@@ -262,7 +262,7 @@ public class StockController {
                 if (null != unit)
                     vo.setUnit(unit.getName());
                 vo.setCode(sku.getCode());
-
+                vo.setMaterialName(sku.getName());
                 vo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
                 vo.setSpecification(sku.getSpecification());
             }
