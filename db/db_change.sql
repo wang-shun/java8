@@ -1579,3 +1579,6 @@ CREATE TABLE `doctor_warehouse_item_org` (
   PRIMARY KEY (`id`),
   KEY `index_org` (`org_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='物料公司关系表';
+
+-- 添加仓库类型 2017-11-07
+ALTER TABLE doctor_warehouse_stock_handle ADD warehouse_type TINYINT(4) NULL COMMENT '仓库类型';
