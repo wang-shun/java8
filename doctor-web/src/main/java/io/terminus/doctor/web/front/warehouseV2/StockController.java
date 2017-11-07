@@ -7,10 +7,12 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.warehouseV2.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -61,6 +63,9 @@ public class StockController {
     @RpcConsumer
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
 
+    @RpcConsumer
+    private DoctorBasicReadService doctorBasicReadService;
+
     @RequestMapping(method = RequestMethod.PUT, value = "in")
     public Long in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
         if (errors.hasErrors())
@@ -108,7 +113,7 @@ public class StockController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "inventory")
     public Long inventory(@RequestBody @Validated(AbstractWarehouseStockDetail.StockInventoryValid.class) WarehouseStockInventoryDto stockInventory,
-                             Errors errors) {
+                          Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -213,7 +218,6 @@ public class StockController {
 
         Calendar now = Calendar.getInstance();
 
-
         Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(stockResponse.getResult().getData().stream().map(DoctorWarehouseStock::getSkuId).collect(Collectors.toList()))).stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
 
         Paging<WarehouseStockStatisticsVo> result = new Paging<>();
@@ -253,7 +257,10 @@ public class StockController {
             vo.setMaterialName(stock.getSkuName());
 
             if (null != sku) {
-                vo.setUnit(sku.getUnit());
+
+                DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(sku.getUnit())));
+                if (null != unit)
+                    vo.setUnit(unit.getName());
                 vo.setCode(sku.getCode());
 
                 vo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
