@@ -62,7 +62,7 @@ public class StockController {
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
 
     @RequestMapping(method = RequestMethod.PUT, value = "in")
-    public boolean in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
+    public Long in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -73,15 +73,15 @@ public class StockController {
             throw new JsonResponseException("user.not.found");
         stockIn.setOperatorName(userResponse.getResult().getRealName());
 
-        Response<Boolean> response = doctorWarehouseStockWriteService.in(stockIn);
+        Response<Long> response = doctorWarehouseStockWriteService.in(stockIn);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
 
-        return true;
+        return response.getResult();
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "out")
-    public boolean out(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockOutDto stockOut, Errors errors) {
+    public Long out(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockOutDto stockOut, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -99,15 +99,15 @@ public class StockController {
             detail.setApplyStaffName(realNameResponse.getResult());
         });
 
-        Response<Boolean> response = doctorWarehouseStockWriteService.out(stockOut);
+        Response<Long> response = doctorWarehouseStockWriteService.out(stockOut);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
 
-        return true;
+        return response.getResult();
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "inventory")
-    public boolean inventory(@RequestBody @Validated(AbstractWarehouseStockDetail.StockInventoryValid.class) WarehouseStockInventoryDto stockInventory,
+    public Long inventory(@RequestBody @Validated(AbstractWarehouseStockDetail.StockInventoryValid.class) WarehouseStockInventoryDto stockInventory,
                              Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
@@ -134,15 +134,15 @@ public class StockController {
             throw new JsonResponseException("user.not.found");
         stockInventory.setOperatorName(userResponse.getResult().getRealName());
 
-        Response<Boolean> response = doctorWarehouseStockWriteService.inventory(stockInventory);
+        Response<Long> response = doctorWarehouseStockWriteService.inventory(stockInventory);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
 
-        return true;
+        return response.getResult();
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "transfer")
-    public boolean transfer(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockTransferDto stockTransfer, Errors errors) {
+    public Long transfer(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockTransferDto stockTransfer, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -153,11 +153,11 @@ public class StockController {
             throw new JsonResponseException("user.not.found");
         stockTransfer.setOperatorName(userResponse.getResult().getRealName());
 
-        Response<Boolean> response = doctorWarehouseStockWriteService.transfer(stockTransfer);
+        Response<Long> response = doctorWarehouseStockWriteService.transfer(stockTransfer);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
 
-        return true;
+        return response.getResult();
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")

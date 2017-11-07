@@ -20,6 +20,7 @@ import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorFarmBasicReadService;
+import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -130,7 +131,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @Override
     @Transactional
     @ExceptionHandle("doctor.warehouse.stock.in.fail")
-    public Response<Boolean> in(WarehouseStockInDto stockIn) {
+    public Response<Long> in(WarehouseStockInDto stockIn) {
 
 
 //        boolean updateMode = stockIn.getStockHandleId() != null;
@@ -186,14 +187,14 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         //TODO 再把原来的入库全部铲掉
 //        }
 
-        return Response.ok(true);
+        return Response.ok(stockHandle.getId());
     }
 
 
     @Override
     @Transactional
     @ExceptionHandle("doctor.warehouse.stock.inventory.fail")
-    public Response<Boolean> inventory(WarehouseStockInventoryDto stockInventory) {
+    public Response<Long> inventory(WarehouseStockInventoryDto stockInventory) {
 
 //        StockContext context = validAndGetContext(stockInventory.getFarmId(), stockInventory.getWarehouseId(), stockInventory.getDetails());
         StockContext context = getWarehouseAndSupportedBasicMaterial(stockInventory.getFarmId(), stockInventory.getWarehouseId());
@@ -342,13 +343,13 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
         doctorWarehouseStockHandleManager.delete(stockInventory.getStockHandleId());
 
-        return Response.ok(true);
+        return Response.ok(stockHandle.getId());
     }
 
     @Override
     @Transactional
     @ExceptionHandle("doctor.warehouse.stock.transfer.fail")
-    public Response<Boolean> transfer(WarehouseStockTransferDto stockTransfer) {
+    public Response<Long> transfer(WarehouseStockTransferDto stockTransfer) {
 
 //        StockContext context = validAndGetContext(stockTransfer.getFarmId(), stockTransfer.getWarehouseId(), stockTransfer.getDetails());
         StockContext context = getWarehouseAndSupportedBasicMaterial(stockTransfer.getFarmId(), stockTransfer.getWarehouseId());
@@ -484,13 +485,13 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //            doctorWarehouseHandlerManager.handle(handleContexts);
 
 
-        return Response.ok(true);
+        return Response.ok(stockHandle.getId());
     }
 
     @Override
     @Transactional
     @ExceptionHandle("doctor.warehouse.stock.out.fail")
-    public Response<Boolean> out(WarehouseStockOutDto stockOut) {
+    public Response<Long> out(WarehouseStockOutDto stockOut) {
 
 //        StockContext context = validAndGetContext(stockOut.getFarmId(), stockOut.getWarehouseId(), stockOut.getDetails());
         StockContext context = getWarehouseAndSupportedBasicMaterial(stockOut.getFarmId(), stockOut.getWarehouseId());
@@ -538,7 +539,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         }
 
 
-        return Response.ok(true);
+        return Response.ok(stockHandle.getId());
     }
 
     @Override

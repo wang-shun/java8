@@ -50,7 +50,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockIn
      * @return
      */
-    Response<Boolean> in(WarehouseStockInDto stockIn);
+    Response<Long> in(WarehouseStockInDto stockIn);
 
     /**
      * 盘点
@@ -58,7 +58,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockInventory
      * @return
      */
-    Response<Boolean> inventory(WarehouseStockInventoryDto stockInventory);
+    Response<Long> inventory(WarehouseStockInventoryDto stockInventory);
 
     /**
      * 调拨
@@ -66,7 +66,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockTransfer
      * @return
      */
-    Response<Boolean> transfer(WarehouseStockTransferDto stockTransfer);
+    Response<Long> transfer(WarehouseStockTransferDto stockTransfer);
 
     /**
      * 出库
@@ -74,7 +74,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockOut
      * @return
      */
-    Response<Boolean> out(WarehouseStockOutDto stockOut);
+    Response<Long> out(WarehouseStockOutDto stockOut);
 
 
     /**
