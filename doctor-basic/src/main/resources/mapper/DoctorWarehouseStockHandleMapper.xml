@@ -123,7 +123,7 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        ORDER BY `id` DESC
+        ORDER BY `handle_date` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
