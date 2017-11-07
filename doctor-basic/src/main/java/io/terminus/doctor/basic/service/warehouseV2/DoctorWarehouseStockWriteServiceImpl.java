@@ -551,15 +551,21 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //            List<DoctorWarehouseHandlerManager.StockHandleContext> handleContexts = new ArrayList<>();
         for (WarehouseFormulaDto.WarehouseFormulaDetail detail : formulaDto.getDetails()) {
 
+            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
+
             List<DoctorWarehouseStock> stocks = getStockByFarm(formulaDto.getFarmId(), detail.getMaterialId());
             if (stocks.isEmpty())
-                return Response.fail("stock.not.found");
+                throw new InvalidException("farm.stock.not.found", formulaDto.getFarmName(), null == sku ? detail.getMaterialId() : sku.getName());
+
+            DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
+
             BigDecimal totalStockQuantity = new BigDecimal(0);
             for (DoctorWarehouseStock stock : stocks) {
                 totalStockQuantity = totalStockQuantity.add(stock.getQuantity());
             }
             if (totalStockQuantity.compareTo(detail.getQuantity()) < 0)
-                return Response.fail("stock.not.enough");
+                throw new InvalidException("stock.not.enough", formulaDto.getFarmName(), sku.getName(), totalStockQuantity, unit.getName());
+//                return Response.fail("stock.not.enough");
 
 
             DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();

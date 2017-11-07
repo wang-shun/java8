@@ -17,6 +17,7 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadServ
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -160,8 +161,11 @@ public class FormulaController {
         if (null != feedProduce.getMedicalProduceEntries() && !feedProduce.getMedicalProduceEntries().isEmpty())
             totalOut.addAll(feedProduce.getMedicalProduceEntries());
 
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+
         WarehouseFormulaDto formulaDto = new WarehouseFormulaDto();
         formulaDto.setFarmId(farmId);
+        formulaDto.setFarmName(farm.getName());
         formulaDto.setWarehouseId(warehouseId);
         formulaDto.setHandleDate(Calendar.getInstance());
         formulaDto.setFeedMaterial(feed);

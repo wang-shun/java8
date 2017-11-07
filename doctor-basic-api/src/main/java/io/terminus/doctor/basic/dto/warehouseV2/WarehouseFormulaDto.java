@@ -27,16 +27,14 @@ public class WarehouseFormulaDto extends AbstractWarehouseStockDto implements Se
 
     private String feedUnit;
 
+    private String farmName;
+
     private List<WarehouseFormulaDetail> details;
 
     @Data
     public static class WarehouseFormulaDetail extends AbstractWarehouseStockDetail implements Serializable {
 
         private static final long serialVersionUID = 8852999063915768802L;
-
-        @NotNull(message = "stock.quantity.null")
-        @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")
-        private BigDecimal quantity;
 
         private String materialName;    //  原料名称
 
