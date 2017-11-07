@@ -3,12 +3,14 @@ package io.terminus.doctor.web.front.warehouseV2;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuWriteService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -42,6 +44,9 @@ public class SkuController {
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
     @RpcConsumer
     private DoctorBasicReadService doctorBasicReadService;
+
+    @RpcConsumer
+    private DoctorWarehouseStockReadService doctorWarehouseStockReadService;
 
     @RequestMapping(method = RequestMethod.GET, value = "paging")
     public Paging<WarehouseSkuDto> query(@RequestParam(required = false) Long orgId,
@@ -141,7 +146,7 @@ public class SkuController {
             return null;
 
         WarehouseSkuDto dto = new WarehouseSkuDto();
-        BeanUtils.copyProperties(sku,dto);
+        BeanUtils.copyProperties(sku, dto);
 
         dto.setUnitId(Long.parseLong(sku.getUnit()));
         DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(dto.getUnitId()));
@@ -165,6 +170,17 @@ public class SkuController {
             if (null == farm)
                 throw new JsonResponseException("farm.not.found");
             skuDto.setOrgId(farm.getOrgId());
+        }
+
+        if (skuDto.getStatus().equals(WarehouseSkuStatus.FORBIDDEN.getValue())) {
+            //改成停用需要检查一下该物料是否有在仓库中
+            Map<String, Object> params = new HashMap<>();
+            params.put("farmIds", RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(skuDto.getOrgId())).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
+            params.put("skuId", skuDto.getId());
+            Long count = RespHelper.or500(doctorWarehouseStockReadService.advCount(params));
+            if (null != count && count > 0) {
+                throw new JsonResponseException("warehouse.sku.has.stock");
+            }
         }
 
         DoctorWarehouseSku sku = new DoctorWarehouseSku();

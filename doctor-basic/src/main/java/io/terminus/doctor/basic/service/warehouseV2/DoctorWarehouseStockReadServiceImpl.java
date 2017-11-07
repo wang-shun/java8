@@ -113,4 +113,9 @@ public class DoctorWarehouseStockReadServiceImpl implements DoctorWarehouseStock
 
         return Response.ok(!listResponse.getResult().isEmpty());
     }
+
+    @Override
+    public Response<Long> advCount(Map<String, Object> criteria) {
+        return Response.ok(doctorWarehouseStockDao.advCount(criteria));
+    }
 }

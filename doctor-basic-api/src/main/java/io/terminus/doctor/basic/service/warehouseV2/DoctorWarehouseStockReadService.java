@@ -82,4 +82,6 @@ public interface DoctorWarehouseStockReadService {
     Response<Boolean> existed(DoctorWarehouseStock criteria);
 
 
+    Response<Long> advCount(Map<String, Object> criteria);
+
 }

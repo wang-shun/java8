@@ -71,6 +71,12 @@
                     sku_id =#{t}
                 </foreach>
             </if>
+            <if test="farmIds != null and farmIds.size() > 0">
+                AND
+                <foreach collection="farmIds" item="t" open="(" separator="or" close=")">
+                    farm_id =#{t}
+                </foreach>
+            </if>
         </where>
     </sql>
 

@@ -6,9 +6,11 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.dao.DoctorFarmBasicDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +39,9 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
     private DoctorBasicMaterialDao doctorBasicMaterialDao;
     @Autowired
     private DoctorFarmBasicDao doctorFarmBasicDao;
+
+    @Autowired
+    private DoctorWarehouseStockDao doctorWarehouseStockDao;
 
     @Override
     @ExceptionHandle("doctor.warehouse.sku.create.fail")
