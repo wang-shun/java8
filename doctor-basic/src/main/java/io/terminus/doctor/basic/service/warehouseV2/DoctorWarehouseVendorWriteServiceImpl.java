@@ -10,6 +10,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendorOrg;
 import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,9 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
 
         for (String id : Arrays.stream(vendorIds.split(",")).collect(Collectors.toSet())) { //过滤潜在重复的内容
 
+            if (StringUtils.isBlank(id))
+                continue;
+            
             if (!NumberUtils.isNumber(id))
                 throw new InvalidException("warehouse.vendor.id.not.number", id);
 

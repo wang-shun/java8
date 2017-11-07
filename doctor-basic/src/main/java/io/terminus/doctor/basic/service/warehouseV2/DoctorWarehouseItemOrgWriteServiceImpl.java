@@ -12,6 +12,7 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseItemOrgWriteS
 import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,6 +74,10 @@ public class DoctorWarehouseItemOrgWriteServiceImpl implements DoctorWarehouseIt
         doctorWarehouseItemOrgDao.deleteByOrg(orgId);
 
         for (String id : Arrays.stream(itemIds.split(",")).collect(Collectors.toSet())) {
+
+            if (StringUtils.isBlank(id))
+                continue;
+
             if (!NumberUtils.isNumber(id))
                 throw new InvalidException("warehouse.item.id.not.number", id);
 
