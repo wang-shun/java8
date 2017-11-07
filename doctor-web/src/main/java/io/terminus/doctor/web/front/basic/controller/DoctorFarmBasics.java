@@ -90,12 +90,12 @@ public class DoctorFarmBasics {
             RespHelper.or500(doctorFarmBasicWriteService.updateFarmBasic(farmBasic));
         }
 
-        if (StringUtils.isNotBlank(vendorIds)) {
+//        if (StringUtils.isNotBlank(vendorIds)) {
             vendorController.boundToOrg(vendorIds, null, farmId);
-        }
-        if (StringUtils.isNotBlank(materialItemIds)) {
+//        }
+//        if (StringUtils.isNotBlank(materialItemIds)) {
             itemController.boundToOrg(materialItemIds, null, farmId);
-        }
+//        }
 
 
         return Boolean.TRUE;
