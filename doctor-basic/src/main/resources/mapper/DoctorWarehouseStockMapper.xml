@@ -155,6 +155,13 @@
         <include refid="advCriteria"/>
     </select>
 
+    <select id="advList" parameterType="map" resultMap="DoctorWarehouseStockMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="advCriteria"/>
+        ORDER BY `id` DESC
+    </select>
+
     <select id="advPaging" parameterType="map" resultMap="DoctorWarehouseStockMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
