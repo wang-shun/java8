@@ -107,9 +107,11 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
             log.info("generateDoctorRangeReports start=========");
             Stopwatch stopwatch = Stopwatch.createStarted();
             Map<Long, Date> map = queryFarmEarlyEventAtImpl(DateUtil.toDateString(date));
-            map.entrySet().stream().parallel().forEach(entry -> {
-                Long farmId = entry.getKey();
-                Date startDate = entry.getValue();
+            farmIds.stream().parallel().forEach(farmId -> {
+                Date startDate = date;
+                if (map.containsKey(farmId)) {
+                    startDate = map.get(farmId);
+                }
                 DateTime startAt = new DateTime(startDate);
                 DateTime dateAt = DateTime.now().minusDays(1);
                 while (!startAt.isAfter(dateAt)) {
