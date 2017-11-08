@@ -214,6 +214,13 @@
         ORDER BY `id` DESC
     </select>
 
-
+    <select id="sumGroupFeedApply" parameterType="map" resultType="double" >
+        SELECT ifnull(sum(quantity),0)
+        FROM <include refid="tb"/>
+        WHERE
+        pig_group_id = #{groupId}
+        <if test="startAt != null"> AND apply_date &gt;= #{startAt} </if>
+        <if test="endAt != null"> AND apply_date &lt;= #{endAt} </if>
+    </select>
 
 </mapper>

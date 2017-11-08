@@ -19,7 +19,12 @@ import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.event.ListenedGroupEvent;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.helper.DoctorConcurrentControl;
+import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorDailyGroup;
+import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -34,6 +39,7 @@ import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Desc:
@@ -53,10 +59,9 @@ public class DoctorGroupManager {
     private final DoctorGroupReadService doctorGroupReadService;
     private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorBarnDao doctorBarnDao;
-    @Autowired
-    private DoctorKpiDao doctorKpiDao;
-    @Autowired
-    private DoctorDailyGroupDao doctorDailyGroupDao;
+    private final DoctorKpiDao doctorKpiDao;
+    private final DoctorDailyGroupDao doctorDailyGroupDao;
+    private final DoctorConcurrentControl doctorConcurrentControl;
 
     @Autowired
     public DoctorGroupManager(DoctorGroupDao doctorGroupDao,
@@ -64,13 +69,16 @@ public class DoctorGroupManager {
                               DoctorGroupTrackDao doctorGroupTrackDao,
                               DoctorGroupReadService doctorGroupReadService,
                               CoreEventDispatcher coreEventDispatcher,
-                              DoctorBarnDao doctorBarnDao) {
+                              DoctorBarnDao doctorBarnDao, DoctorKpiDao doctorKpiDao, DoctorDailyGroupDao doctorDailyGroupDao, DoctorConcurrentControl doctorConcurrentControl) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupReadService = doctorGroupReadService;
         this.coreEventDispatcher = coreEventDispatcher;
         this.doctorBarnDao = doctorBarnDao;
+        this.doctorKpiDao = doctorKpiDao;
+        this.doctorDailyGroupDao = doctorDailyGroupDao;
+        this.doctorConcurrentControl = doctorConcurrentControl;
     }
 
     /**
@@ -82,61 +90,67 @@ public class DoctorGroupManager {
      */
     @Transactional
     public Long createNewGroup(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorNewGroupInput newGroupInput) {
-        newGroupInput.setEventType(GroupEventType.NEW.getValue());
-        checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId(), group.getGroupCode());
+        expectTrue(doctorConcurrentControl.setKey(group.getFarmId() + group.getGroupCode()),
+                "event.concurrent.error", group.getGroupCode());
+        try {
+            newGroupInput.setEventType(GroupEventType.NEW.getValue());
+            checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId(), group.getGroupCode());
 
-        //0.校验猪群号是否重复
-        checkGroupCodeExist(newGroupInput.getFarmId(), newGroupInput.getGroupCode());
+            //0.校验猪群号是否重复
+            checkGroupCodeExist(newGroupInput.getFarmId(), newGroupInput.getGroupCode());
 
-        //1. 创建猪群
-        doctorGroupDao.create(getNewGroup(group, newGroupInput));
-        Long groupId = group.getId();
+            //1. 创建猪群
+            doctorGroupDao.create(getNewGroup(group, newGroupInput));
+            Long groupId = group.getId();
 
-        //2. 创建新建猪群事件
-        DoctorGroupEvent groupEvent = getNewGroupEvent(group, newGroupInput);
-        groupEvent.setSowId(newGroupInput.getSowId());
-        groupEvent.setSowCode(newGroupInput.getSowCode());
-        doctorGroupEventDao.create(groupEvent);
+            //2. 创建新建猪群事件
+            DoctorGroupEvent groupEvent = getNewGroupEvent(group, newGroupInput);
+            groupEvent.setSowId(newGroupInput.getSowId());
+            groupEvent.setSowCode(newGroupInput.getSowCode());
+            doctorGroupEventDao.create(groupEvent);
 
-        //3. 创建猪群跟踪
-        DoctorGroupTrack groupTrack = BeanMapper.map(groupEvent, DoctorGroupTrack.class);
-        groupTrack.setGroupId(groupId);
-        groupTrack.setRelEventId(groupEvent.getId());
-        groupTrack.setBoarQty(0);
-        groupTrack.setSowQty(0);
-        groupTrack.setQuantity(0);
-        groupTrack.setBirthDate(DateUtil.toDate(newGroupInput.getEventAt()));    //出生日期(用于计算日龄)
+            //3. 创建猪群跟踪
+            DoctorGroupTrack groupTrack = BeanMapper.map(groupEvent, DoctorGroupTrack.class);
+            groupTrack.setGroupId(groupId);
+            groupTrack.setRelEventId(groupEvent.getId());
+            groupTrack.setBoarQty(0);
+            groupTrack.setSowQty(0);
+            groupTrack.setQuantity(0);
+            groupTrack.setBirthDate(DateUtil.toDate(newGroupInput.getEventAt()));    //出生日期(用于计算日龄)
 
-        int age = DateUtil.getDeltaDaysAbs(groupTrack.getBirthDate(), new Date());
-        groupTrack.setAvgDayAge(age + 1);             //日龄
+            int age = DateUtil.getDeltaDaysAbs(groupTrack.getBirthDate(), new Date());
+            groupTrack.setAvgDayAge(age + 1);             //日龄
 
-        groupTrack.setSex(newGroupInput.getSex());
-        groupTrack.setWeanWeight(0D);
-        groupTrack.setBirthWeight(0D);
-        groupTrack.setNest(0);
-        groupTrack.setLiveQty(0);
-        groupTrack.setHealthyQty(0);
-        groupTrack.setWeakQty(0);
-        groupTrack.setWeanQty(0);
-        groupTrack.setWeanWeight(0D);
-        groupTrack.setUnweanQty(0);
-        groupTrack.setQuaQty(0);
-        groupTrack.setUnqQty(0);
-        doctorGroupTrackDao.create(groupTrack);
+            groupTrack.setSex(newGroupInput.getSex());
+            groupTrack.setWeanWeight(0D);
+            groupTrack.setBirthWeight(0D);
+            groupTrack.setNest(0);
+            groupTrack.setLiveQty(0);
+            groupTrack.setHealthyQty(0);
+            groupTrack.setWeakQty(0);
+            groupTrack.setWeanQty(0);
+            groupTrack.setWeanWeight(0D);
+            groupTrack.setUnweanQty(0);
+            groupTrack.setQuaQty(0);
+            groupTrack.setUnqQty(0);
+            doctorGroupTrackDao.create(groupTrack);
 
-        DoctorEventInfo eventInfo = DoctorEventInfo.builder()
-                .orgId(group.getOrgId())
-                .farmId(group.getFarmId())
-                .eventId(groupEvent.getId())
-                .eventType(groupEvent.getType())
-                .businessId(group.getId())
-                .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
-                .code(group.getGroupCode())
-                .build();
-        eventInfoList.add(eventInfo);
+            DoctorEventInfo eventInfo = DoctorEventInfo.builder()
+                    .orgId(group.getOrgId())
+                    .farmId(group.getFarmId())
+                    .eventId(groupEvent.getId())
+                    .eventType(groupEvent.getType())
+                    .businessId(group.getId())
+                    .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
+                    .code(group.getGroupCode())
+                    .build();
+            eventInfoList.add(eventInfo);
 
-        autoDailyGroup(groupEvent.getFarmId(), groupEvent.getGroupId(), group.getPigType(), groupEvent.getEventAt());
-        return groupId;
+            autoDailyGroup(groupEvent.getFarmId(), groupEvent.getGroupId(), group.getPigType(), groupEvent.getEventAt());
+            return groupId;
+        } finally {
+            doctorConcurrentControl.delKey(group.getFarmId() + group.getGroupCode());
+        }
     }
 
     /**

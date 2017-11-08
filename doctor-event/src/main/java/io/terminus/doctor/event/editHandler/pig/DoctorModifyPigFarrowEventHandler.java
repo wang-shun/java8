@@ -189,7 +189,7 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         DoctorEventChangeDto changeDto = buildEventChange(oldDto, new DoctorFarrowingDto());
         changeDto.setFarrowNestChange(-1);
         oldDailyPig = buildDailyPig(oldDailyPig, changeDto);
-        doctorDailyPigDao.update(oldDailyPig);
+        doctorDailyReportManager.createOrUpdateDailyPig(oldDailyPig);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         DoctorEventChangeDto changeDto1 = buildEventChange(farrowingDto1, new DoctorFarrowingDto());
         changeDto1.setFarrowNestChange(-1);
         DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig1, changeDto1));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig1, changeDto1));
     }
 
     @Override
@@ -207,7 +207,7 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         DoctorEventChangeDto changeDto2 = buildEventChange(new DoctorFarrowingDto(), farrowingDto2);
         changeDto2.setFarrowNestChange(1);
         DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), farrowingDto2.eventAt());
-        doctorDailyPigDao.update(buildDailyPig(oldDailyPig2, changeDto2));
+        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig2, changeDto2));
     }
 
     @Override

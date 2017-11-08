@@ -1479,6 +1479,11 @@ CREATE TABLE `doctor_warehouse_stock_monthly` (
 ALTER TABLE doctor_warehouse_material_apply MODIFY pig_group_name VARCHAR(512) COMMENT '领用猪群名称';
 ALTER TABLE doctor_warehouse_material_apply MODIFY apply_date DATE COMMENT '领用日期';
 
+ALTER TABLE `doctor_daily_reports`
+ADD COLUMN `version` INT NOT NULL DEFAULT 1 COMMENT '版本号' AFTER `sow_ph_chg_farm_in`;
+ALTER TABLE `doctor_daily_groups`
+ADD COLUMN `version` INT NOT NULL DEFAULT 1 COMMENT '版本号' AFTER `farrowing_in`;
+
 -- 仓库添加sku表 2017-10-13
 CREATE TABLE `doctor_warehouse_sku` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
