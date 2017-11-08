@@ -8,7 +8,6 @@ import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -41,15 +40,17 @@ public class DoctorGroupBatchSummaryManager {
     private DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
 
     public void createAllGroupSummary() {
+        log.info("create all group summary starting");
         List<DoctorGroup> groups = doctorGroupDao.listAll();
         groups.forEach(this::createGroupSummary);
+        log.info("create all group summary end");
     }
 
     public void createGroupSummary(DoctorGroup group) {
         try {
             DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
             Double frcFeed = RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, group.getId(), null, null), 0D);
-            Response<DoctorGroupBatchSummary> result = doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack), frcFeed);
+            Response<DoctorGroupBatchSummary> result = doctorGroupBatchSummaryReadService.getGroupBatchSummary(group, groupTrack, frcFeed);
             if (result.isSuccess() && result.getResult() != null) {
                 DoctorGroupBatchSummary s = result.getResult();
                 List<DoctorMaterialConsumeProvider> consumeProviders = Lists.newArrayList();

@@ -1359,4 +1359,16 @@ public class DoctorMoveDataController {
         log.info("flush nest code ending");
         return Boolean.TRUE;
     }
+
+    /**
+     * 刷新主账户猪舍权限
+     * @return
+     */
+    @RequestMapping(value = "/flushPrimaryBarnsPermission", method = RequestMethod.GET)
+    public Boolean flushPrimaryBarnsPermission() {
+        log.info("flush primary barns permisson starting");
+        doctorMoveDataService.flushPrimaryBarnsPermission();
+        log.info("flush primary barns permisson ending");
+        return Boolean.TRUE;
+    }
 }

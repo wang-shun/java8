@@ -7,6 +7,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.dao.DoctorMaterialInWareHouseDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
 import io.terminus.doctor.basic.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.Params;
@@ -35,6 +36,8 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
 
     @Autowired
     private DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;
+    @Autowired
+    private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
 
     @Autowired
     public DoctorMaterialConsumeProviderReadServiceImpl(DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao) {
@@ -143,14 +146,7 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
     public Response<Double> sumConsumeFeed(Long farmId, Long wareHouseId, Long materialId, Long staffId, Long barnId, Long groupId,
                                            String startAt, String endAt){
         try{
-            DoctorMaterialConsumeProvider model = DoctorMaterialConsumeProvider.builder()
-                    .materialId(materialId).wareHouseId(wareHouseId).barnId(barnId).groupId(groupId)
-                    .staffId(staffId).farmId(farmId)
-                    .build();
-            Map<String, Object> map = BeanMapper.convertObjectToMap(model);
-            map.put("startAt", startAt);
-            map.put("endAt", endAt);
-            return Response.ok(doctorMaterialConsumeProviderDao.sumConsumeFeed(Params.filterNullOrEmpty(map)));
+            return Response.ok(doctorWarehouseMaterialApplyDao.sumGroupFeedApply(groupId, startAt, endAt));
         }catch (Exception e){
             log.error("sumConsume failed, farmId={}, wareHouseId={}, materialId={}, staffId={}, barnId={}, groupId={}, startAt={}, endAt={}, cause :{}",
                     farmId, wareHouseId, materialId, staffId, barnId, groupId, startAt, endAt, Throwables.getStackTraceAsString(e));

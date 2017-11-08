@@ -21,6 +21,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.event.DoctorGroupEventListener;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
+import io.terminus.doctor.event.helper.DoctorConcurrentControl;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -37,6 +38,7 @@ import java.util.Objects;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.enums.PigType.*;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Desc:
@@ -60,6 +62,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     @Autowired
     private DoctorGroupEventListener doctorGroupEventListener;
+    @Autowired
+    private DoctorConcurrentControl doctorConcurrentControl;
 
     @Autowired
     public DoctorAbstractGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao,
@@ -77,18 +81,27 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     @Override
     public <I extends BaseGroupInput> void handle(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
-        handleEvent(eventInfoList, group, groupTrack, input);
-        DoctorEventInfo eventInfo = DoctorEventInfo.builder()
-                .businessId(group.getId())
-                .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
-                .eventAt(DateUtil.toDate(input.getEventAt()))
-                .eventType(input.getEventType())
-                .code(group.getGroupCode())
-                .farmId(group.getFarmId())
-                .orgId(group.getOrgId())
-                .pigType(group.getPigType())
-                .build();
-        eventInfoList.add(eventInfo);
+        String key = "group" + group.getId().toString();
+        expectTrue(doctorConcurrentControl.setKey(key),
+                "event.concurrent.error", group.getGroupCode());
+        try {
+            handleEvent(eventInfoList, group, groupTrack, input);
+            DoctorEventInfo eventInfo = DoctorEventInfo.builder()
+                    .businessId(group.getId())
+                    .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
+                    .eventAt(DateUtil.toDate(input.getEventAt()))
+                    .eventType(input.getEventType())
+                    .code(group.getGroupCode())
+                    .farmId(group.getFarmId())
+                    .orgId(group.getOrgId())
+                    .pigType(group.getPigType())
+                    .build();
+            eventInfoList.add(eventInfo);
+        } catch (Exception e) {
+            throw e;
+        }finally {
+            doctorConcurrentControl.delKey(key);
+        }
     }
 
     @Override

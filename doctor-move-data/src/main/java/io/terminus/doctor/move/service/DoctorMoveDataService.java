@@ -106,6 +106,7 @@ import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.parana.user.impl.dao.UserDao;
@@ -3005,4 +3006,18 @@ public class DoctorMoveDataService {
         });
     }
 
+    public void flushPrimaryBarnsPermission() {
+        List<PrimaryUser> allPrimary = primaryUserDao.listAll();
+        List<Long> userIds = allPrimary.stream().map(PrimaryUser::getUserId).collect(Collectors.toList());
+        List<DoctorUserDataPermission> permissions = doctorUserDataPermissionDao.findByUserIds(userIds);
+        permissions.add(doctorUserDataPermissionDao.findByUserId(10L));
+        permissions.forEach(doctorUserDataPermission -> {
+            List<Long> barnIds = doctorBarnDao.findByFarmIds(doctorUserDataPermission.getFarmIdsList())
+                    .stream().map(DoctorBarn::getId).collect(Collectors.toList());
+            DoctorUserDataPermission updatePermission = new DoctorUserDataPermission();
+            updatePermission.setId(doctorUserDataPermission.getId());
+            updatePermission.setBarnIds(Joiners.COMMA.join(barnIds));
+            doctorUserDataPermissionDao.update(updatePermission);
+        });
+    }
 }
