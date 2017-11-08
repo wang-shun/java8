@@ -343,7 +343,11 @@ public class ReportController {
         criteria.put("handleMonth", date.get(Calendar.MONTH) + 1);
         criteria.put("deleteFlag", WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
         if (null != type) {
-            if (4 == type) {
+            if (WarehouseMaterialHandleType.IN.getValue() == type) {
+                criteria.put("bigType", Lists.newArrayList(WarehouseMaterialHandleType.IN.getValue(), WarehouseMaterialHandleType.FORMULA_IN.getValue()));
+            } else if (WarehouseMaterialHandleType.OUT.getValue() == type) {
+                criteria.put("bigType", Lists.newArrayList(WarehouseMaterialHandleType.OUT.getValue(), WarehouseMaterialHandleType.FORMULA_OUT.getValue()));
+            } else if (4 == type) {
                 criteria.put("bigType", Lists.newArrayList(WarehouseMaterialHandleType.TRANSFER_IN.getValue(), WarehouseMaterialHandleType.TRANSFER_OUT.getValue()));
             } else if (3 == type) {
                 criteria.put("bigType", Lists.newArrayList(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue(), WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue()));
