@@ -130,9 +130,7 @@ public class StockHandleController {
 
                             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
                             if (null != sku) {
-                                DoctorWarehouseVendor vendor = RespHelper.or500(doctorWarehouseVendorReadService.findById(sku.getVendorId()));
-                                if (vendor != null)
-                                    detail.setVendorName(vendor.getShortName());
+                                detail.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
                                 detail.setMaterialCode(sku.getCode());
                                 detail.setMaterialSpecification(sku.getSpecification());
                             } else {
@@ -228,9 +226,7 @@ public class StockHandleController {
 
                     DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
                     if (null != sku) {
-                        DoctorWarehouseVendor vendor = RespHelper.or500(doctorWarehouseVendorReadService.findById(sku.getVendorId()));
-                        if (vendor != null)
-                            vo.setVendorName(vendor.getName());
+                        vo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
                         vo.setMaterialCode(sku.getCode());
                         vo.setMaterialSpecification(sku.getSpecification());
                     }

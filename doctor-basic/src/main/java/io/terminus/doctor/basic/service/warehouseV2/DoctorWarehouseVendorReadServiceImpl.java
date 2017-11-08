@@ -62,7 +62,7 @@ public class DoctorWarehouseVendorReadServiceImpl implements DoctorWarehouseVend
         if (null == vendor)
             return Response.ok("");
 
-        return Response.ok(vendor.getName());
+        return Response.ok(vendor.getShortName());
     }
 
     @Override
