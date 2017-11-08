@@ -674,6 +674,7 @@ public class WarehouseController {
         for (DoctorWarehouseStock stock : stockResponse.getResult()) {
 
             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
+            DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(sku.getUnit())));
             if (null == sku) {
                 //TODO 参数没有塞进去
                 String errorMessage = messageSource.getMessage("warehouse.sku.not.found", new Object[]{stock.getSkuName()}, Locale.CHINA);
@@ -684,7 +685,7 @@ public class WarehouseController {
                     .materialId(stock.getSkuId())
                     .materialName(stock.getSkuName())
                     .quantity(stock.getQuantity())
-                    .unit(sku.getUnit())
+                    .unit(null == unit ? "" : unit.getName())
                     .code(sku.getCode())
                     .specification(sku.getSpecification())
                     .vendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())))
@@ -787,8 +788,10 @@ public class WarehouseController {
         if (null == wareHouseResponse.getResult())
             throw new JsonResponseException("warehouse.not.found");
         DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stockResponse.getResult().get(0).getSkuId()));
+        DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(sku.getUnit())));
 
         WarehouseStockStatisticsVo vo = new WarehouseStockStatisticsVo();
+
 
         vo.setWarehouseId(id);
         vo.setWarehouseName(wareHouseResponse.getResult().getWareHouseName());
@@ -797,7 +800,7 @@ public class WarehouseController {
         vo.setId(stockResponse.getResult().get(0).getId());
         vo.setMaterialId(stockResponse.getResult().get(0).getSkuId());
         vo.setMaterialName(stockResponse.getResult().get(0).getSkuName());
-        vo.setUnit(sku.getUnit());
+        vo.setUnit(null == unit ? "" : unit.getName());
 
         vo.setOutQuantity(statisticsDtoResponse.getResult().getOut().getQuantity());
         vo.setOutAmount(statisticsDtoResponse.getResult().getOut().getAmount());

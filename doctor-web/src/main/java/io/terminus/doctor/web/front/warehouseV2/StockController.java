@@ -153,6 +153,23 @@ public class StockController {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
+        Collections.reverse(stockTransfer.getDetails());
+        List<WarehouseStockTransferDto.WarehouseStockTransferDetail> removedRepeat = new ArrayList<>();
+        for (WarehouseStockTransferDto.WarehouseStockTransferDetail detail : stockTransfer.getDetails()) {
+            boolean existed = false;
+            for (WarehouseStockTransferDto.WarehouseStockTransferDetail detail1 : removedRepeat) {
+                if (detail.getMaterialId().equals(detail1.getMaterialId())
+                        && detail.getTransferInWarehouseId().equals(detail1.getTransferInWarehouseId())
+                        && detail.getQuantity().compareTo(detail1.getQuantity()) == 0) {
+                    existed = true;
+                    break;
+                }
+            }
+            if (!existed)
+                removedRepeat.add(detail);
+        }
+        stockTransfer.setDetails(removedRepeat);
+
         Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockTransfer.getOperatorId());
         if (!userResponse.isSuccess())
             throw new JsonResponseException(userResponse.getError());
