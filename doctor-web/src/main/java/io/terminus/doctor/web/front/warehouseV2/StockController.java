@@ -116,8 +116,10 @@ public class StockController {
                           Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
+        if (null == stockInventory.getStockHandleId() && stockInventory.getDetails().isEmpty())
+            throw new JsonResponseException("stock.detail.empty");
 
-        Collections.reverse(stockInventory.getDetails());
+        Collections.reverse(stockInventory.getDetails());//倒序，最新的覆盖替换老的
         List<WarehouseStockInventoryDto.WarehouseStockInventoryDetail> removedRepeat = new ArrayList<>();
         for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : stockInventory.getDetails()) {
             boolean existed = false;

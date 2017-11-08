@@ -23,7 +23,7 @@ public class WarehouseStockInventoryDto extends AbstractWarehouseStockDto implem
 
 
     @Valid
-    @NotEmpty(message = "stock.detail.empty")
+//    @NotEmpty(message = "stock.detail.empty")
     private List<WarehouseStockInventoryDetail> details;
 
 

@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -133,26 +134,28 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @ExceptionHandle("doctor.warehouse.stock.in.fail")
     public Response<Long> in(WarehouseStockInDto stockIn) {
 
-
-//        boolean updateMode = stockIn.getStockHandleId() != null;
-//        if (updateMode)
-//            doctorWarehouseStockHandleManager.check(stockIn, stockIn.getDetails(), WarehouseMaterialHandleType.IN);
-
         StockContext context = getWarehouseAndSupportedBasicMaterial(stockIn.getFarmId(), stockIn.getWarehouseId());
 
-        String serialNo = "R" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
+        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockIn, context.getWareHouse(), WarehouseMaterialHandleType.IN);
 
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockIn, context.getWareHouse(), serialNo, WarehouseMaterialHandleType.IN);
+        List<WarehouseStockInDto.WarehouseStockInDetailDto> needProcessDetails;
+        if (stockIn.getStockHandleId() != null)
+            needProcessDetails = doctorWarehouseStockHandleManager.clean(stockIn, stockIn.getDetails(), context.getWareHouse(), new DoctorWarehouseStockHandleManager.MaterialHandleComparator<WarehouseStockInDto.WarehouseStockInDetailDto>() {
+                @Override
+                public boolean same(WarehouseStockInDto.WarehouseStockInDetailDto source, DoctorWarehouseMaterialHandle target) {
+                    return source.getQuantity().compareTo(target.getQuantity()) == 0 && source.getUnitPrice().equals(target.getUnitPrice());
+                }
+            });
+        else
+            needProcessDetails = stockIn.getDetails();
 
-        stockIn.getDetails().forEach(detail -> {
+        needProcessDetails.forEach(detail -> {
 
             DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
             if (null == sku)
                 throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
             if (!sku.getType().equals(context.getWareHouse().getType()))
                 throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
-//            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
-//                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 
             DoctorWarehouseStock stock = doctorWarehouseStockManager.in(stockIn, detail, context, sku);
 
@@ -180,13 +183,6 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     true);
         });
 
-
-//        }
-
-//        if (updateMode) {
-        //TODO 再把原来的入库全部铲掉
-//        }
-
         return Response.ok(stockHandle.getId());
     }
 
@@ -195,27 +191,44 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @Transactional
     @ExceptionHandle("doctor.warehouse.stock.inventory.fail")
     public Response<Long> inventory(WarehouseStockInventoryDto stockInventory) {
-
-//        StockContext context = validAndGetContext(stockInventory.getFarmId(), stockInventory.getWarehouseId(), stockInventory.getDetails());
         StockContext context = getWarehouseAndSupportedBasicMaterial(stockInventory.getFarmId(), stockInventory.getWarehouseId());
 
+        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockInventory, context.getWareHouse(), WarehouseMaterialHandleType.INVENTORY);
+
+        List<WarehouseStockInventoryDto.WarehouseStockInventoryDetail> needProcessDetails;
+
         boolean updateMode = stockInventory.getStockHandleId() != null;
+        if (updateMode) {
+            needProcessDetails = doctorWarehouseStockHandleManager.clean(stockInventory, stockInventory.getDetails(), context.getWareHouse(), new DoctorWarehouseStockHandleManager.MaterialHandleComparator<WarehouseStockInventoryDto.WarehouseStockInventoryDetail>() {
+                @Override
+                public boolean same(WarehouseStockInventoryDto.WarehouseStockInventoryDetail source, DoctorWarehouseMaterialHandle target) {
+                    BigDecimal oldQuantity;
+                    if (target.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))
+                        oldQuantity = target.getBeforeInventoryQuantity().add(target.getQuantity());
+                    else
+                        oldQuantity = target.getBeforeInventoryQuantity().subtract(target.getQuantity());
+                    return source.getQuantity().compareTo(oldQuantity) == 0;
+                }
+            });
+        } else
+            needProcessDetails = stockInventory.getDetails();
 
-        Map<Long/*skuID*/, List<DoctorWarehouseMaterialHandle>> skuHandle = doctorWarehouseMaterialHandleDao.findByStockHandle(stockInventory.getStockHandleId()).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getMaterialId));
+        Map<Long, List<DoctorWarehouseSku>> skuMap = doctorWarehouseSkuDao.findByIds(
+                needProcessDetails.stream()
+                        .map(WarehouseStockInventoryDto.WarehouseStockInventoryDetail::getMaterialId)
+                        .collect(Collectors.toList()))
+                .stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
 
-        String serialNo = updateMode ? "" : "P" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
+        for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : needProcessDetails) {
 
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockInventory, context.getWareHouse(), serialNo, WarehouseMaterialHandleType.INVENTORY);
-
-        for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : stockInventory.getDetails()) {
-
-            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
-            if (null == sku)
+//            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
+            if (!skuMap.containsKey(detail.getMaterialId()))
                 throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
+
+            DoctorWarehouseSku sku = skuMap.get(detail.getMaterialId()).get(0);
+
             if (!sku.getType().equals(context.getWareHouse().getType()))
                 throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
-//            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
-//                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 
             //找到对应库存
             DoctorWarehouseStock stock = getStock(stockInventory.getWarehouseId(), detail.getMaterialId(), null);
@@ -227,11 +240,6 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             if (!updateMode && compareResult == 0) {
                 log.info("盘点库存量与原库存量一致，warehouse[{}],material[{}]", stockInventory.getWarehouseId(), detail.getMaterialId());
                 continue;
-            }
-
-            DoctorWarehouseMaterialHandle oldHandle = null;
-            if (updateMode && skuHandle.containsKey(detail.getMaterialId())) {
-                oldHandle = skuHandle.get(detail.getMaterialId()).get(0);
             }
 
             DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
@@ -262,13 +270,6 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             BigDecimal changedQuantity;
             if (compareResult > 0) {  //盘亏
 
-                if (updateMode
-                        && null != oldHandle
-                        && oldHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())
-                        && stock.getQuantity().compareTo(oldHandle.getQuantity()) < 0) {
-                    throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), stock.getQuantity(), sku.getUnit());
-                }
-
                 purchaseCriteria.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
                 List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.list(purchaseCriteria);
                 if (null == purchases || purchases.isEmpty())
@@ -294,10 +295,6 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                         materialHandle.getUnitPrice(),
                         false);
             } else {
-
-                if (updateMode && null != oldHandle && oldHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())
-                        && detail.getQuantity().compareTo(oldHandle.getQuantity()) < 0)
-                    throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), detail.getQuantity(), sku.getUnit());
 
                 PageInfo page = new PageInfo(1, 1);
                 Paging<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.paging(page.getOffset(), page.getLimit(), purchaseCriteria);
@@ -341,7 +338,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
         }
 
-        doctorWarehouseStockHandleManager.delete(stockInventory.getStockHandleId());
+//        doctorWarehouseStockHandleManager.delete(stockHandle,stockInventory);
 
         return Response.ok(stockHandle.getId());
     }
@@ -354,9 +351,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //        StockContext context = validAndGetContext(stockTransfer.getFarmId(), stockTransfer.getWarehouseId(), stockTransfer.getDetails());
         StockContext context = getWarehouseAndSupportedBasicMaterial(stockTransfer.getFarmId(), stockTransfer.getWarehouseId());
 
-        String serialNo = "D" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
-
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockTransfer, context.getWareHouse(), serialNo, WarehouseMaterialHandleType.TRANSFER);
+        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockTransfer, context.getWareHouse(), WarehouseMaterialHandleType.TRANSFER);
 
         List<DoctorWarehouseHandlerManager.StockHandleContext> handleContexts = new ArrayList<>(stockTransfer.getDetails().size());
         for (WarehouseStockTransferDto.WarehouseStockTransferDetail detail : stockTransfer.getDetails()) {
@@ -493,12 +488,20 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @ExceptionHandle("doctor.warehouse.stock.out.fail")
     public Response<Long> out(WarehouseStockOutDto stockOut) {
 
-//        StockContext context = validAndGetContext(stockOut.getFarmId(), stockOut.getWarehouseId(), stockOut.getDetails());
         StockContext context = getWarehouseAndSupportedBasicMaterial(stockOut.getFarmId(), stockOut.getWarehouseId());
 
-        String serialNo = "C" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
-
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockOut, context.getWareHouse(), serialNo, WarehouseMaterialHandleType.OUT);
+        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockOut, context.getWareHouse(), WarehouseMaterialHandleType.OUT);
+        List<WarehouseStockOutDto.WarehouseStockOutDetail> needProcessDetails;
+        if (stockOut.getStockHandleId() != null)
+            doctorWarehouseStockHandleManager.clean(stockOut, stockOut.getDetails(), context.getWareHouse(), new DoctorWarehouseStockHandleManager.MaterialHandleComparator<WarehouseStockOutDto.WarehouseStockOutDetail>() {
+                @Override
+                public boolean same(WarehouseStockOutDto.WarehouseStockOutDetail source, DoctorWarehouseMaterialHandle target) {
+                    //无论改了什么全部铲掉重做
+                    return false;
+                }
+            });
+        else
+            needProcessDetails = stockOut.getDetails();
 
         for (WarehouseStockOutDto.WarehouseStockOutDetail detail : stockOut.getDetails()) {
 
@@ -507,8 +510,6 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
             if (!sku.getType().equals(context.getWareHouse().getType()))
                 throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
-//            if (!context.getSupportedMaterials().containsKey(sku.getItemId()))
-//                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
 
             DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
 
@@ -537,7 +538,6 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     unitPrice,
                     false);
         }
-
 
         return Response.ok(stockHandle.getId());
     }

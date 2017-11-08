@@ -139,7 +139,9 @@ public class StockHandleController {
                             DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getId()));
                             if (null != apply) {
                                 detail.setApplyPigBarnName(apply.getPigBarnName());
+                                detail.setApplyPigBarnId(apply.getPigBarnId());
                                 detail.setApplyPigGroupName(apply.getPigGroupName());
+                                detail.setApplyPigGroupId(apply.getPigGroupId());
                                 detail.setApplyStaffName(apply.getApplyStaffName());
                             } else
                                 log.warn("material apply not found,by material handle {}", mh.getId());
@@ -149,7 +151,9 @@ public class StockHandleController {
                                 DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(transferInHandle.getWarehouseId()));
                                 if (wareHouse != null) {
                                     detail.setTransferInWarehouseName(wareHouse.getWareHouseName());
+                                    detail.setTransferInWarehouseId(wareHouse.getId());
                                     detail.setTransferInFarmName(wareHouse.getFarmName());
+                                    detail.setTransferInFarmId(wareHouse.getFarmId());
                                 } else
                                     log.warn("warehouse not found,{}", transferInHandle.getWarehouseId());
                             } else
