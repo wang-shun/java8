@@ -8,8 +8,13 @@ import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorFarmBasicReadService;
 import io.terminus.doctor.basic.service.DoctorFarmBasicWriteService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseVendorWriteService;
+import io.terminus.doctor.web.front.warehouseV2.ItemController;
+import io.terminus.doctor.web.front.warehouseV2.VendorController;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,9 +44,14 @@ public class DoctorFarmBasics {
 
     @RpcConsumer
     private DoctorBasicReadService doctorBasicReadService;
+    @RpcConsumer
+    private VendorController vendorController;
+    @RpcConsumer
+    private ItemController itemController;
 
     /**
      * 根据猪场id查询猪场有权限的基础数据ids
+     *
      * @param farmId 猪场id
      * @return 基础数据ids
      */
@@ -58,11 +68,14 @@ public class DoctorFarmBasics {
 
     /**
      * 创建或更新basicIds
+     *
      * @return 是否成功
      */
     @RequestMapping(value = "/farmBasic/basicIds", method = RequestMethod.POST)
     public Boolean createOrUpdateBasicIds(@RequestParam("farmId") Long farmId,
-                                          @RequestParam("ids") String ids) {
+                                          @RequestParam("ids") String ids,
+                                          @RequestParam(required = false) String vendorIds,
+                                          @RequestParam(required = false) String materialItemIds) {
         if (isEmpty(ids)) {
             return Boolean.TRUE;
         }
@@ -76,16 +89,26 @@ public class DoctorFarmBasics {
             farmBasic.setBasicIds(ids);
             RespHelper.or500(doctorFarmBasicWriteService.updateFarmBasic(farmBasic));
         }
+
+//        if (StringUtils.isNotBlank(vendorIds)) {
+            vendorController.boundToOrg(vendorIds, null, farmId);
+//        }
+//        if (StringUtils.isNotBlank(materialItemIds)) {
+            itemController.boundToOrg(materialItemIds, null, farmId);
+//        }
+
+
         return Boolean.TRUE;
     }
 
     /**
      * 创建或更新reasonIds
+     *
      * @return 是否成功
      */
     @RequestMapping(value = "/farmBasic/reasonIds", method = RequestMethod.POST)
     public Boolean createOrUpdateReasonIds(@RequestParam("farmId") Long farmId,
-                                          @RequestParam("ids") String ids) {
+                                           @RequestParam("ids") String ids) {
         if (isEmpty(ids)) {
             return Boolean.TRUE;
         }
@@ -104,11 +127,12 @@ public class DoctorFarmBasics {
 
     /**
      * 创建或更新materialIds
+     *
      * @return 是否成功
      */
     @RequestMapping(value = "/farmBasic/materialIds", method = RequestMethod.POST)
     public Boolean createOrUpdateMaterialIds(@RequestParam("farmId") Long farmId,
-                                           @RequestParam("ids") String ids) {
+                                             @RequestParam("ids") String ids) {
         if (isEmpty(ids)) {
             return Boolean.TRUE;
         }

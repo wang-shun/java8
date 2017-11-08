@@ -1505,3 +1505,86 @@ ALTER TABLE doctor_warehouse_stock CHANGE material_id sku_id BIGINT(20) COMMENT 
 ALTER TABLE doctor_warehouse_stock DROP vendor_name;
 ALTER TABLE doctor_warehouse_stock DROP manager_id;
 ALTER TABLE doctor_warehouse_stock DROP unit;
+
+
+-- 添加厂商表，厂商-公司关系表，单位-公司关系表 2017-10-30
+CREATE TABLE `doctor_warehouse_vendor` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `name` varchar(64) NOT NULL COMMENT '供应商名称',
+  `short_name` varchar(32) DEFAULT NULL COMMENT '简称',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COMMENT='物料供应商表';
+CREATE TABLE `doctor_warehouse_vendor_org` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司编号',
+  `vendor_id` bigint(20) DEFAULT NULL COMMENT '供应商编号',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='sku供应商与公司关系表';
+CREATE TABLE `doctor_warehouse_unit_org` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `org_id` BIGINT(20) NOT NULL COMMENT '公司编号',
+  `unit_id` BIGINT(20) NOT NULL COMMENT '单位编号',
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  INDEX `index_org` (`org_id` ASC));
+
+-- 厂商表添加删除标志字段 2017-10-30
+ALTER TABLE doctor_warehouse_vendor ADD delete_flag TINYINT NULL COMMENT '删除标志，0正常，1删除';
+ALTER TABLE doctor_warehouse_vendor
+  MODIFY COLUMN delete_flag TINYINT COMMENT '删除标志，0正常，1删除' AFTER short_name;
+
+-- sku表添加status字段 2017-10-31
+ALTER TABLE doctor_warehouse_sku ADD status TINYINT NULL COMMENT '状态';
+
+-- 物料处理明细表添加批次号 2017-10-31
+ALTER TABLE doctor_warehouse_material_handle ADD handle_no VARCHAR(64) NULL COMMENT '物料处理批次号';
+ALTER TABLE doctor_warehouse_material_handle
+  MODIFY COLUMN handle_no VARCHAR(64) COMMENT '物料处理批次号' AFTER id;
+
+-- 修改物料处理明细表调入仓库编号 2017-10-31
+ALTER TABLE doctor_warehouse_material_handle CHANGE other_trasnfer_handle_id other_transfer_handle_id BIGINT(20) COMMENT '另一条调拨物料处理单的编号';
+
+-- 库存处理表添加字段 2017-10-31
+ALTER TABLE doctor_warehouse_stock_handle ADD handle_sub_type TINYINT NULL COMMENT '事件子类型';
+ALTER TABLE doctor_warehouse_stock_handle ADD handle_type TINYINT NULL COMMENT '事件类型';
+ALTER TABLE doctor_warehouse_stock_handle ADD operator_name VARCHAR(64) NULL COMMENT '创建人名';
+ALTER TABLE doctor_warehouse_stock_handle ADD operator_id BIGINT(20) NULL COMMENT '创建人';
+ALTER TABLE doctor_warehouse_stock_handle ADD warehouse_name VARCHAR(64) NULL COMMENT '仓库名';
+ALTER TABLE doctor_warehouse_stock_handle
+  MODIFY COLUMN updated_at DATETIME AFTER handle_sub_type,
+  MODIFY COLUMN created_at DATETIME AFTER handle_sub_type,
+  MODIFY COLUMN warehouse_name VARCHAR(64) COMMENT '仓库名' AFTER warehouse_id;
+
+-- 添加默认值 2017-10-31
+ALTER TABLE doctor_warehouse_material_handle MODIFY delete_flag TINYINT(2) DEFAULT 1 COMMENT '删除标志';
+ALTER TABLE doctor_warehouse_sku ALTER COLUMN status SET DEFAULT 1;
+ALTER TABLE doctor_warehouse_vendor MODIFY delete_flag TINYINT(4) DEFAULT 1 COMMENT '删除标志';
+
+-- sku表添加item字段
+ALTER TABLE doctor_warehouse_sku ADD item_id BIGINT(20) NULL COMMENT '物料类型编号';
+ALTER TABLE doctor_warehouse_sku ADD item_name VARCHAR(128) NULL COMMENT '基础物料名称';
+ALTER TABLE doctor_warehouse_sku ADD type SMALLINT(6) NULL COMMENT '基础物料类型';
+
+-- 物料处理表的批次号字段修改 2017-10-31
+ALTER TABLE doctor_warehouse_material_handle CHANGE handle_no stock_handle_id BIGINT(20) COMMENT '库存处理ID';
+
+-- 添加物料与公司关系表 2017-11-3
+CREATE TABLE `doctor_warehouse_item_org` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `item_id` bigint(20) NOT NULL COMMENT '物料类目编号',
+  `org_id` bigint(20) NOT NULL COMMENT '公司编号',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_org` (`org_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='物料公司关系表';
+
+-- 添加仓库类型 2017-11-07
+ALTER TABLE doctor_warehouse_stock_handle ADD warehouse_type TINYINT(4) NULL COMMENT '仓库类型';
+ALTER TABLE doctor_warehouse_material_handle ADD before_inventory_quantity DECIMAL(23,2) NULL COMMENT '盘点前库存数量';

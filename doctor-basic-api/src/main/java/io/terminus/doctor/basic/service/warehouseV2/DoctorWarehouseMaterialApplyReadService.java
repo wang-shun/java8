@@ -23,6 +23,8 @@ public interface DoctorWarehouseMaterialApplyReadService {
      */
     Response<DoctorWarehouseMaterialApply> findById(Long id);
 
+    Response<DoctorWarehouseMaterialApply> findByMaterialHandle(Long materialHandleId);
+
     /**
      * 分页
      *
@@ -46,5 +48,5 @@ public interface DoctorWarehouseMaterialApplyReadService {
     Response<List<DoctorWarehouseMaterialApply>> listOrderByHandleDate(DoctorWarehouseMaterialApply criteria, Integer limit);
 
 
-    Response<Map<Integer,DoctorWarehouseMaterialApply>> listEachWarehouseTypeLastApply(Long farmId);
+    Response<Map<Integer, DoctorWarehouseMaterialApply>> listEachWarehouseTypeLastApply(Long farmId);
 }

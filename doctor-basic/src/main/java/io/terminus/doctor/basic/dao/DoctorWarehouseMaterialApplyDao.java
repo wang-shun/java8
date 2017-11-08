@@ -33,15 +33,26 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
     }
 
 
-    public List<DoctorWarehouseMaterialApply> advList(Map<String, Object> criteria){
+    public List<DoctorWarehouseMaterialApply> advList(Map<String, Object> criteria) {
         return sqlSession.selectList(sqlId("advList"), criteria);
+    }
+
+    public DoctorWarehouseMaterialApply findMaterialHandle(Long materialHandleId) {
+        List<DoctorWarehouseMaterialApply> applies = this.list(DoctorWarehouseMaterialApply.builder()
+                .materialHandleId(materialHandleId)
+                .build());
+        if (applies.isEmpty())
+            return null;
+
+        return applies.get(0);
     }
 
     /**
      * 猪群饲料指定时间段内领用和
+     *
      * @param groupId 猪群id
      * @param startAt 开始时间 yy-MM-dd
-     * @param endAt 结束时间
+     * @param endAt   结束时间
      * @return 和
      */
     public Double sumGroupFeedApply(Long groupId, String startAt, String endAt) {
@@ -49,7 +60,7 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("groupId", groupId);
         map.put("startAt", startAt);
         map.put("endAt", endAt);
-        return getSqlSession().selectOne(sqlId("sumGroupFeedApply"),map);
+        return getSqlSession().selectOne(sqlId("sumGroupFeedApply"), map);
     }
 
 }

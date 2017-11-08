@@ -3,23 +3,21 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-08-11 11:35:21
+ ~ Date: 2017-11-02 22:15:38
  ~ Created by [ your name ]
 -->
 
-<mapper namespace="DoctorWarehouseStockHandler">
-    <resultMap id="DoctorWarehouseStockHandlerMap" type="DoctorWarehouseStockHandler">
+<mapper namespace="DoctorWarehouseItemOrg">
+    <resultMap id="DoctorWarehouseItemOrgMap" type="DoctorWarehouseItemOrg">
         <id property="id" column="id"/>
-        <result property="handlerType" column="handler_type"/>
-        <result property="handlerDate" column="handler_date"/>
-        <result property="warehouseId" column="warehouse_id"/>
-        <result property="farmId" column="farm_id"/>
+        <result property="itemId" column="item_id"/>
+        <result property="orgId" column="org_id"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <sql id="tb">
-        doctor_warehouse_stock_handler
+        doctor_warehouse_item_org
     </sql>
 
     <sql id="cols_all">
@@ -28,27 +26,25 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `handler_type`, `handler_date`, `warehouse_id`, `farm_id`, 
+        `item_id`, `org_id`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{handlerType}, #{handlerDate}, #{warehouseId}, #{farmId}, 
+        #{itemId}, #{orgId}, 
         now(), now()
     </sql>
 
     <sql id="criteria">
         <where>
-            <if test="handlerType != null">AND `handler_type` = #{handlerType}</if>
-            <if test="handlerDate != null">AND `handler_date` = #{handlerDate}</if>
-            <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
-            <if test="farmId != null">AND `farm_id` = #{farmId}</if>
+            <if test="itemId != null">AND `item_id` = #{itemId}</if>
+            <if test="orgId != null">AND `org_id` = #{orgId}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
     </sql>
 
-    <insert id="create" parameterType="DoctorWarehouseStockHandler" useGeneratedKeys="true" keyProperty="id">
+    <insert id="create" parameterType="DoctorWarehouseItemOrg" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
         <include refid="tb"/>
         (<include refid="cols_exclude_id"/>)
@@ -56,7 +52,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findById" parameterType="long" resultMap="DoctorWarehouseStockHandlerMap">
+    <select id="findById" parameterType="long" resultMap="DoctorWarehouseItemOrgMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -64,7 +60,7 @@
         WHERE id = #{id} LIMIT 1
     </select>
 
-    <select id="findByIds" parameterType="list" resultMap="DoctorWarehouseStockHandlerMap">
+    <select id="findByIds" parameterType="list" resultMap="DoctorWarehouseItemOrgMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -75,14 +71,12 @@
         </foreach>
     </select>
 
-    <update id="update" parameterType="DoctorWarehouseStockHandler">
+    <update id="update" parameterType="DoctorWarehouseItemOrg">
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="handlerType != null">`handler_type` = #{handlerType},</if>
-            <if test="handlerDate != null">`handler_date` = #{handlerDate},</if>
-            <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
-            <if test="farmId != null">`farm_id` = #{farmId},</if>
+            <if test="itemId != null">`item_id` = #{itemId},</if>
+            <if test="orgId != null">`org_id` = #{orgId},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}
@@ -92,6 +86,11 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
+
+    <delete id="deleteByOrg" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE org_id = #{orgId}
+    </delete>
     
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
@@ -99,7 +98,7 @@
         <include refid="criteria"/>
     </select>
 
-    <select id="paging" parameterType="map" resultMap="DoctorWarehouseStockHandlerMap">
+    <select id="paging" parameterType="map" resultMap="DoctorWarehouseItemOrgMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
@@ -107,7 +106,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="list" parameterType="map" resultMap="DoctorWarehouseStockHandlerMap">
+    <select id="list" parameterType="map" resultMap="DoctorWarehouseItemOrgMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>

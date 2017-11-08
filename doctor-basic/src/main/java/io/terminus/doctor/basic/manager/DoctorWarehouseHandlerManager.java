@@ -21,8 +21,8 @@ public class DoctorWarehouseHandlerManager {
 
     @Autowired
     private DoctorWarehouseStockDao doctorWarehouseStockDao;
-    @Autowired
-    private DoctorWarehouseStockHandlerDao doctorWarehouseStockHandlerDao;
+//    @Autowired
+//    private DoctorWarehouseStockHandlerDao doctorWarehouseStockHandlerDao;
     @Autowired
     private DoctorWarehouseStockHandlerDetailDao doctorWarehouseStockHandlerDetailDao;
 
@@ -83,8 +83,8 @@ public class DoctorWarehouseHandlerManager {
             //两笔物料处理记录，只有调拨才有。
             if (context.getMaterialHandle().size() == 2) {
                 //相互保存各自编号，方便通过一条调拨记录找到另一条
-                context.getMaterialHandle().get(0).setOtherTrasnferHandleId(context.getMaterialHandle().get(1).getId());
-                context.getMaterialHandle().get(1).setOtherTrasnferHandleId(context.getMaterialHandle().get(0).getId());
+                context.getMaterialHandle().get(0).setOtherTransferHandleId(context.getMaterialHandle().get(1).getId());
+                context.getMaterialHandle().get(1).setOtherTransferHandleId(context.getMaterialHandle().get(0).getId());
                 doctorWarehouseMaterialHandleDao.update(context.getMaterialHandle().get(0));
                 doctorWarehouseMaterialHandleDao.update(context.getMaterialHandle().get(1));
             }
@@ -155,8 +155,8 @@ public class DoctorWarehouseHandlerManager {
 
     }
 
-    @Transactional
-    public void inAndOutStock(List<DoctorWarehouseStockHandleDto> handleInDtos, List<DoctorWarehouseStockHandleDto> handleOutDtos, DoctorWarehouseStockHandler handle) {
+//    @Transactional
+//    public void inAndOutStock(List<DoctorWarehouseStockHandleDto> handleInDtos, List<DoctorWarehouseStockHandleDto> handleOutDtos, DoctorWarehouseStockHandler handle) {
 
 //        List<DoctorWarehouseStockHandlerDetail> handleDetails = new ArrayList<>();
 //        for (DoctorWarehouseStockHandleDto in : handleInDtos) {
@@ -195,7 +195,7 @@ public class DoctorWarehouseHandlerManager {
 //            doctorWarehouseStockHandlerDetailDao.create(detail);
 //        }
 
-    }
+//    }
 
 
     private void handleStockMonthlyReport(DoctorWarehouseStock stock, Date handleDate, BigDecimal number, Long unitPrice, boolean in) {

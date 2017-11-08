@@ -41,6 +41,12 @@
 
     <sql id="criteria">
         <if test="type != null">AND `type` = #{type}</if>
+        <if test="ids != null and ids.size() > 0">
+            AND
+            <foreach collection="ids" item="id" open="(" separator="or" close=")">
+                id =#{id}
+            </foreach>
+        </if>
         <if test="subType != null">AND `sub_type` = #{subType}</if>
         <if test="name != null">AND `name` like concat('%', #{name}, '%')</if>
         <if test="srm != null">AND srm like concat('%', #{srm}, '%')</if>
@@ -72,6 +78,9 @@
         FROM <include refid="tb" />
         where is_valid = 1
         <if test="type != null"> and type = #{type}</if>
+        <if test="nameSort">
+            ORDER BY CONVERT(name USING gbk)
+        </if>
     </select>
 
     <select id="findByTypeAndName" parameterType="map" resultMap="DoctorBasicMaterialMap" >
@@ -144,6 +153,9 @@
         <where>
             <include refid="criteria"/>
         </where>
+        <if test="nameSort">
+            ORDER BY CONVERT(name USING gbk)
+        </if>
     </select>
 
     <select id="findByIdsAndType" parameterType="map" resultMap="DoctorBasicMaterialMap">

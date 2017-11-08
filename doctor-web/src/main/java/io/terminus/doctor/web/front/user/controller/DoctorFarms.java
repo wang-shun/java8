@@ -82,7 +82,7 @@ public class DoctorFarms {
      * @return 公司信息
      */
     @RequestMapping(value = "/companyInfo", method = RequestMethod.GET)
-    public DoctorBasicDto getCompanyInfo(@RequestParam(value = "orgId", required = false) Long orgId){
+    public DoctorBasicDto getCompanyInfo(@RequestParam(value = "orgId", required = false) Long orgId) {
         return RespHelper.or500(doctorStatisticReadService.getOrgStatisticByOrg(UserUtil.getUserId(), orgId));
     }
 
@@ -101,14 +101,12 @@ public class DoctorFarms {
     }
 
     /**
-     *
-     *
      * @return 猪场list
      */
     @RequestMapping(value = "/toFarms", method = RequestMethod.GET)
     public List<DoctorFarm> findToFarmsByFarm(@RequestParam(value = "farmId") Long farmId) {
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
-        if(Arguments.isNull(farm)){
+        if (Arguments.isNull(farm)) {
             log.error("no farm find, farmId: {}", farmId);
             throw new JsonResponseException("no.farm.find");
         }
@@ -148,6 +146,7 @@ public class DoctorFarms {
 
     /**
      * 获取猪场员工
+     *
      * @param farmId 猪场id
      * @return 员工列表
      */
@@ -165,7 +164,7 @@ public class DoctorFarms {
             }).collect(Collectors.toList()));
         }
         PrimaryUser primaryUser = RespHelper.or500(primaryUserReadService.findPrimaryByFarmIdAndStatus(farmId, UserStatus.NORMAL.value()));
-        if(primaryUser !=null){
+        if (primaryUser != null) {
             FarmStaff farmStaff = new FarmStaff();
             farmStaff.setFarmId(primaryUser.getRelFarmId());
             farmStaff.setUserId(primaryUser.getUserId());
@@ -203,7 +202,30 @@ public class DoctorFarms {
     }
 
     /**
+     * 根据猪厂查询同公司的所有的猪厂
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(value = "/org/farm", method = RequestMethod.GET)
+    public List<DoctorFarm> findOtherFarmByOrgId(Long farmId) {
+        DoctorUserDataPermission doctorUserDataPermission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(UserUtil.getUserId()));
+        List<Long> doctorFarmIds = doctorUserDataPermission.getFarmIdsList();
+
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+        if (null == farm)
+            throw new JsonResponseException("farm.not.found");
+        Long orgId = farm.getOrgId();
+
+        List<DoctorFarm> doctorFarms = RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(orgId));
+        if (doctorFarms != null) {
+            doctorFarms = doctorFarms.stream().filter(t -> doctorFarmIds.contains(t.getId())).collect(Collectors.toList());
+        }
+        return doctorFarms;
+    }
+
+    /**
      * 根据猪场id查询猪场信息
+     *
      * @param farmId 猪场id
      * @return 猪场信息
      */
@@ -213,7 +235,8 @@ public class DoctorFarms {
     }
 
     /**
-     *查询所有猪场
+     * 查询所有猪场
+     *
      * @return 猪场列表
      */
     @RequestMapping(value = "/findAllFarm", method = RequestMethod.GET)

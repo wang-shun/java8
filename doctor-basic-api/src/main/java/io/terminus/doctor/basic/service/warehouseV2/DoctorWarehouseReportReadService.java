@@ -25,6 +25,8 @@ public interface DoctorWarehouseReportReadService {
      */
     Response<AmountAndQuantityDto> countFarmBalance(Long farmId);
 
+    Response<AmountAndQuantityDto> countFarmBalance(Long farmId, Long skuId);
+
     /**
      * 统计猪厂下某一类型的仓库的所有余量和余额
      *
@@ -56,7 +58,7 @@ public interface DoctorWarehouseReportReadService {
      * @param farmId
      * @return
      */
-    Response<Map<Long, AmountAndQuantityDto>> countEachWarehouseBalance(Long farmId,Integer warehouseType);
+    Response<Map<Long, AmountAndQuantityDto>> countEachWarehouseBalance(Long farmId, Integer warehouseType);
 
     Response<Map<Long/*materialID*/, AmountAndQuantityDto>> countEachMaterialBalance(Long farmId, Long warehouId);
 
@@ -121,7 +123,7 @@ public interface DoctorWarehouseReportReadService {
 
     Response<Map<Integer, WarehouseStockStatisticsDto>> countMaterialHandleByFarmAndWarehouseType(Long farmId, Calendar handleDate, WarehouseMaterialHandleType... types);
 
-    Response<Map<Long, WarehouseStockStatisticsDto>> countMaterialHandleByFarm(Long farmId,Integer warehouseType, Calendar handleDate, WarehouseMaterialHandleType... types);
+    Response<Map<Long, WarehouseStockStatisticsDto>> countMaterialHandleByFarm(Long farmId, Integer warehouseType, Calendar handleDate, WarehouseMaterialHandleType... types);
 
     Response<Map<Long, WarehouseStockStatisticsDto>> countMaterialHandleByWarehouse(Long farmId, Long warehouseId, Calendar handleDate, WarehouseMaterialHandleType... types);
 
@@ -146,6 +148,8 @@ public interface DoctorWarehouseReportReadService {
      * @return
      */
     Response<WarehouseStockStatisticsDto> countMaterialHandleByMaterial(Long warehouseId, Long materialId, Calendar handleDate, WarehouseMaterialHandleType... types);
+
+    Response<WarehouseStockStatisticsDto> countMaterialHandleByFarmAndMaterial(Long farmId, Long materialId, Calendar handleDate, WarehouseMaterialHandleType... types);
 
     Response<WarehouseStockStatisticsDto> countMaterialHandleByMaterialVendor(Long warehouseId, Long materialId, String vendorName, Calendar handleDate, WarehouseMaterialHandleType... types);
 

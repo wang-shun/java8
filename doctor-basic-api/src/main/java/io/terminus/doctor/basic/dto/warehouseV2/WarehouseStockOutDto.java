@@ -1,7 +1,5 @@
 package io.terminus.doctor.basic.dto.warehouseV2;
 
-import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
-import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,10 +8,8 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
-import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -25,7 +21,7 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
     private static final long serialVersionUID = 9222667660305355019L;
 
     @Valid
-    @NotEmpty(message = "stock.detail.empty")
+    @NotEmpty(message = "stock.detail.empty", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
     private List<WarehouseStockOutDetail> details;
 
     @Data
@@ -36,9 +32,9 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
 
         private static final long serialVersionUID = -6161879769774585774L;
 
-        @NotNull(message = "stock.quantity.null")
-        @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")
-        private BigDecimal quantity;
+//        @NotNull(message = "stock.quantity.null")
+//        @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")
+//        private BigDecimal quantity;
 
         //        @NotNull(message = "stock.unit.price.null")
 //        private Long unitPrice;
@@ -56,10 +52,10 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
         /**
          * 领用猪舍
          */
-        @NotNull(message = "stock.apply.pig.house.id.null")
+        @NotNull(message = "stock.apply.pig.house.id.null", groups = StockDefaultValid.class)
         private Long applyPigBarnId;
 
-        @NotBlank(message = "stock.apply.pig.house.name.null")
+        @NotBlank(message = "stock.apply.pig.house.name.null", groups = StockDefaultValid.class)
         private String applyPigBarnName;
 
         /**

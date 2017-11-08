@@ -30,7 +30,6 @@ public abstract class AbstractEventHandler<T, R> {
     }
 
     protected void transfer(T eventDto, R event) {
-        //TODO from string to date not work,use spring beanutils
 
 //        BeanMapper.copy(eventDto, event);
         BeanUtils.copyProperties(eventDto, event);

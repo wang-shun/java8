@@ -1,18 +1,20 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
-import io.terminus.common.model.Response;
-import io.terminus.boot.rpc.common.annotation.RpcProvider;
-
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.dao.DoctorFarmBasicDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
+import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
-import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
-
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,9 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
     @Autowired
     private DoctorFarmBasicDao doctorFarmBasicDao;
 
+    @Autowired
+    private DoctorWarehouseStockDao doctorWarehouseStockDao;
+
     @Override
     @ExceptionHandle("doctor.warehouse.sku.create.fail")
     public Response<Long> create(DoctorWarehouseSku doctorWarehouseSku) {
@@ -45,6 +50,7 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         Map<String, Object> params = new HashMap<>();
         params.put("orgId", doctorWarehouseSku.getOrgId());
         params.put("code", doctorWarehouseSku.getCode());
+        params.put("status", WarehouseSkuStatus.NORMAL.getValue());
         if (!doctorWarehouseSkuDao.list(params).isEmpty())
             throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getCode());
 
@@ -88,7 +94,7 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         Map<String, Object> params = new HashMap<>();
         params.put("orgId", doctorWarehouseSku.getOrgId());
         params.put("code", doctorWarehouseSku.getCode());
-
+        params.put("status", WarehouseSkuStatus.NORMAL.getValue());
         List<DoctorWarehouseSku> existedSku = doctorWarehouseSkuDao.list(params);
         if (!existedSku.isEmpty()) {
             if (existedSku.size() > 1)
@@ -115,6 +121,56 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
             log.error("failed to delete doctor warehouse sku by id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.sku.delete.fail");
         }
+    }
+
+    @Override
+    @ExceptionHandle("doctor.warehouse.sku.generate.code.fail")
+    public Response<String> generateCode(Long orgId, Integer type) {
+
+        String prefix = null;
+        switch (type) {
+            case 1:         //饲料
+                prefix = "SL";
+                break;
+            case 2:         //原料
+                prefix = "YL";
+                break;
+            case 3:         //疫苗
+                prefix = "YM";
+                break;
+            case 4:         //药品
+                prefix = "YP";
+                break;
+            case 5:         //消耗品
+                prefix = "YHP";
+                break;
+            default:
+                throw new InvalidException("warehouse.sku.type.not.support", type);
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("type", type);
+        params.put("orgId", orgId);
+//        params.put("status", WarehouseSkuStatus.NORMAL.getValue());
+
+        List<DoctorWarehouseSku> skus = doctorWarehouseSkuDao.list(params);
+        if (skus.isEmpty())
+            return Response.ok(prefix + "0001");
+
+        String lasSkuCode = skus.get(0).getCode().substring(prefix.length());
+//        if (!NumberUtils.isNumber(lasSkuCode))
+//            throw new InvalidException("warehouse.sku.code.format.illegal", lasSkuCode);
+
+        try {
+            int lastCodeWithSameOrgAndType = Integer.parseInt(lasSkuCode);
+            if (lastCodeWithSameOrgAndType >= 9999)
+                throw new InvalidException("warehouse.sku.code.out.of.range", 9999);
+
+            return Response.ok(prefix + StringUtils.leftPad(String.valueOf((lastCodeWithSameOrgAndType + 1)), 4, '0'));
+        } catch (NumberFormatException e) {
+            throw new InvalidException("warehouse.sku.code.format.illegal", lasSkuCode);
+        }
+
     }
 
 }

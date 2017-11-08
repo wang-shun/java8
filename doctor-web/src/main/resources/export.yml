@@ -1028,3 +1028,25 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+
+  web-wareHouse-stock-handle:
+      display: 仓库单据
+      columns:
+        - name: materialName
+        - display: 物料名称
+        - name: vendorName
+        - display: 厂家
+        - name: materialCode
+        - display: 物料编码
+        - name: materialSpecification
+        - display: 规格
+        - name: unit
+        - display: 单位
+        - name: quantity
+        - display: 数量
+        - name: unitPrice
+        - display: 单价（元）
+        - name: amount
+        - display: 金额（元）
+        - name: remark
+        - display: 备注

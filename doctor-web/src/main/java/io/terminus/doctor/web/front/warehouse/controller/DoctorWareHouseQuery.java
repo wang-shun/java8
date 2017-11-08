@@ -252,7 +252,7 @@ public class DoctorWareHouseQuery {
                 .stream()
                 .map(DoctorMaterialInWareHouse::getMaterialId)
                 .collect(Collectors.toList());
-        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialByTypeFilterBySrm(type, srm, exIds))
+        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialByTypeFilterBySrm(type, srm, exIds,false))
                 .stream()
                 .filter(basicMaterial -> !exist.contains(basicMaterial.getId()))
                 .collect(Collectors.toList());

@@ -86,7 +86,7 @@ public abstract class AbstractPigEventBuilder<T extends BasePigEventInputDto> im
     }
 
     /**
-     * 从eventDto构建pigEvent
+     * 从eventDto构建pigEvents
      * 同名的字段不需要处理，自动转移
      *
      * @param eventDto

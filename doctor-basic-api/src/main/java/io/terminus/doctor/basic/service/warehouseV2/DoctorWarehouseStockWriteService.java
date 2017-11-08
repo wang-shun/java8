@@ -5,7 +5,6 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.*;
 import io.terminus.doctor.basic.dto.warehouseV2.*;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandler;
 
 import java.util.List;
 
@@ -51,7 +50,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockIn
      * @return
      */
-    Response<Boolean> in(WarehouseStockInDto stockIn);
+    Response<Long> in(WarehouseStockInDto stockIn);
 
     /**
      * 盘点
@@ -59,7 +58,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockInventory
      * @return
      */
-    Response<Boolean> inventory(WarehouseStockInventoryDto stockInventory);
+    Response<Long> inventory(WarehouseStockInventoryDto stockInventory);
 
     /**
      * 调拨
@@ -67,7 +66,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockTransfer
      * @return
      */
-    Response<Boolean> transfer(WarehouseStockTransferDto stockTransfer);
+    Response<Long> transfer(WarehouseStockTransferDto stockTransfer);
 
     /**
      * 出库
@@ -75,7 +74,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockOut
      * @return
      */
-    Response<Boolean> out(WarehouseStockOutDto stockOut);
+    Response<Long> out(WarehouseStockOutDto stockOut);
 
 
     /**
@@ -85,7 +84,7 @@ public interface DoctorWarehouseStockWriteService {
      */
     Response<Boolean> formula(WarehouseFormulaDto formulaDto);
 
-    @Deprecated
-    Response<Boolean> outAndIn(List<DoctorWarehouseStockHandleDto> inHandles, List<DoctorWarehouseStockHandleDto> outHandles, DoctorWarehouseStockHandler handle);
+//    @Deprecated
+//    Response<Boolean> outAndIn(List<DoctorWarehouseStockHandleDto> inHandles, List<DoctorWarehouseStockHandleDto> outHandles, DoctorWarehouseStockHandler handle);
 
 }

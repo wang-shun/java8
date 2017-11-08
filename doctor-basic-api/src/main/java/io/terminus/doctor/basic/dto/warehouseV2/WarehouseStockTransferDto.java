@@ -22,7 +22,7 @@ public class WarehouseStockTransferDto extends AbstractWarehouseStockDto impleme
     private static final long serialVersionUID = 3044734405148417477L;
 
     @Valid
-    @NotEmpty(message = "stock.detail.empty")
+    @NotEmpty(message = "stock.detail.empty", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
     private List<WarehouseStockTransferDetail> details;
 
     @Data
@@ -30,12 +30,12 @@ public class WarehouseStockTransferDto extends AbstractWarehouseStockDto impleme
 
         private static final long serialVersionUID = 2339146227421186614L;
 
-        @NotNull(message = "stock.target.warehouse.id.null")
+        @NotNull(message = "stock.target.warehouse.id.null", groups = StockDefaultValid.class)
         private Long transferInWarehouseId;
 
-        @NotNull(message = "stock.quantity.null")
-        @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")
-        private BigDecimal quantity;
+//        @NotNull(message = "stock.quantity.null")
+//        @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")
+//        private BigDecimal quantity;
 
     }
 

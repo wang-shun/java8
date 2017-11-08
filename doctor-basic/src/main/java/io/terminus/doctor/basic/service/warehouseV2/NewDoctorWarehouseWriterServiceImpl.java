@@ -16,7 +16,6 @@ import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMonthlyStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandler;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandlerDetail;
 import io.terminus.doctor.basic.service.DoctorFarmBasicReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
@@ -47,8 +46,8 @@ public class NewDoctorWarehouseWriterServiceImpl implements NewDoctorWarehouseWr
 
     @Autowired
     private DoctorWarehouseStockDao doctorWarehouseStockDao;
-    @Autowired
-    private DoctorWarehouseStockHandlerDao doctorWarehouseStockHandlerDao;
+//    @Autowired
+//    private DoctorWarehouseStockHandlerDao doctorWarehouseStockHandlerDao;
     @Autowired
     private DoctorWarehouseStockHandlerDetailDao doctorWarehouseStockHandlerDetailDao;
     @Autowired
@@ -203,14 +202,14 @@ public class NewDoctorWarehouseWriterServiceImpl implements NewDoctorWarehouseWr
 
 //            handlerDetails.add(handlerDetail);
         });
-        DoctorWarehouseStockHandler handler = new DoctorWarehouseStockHandler();
-        handler.setFarmId(warehouseStockDto.getFarmID());
-        handler.setWarehouseId(warehouseStockDto.getWarehouseID());
-        handler.setHandlerType(warehouseStockDto.getType());
-        handler.setHandlerDate(warehouseStockDto.getHandlerDate());
+//        DoctorWarehouseStockHandler handler = new DoctorWarehouseStockHandler();
+//        handler.setFarmId(warehouseStockDto.getFarmID());
+//        handler.setWarehouseId(warehouseStockDto.getWarehouseID());
+//        handler.setHandlerType(warehouseStockDto.getType());
+//        handler.setHandlerDate(warehouseStockDto.getHandlerDate());
 
 
-        doctorWarehouseHandlerManager.inAndOutStock(inHandles, outHandles, handler);
+//        doctorWarehouseHandlerManager.inAndOutStock(inHandles, outHandles, handler);
     }
 
 

@@ -5,14 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Desc:
  * Mail: [ your email ]
- * Date: 2017-10-16 22:14:22
+ * Date: 2017-10-26 17:12:43
  * Created by [ your name ]
  */
 @Data
@@ -21,85 +20,69 @@ import java.util.Date;
 @NoArgsConstructor
 public class DoctorWarehouseSku implements Serializable {
 
-    private static final long serialVersionUID = 8742028251011930610L;
+    private static final long serialVersionUID = -1128431683503011787L;
 
     /**
      * 自增主键
      */
-    @NotNull(message = "warehouse.sku.id.null", groups = UpdateValid.class)
     private Long id;
-    
+
     /**
      * 公司编号
      */
-    @NotNull(message = "warehouse.sku.org.id.null", groups = CreateValid.class)
     private Long orgId;
-    
-    /**
-     * 猪厂编号
-     */
-//    @NotNull(message = "warehouse.sku.farm.id.null", groups = CreateValid.class)
-    private Long farmId;
-    
-    /**
-     * 仓库编号
-     */
-//    @NotNull(message = "warehouse.sku.warehouse.id.null", groups = CreateValid.class)
-    private Long warehouseId;
-    
-    /**
-     * 仓库名称
-     */
-    private String warehouseName;
-    
+
     /**
      * 物料类型编号
      */
-    @NotNull(message = "warehouse.sku.item.id.null", groups = CreateValid.class)
     private Long itemId;
-    
+
     /**
      * 基础物料名称
      */
     private String itemName;
-    
+
     /**
      * 基础物料类型
      */
     private Integer type;
-    
+
     /**
      * 物料名称
      */
-    @NotNull(message = "warehouse.sku.name.null", groups = CreateValid.class)
     private String name;
-    
+
     /**
      * 编码,用于跨厂调拨
      */
-    @NotNull(message = "warehouse.sku.code.null", groups = CreateValid.class)
     private String code;
-    
+
+    /**
+     * 状态
+     * @see io.terminus.doctor.basic.enums.WarehouseSkuStatus
+     */
+    private Integer status;
+
     /**
      * 短码,用于查询
      */
     private String srm;
-    
+
     /**
-     * 供应商
+     * 供应商编号
      */
-    private String vendorName;
-    
+    private Long vendorId;
+
     /**
      * 单位
      */
     private String unit;
-    
+
     /**
      * 规格
      */
     private String specification;
-    
+
     /**
      * 创建时间
      */
@@ -110,12 +93,4 @@ public class DoctorWarehouseSku implements Serializable {
      */
     private Date updatedAt;
 
-
-    public static interface UpdateValid extends CreateValid {
-
-    }
-
-    public static interface CreateValid {
-
-    }
 }
