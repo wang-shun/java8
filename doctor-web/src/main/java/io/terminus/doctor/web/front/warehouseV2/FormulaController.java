@@ -151,6 +151,8 @@ public class FormulaController {
         // 查询对应的饲料
 //        DoctorBasicMaterial feed = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(feedFormula.getFeedId()));
         DoctorWarehouseSku feed = RespHelper.or500(doctorWarehouseSkuReadService.findById(feedFormula.getFeedId()));
+        if (null == feed)
+            throw new JsonResponseException("warehouse.feed.not.found");
 
         // 校验生产后的入仓仓库类型
         DoctorWareHouse wareHouse = RespHelper.orServEx(doctorWareHouseReadService.findById(warehouseId));

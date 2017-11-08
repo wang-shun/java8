@@ -422,7 +422,9 @@ public class ReportController {
                 handleVo.setCode(skuMap.get(handle.getMaterialId()).get(0).getCode());
                 handleVo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(skuMap.get(handle.getMaterialId()).get(0).getVendorId())));
                 handleVo.setSpecification(skuMap.get(handle.getMaterialId()).get(0).getSpecification());
-                handleVo.setUnit(skuMap.get(handle.getMaterialId()).get(0).getUnit());
+                DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(skuMap.get(handle.getMaterialId()).get(0).getUnit())));
+                handleVo.setUnit(null == unit ? "" : unit.getName());
+//                handleVo.setUnit(skuMap.get(handle.getMaterialId()).get(0).getUnit());
             }
 
             vos.add(handleVo);
@@ -484,7 +486,9 @@ public class ReportController {
             WarehouseMaterialApplyVo vo = new WarehouseMaterialApplyVo();
             BeanUtils.copyProperties(apply, vo);
             if (skuMap.containsKey(apply.getMaterialId())) {
-                vo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
+//                vo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
+                DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(skuMap.get(apply.getMaterialId()).get(0).getUnit())));
+                vo.setUnit(null == unit ? "" : unit.getName());
                 vo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
                 vo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(skuMap.get(apply.getMaterialId()).get(0).getVendorId())));
                 vo.setSpecification(skuMap.get(apply.getMaterialId()).get(0).getSpecification());
@@ -608,7 +612,8 @@ public class ReportController {
                     .build();
 
             if (skuMap.containsKey(apply.getMaterialId())) {
-                applyVo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
+                DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(skuMap.get(apply.getMaterialId()).get(0).getUnit())));
+                applyVo.setUnit(null == unit ? "" : unit.getName());
                 applyVo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
                 applyVo.setSpecification(skuMap.get(apply.getMaterialId()).get(0).getSpecification());
                 applyVo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(skuMap.get(apply.getMaterialId()).get(0).getVendorId())));
