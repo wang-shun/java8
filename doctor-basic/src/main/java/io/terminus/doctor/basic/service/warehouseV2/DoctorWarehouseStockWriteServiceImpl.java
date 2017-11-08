@@ -157,7 +157,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
             if (!sku.getType().equals(context.getWareHouse().getType()))
                 throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
-            if (sku.getStatus().equals(WarehouseSkuStatus.FORBIDDEN.getValue()))
+            if (WarehouseSkuStatus.FORBIDDEN.getValue() == sku.getStatus())
                 throw new InvalidException("warehouse.sku.forbidden", sku.getName());
 
             DoctorWarehouseStock stock = doctorWarehouseStockManager.in(stockIn, detail, context, sku);
