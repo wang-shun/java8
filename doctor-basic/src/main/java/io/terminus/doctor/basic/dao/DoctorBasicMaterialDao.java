@@ -30,6 +30,14 @@ public class DoctorBasicMaterialDao extends MyBatisDao<DoctorBasicMaterial> {
         return getSqlSession().selectList(sqlId("findByType"), params);
     }
 
+    public List<DoctorBasicMaterial> findByType(Integer type) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("type", type);
+
+        return getSqlSession().selectList(sqlId("findByType"), params);
+    }
+
     /**
      * 物料的当前最大的id, 这个是dump搜素引擎用的
      *
