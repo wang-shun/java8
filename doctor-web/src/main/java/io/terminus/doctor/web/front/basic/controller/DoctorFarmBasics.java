@@ -73,7 +73,7 @@ public class DoctorFarmBasics {
      */
     @RequestMapping(value = "/farmBasic/basicIds", method = RequestMethod.POST)
     public Boolean createOrUpdateBasicIds(@RequestParam("farmId") Long farmId,
-                                          @RequestParam("ids") String ids,
+                                          @RequestParam(value = "ids",required = false) String ids,
                                           @RequestParam(required = false) String vendorIds,
                                           @RequestParam(required = false) String materialItemIds) {
         if (isEmpty(ids)) {
