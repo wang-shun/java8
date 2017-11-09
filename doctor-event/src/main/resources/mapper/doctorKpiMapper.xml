@@ -1579,7 +1579,7 @@
         ifnull(sum(t0.quantity), 0) AS result
         FROM doctor_warehouse_material_apply AS t0
         LEFT JOIN doctor_barns t1 ON t0.pig_barn_id = t1.id
-        LEFT JOIN doctor_basic_materials t2 on t0.material_id=t2.id
+        LEFT JOIN doctor_warehouse_sku t2 on t0.material_id=t2.id
         WHERE t2.type=1
         <if test="farmId != null">AND t0.farm_id = #{farmId}</if>
         <if test="startAt != null">AND t0.apply_date &gt;= #{startAt}</if>
@@ -1704,7 +1704,7 @@
             SELECT t1.pig_type,t2.type as material_type,ifnull(sum(t0.quantity * t0.unit_price), 0) AS amount
                 from doctor_warehouse_material_apply t0
                 LEFT JOIN doctor_barns t1 on t0.pig_barn_id=t1.id
-                LEFT JOIN doctor_basic_materials t2 on t0.material_id=t2.id
+                LEFT JOIN doctor_warehouse_sku t2 on t0.material_id=t2.id
                 <where>
                     <if test="farmId !=null">AND t0.farm_id=#{farmId}</if>
                     <if test="startAt != null">AND t0.apply_date &gt;= #{startAt}</if>
@@ -2325,6 +2325,28 @@
         and event_type = 1
         and type = 1
         and group_id in
+        ( select group_id
+        from doctor_group_batch_summaries
+        where status = -1
+        and farm_id IN
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")" >
+            #{fId}
+        </foreach>
+        and pig_type = #{type}
+        and close_at &gt;= #{startAt}
+        and close_at &lt;= #{endAt}
+        )
+    </select>
+
+    <select id="getFeedConsume2" parameterType="map" resultType="double">
+
+        select * from doctor_warehouse_material_apply
+        where farm_id IN
+        <foreach collection="farmIds" item="fId" open="(" separator="," close=")" >
+            #{fId}
+        </foreach>
+        and warehouse_type=1
+        and pig_group_id in
         ( select group_id
         from doctor_group_batch_summaries
         where status = -1
