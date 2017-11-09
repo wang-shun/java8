@@ -43,6 +43,13 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
     }
 
     @Override
+    @ExceptionHandle("doctor.warehouse.material.apply.find.fail")
+    public Response<DoctorWarehouseMaterialApply> findByMaterialHandle(Long materialHandleId) {
+
+        return Response.ok(doctorWarehouseMaterialApplyDao.findMaterialHandle(materialHandleId));
+    }
+
+    @Override
     public Response<Paging<DoctorWarehouseMaterialApply>> paging(Integer pageNo, Integer pageSize, Map<String, Object> criteria) {
         try {
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);

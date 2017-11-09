@@ -54,7 +54,7 @@ public class DoctorInitFarmService {
             doctorFarmBasic.setFarmId(farm.getId());
             List<DoctorBasic> basicList = RespHelper.orServEx(doctorBasicReadService.findAllValidBasics());
             List<DoctorChangeReason> reasonList = RespHelper.orServEx(doctorBasicReadService.findAllChangeReasons());
-            List<DoctorBasicMaterial> materialList = RespHelper.orServEx(doctorBasicMaterialReadService.findAllBasicMaterials());
+            List<DoctorBasicMaterial> materialList = RespHelper.orServEx(doctorBasicMaterialReadService.findAllBasicMaterials(false));
             String basicIds = basicList.stream().map(doctorBasic -> String.valueOf(doctorBasic.getId())).collect(Collectors.joining(","));
             String reasonIds = reasonList.stream().map(doctorChangeReason -> String.valueOf(doctorChangeReason.getId())).collect(Collectors.joining(","));
             String materialIds = materialList.stream().map(doctorBasicMaterial -> String.valueOf(doctorBasicMaterial.getId())).collect(Collectors.joining(","));

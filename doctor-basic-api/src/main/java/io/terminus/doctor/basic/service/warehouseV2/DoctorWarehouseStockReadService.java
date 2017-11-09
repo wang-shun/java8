@@ -53,6 +53,8 @@ public interface DoctorWarehouseStockReadService {
      */
     Response<List<DoctorWarehouseStock>> list(DoctorWarehouseStock criteria);
 
+    Response<List<DoctorWarehouseStock>> list(Map<String, Object> criteria);
+
     /**
      * 获取农场下所有仓库中指定物料的库存
      *
@@ -79,5 +81,7 @@ public interface DoctorWarehouseStockReadService {
      */
     Response<Boolean> existed(DoctorWarehouseStock criteria);
 
+
+    Response<Long> advCount(Map<String, Object> criteria);
 
 }

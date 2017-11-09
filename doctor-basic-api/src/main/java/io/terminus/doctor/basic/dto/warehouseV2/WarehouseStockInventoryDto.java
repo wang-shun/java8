@@ -23,18 +23,21 @@ public class WarehouseStockInventoryDto extends AbstractWarehouseStockDto implem
 
 
     @Valid
-    @NotEmpty(message = "stock.detail.empty")
+//    @NotEmpty(message = "stock.detail.empty")
     private List<WarehouseStockInventoryDetail> details;
 
 
     @Data
-    public static class WarehouseStockInventoryDetail extends AbstractWarehouseStockDetail implements  Serializable{
+    public static class WarehouseStockInventoryDetail extends AbstractWarehouseStockDetail implements Serializable {
 
         private static final long serialVersionUID = -3947299201390395960L;
 
-        @NotNull(message = "stock.quantity.null")
-        @DecimalMin(inclusive = true, value = "0", message = "stock.quantity.small.then.zero")
-        private BigDecimal quantity;
+//        @NotNull(message = "stock.quantity.null")
+//        @DecimalMin.List(
+//                @DecimalMin(inclusive = true, value = "0", message = "stock.quantity.small.then.zero"),
+//                @DecimalMin(value = "0"))
+//        private BigDecimal quantity;
 
     }
+
 }

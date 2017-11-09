@@ -72,8 +72,9 @@ public class DoctorBasicMaterials {
     @RequestMapping(value = "/type", method = RequestMethod.GET)
     public List<DoctorBasicMaterial> finaBasicMaterialByTypeFilterBySrm(@RequestParam(value = "type", required = false) Integer type,
                                                                         @RequestParam(value = "srm", required = false) String srm,
-                                                                        @RequestParam(value = "exIds", required = false) String exIds) {
-        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialByTypeFilterBySrm(type, srm, exIds));
+                                                                        @RequestParam(value = "exIds", required = false) String exIds,
+                                                                        @RequestParam(required = false, defaultValue = "false") boolean userNameSort) {
+        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialByTypeFilterBySrm(type, srm, exIds, userNameSort));
     }
 
     /**
@@ -82,7 +83,8 @@ public class DoctorBasicMaterials {
      * @return 物料数据信息
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
-    public List<DoctorBasicMaterial> findAllBasicMaterials() {
-        return RespHelper.or500(doctorBasicMaterialReadService.findAllBasicMaterials());
+    public List<DoctorBasicMaterial> findAllBasicMaterials(@RequestParam(required = false, defaultValue = "false") boolean useNameSort) {
+
+        return RespHelper.or500(doctorBasicMaterialReadService.findAllBasicMaterials(useNameSort));
     }
 }

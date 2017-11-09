@@ -13,12 +13,12 @@ public enum WarehouseMaterialHandleDeleteFlag {
     /**
      *未删除
      */
-    NOT_DELETE(0),
+    NOT_DELETE(1),
 
     /**
      * 已删除
      */
-    DELETE(1);
+    DELETE(0);
 
     @Getter
     private int value;

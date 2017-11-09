@@ -16,7 +16,9 @@ import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.zookeeper.common.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -24,6 +26,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 
 import java.util.List;
 
@@ -36,21 +41,22 @@ import java.util.List;
 @Configuration
 @ComponentScan({"io.terminus.doctor.basic"})
 @Import({DoctorCommonConfiguration.class})
+@EnableCaching
 public class DoctorBasicConfiguration {
 
     @Configuration
     @Profile("zookeeper")
-    public static class ZookeeperConfiguration{
+    public static class ZookeeperConfiguration {
 
         @Bean
         public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
-            return new Subscriber(zkClientFactory,zkTopic);
+                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception {
+            return new Subscriber(zkClientFactory, zkTopic);
         }
 
         @Bean
         public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}}") String zkTopic) throws Exception{
+                                            @Value("${zookeeper.zkTopic}}") String zkTopic) throws Exception {
             return new Publisher(zkClientFactory, zkTopic);
         }
     }
@@ -71,7 +77,7 @@ public class DoctorBasicConfiguration {
             DoctorMaterialAvgConsumerHandler doctorMaterialAvgConsumerHandler, DoctorWareHouseTrackConsumeHandler doctorWareHouseTrackConsumeHandler,
             DoctorWareHouseTypeConsumerHandler doctorWareHouseTypeConsumerHandler,
             DoctorInWareHouseProviderHandler doctorInWareHouseProviderHandler, DoctorProviderEventHandler doctorProviderEventHandler,
-            DoctorTrackProviderHandler doctorTrackProviderHandler, DoctorTypeProviderHandler doctorTypeProviderHandler){
+            DoctorTrackProviderHandler doctorTrackProviderHandler, DoctorTypeProviderHandler doctorTypeProviderHandler) {
         List<IHandler> iHandlers = Lists.newArrayList();
 
         // consumer
@@ -88,6 +94,16 @@ public class DoctorBasicConfiguration {
         iHandlers.add(doctorTypeProviderHandler);
 
         return new DoctorWareHouseHandlerChain(iHandlers);
+    }
+
+
+    @Bean
+    @Autowired
+    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate template = new RedisTemplate();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());
+        return template;
     }
 
 }

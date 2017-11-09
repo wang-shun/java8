@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-10-16 22:14:22
+ ~ Date: 2017-10-26 17:12:43
  ~ Created by [ your name ]
 -->
 
@@ -11,16 +11,14 @@
     <resultMap id="DoctorWarehouseSkuMap" type="DoctorWarehouseSku">
         <id property="id" column="id"/>
         <result property="orgId" column="org_id"/>
-        <result property="farmId" column="farm_id"/>
-        <result property="warehouseId" column="warehouse_id"/>
-        <result property="warehouseName" column="warehouse_name"/>
         <result property="itemId" column="item_id"/>
         <result property="itemName" column="item_name"/>
         <result property="type" column="type"/>
         <result property="name" column="name"/>
         <result property="code" column="code"/>
+        <result property="status" column="status"/>
         <result property="srm" column="srm"/>
-        <result property="vendorName" column="vendorName"/>
+        <result property="vendorId" column="vendor_id"/>
         <result property="unit" column="unit"/>
         <result property="specification" column="specification"/>
         <result property="createdAt" column="created_at"/>
@@ -37,28 +35,26 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `org_id`, `farm_id`, `warehouse_id`, `warehouse_name`, `item_id`, `item_name`, `type`, `name`, `code`, `srm`, `vendorName`, `unit`, `specification`, 
+        `org_id`, `item_id`, `item_name`, `type`, `name`, `code`, `status`, `srm`, `vendor_id`, `unit`, `specification`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{orgId}, #{farmId}, #{warehouseId}, #{warehouseName}, #{itemId}, #{itemName}, #{type}, #{name}, #{code}, #{srm}, #{vendorName}, #{unit}, #{specification}, 
+        #{orgId}, #{itemId}, #{itemName}, #{type}, #{name}, #{code}, #{status}, #{srm}, #{vendorId}, #{unit}, #{specification}, 
         now(), now()
     </sql>
 
     <sql id="criteria">
         <where>
             <if test="orgId != null">AND `org_id` = #{orgId}</if>
-            <if test="farmId != null">AND `farm_id` = #{farmId}</if>
-            <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
-            <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
             <if test="itemId != null">AND `item_id` = #{itemId}</if>
             <if test="itemName != null">AND `item_name` = #{itemName}</if>
             <if test="type != null">AND `type` = #{type}</if>
             <if test="name != null">AND `name` = #{name}</if>
             <if test="code != null">AND `code` = #{code}</if>
+            <if test="status != null">AND `status` = #{status}</if>
             <if test="srm != null">AND `srm` = #{srm}</if>
-            <if test="vendorName != null">AND `vendorName` = #{vendorName}</if>
+            <if test="vendorId != null">AND `vendor_id` = #{vendorId}</if>
             <if test="unit != null">AND `unit` = #{unit}</if>
             <if test="specification != null">AND `specification` = #{specification}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
@@ -99,16 +95,14 @@
         <include refid="tb"/>
         <set>
             <if test="orgId != null">`org_id` = #{orgId},</if>
-            <if test="farmId != null">`farm_id` = #{farmId},</if>
-            <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
-            <if test="warehouseName != null">`warehouse_name` = #{warehouseName},</if>
             <if test="itemId != null">`item_id` = #{itemId},</if>
             <if test="itemName != null">`item_name` = #{itemName},</if>
             <if test="type != null">`type` = #{type},</if>
             <if test="name != null">`name` = #{name},</if>
             <if test="code != null">`code` = #{code},</if>
+            <if test="status != null">`status` = #{status},</if>
             <if test="srm != null">`srm` = #{srm},</if>
-            <if test="vendorName != null">`vendorName` = #{vendorName},</if>
+            <if test="vendorId != null">`vendor_id` = #{vendorId},</if>
             <if test="unit != null">`unit` = #{unit},</if>
             <if test="specification != null">`specification` = #{specification},</if>
             updated_at = now()

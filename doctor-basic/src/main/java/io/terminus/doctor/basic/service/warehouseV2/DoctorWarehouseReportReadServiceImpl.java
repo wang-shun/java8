@@ -55,6 +55,18 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
     }
 
     @Override
+    public Response<AmountAndQuantityDto> countFarmBalance(Long farmId, Long skuId) {
+        List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase
+                .builder()
+                .farmId(farmId)
+                .materialId(skuId)
+                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+                .build());
+
+        return countBalance(purchases);
+    }
+
+    @Override
     public Response<AmountAndQuantityDto> countWarehouseTypeBalance(Long farmId, Integer type) {
 
         return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
@@ -245,6 +257,11 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
     public Response<WarehouseStockStatisticsDto> countMaterialHandleByMaterial(Long warehouseId, Long materialId, Calendar handleDate, WarehouseMaterialHandleType... types) {
 
         return Response.ok(countMaterialHandle(findMaterialHandleByMaterial(warehouseId, materialId, handleDate, types)));
+    }
+
+    @Override
+    public Response<WarehouseStockStatisticsDto> countMaterialHandleByFarmAndMaterial(Long farmId, Long materialId, Calendar handleDate, WarehouseMaterialHandleType... types) {
+        return Response.ok(countMaterialHandle(findMaterialHandleByFarm(farmId, null, handleDate, types)));
     }
 
     @Override

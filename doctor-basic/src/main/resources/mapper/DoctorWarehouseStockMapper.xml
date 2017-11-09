@@ -71,6 +71,12 @@
                     sku_id =#{t}
                 </foreach>
             </if>
+            <if test="farmIds != null and farmIds.size() > 0">
+                AND
+                <foreach collection="farmIds" item="t" open="(" separator="or" close=")">
+                    farm_id =#{t}
+                </foreach>
+            </if>
         </where>
     </sql>
 
@@ -147,6 +153,13 @@
         SELECT COUNT(1)
         FROM <include refid="tb"/>
         <include refid="advCriteria"/>
+    </select>
+
+    <select id="advList" parameterType="map" resultMap="DoctorWarehouseStockMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="advCriteria"/>
+        ORDER BY `id` DESC
     </select>
 
     <select id="advPaging" parameterType="map" resultMap="DoctorWarehouseStockMap">

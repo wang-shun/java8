@@ -5,6 +5,7 @@ import io.terminus.doctor.basic.dao.DoctorMaterialVendorDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockOutDto;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteServiceImpl;
@@ -94,12 +95,12 @@ public class DoctorWarehouseStockManager {
     }
 
     //    @Transactional(propagation = Propagation.NESTED)
-    public DoctorWarehouseStock out(WarehouseStockOutDto outDto, WarehouseStockOutDto.WarehouseStockOutDetail detailDto, DoctorWarehouseStockWriteServiceImpl.StockContext context, DoctorWarehouseSku sku) {
+    public DoctorWarehouseStock out(WarehouseStockOutDto outDto, WarehouseStockOutDto.WarehouseStockOutDetail detailDto, DoctorWarehouseStockWriteServiceImpl.StockContext context, DoctorWarehouseSku sku, DoctorBasic unit) {
         DoctorWarehouseStock stock = getStock(outDto.getWarehouseId(), detailDto.getMaterialId()).orElseThrow(() ->
                 new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), detailDto.getMaterialId()));
 
         if (stock.getQuantity().compareTo(detailDto.getQuantity()) < 0)
-            throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), stock.getQuantity(), sku.getUnit());
+            throw new InvalidException("stock.not.enough", stock.getWarehouseName(), stock.getSkuName(), stock.getQuantity(), unit.getName());
 
         stock.setQuantity(stock.getQuantity().subtract(detailDto.getQuantity()));
         doctorWarehouseStockDao.update(stock);

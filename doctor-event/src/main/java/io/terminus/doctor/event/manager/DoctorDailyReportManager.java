@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Desc:
@@ -102,9 +103,22 @@ public class DoctorDailyReportManager {
         if (isNull(dailyGroup.getId())) {
             doctorDailyGroupDao.create(dailyGroup);
         } else {
-            doctorDailyGroupDao.update(dailyGroup);
+            expectTrue(doctorDailyGroupDao.update(dailyGroup), "concurrent.error");
         }
     }
+
+    /**
+     * 有则更新,无责创建
+     * @param dailyPig 猪日记录
+     */
+    public void createOrUpdateDailyPig (DoctorDailyReport dailyPig) {
+        if (isNull(dailyPig.getId())) {
+            doctorDailyReportDao.create(dailyPig);
+        } else {
+            expectTrue(doctorDailyReportDao.update(dailyPig), "concurrent.error");
+        }
+    }
+
     /**
      * 生成某一天报表
      * @param farmId  猪场id

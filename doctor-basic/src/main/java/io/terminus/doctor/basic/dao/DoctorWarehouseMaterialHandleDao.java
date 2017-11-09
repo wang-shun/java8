@@ -3,6 +3,8 @@ package io.terminus.doctor.basic.dao;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
+
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import org.springframework.stereotype.Repository;
 
@@ -13,12 +15,11 @@ import java.util.Map;
 /**
  * Desc:
  * Mail: [ your email ]
- * Date: 2017-08-21 08:56:13
+ * Date: 2017-10-31 13:22:27
  * Created by [ your name ]
  */
 @Repository
 public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouseMaterialHandle> {
-
 
     /**
      * 支持bigType参数，对多个type的or查询
@@ -56,6 +57,13 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     public List<DoctorWarehouseMaterialHandle> advList(Map<?, ?> criteria) {
 
         return this.sqlSession.selectList(this.sqlId("advList"), criteria);
+    }
+
+    public List<DoctorWarehouseMaterialHandle> findByStockHandle(Long stockHandleId) {
+        return this.list(DoctorWarehouseMaterialHandle.builder()
+                .deleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue())
+                .stockHandleId(stockHandleId)
+                .build());
     }
 
 }

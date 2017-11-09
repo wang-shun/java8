@@ -6,15 +6,15 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.warehouseV2.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
+import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseReportReadService;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadService;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
+import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -60,9 +60,14 @@ public class StockController {
     private DoctorWareHouseReadService doctorWareHouseReadService;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
+    @RpcConsumer
+    private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
+
+    @RpcConsumer
+    private DoctorBasicReadService doctorBasicReadService;
 
     @RequestMapping(method = RequestMethod.PUT, value = "in")
-    public boolean in(@RequestBody @Validated WarehouseStockInDto stockIn, Errors errors) {
+    public Long in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -73,19 +78,17 @@ public class StockController {
             throw new JsonResponseException("user.not.found");
         stockIn.setOperatorName(userResponse.getResult().getRealName());
 
-
-        Response<Boolean> response = doctorWarehouseStockWriteService.in(stockIn);
+        Response<Long> response = doctorWarehouseStockWriteService.in(stockIn);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
 
-        return true;
+        return response.getResult();
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "out")
-    public boolean out(@RequestBody @Validated WarehouseStockOutDto stockOut, Errors errors) {
+    public Long out(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockOutDto stockOut, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
-
 
         Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockOut.getOperatorId());
         if (!userResponse.isSuccess())
@@ -101,18 +104,35 @@ public class StockController {
             detail.setApplyStaffName(realNameResponse.getResult());
         });
 
-        Response<Boolean> response = doctorWarehouseStockWriteService.out(stockOut);
+        Response<Long> response = doctorWarehouseStockWriteService.out(stockOut);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
 
-        return true;
+        return response.getResult();
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "inventory")
-    public boolean inventory(@RequestBody @Validated WarehouseStockInventoryDto stockInventory, Errors errors) {
+    public Long inventory(@RequestBody @Validated(AbstractWarehouseStockDetail.StockInventoryValid.class) WarehouseStockInventoryDto stockInventory,
+                          Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
+        if (null == stockInventory.getStockHandleId() && stockInventory.getDetails().isEmpty())
+            throw new JsonResponseException("stock.detail.empty");
 
+        Collections.reverse(stockInventory.getDetails());//倒序，最新的覆盖替换老的
+        List<WarehouseStockInventoryDto.WarehouseStockInventoryDetail> removedRepeat = new ArrayList<>();
+        for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : stockInventory.getDetails()) {
+            boolean existed = false;
+            for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail1 : removedRepeat) {
+                if (detail.getMaterialId().equals(detail1.getMaterialId())) {
+                    existed = true;
+                    break;
+                }
+            }
+            if (!existed)
+                removedRepeat.add(detail);
+        }
+        stockInventory.setDetails(removedRepeat);
 
         Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockInventory.getOperatorId());
         if (!userResponse.isSuccess())
@@ -121,17 +141,34 @@ public class StockController {
             throw new JsonResponseException("user.not.found");
         stockInventory.setOperatorName(userResponse.getResult().getRealName());
 
-        Response<Boolean> response = doctorWarehouseStockWriteService.inventory(stockInventory);
+        Response<Long> response = doctorWarehouseStockWriteService.inventory(stockInventory);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
 
-        return true;
+        return response.getResult();
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "transfer")
-    public boolean transfer(@RequestBody @Validated WarehouseStockTransferDto stockTransfer, Errors errors) {
+    public Long transfer(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockTransferDto stockTransfer, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
+
+        Collections.reverse(stockTransfer.getDetails());
+        List<WarehouseStockTransferDto.WarehouseStockTransferDetail> removedRepeat = new ArrayList<>();
+        for (WarehouseStockTransferDto.WarehouseStockTransferDetail detail : stockTransfer.getDetails()) {
+            boolean existed = false;
+            for (WarehouseStockTransferDto.WarehouseStockTransferDetail detail1 : removedRepeat) {
+                if (detail.getMaterialId().equals(detail1.getMaterialId())
+                        && detail.getTransferInWarehouseId().equals(detail1.getTransferInWarehouseId())
+                        && detail.getQuantity().compareTo(detail1.getQuantity()) == 0) {
+                    existed = true;
+                    break;
+                }
+            }
+            if (!existed)
+                removedRepeat.add(detail);
+        }
+        stockTransfer.setDetails(removedRepeat);
 
         Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockTransfer.getOperatorId());
         if (!userResponse.isSuccess())
@@ -140,13 +177,12 @@ public class StockController {
             throw new JsonResponseException("user.not.found");
         stockTransfer.setOperatorName(userResponse.getResult().getRealName());
 
-        Response<Boolean> response = doctorWarehouseStockWriteService.transfer(stockTransfer);
+        Response<Long> response = doctorWarehouseStockWriteService.transfer(stockTransfer);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
 
-        return true;
+        return response.getResult();
     }
-
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
     public boolean delete(@PathVariable Long id) {
@@ -181,6 +217,7 @@ public class StockController {
 
             Map<String, Object> skuParams = new HashMap<>();
             skuParams.put("orgId", orgId);
+            skuParams.put("status", WarehouseSkuStatus.NORMAL.getValue());
             skuParams.put("nameOrSrmLike", materialName);
             List<Long> skuIds = RespHelper.or500(doctorWarehouseSkuReadService.list(skuParams)).stream().map(DoctorWarehouseSku::getId).collect(Collectors.toList());
             if (skuIds.isEmpty())
@@ -199,7 +236,6 @@ public class StockController {
             throw new JsonResponseException("stock.not.found");
 
         Calendar now = Calendar.getInstance();
-
 
         Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(stockResponse.getResult().getData().stream().map(DoctorWarehouseStock::getSkuId).collect(Collectors.toList()))).stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
 
@@ -240,9 +276,13 @@ public class StockController {
             vo.setMaterialName(stock.getSkuName());
 
             if (null != sku) {
-                vo.setUnit(sku.getUnit());
+
+                DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(sku.getUnit())));
+                if (null != unit)
+                    vo.setUnit(unit.getName());
                 vo.setCode(sku.getCode());
-                vo.setVendorName(sku.getVendorName());
+                vo.setMaterialName(sku.getName());
+                vo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
                 vo.setSpecification(sku.getSpecification());
             }
 

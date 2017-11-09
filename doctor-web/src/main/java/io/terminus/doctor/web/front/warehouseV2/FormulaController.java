@@ -8,7 +8,6 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseFormulaDto;
-import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.FeedFormula;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
@@ -18,6 +17,7 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockReadServ
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -151,6 +151,8 @@ public class FormulaController {
         // 查询对应的饲料
 //        DoctorBasicMaterial feed = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(feedFormula.getFeedId()));
         DoctorWarehouseSku feed = RespHelper.or500(doctorWarehouseSkuReadService.findById(feedFormula.getFeedId()));
+        if (null == feed)
+            throw new JsonResponseException("warehouse.feed.not.found");
 
         // 校验生产后的入仓仓库类型
         DoctorWareHouse wareHouse = RespHelper.orServEx(doctorWareHouseReadService.findById(warehouseId));
@@ -161,8 +163,11 @@ public class FormulaController {
         if (null != feedProduce.getMedicalProduceEntries() && !feedProduce.getMedicalProduceEntries().isEmpty())
             totalOut.addAll(feedProduce.getMedicalProduceEntries());
 
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+
         WarehouseFormulaDto formulaDto = new WarehouseFormulaDto();
         formulaDto.setFarmId(farmId);
+        formulaDto.setFarmName(farm.getName());
         formulaDto.setWarehouseId(warehouseId);
         formulaDto.setHandleDate(Calendar.getInstance());
         formulaDto.setFeedMaterial(feed);
