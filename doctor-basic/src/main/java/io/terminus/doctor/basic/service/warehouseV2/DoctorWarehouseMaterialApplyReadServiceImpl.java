@@ -6,6 +6,7 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
+import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialApplyReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -47,6 +48,16 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
     public Response<DoctorWarehouseMaterialApply> findByMaterialHandle(Long materialHandleId) {
 
         return Response.ok(doctorWarehouseMaterialApplyDao.findMaterialHandle(materialHandleId));
+    }
+
+    @Override
+    @ExceptionHandle("doctor.warehouse.material.apply.find.fail")
+    public Response<List<DoctorWarehouseMaterialApply>> findByFarmAndPigGroup(Long farmId, Long groupId) {
+        List<DoctorWarehouseMaterialApply> applies= doctorWarehouseMaterialApplyDao.list(DoctorWarehouseMaterialApply.builder()
+                .farmId(farmId)
+                .pigGroupId(groupId)
+                .build());
+        return Response.ok(applies);
     }
 
     @Override
