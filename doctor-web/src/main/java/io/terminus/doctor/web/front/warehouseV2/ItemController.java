@@ -48,7 +48,19 @@ public class ItemController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "org/id")
-    public List<Long> queryByOrg(Long orgId) {
+    public List<Long> queryByOrg(@RequestParam(required = false) Long orgId,
+                                 @RequestParam(required = false) Long farmId) {
+
+
+        if (null == orgId && null == farmId)
+            throw new JsonResponseException("warehouse.sku.org.id.or.farm.id.not.null");
+        if (null == orgId) {
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+            if (null == farm)
+                throw new JsonResponseException("farm.not.found");
+            orgId = farm.getOrgId();
+        }
+        
         return RespHelper.or500(doctorWarehouseItemOrgReadService.findByOrgId(orgId)).stream().map(DoctorBasicMaterial::getId).collect(Collectors.toList());
     }
 

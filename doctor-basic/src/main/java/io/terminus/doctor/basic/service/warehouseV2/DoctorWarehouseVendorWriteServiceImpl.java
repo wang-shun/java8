@@ -90,13 +90,16 @@ public class DoctorWarehouseVendorWriteServiceImpl implements DoctorWarehouseVen
     @Transactional
     public Response<Boolean> boundToOrg(String vendorIds, Long orgId) {
 
+        if (null == vendorIds)
+            return Response.ok(true);
+
         doctorWarehouseVendorOrgDao.deleteByOrg(orgId);
 
         for (String id : Arrays.stream(vendorIds.split(",")).collect(Collectors.toSet())) { //过滤潜在重复的内容
 
             if (StringUtils.isBlank(id))
                 continue;
-            
+
             if (!NumberUtils.isNumber(id))
                 throw new InvalidException("warehouse.vendor.id.not.number", id);
 
