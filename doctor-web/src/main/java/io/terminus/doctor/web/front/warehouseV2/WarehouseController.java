@@ -334,6 +334,8 @@ public class WarehouseController {
                 WarehouseMaterialHandleType.IN,
                 WarehouseMaterialHandleType.INVENTORY_PROFIT,
                 WarehouseMaterialHandleType.INVENTORY_DEFICIT,
+                WarehouseMaterialHandleType.FORMULA_IN,
+                WarehouseMaterialHandleType.FORMULA_OUT,
                 WarehouseMaterialHandleType.OUT,
                 WarehouseMaterialHandleType.TRANSFER_IN,
                 WarehouseMaterialHandleType.TRANSFER_OUT);
@@ -364,10 +366,18 @@ public class WarehouseController {
                 vo.setTransferOutAmount(0);
                 vo.setTransferOutQuantity(new BigDecimal(0));
             } else {
-                vo.setInAmount(warehouseStatistics.getIn().getAmount() + warehouseStatistics.getInventoryProfit().getAmount());
-                vo.setInQuantity(warehouseStatistics.getIn().getQuantity().add(warehouseStatistics.getInventoryProfit().getQuantity()));
-                vo.setOutAmount(warehouseStatistics.getOut().getAmount() + warehouseStatistics.getInventoryDeficit().getAmount());
-                vo.setOutQuantity(warehouseStatistics.getOut().getQuantity().add(warehouseStatistics.getInventoryDeficit().getQuantity()));
+                vo.setInAmount(warehouseStatistics.getIn().getAmount()
+                        + warehouseStatistics.getInventoryProfit().getAmount()
+                        + warehouseStatistics.getFormulaIn().getAmount());
+                vo.setInQuantity(warehouseStatistics.getIn().getQuantity()
+                        .add(warehouseStatistics.getInventoryProfit().getQuantity())
+                        .add(warehouseStatistics.getFormulaIn().getQuantity()));
+                vo.setOutAmount(warehouseStatistics.getOut().getAmount()
+                        + warehouseStatistics.getInventoryDeficit().getAmount()
+                        + warehouseStatistics.getFormulaOut().getAmount());
+                vo.setOutQuantity(warehouseStatistics.getOut().getQuantity()
+                        .add(warehouseStatistics.getInventoryDeficit().getQuantity())
+                        .add(warehouseStatistics.getFormulaOut().getQuantity()));
                 vo.setTransferOutAmount(warehouseStatistics.getTransferOut().getAmount());
                 vo.setTransferOutQuantity(warehouseStatistics.getTransferOut().getQuantity());
                 vo.setTransferInAmount(warehouseStatistics.getTransferIn().getAmount());
@@ -527,7 +537,14 @@ public class WarehouseController {
     public WarehouseStatisticsVo warehouseInAndOut(@PathVariable Long id,
                                                    @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
-        Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByWarehouse(id, date, WarehouseMaterialHandleType.IN, WarehouseMaterialHandleType.OUT);
+        Response<WarehouseStockStatisticsDto> statisticsResponse =
+                doctorWarehouseReportReadService.countMaterialHandleByWarehouse(id, date,
+                        WarehouseMaterialHandleType.IN,
+                        WarehouseMaterialHandleType.OUT,
+                        WarehouseMaterialHandleType.FORMULA_IN,
+                        WarehouseMaterialHandleType.FORMULA_OUT,
+                        WarehouseMaterialHandleType.INVENTORY_DEFICIT,
+                        WarehouseMaterialHandleType.INVENTORY_PROFIT);
         if (!statisticsResponse.isSuccess())
             throw new JsonResponseException(statisticsResponse.getError());
 
@@ -541,10 +558,20 @@ public class WarehouseController {
                 .id(id)
                 .balanceQuantity(amountAndQuantityResponse.getResult().getQuantity())
                 .balanceAmount(amountAndQuantityResponse.getResult().getAmount())
-                .inAmount(statisticsResponse.getResult().getIn().getAmount())
-                .inQuantity(statisticsResponse.getResult().getIn().getQuantity())
-                .outAmount(statisticsResponse.getResult().getOut().getAmount())
-                .outQuantity(statisticsResponse.getResult().getOut().getQuantity())
+                
+                .inAmount(statisticsResponse.getResult().getIn().getAmount()
+                        + statisticsResponse.getResult().getFormulaIn().getAmount()
+                        + statisticsResponse.getResult().getInventoryProfit().getAmount())
+                .inQuantity(statisticsResponse.getResult().getIn().getQuantity()
+                        .add(statisticsResponse.getResult().getFormulaIn().getQuantity())
+                        .add(statisticsResponse.getResult().getInventoryProfit().getQuantity()))
+
+                .outAmount(statisticsResponse.getResult().getOut().getAmount() +
+                        statisticsResponse.getResult().getFormulaOut().getAmount() +
+                        statisticsResponse.getResult().getInventoryDeficit().getAmount())
+                .outQuantity(statisticsResponse.getResult().getOut().getQuantity()
+                        .add(statisticsResponse.getResult().getFormulaOut().getQuantity())
+                        .add(statisticsResponse.getResult().getInventoryDeficit().getQuantity()))
                 .build();
     }
 
