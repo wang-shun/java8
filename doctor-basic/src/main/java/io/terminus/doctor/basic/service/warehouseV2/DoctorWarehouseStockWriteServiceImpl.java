@@ -141,12 +141,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
         List<WarehouseStockInDto.WarehouseStockInDetailDto> needProcessDetails;
         if (stockIn.getStockHandleId() != null)
-            needProcessDetails = doctorWarehouseStockHandleManager.clean(stockIn, stockIn.getDetails(), context.getWareHouse(), new DoctorWarehouseStockHandleManager.MaterialHandleComparator<WarehouseStockInDto.WarehouseStockInDetailDto>() {
-                @Override
-                public boolean same(WarehouseStockInDto.WarehouseStockInDetailDto source, DoctorWarehouseMaterialHandle target) {
-                    return source.getQuantity().compareTo(target.getQuantity()) == 0 && source.getUnitPrice().equals(target.getUnitPrice());
-                }
-            });
+            needProcessDetails = doctorWarehouseStockHandleManager.clean(stockIn, stockIn.getDetails(), context.getWareHouse());
         else
             needProcessDetails = stockIn.getDetails();
 
@@ -202,17 +197,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
         boolean updateMode = stockInventory.getStockHandleId() != null;
         if (updateMode) {
-            needProcessDetails = doctorWarehouseStockHandleManager.clean(stockInventory, stockInventory.getDetails(), context.getWareHouse(), new DoctorWarehouseStockHandleManager.MaterialHandleComparator<WarehouseStockInventoryDto.WarehouseStockInventoryDetail>() {
-                @Override
-                public boolean same(WarehouseStockInventoryDto.WarehouseStockInventoryDetail source, DoctorWarehouseMaterialHandle target) {
-                    BigDecimal oldQuantity;
-                    if (target.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))
-                        oldQuantity = target.getBeforeInventoryQuantity().add(target.getQuantity());
-                    else
-                        oldQuantity = target.getBeforeInventoryQuantity().subtract(target.getQuantity());
-                    return source.getQuantity().compareTo(oldQuantity) == 0;
-                }
-            });
+            needProcessDetails = doctorWarehouseStockHandleManager.clean(stockInventory, stockInventory.getDetails(), context.getWareHouse());
         } else
             needProcessDetails = stockInventory.getDetails();
 
@@ -341,8 +326,6 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
         }
 
-//        doctorWarehouseStockHandleManager.delete(stockHandle,stockInventory);
-
         return Response.ok(stockHandle.getId());
     }
 
@@ -357,12 +340,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
         List<WarehouseStockTransferDto.WarehouseStockTransferDetail> needProcessDetails;
         if (stockTransfer.getStockHandleId() != null)
-            needProcessDetails = doctorWarehouseStockHandleManager.clean(stockTransfer, stockTransfer.getDetails(), context.getWareHouse(), new DoctorWarehouseStockHandleManager.MaterialHandleComparator<WarehouseStockTransferDto.WarehouseStockTransferDetail>() {
-                @Override
-                public boolean same(WarehouseStockTransferDto.WarehouseStockTransferDetail source, DoctorWarehouseMaterialHandle target) {
-                    return source.getQuantity().compareTo(target.getQuantity()) == 0 && source.getTransferInWarehouseId().equals(target.getOtherTransferHandleId());
-                }
-            });
+            needProcessDetails = doctorWarehouseStockHandleManager.clean(stockTransfer, stockTransfer.getDetails(), context.getWareHouse());
         else
             needProcessDetails = stockTransfer.getDetails();
 
@@ -485,13 +463,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockOut, context.getWareHouse(), WarehouseMaterialHandleType.OUT);
         List<WarehouseStockOutDto.WarehouseStockOutDetail> needProcessDetails;
         if (stockOut.getStockHandleId() != null)
-            doctorWarehouseStockHandleManager.clean(stockOut, stockOut.getDetails(), context.getWareHouse(), new DoctorWarehouseStockHandleManager.MaterialHandleComparator<WarehouseStockOutDto.WarehouseStockOutDetail>() {
-                @Override
-                public boolean same(WarehouseStockOutDto.WarehouseStockOutDetail source, DoctorWarehouseMaterialHandle target) {
-                    //无论改了什么全部铲掉重做
-                    return false;
-                }
-            });
+            doctorWarehouseStockHandleManager.clean(stockOut, stockOut.getDetails(), context.getWareHouse());
         else
             needProcessDetails = stockOut.getDetails();
 

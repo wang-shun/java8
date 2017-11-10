@@ -87,6 +87,18 @@ public class DoctorWarehouseStockHandleManager {
         return handle;
     }
 
+
+    public <T extends AbstractWarehouseStockDetail> List<T> clean(AbstractWarehouseStockDto stockDto, List<T> stockDetails, DoctorWareHouse wareHouse) {
+        doctorWarehouseMaterialHandleDao
+                .findByStockHandle(stockDto.getStockHandleId())
+                .forEach(mh -> {
+                    doctorWarehouseMaterialHandleManager.delete(mh);
+                });
+
+        return stockDetails;
+    }
+
+    @Deprecated//太复杂了算了
     public <T extends AbstractWarehouseStockDetail> List<T> clean(AbstractWarehouseStockDto stockDto, List<T> stockDetails, DoctorWareHouse wareHouse, MaterialHandleComparator<T> keyComparator) {
 
         List<DoctorWarehouseMaterialHandle> oldSkuHandle = doctorWarehouseMaterialHandleDao
@@ -98,46 +110,73 @@ public class DoctorWarehouseStockHandleManager {
 
         //过滤一下，不是所有的都更改了
         List<T> needUpdateDetails = new ArrayList<>();
-        stockDetails.stream().forEach(d -> {
-            if (oldSkuHandleMap.containsKey(d.getMaterialId())) {
-                List<DoctorWarehouseMaterialHandle> oldMaterialHandles = oldSkuHandleMap.get(d.getMaterialId());
-                if (!oldMaterialHandles.isEmpty()) {
-                    log.debug("find same sku handle record:{},start compare", d.getMaterialId());
-//                    BigDecimal oldQuantity;
-//                    if (oldMaterialHandles.get(0).getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))
-//                        oldQuantity = oldMaterialHandles.get(0).getBeforeInventoryQuantity().add(oldMaterialHandles.get(0).getQuantity());
-//                    else if (oldMaterialHandles.get(0).getType().equals(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue()))
-//                        oldQuantity = oldMaterialHandles.get(0).getBeforeInventoryQuantity().subtract(oldMaterialHandles.get(0).getQuantity());
-//                    else oldQuantity = oldMaterialHandles.get(0).getQuantity();
+        Map<Long/*skuID*/, List<T>> detailMaps = stockDetails.stream().collect(Collectors.groupingBy(AbstractWarehouseStockDetail::getMaterialId));
+        Map<Long/**skuID*/, List<T>> coldBench = new HashMap<>();
 
-                    if (keyComparator.same(d, oldMaterialHandles.get(0))) {
-                        if (!Objects.equals(oldMaterialHandles.get(0).getRemark(), d.getRemark())) {
-                            oldMaterialHandles.get(0).setRemark(d.getRemark());
-                            doctorWarehouseMaterialHandleDao.update(oldMaterialHandles.get(0));
-                        } else
-                            log.debug("new sku handle match old same quantity[{}] and remark,do not need update", d.getQuantity());
+        for (Long skuId : detailMaps.keySet()) {
+            if (!oldSkuHandleMap.containsKey(skuId))
+                needUpdateDetails.addAll(detailMaps.get(skuId));
+            else {
+                List<DoctorWarehouseMaterialHandle> oldMaterialHandles = oldSkuHandleMap.get(skuId);
+                if (!oldMaterialHandles.isEmpty()) {
+                    log.debug("find same sku handle record:{},start compare", skuId);
+                    //有可能有多条
+                    for (T detail : detailMaps.get(skuId)) {
+                        for (DoctorWarehouseMaterialHandle oldHandle : oldMaterialHandles) {//id=1,3,3
+                            if (keyComparator.same(detail, oldHandle)) {
+
+                                if (!coldBench.containsKey(skuId)) {
+                                    //TODO 如果remark相同就有问题
+
+                                    List<T> details = new ArrayList<>();
+                                    details.add(detail);
+                                    coldBench.put(skuId, details);
+                                } else
+                                    coldBench.get(skuId).add(detail);
+                            } else {
+                                needUpdateDetails.add(detail);
+
+                                doctorWarehouseMaterialHandleManager.delete(oldHandle);
+                                needUpdateDetails.addAll(coldBench.get(skuId));//冷板凳上的需要重新上场
+                                coldBench.remove(skuId);
+                            }
+                        }
                     }
 
-//                    if (oldMaterialHandles.get(0).getType().equals(WarehouseMaterialHandleType.IN.getValue())) {
-//                        if (oldQuantity.compareTo(d.getQuantity()) == 0 && oldMaterialHandles.get(0).getUnitPrice().equals())
-//                    }
+                    coldBench.forEach((id, d) -> {
+                        needUpdateDetails.add(d.get(0));
+                    });
+                }
+            }
+        }
+        //id=1,3,4  o  id=1,3,4    o    id=1,3,4    o   id=1,3,4    o
+        //id=2,3,4  o  id=2,3,4    o    id=2,3,4    o   id=1,2,5    o
+        //                                              id=2,3,5    o
 
-//                    if (oldQuantity.compareTo(d.getQuantity()) == 0) {
+        //id=1,3,4  x  id=3,3,4    o    id=1,3,5    o   id=2,3,5    x
+        //id=2,3,4  x  id=3,3,5    o    id=2,3,4    x   id=1,4,4    o
+        //id=1,2,4  o  id=2,3,4    x    id=1,4,4    o
+
+//        stockDetails.stream().forEach(d -> {
+//            if (oldSkuHandleMap.containsKey(d.getMaterialId())) {
+//                List<DoctorWarehouseMaterialHandle> oldMaterialHandles = oldSkuHandleMap.get(d.getMaterialId());
+//                if (!oldMaterialHandles.isEmpty()) {
+//                    log.debug("find same sku handle record:{},start compare", d.getMaterialId());
+//                    if (keyComparator.same(d, oldMaterialHandles.get(0))) {
 //                        if (!Objects.equals(oldMaterialHandles.get(0).getRemark(), d.getRemark())) {
 //                            oldMaterialHandles.get(0).setRemark(d.getRemark());
 //                            doctorWarehouseMaterialHandleDao.update(oldMaterialHandles.get(0));
 //                        } else
-//                            log.debug("new sku handle match old same quantity[{}] and remark,do not need update", oldQuantity);
+//                            log.debug("new sku handle match old same quantity[{}] and remark,do not need update", d.getQuantity());
+//                    } else {
+//                        doctorWarehouseMaterialHandleManager.delete(oldMaterialHandles.get(0));
+//                        needUpdateDetails.add(d);
 //                    }
-                    else {
-                        doctorWarehouseMaterialHandleManager.delete(oldMaterialHandles.get(0));
-                        needUpdateDetails.add(d);
-                    }
-                }
-            } else
-                //新增的
-                needUpdateDetails.add(d);
-        });
+//                }
+//            } else
+//                //新增的
+//                needUpdateDetails.add(d);
+//        });
 
         //删除的
         for (DoctorWarehouseMaterialHandle materialHandle : oldSkuHandle) {
@@ -148,22 +187,16 @@ public class DoctorWarehouseStockHandleManager {
                     break;
                 }
             }
-            if (!include) {
+            if (!include) { //如果单据中原有的明细未包含在请求参数中，表明这条明细已被删除
                 doctorWarehouseMaterialHandleManager.delete(materialHandle);
             }
         }
-
-        //盘点不需要检查库存
-//        needUpdateDetails.stream().forEach(d -> {
-//            DoctorWarehouseStock stock = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(d.getMaterialId(), wareHouse.getId())
-//                    .orElseThrow(() -> new InvalidException(""));
-//
-//        });
 
         return needUpdateDetails;
     }
 
 
+    @Deprecated
     public void delete(DoctorWarehouseStockHandle stockHandle, AbstractWarehouseStockDto stockDto) {
 
         if (null != stockDto.getStockHandleId()) {
@@ -183,6 +216,7 @@ public class DoctorWarehouseStockHandleManager {
     }
 
 
+    @Deprecated
     public interface MaterialHandleComparator<T> {
 
         boolean same(T source, DoctorWarehouseMaterialHandle target);
