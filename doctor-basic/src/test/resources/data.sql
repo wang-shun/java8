@@ -15,3 +15,7 @@ INSERT INTO `doctor_ware_houses` (`id`,`ware_house_name`,`farm_id`,`farm_name`,`
 INSERT INTO `doctor_ware_houses` (`id`,`ware_house_name`,`farm_id`,`farm_name`,`manager_id`,`manager_name`,`address`,`type`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`) VALUES (190,'原料仓库',407,'演示猪场八区',12030,'李咏','',2,NULL,91,'lyy',NULL,NULL,'2017-05-15 11:49:42','2017-05-15 11:49:42');
 INSERT INTO `doctor_ware_houses` (`id`,`ware_house_name`,`farm_id`,`farm_name`,`manager_id`,`manager_name`,`address`,`type`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`) VALUES (200,'仓库11',407,'演示猪场八区',1,NULL,NULL,3,NULL,10390,'lxzc',NULL,NULL,'2017-08-23 19:17:40','2017-08-23 19:17:40');
 INSERT INTO `doctor_ware_houses` (`id`,`ware_house_name`,`farm_id`,`farm_name`,`manager_id`,`manager_name`,`address`,`type`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`) VALUES (201,'原料仓库2',407,'演示猪场八区',12030,'李咏',NULL,2,NULL,91,'lyy',NULL,NULL,'2017-08-23 19:17:40','2017-08-23 19:17:40');
+
+
+insert into `doctor_warehouse_stock`(`id`,`warehouse_id`,`warehouse_name`,`warehouse_type`,`farm_id`,`sku_id`,`sku_name`,`quantity`,`created_at`,`updated_at`)values(1,1,'仓库',1,1,1,'sku',10,'2017-08-23 19:17:40','2017-08-23 19:17:40');
+insert into `doctor_warehouse_stock`(`id`,`warehouse_id`,`warehouse_name`,`warehouse_type`,`farm_id`,`sku_id`,`sku_name`,`quantity`,`created_at`,`updated_at`)values(2,1,'仓库',1,1,2,'sku2',0,'2017-08-23 19:17:40','2017-08-23 19:17:40');
