@@ -64,6 +64,7 @@
             <if test="quantity != null">AND `quantity` = #{quantity}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+            <if test="effective">AND <![CDATA[quantity > 0]]>  </if>
             <if test="skuNameLike != null">AND `sku_name` like  CONCAT('%',#{skuNameLike},'%')</if>
             <if test="skuIds != null and skuIds.size() > 0">
                 AND
