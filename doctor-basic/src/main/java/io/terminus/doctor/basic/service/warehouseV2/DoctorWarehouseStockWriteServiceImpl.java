@@ -23,6 +23,7 @@ import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorFarmBasicReadService;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.RespHelper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.HashedMap;
@@ -117,8 +118,10 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     public Response<Boolean> delete(Long id) {
         try {
 
-
             DoctorWarehouseStock stock = doctorWarehouseStockDao.findById(id);
+
+            if (null == stock)
+                return Response.fail("stock.not.found");
 
             if (stock.getQuantity().compareTo(new BigDecimal(0)) > 0)
                 return Response.fail("stock.not.empty");
