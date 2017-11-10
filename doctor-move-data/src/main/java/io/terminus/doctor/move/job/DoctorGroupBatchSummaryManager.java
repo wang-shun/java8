@@ -50,8 +50,7 @@ public class DoctorGroupBatchSummaryManager {
 
     public void createAllGroupSummary() {
         log.info("create all group summary starting");
-//        List<DoctorGroup> groups = doctorGroupDao.listAll();
-        List<DoctorGroup> groups = Collections.singletonList(doctorGroupDao.findById(7380));
+        List<DoctorGroup> groups = doctorGroupDao.listAll();
         groups.forEach(this::createGroupSummary);
         log.info("create all group summary end");
     }
