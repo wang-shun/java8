@@ -23,6 +23,8 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.front.warehouseV2.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -74,7 +76,8 @@ public class ReportController {
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
     @RpcConsumer
     private DoctorBasicReadService doctorBasicReadService;
-
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
     /**
      * 仓库报表
      *
@@ -331,7 +334,8 @@ public class ReportController {
     @RequestMapping(method = RequestMethod.GET, value = "material")
     @JsonView(WarehouseMaterialHandleVo.MaterialHandleReportView.class)
     public List<WarehouseMaterialHandleVo> materialHandleReport(@RequestParam Long warehouseId,
-                                                                @RequestParam Long orgId,
+                                                                @RequestParam(required = false) Long orgId,
+                                                                @RequestParam(required = false) Long farmId,
                                                                 @RequestParam(required = false) String materialName,
                                                                 @RequestParam(required = false) Integer type,
                                                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
@@ -356,6 +360,16 @@ public class ReportController {
         }
 
         if (StringUtils.isNotBlank(materialName)) {
+
+            if (null == orgId && null == farmId)
+                throw new JsonResponseException("warehouse.sku.org.id.or.farm.id.not.null");
+            if (null == orgId) {
+                DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+                if (null == farm)
+                    throw new JsonResponseException("farm.not.found");
+                orgId = farm.getOrgId();
+            }
+
             Map<String, Object> skuParams = new HashMap<>();
             skuParams.put("orgId", orgId);
             skuParams.put("status", WarehouseSkuStatus.NORMAL.getValue());
