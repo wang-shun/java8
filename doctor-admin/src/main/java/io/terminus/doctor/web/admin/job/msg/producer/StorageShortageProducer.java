@@ -1,8 +1,7 @@
 package io.terminus.doctor.web.admin.job.msg.producer;
 
 import com.google.api.client.util.Maps;
-import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.dto.DoctorMaterialConsumeAvgDto;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
@@ -22,13 +21,14 @@ import io.terminus.doctor.event.model.DoctorMessage;
 import io.terminus.doctor.event.model.DoctorMessageRuleRole;
 import io.terminus.doctor.web.admin.job.msg.dto.DoctorMessageInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.xmlbeans.impl.jam.internal.parser.ParamStructPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -45,16 +45,16 @@ public class StorageShortageProducer extends AbstractJobProducer {
     @Autowired
     private DoctorMaterialConsumeAvgReadService doctorMaterialConsumeAvgReadService;
 
-    @Autowired
+    @RpcConsumer
     private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
 
-    @Autowired
+    @RpcConsumer
     private DoctorWarehouseStockReadService doctorWarehouseStockReadService;
 
-    @Autowired
+    @RpcConsumer
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
 
-    @Autowired
+    @RpcConsumer
     private DoctorWareHouseReadService doctorWareHouseReadService;
 
     public StorageShortageProducer() {
