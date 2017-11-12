@@ -99,7 +99,7 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         if (!existedSku.isEmpty()) {
             if (existedSku.size() > 1)
                 throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getCode());
-            if (existedSku.size() == 1 && existedSku.get(0).getId() != doctorWarehouseSku.getId())
+            if (existedSku.size() == 1 && !existedSku.get(0).getId().equals(doctorWarehouseSku.getId()))
                 throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getCode());
         }
 
