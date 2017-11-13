@@ -403,8 +403,8 @@ public class StockHandleController {
                         row.createCell(1).setCellValue(vo.getMaterialCode());
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
-                        row.createCell(5).setCellValue(quantity.doubleValue());
-                        row.createCell(6).setCellValue(vo.getQuantity().doubleValue());
+                        row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
+                        row.createCell(6).setCellValue(quantity.doubleValue());
                         row.createCell(7).setCellValue(vo.getRemark());
                     }
                 } else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.TRANSFER.getValue())) {
