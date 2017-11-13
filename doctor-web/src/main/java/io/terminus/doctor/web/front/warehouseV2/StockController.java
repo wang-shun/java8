@@ -224,9 +224,6 @@ public class StockController {
                 return Paging.empty();
             params.put("skuIds", skuIds);
         }
-//        if (StringUtils.isNotBlank(materialName)) {
-//            params.put("materialNameLike", materialName);
-//        }
 
         Response<Paging<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.paging(pageNo, pageSize, params);
 
@@ -244,12 +241,7 @@ public class StockController {
         List<WarehouseStockStatisticsVo> vos = new ArrayList<>(stockResponse.getResult().getData().size());
         stockResponse.getResult().getData().forEach(stock -> {
 
-//            if (!skuMap.containsKey(stock.getSkuId()))
-//                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
-
-            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getSkuId());
-            if (!balanceResponse.isSuccess())
-                throw new JsonResponseException(balanceResponse.getError());
+            AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getSkuId()));
             Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterial(warehouseId, stock.getSkuId(), now,
                     WarehouseMaterialHandleType.IN,
                     WarehouseMaterialHandleType.OUT,
@@ -261,8 +253,6 @@ public class StockController {
                     WarehouseMaterialHandleType.FORMULA_OUT);
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
-//            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
-
 
             DoctorWarehouseSku sku = skuMap.containsKey(stock.getSkuId()) ? skuMap.get(stock.getSkuId()).get(0) : null;
 
@@ -312,8 +302,9 @@ public class StockController {
                     .add(statisticsResponse.getResult().getTransferOut().getQuantity())
                     .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
 
-            vo.setBalanceQuantity(balanceResponse.getResult().getQuantity());
-            vo.setBalanceAmount(balanceResponse.getResult().getAmount());
+//            vo.setBalanceQuantity(balance.getQuantity());
+            vo.setBalanceQuantity(stock.getQuantity());
+            vo.setBalanceAmount(balance.getAmount());
             vos.add(vo);
         });
         result.setData(vos);

@@ -253,10 +253,6 @@ public class ReportController {
         List<WarehouseMonthlyReportVo> report = new ArrayList<>();
         for (DoctorWarehouseStock stock : stocksResponse.getResult()) {
 
-//            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getSkuId(), null);
-//            if (!balanceResponse.isSuccess())
-//                throw new JsonResponseException(balanceResponse.getError());
-
             AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getSkuId(), date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1));
 
             Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterialVendor(warehouseId, stock.getSkuId(), null, date,
@@ -272,10 +268,6 @@ public class ReportController {
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
 
-//            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
-//            if (!skuMap.containsKey(stock.getSkuId()))
-//                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
-//            DoctorWarehouseSku sku = skuMap.get(stock.getSkuId()).get(0);
 
             WarehouseMonthlyReportVo vo = new WarehouseMonthlyReportVo();
             vo.setMaterialName(stock.getSkuName());
@@ -292,6 +284,7 @@ public class ReportController {
 
             vo.setBalanceAmount(balance.getAmount());
             vo.setBalanceQuantity(balance.getQuantity());
+//            vo.setBalanceQuantity(stock.getQuantity());
 
             vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
                     + statisticsResponse.getResult().getInventoryProfit().getAmount()
@@ -311,7 +304,8 @@ public class ReportController {
                     .add(statisticsResponse.getResult().getTransferOut().getQuantity())
                     .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
 
-            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getSkuId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
+            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService
+                    .countMaterialBalance(warehouseId, stock.getSkuId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
             vo.setInitialAmount(initialBalance.getAmount());
             vo.setInitialQuantity(initialBalance.getQuantity());
 
