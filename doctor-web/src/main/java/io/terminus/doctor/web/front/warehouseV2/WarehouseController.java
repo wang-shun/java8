@@ -325,12 +325,10 @@ public class WarehouseController {
     @RequestMapping(method = RequestMethod.GET, value = "farm/{farmId}")
     public List<FarmWarehouseVo> query(@PathVariable Long farmId) {
 
-        Response<List<DoctorWareHouse>> warehouseResponse = doctorWarehouseReaderService.findByFarmId(farmId);
-        if (!warehouseResponse.isSuccess())
-            throw new JsonResponseException(warehouseResponse.getError());
+        List<DoctorWareHouse> wareHouses = RespHelper.or500(doctorWarehouseReaderService.findByFarmId(farmId));
 
         Calendar now = Calendar.getInstance();
-        Response<Map<Long, WarehouseStockStatisticsDto>> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByFarm(farmId, null, now,
+        Map<Long, WarehouseStockStatisticsDto> statistics = RespHelper.or500(doctorWarehouseReportReadService.countMaterialHandleByFarm(farmId, null, now,
                 WarehouseMaterialHandleType.IN,
                 WarehouseMaterialHandleType.INVENTORY_PROFIT,
                 WarehouseMaterialHandleType.INVENTORY_DEFICIT,
@@ -338,16 +336,16 @@ public class WarehouseController {
                 WarehouseMaterialHandleType.FORMULA_OUT,
                 WarehouseMaterialHandleType.OUT,
                 WarehouseMaterialHandleType.TRANSFER_IN,
-                WarehouseMaterialHandleType.TRANSFER_OUT);
-        if (!statisticsResponse.isSuccess())
-            throw new JsonResponseException(statisticsResponse.getError());
+                WarehouseMaterialHandleType.TRANSFER_OUT));
 
-        Response<Map<Long, AmountAndQuantityDto>> warehouseBalanceResponse = doctorWarehouseReportReadService.countEachWarehouseBalance(farmId, null);
-        if (!warehouseBalanceResponse.isSuccess())
-            throw new JsonResponseException(warehouseBalanceResponse.getError());
+        Map<Long/*warehouseId*/, AmountAndQuantityDto> warehouseBalance = RespHelper.or500(doctorWarehouseReportReadService.countEachWarehouseBalance(farmId, null));
+
+        Map<Long/*warehouseId*/, List<DoctorWarehouseStock>> warehouseStocks = RespHelper.or500(doctorWarehouseStockReadService.list(DoctorWarehouseStock.builder()
+                .farmId(farmId)
+                .build())).stream().collect(Collectors.groupingBy(DoctorWarehouseStock::getWarehouseId));
 
         List<FarmWarehouseVo> vos = new ArrayList<>();
-        warehouseResponse.getResult().forEach(wareHouse -> {
+        wareHouses.forEach(wareHouse -> {
             FarmWarehouseVo vo = new FarmWarehouseVo();
             vo.setId(wareHouse.getId());
             vo.setName(wareHouse.getWareHouseName());
@@ -355,7 +353,7 @@ public class WarehouseController {
             vo.setManagerName(wareHouse.getManagerName());
             vo.setManagerId(wareHouse.getManagerId());
 
-            WarehouseStockStatisticsDto warehouseStatistics = statisticsResponse.getResult().get(wareHouse.getId());
+            WarehouseStockStatisticsDto warehouseStatistics = statistics.get(wareHouse.getId());
             if (null == warehouseStatistics) {
                 vo.setInAmount(0);
                 vo.setInQuantity(new BigDecimal(0));
@@ -384,19 +382,27 @@ public class WarehouseController {
                 vo.setTransferInQuantity(warehouseStatistics.getTransferIn().getQuantity());
             }
 
-            AmountAndQuantityDto balance = warehouseBalanceResponse.getResult().get(wareHouse.getId());
+            AmountAndQuantityDto balance = warehouseBalance.get(wareHouse.getId());
             if (null == balance) {
-                vo.setBalanceQuantity(new BigDecimal(0));
+//                vo.setBalanceQuantity(new BigDecimal(0));
                 vo.setBalanceAmount(0);
             } else {
                 vo.setBalanceAmount(balance.getAmount());
-                vo.setBalanceQuantity(balance.getQuantity());
+//                vo.setBalanceQuantity(balance.getQuantity());
             }
+
+            List<DoctorWarehouseStock> stocks = warehouseStocks.get(wareHouse.getId());
+            if (null == stocks)
+                vo.setBalanceQuantity(new BigDecimal(0));
+            else
+                vo.setBalanceQuantity(new BigDecimal(stocks.stream().mapToDouble(s -> s.getQuantity().doubleValue()).sum()));
+
             vos.add(vo);
         });
 
         return vos;
     }
+
 
     @RequestMapping(method = RequestMethod.GET, value = "farm/{farmId}/material/statistics")
     public Paging<WarehouseStockStatisticsVo> farmMaterialStatistics(@PathVariable Long farmId,
@@ -517,11 +523,20 @@ public class WarehouseController {
         if (null != applyResponse && !applyResponse.getResult().isEmpty())
             vo.setLastApplyDate(applyResponse.getResult().get(0).getApplyDate());
 
-        Response<AmountAndQuantityDto> amountAndQuantityDtoResponse = doctorWarehouseReaderService.countWarehouseBalance(id);
-        if (!amountAndQuantityDtoResponse.isSuccess())
-            throw new JsonResponseException(amountAndQuantityDtoResponse.getError());
+//        Response<AmountAndQuantityDto> amountAndQuantityDtoResponse = doctorWarehouseReaderService.countWarehouseBalance(id);
+//        if (!amountAndQuantityDtoResponse.isSuccess())
+//            throw new JsonResponseException(amountAndQuantityDtoResponse.getError());
 
-        vo.setBalanceQuantity(amountAndQuantityDtoResponse.getResult().getQuantity());
+//        vo.setBalanceQuantity(amountAndQuantityDtoResponse.getResult().getQuantity());
+
+        vo.setBalanceQuantity(new BigDecimal(
+                RespHelper.or500(
+                        doctorWarehouseStockReadService.list(DoctorWarehouseStock.builder()
+                                .warehouseId(id)
+                                .build()))
+                        .stream()
+                        .mapToDouble(s -> s.getQuantity().doubleValue())
+                        .sum()));
 
         return vo;
     }
@@ -537,41 +552,39 @@ public class WarehouseController {
     public WarehouseStatisticsVo warehouseInAndOut(@PathVariable Long id,
                                                    @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
 
-        Response<WarehouseStockStatisticsDto> statisticsResponse =
-                doctorWarehouseReportReadService.countMaterialHandleByWarehouse(id, date,
+        WarehouseStockStatisticsDto statistics =
+                RespHelper.or500(doctorWarehouseReportReadService.countMaterialHandleByWarehouse(id, date,
                         WarehouseMaterialHandleType.IN,
                         WarehouseMaterialHandleType.OUT,
                         WarehouseMaterialHandleType.FORMULA_IN,
                         WarehouseMaterialHandleType.FORMULA_OUT,
                         WarehouseMaterialHandleType.INVENTORY_DEFICIT,
-                        WarehouseMaterialHandleType.INVENTORY_PROFIT);
-        if (!statisticsResponse.isSuccess())
-            throw new JsonResponseException(statisticsResponse.getError());
+                        WarehouseMaterialHandleType.INVENTORY_PROFIT));
 
+        AmountAndQuantityDto amountAndQuantity = RespHelper.or500(doctorWarehouseReaderService.countWarehouseBalance(id));
 
-        Response<AmountAndQuantityDto> amountAndQuantityResponse = doctorWarehouseReaderService.countWarehouseBalance(id);
-        if (!amountAndQuantityResponse.isSuccess())
-            throw new JsonResponseException(amountAndQuantityResponse.getError());
-
+        double quantity = RespHelper.or500(doctorWarehouseStockReadService.list(DoctorWarehouseStock.builder()
+                .warehouseId(id)
+                .build())).stream().mapToDouble(s -> s.getQuantity().doubleValue()).sum();
 
         return WarehouseStatisticsVo.builder()
                 .id(id)
-                .balanceQuantity(amountAndQuantityResponse.getResult().getQuantity())
-                .balanceAmount(amountAndQuantityResponse.getResult().getAmount())
-                
-                .inAmount(statisticsResponse.getResult().getIn().getAmount()
-                        + statisticsResponse.getResult().getFormulaIn().getAmount()
-                        + statisticsResponse.getResult().getInventoryProfit().getAmount())
-                .inQuantity(statisticsResponse.getResult().getIn().getQuantity()
-                        .add(statisticsResponse.getResult().getFormulaIn().getQuantity())
-                        .add(statisticsResponse.getResult().getInventoryProfit().getQuantity()))
+//                .balanceQuantity(amountAndQuantity.getQuantity())
+                .balanceAmount(amountAndQuantity.getAmount())
+                .balanceQuantity(new BigDecimal(quantity))
+                .inAmount(statistics.getIn().getAmount()
+                        + statistics.getFormulaIn().getAmount()
+                        + statistics.getInventoryProfit().getAmount())
+                .inQuantity(statistics.getIn().getQuantity()
+                        .add(statistics.getFormulaIn().getQuantity())
+                        .add(statistics.getInventoryProfit().getQuantity()))
 
-                .outAmount(statisticsResponse.getResult().getOut().getAmount() +
-                        statisticsResponse.getResult().getFormulaOut().getAmount() +
-                        statisticsResponse.getResult().getInventoryDeficit().getAmount())
-                .outQuantity(statisticsResponse.getResult().getOut().getQuantity()
-                        .add(statisticsResponse.getResult().getFormulaOut().getQuantity())
-                        .add(statisticsResponse.getResult().getInventoryDeficit().getQuantity()))
+                .outAmount(statistics.getOut().getAmount() +
+                        statistics.getFormulaOut().getAmount() +
+                        statistics.getInventoryDeficit().getAmount())
+                .outQuantity(statistics.getOut().getQuantity()
+                        .add(statistics.getFormulaOut().getQuantity())
+                        .add(statistics.getInventoryDeficit().getQuantity()))
                 .build();
     }
 

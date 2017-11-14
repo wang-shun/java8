@@ -128,6 +128,7 @@ public class StockHandleController {
                             StockHandleVo.Detail detail = new StockHandleVo.Detail();
                             BeanUtils.copyProperties(mh, detail);
 
+
                             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
                             if (null != sku) {
                                 detail.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
