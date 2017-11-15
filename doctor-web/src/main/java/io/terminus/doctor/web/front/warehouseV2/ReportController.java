@@ -559,13 +559,15 @@ public class ReportController {
             params.put("endCloseAt", pigGroupCloseDateEnd);      //关群结束时间
             params.put("farmId", wareHouse.getFarmId());
             pigGroupIds = RespHelper.or500(doctorGroupReadService.findGroup(params)).stream().map(DoctorGroup::getId).collect(Collectors.toList());
+            if (pigGroupIds.isEmpty())
+                return Collections.emptyList();
         }
 
         Map<String, Object> criteria = new HashMap<>();
         criteria.put("warehouseId", warehouseId);
         criteria.put("type", materialType);
         criteria.put("pigBarnId", pigBarnId);
-        if (null != pigGroupIds && !pigGroupIds.isEmpty()) {
+        if (null != pigGroupIds) {
             if (null != pigGroupId) {
                 if (!pigGroupIds.contains(pigGroupId))
                     return Collections.emptyList();
