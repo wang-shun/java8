@@ -114,6 +114,12 @@
                     pigGroupId =#{t}
                 </foreach>
             </if>
+            <if test="groupOrBarn !=null and groupOrBarn=='barn'">
+                AND `pig_group_id` is null
+            </if>
+            <if test="groupOrBarn !=null and groupOrBarn=='group'">
+                AND `pig_group_id` is not null AND `pig_group_id` != -1
+            </if>
         </where>
     </sql>
 
