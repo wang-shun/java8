@@ -34,7 +34,7 @@ public class DoctorWarehouseStockMonthlyManager {
                     .materialId(materialId)
                     .handleYear(handleYear)
                     .handleMonth(handleMonth)
-                    .balanceQuantity(quantity)
+                    .balanceQuantity(add ? quantity : new BigDecimal(0).subtract(quantity))
                     .balacneAmount(amount)
                     .build());
         } else {
