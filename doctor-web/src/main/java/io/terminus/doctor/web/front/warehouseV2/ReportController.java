@@ -29,13 +29,13 @@ import io.terminus.doctor.web.front.warehouseV2.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -78,6 +78,13 @@ public class ReportController {
     private DoctorBasicReadService doctorBasicReadService;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
+
+
+    @InitBinder
+    public void init(WebDataBinder binder) {
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"), true));
+    }
+
     /**
      * 仓库报表
      *
@@ -480,6 +487,7 @@ public class ReportController {
             criteria.put("skuIds", skuIds);
         }
 
+        criteria.put("groupOrBarn", "barn");
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
         if (!applyResponse.isSuccess())
             throw new JsonResponseException(applyResponse.getError());
@@ -530,11 +538,11 @@ public class ReportController {
 
 
         if (null != pigGroupCreateDateStart && null != pigGroupCreateDateEnd
-                && pigGroupCreateDateStart.before(pigGroupCreateDateEnd)) {
+                && pigGroupCreateDateStart.after(pigGroupCreateDateEnd)) {
             throw new JsonResponseException("start.date.after.end.date");
         }
         if (null != pigGroupCloseDateStart && null != pigGroupCloseDateEnd
-                && pigGroupCloseDateStart.before(pigGroupCloseDateEnd))
+                && pigGroupCloseDateStart.after(pigGroupCloseDateEnd))
             throw new JsonResponseException("start.date.after.end.date");
 
         List<Long> pigGroupIds = null;
@@ -544,25 +552,31 @@ public class ReportController {
             if (null == wareHouse)
                 throw new JsonResponseException("warehouse.not.found");
 
-            DoctorGroupSearchDto groupSearchDto = new DoctorGroupSearchDto();
-            groupSearchDto.setStartOpenAt(pigGroupCreateDateStart);
-            groupSearchDto.setEndOpenAt(pigGroupCreateDateEnd);
-            groupSearchDto.setStartCloseAt(pigGroupCloseDateStart);
-            groupSearchDto.setEndCloseAt(pigGroupCloseDateEnd);
-            groupSearchDto.setFarmId(wareHouse.getFarmId());
-            pigGroupIds = RespHelper.or500(doctorGroupReadService.pagingGroup(groupSearchDto, 1, 5000)).getData().stream().map(g -> g.getGroup().getId()).collect(Collectors.toList());
+            Map<String, Object> params = new HashMap<>();
+            params.put("startOpenAt", pigGroupCreateDateStart);  //建群开始时间
+            params.put("endOpenAt", pigGroupCreateDateEnd);      //建群结束时间
+            params.put("startCloseAt", pigGroupCloseDateStart);  //关群开始时间
+            params.put("endCloseAt", pigGroupCloseDateEnd);      //关群结束时间
+            params.put("farmId", wareHouse.getFarmId());
+            pigGroupIds = RespHelper.or500(doctorGroupReadService.findGroup(params)).stream().map(DoctorGroup::getId).collect(Collectors.toList());
         }
 
         Map<String, Object> criteria = new HashMap<>();
-//        if (StringUtils.isNotBlank(materialName))
-//            criteria.put("materialNameLike", materialName);
         criteria.put("warehouseId", warehouseId);
         criteria.put("type", materialType);
         criteria.put("pigBarnId", pigBarnId);
-        if (null != pigGroupIds && !pigGroupIds.isEmpty())
-            criteria.put("pigGroupIds", pigGroupIds);
-        else
+        if (null != pigGroupIds && !pigGroupIds.isEmpty()) {
+            if (null != pigGroupId) {
+                if (!pigGroupIds.contains(pigGroupId))
+                    return Collections.emptyList();
+                else
+                    criteria.put("pigGroupId", pigGroupId);
+            } else
+                criteria.put("pigGroupIds", pigGroupIds);
+        } else if (null != pigGroupId)
             criteria.put("pigGroupId", pigGroupId);
+        else
+            criteria.put("groupOrBarn", "group");
 
         if (StringUtils.isNotBlank(materialName)) {
             Map<String, Object> skuParams = new HashMap<>();
