@@ -348,7 +348,7 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
                 totalTransferOutQuantity = totalTransferOutQuantity.add(quantity);
             } else if (WarehouseMaterialHandleType.FORMULA_IN.getValue() == handle.getType()) {
                 totalFormulaInAmount += amount;
-                totalTransferInQuantity = totalFormulaInQuantity.add(quantity);
+                totalFormulaInQuantity = totalFormulaInQuantity.add(quantity);
             } else if (WarehouseMaterialHandleType.FORMULA_OUT.getValue() == handle.getType()) {
                 totalFormulaOutAmount += amount;
                 totalFormulaOutQuantity = totalFormulaOutQuantity.add(quantity);
