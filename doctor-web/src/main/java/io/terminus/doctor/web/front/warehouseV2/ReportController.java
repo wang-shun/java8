@@ -109,9 +109,10 @@ public class ReportController {
             return Collections.emptyList();
         }
 
-        date.add(Calendar.MONTH, 1); //包含选中的那一月
-        for (int i = 0; i < 6; i++) { //最近六个月
-            date.add(Calendar.MONTH, -1);
+        Map<Long/*warehouseId*/, AmountAndQuantityDto> lastMonthBalance = new HashMap<>();  //上一个月的发生额
+        date.add(Calendar.MONTH, -6);         //从6个月前开始遍历
+        for (int i = 0; i < 6; i++) {                 //最近六个月
+            date.add(Calendar.MONTH, 1);      //往前推
             int month = date.get(Calendar.MONTH) + 1; //默认月份0～11
             int year = date.get(Calendar.YEAR);
 
@@ -134,11 +135,6 @@ public class ReportController {
             if (!inAndOutAmountsResponse.isSuccess())
                 throw new JsonResponseException(inAndOutAmountsResponse.getError());
 
-            //统计猪厂下每个仓库的当前余额
-//            Response<Map<Long, Long>> balanceAmountsResponse = doctorWarehousePurchaseReadService.countWarehouseBalanceAmount(farmId);
-//            if (!balanceAmountsResponse.isSuccess())
-//                throw new JsonResponseException(balanceAmountsResponse.getError());
-
             WarehouseReportVo balanceVo = new WarehouseReportVo();
             balanceVo.setMonthAndType(year + "-" + month + "结余");
 
@@ -153,13 +149,15 @@ public class ReportController {
             List<WarehouseReportVo.WarehouseReportMonthDetail> outDetails = new ArrayList<>(warehouseResponse.getResult().size());
             long totalBalance = 0, totalIn = 0, totalOut = 0;
             for (DoctorWareHouse wareHouse : warehouseResponse.getResult()) {
-//
-//
                 AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), year, month));
+
+
                 balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
-                        .amount(balance.getAmount())
+                        .amount((lastMonthBalance.containsKey(wareHouse.getId()) ? lastMonthBalance.get(wareHouse.getId()).getAmount() : 0) + balance.getAmount())
                         .build());
+
+                lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount(), balance.getQuantity()));
 
                 long inAmount;
                 if (!inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.IN))
@@ -225,10 +223,12 @@ public class ReportController {
             balanceVo.setDetails(balanceDetails);
             inVo.setDetails(inDetails);
             outVo.setDetails(outDetails);
-            reports.add(balanceVo);
-            reports.add(inVo);
+
             reports.add(outVo);
+            reports.add(inVo);
+            reports.add(balanceVo);
         }
+        Collections.reverse(reports);
         return reports;
     }
 
@@ -260,7 +260,10 @@ public class ReportController {
         List<WarehouseMonthlyReportVo> report = new ArrayList<>();
         for (DoctorWarehouseStock stock : stocksResponse.getResult()) {
 
-            AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getSkuId(), date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1));
+            AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService
+                    .countMaterialBalance(warehouseId, stock.getSkuId(), date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1));
+            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService
+                    .countMaterialBalance(warehouseId, stock.getSkuId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
 
             Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterialVendor(warehouseId, stock.getSkuId(), null, date,
                     WarehouseMaterialHandleType.IN,
@@ -289,10 +292,6 @@ public class ReportController {
                 vo.setCode(skuMap.get(stock.getSkuId()).get(0).getCode());
             }
 
-            vo.setBalanceAmount(balance.getAmount());
-            vo.setBalanceQuantity(balance.getQuantity());
-//            vo.setBalanceQuantity(stock.getQuantity());
-
             vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
                     + statisticsResponse.getResult().getInventoryProfit().getAmount()
                     + statisticsResponse.getResult().getTransferIn().getAmount()
@@ -311,19 +310,17 @@ public class ReportController {
                     .add(statisticsResponse.getResult().getTransferOut().getQuantity())
                     .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
 
-            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService
-                    .countMaterialBalance(warehouseId, stock.getSkuId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
             vo.setInitialAmount(initialBalance.getAmount());
             vo.setInitialQuantity(initialBalance.getQuantity());
 
-//            vo.setInQuantity(vo.getBalanceQuantity().add(vo.getOutQuantity()).multiply(vo.getInQuantity()));
+            vo.setBalanceAmount(initialBalance.getAmount() + balance.getAmount());
+            vo.setBalanceQuantity(initialBalance.getQuantity().add(balance.getQuantity()));
 
             report.add(vo);
         }
 
         return report;
     }
-
 
     /**
      * 物料变动明细
