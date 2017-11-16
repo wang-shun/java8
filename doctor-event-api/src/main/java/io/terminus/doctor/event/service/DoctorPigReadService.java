@@ -177,13 +177,13 @@ public interface DoctorPigReadService {
     Response<List<DoctorPigTrack>> queryCurrentStatus(List<Long> pigIds);
 
     /**
-     * 模糊搜索pigCode猪场下符合
-     * @param farmId 猪场id
+     * 模糊搜索pigCode猪舍下符合
+     * @param barnId 猪舍id
      * @param name 模糊搜索字段
      * @param count 返回前count
      * @return
      */
-    Response<List<DoctorPig>> suggestSowPig(Long farmId, String name, Integer count);
+    Response<List<DoctorPig>> suggestSowPig(Long barnId, String name, Integer count);
 
     /**
      * 根据pigId获取物联网相关猪信息

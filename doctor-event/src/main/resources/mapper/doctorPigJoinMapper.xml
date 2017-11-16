@@ -118,4 +118,13 @@
         AND pig_type = 2
         AND is_removal = 0
     </select>
+
+    <select id="suggestSowPig" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorPig">
+        SELECT a.id, a.pig_code as pigCode
+        FROM doctor_pigs a left join doctor_pig_tracks b on a.id = b.pig_id
+        WHERE b.current_barn_id = #{barnId} AND a.is_removal = 0 AND a.pig_type = 1
+        <if test="name != null">AND `pig_code` like concat('%', #{name}, '%')</if>
+        ORDER BY instr(`pig_code`, #{name}) ASC, length(`pig_code`) ASC, `pig_code` ASC
+        limit #{count}
+    </select>
 </mapper>

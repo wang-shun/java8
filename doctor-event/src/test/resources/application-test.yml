@@ -15,10 +15,6 @@ mybatis:
 search:
   host: localhost
   port: 9200
-zookeeper:
-  host: 101.201.44.35
-  port: 2181
-  zkTopic: pig.doctor.topic
 
 zookeeper:
   host: 127.0.0.1

@@ -93,11 +93,7 @@ import java.util.Map;
 @Configuration
 @EnableAutoConfiguration(exclude = {DubboBaseAutoConfiguration.class})
 @Import({MessageAutoConfig.class, DoctorCommonConfiguration.class})
-<<<<<<< HEAD
 @ComponentScan({"io.terminus.doctor.event.*"})
-=======
-@ComponentScan(basePackages = {"io.terminus.doctor.event.*"})
->>>>>>> develop
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class ServiceConfiguration {
     @Bean
@@ -151,7 +147,6 @@ public class ServiceConfiguration {
         eventHandlerMap.put(PigEvent.DISEASE.getKey(), doctorDiseaseHandler);
         eventHandlerMap.put(PigEvent.REMOVAL.getKey(), doctorRemovalHandler);
         eventHandlerMap.put(PigEvent.VACCINATION.getKey(), doctorVaccinationHandler);
-<<<<<<< HEAD
 
         DoctorPigEventHandlers doctorEventHandlers = new DoctorPigEventHandlers();
         doctorEventHandlers.setEventHandlerMap(eventHandlerMap);
@@ -259,115 +254,6 @@ public class ServiceConfiguration {
         return modifyGroupEventHandlers;
     }
 
-=======
-
-        DoctorPigEventHandlers doctorEventHandlers = new DoctorPigEventHandlers();
-        doctorEventHandlers.setEventHandlerMap(eventHandlerMap);
-        return doctorEventHandlers;
-    }
-
-    @Bean
-    public DoctorGroupEventHandlers doctorGroupEventHandlers(DoctorAntiepidemicGroupEventHandler doctorAntiepidemicGroupEventHandler,
-                                                             DoctorChangeGroupEventHandler doctorChangeGroupEventHandler,
-                                                             DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
-                                                             DoctorDiseaseGroupEventHandler doctorDiseaseGroupEventHandler,
-                                                             DoctorLiveStockGroupEventHandler doctorLiveStockGroupEventHandler,
-                                                             DoctorMoveInGroupEventHandler doctorMoveInGroupEventHandler,
-                                                             DoctorTransFarmGroupEventHandler doctorTransFarmGroupEventHandler,
-                                                             DoctorTransGroupEventHandler doctorTransGroupEventHandler,
-                                                             DoctorTurnSeedGroupEventHandler doctorTurnSeedGroupEventHandler,
-                                                             DoctorWeanGroupEventHandler doctorWeanGroupEventHandler,
-                                                             DoctorNewGroupEventHandler doctorNewGroupEventHandler){
-        Map<Integer, DoctorGroupEventHandler> handlerMap = Maps.newHashMap();
-        handlerMap.put(GroupEventType.NEW.getValue(), doctorNewGroupEventHandler);
-        handlerMap.put(GroupEventType.ANTIEPIDEMIC.getValue(),doctorAntiepidemicGroupEventHandler);
-        handlerMap.put(GroupEventType.CHANGE.getValue(),doctorChangeGroupEventHandler);
-        handlerMap.put(GroupEventType.CLOSE.getValue(),doctorCloseGroupEventHandler);
-        handlerMap.put(GroupEventType.DISEASE.getValue(),doctorDiseaseGroupEventHandler);
-        handlerMap.put(GroupEventType.LIVE_STOCK.getValue(), doctorLiveStockGroupEventHandler);
-        handlerMap.put(GroupEventType.MOVE_IN.getValue(), doctorMoveInGroupEventHandler);
-        handlerMap.put(GroupEventType.TRANS_FARM.getValue(), doctorTransFarmGroupEventHandler);
-        handlerMap.put(GroupEventType.TRANS_GROUP.getValue(), doctorTransGroupEventHandler);
-        handlerMap.put(GroupEventType.TURN_SEED.getValue(), doctorTurnSeedGroupEventHandler);
-        handlerMap.put(GroupEventType.WEAN.getValue(), doctorWeanGroupEventHandler);
-        DoctorGroupEventHandlers doctorGroupEventHandlers = new DoctorGroupEventHandlers();
-        doctorGroupEventHandlers.setEventHandlerMap(handlerMap);
-        return doctorGroupEventHandlers;
-    }
-
-    @Bean
-    public DoctorModifyPigEventHandlers doctorModifyPigEventHandlers(
-            DoctorModifyPigChgFarmEventHandler modifyPigChgFarmEventHandler,
-            DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler,
-            DoctorModifyPigChgLocationEventHandler modifyPigChgLocationEventHandler,
-            DoctorModifyPigConditionEventHandler modifyPigConditionEventHandler,
-            DoctorModifyPigDiseaseEventHandler modifyPigDiseaseEventHandler,
-            DoctorModifyPigEntryEventHandler modifyPigEntryEventHandler,
-            DoctorModifyPigFarrowEventHandler modifyFarrowEventHandler,
-            DoctorModifyPigFosterByEventHandler modifyPigFosterByEventHandler,
-            DoctorModifyPigFosterEventHandler modifyPigFosterEventHandler,
-            DoctorModifyPigMatingEventHandler modifyPigMatingEventHandler,
-            DoctorModifyPigPigletsChgEventHandler modifyPigPigletsChgHandler,
-            DoctorModifyPigPregCheckEventHandler modifyPigPregCheckEventHandler,
-            DoctorModifyPigRemoveEventHandler modifyPigRemoveEventHandler,
-            DoctorModifyPigSemenEventHandler modifyPigSemenEventHandler,
-            DoctorModifyPigVaccinEventHandler modifyPigVaccinEventHandler,
-            DoctorModifyPigWeanEventHandler modifyPigWeanEventHandler) {
-        Map<Integer, DoctorModifyPigEventHandler> modifyPigEventHandlerMap = Maps.newHashMap();
-        modifyPigEventHandlerMap.put(PigEvent.CHG_FARM.getKey(), modifyPigChgFarmEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.CHG_FARM_IN.getKey(), modifyPigChgFarmInEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.CHG_LOCATION.getKey(), modifyPigChgLocationEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.TO_FARROWING.getKey(), modifyPigChgLocationEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.TO_MATING.getKey(), modifyPigChgLocationEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.CONDITION.getKey(), modifyPigConditionEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.DISEASE.getKey(), modifyPigDiseaseEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.ENTRY.getKey(), modifyPigEntryEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.FARROWING.getKey(), modifyFarrowEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.FOSTERS_BY.getKey(), modifyPigFosterByEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.FOSTERS.getKey(), modifyPigFosterEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.MATING.getKey(), modifyPigMatingEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.PIGLETS_CHG.getKey(), modifyPigPigletsChgHandler);
-        modifyPigEventHandlerMap.put(PigEvent.PREG_CHECK.getKey(), modifyPigPregCheckEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.REMOVAL.getKey(), modifyPigRemoveEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.SEMEN.getKey(), modifyPigSemenEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.VACCINATION.getKey(), modifyPigVaccinEventHandler);
-        modifyPigEventHandlerMap.put(PigEvent.WEAN.getKey(), modifyPigWeanEventHandler);
-        DoctorModifyPigEventHandlers modifyPigEventHandlers = new DoctorModifyPigEventHandlers();
-        modifyPigEventHandlers.setModifyPigEventHandlerMap(modifyPigEventHandlerMap);
-        return modifyPigEventHandlers;
-    }
-
-    @Bean
-    public DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers(
-            DoctorModifyGroupAntiepidemicEventHandler modifyGroupAntiepidemicEventHandler,
-            DoctorModifyGroupChangeEventHandler modifyGroupChangeEventHandler,
-            DoctorModifyGroupCloseEventHandler modifyGroupCloseEventHandler,
-            DoctorModifyGroupDiseaseEventHandler modifyGroupDiseaseEventHandler,
-            DoctorModifyGroupLiveStockEventHandler modifyGroupLiveStockEventHandler,
-            DoctorModifyGroupMoveInEventHandler modifyMoveInEventHandler,
-            DoctorModifyGroupNewEventHandler modifyGroupNewEventHandler,
-            DoctorModifyGroupTransFarmEventHandler modifyGroupTransFarmEventHandler,
-            DoctorModifyGroupTransGroupEventHandler modifyGroupTransGroupEventHandler,
-            DoctorModifyGroupTurnSeedEventHandler modifyGroupTurnSeedEventHandler,
-            DoctorModifyGroupWeanEventHandler modifyGroupWeanEventHandler) {
-        Map<Integer, DoctorModifyGroupEventHandler> modifyGroupEventHandlerMap = Maps.newHashMap();
-        modifyGroupEventHandlerMap.put(GroupEventType.ANTIEPIDEMIC.getValue(), modifyGroupAntiepidemicEventHandler);
-        modifyGroupEventHandlerMap.put(GroupEventType.CHANGE.getValue(), modifyGroupChangeEventHandler);
-        modifyGroupEventHandlerMap.put(GroupEventType.CLOSE.getValue(), modifyGroupCloseEventHandler);
-        modifyGroupEventHandlerMap.put(GroupEventType.DISEASE.getValue(), modifyGroupDiseaseEventHandler);
-        modifyGroupEventHandlerMap.put(GroupEventType.LIVE_STOCK.getValue(), modifyGroupLiveStockEventHandler);
-        modifyGroupEventHandlerMap.put(GroupEventType.MOVE_IN.getValue(), modifyMoveInEventHandler);
-        modifyGroupEventHandlerMap.put(GroupEventType.NEW.getValue(), modifyGroupNewEventHandler);
-        modifyGroupEventHandlerMap.put(GroupEventType.TRANS_FARM.getValue(), modifyGroupTransFarmEventHandler);
-        modifyGroupEventHandlerMap.put(GroupEventType.TRANS_GROUP.getValue(), modifyGroupTransGroupEventHandler);
-        modifyGroupEventHandlerMap.put(GroupEventType.TURN_SEED.getValue(), modifyGroupTurnSeedEventHandler);
-        modifyGroupEventHandlerMap.put(GroupEventType.WEAN.getValue(), modifyGroupWeanEventHandler);
-        DoctorModifyGroupEventHandlers modifyGroupEventHandlers = new DoctorModifyGroupEventHandlers();
-        modifyGroupEventHandlers.setModifyGroupEventHandlerMap(modifyGroupEventHandlerMap);
-        return modifyGroupEventHandlers;
-    }
-
->>>>>>> develop
     @Configuration
     public static class ZookeeperConfiguration{
 

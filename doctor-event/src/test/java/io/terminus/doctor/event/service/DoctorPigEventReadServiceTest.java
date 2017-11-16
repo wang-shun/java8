@@ -26,6 +26,8 @@ public class DoctorPigEventReadServiceTest extends BaseServiceTest{
     private DoctorGroupReadService doctorGroupReadService;
     @Autowired
     private DoctorBarnReadService doctorBarnReadService;
+    @Autowired
+    private DoctorPigReadService doctorPigReadService;
 
     @Test
     public void testPagingPigEvent(){
@@ -46,5 +48,10 @@ public class DoctorPigEventReadServiceTest extends BaseServiceTest{
     @Test
     public void testQueryFattenOut() {
         System.out.println(doctorGroupReadService.queryFattenOutBySumAt("2016-10-10"));
+    }
+
+    @Test
+    public void testSuggestSowPig() {
+        System.out.println(RespHelper.orServEx(doctorPigReadService.suggestSowPig(21L, "l", 10)));
     }
 }

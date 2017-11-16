@@ -476,9 +476,9 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
-    public Response<List<DoctorPig>> suggestSowPig(Long farmId, String name, Integer count) {
+    public Response<List<DoctorPig>> suggestSowPig(Long barnId, String name, Integer count) {
         try {
-            return Response.ok(doctorPigDao.suggestSowPig(farmId, name, count));
+            return Response.ok(doctorPigJoinDao.suggestSowPig(barnId, name, count));
         } catch (Exception e) {
             log.error("suggest sow pig failed,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("suggest.sow.pig.failed");

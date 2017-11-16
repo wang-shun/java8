@@ -6,6 +6,7 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.Constants;
 import io.terminus.doctor.event.dto.search.DoctorPigCountDto;
 import io.terminus.doctor.event.dto.search.SearchedPig;
+import io.terminus.doctor.event.model.DoctorPig;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
@@ -52,5 +53,18 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
         return getSqlSession().selectOne(sqlId("findBoarPigCount"), farmId);
     }
 
-
+    /**
+     * 模糊搜索pigCode猪舍下符合
+     * @param barnId 猪舍id
+     * @param name 模糊搜索字段
+     * @param count 返回前count
+     * @return
+     */
+    public List<DoctorPig> suggestSowPig(Long barnId, String name, Integer count){
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("barnId", barnId);
+        map.put("name", name);
+        map.put("count", count);
+        return sqlSession.selectList(sqlId("suggestSowPig"), map);
+    }
 }
