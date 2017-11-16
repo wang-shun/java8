@@ -386,7 +386,7 @@ public class StockHandleController {
                     title.createCell(2).setCellValue("厂家");
                     title.createCell(3).setCellValue("规格");
                     title.createCell(4).setCellValue("单位");
-                    title.createCell(5).setCellValue("当前数量");
+                    title.createCell(5).setCellValue("账面数量");
                     title.createCell(6).setCellValue("盘点数量");
                     title.createCell(7).setCellValue("备注");
 
