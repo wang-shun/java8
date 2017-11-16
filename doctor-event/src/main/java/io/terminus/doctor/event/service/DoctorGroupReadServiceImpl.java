@@ -137,6 +137,17 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Response<List<DoctorGroup>> findGroup(Map<String, Object> params) {
+        try {
+            return Response.ok(doctorGroupDao.list(params));
+        } catch (Exception e) {
+            log.error("find group failed, params:{}, cause:{}",
+                    params, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
     public Response<Long> getGroupCount(@Valid DoctorGroupSearchDto groupSearchDto) {
         try {
             return Response.ok(doctorGroupJoinDao.getPigCount(groupSearchDto));

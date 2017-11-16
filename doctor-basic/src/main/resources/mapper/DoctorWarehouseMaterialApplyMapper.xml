@@ -111,8 +111,14 @@
             <if test="pigGroupIds != null and pigGroupIds.size() > 0">
                 AND
                 <foreach collection="pigGroupIds" item="t" open="(" separator="or" close=")">
-                    pigGroupId =#{t}
+                    pig_group_id =#{t}
                 </foreach>
+            </if>
+            <if test="groupOrBarn !=null and groupOrBarn=='barn'">
+                AND `pig_group_id` is null
+            </if>
+            <if test="groupOrBarn !=null and groupOrBarn=='group'">
+                AND `pig_group_id` is not null AND `pig_group_id` != -1
             </if>
         </where>
     </sql>
