@@ -177,6 +177,7 @@ public class SkuController {
             Map<String, Object> params = new HashMap<>();
             params.put("farmIds", RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(skuDto.getOrgId())).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
             params.put("skuId", skuDto.getId());
+            params.put("effective", "true");
             Long count = RespHelper.or500(doctorWarehouseStockReadService.advCount(params));
             if (null != count && count > 0) {
                 throw new JsonResponseException("warehouse.sku.has.stock");

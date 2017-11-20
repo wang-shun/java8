@@ -921,6 +921,7 @@ public class DoctorKpiDao {
 
     /**
      * 存栏变动
+     *
      * @param farmId
      * @param startAt
      * @param endAt
@@ -940,7 +941,8 @@ public class DoctorKpiDao {
 
     /**
      * 存栏变动
-     *不同领用猪舍类型下不同物料类型的领用金额统计
+     * 不同领用猪舍类型下不同物料类型的领用金额统计
+     *
      * @param farmId
      * @param startAt
      * @param endAt
@@ -1403,11 +1405,18 @@ public class DoctorKpiDao {
     }
 
     private Double getFeedConversion(List<Long> farmIds, Date startAt, Date endAt, int type) {
-        Double feed = sqlSession.selectOne(sqlId("getFeedConsume"), ImmutableMap.of("farmIds", farmIds, "startAt", startAt, "endAt", endAt, "type", type));
+//        Double feed = sqlSession.selectOne(sqlId("getFeedConsume"), ImmutableMap.of("farmIds", farmIds, "startAt", startAt, "endAt", endAt, "type", type));
+//        Double weight = sqlSession.selectOne(sqlId("getWeightGain"), ImmutableMap.of("farmIds", farmIds, "startAt", startAt, "endAt", endAt, "type", type));
+//        if (Arguments.isNull(feed) || Arguments.isNull(weight) || Objects.equals(0d, weight)) {
+//            return null;
+//        }
+
+        Double feed = sqlSession.selectOne(sqlId("getFeedConsume2"), ImmutableMap.of("farmIds", farmIds, "startAt", startAt, "endAt", endAt, "type", type));
         Double weight = sqlSession.selectOne(sqlId("getWeightGain"), ImmutableMap.of("farmIds", farmIds, "startAt", startAt, "endAt", endAt, "type", type));
         if (Arguments.isNull(feed) || Arguments.isNull(weight) || Objects.equals(0d, weight)) {
             return null;
         }
+
         return feed / weight;
     }
 

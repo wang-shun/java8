@@ -73,28 +73,28 @@ public class DoctorFarmBasics {
      */
     @RequestMapping(value = "/farmBasic/basicIds", method = RequestMethod.POST)
     public Boolean createOrUpdateBasicIds(@RequestParam("farmId") Long farmId,
-                                          @RequestParam("ids") String ids,
+                                          @RequestParam(value = "ids", required = false) String ids,
                                           @RequestParam(required = false) String vendorIds,
                                           @RequestParam(required = false) String materialItemIds) {
-        if (isEmpty(ids)) {
-            return Boolean.TRUE;
-        }
-        DoctorFarmBasic farmBasic = RespHelper.or500(doctorFarmBasicReadService.findFarmBasicByFarmId(farmId));
-        if (farmBasic == null) {
-            farmBasic = new DoctorFarmBasic();
-            farmBasic.setFarmId(farmId);
-            farmBasic.setBasicIds(ids);
-            RespHelper.or500(doctorFarmBasicWriteService.createFarmBasic(farmBasic));
-        } else {
-            farmBasic.setBasicIds(ids);
-            RespHelper.or500(doctorFarmBasicWriteService.updateFarmBasic(farmBasic));
+        if (!isEmpty(ids)) {
+//            return Boolean.TRUE;
+            DoctorFarmBasic farmBasic = RespHelper.or500(doctorFarmBasicReadService.findFarmBasicByFarmId(farmId));
+            if (farmBasic == null) {
+                farmBasic = new DoctorFarmBasic();
+                farmBasic.setFarmId(farmId);
+                farmBasic.setBasicIds(ids);
+                RespHelper.or500(doctorFarmBasicWriteService.createFarmBasic(farmBasic));
+            } else {
+                farmBasic.setBasicIds(ids);
+                RespHelper.or500(doctorFarmBasicWriteService.updateFarmBasic(farmBasic));
+            }
         }
 
 //        if (StringUtils.isNotBlank(vendorIds)) {
-            vendorController.boundToOrg(vendorIds, null, farmId);
+        vendorController.boundToOrg(vendorIds, null, farmId);
 //        }
 //        if (StringUtils.isNotBlank(materialItemIds)) {
-            itemController.boundToOrg(materialItemIds, null, farmId);
+        itemController.boundToOrg(materialItemIds, null, farmId);
 //        }
 
 

@@ -179,17 +179,16 @@ CREATE TABLE `doctor_warehouse_stock` (
   `warehouse_id` bigint(20) DEFAULT NULL COMMENT '仓库编号',
   `warehouse_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
   `warehouse_type` smallint(6) DEFAULT NULL COMMENT '仓库类型，冗余，方便查询',
-  `vendor_name` varchar(64) DEFAULT NULL COMMENT '物料供应商',
   `farm_id` bigint(20) DEFAULT NULL COMMENT '猪厂编号',
-  `manager_id` bigint(20) DEFAULT NULL COMMENT '管理员编号',
-  `material_name` varchar(64) DEFAULT NULL COMMENT '物料名称',
-  `material_id` bigint(20) DEFAULT NULL COMMENT '物料编号',
+  `sku_name` varchar(64) DEFAULT NULL COMMENT '物料名称',
+  `sku_id` bigint(20) DEFAULT NULL COMMENT '物料编号',
   `quantity` decimal(23,2) DEFAULT NULL COMMENT '数量',
-  `unit` varchar(45) DEFAULT NULL COMMENT '单位',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) COMMENT='仓库物料库存表';
+  PRIMARY KEY (`id`),
+  KEY `index_warehouse_sku` (`warehouse_id`,`sku_id`)
+)COMMENT='仓库物料库存表';
+
 
 CREATE TABLE `doctor_warehouse_purchase` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',

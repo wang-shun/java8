@@ -128,6 +128,7 @@ public class StockHandleController {
                             StockHandleVo.Detail detail = new StockHandleVo.Detail();
                             BeanUtils.copyProperties(mh, detail);
 
+
                             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
                             if (null != sku) {
                                 detail.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
@@ -228,6 +229,7 @@ public class StockHandleController {
                     StockHandleExportVo vo = new StockHandleExportVo();
                     BeanUtils.copyProperties(mh, vo);
 
+                    vo.setHandleType(mh.getType());
                     DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
                     if (null != sku) {
                         vo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
@@ -343,6 +345,7 @@ public class StockHandleController {
                     BigDecimal totalQuantity = new BigDecimal(0);
                     double totalAmount = 0L;
                     for (StockHandleExportVo vo : exportVos) {
+
                         Row row = sheet.createRow(pos++);
                         row.createCell(0).setCellValue(vo.getMaterialName());
                         row.createCell(2).setCellValue(vo.getVendorName());
@@ -383,11 +386,18 @@ public class StockHandleController {
                     title.createCell(2).setCellValue("厂家");
                     title.createCell(3).setCellValue("规格");
                     title.createCell(4).setCellValue("单位");
-                    title.createCell(5).setCellValue("当前数量");
+                    title.createCell(5).setCellValue("账面数量");
                     title.createCell(6).setCellValue("盘点数量");
                     title.createCell(7).setCellValue("备注");
 
                     for (StockHandleExportVo vo : exportVos) {
+
+                        BigDecimal quantity;
+                        if (vo.getHandleType() == WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue())
+                            quantity = vo.getBeforeInventoryQuantity().subtract(vo.getQuantity());
+                        else
+                            quantity = vo.getBeforeInventoryQuantity().add(vo.getQuantity());
+
                         Row row = sheet.createRow(pos++);
                         row.createCell(0).setCellValue(vo.getMaterialName());
                         row.createCell(2).setCellValue(vo.getVendorName());
@@ -395,7 +405,7 @@ public class StockHandleController {
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
-                        row.createCell(6).setCellValue(vo.getQuantity().doubleValue());
+                        row.createCell(6).setCellValue(quantity.doubleValue());
                         row.createCell(7).setCellValue(vo.getRemark());
                     }
                 } else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.TRANSFER.getValue())) {

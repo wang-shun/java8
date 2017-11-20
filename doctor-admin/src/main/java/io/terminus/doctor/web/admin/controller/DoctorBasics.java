@@ -11,7 +11,6 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.constants.JacksonType;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
@@ -65,7 +64,7 @@ public class DoctorBasics {
     @RequestMapping(value = "/basic/type", method = RequestMethod.GET)
     public List<DoctorBasic> findBasicByTypeAndSrm(@RequestParam("type") Integer type,
                                                    @RequestParam(value = "srm", required = false) String srm) {
-        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrm(type, srm));
+        return RespHelper.or500(doctorBasicReadService.findValidBasicByTypeAndSrm(type, srm));
     }
 
     /**

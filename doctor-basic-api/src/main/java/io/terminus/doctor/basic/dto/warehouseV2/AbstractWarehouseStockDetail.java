@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 @Data
 public abstract class AbstractWarehouseStockDetail {
 
+    private Long materialHandleId;
+
     @NotNull(message = "stock.material.id.null", groups = StockDefaultValid.class)
     private Long materialId;
 

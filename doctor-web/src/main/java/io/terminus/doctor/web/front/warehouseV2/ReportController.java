@@ -23,17 +23,19 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.front.warehouseV2.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,6 +76,14 @@ public class ReportController {
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
     @RpcConsumer
     private DoctorBasicReadService doctorBasicReadService;
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
+
+
+    @InitBinder
+    public void init(WebDataBinder binder) {
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"), true));
+    }
 
     /**
      * 仓库报表
@@ -99,9 +109,10 @@ public class ReportController {
             return Collections.emptyList();
         }
 
-        date.add(Calendar.MONTH, 1); //包含选中的那一月
-        for (int i = 0; i < 6; i++) { //最近六个月
-            date.add(Calendar.MONTH, -1);
+        Map<Long/*warehouseId*/, AmountAndQuantityDto> lastMonthBalance = new HashMap<>();  //上一个月的发生额
+        date.add(Calendar.MONTH, -6);         //从6个月前开始遍历
+        for (int i = 0; i < 6; i++) {                 //最近六个月
+            date.add(Calendar.MONTH, 1);      //往前推
             int month = date.get(Calendar.MONTH) + 1; //默认月份0～11
             int year = date.get(Calendar.YEAR);
 
@@ -124,11 +135,6 @@ public class ReportController {
             if (!inAndOutAmountsResponse.isSuccess())
                 throw new JsonResponseException(inAndOutAmountsResponse.getError());
 
-            //统计猪厂下每个仓库的当前余额
-//            Response<Map<Long, Long>> balanceAmountsResponse = doctorWarehousePurchaseReadService.countWarehouseBalanceAmount(farmId);
-//            if (!balanceAmountsResponse.isSuccess())
-//                throw new JsonResponseException(balanceAmountsResponse.getError());
-
             WarehouseReportVo balanceVo = new WarehouseReportVo();
             balanceVo.setMonthAndType(year + "-" + month + "结余");
 
@@ -143,13 +149,15 @@ public class ReportController {
             List<WarehouseReportVo.WarehouseReportMonthDetail> outDetails = new ArrayList<>(warehouseResponse.getResult().size());
             long totalBalance = 0, totalIn = 0, totalOut = 0;
             for (DoctorWareHouse wareHouse : warehouseResponse.getResult()) {
-//
-//
                 AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), year, month));
+
+
                 balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
-                        .amount(balance.getAmount())
+                        .amount((lastMonthBalance.containsKey(wareHouse.getId()) ? lastMonthBalance.get(wareHouse.getId()).getAmount() : 0) + balance.getAmount())
                         .build());
+
+                lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount(), balance.getQuantity()));
 
                 long inAmount;
                 if (!inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.IN))
@@ -215,10 +223,12 @@ public class ReportController {
             balanceVo.setDetails(balanceDetails);
             inVo.setDetails(inDetails);
             outVo.setDetails(outDetails);
-            reports.add(balanceVo);
-            reports.add(inVo);
+
             reports.add(outVo);
+            reports.add(inVo);
+            reports.add(balanceVo);
         }
+        Collections.reverse(reports);
         return reports;
     }
 
@@ -250,11 +260,10 @@ public class ReportController {
         List<WarehouseMonthlyReportVo> report = new ArrayList<>();
         for (DoctorWarehouseStock stock : stocksResponse.getResult()) {
 
-//            Response<AmountAndQuantityDto> balanceResponse = doctorWarehouseReportReadService.countMaterialBalance(warehouseId, stock.getSkuId(), null);
-//            if (!balanceResponse.isSuccess())
-//                throw new JsonResponseException(balanceResponse.getError());
-
-            AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getSkuId(), date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1));
+            AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService
+                    .countMaterialBalance(warehouseId, stock.getSkuId(), date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1));
+            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService
+                    .countMaterialBalance(warehouseId, stock.getSkuId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
 
             Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterialVendor(warehouseId, stock.getSkuId(), null, date,
                     WarehouseMaterialHandleType.IN,
@@ -269,10 +278,6 @@ public class ReportController {
             if (!statisticsResponse.isSuccess())
                 throw new JsonResponseException(statisticsResponse.getError());
 
-//            DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(stock.getSkuId()));
-//            if (!skuMap.containsKey(stock.getSkuId()))
-//                throw new InvalidException("warehouse.sku.not.found", stock.getSkuId());
-//            DoctorWarehouseSku sku = skuMap.get(stock.getSkuId()).get(0);
 
             WarehouseMonthlyReportVo vo = new WarehouseMonthlyReportVo();
             vo.setMaterialName(stock.getSkuName());
@@ -286,9 +291,6 @@ public class ReportController {
                 vo.setSpecification(skuMap.get(stock.getSkuId()).get(0).getSpecification());
                 vo.setCode(skuMap.get(stock.getSkuId()).get(0).getCode());
             }
-
-            vo.setBalanceAmount(balance.getAmount());
-            vo.setBalanceQuantity(balance.getQuantity());
 
             vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
                     + statisticsResponse.getResult().getInventoryProfit().getAmount()
@@ -308,18 +310,17 @@ public class ReportController {
                     .add(statisticsResponse.getResult().getTransferOut().getQuantity())
                     .add(statisticsResponse.getResult().getFormulaOut().getQuantity()));
 
-            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countMaterialBalance(warehouseId, stock.getSkuId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
             vo.setInitialAmount(initialBalance.getAmount());
             vo.setInitialQuantity(initialBalance.getQuantity());
 
-//            vo.setInQuantity(vo.getBalanceQuantity().add(vo.getOutQuantity()).multiply(vo.getInQuantity()));
+            vo.setBalanceAmount(initialBalance.getAmount() + balance.getAmount());
+            vo.setBalanceQuantity(initialBalance.getQuantity().add(balance.getQuantity()));
 
             report.add(vo);
         }
 
         return report;
     }
-
 
     /**
      * 物料变动明细
@@ -331,7 +332,8 @@ public class ReportController {
     @RequestMapping(method = RequestMethod.GET, value = "material")
     @JsonView(WarehouseMaterialHandleVo.MaterialHandleReportView.class)
     public List<WarehouseMaterialHandleVo> materialHandleReport(@RequestParam Long warehouseId,
-                                                                @RequestParam Long orgId,
+                                                                @RequestParam(required = false) Long orgId,
+                                                                @RequestParam(required = false) Long farmId,
                                                                 @RequestParam(required = false) String materialName,
                                                                 @RequestParam(required = false) Integer type,
                                                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM") Calendar date) {
@@ -356,6 +358,16 @@ public class ReportController {
         }
 
         if (StringUtils.isNotBlank(materialName)) {
+
+            if (null == orgId && null == farmId)
+                throw new JsonResponseException("warehouse.sku.org.id.or.farm.id.not.null");
+            if (null == orgId) {
+                DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+                if (null == farm)
+                    throw new JsonResponseException("farm.not.found");
+                orgId = farm.getOrgId();
+            }
+
             Map<String, Object> skuParams = new HashMap<>();
             skuParams.put("orgId", orgId);
             skuParams.put("status", WarehouseSkuStatus.NORMAL.getValue());
@@ -472,6 +484,7 @@ public class ReportController {
             criteria.put("skuIds", skuIds);
         }
 
+        criteria.put("groupOrBarn", "barn");
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
         if (!applyResponse.isSuccess())
             throw new JsonResponseException(applyResponse.getError());
@@ -522,11 +535,11 @@ public class ReportController {
 
 
         if (null != pigGroupCreateDateStart && null != pigGroupCreateDateEnd
-                && pigGroupCreateDateStart.before(pigGroupCreateDateEnd)) {
+                && pigGroupCreateDateStart.after(pigGroupCreateDateEnd)) {
             throw new JsonResponseException("start.date.after.end.date");
         }
         if (null != pigGroupCloseDateStart && null != pigGroupCloseDateEnd
-                && pigGroupCloseDateStart.before(pigGroupCloseDateEnd))
+                && pigGroupCloseDateStart.after(pigGroupCloseDateEnd))
             throw new JsonResponseException("start.date.after.end.date");
 
         List<Long> pigGroupIds = null;
@@ -536,25 +549,33 @@ public class ReportController {
             if (null == wareHouse)
                 throw new JsonResponseException("warehouse.not.found");
 
-            DoctorGroupSearchDto groupSearchDto = new DoctorGroupSearchDto();
-            groupSearchDto.setStartOpenAt(pigGroupCreateDateStart);
-            groupSearchDto.setEndOpenAt(pigGroupCreateDateEnd);
-            groupSearchDto.setStartCloseAt(pigGroupCloseDateStart);
-            groupSearchDto.setEndCloseAt(pigGroupCloseDateEnd);
-            groupSearchDto.setFarmId(wareHouse.getFarmId());
-            pigGroupIds = RespHelper.or500(doctorGroupReadService.pagingGroup(groupSearchDto, 1, 5000)).getData().stream().map(g -> g.getGroup().getId()).collect(Collectors.toList());
+            Map<String, Object> params = new HashMap<>();
+            params.put("startOpenAt", pigGroupCreateDateStart);  //建群开始时间
+            params.put("endOpenAt", pigGroupCreateDateEnd);      //建群结束时间
+            params.put("startCloseAt", pigGroupCloseDateStart);  //关群开始时间
+            params.put("endCloseAt", pigGroupCloseDateEnd);      //关群结束时间
+            params.put("farmId", wareHouse.getFarmId());
+            pigGroupIds = RespHelper.or500(doctorGroupReadService.findGroup(params)).stream().map(DoctorGroup::getId).collect(Collectors.toList());
+            if (pigGroupIds.isEmpty())
+                return Collections.emptyList();
         }
 
         Map<String, Object> criteria = new HashMap<>();
-//        if (StringUtils.isNotBlank(materialName))
-//            criteria.put("materialNameLike", materialName);
         criteria.put("warehouseId", warehouseId);
         criteria.put("type", materialType);
         criteria.put("pigBarnId", pigBarnId);
-        if (null != pigGroupIds && !pigGroupIds.isEmpty())
-            criteria.put("pigGroupIds", pigGroupIds);
-        else
+        if (null != pigGroupIds) {
+            if (null != pigGroupId) {
+                if (!pigGroupIds.contains(pigGroupId))
+                    return Collections.emptyList();
+                else
+                    criteria.put("pigGroupId", pigGroupId);
+            } else
+                criteria.put("pigGroupIds", pigGroupIds);
+        } else if (null != pigGroupId)
             criteria.put("pigGroupId", pigGroupId);
+        else
+            criteria.put("groupOrBarn", "group");
 
         if (StringUtils.isNotBlank(materialName)) {
             Map<String, Object> skuParams = new HashMap<>();

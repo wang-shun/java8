@@ -113,7 +113,7 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
                 .build());
 
         if (null == warehousePurchases || warehousePurchases.isEmpty()) {
-            log.info("该仓库[{}]已出库完", warehouseId);
+            log.debug("该仓库[{}]已出库完", warehouseId);
             return Response.ok(new AmountAndQuantityDto(0, new BigDecimal(0)));
         }
 

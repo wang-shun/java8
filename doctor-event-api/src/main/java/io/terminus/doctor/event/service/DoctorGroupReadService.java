@@ -69,6 +69,8 @@ public interface DoctorGroupReadService {
      */
     Response<Paging<DoctorGroupDetail>> pagingGroup(@Valid DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size);
 
+    Response<List<DoctorGroup>> findGroup(Map<String, Object> params);
+
     /**
      * 获取猪群数量
      */

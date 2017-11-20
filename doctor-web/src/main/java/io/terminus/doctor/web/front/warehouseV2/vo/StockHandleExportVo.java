@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 public class StockHandleExportVo {
 
 
+    private int handleType;
+
     private String materialName;
 
     private String vendorName;
