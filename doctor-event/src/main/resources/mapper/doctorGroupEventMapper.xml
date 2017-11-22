@@ -617,7 +617,7 @@
         <if test="farmId != null">AND `farm_id` = #{farmId}</if>
     </select>
 
-    <select id="findLastGroupEventByType" parameterType="map" resultType="DoctorGroupEvent">
+    <select id="findLastGroupEventByType" parameterType="map" resultMap="DoctorGroupEventMap">
         SELECT
         <include refid="cols_all"/>
         FROM
