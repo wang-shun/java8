@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
@@ -227,8 +228,13 @@ public class DoctorGroupEvents {
         List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEventDelWean(
                 groupDetail.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3), null, null)).getData();
 
+        Response<DoctorGroupEvent> response = doctorGroupReadService.findLastGroupEventByType(groupId, GroupEventType.LIVE_STOCK.getValue());
+        Double avgWeight = 0.0;
+        if (response.isSuccess() && response.getResult() != null) {
+            avgWeight = response.getResult().getAvgWeight();
+        }
         return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack()
-                , transFromUtil.transFromGroupEvents(groupEvents));
+                , transFromUtil.transFromGroupEvents(groupEvents), avgWeight);
     }
 
     /**
