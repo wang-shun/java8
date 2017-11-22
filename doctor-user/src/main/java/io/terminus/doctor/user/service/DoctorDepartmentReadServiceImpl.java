@@ -9,7 +9,6 @@ import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
 import io.terminus.doctor.user.manager.DoctorDepartmentManager;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorOrg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -89,18 +88,16 @@ public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadServ
     @Override
     public Response<List<DoctorDepartmentDto>> findCliqueTree() {
         try {
-            List<DoctorDepartmentDto> doctorDepartmentDtos =
-                    doctorOrgDao.findByType(DoctorOrg.Type.ORG.getValue())
-                            .stream().map(doctorOrg ->
-                            new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null, null)
-                    ).collect(Collectors.toList());
-            doctorDepartmentDtos.forEach(doctorDepartmentDto -> {
-                List<DoctorDepartmentDto> farmDto = doctorFarmDao.findByOrgId(doctorDepartmentDto.getId()).stream().
-                        map(doctorFarm -> new DoctorDepartmentDto(doctorFarm.getId(), doctorFarm.getName(), null, null))
+            List<DoctorFarm> allFarm = doctorFarmDao.findAll();
+            Map<Long, List<DoctorFarm>> map = allFarm.stream().collect(Collectors.groupingBy(DoctorFarm::getOrgId));
+            List<DoctorDepartmentDto> dtos = map.entrySet().stream().map(entry -> {
+                List<DoctorDepartmentDto> list = entry.getValue().stream().map(doctorFarm ->
+                        new DoctorDepartmentDto(doctorFarm.getId(), doctorFarm.getName(), null, null))
                         .collect(Collectors.toList());
-                doctorDepartmentDto.setChildren(farmDto);
-            });
-            return Response.ok(doctorDepartmentDtos);
+                return new DoctorDepartmentDto(entry.getKey(), entry.getValue().get(0).getOrgName(), null, list);
+            }).collect(Collectors.toList());
+
+            return Response.ok(dtos);
         } catch (Exception e) {
             log.error("find clique tree failed,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.clique.tree.failed");
