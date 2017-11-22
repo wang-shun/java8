@@ -70,4 +70,13 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
     public List<DoctorOrg> findExcludeIds(List<Long> orgIds) {
         return sqlSession.selectList(sqlId("findExcludeIds"), ImmutableMap.of("orgIds", orgIds));
     }
+
+    /**
+     * 获取某种类型的公司
+     * @param type 公司类型
+     * @return
+     */
+    public List<DoctorOrg> findByType(Integer type) {
+        return getSqlSession().selectList(sqlId("findByType"), type);
+    }
 }

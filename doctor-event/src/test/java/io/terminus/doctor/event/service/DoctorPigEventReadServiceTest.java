@@ -41,7 +41,7 @@ public class DoctorPigEventReadServiceTest extends BaseServiceTest{
 
     @Test
     public void testSelectBarns() {
-        List<DoctorBarn> list = RespHelper.orServEx(doctorBarnReadService.selectBarns(null, 10));
+        List<DoctorBarn> list = RespHelper.orServEx(doctorBarnReadService.selectBarns(1L, 1L, "妊娠",10));
         System.out.println(list);
     }
 

@@ -4,9 +4,12 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.user.dao.DoctorFarmDao;
+import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
 import io.terminus.doctor.user.manager.DoctorDepartmentManager;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by xjn on 17/7/19.
@@ -25,6 +29,10 @@ import java.util.Map;
 public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadService{
     @Autowired
     private DoctorDepartmentManager doctorDepartmentManager;
+    @Autowired
+    private DoctorOrgDao doctorOrgDao;
+    @Autowired
+    private DoctorFarmDao doctorFarmDao;
 
     @Override
     public Response<List<DoctorFarm>> findAllFarmsByOrgId(@NotNull(message = "orgId.not.null") Long orgId) {
@@ -75,6 +83,27 @@ public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadServ
             log.error("find clique faied, departmentId:{}, isFarm:{}, cause:{}"
                     , departmentId, isFarm, Throwables.getStackTraceAsString(e));
             return Response.fail("find.clique.failed");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorDepartmentDto>> findCliqueTree() {
+        try {
+            List<DoctorDepartmentDto> doctorDepartmentDtos =
+                    doctorOrgDao.findByType(DoctorOrg.Type.ORG.getValue())
+                            .stream().map(doctorOrg ->
+                            new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null, null)
+                    ).collect(Collectors.toList());
+            doctorDepartmentDtos.forEach(doctorDepartmentDto -> {
+                List<DoctorDepartmentDto> farmDto = doctorFarmDao.findByOrgId(doctorDepartmentDto.getId()).stream().
+                        map(doctorFarm -> new DoctorDepartmentDto(doctorFarm.getId(), doctorFarm.getName(), null, null))
+                        .collect(Collectors.toList());
+                doctorDepartmentDto.setChildren(farmDto);
+            });
+            return Response.ok(doctorDepartmentDtos);
+        } catch (Exception e) {
+            log.error("find clique tree failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.clique.tree.failed");
         }
     }
 }
