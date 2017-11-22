@@ -288,6 +288,8 @@
         FROM <include refid="tb"/>
         WHERE
         1=1
+        <if test="orgId != null"> AND org_id = #{orgId}</if>
+        <if test="farmId != null"> AND farm_id = #{farmId}</if>
         <if test="name != null">AND `name` like concat('%', #{name}, '%')</if>
         ORDER BY instr(`name`, #{name}) ASC, length(`name`) ASC, `name` ASC
         limit #{count}

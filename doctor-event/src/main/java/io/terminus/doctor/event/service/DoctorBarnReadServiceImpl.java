@@ -181,9 +181,9 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     }
 
     @Override
-    public Response<List<DoctorBarn>> selectBarns(String name, Integer count) {
+    public Response<List<DoctorBarn>> selectBarns(Long orgId, Long farmId, String name, Integer count) {
         try {
-            return Response.ok(doctorBarnDao.selectBarns(name, count));
+            return Response.ok(doctorBarnDao.selectBarns(orgId, farmId, name, count));
         } catch (Exception e) {
             log.error("select barns failed, name, count,cause:{}",
                     name, count, Throwables.getStackTraceAsString(e));

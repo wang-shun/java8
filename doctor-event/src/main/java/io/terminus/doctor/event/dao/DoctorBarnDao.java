@@ -110,10 +110,12 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
      * @param count 返回的个数
      * @return 返回满足条件的前count个
      */
-    public List<DoctorBarn> selectBarns(String name, Integer count) {
+    public List<DoctorBarn> selectBarns(Long orgId, Long farmId, String name, Integer count) {
         Map<String, Object> map = Maps.newHashMap();
         map.put("name", name);
         map.put("count", count);
+        map.put("orgId", orgId);
+        map.put("farmId", farmId);
         return getSqlSession().selectList(sqlId("selectBarns"), map);
     }
 }

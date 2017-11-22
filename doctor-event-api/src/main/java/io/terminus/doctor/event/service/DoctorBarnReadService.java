@@ -103,7 +103,7 @@ public interface DoctorBarnReadService {
      * @param count 返回的个数
      * @return 返回满足条件的前count个
      */
-    Response<List<DoctorBarn>> selectBarns(String name, Integer count);
+    Response<List<DoctorBarn>> selectBarns(Long orgId, Long farmId, String name, Integer count);
 
     /**
      * 获取物联网猪舍信息，包含其下的猪数量
