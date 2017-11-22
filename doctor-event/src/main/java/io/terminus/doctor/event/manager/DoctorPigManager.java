@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.manager;
 
+import com.google.common.base.Strings;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.DoctorMessageDao;
@@ -70,9 +71,17 @@ public class DoctorPigManager {
         //更新猪
         DoctorPig updatePig = new DoctorPig();
         updatePig.setId(pigId);
-        updatePig.setPigCode(pigCode);
-        updatePig.setRfid(rfid);
+        if (!Strings.isNullOrEmpty(pigCode)) {
+            updatePig.setPigCode(pigCode);
+        }
+        if (!Strings.isNullOrEmpty(rfid)) {
+            updatePig.setRfid(rfid);
+        }
         doctorPigDao.update(updatePig);
+
+        if (Strings.isNullOrEmpty(pigCode)) {
+            return;
+        }
         doctorPigEventDao.updatePigCode(pigId, pigCode);
         //更新消息
         DoctorMessageSearchDto msgSearch = new DoctorMessageSearchDto();
