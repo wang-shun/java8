@@ -495,8 +495,12 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             iotPigDto.setRfid(doctorPig.getRfid());
             DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigId);
             iotPigDto.setStatus(pigTrack.getStatus());
+            PigStatus status = PigStatus.from(iotPigDto.getStatus());
+            iotPigDto.setStatusName(status.getName());
             if (Objects.equals(pigTrack.getStatus(), PigStatus.KongHuai.getKey())) {
                 iotPigDto.setStatus((Integer) pigTrack.getExtraMap().get("pregCheckResult"));
+                KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(iotPigDto.getStatus());
+                iotPigDto.setStatusName(result.getName());
             }
             Date statusDate = doctorPigEventDao.findEventAtLeadToStatus(pigId, pigTrack.getStatus());
             iotPigDto.setStatusDay(DateUtil.getDeltaDays(statusDate, new Date()));

@@ -17,4 +17,5 @@ public class IotPigDto implements Serializable{
     private String rfid;
     private Integer statusDay;
     private Integer status;
+    private String statusName;
 }
