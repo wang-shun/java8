@@ -209,6 +209,8 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             iotBarnInfo.setCapacity(doctorBarn.getCapacity());
             iotBarnInfo.setBarnId(doctorBarn.getId());
             iotBarnInfo.setBarnName(doctorBarn.getName());
+            iotBarnInfo.setStaffId(doctorBarn.getStaffId());
+            iotBarnInfo.setStaffName(doctorBarn.getStaffName());
             Integer currentCount = 0;
             Map<String, Integer> map = Maps.newHashMap();
             iotBarnInfo.setCurrentPigs(currentCount);
@@ -322,25 +324,5 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
                 //其他 => 同类型
                 || (Objects.equal(pigType, barnType));
 
-    }
-
-    private IotBarnInfo getBarnInfo(Long barnId) {
-        DoctorBarn doctorBarn = doctorBarnDao.findById(barnId);
-        IotBarnInfo info = new IotBarnInfo();
-        info.setBarnId(doctorBarn.getId());
-        info.setBarnName(doctorBarn.getName());
-        info.setCapacity(doctorBarn.getCapacity());
-        info.setStatusPigs(Maps.newHashMap());
-        fillStatusPigs(info.getStatusPigs(), doctorBarn.getPigType());
-        return info;
-    }
-
-    private void fillStatusPigs(Map<String, Integer> statusPigs, Integer type) {
-        PigType pigType = PigType.from(type);
-        switch (pigType) {
-            case NURSERY_PIGLET:
-            case FATTEN_PIG:
-            case RESERVE:
-        }
     }
 }

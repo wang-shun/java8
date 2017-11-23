@@ -23,6 +23,16 @@ public class IotBarnInfo implements Serializable{
     private String barnName;
 
     /**
+     * 关联员id
+     */
+    private Long staffId;
+
+    /**
+     * 关联员名称
+     */
+    private String staffName;
+
+    /**
      * 当前猪数量
      */
     private Integer currentPigs;
