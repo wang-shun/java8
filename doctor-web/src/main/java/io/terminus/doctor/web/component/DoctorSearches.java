@@ -36,6 +36,7 @@ import io.terminus.doctor.event.dto.search.SearchedBarnDto;
 import io.terminus.doctor.event.dto.search.SearchedGroup;
 import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -219,8 +220,14 @@ public class DoctorSearches {
                     searchedPig.setPigTypeName(pigSex.getDesc());
                 }
             }
+
+            Integer status = searchedPig.getStatus();
+            KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
+            if (result != null) {
+                status = PigStatus.KongHuai.getKey();
+            }
             Date eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId()
-                    , searchedPig.getStatus()));
+                    , status));
             Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
             searchedPig.setStatusDay(statusDay);
         });
