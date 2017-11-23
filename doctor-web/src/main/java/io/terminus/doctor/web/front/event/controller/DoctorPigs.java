@@ -185,6 +185,10 @@ public class DoctorPigs {
         Integer pregCheckResult = null;
         try{
             String extra = doctorPigTrack.getExtra();
+            Date eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(dto.getDoctorPig().getId()
+                    , dto.getDoctorPigTrack().getStatus()));
+            Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
+
             if (doctorPigTrack.getStatus() == PigStatus.KongHuai.getKey() && StringUtils.isNotBlank(extra)){
                 Map<String, Object> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(extra, JacksonType.MAP_OF_OBJECT);
                 Object checkResult = extraMap.get("pregCheckResult");
@@ -194,9 +198,7 @@ public class DoctorPigs {
                 }
             }
             String warnMessage = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(queryPigNotifyMessages(dto.getDoctorPig().getId()));
-            Date eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(dto.getDoctorPig().getId()
-                    , dto.getDoctorPigTrack().getStatus()));
-            Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
+
             return DoctorSowDetailDto.builder()
                     .pigSowCode(dto.getDoctorPig().getPigCode())
                     .warnMessage(warnMessage)
