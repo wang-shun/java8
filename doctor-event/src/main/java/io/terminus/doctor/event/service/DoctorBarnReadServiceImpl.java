@@ -12,13 +12,19 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
 import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.IotBarnInfo;
+import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPigStatusCount;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,16 +50,20 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
 
     private final DoctorBarnDao doctorBarnDao;
     private final DoctorGroupDao doctorGroupDao;
+    private final DoctorGroupTrackDao doctorGroupTrackDao;
+    private final DoctorPigTrackDao doctorPigTrackDao;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorPigReadService doctorPigReadService;
 
     @Autowired
     public DoctorBarnReadServiceImpl(DoctorBarnDao doctorBarnDao,
                                      DoctorGroupDao doctorGroupDao,
-                                     DoctorGroupReadService doctorGroupReadService,
+                                     DoctorGroupTrackDao doctorGroupTrackDao, DoctorPigTrackDao doctorPigTrackDao, DoctorGroupReadService doctorGroupReadService,
                                      DoctorPigReadService doctorPigReadService) {
         this.doctorBarnDao = doctorBarnDao;
         this.doctorGroupDao = doctorGroupDao;
+        this.doctorGroupTrackDao = doctorGroupTrackDao;
+        this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorPigReadService = doctorPigReadService;
     }
@@ -193,7 +203,109 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
 
     @Override
     public Response<IotBarnInfo> findIotBarnInfo(Long barnId) {
-        return null;
+        try {
+            IotBarnInfo iotBarnInfo = new IotBarnInfo();
+            DoctorBarn doctorBarn = doctorBarnDao.findById(barnId);
+            iotBarnInfo.setCapacity(doctorBarn.getCapacity());
+            iotBarnInfo.setBarnId(doctorBarn.getId());
+            iotBarnInfo.setBarnName(doctorBarn.getName());
+            Integer currentCount = 0;
+            Map<String, Integer> map = Maps.newHashMap();
+            iotBarnInfo.setCurrentPigs(currentCount);
+            iotBarnInfo.setStatusPigs(map);
+
+            //育肥。保育。后备
+            if (doctorBarn.getPigType() == PigType.NURSERY_PIGLET.getValue()
+                    || doctorBarn.getPigType() == PigType.RESERVE.getValue()
+                    || doctorBarn.getPigType() == PigType.FATTEN_PIG.getValue()) {
+                List<DoctorGroup> groups = doctorGroupDao.findByCurrentBarnId(barnId);
+
+                if (groups.isEmpty()) {
+                    return Response.ok(iotBarnInfo);
+                }
+                List<DoctorGroupTrack> tracks = doctorGroupTrackDao.findsByGroups(groups.stream().map(DoctorGroup::getId).collect(Collectors.toList()));
+                currentCount = tracks.stream().mapToInt(DoctorGroupTrack::getQuantity).sum();
+                iotBarnInfo.setCurrentPigs(currentCount);
+                tracks.forEach(doctorGroupTrack -> map.put("日龄", doctorGroupTrack.getAvgDayAge()));
+                return Response.ok(iotBarnInfo);
+            }
+
+            //种猪
+            List<DoctorPigTrack> pigTracks = doctorPigTrackDao.findByBarnId(doctorBarn.getId());
+            if (!pigTracks.isEmpty()) {
+                currentCount = pigTracks.size();
+                List<DoctorPigStatusCount> pigStatusCountList = doctorPigTrackDao.getStatusPigForBarn(doctorBarn.getId());
+                if (!pigStatusCountList.isEmpty()) {
+                    int yang = 0;
+                    for (DoctorPigStatusCount doctorPigStatusCount : pigStatusCountList) {
+                        if (Objects.equal(doctorPigStatusCount.getStatus(), PigStatus.Entry.getKey())
+                                || Objects.equal(doctorPigStatusCount.getStatus(), PigStatus.Mate.getKey())
+                                || Objects.equal(doctorPigStatusCount.getStatus(), PigStatus.FEED.getKey())
+                                || Objects.equal(doctorPigStatusCount.getStatus(), PigStatus.Wean.getKey())) {
+                            PigStatus status = PigStatus.from(doctorPigStatusCount.getStatus());
+                            map.put(status.getName(), doctorPigStatusCount.getCount());
+                        }
+
+                        if (Objects.equal(doctorPigStatusCount.getStatus(), PigStatus.Pregnancy.getKey())
+                                || Objects.equal(doctorPigStatusCount.getStatus(), PigStatus.Farrow.getKey())) {
+                            yang += doctorPigStatusCount.getCount();
+                        }
+                    }
+                    if (yang != 0) {
+                        map.put(PigStatus.Pregnancy.getName(), yang);
+                    }
+
+                    List<DoctorPigTrack> konghuaiTrack = doctorPigTrackDao.findByBarnIdAndStatus(doctorBarn.getId(), PigStatus.KongHuai.getKey());
+
+                    int ying = 0;
+                    int liuchan = 0;
+                    int fanqing = 0;
+                    for (DoctorPigTrack pigTrack : konghuaiTrack) {
+                        KongHuaiPregCheckResult konghuai = KongHuaiPregCheckResult.from((Integer) pigTrack.getExtraMap().get("pregCheckResult"));
+                        switch (konghuai) {
+                            case YING:
+                                ying++;
+                                break;
+                            case FANQING:
+                                fanqing++;
+                                break;
+                            case LIUCHAN:
+                                liuchan++;
+                                break;
+                        }
+                    }
+                    if (ying != 0) {
+                        map.put(KongHuaiPregCheckResult.YING.getName(), ying);
+                    }
+
+                    if (fanqing != 0) {
+                        map.put(KongHuaiPregCheckResult.FANQING.getName(), fanqing);
+                    }
+
+                    if (liuchan != 0) {
+                        map.put(KongHuaiPregCheckResult.LIUCHAN.getName(), liuchan);
+                    }
+                }
+            }
+
+            //产房
+            if (doctorBarn.getPigType() == PigType.DELIVER_SOW.getValue()) {
+
+                List<DoctorGroup> groups = doctorGroupDao.findByCurrentBarnId(barnId);
+                if (!groups.isEmpty()) {
+                    DoctorGroup group = groups.get(0);
+                    DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
+                    currentCount += groupTrack.getQuantity();
+                    map.put("仔猪", groupTrack.getQuantity());
+                    map.put("日龄", groupTrack.getAvgDayAge());
+                }
+            }
+            iotBarnInfo.setCurrentPigs(currentCount);
+            return Response.ok(iotBarnInfo);
+        } catch (Exception e) {
+            log.error("find.iot.barn.info.faled,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.Iot.Barn.Info.failed");
+        }
     }
 
     //校验能否转入此舍(产房 => 产房(分娩母猪舍)/保育舍，保育舍 => 保育舍/育肥舍/育种舍，同类型可以互转)
