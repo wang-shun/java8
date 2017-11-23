@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -66,12 +65,12 @@ public class DoctorPigManager {
     }
 
     private void updatePigCode(Long pigId, String pigCode, String rfid) {
-        checkCanUpdate(pigId, pigCode);
 
         //更新猪
         DoctorPig updatePig = new DoctorPig();
         updatePig.setId(pigId);
         if (!Strings.isNullOrEmpty(pigCode)) {
+            checkCanUpdate(pigId, pigCode);
             updatePig.setPigCode(pigCode);
         }
         if (!Strings.isNullOrEmpty(rfid)) {
@@ -95,9 +94,6 @@ public class DoctorPigManager {
     }
 
     private void checkCanUpdate(Long pigId, String newCode) {
-        if (!StringUtils.hasText(newCode)) {
-            throw new ServiceException("pig.code.not.empty");
-        }
         DoctorPig pig = doctorPigDao.findById(pigId);
         if (pig == null) {
             throw new ServiceException("pig.not.found");
