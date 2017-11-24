@@ -191,4 +191,11 @@ public interface DoctorPigReadService {
      * @return 猪信息
      */
     Response<IotPigDto> getIotPig(Long pigId);
+
+    /**
+     * 查询猪舍下未离场的猪
+     * @param barnId
+     * @return
+     */
+    Response<List<DoctorPig>> findUnRemovalPigsBy(Long barnId);
 }

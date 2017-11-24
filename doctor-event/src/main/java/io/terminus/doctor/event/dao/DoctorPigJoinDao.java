@@ -67,4 +67,9 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
         map.put("count", count);
         return sqlSession.selectList(sqlId("suggestSowPig"), map);
     }
+
+
+    public List<DoctorPig> findUnRemovalPigsBy(Long barnId){
+        return getSqlSession().selectList(sqlId("findUnRemovalPigsBy"), barnId);
+    }
 }

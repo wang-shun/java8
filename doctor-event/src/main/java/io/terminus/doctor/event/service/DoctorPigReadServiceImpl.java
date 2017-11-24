@@ -510,4 +510,14 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             return Response.fail("get.iot.pig.failed");
         }
     }
+
+    @Override
+    public Response<List<DoctorPig>> findUnRemovalPigsBy(Long barnId) {
+        try {
+            return Response.ok(doctorPigJoinDao.findUnRemovalPigsBy(barnId));
+        } catch (Exception e) {
+            log.error("find unremoval pigs by failed,barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.unremoval.pigs.by.failed");
+        }
+    }
 }
