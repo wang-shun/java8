@@ -270,7 +270,7 @@ public class ReportController {
                     WarehouseMaterialHandleType.OUT,
                     WarehouseMaterialHandleType.INVENTORY_PROFIT,
                     WarehouseMaterialHandleType.INVENTORY_DEFICIT,
-                    WarehouseMaterialHandleType.FORMULA_IN,
+                    WarehouseMaterialHandleType.TRANSFER_IN,
                     WarehouseMaterialHandleType.TRANSFER_OUT,
                     WarehouseMaterialHandleType.FORMULA_IN,
                     WarehouseMaterialHandleType.FORMULA_OUT
