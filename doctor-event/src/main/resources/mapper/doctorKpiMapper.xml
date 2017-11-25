@@ -1601,9 +1601,9 @@
         SELECT sum(quantity) AS quantity,sum(quantity * unit_price) AS amount,type
         FROM doctor_warehouse_material_apply
         WHERE pig_group_id=-1
-        <if test="farmId != null">AND t0.farm_id = #{farmId}</if>
-        <if test="startAt != null">AND t0.apply_date &gt;= #{startAt}</if>
-        <if test="endAt != null">AND t0.apply_date &lt;= #{endAt}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
+        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
         GROUP BY type
         ) AS a
     </select>
@@ -1621,9 +1621,9 @@
         SELECT sum(quantity) AS quantity,sum(quantity * unit_price) AS amount,type
         FROM doctor_warehouse_material_apply
         WHERE pig_group_id!=-1
-        <if test="farmId != null">AND t0.farm_id = #{farmId}</if>
-        <if test="startAt != null">AND t0.apply_date &gt;= #{startAt}</if>
-        <if test="endAt != null">AND t0.apply_date &lt;= #{endAt}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
+        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
         GROUP BY type
         ) AS a
     </select>
