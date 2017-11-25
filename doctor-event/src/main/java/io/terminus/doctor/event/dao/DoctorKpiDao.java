@@ -931,6 +931,18 @@ public class DoctorKpiDao {
         return sqlSession.selectOne("getMonthlyLiveStockChangeFeedCountV2", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
+    /**
+     * 产房母猪物料领用统计
+     *
+     * @return
+     */
+    public DoctorLiveStockChangeCommonReport getFarrowSowApplyCount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getFarrowSowApplyCount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    public DoctorLiveStockChangeCommonReport getFarrowApplyCount(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne("getFarrowApplyCount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
 
     /**
      * 存栏变动月报: 物料金额(饲料, 药品, 疫苗, 易耗品

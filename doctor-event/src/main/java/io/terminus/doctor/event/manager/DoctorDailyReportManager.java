@@ -52,8 +52,10 @@ public class DoctorDailyReportManager {
         this.doctorKpiDao = doctorKpiDao;
         this.doctorDailyGroupDao = doctorDailyGroupDao;
     }
+
     /**
      * 实时计算日报后, 创建之
+     *
      * @param farmId 猪场id
      * @param sumAt  统计日期
      */
@@ -76,8 +78,9 @@ public class DoctorDailyReportManager {
 
     /**
      * 获取猪群某一天记录, 没有这初始化
+     *
      * @param groupId 猪群id
-     * @param sumAt 统计日期
+     * @param sumAt   统计日期
      * @return 猪群记录
      */
     public DoctorDailyGroup findByGroupIdAndSumAt(Long groupId, Date sumAt) {
@@ -97,9 +100,10 @@ public class DoctorDailyReportManager {
 
     /**
      * 有则更新,无责创建
+     *
      * @param dailyGroup 猪群日记录
      */
-    public void createOrUpdateDailyGroup (DoctorDailyGroup dailyGroup) {
+    public void createOrUpdateDailyGroup(DoctorDailyGroup dailyGroup) {
         if (isNull(dailyGroup.getId())) {
             doctorDailyGroupDao.create(dailyGroup);
         } else {
@@ -109,9 +113,10 @@ public class DoctorDailyReportManager {
 
     /**
      * 有则更新,无责创建
+     *
      * @param dailyPig 猪日记录
      */
-    public void createOrUpdateDailyPig (DoctorDailyReport dailyPig) {
+    public void createOrUpdateDailyPig(DoctorDailyReport dailyPig) {
         if (isNull(dailyPig.getId())) {
             doctorDailyReportDao.create(dailyPig);
         } else {
@@ -121,8 +126,9 @@ public class DoctorDailyReportManager {
 
     /**
      * 生成某一天报表
-     * @param farmId  猪场id
-     * @param date 日期
+     *
+     * @param farmId 猪场id
+     * @param date   日期
      * @return
      */
     public Boolean createOrUpdateReport(Long farmId, Date date) {
@@ -231,15 +237,23 @@ public class DoctorDailyReportManager {
         return doctorDailyReport;
     }
 
-    private DoctorDailyReport caculateIndicator(DoctorDailyReport doctorDailyReport){
+    private DoctorDailyReport caculateIndicator(DoctorDailyReport doctorDailyReport) {
         Long farmId = doctorDailyReport.getFarmId();
         Date startAt = DateUtil.toDate(doctorDailyReport.getSumAt());
         Date endAt = DateUtil.getDateEnd(new DateTime(startAt)).toDate();
 
 //        DoctorLiveStockChangeCommonReport changeCountReport = doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId, startAt, endAt);
 //        DoctorLiveStockChangeCommonReport changeAmountReport = doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId, startAt, endAt);
+
+        //物料领用数量统计
         DoctorLiveStockChangeCommonReport changeCountReport = doctorKpiDao.getMonthlyLiveStockChangeFeedCountV2(farmId, startAt, endAt);
+        //物料领用金额统计
         DoctorLiveStockChangeCommonReport changeAmountReport = doctorKpiDao.getMonthlyLiveStockChangeMaterialAmountV2(farmId, startAt, endAt);
+
+        //产房母猪和产房仔猪领用需要另算
+        DoctorLiveStockChangeCommonReport farrowSowChange = doctorKpiDao.getFarrowSowApplyCount(farmId, startAt, endAt);
+        DoctorLiveStockChangeCommonReport farrowChange = doctorKpiDao.getFarrowApplyCount(farmId, startAt, endAt);
+
 
         doctorDailyReport.setFattenPrice(doctorKpiDao.getGroupSaleFattenPrice(farmId, startAt, endAt));
         doctorDailyReport.setBasePrice10(doctorKpiDao.getGroupSaleBasePrice10(farmId, startAt, endAt));
@@ -251,17 +265,19 @@ public class DoctorDailyReportManager {
         doctorDailyReport.setSowPhVaccinationAmount(changeAmountReport.getPeiHuaiVaccineAmount());
         doctorDailyReport.setSowPhConsumableAmount(changeAmountReport.getPeiHuaiConsumerAmount());
 
-        doctorDailyReport.setSowCfFeed(changeCountReport.getFarrowSowFeedCount());
-        doctorDailyReport.setSowCfFeedAmount(changeAmountReport.getFarrowSowFeedAmount());
-        doctorDailyReport.setSowCfMedicineAmount(changeAmountReport.getFarrowSowDrugAmount());
-        doctorDailyReport.setSowCfVaccinationAmount(changeAmountReport.getFarrowSowVaccineAmount());
-        doctorDailyReport.setSowCfConsumableAmount(changeAmountReport.getFarrowSowConsumerAmount());
+        //产房母猪
+        doctorDailyReport.setSowCfFeed(farrowSowChange.getFarrowSowFeedCount());
+        doctorDailyReport.setSowCfFeedAmount(farrowSowChange.getFarrowSowFeedAmount());
+        doctorDailyReport.setSowCfMedicineAmount(farrowSowChange.getFarrowSowDrugAmount());
+        doctorDailyReport.setSowCfVaccinationAmount(farrowSowChange.getFarrowSowVaccineAmount());
+        doctorDailyReport.setSowCfConsumableAmount(farrowSowChange.getFarrowSowConsumerAmount());
 
-        doctorDailyReport.setFarrowFeed(changeCountReport.getFarrowFeedCount());
-        doctorDailyReport.setFarrowFeedAmount(changeAmountReport.getFarrowFeedAmount());
-        doctorDailyReport.setFarrowMedicineAmount(changeAmountReport.getFarrowDrugAmount());
-        doctorDailyReport.setFarrowVaccinationAmount(changeAmountReport.getFarrowVaccineAmount());
-        doctorDailyReport.setFarrowConsumableAmount(changeAmountReport.getFarrowConsumerAmount());
+        //产房仔猪
+        doctorDailyReport.setFarrowFeed(farrowChange.getFarrowFeedCount());
+        doctorDailyReport.setFarrowFeedAmount(farrowChange.getFarrowFeedAmount());
+        doctorDailyReport.setFarrowMedicineAmount(farrowChange.getFarrowDrugAmount());
+        doctorDailyReport.setFarrowVaccinationAmount(farrowChange.getFarrowVaccineAmount());
+        doctorDailyReport.setFarrowConsumableAmount(farrowChange.getFarrowConsumerAmount());
 
         doctorDailyReport.setNurseryFeed(changeCountReport.getNurseryFeedCount());
         doctorDailyReport.setNurseryFeedAmount(changeAmountReport.getNurseryFeedAmount());

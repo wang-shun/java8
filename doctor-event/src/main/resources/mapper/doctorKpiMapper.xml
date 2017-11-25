@@ -1588,6 +1588,47 @@
         ) AS a
     </select>
 
+    <select id="getFarrowSowApplyCount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
+        SELECT
+        ifnull(max(CASE WHEN type = 1 THEN amount ELSE 0 END), 0) AS farrowSowFeedAmount,
+        ifnull(max(CASE WHEN type = 1 THEN quantity ELSE 0 END), 0) AS farrowSowFeedCount,
+        ifnull(max(CASE WHEN type = 3 THEN amount ELSE 0 END), 0) AS farrowSowVaccineAmount,
+        ifnull(max(CASE WHEN type = 4 THEN amount ELSE 0 END), 0) AS farrowSowDrugAmount,
+        ifnull(max(CASE WHEN type = 5 THEN amount ELSE 0 END), 0) AS farrowSowConsumerAmount
+
+        FROM
+        (
+        SELECT sum(quantity) AS quantity,sum(quantity * unit_price) AS amount,type
+        FROM doctor_warehouse_material_apply
+        WHERE pig_group_id=-1
+        <if test="farmId != null">AND t0.farm_id = #{farmId}</if>
+        <if test="startAt != null">AND t0.apply_date &gt;= #{startAt}</if>
+        <if test="endAt != null">AND t0.apply_date &lt;= #{endAt}</if>
+        GROUP BY type
+        ) AS a
+    </select>
+
+
+    <select id="getFarrowApplyCount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
+        SELECT
+        ifnull(max(CASE WHEN type = 1 THEN amount ELSE 0 END), 0) AS farrowFeedCount,
+        ifnull(max(CASE WHEN type = 1 THEN quantity ELSE 0 END), 0) AS farrowFeedAmount,
+        ifnull(max(CASE WHEN type = 3 THEN amount ELSE 0 END), 0) AS farrowVaccineAmount,
+        ifnull(max(CASE WHEN type = 4 THEN amount ELSE 0 END), 0) AS farrowDrugAmount,
+        ifnull(max(CASE WHEN type = 5 THEN amount ELSE 0 END), 0) AS farrowConsumerAmount
+        FROM
+        (
+        SELECT sum(quantity) AS quantity,sum(quantity * unit_price) AS amount,type
+        FROM doctor_warehouse_material_apply
+        WHERE pig_group_id!=-1
+        <if test="farmId != null">AND t0.farm_id = #{farmId}</if>
+        <if test="startAt != null">AND t0.apply_date &gt;= #{startAt}</if>
+        <if test="endAt != null">AND t0.apply_date &lt;= #{endAt}</if>
+        GROUP BY type
+        ) AS a
+    </select>
+
+
     <!--存栏变动月报: 饲料金额-->
     <select id="getMonthlyLiveStockChangeMaterielAmount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
