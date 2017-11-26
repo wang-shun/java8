@@ -1754,6 +1754,19 @@
                 GROUP BY t1.pig_type,material_type
         ) as res;
     </select>
+    
+    <select id="getGroupApplyCount" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorGroupBatchSummary">
+        SELECT
+        ifnull(max(CASE WHEN type = 1 THEN amount ELSE 0 END), 0) AS feedAmount,
+        ifnull(max(CASE WHEN type = 1 THEN quantity ELSE 0 END), 0) AS fendNumber,
+        ifnull(max(CASE WHEN type = 3 THEN amount ELSE 0 END), 0) AS vaccineAmount,
+        ifnull(max(CASE WHEN type = 4 THEN amount ELSE 0 END), 0) AS medicineAmount,
+        ifnull(max(CASE WHEN type = 5 THEN amount ELSE 0 END), 0) AS consumablesAmount
+        FROM (
+        SELECT sum(quantity) AS quantity,sum(quantity * unit_price) AS amount,type FROM doctor_warehouse_material_apply
+        WHERE farm_id=#{farmId} and pig_group_id=#{groupId} GROUP BY type
+        ) AS a
+    </select>
 
     <select id="getParityStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorStockStructureCommonReport">
         select  date_format(#{endAt}, '%Y-%m-%d') as sumAt,
