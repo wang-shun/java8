@@ -1764,7 +1764,7 @@
         ifnull(max(CASE WHEN type = 5 THEN amount ELSE 0 END), 0) AS consumablesAmount
         FROM (
         SELECT sum(quantity) AS quantity,sum(quantity * unit_price) AS amount,type FROM doctor_warehouse_material_apply
-        WHERE farm_id=#{farmID} and pig_group_id=#{groupId} GROUP BY type
+        WHERE farm_id=#{farmId} and pig_group_id=#{groupId} GROUP BY type
         ) AS a
     </select>
 
