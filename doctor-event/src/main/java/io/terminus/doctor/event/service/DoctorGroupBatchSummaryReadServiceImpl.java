@@ -51,6 +51,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
     private final DoctorKpiDao doctorKpiDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
 
+
     @Autowired
     public DoctorGroupBatchSummaryReadServiceImpl(DoctorGroupEventDao doctorGroupEventDao,
                                                   DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao,
@@ -156,6 +157,14 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         summary.setDailyWeightGain(gain < 0 ? 0 : gain);//日增重(kg)
         setToNurseryOrFatten(summary, events);                                       //阶段转
 
+
+        DoctorGroupBatchSummary applySummary = doctorKpiDao.getGroupApplyCount(group.getFarmId(), group.getId());
+        summary.setFendNumber(applySummary.getFendNumber());
+        summary.setFeedAmount(applySummary.getFeedAmount());
+        summary.setVaccineAmount(applySummary.getVaccineAmount());
+        summary.setMedicineAmount(applySummary.getMedicineAmount());
+        summary.setConsumablesAmount(applySummary.getConsumablesAmount());
+
         // TODO: 16/9/13 上线后再弄
 //        summary.setToFattenCost();         //转育肥成本(分)
 //        summary.setToNurseryCost();        //转保育成本(分)
@@ -198,10 +207,10 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
     private void setToNurseryOrFatten(DoctorGroupBatchSummary summary, List<DoctorGroupEvent> events) {
         //产房仔猪 => 保育猪
         if (PigType.FARROW_TYPES.contains(summary.getPigType())) {
-            summary.setToNurseryCount(CountUtil.intStream(events, DoctorGroupEvent::getQuantity, 
+            summary.setToNurseryCount(CountUtil.intStream(events, DoctorGroupEvent::getQuantity,
                     event -> isToNursery(event.getType(), event.getOtherBarnType())).sum());       //转保育数量
-            
-            double toWeight = CountUtil.doubleStream(events, event -> event.getQuantity() * event.getAvgWeight(), 
+
+            double toWeight = CountUtil.doubleStream(events, event -> event.getQuantity() * event.getAvgWeight(),
                     event -> isToNursery(event.getType(), event.getOtherBarnType())).sum();
             summary.setToNurseryAvgWeight(EventUtil.get2(EventUtil.getAvgWeight(toWeight, summary.getToNurseryCount())));   //转保育均重(kg)
         }
@@ -216,9 +225,9 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
             summary.setToFattenAvgWeight(EventUtil.get2(EventUtil.getAvgWeight(toWeight, summary.getToNurseryCount())));    //转育肥均重(kg)
         }
     }
-    
+
     private static boolean isToNursery(Integer eventType, Integer toPigType) {
-        return Objects.equals(eventType, GroupEventType.TRANS_GROUP.getValue()) 
+        return Objects.equals(eventType, GroupEventType.TRANS_GROUP.getValue())
                 && Objects.equals(toPigType, PigType.NURSERY_PIGLET.getValue());
     }
 
@@ -226,7 +235,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         return Objects.equals(eventType, GroupEventType.TRANS_GROUP.getValue())
                 && Objects.equals(toPigType, PigType.FATTEN_PIG.getValue());
     }
-    
+
     //获取料肉比增重: 增重 = 转出重 - 转入重
     private static double getFcrDeltaWeight(List<DoctorGroupEvent> events, int inCount, double inAvgWeight) {
         if (!notEmpty(events)) {
