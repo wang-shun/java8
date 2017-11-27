@@ -60,14 +60,25 @@ public class ItemController {
                 throw new JsonResponseException("farm.not.found");
             orgId = farm.getOrgId();
         }
-        
+
         return RespHelper.or500(doctorWarehouseItemOrgReadService.findByOrgId(orgId)).stream().map(DoctorBasicMaterial::getId).collect(Collectors.toList());
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "suggest")
     public List<DoctorBasicMaterial> suggest(@RequestParam Integer type,
-                                             @RequestParam Long orgId,
+                                             @RequestParam(required = false) Long orgId,
+                                             @RequestParam(required = false) Long farmId,
                                              @RequestParam(required = false) String name) {
+
+        if (null == orgId && null == farmId)
+            throw new JsonResponseException("warehouse.sku.org.id.or.farm.id.not.null");
+        if (null == orgId) {
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+            if (null == farm)
+                throw new JsonResponseException("farm.not.found");
+            orgId = farm.getOrgId();
+        }
+
         return RespHelper.or500(doctorWarehouseItemOrgReadService.suggest(type, orgId, name));
     }
 
