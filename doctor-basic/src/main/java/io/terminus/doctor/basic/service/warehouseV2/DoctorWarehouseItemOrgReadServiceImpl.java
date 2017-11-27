@@ -12,6 +12,7 @@ import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseItemOrg;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -85,7 +86,8 @@ public class DoctorWarehouseItemOrgReadServiceImpl implements DoctorWarehouseIte
         Map<String, Object> params = new HashMap<>();
         params.put("type", type);
         params.put("ids", itemIds);
-        params.put("name", name);
+        if (StringUtils.isNotBlank(name))
+            params.put("name", name);
 
         return Response.ok(doctorBasicMaterialDao.list(params));
     }
