@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
@@ -88,7 +89,7 @@ public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadServ
     @Override
     public Response<List<DoctorDepartmentDto>> findCliqueTree() {
         try {
-            List<DoctorFarm> allFarm = doctorFarmDao.findAll();
+            List<DoctorFarm> allFarm = doctorFarmDao.findFarmsBy(null, IsOrNot.YES.getKey());
             Map<Long, List<DoctorFarm>> map = allFarm.stream().collect(Collectors.groupingBy(DoctorFarm::getOrgId));
             List<DoctorDepartmentDto> dtos = map.entrySet().stream().map(entry -> {
                 List<DoctorDepartmentDto> list = entry.getValue().stream().map(doctorFarm ->
