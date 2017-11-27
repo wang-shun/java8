@@ -7,6 +7,7 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport;
 import io.terminus.doctor.event.dto.report.common.DoctorStockStructureCommonReport;
 import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
+import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.util.EventUtil;
 import org.joda.time.DateTime;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -931,6 +932,18 @@ public class DoctorKpiDao {
         return sqlSession.selectOne("getMonthlyLiveStockChangeFeedCountV2", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
+    /**
+     * 产房母猪物料领用统计
+     *
+     * @return
+     */
+    public DoctorLiveStockChangeCommonReport getFarrowSowApplyCount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getFarrowSowApplyCount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    public DoctorLiveStockChangeCommonReport getFarrowApplyCount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getFarrowApplyCount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
 
     /**
      * 存栏变动月报: 物料金额(饲料, 药品, 疫苗, 易耗品
@@ -1404,6 +1417,11 @@ public class DoctorKpiDao {
                 , "startAt", startAt, "endAt", endAt));
     }
 
+    public DoctorGroupBatchSummary getGroupApplyCount(Long farmId, Long groupId) {
+        return sqlSession.selectOne(sqlId("getGroupApplyCount"), ImmutableMap.of("farmId", farmId
+                , "groupId", groupId));
+    }
+
     private Double getFeedConversion(List<Long> farmIds, Date startAt, Date endAt, int type) {
 //        Double feed = sqlSession.selectOne(sqlId("getFeedConsume"), ImmutableMap.of("farmIds", farmIds, "startAt", startAt, "endAt", endAt, "type", type));
 //        Double weight = sqlSession.selectOne(sqlId("getWeightGain"), ImmutableMap.of("farmIds", farmIds, "startAt", startAt, "endAt", endAt, "type", type));
@@ -1419,5 +1437,6 @@ public class DoctorKpiDao {
 
         return feed / weight;
     }
+
 
 }

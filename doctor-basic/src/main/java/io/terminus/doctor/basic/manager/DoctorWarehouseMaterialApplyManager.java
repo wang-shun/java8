@@ -54,10 +54,16 @@ public class DoctorWarehouseMaterialApplyManager {
         materialApply.setMaterialHandleId(handle.getId());
         materialApply.setPigBarnId(outDetail.getApplyPigBarnId());
         materialApply.setPigBarnName(outDetail.getApplyPigBarnName());
-        if (null!=outDetail.getApplyPigGroupId()&&outDetail.getApplyPigGroupId() != -1) {
-            materialApply.setPigGroupId(outDetail.getApplyPigGroupId());
-            materialApply.setPigGroupName(outDetail.getApplyPigGroupName());
+        if (null != outDetail.getApplyPigGroupId()) {
+            if (outDetail.getApplyPigGroupId() == -1) {
+                materialApply.setPigGroupId(-1L);
+                materialApply.setPigGroupName("母猪");
+            } else {
+                materialApply.setPigGroupId(outDetail.getApplyPigGroupId());
+                materialApply.setPigGroupName(outDetail.getApplyPigGroupName());
+            }
         }
+
         materialApply.setApplyStaffName(outDetail.getApplyStaffName());
 
         doctorWarehouseMaterialApplyDao.create(materialApply);
