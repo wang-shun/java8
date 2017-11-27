@@ -1,6 +1,8 @@
 package io.terminus.doctor.user.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.user.dto.FarmCriteria;
 import io.terminus.doctor.user.model.DoctorFarm;
 
 import javax.validation.constraints.NotNull;
@@ -55,4 +57,11 @@ public interface DoctorFarmReadService {
      * @return 猪场列表
      */
     Response<List<DoctorFarm>> findFarmsByIds(List<Long> ids);
+
+    /**
+     * 分页查询猪场
+     * @param farmCriteria
+     * @return
+     */
+    Response<Paging<DoctorFarm>> pagingFarm(FarmCriteria farmCriteria, Integer pageNo, Integer pageSize);
 }

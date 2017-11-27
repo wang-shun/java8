@@ -1617,3 +1617,9 @@ CREATE TABLE `doctor_warehouse_item_org` (
 -- 添加仓库类型 2017-11-07
 ALTER TABLE doctor_warehouse_stock_handle ADD warehouse_type TINYINT(4) NULL COMMENT '仓库类型';
 ALTER TABLE doctor_warehouse_material_handle ADD before_inventory_quantity DECIMAL(23,2) NULL COMMENT '盘点前库存数量';
+
+-- doctorfarm 添加是否是智能猪舍标志
+ALTER TABLE doctor_farms ADD column is_intelligent  smallint(6) DEFAULT 0 NULL
+COMMENT '是否是智能猪舍（物联网使用默认是0）1->智能猪场 0不是猪场' after extra;
+
+
