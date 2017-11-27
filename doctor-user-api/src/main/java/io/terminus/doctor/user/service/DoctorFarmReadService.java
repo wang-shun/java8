@@ -52,6 +52,13 @@ public interface DoctorFarmReadService {
     Response<List<DoctorFarm>> findFarmsByOrgId(@NotNull(message = "orgId.not.null") Long orgId);
 
     /**
+     * 查询猪场
+     * @param orgId 公司id
+     * @param isIntelligent 是否是时智能猪场
+     * @return
+     */
+    Response<List<DoctorFarm>> findFarmsBy(Long orgId, Integer isIntelligent);
+    /**
      * 根据farmIds 查询猪场
      * @param ids 猪场ids
      * @return 猪场列表

@@ -40,4 +40,9 @@ public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
     public List<DoctorFarm> findFarmsByIds(List<Long> list) {
         return getSqlSession().selectList(sqlId("findFarmsByIds"), list);
     }
+
+    public List<DoctorFarm> findFarmsBy(Long orgId, Integer isIntelligent) {
+        return getSqlSession().selectList(sqlId("findFarmsBy"),
+                MapBuilder.newHashMap().put("orgId", orgId).put("isIntelligent", isIntelligent));
+    }
 }

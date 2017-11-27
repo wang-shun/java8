@@ -191,10 +191,11 @@ public class DoctorFarms {
      * @return
      */
     @RequestMapping(value = "/org/farm-list", method = RequestMethod.GET)
-    public List<DoctorFarm> findFarmByOrgId(Long orgId) {
+    public List<DoctorFarm> findFarmByOrgId(@RequestParam Long orgId,
+                                            @RequestParam(required = false) Integer isIntelligent) {
         DoctorUserDataPermission doctorUserDataPermission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(UserUtil.getUserId()));
         List<Long> doctorFarmIds = doctorUserDataPermission.getFarmIdsList();
-        List<DoctorFarm> doctorFarms = RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(orgId));
+        List<DoctorFarm> doctorFarms = RespHelper.or500(doctorFarmReadService.findFarmsBy(orgId, isIntelligent));
         if (doctorFarms != null) {
             doctorFarms = doctorFarms.stream().filter(t -> doctorFarmIds.contains(t.getId())).collect(Collectors.toList());
         }
