@@ -1,11 +1,13 @@
 package io.terminus.doctor.user.dao;
 
+import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.user.model.DoctorFarm;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 猪场表Dao类
@@ -42,7 +44,9 @@ public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
     }
 
     public List<DoctorFarm> findFarmsBy(Long orgId, Integer isIntelligent) {
-        return getSqlSession().selectList(sqlId("findFarmsBy"),
-                MapBuilder.newHashMap().put("orgId", orgId).put("isIntelligent", isIntelligent));
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("orgId", orgId);
+        map.put("isIntelligent", isIntelligent);
+        return getSqlSession().selectList(sqlId("findFarmsBy"), map);
     }
 }
