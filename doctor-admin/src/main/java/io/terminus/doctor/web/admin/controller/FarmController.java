@@ -180,7 +180,7 @@ public class FarmController {
         return RespHelper.or500(doctorFarmReadService.pagingFarm(farmCriteria, pageNo, pageSize));
     }
 
-    @ApiOperation("切换智能猪场")
+    @ApiOperation("切换智能猪场, isIntelligent: 1-》智能猪场，0-》非智能猪场")
     @RequestMapping(value = "/switch/isIntelligent", method = RequestMethod.PUT)
     public Boolean switchIsIntelligent(@RequestParam @ApiParam("猪场id") Long farmId) {
         return RespHelper.or500(doctorFarmWriteService.switchIsIntelligent(farmId));
