@@ -180,7 +180,7 @@
         FROM <include refid="tb" />
         WHERE
         1=1
-        <if test="orgId != null">org_id = #{orgId}</if>
+        <if test="orgId != null">AND org_id = #{orgId}</if>
         <if test="isIntelligent != null">AND is_intelligent = #{isIntelligent} </if>
     </select>
 </mapper>
