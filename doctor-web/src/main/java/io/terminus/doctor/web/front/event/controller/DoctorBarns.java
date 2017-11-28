@@ -18,40 +18,26 @@ import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.search.SearchedBarn;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorEventSelector;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.event.service.DoctorBarnWriteService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorGroupWriteService;
-import io.terminus.doctor.event.service.DoctorPigEventReadService;
-import io.terminus.doctor.event.service.DoctorPigReadService;
-import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.PrimaryUser;
-import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
-import io.terminus.doctor.user.service.PrimaryUserReadService;
-import io.terminus.doctor.user.service.SubRoleReadService;
+import io.terminus.doctor.user.service.*;
+import io.terminus.doctor.web.component.DoctorSearches;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnSelect;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -89,6 +75,9 @@ public class DoctorBarns {
     private DoctorGroupWriteService doctorGroupWriteService;
     @RpcConsumer
     private DoctorPigWriteService doctorPigWriteService;
+
+    @Autowired
+    private DoctorSearches doctorSearches;
 
     @Autowired
     public DoctorBarns(DoctorBarnReadService doctorBarnReadService,
@@ -213,6 +202,20 @@ public class DoctorBarns {
         }
 
         return barnSelects;
+    }
+
+    /**
+     * 根据farmid查询非空猪舍
+     *
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/using")
+    public List<SearchedBarn> findBarnsByFarmId(@RequestParam Long farmId) {
+
+        List<DoctorBarn> barns = RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null, null, DoctorBarn.Status.USING.getValue(), null));
+        List<SearchedBarn> notEmptyBarns=doctorSearches.getSearchedBarn(barns).stream().filter(b -> b.getPigCount() > 0 || b.getPigGroupCount() > 0).collect(Collectors.toList());
+        return notEmptyBarns;
     }
 
     /**
@@ -356,7 +359,7 @@ public class DoctorBarns {
 
             //更新 数据权限
             this.addBarnIdDataPermissionForPrimary(barnId, barn.getFarmId());
-            if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+            if (Objects.equals(user.getType(), UserType.FARM_SUB.value())) {
                 DoctorUserDataPermission permission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId()));
                 this.addBarnId2DataPermission(barnId, permission);
             }
@@ -403,7 +406,7 @@ public class DoctorBarns {
 
     }
 
-    private void addBarnId2DataPermission(Long barnId, DoctorUserDataPermission permission){
+    private void addBarnId2DataPermission(Long barnId, DoctorUserDataPermission permission) {
         List<Long> barnIds = permission.getBarnIdsList();
         if (barnIds == null) {
             barnIds = Lists.newArrayList();
