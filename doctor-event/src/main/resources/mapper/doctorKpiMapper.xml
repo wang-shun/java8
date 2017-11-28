@@ -1611,8 +1611,8 @@
 
     <select id="getFarrowApplyCount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
-        ifnull(max(CASE WHEN type = 1 THEN amount ELSE 0 END), 0) AS farrowFeedCount,
-        ifnull(max(CASE WHEN type = 1 THEN quantity ELSE 0 END), 0) AS farrowFeedAmount,
+        ifnull(max(CASE WHEN type = 1 THEN amount ELSE 0 END), 0) AS farrowFeedAmount,
+        ifnull(max(CASE WHEN type = 1 THEN quantity ELSE 0 END), 0) AS farrowFeedCount,
         ifnull(max(CASE WHEN type = 3 THEN amount ELSE 0 END), 0) AS farrowVaccineAmount,
         ifnull(max(CASE WHEN type = 4 THEN amount ELSE 0 END), 0) AS farrowDrugAmount,
         ifnull(max(CASE WHEN type = 5 THEN amount ELSE 0 END), 0) AS farrowConsumerAmount
