@@ -965,6 +965,10 @@ public class DoctorKpiDao {
         return sqlSession.selectOne("getMonthlyLiveStockChangeMaterielAmountV2", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
+    public DoctorLiveStockChangeCommonReport getMonthlyLiveStockChangeQuantityAndAmount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeQuantityAndAmount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
     /**
      * 胎次分布月报
      *
@@ -1418,6 +1422,7 @@ public class DoctorKpiDao {
     }
 
     public DoctorGroupBatchSummary getGroupApplyCount(Long farmId, Long groupId) {
+
         return sqlSession.selectOne(sqlId("getGroupApplyCount"), ImmutableMap.of("farmId", farmId
                 , "groupId", groupId));
     }
