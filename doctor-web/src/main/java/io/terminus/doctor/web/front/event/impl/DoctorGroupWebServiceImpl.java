@@ -622,10 +622,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //检验参数是否为空
     private void checkParam(Map<String, Object> params, String groupCode) {
-        if (params.get("changeTypeId") == null || params.get("sowQty") == null
-                || params.get("boarQty") == null || params.get("weight") == null) {
-            throw new InvalidException("some.param.is.null", groupCode);
-        }
+
+        expectNotNull(params.get("changeTypeId"), "change.type.id.is.null", groupCode);
+        expectNotNull(params.get("sowQty"), "sow.qty.is.null", groupCode);
+        expectNotNull(params.get("boarQty"), "boar.qty.is.null", groupCode);
+        expectNotNull(params.get("weight"), "weight.is.null", groupCode);
         Boolean isSaleType = Objects.equals(getLong(params, "changeTypeId"), CHANGE_TYPE_SALE);
         Boolean canGetCustomer = getLong(params, "customerId") != null || params.get("customerName") != null;
         if (isSaleType && (!canGetCustomer || getLong(params, "price") == null)) {
