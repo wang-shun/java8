@@ -6,14 +6,14 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
-import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
-import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialApplyReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +53,7 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
     @Override
     @ExceptionHandle("doctor.warehouse.material.apply.find.fail")
     public Response<List<DoctorWarehouseMaterialApply>> findByFarmAndPigGroup(Long farmId, Long groupId) {
-        List<DoctorWarehouseMaterialApply> applies= doctorWarehouseMaterialApplyDao.list(DoctorWarehouseMaterialApply.builder()
+        List<DoctorWarehouseMaterialApply> applies = doctorWarehouseMaterialApplyDao.list(DoctorWarehouseMaterialApply.builder()
                 .farmId(farmId)
                 .pigGroupId(groupId)
                 .build());
@@ -115,5 +115,17 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
 
         return Response.ok(eachWarehouseTypeLastApply);
+    }
+
+    @Override
+    @ExceptionHandle("doctor.warehouse.material.apply.list.fail")
+    public Response<List<DoctorWarehouseMaterialApply>> month(Long warehouseId, Integer applyYear, Integer applyMonth, String skuName) {
+
+        return Response.ok(doctorWarehouseMaterialApplyDao.list(DoctorWarehouseMaterialApply.builder()
+                .warehouseId(warehouseId)
+                .materialName(StringUtils.isBlank(skuName) ? null : skuName)
+                .applyYear(applyYear)
+                .applyMonth(applyMonth)
+                .build()));
     }
 }

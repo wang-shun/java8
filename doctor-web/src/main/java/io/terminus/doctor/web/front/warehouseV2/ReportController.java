@@ -7,6 +7,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
+import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
@@ -19,8 +20,6 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -384,18 +383,10 @@ public class ReportController {
         if (!materialHandleResponse.isSuccess())
             throw new JsonResponseException(materialHandleResponse.getError());
 
-        Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(DoctorWarehouseMaterialApply.builder()
-                .warehouseId(warehouseId)
-                .materialName(StringUtils.isBlank(materialName) ? null : materialName)
-                .applyYear(date.get(Calendar.YEAR))
-                .applyMonth(date.get(Calendar.MONTH) + 1)
-                .build());
-        if (!applyResponse.isSuccess())
-            throw new JsonResponseException(applyResponse.getError());
-
+        List<DoctorWarehouseMaterialApply> applies = RespHelper.or500(doctorWarehouseMaterialApplyReadService.month(warehouseId, date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, null));
 
         Map<Long/*MaterialHandleId*/, DoctorWarehouseMaterialApply> handleApply = new HashMap<>();
-        for (DoctorWarehouseMaterialApply apply : applyResponse.getResult()) {
+        for (DoctorWarehouseMaterialApply apply : applies) {
             handleApply.put(apply.getMaterialHandleId(), apply);
         }
 
@@ -466,11 +457,9 @@ public class ReportController {
         criteria.put("applyMonth", date.get(Calendar.MONTH) + 1);
         criteria.put("warehouseId", warehouseId);
 
-//        if (StringUtils.isNotBlank(materialName))
-//            criteria.put("materialNameLike", materialName);
         if (null != pigBarnId)
             criteria.put("pigBarnId", pigBarnId);
-        if (null != type)
+        if (null != type) //物料类型
             criteria.put("type", type);
 
         if (StringUtils.isNotBlank(materialName)) {
@@ -484,7 +473,7 @@ public class ReportController {
             criteria.put("skuIds", skuIds);
         }
 
-        criteria.put("groupOrBarn", "barn");
+        criteria.put("applyType", WarehouseMaterialApplyType.BARN.getValue());
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
         if (!applyResponse.isSuccess())
             throw new JsonResponseException(applyResponse.getError());
@@ -493,13 +482,10 @@ public class ReportController {
 
         List<WarehouseMaterialApplyVo> vos = new ArrayList<>(applyResponse.getResult().size());
         for (DoctorWarehouseMaterialApply apply : applyResponse.getResult()) {
-//            if (!skuMap.containsKey(apply.getMaterialId()))
-//                throw new InvalidException("warehouse.sku.not.found");
 
             WarehouseMaterialApplyVo vo = new WarehouseMaterialApplyVo();
             BeanUtils.copyProperties(apply, vo);
             if (skuMap.containsKey(apply.getMaterialId())) {
-//                vo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
                 DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(skuMap.get(apply.getMaterialId()).get(0).getUnit())));
                 vo.setUnit(null == unit ? "" : unit.getName());
                 vo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
@@ -575,7 +561,8 @@ public class ReportController {
         } else if (null != pigGroupId)
             criteria.put("pigGroupId", pigGroupId);
         else
-            criteria.put("groupOrBarn", "group");
+//            criteria.put("groupOrBarn", "group");
+            criteria.put("applyType", WarehouseMaterialApplyType.GROUP.getValue());
 
         if (StringUtils.isNotBlank(materialName)) {
             Map<String, Object> skuParams = new HashMap<>();
@@ -609,9 +596,6 @@ public class ReportController {
                 throw new JsonResponseException(groupResponse.getError());
             if (null == groupResponse.getResult())
                 throw new JsonResponseException("pig.group.not.found");
-//            if (!skuMap.containsKey(apply.getMaterialId()))
-//                throw new InvalidException("warehouse.sku.not.found", apply.getMaterialId());
-
 
             WarehousePigGroupApplyVo applyVo = WarehousePigGroupApplyVo.builder()
                     .pigGroupId(apply.getPigGroupId())

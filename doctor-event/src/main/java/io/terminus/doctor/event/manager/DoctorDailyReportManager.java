@@ -246,9 +246,11 @@ public class DoctorDailyReportManager {
 //        DoctorLiveStockChangeCommonReport changeAmountReport = doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId, startAt, endAt);
 
         //物料领用数量统计
-        DoctorLiveStockChangeCommonReport changeCountReport = doctorKpiDao.getMonthlyLiveStockChangeFeedCountV2(farmId, startAt, endAt);
+//        DoctorLiveStockChangeCommonReport changeCountReport = doctorKpiDao.getMonthlyLiveStockChangeFeedCountV2(farmId, startAt, endAt);
         //物料领用金额统计
-        DoctorLiveStockChangeCommonReport changeAmountReport = doctorKpiDao.getMonthlyLiveStockChangeMaterialAmountV2(farmId, startAt, endAt);
+//        DoctorLiveStockChangeCommonReport changeAmountReport = doctorKpiDao.getMonthlyLiveStockChangeMaterialAmountV2(farmId, startAt, endAt);
+
+        DoctorLiveStockChangeCommonReport changeCountAndAmountReport = doctorKpiDao.getMonthlyLiveStockChangeQuantityAndAmount(farmId, startAt, endAt);
 
         //产房母猪和产房仔猪领用需要另算
         DoctorLiveStockChangeCommonReport farrowSowChange = doctorKpiDao.getFarrowSowApplyCount(farmId, startAt, endAt);
@@ -259,11 +261,11 @@ public class DoctorDailyReportManager {
         doctorDailyReport.setBasePrice10(doctorKpiDao.getGroupSaleBasePrice10(farmId, startAt, endAt));
         doctorDailyReport.setBasePrice15(doctorKpiDao.getGroupSaleBasePrice15(farmId, startAt, endAt));
 
-        doctorDailyReport.setSowPhFeed(changeCountReport.getPeiHuaiFeedCount());
-        doctorDailyReport.setSowPhFeedAmount(changeAmountReport.getPeiHuaiFeedAmount());
-        doctorDailyReport.setSowPhMedicineAmount(changeAmountReport.getPeiHuaiDrugAmount());
-        doctorDailyReport.setSowPhVaccinationAmount(changeAmountReport.getPeiHuaiVaccineAmount());
-        doctorDailyReport.setSowPhConsumableAmount(changeAmountReport.getPeiHuaiConsumerAmount());
+        doctorDailyReport.setSowPhFeed(changeCountAndAmountReport.getPeiHuaiFeedCount());
+        doctorDailyReport.setSowPhFeedAmount(changeCountAndAmountReport.getPeiHuaiFeedAmount());
+        doctorDailyReport.setSowPhMedicineAmount(changeCountAndAmountReport.getPeiHuaiDrugAmount());
+        doctorDailyReport.setSowPhVaccinationAmount(changeCountAndAmountReport.getPeiHuaiVaccineAmount());
+        doctorDailyReport.setSowPhConsumableAmount(changeCountAndAmountReport.getPeiHuaiConsumerAmount());
 
         //产房母猪
         doctorDailyReport.setSowCfFeed(farrowSowChange.getFarrowSowFeedCount());
@@ -279,23 +281,23 @@ public class DoctorDailyReportManager {
         doctorDailyReport.setFarrowVaccinationAmount(farrowChange.getFarrowVaccineAmount());
         doctorDailyReport.setFarrowConsumableAmount(farrowChange.getFarrowConsumerAmount());
 
-        doctorDailyReport.setNurseryFeed(changeCountReport.getNurseryFeedCount());
-        doctorDailyReport.setNurseryFeedAmount(changeAmountReport.getNurseryFeedAmount());
-        doctorDailyReport.setNurseryMedicineAmount(changeAmountReport.getNurseryDrugAmount());
-        doctorDailyReport.setNurseryVaccinationAmount(changeAmountReport.getNurseryVaccineAmount());
-        doctorDailyReport.setNurseryConsumableAmount(changeAmountReport.getNurseryConsumerAmount());
+        doctorDailyReport.setNurseryFeed(changeCountAndAmountReport.getNurseryFeedCount());
+        doctorDailyReport.setNurseryFeedAmount(changeCountAndAmountReport.getNurseryFeedAmount());
+        doctorDailyReport.setNurseryMedicineAmount(changeCountAndAmountReport.getNurseryDrugAmount());
+        doctorDailyReport.setNurseryVaccinationAmount(changeCountAndAmountReport.getNurseryVaccineAmount());
+        doctorDailyReport.setNurseryConsumableAmount(changeCountAndAmountReport.getNurseryConsumerAmount());
 
-        doctorDailyReport.setFattenFeed(changeCountReport.getFattenFeedCount());
-        doctorDailyReport.setFattenFeedAmount(changeAmountReport.getFattenFeedAmount());
-        doctorDailyReport.setFattenMedicineAmount(changeAmountReport.getFattenDrugAmount());
-        doctorDailyReport.setFattenVaccinationAmount(changeAmountReport.getFattenVaccineAmount());
-        doctorDailyReport.setFattenConsumableAmount(changeAmountReport.getFattenConsumerAmount());
+        doctorDailyReport.setFattenFeed(changeCountAndAmountReport.getFattenFeedCount());
+        doctorDailyReport.setFattenFeedAmount(changeCountAndAmountReport.getFattenFeedAmount());
+        doctorDailyReport.setFattenMedicineAmount(changeCountAndAmountReport.getFattenDrugAmount());
+        doctorDailyReport.setFattenVaccinationAmount(changeCountAndAmountReport.getFattenVaccineAmount());
+        doctorDailyReport.setFattenConsumableAmount(changeCountAndAmountReport.getFattenConsumerAmount());
 
-        doctorDailyReport.setHoubeiFeed(changeCountReport.getHoubeiFeedCount());
-        doctorDailyReport.setHoubeiFeedAmount(changeAmountReport.getHoubeiFeedAmount());
-        doctorDailyReport.setHoubeiMedicineAmount(changeAmountReport.getHoubeiDrugAmount());
-        doctorDailyReport.setHoubeiVaccinationAmount(changeAmountReport.getHoubeiVaccineAmount());
-        doctorDailyReport.setHoubeiConsumableAmount(changeAmountReport.getHoubeiConsumerAmount());
+        doctorDailyReport.setHoubeiFeed(changeCountAndAmountReport.getHoubeiFeedCount());
+        doctorDailyReport.setHoubeiFeedAmount(changeCountAndAmountReport.getHoubeiFeedAmount());
+        doctorDailyReport.setHoubeiMedicineAmount(changeCountAndAmountReport.getHoubeiDrugAmount());
+        doctorDailyReport.setHoubeiVaccinationAmount(changeCountAndAmountReport.getHoubeiVaccineAmount());
+        doctorDailyReport.setHoubeiConsumableAmount(changeCountAndAmountReport.getHoubeiConsumerAmount());
 
         return doctorDailyReport;
     }
