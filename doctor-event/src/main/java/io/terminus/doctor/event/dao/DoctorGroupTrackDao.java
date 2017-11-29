@@ -69,4 +69,13 @@ public class DoctorGroupTrackDao extends MyBatisDao<DoctorGroupTrack> {
     public List<Map<String, Object>> queryFattenOutBySumAt(Map<String, Object> criteria){
         return getSqlSession().selectList(sqlId("queryFattenOutBySumAt"), criteria);
     }
+
+    /**
+     * 统计指定猪群的存栏之和
+     * @param list
+     * @return
+     */
+    public Integer sumPigletCount(List<Long> list) {
+        return getSqlSession().selectOne(sqlId("sumPigletCount"), list);
+    }
 }
