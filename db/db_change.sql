@@ -1588,3 +1588,8 @@ CREATE TABLE `doctor_warehouse_item_org` (
 -- 添加仓库类型 2017-11-07
 ALTER TABLE doctor_warehouse_stock_handle ADD warehouse_type TINYINT(4) NULL COMMENT '仓库类型';
 ALTER TABLE doctor_warehouse_material_handle ADD before_inventory_quantity DECIMAL(23,2) NULL COMMENT '盘点前库存数量';
+
+
+-- 物料领用添加领用类型 2017-11-28
+ALTER TABLE `pig_doctor`.`doctor_warehouse_material_apply`
+ADD COLUMN `apply_type` TINYINT(4) NOT NULL COMMENT '领用类型。0猪舍，1猪群，2母猪' AFTER `updated_at`;

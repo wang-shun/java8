@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-08-25 16:22:00
+ ~ Date: 2017-11-28 14:18:26
  ~ Created by [ your name ]
 -->
 
@@ -29,6 +29,7 @@
         <result property="unit" column="unit"/>
         <result property="quantity" column="quantity"/>
         <result property="unitPrice" column="unit_price"/>
+        <result property="applyType" column="apply_type"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -43,12 +44,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `material_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, 
+        `material_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{materialHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, 
+        #{materialHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, #{applyType}, 
         now(), now()
     </sql>
 
@@ -73,6 +74,7 @@
             <if test="unit != null">AND `unit` = #{unit}</if>
             <if test="quantity != null">AND `quantity` = #{quantity}</if>
             <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
+            <if test="applyType != null">AND `apply_type` = #{applyType}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
@@ -99,6 +101,7 @@
             <if test="unit != null">AND `unit` = #{unit}</if>
             <if test="quantity != null">AND `quantity` = #{quantity}</if>
             <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
+            <if test="applyType != null">AND `apply_type` = #{applyType}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
             <if test="materialNameLike != null">AND `material_name` like CONCAT('%',#{materialNameLike},'%')</if>
@@ -114,15 +117,20 @@
                     pig_group_id =#{t}
                 </foreach>
             </if>
-            <if test="groupOrBarn !=null and groupOrBarn=='barn'">
-                AND `pig_group_id` is null
+            <!--<if test="groupOrBarn !=null and groupOrBarn=='barn'">-->
+                <!--AND `pig_group_id` is null-->
+            <!--</if>-->
+            <!--<if test="groupOrBarn !=null and groupOrBarn=='group'">-->
+                <!--AND `pig_group_id` is not null AND `pig_group_id` != -1-->
+            <!--</if>-->
+            <if test="startDate !=null">
+                AND <![CDATA[apply_date >= #{startDate}]]>
             </if>
-            <if test="groupOrBarn !=null and groupOrBarn=='group'">
-                AND `pig_group_id` is not null AND `pig_group_id` != -1
+            <if test="endDate !=null">
+                AND  <![CDATA[apply_date <= #{endDate}]]>
             </if>
         </where>
     </sql>
-
 
     <insert id="create" parameterType="DoctorWarehouseMaterialApply" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
@@ -174,6 +182,7 @@
             <if test="unit != null">`unit` = #{unit},</if>
             <if test="quantity != null">`quantity` = #{quantity},</if>
             <if test="unitPrice != null">`unit_price` = #{unitPrice},</if>
+            <if test="applyType != null">`apply_type` = #{applyType},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}

@@ -1,8 +1,6 @@
 package io.terminus.doctor.move.job;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
-import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
