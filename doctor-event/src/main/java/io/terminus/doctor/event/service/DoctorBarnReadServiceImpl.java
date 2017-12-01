@@ -8,6 +8,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -235,6 +236,8 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             //种猪
             List<DoctorPigTrack> pigTracks = doctorPigTrackDao.findByBarnId(doctorBarn.getId());
             if (!pigTracks.isEmpty()) {
+                pigTracks = pigTracks.stream().filter(doctorPigTrack -> Objects.equal(doctorPigTrack.getIsRemoval(),
+                        IsOrNot.NO.getKey())).collect(Collectors.toList());
                 currentCount = pigTracks.size();
                 List<DoctorPigStatusCount> pigStatusCountList = doctorPigTrackDao.getStatusPigForBarn(doctorBarn.getId());
                 if (!pigStatusCountList.isEmpty()) {
