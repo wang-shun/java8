@@ -1668,9 +1668,9 @@
         FROM
         (
         SELECT sum(quantity) AS quantity,sum(quantity * unit_price) AS amount,type
-        FROM doctor_warehouse_material_apply
-        WHERE apply_type=1
-        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        FROM doctor_warehouse_material_apply t0 LEFT JOIN doctor_barns t1 on t0.pig_barn_id=t1.id
+        WHERE apply_type=1 and (t1.pig_type=1 or t1.pig_type=7)
+        <if test="farmId != null">AND t0.farm_id = #{farmId}</if>
         <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
         <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
         GROUP BY type
