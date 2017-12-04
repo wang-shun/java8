@@ -121,6 +121,7 @@ public class ReportController {
                                     .farmId(farmId)
                                     .handleYear(year)
                                     .handleMonth(month)
+                                    .deleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue())
                                     .build(),
                             WarehouseMaterialHandleType.OUT,
                             WarehouseMaterialHandleType.IN,
