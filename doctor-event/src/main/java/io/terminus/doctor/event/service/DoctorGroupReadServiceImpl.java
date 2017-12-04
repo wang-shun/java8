@@ -9,6 +9,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -542,6 +543,30 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("find farm to group count failed,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.farm.to.group.count.failed");
+        }
+    }
+
+    @Override
+    public Response<Integer> sumPigletCount(List<Long> groupIds) {
+        try {
+            if (Arguments.isNullOrEmpty(groupIds)) {
+                return Response.ok(0);
+            }
+            return Response.ok(doctorGroupTrackDao.sumPigletCount(groupIds));
+        } catch (Exception e) {
+            log.error("sum piglet count failed, groupIds:{},cause:{}",
+                    groupIds, Throwables.getStackTraceAsString(e));
+            return Response.fail("sum.piglet.count.failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorGroupTrack> findTrackByGroupId(Long groupId) {
+        try {
+            return Response.ok(doctorGroupTrackDao.findByGroupId(groupId));
+        } catch (Exception e) {
+            log.error("find track by groupId,groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.track.by.groupId");
         }
     }
 }

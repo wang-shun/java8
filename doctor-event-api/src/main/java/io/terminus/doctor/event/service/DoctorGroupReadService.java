@@ -312,4 +312,13 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<Map<Long, Integer>> findFarmToGroupCount();
+
+    /**
+     * 统计某些猪群的仔猪数量和
+     * @param groupIds
+     * @return
+     */
+    Response<Integer> sumPigletCount(List<Long> groupIds);
+
+    Response<DoctorGroupTrack> findTrackByGroupId(Long groupId);
 }

@@ -52,6 +52,9 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
         super.handleCheck(executeEvent, fromTrack);
         DoctorFostersDto fostersDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorFostersDto.class);
         expectTrue(!Objects.equals(fostersDto.getPigId(), fostersDto.getFosterSowId()), "not.foster.userself", fostersDto.getPigCode());
+
+        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(fostersDto.getFosterSowId());
+        expectTrue(Objects.equals(fromTrack.getCurrentBarnId(), pigTrack.getCurrentBarnId()), "not.same.barn", fostersDto.getPigCode());
     }
 
     @Override
