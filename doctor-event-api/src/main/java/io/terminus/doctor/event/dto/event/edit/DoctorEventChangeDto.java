@@ -16,6 +16,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DoctorEventChangeDto {
+    private Long eventId;
     /**
      * 当前猪场id
      */
