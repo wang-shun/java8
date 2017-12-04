@@ -10,6 +10,7 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -124,7 +125,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     public Response<Paging<DoctorGroupDetail>> pagingGroup(DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size) {
         try {
             PageInfo pageInfo = PageInfo.of(pageNo, size);
-            Map<String, Object> params = JSON_MAPPER.getMapper().convertValue(groupSearchDto, Map.class);
+            Map<String, Object> params = BeanMapper.convertObjectToMap(groupSearchDto);
             Paging<DoctorGroup> groupPaging = doctorGroupDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), params);
             List<DoctorGroupDetail> groupDetails = groupPaging.getData().stream()
                     .map(group -> new DoctorGroupDetail(group, doctorGroupTrackDao.findByGroupId(group.getId())))
