@@ -544,7 +544,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                             DoctorWarehouseMaterialApply apply = doctorWarehouseMaterialApplyDao.findMaterialHandle(target.getId());
                             if (!Objects.equals(source.getApplyPigGroupId(), apply.getPigGroupId())
                                     || !Objects.equals(source.getApplyPigBarnId(), apply.getPigBarnId())) {
-                                doctorWarehouseMaterialApplyDao.delete(apply.getId());
+//                                doctorWarehouseMaterialApplyDao.delete(apply.getId());
+                                doctorWarehouseMaterialApplyDao.deleteByMaterialHandle(apply.getMaterialHandleId());//如果是猪群领用会有两条记录
                                 doctorWarehouseMaterialApplyManager.apply(target, source);
                                 needUpdate = true;
                             }
