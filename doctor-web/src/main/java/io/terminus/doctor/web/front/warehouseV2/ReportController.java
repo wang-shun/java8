@@ -404,6 +404,7 @@ public class ReportController {
                     if (a.getPigGroupId() != null)
                         pigGroupName = a.getPigGroupName();
                 }
+//                pigGroupName = handleApply.get(handle.getId()).get(0).getPigGroupName();
                 pigBarnName = handleApply.get(handle.getId()).get(0).getPigBarnName();
 
             }
