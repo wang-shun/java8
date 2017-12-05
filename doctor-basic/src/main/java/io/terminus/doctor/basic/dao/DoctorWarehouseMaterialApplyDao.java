@@ -37,14 +37,22 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         return sqlSession.selectList(sqlId("advList"), criteria);
     }
 
+    /**
+     * @param materialHandleId
+     * @return 如果是猪舍领用，返回猪舍领用
+     * 如果是猪群领用，返回猪群领用那一条，屏蔽猪舍领用那一条
+     * 如果没有，返回null
+     */
     public DoctorWarehouseMaterialApply findMaterialHandle(Long materialHandleId) {
-        List<DoctorWarehouseMaterialApply> applies = this.list(DoctorWarehouseMaterialApply.builder()
-                .materialHandleId(materialHandleId)
-                .build());
-        if (applies.isEmpty())
-            return null;
+//        List<DoctorWarehouseMaterialApply> applies = this.list(DoctorWarehouseMaterialApply.builder()
+//                .materialHandleId(materialHandleId)
+//                .build());
+//        if (applies.isEmpty())
+//            return null;
+//
+//        return applies.get(0);
 
-        return applies.get(0);
+        return sqlSession.selectOne("findByMaterialHandle", materialHandleId);
     }
 
     /**

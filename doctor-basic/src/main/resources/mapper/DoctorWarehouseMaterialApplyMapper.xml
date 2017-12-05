@@ -44,12 +44,16 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `material_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`, 
+        `material_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`,
+        `pig_barn_name`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_name`,
+        `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{materialHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, #{applyType}, 
+        #{materialHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId},
+        #{pigBarnName}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffName}, #{applyYear},
+        #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, #{applyType},
         now(), now()
     </sql>
 
@@ -118,10 +122,10 @@
                 </foreach>
             </if>
             <!--<if test="groupOrBarn !=null and groupOrBarn=='barn'">-->
-                <!--AND `pig_group_id` is null-->
+            <!--AND `pig_group_id` is null-->
             <!--</if>-->
             <!--<if test="groupOrBarn !=null and groupOrBarn=='group'">-->
-                <!--AND `pig_group_id` is not null AND `pig_group_id` != -1-->
+            <!--AND `pig_group_id` is not null AND `pig_group_id` != -1-->
             <!--</if>-->
             <if test="startDate !=null">
                 AND <![CDATA[apply_date >= #{startDate}]]>
@@ -189,58 +193,78 @@
     </update>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM <include refid="tb"/>
+        DELETE FROM
+        <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-    
+
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
     <select id="list" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>
 
     <select id="listAndOrderByHandleDate" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `apply_date` DESC
         <if test="limit != null">limit #{limit}</if>
     </select>
 
     <select id="advList" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="advCriteria"/>
         ORDER BY `id` DESC
     </select>
 
-    <select id="sumGroupFeedApply" parameterType="map" resultType="double" >
+    <select id="sumGroupFeedApply" parameterType="map" resultType="double">
         SELECT ifnull(sum(quantity),0)
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         WHERE
         pig_group_id = #{groupId}
-        <if test="startAt != null"> AND apply_date &gt;= #{startAt} </if>
-        <if test="endAt != null"> AND apply_date &lt;= #{endAt} </if>
+        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
+        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
     </select>
 
     <delete id="deleteByMaterialHandle" parameterType="long">
-        DELETE FROM <include refid="tb"/>
+        DELETE FROM
+        <include refid="tb"/>
         WHERE material_handle_id = #{materialHandleId}
     </delete>
+
+    <select id="findByMaterialHandle" parameterType="long" resultMap="DoctorWarehouseMaterialApplyMap">
+        SELECT *
+        FROM
+        <include refid="tb"/>
+        WHERE material_handle_id= #{materialHandleId}
+        ORDER BY id DESC LIMIT 1
+    </select>
 
 </mapper>
