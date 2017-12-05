@@ -295,3 +295,29 @@ CREATE TABLE `doctor_warehouse_stock_monthly` (
   PRIMARY KEY (`id`),
   KEY `warehouse_id_year_month_material_id_index` (`warehouse_id`,`handle_year`,`handle_month`,`material_id`)
 ) COMMENT='仓库物料月度结余表';
+CREATE TABLE `doctor_warehouse_material_apply` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `material_handle_id` bigint(20) NOT NULL COMMENT '物料处理编号',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪厂编号',
+  `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
+  `warehouse_type` smallint(6) NOT NULL COMMENT '仓库类型',
+  `warehouse_name` varchar(64) DEFAULT NULL COMMENT '仓库名',
+  `pig_barn_id` bigint(20) NOT NULL COMMENT '领用猪舍编号',
+  `pig_barn_name` varchar(64) DEFAULT NULL COMMENT '领用猪舍名称',
+  `pig_group_id` bigint(20) DEFAULT NULL COMMENT '领用猪群编号',
+  `pig_group_name` varchar(64) DEFAULT NULL COMMENT '领用猪群名称',
+  `material_id` bigint(20) NOT NULL COMMENT '物料编号',
+  `apply_date` datetime DEFAULT NULL COMMENT '领用日期',
+  `apply_staff_name` varchar(64) DEFAULT NULL COMMENT '领用人',
+  `apply_year` smallint(12) NOT NULL COMMENT '领用年',
+  `apply_month` tinyint(4) NOT NULL COMMENT '领用月',
+  `material_name` varchar(64) DEFAULT NULL COMMENT '物料名称',
+  `type` smallint(6) DEFAULT NULL COMMENT '物料类型，易耗品，原料，饲料，药品，饲料',
+  `unit` varchar(64) DEFAULT NULL COMMENT '单位',
+  `quantity` decimal(23,2) NOT NULL COMMENT '数量',
+  `unit_price` bigint(20) NOT NULL COMMENT '单价，单位分',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `apply_type` tinyint(4) NOT NULL COMMENT '领用类型。0猪舍，1猪群，2母猪',
+  PRIMARY KEY (`id`)
+) COMMENT='仓库物料领用表';

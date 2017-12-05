@@ -63,5 +63,9 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         return getSqlSession().selectOne(sqlId("sumGroupFeedApply"), map);
     }
 
+
+    public void deleteByMaterialHandle(Long materialHandleId) {
+        getSqlSession().delete("deleteByMaterialHandle", materialHandleId);
+    }
 }
 
