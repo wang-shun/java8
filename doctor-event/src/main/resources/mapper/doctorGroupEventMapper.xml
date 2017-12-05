@@ -269,7 +269,7 @@
         <if test="inType != null">AND in_type = #{inType}</if>
         <if test="notInType != null">AND in_type != #{notInType}</if>
         <if test="otherBarnId != null">AND other_barn_id = #{otherBarnId}</if>
-        <if test="otherBarnType != null">AND other_barn_type = #{otherBarnType},</if>
+        <if test="otherBarnType != null">AND other_barn_type = #{otherBarnType}</if>
         <if test="relGroupEventId != null">AND rel_group_event_id = #{relGroupEventId}</if>
         <if test="relPigEventId != null">AND rel_pig_event_id = #{relPigEventId}</if>
         <if test="outId != null">AND out_id = #{outId}</if>
