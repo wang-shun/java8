@@ -156,7 +156,11 @@ public class ReportController {
                         .amount((lastMonthBalance.containsKey(wareHouse.getId()) ? lastMonthBalance.get(wareHouse.getId()).getAmount() : 0) + balance.getAmount())
                         .build());
 
-                lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount(), balance.getQuantity()));
+                if (lastMonthBalance.containsKey(wareHouse.getId())) {
+                    AmountAndQuantityDto a = lastMonthBalance.get(wareHouse.getId());
+                    lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount() + a.getAmount(), balance.getQuantity().add(a.getQuantity())));
+                } else
+                    lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount(), balance.getQuantity()));
 
                 long inAmount;
                 if (!inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.IN))
