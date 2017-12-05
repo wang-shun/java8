@@ -376,31 +376,36 @@ public class ReportController {
                 return Collections.emptyList();
             criteria.put("skuIds", skuIds);
         }
-//        if (StringUtils.isNotBlank(materialName))
-//            criteria.put("materialNameLike", materialName);
 
         Response<List<DoctorWarehouseMaterialHandle>> materialHandleResponse = doctorWarehouseMaterialHandleReadService.advList(criteria);
         if (!materialHandleResponse.isSuccess())
             throw new JsonResponseException(materialHandleResponse.getError());
 
-        List<DoctorWarehouseMaterialApply> applies = RespHelper.or500(doctorWarehouseMaterialApplyReadService.month(warehouseId, date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, null));
+//        List<DoctorWarehouseMaterialApply> applies = RespHelper.or500(doctorWarehouseMaterialApplyReadService.month(warehouseId, date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, null));
+//
+//        Map<Long/*MaterialHandleId*/, DoctorWarehouseMaterialApply> handleApply = new HashMap<>();
+//        for (DoctorWarehouseMaterialApply apply : applies) {
+//            handleApply.put(apply.getMaterialHandleId(), apply);
+//        }
+        Map<Long, List<DoctorWarehouseMaterialApply>> handleApply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.month(warehouseId, date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, null)).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialApply::getMaterialHandleId));
 
-        Map<Long/*MaterialHandleId*/, DoctorWarehouseMaterialApply> handleApply = new HashMap<>();
-        for (DoctorWarehouseMaterialApply apply : applies) {
-            handleApply.put(apply.getMaterialHandleId(), apply);
-        }
 
         Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(materialHandleResponse.getResult().stream().map(DoctorWarehouseMaterialHandle::getMaterialId).collect(Collectors.toList()))).stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
 
         List<WarehouseMaterialHandleVo> vos = new ArrayList<>(materialHandleResponse.getResult().size());
         for (DoctorWarehouseMaterialHandle handle : materialHandleResponse.getResult()) {
 
-            String pigBarnName, pigGroupName;
+            String pigBarnName, pigGroupName = null;
             if (!handleApply.containsKey(handle.getId()))
                 pigBarnName = pigGroupName = null;
             else {
-                pigBarnName = handleApply.get(handle.getId()).getPigBarnName();
-                pigGroupName = handleApply.get(handle.getId()).getPigGroupName();
+
+                for (DoctorWarehouseMaterialApply a : handleApply.get(handle.getId())) {
+                    if (a.getPigGroupId() != null)
+                        pigGroupName = a.getPigGroupName();
+                }
+                pigBarnName = handleApply.get(handle.getId()).get(0).getPigBarnName();
+
             }
 
 //            if (!skuMap.containsKey(handle.getMaterialId()))
