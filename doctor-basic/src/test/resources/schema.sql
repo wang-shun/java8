@@ -281,3 +281,17 @@ CREATE TABLE `doctor_warehouse_stock_handle` (
   PRIMARY KEY (`id`),
   KEY `index_serial_no_warehouse_id` (`serial_no`,`warehouse_id`)
 ) COMMENT='库存处理表';
+
+CREATE TABLE `doctor_warehouse_stock_monthly` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
+  `material_id` bigint(20) NOT NULL COMMENT '物料编号',
+  `handle_year` smallint(6) NOT NULL COMMENT '处理年',
+  `handle_month` tinyint(2) NOT NULL COMMENT '处理月',
+  `balance_quantity` decimal(23,2) NOT NULL DEFAULT '0.00' COMMENT '余量',
+  `balacne_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '余额',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `warehouse_id_year_month_material_id_index` (`warehouse_id`,`handle_year`,`handle_month`,`material_id`)
+) COMMENT='仓库物料月度结余表';

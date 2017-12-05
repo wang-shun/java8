@@ -151,7 +151,6 @@ public class ReportController {
             for (DoctorWareHouse wareHouse : warehouseResponse.getResult()) {
                 AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), year, month));
 
-
                 balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
                         .amount((lastMonthBalance.containsKey(wareHouse.getId()) ? lastMonthBalance.get(wareHouse.getId()).getAmount() : 0) + balance.getAmount())

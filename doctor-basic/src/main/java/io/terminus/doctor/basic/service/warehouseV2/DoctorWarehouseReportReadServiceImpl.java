@@ -1,16 +1,22 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.dao.DoctorWarehousePurchaseDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseStockMonthlyDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
+import io.terminus.doctor.common.enums.WareHouseType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,147 +48,218 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
     @Autowired
     private DoctorWarehousePurchaseDao doctorWarehousePurchaseDao;
 
-    @Override
-    public Response<AmountAndQuantityDto> countFarmBalance(Long farmId) {
+    @Autowired
+    private DoctorWarehouseStockMonthlyDao doctorWarehouseStockMonthlyDao;
 
-        List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase
-                .builder()
-                .farmId(farmId)
-                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
-                .build());
+    @Autowired
+    private DoctorWareHouseDao doctorWareHouseDao;
 
-        return countBalance(purchases);
-    }
+//    @Override
+//    public Response<AmountAndQuantityDto> countFarmBalance(Long farmId) {
+
+//        List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase
+//                .builder()
+//                .farmId(farmId)
+//                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+//                .build());
+//
+//        return countBalance(purchases);
+
+//        doctorWarehouseStockMonthlyDao.list(DoctorWarehouseStockMonthly.builder()
+//
+//                .build());
+//    }
 
     @Override
     public Response<AmountAndQuantityDto> countFarmBalance(Long farmId, Long skuId) {
-        List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase
-                .builder()
-                .farmId(farmId)
-                .materialId(skuId)
-                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
-                .build());
 
-        return countBalance(purchases);
+        Map<String, Object> params = new HashMap<>();
+        params.put("warehouseIds", doctorWareHouseDao.findByFarmId(farmId).stream().map(DoctorWareHouse::getId).collect(Collectors.toList()));
+        params.put("skuId", skuId);
+
+        return Response.ok(doctorWarehouseStockMonthlyDao.statistics(params));
+
+//        List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase
+//                .builder()
+//                .farmId(farmId)
+//                .materialId(skuId)
+//                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+//                .build());
+//
+//        return countBalance(purchases);
     }
 
-    @Override
-    public Response<AmountAndQuantityDto> countWarehouseTypeBalance(Long farmId, Integer type) {
-
-        return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
-                .farmId(farmId)
-                .warehouseType(type)
-                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
-                .build()));
-    }
+//    @Override
+//    public Response<AmountAndQuantityDto> countWarehouseTypeBalance(Long farmId, Integer type) {
+//
+//        return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
+//                .farmId(farmId)
+//                .warehouseType(type)
+//                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+//                .build()));
+//    }
 
     @Override
     public Response<Map<Integer, AmountAndQuantityDto>> countBalanceEachWarehouseType(Long farmId) {
 
 
-        Map<Integer, List<DoctorWarehousePurchase>> warehouseTypePurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
-                .farmId(farmId)
-                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
-                .build()).stream().collect(Collectors.groupingBy(DoctorWarehousePurchase::getWarehouseType));
-
-
         Map<Integer, AmountAndQuantityDto> eachWarehouseTypeBalance = new HashMap<>();
-        for (Integer warehouseType : warehouseTypePurchases.keySet()) {
-            eachWarehouseTypeBalance.put(warehouseType, countBalance(warehouseTypePurchases.get(warehouseType)).getResult());
-        }
+
+        doctorWareHouseDao.findByFarmId(farmId).stream().collect(Collectors.groupingBy(DoctorWareHouse::getType)).forEach((k, v) -> {
+            Map<String, Object> params = new HashMap<>();
+            long amount = 0;
+            BigDecimal quantity = new BigDecimal(0);
+            for (DoctorWareHouse w : v) {
+                params.put("warehouseId", w.getId());
+                AmountAndQuantityDto amountAndQuantityDto = doctorWarehouseStockMonthlyDao.statistics(params);
+                amount += amountAndQuantityDto.getAmount();
+                quantity = quantity.add(amountAndQuantityDto.getQuantity());
+            }
+            eachWarehouseTypeBalance.put(k, new AmountAndQuantityDto(amount, quantity));
+        });
+
         return Response.ok(eachWarehouseTypeBalance);
+
+//        Map<Integer, List<DoctorWarehousePurchase>> warehouseTypePurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
+//                .farmId(farmId)
+//                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+//                .build()).stream().collect(Collectors.groupingBy(DoctorWarehousePurchase::getWarehouseType));
+//
+//
+//        Map<Integer, AmountAndQuantityDto> eachWarehouseTypeBalance = new HashMap<>();
+//        for (Integer warehouseType : warehouseTypePurchases.keySet()) {
+//            eachWarehouseTypeBalance.put(warehouseType, countBalance(warehouseTypePurchases.get(warehouseType)).getResult());
+//        }
+//        return Response.ok(eachWarehouseTypeBalance);
     }
 
     @Override
     public Response<AmountAndQuantityDto> countWarehouseBalance(Long warehouseId) {
-        return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
-                .warehouseId(warehouseId)
-                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
-                .build()));
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("warehouseId", warehouseId);
+        return Response.ok(doctorWarehouseStockMonthlyDao.statistics(params));
+//        return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
+//                .warehouseId(warehouseId)
+//                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+//                .build()));
     }
 
     @Override
     public Response<Map<Long, AmountAndQuantityDto>> countEachWarehouseBalance(Long farmId, Integer warehouseType) {
 
-        Map<Long, List<DoctorWarehousePurchase>> warehousePurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
-                .farmId(farmId)
-                .warehouseType(warehouseType)
-                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
-                .build()).stream().collect(Collectors.groupingBy(DoctorWarehousePurchase::getWarehouseId));
-
-
-        //如果仓库没有余额和余量，则为null
         Map<Long, AmountAndQuantityDto> eachWarehouseBalance = new HashMap<>();
-        for (Long warehouseId : warehousePurchases.keySet()) {
-            eachWarehouseBalance.put(warehouseId, countBalance(warehousePurchases.get(warehouseId)).getResult());
-        }
-
+        doctorWareHouseDao.list(DoctorWareHouse.builder().farmId(farmId).type(warehouseType).build()).stream().forEach(w -> {
+            Map<String, Object> params = new HashMap<>();
+            params.put("warehouseId", w.getId());
+            eachWarehouseBalance.put(w.getId(), doctorWarehouseStockMonthlyDao.statistics(params));
+        });
         return Response.ok(eachWarehouseBalance);
+//        Map<Long, List<DoctorWarehousePurchase>> warehousePurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
+//                .farmId(farmId)
+//                .warehouseType(warehouseType)
+//                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+//                .build()).stream().collect(Collectors.groupingBy(DoctorWarehousePurchase::getWarehouseId));
+//
+//
+//        如果仓库没有余额和余量，则为null
+//        Map<Long, AmountAndQuantityDto> eachWarehouseBalance = new HashMap<>();
+//        for (Long warehouseId : warehousePurchases.keySet()) {
+//            eachWarehouseBalance.put(warehouseId, countBalance(warehousePurchases.get(warehouseId)).getResult());
+//        }
+//
+//        return Response.ok(eachWarehouseBalance);
     }
 
     @Override
-    public Response<Map<Long, AmountAndQuantityDto>> countEachMaterialBalance(Long farmId, Long warehouId) {
-        Map<Long, List<DoctorWarehousePurchase>> materialPurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
-                .farmId(farmId)
-                .warehouseId(warehouId)
-                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
-                .build()).stream().collect(Collectors.groupingBy(DoctorWarehousePurchase::getMaterialId));
-        Map<Long, AmountAndQuantityDto> eachMaterialBalance = new HashMap<>();
-        for (Long materialId : materialPurchases.keySet()) {
-            eachMaterialBalance.put(materialId, countBalance(materialPurchases.get(materialId)).getResult());
-        }
+    public Response<Map<Long, AmountAndQuantityDto>> countEachMaterialBalance(Long farmId, Long warehouseId) {
 
-        return Response.ok(eachMaterialBalance);
+
+        return Response.ok(doctorWarehouseStockMonthlyDao.statisticsGroupBySku(warehouseId));
+//        Map<Long, List<DoctorWarehousePurchase>> materialPurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
+//                .farmId(farmId)
+//                .warehouseId(warehouId)
+//                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+//                .build()).stream().collect(Collectors.groupingBy(DoctorWarehousePurchase::getMaterialId));
+//        Map<Long, AmountAndQuantityDto> eachMaterialBalance = new HashMap<>();
+//        for (Long materialId : materialPurchases.keySet()) {
+//            eachMaterialBalance.put(materialId, countBalance(materialPurchases.get(materialId)).getResult());
+//        }
+//
+//        return Response.ok(eachMaterialBalance);
     }
 
     @Override
     public Response<AmountAndQuantityDto> countMaterialBalance(Long warehouseId, Long materialId) {
-        return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
-                .warehouseId(warehouseId)
-                .materialId(materialId)
-                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
-                .build()));
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("warehouseId", warehouseId);
+        params.put("skuId", materialId);
+        return Response.ok(doctorWarehouseStockMonthlyDao.statistics(params));
+//        return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
+//                .warehouseId(warehouseId)
+//                .materialId(materialId)
+//                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+//                .build()));
     }
 
-    @Override
-    public Response<AmountAndQuantityDto> countMaterialBalance(Long warehouseId, Long materialId, String vendorName) {
-        return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
-                .warehouseId(warehouseId)
-                .materialId(materialId)
-                .vendorName(vendorName)
-                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
-                .build()));
-    }
+//    @Override
+//    public Response<AmountAndQuantityDto> countMaterialBalance(Long warehouseId, Long materialId, String vendorName) {
+//        return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
+//                .warehouseId(warehouseId)
+//                .materialId(materialId)
+//                .vendorName(vendorName)
+//                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+//                .build()));
+//    }
 
     @Override
     public Response<AmountAndQuantityDto> countBalance(Long farmId, Integer warehouseType, Long warehouseId, Long materialId, String vendorName) {
 
-        return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
-                .farmId(farmId)
-                .warehouseType(warehouseType)
-                .warehouseId(warehouseId)
-                .materialId(materialId)
-                .vendorName(vendorName)
-                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
-                .build()));
-    }
 
-    @Override
-    public Response<AmountAndQuantityDto> countBalance(List<DoctorWarehousePurchase> purchases) {
-        if (null == purchases || purchases.isEmpty())
-            return Response.ok(new AmountAndQuantityDto(0, new BigDecimal(0)));
+        long amount = 0;
+        BigDecimal quantity = new BigDecimal(0);
+        List<DoctorWareHouse> wareHouses;
+        if (null != warehouseId)
+            wareHouses = Collections.singletonList(doctorWareHouseDao.findById(warehouseId));
+        else
+            wareHouses = doctorWareHouseDao.list(DoctorWareHouse.builder().id(warehouseId).farmId(farmId).type(warehouseType).build());
+        for (DoctorWareHouse wareHouse : wareHouses) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("warehouseId", wareHouse.getId());
+            params.put("skuId", materialId);
+            AmountAndQuantityDto a = doctorWarehouseStockMonthlyDao.statistics(params);
+            amount += a.getAmount();
+            quantity = quantity.add(a.getQuantity());
 
-
-        long totalAmount = 0;
-        BigDecimal totalQuantity = new BigDecimal(0);
-        for (DoctorWarehousePurchase purchase : purchases) {
-            BigDecimal leftQuantity = purchase.getQuantity().subtract(purchase.getHandleQuantity());
-            totalQuantity = leftQuantity.add(totalQuantity);
-            totalAmount += leftQuantity.multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
         }
-
-        return Response.ok(new AmountAndQuantityDto(totalAmount, totalQuantity));
+        return Response.ok(new AmountAndQuantityDto(amount, quantity));
+//        return countBalance(doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
+//                .farmId(farmId)
+//                .warehouseType(warehouseType)
+//                .warehouseId(warehouseId)
+//                .materialId(materialId)
+//                .vendorName(vendorName)
+//                .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
+//                .build()));
     }
+
+//    @Override
+//    public Response<AmountAndQuantityDto> countBalance(List<DoctorWarehousePurchase> purchases) {
+//        if (null == purchases || purchases.isEmpty())
+//            return Response.ok(new AmountAndQuantityDto(0, new BigDecimal(0)));
+//
+//
+//        long totalAmount = 0;
+//        BigDecimal totalQuantity = new BigDecimal(0);
+//        for (DoctorWarehousePurchase purchase : purchases) {
+//            BigDecimal leftQuantity = purchase.getQuantity().subtract(purchase.getHandleQuantity());
+//            totalQuantity = leftQuantity.add(totalQuantity);
+//            totalAmount += leftQuantity.multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
+//        }
+//
+//        return Response.ok(new AmountAndQuantityDto(totalAmount, totalQuantity));
+//    }
 
     @Override
     public Response<WarehouseStockStatisticsDto> countMaterialHandle(Long farmId, Calendar handleDate) {
