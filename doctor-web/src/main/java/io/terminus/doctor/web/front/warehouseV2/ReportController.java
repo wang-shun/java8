@@ -413,9 +413,6 @@ public class ReportController {
 
             }
 
-//            if (!skuMap.containsKey(handle.getMaterialId()))
-//                throw new InvalidException("warehouse.sku.not.found", handle.getMaterialId());
-
             WarehouseMaterialHandleVo handleVo = WarehouseMaterialHandleVo.builder()
                     .materialName(handle.getMaterialName())
                     .type(handle.getType())
@@ -439,6 +436,12 @@ public class ReportController {
                 handleVo.setUnit(null == unit ? "" : unit.getName());
 //                handleVo.setUnit(skuMap.get(handle.getMaterialId()).get(0).getUnit());
             }
+
+            if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()) {
+                DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(handle.getOtherTransferHandleId()));
+                handleVo.setTransferInWarehouseName(transferInHandle.getWarehouseName());
+            }
+
 
             vos.add(handleVo);
         }
