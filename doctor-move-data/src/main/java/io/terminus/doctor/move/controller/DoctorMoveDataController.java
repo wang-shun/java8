@@ -1371,4 +1371,16 @@ public class DoctorMoveDataController {
         log.info("flush primary barns permisson ending");
         return Boolean.TRUE;
     }
+
+    /**
+     * 刷新猪群变动事件的平均日龄
+     * @return
+     */
+    @RequestMapping(value = "/flushGroupChangeEventAvgDayAge", method = RequestMethod.GET)
+    public Boolean flushGroupChangeEventAvgDayAge() {
+        log.info("flush Group sale event avg day age starting");
+        doctorMoveDataService.flushGroupChangeEventAvgDayAge();
+        log.info("flush Group sale event avg day age end");
+        return Boolean.TRUE;
+    }
 }

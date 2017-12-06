@@ -266,4 +266,22 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public List<DoctorFarmEarlyEventAtDto> getFarmEarlyEventAt(String startDate)  {
         return sqlSession.selectList(sqlId("getFarmEarlyEventAt"), startDate);
     }
+
+    /**
+     * 修复日龄,请勿使用
+     */
+    @Deprecated
+    public List<Long> findAllGroupIdWithChangeNoAvgDayAge() {
+        return sqlSession.selectList(sqlId("findAllGroupIdWithChangeNoAvgDayAge"));
+    }
+
+    /**
+     * 修复日龄,请勿使用
+     * @param id
+     * @param avgDayAge
+     */
+    @Deprecated
+    public void updateAvgDayAge(Long id, Integer avgDayAge) {
+        sqlSession.update(sqlId("updateAvgDayAge"), ImmutableMap.of("id", id, "avgDayAge", avgDayAge));
+    }
 }

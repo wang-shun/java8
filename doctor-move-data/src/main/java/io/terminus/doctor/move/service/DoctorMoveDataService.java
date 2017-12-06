@@ -90,6 +90,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.job.DoctorGroupBatchSummaryManager;
 import io.terminus.doctor.move.model.DoctorSowFarrowWeight;
@@ -3019,5 +3020,44 @@ public class DoctorMoveDataService {
             updatePermission.setBarnIds(Joiners.COMMA.join(barnIds));
             doctorUserDataPermissionDao.update(updatePermission);
         });
+    }
+
+    public void flushGroupChangeEventAvgDayAge() {
+        List<Long> groupIds = doctorGroupEventDao.findAllGroupIdWithChangeNoAvgDayAge();
+        if (groupIds.isEmpty()) {
+            return;
+        }
+
+        List<Integer> includeTypes = Lists.newArrayList(GroupEventType.CHANGE.getValue(), GroupEventType.MOVE_IN.getValue(),
+                GroupEventType.TRANS_FARM.getValue(), GroupEventType.TRANS_GROUP.getValue());
+
+        groupIds.parallelStream().forEach(groupId -> {
+            try {
+                List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypes(groupId, includeTypes);
+                int currentQuantity = 0;
+                int avgDay = 0;
+                Date lastEvent = new Date();
+                for (DoctorGroupEvent groupEvent : groupEventList) {
+                    if (Objects.equals(MoreObjects.firstNonNull(groupEvent.getQuantity(), 0), 0)) {
+                        continue;
+                    }
+                    if (Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
+                        avgDay = avgDay + DateUtil.getDeltaDays(lastEvent, groupEvent.getEventAt());
+                        avgDay = EventUtil.getAvgDayAge(avgDay, currentQuantity, groupEvent.getAvgDayAge(), groupEvent.getQuantity());
+                        currentQuantity += groupEvent.getQuantity();
+                        lastEvent = groupEvent.getEventAt();
+                    } else {
+                        if (Objects.equals(groupEvent.getType(), GroupEventType.CHANGE.getValue()) && isNull(groupEvent.getAvgDayAge())) {
+                            doctorGroupEventDao.updateAvgDayAge(groupEvent.getId(),
+                                    avgDay + DateUtil.getDeltaDays(lastEvent, groupEvent.getEventAt()));
+                        }
+                        currentQuantity -= groupEvent.getQuantity();
+                    }
+                }
+            }catch (Exception e){
+                log.error("=======groupId:{}", groupId);
+            }
+        });
+
     }
 }
