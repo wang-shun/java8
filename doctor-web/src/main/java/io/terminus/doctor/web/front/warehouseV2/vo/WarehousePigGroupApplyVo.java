@@ -24,6 +24,8 @@ public class WarehousePigGroupApplyVo {
 
     private Date closeDate;
 
+    private Date applyDate;
+
     private String pigBarnName;
 
     private String applyStaffName;
