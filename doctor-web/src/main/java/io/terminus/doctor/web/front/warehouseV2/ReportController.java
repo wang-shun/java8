@@ -627,6 +627,7 @@ public class ReportController {
                     .quantity(apply.getQuantity())
                     .unitPrice(apply.getUnitPrice())
                     .amount(apply.getQuantity().multiply(new BigDecimal(apply.getUnitPrice())).longValue())
+                    .applyDate(apply.getApplyDate())
                     .build();
 
             if (skuMap.containsKey(apply.getMaterialId())) {
