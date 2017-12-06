@@ -84,6 +84,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         event.setWeight(change.getWeight());            //总重
         event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
+        event.setAvgDayAge(groupTrack.getAvgDayAge());
         event.setChangeTypeId(changeEvent.getChangeTypeId());   //变动类型id
         event.setSowId(change.getSowId());
         event.setSowCode(change.getSowCode());
