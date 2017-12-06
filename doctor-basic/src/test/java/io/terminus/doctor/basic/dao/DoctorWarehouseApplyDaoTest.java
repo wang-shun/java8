@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.jdbc.JdbcTestUtils;
+import sun.java2d.pipe.AAShapePipe;
 
 /**
  * Created by sunbo@terminus.io on 2017/12/5.
@@ -41,6 +42,15 @@ public class DoctorWarehouseApplyDaoTest extends BaseDaoTest {
     public void testFindByMaterialHandleOnNoData() {
         DoctorWarehouseMaterialApply apply = doctorWarehouseMaterialApplyDao.findMaterialHandle(1L);
         Assert.assertNull(apply);
+    }
+
+    @Test
+    @Sql(statements = "insert into doctor_warehouse_material_apply(material_handle_id,pig_group_id)values(2,null)")
+    @Sql(statements = "delete from doctor_warehouse_material_apply where material_handle_id=2", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void testFindByMaterialHandleOnBarn() {
+        DoctorWarehouseMaterialApply apply = doctorWarehouseMaterialApplyDao.findMaterialHandle(2L);
+        Assert.assertNotNull(apply);
+        Assert.assertNull(apply.getPigGroupId());
     }
 
 }
