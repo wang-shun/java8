@@ -27,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -95,9 +94,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
         event.setQuantity(transGroup.getQuantity());
 
-        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
-
+        event.setAvgDayAge(groupTrack.getAvgDayAge());  //重算日龄
         event.setAvgWeight(transGroup.getAvgWeight());  //均重
         event.setWeight(realWeight);                    //总重
         event.setTransGroupType(getTransType(null, group.getPigType(), toBarn).getValue());   //区别内转还是外转(null是因为不用判断转入类型)
@@ -180,9 +177,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
         event.setQuantity(transGroup.getQuantity());
 
-        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
-        event.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));  //重算日龄
-
+        event.setAvgDayAge(groupTrack.getAvgDayAge());  //重算日龄
         event.setSowId(transGroup.getSowId());
         event.setSowCode(transGroup.getSowCode());
         event.setAvgWeight(transGroup.getAvgWeight());  //均重

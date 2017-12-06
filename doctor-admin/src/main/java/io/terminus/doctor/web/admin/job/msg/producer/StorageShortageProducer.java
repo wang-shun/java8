@@ -2,6 +2,7 @@ package io.terminus.doctor.web.admin.job.msg.producer;
 
 import com.google.api.client.util.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
@@ -79,6 +80,7 @@ public class StorageShortageProducer extends AbstractJobProducer {
 
         params.clear();
         params.put("farmId", ruleRole.getFarmId());
+        params.put("apply_type", WarehouseMaterialApplyType.BARN.getValue());//只需要猪舍领用。猪群和母猪领用都会再生成一条猪舍领用，如不过滤会重复统计
         params.put("skuIds", stocks
                 .stream()
                 .map(DoctorWarehouseStock::getSkuId)

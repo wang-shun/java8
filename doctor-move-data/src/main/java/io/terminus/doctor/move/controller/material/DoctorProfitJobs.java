@@ -9,11 +9,11 @@ import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,7 +49,7 @@ public class DoctorProfitJobs {
     public void profitReport() {
 
         try {
-            if(!hostLeader.isLeader()) {
+            if (!hostLeader.isLeader()) {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
                 return;
             }
@@ -61,6 +61,27 @@ public class DoctorProfitJobs {
             log.error("daily profit job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/profit/{farmId}")
+    public void refreshProfitReport(@PathVariable Long farmId,
+                                    @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
+        try {
+            if (!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+
+            Date refreshDate = null == date ? new Date() : date;
+            log.info("daily profit job start, now is:{}", DateUtil.toDateTimeString(refreshDate));
+
+            doctorGroupProfitManage.sumDoctorProfitMaterialOrPig(Collections.singletonList(farmId), refreshDate);
+            log.info("daily profit job end, now is:{}", DateUtil.toDateTimeString(refreshDate));
+        } catch (Exception e) {
+            log.error("daily profit job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
     private List<Long> getAllFarmIds() {
         return RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
     }
@@ -68,7 +89,7 @@ public class DoctorProfitJobs {
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public void profitReportAll() {
         try {
-            if(!hostLeader.isLeader()) {
+            if (!hostLeader.isLeader()) {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
                 return;
             }
@@ -76,21 +97,22 @@ public class DoctorProfitJobs {
             List<Long> farmIds = getAllFarmIds();
 
 
-            for (int i = 0; i <= 6 ;i++) {
+            for (int i = 0; i <= 6; i++) {
                 int finalI = i;
                 new Thread(new Runnable() {
                     Date dateStart = DateUtils.addYears(DateUtil.toDate("2011-01-01"), finalI);
                     Date nowDate = DateUtil.monthStart(DateUtils.addYears(dateStart, 1));
+
                     @Override
                     public void run() {
                         Date date = dateStart;
                         while (!DateUtil.inSameYearMonth(date, nowDate)) {
-                            log.info("profit job time, now is:{},{}", DateUtil.toDateTimeString(date),Thread.currentThread().getName());
+                            log.info("profit job time, now is:{},{}", DateUtil.toDateTimeString(date), Thread.currentThread().getName());
                             doctorGroupProfitManage.sumDoctorProfitMaterialOrPig(farmIds, date);
                             date = DateUtils.addMonths(date, 1);
                         }
                     }
-                },"-->>"+i+"<<--").start();
+                }, "-->>" + i + "<<--").start();
             }
 
             log.info("daily all profit job end, now is:{}", DateUtil.toDateTimeString(new Date()));

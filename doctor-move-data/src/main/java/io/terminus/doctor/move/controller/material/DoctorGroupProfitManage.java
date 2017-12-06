@@ -122,7 +122,8 @@ public class DoctorGroupProfitManage {
                 yearBarnAmount.clear();
             }
         }
-        doctorProfitMaterOrPigWriteServer.insterDoctorProfitMaterialOrPig(doctorProfitMaterialOrPigList);
+        if (!doctorProfitMaterialOrPigList.isEmpty())
+            doctorProfitMaterOrPigWriteServer.insterDoctorProfitMaterialOrPig(doctorProfitMaterialOrPigList);
     }
 
     private final DoctorProfitMaterialOrPig sumMaterialAmount(Date startDate, Date endDate, Long farmId, Long barnId, DoctorProfitMaterialOrPig doctorProfitMaterialOrPig, Boolean tag, String pigType) {

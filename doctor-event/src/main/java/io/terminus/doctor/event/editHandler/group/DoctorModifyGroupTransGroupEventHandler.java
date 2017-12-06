@@ -75,7 +75,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
                 .weightChange(EventUtil.minusDouble(newInput.getWeight(), oldInput.getWeight()))
                 .isSowTrigger(notNull(oldGroupEvent.getSowId()))
                 .transBarnType(toBarn.getPigType())
-                .transBarnType(oldGroupEvent.getTransGroupType())
+                .transGroupType(oldGroupEvent.getTransGroupType())
                 .build();
     }
 
@@ -195,7 +195,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .quantityChange(EventUtil.minusInt(0, oldInput.getQuantity()))
                 .transBarnType(toBarn.getPigType())
-                .transBarnType(oldGroupEvent.getTransGroupType())
+                .transGroupType(oldGroupEvent.getTransGroupType())
                 .build();
         DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
         doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));

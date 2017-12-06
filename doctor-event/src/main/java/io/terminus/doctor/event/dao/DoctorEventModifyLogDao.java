@@ -33,14 +33,14 @@ public class DoctorEventModifyLogDao extends MyBatisDao<DoctorEventModifyLog> {
             params.putAll(objMap);
         }
         // get total count
-        Long total = sqlSession.selectOne(sqlId(COUNT), criteria);
+        Long total = sqlSession.selectOne(sqlId("countExcludeDeleteLog"), criteria);
         if (total <= 0){
             return Paging.empty();
         }
         params.put(Constants.VAR_OFFSET, offset);
         params.put(Constants.VAR_LIMIT, limit);
         // get data
-        List<DoctorEventModifyLog> datas = sqlSession.selectList(sqlId(PAGING), params);
+        List<DoctorEventModifyLog> datas = sqlSession.selectList(sqlId("pagingExcludeDeleteLog"), params);
         return new Paging<>(total, datas);
     }
 

@@ -269,7 +269,7 @@
         <if test="inType != null">AND in_type = #{inType}</if>
         <if test="notInType != null">AND in_type != #{notInType}</if>
         <if test="otherBarnId != null">AND other_barn_id = #{otherBarnId}</if>
-        <if test="otherBarnType != null">AND other_barn_type = #{otherBarnType},</if>
+        <if test="otherBarnType != null">AND other_barn_type = #{otherBarnType}</if>
         <if test="relGroupEventId != null">AND rel_group_event_id = #{relGroupEventId}</if>
         <if test="relPigEventId != null">AND rel_pig_event_id = #{relPigEventId}</if>
         <if test="outId != null">AND out_id = #{outId}</if>
@@ -755,4 +755,18 @@
         WHERE created_at &gt;= #{startDate}
         group by farm_id
     </select>
+
+    <select id="findAllGroupIdWithChangeNoAvgDayAge" resultType="long" >
+        select group_id
+        from <include refid="tb"/>
+        where type = 3
+        and `avg_day_age` is null
+        GROUP BY group_id
+    </select>
+
+    <update id="updateAvgDayAge" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        set avg_day_age = #{avgDayAge}
+        WHERE id = #{id}
+    </update>
 </mapper>

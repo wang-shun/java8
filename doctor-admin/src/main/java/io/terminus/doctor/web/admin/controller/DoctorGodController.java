@@ -338,7 +338,7 @@ public class DoctorGodController {
             pig.setGeneticId(pigAndPigGroup.getGeneticId());
             if (null != pigAndPigGroup.getGeneticId())
                 pig.setGeneticName(RespHelper.orServEx(doctorBasicReadService.findBasicById(pigAndPigGroup.getGeneticId())).getName());
-            if (pig.getPigType().intValue() == PigType.BOAR.getValue())
+            if (pig.getPigType().intValue() == DoctorPig.PigSex.BOAR.getKey())
                 pig.setBoarType(pigAndPigGroup.getBoarType());
 
 
