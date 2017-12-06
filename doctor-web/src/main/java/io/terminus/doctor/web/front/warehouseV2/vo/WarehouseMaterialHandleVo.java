@@ -45,6 +45,9 @@ public class WarehouseMaterialHandleVo {
     private String warehouseName;
 
     @JsonView(MaterialHandleReportView.class)
+    private String transferInWarehouseName;
+
+    @JsonView(MaterialHandleReportView.class)
     private String vendorName;
 
     @JsonView(MaterialHandleReportView.class)
