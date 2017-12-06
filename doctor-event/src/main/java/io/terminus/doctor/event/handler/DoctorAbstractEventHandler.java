@@ -20,6 +20,7 @@ import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
@@ -153,6 +154,10 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         doctorPigEvent.setExtraMap(inputDto.toMap());
         doctorPigEvent.setParity(doctorPigEventDao.findLastParity(inputDto.getPigId()));
 
+        if (Objects.equals(doctorPigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())) {
+            DoctorPig boarPig = doctorPigDao.findById(inputDto.getPigId());
+            doctorPigEvent.setBoarType(boarPig.getBoarType());
+        }
         return doctorPigEvent;
     }
 
