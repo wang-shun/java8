@@ -95,6 +95,20 @@ public enum WarehouseMaterialHandleType {
         return Stream.of(WarehouseMaterialHandleType.values()).parallel().filter(t -> t.value == value).findFirst().orElseThrow(() -> new ServiceException("unknown.warehouse.material.handle.flag"));
     }
 
+    public static boolean isBigOut(int value) {
+        return WarehouseMaterialHandleType.OUT.getValue() == value
+                || WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue() == value
+                || WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == value
+                || WarehouseMaterialHandleType.FORMULA_OUT.getValue() == value;
+    }
+
+    public static boolean isBigIn(int value) {
+        return WarehouseMaterialHandleType.IN.getValue() == value
+                || WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == value
+                || WarehouseMaterialHandleType.TRANSFER_IN.getValue() == value
+                || WarehouseMaterialHandleType.FORMULA_IN.getValue() == value;
+    }
+
     public static List<Integer> getGroupType(Integer type) {
         if (null == type)
             return Collections.emptyList();
