@@ -474,6 +474,23 @@ public class DoctorPigEvents {
     }
 
     /**
+     * 猪的销售表
+     */
+    @RequestMapping(value = "/list/sales", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DoctorPigSalesExportDto> listPigSales(@RequestParam(required = false) Map<String, Object> pigEventCriteria,
+                                                      @RequestParam(required = false) String date) {
+
+        pigEventCriteria = Params.filterNullOrEmpty(pigEventCriteria);
+        DateTime dateTime = DateTime.parse(date);
+        String startDate = dateTime.toString(DateUtil.DATE);
+        String endDate = DateUtil.getMonthEnd(dateTime).toString(DateUtil.DATE);
+        pigEventCriteria.put("startDate", startDate);
+        pigEventCriteria.put("endDate", endDate);
+        return RespHelper.or500(doctorPigEventReadService.listFindSales(pigEventCriteria));
+    }
+
+    /**
      * 获取某一头某一胎次下未断奶数量
      * @param pigId 猪id
      * @param parity 胎次
