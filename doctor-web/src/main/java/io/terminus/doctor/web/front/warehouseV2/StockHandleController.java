@@ -147,6 +147,7 @@ public class StockHandleController {
                                 detail.setApplyPigGroupName(apply.getPigGroupName());
                                 detail.setApplyPigGroupId(apply.getPigGroupId());
                                 detail.setApplyStaffName(apply.getApplyStaffName());
+                                detail.setApplyStaffId(apply.getApplyStaffId());
                             } else
                                 log.warn("material apply not found,by material handle {}", mh.getId());
 
