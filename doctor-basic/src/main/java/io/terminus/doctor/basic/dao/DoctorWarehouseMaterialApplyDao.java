@@ -3,11 +3,13 @@ package io.terminus.doctor.basic.dao;
 import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Desc:
@@ -44,15 +46,18 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
      * 如果没有，返回null
      */
     public DoctorWarehouseMaterialApply findMaterialHandle(Long materialHandleId) {
-//        List<DoctorWarehouseMaterialApply> applies = this.list(DoctorWarehouseMaterialApply.builder()
-//                .materialHandleId(materialHandleId)
-//                .build());
-//        if (applies.isEmpty())
-//            return null;
-//
-//        return applies.get(0);
+        List<DoctorWarehouseMaterialApply> applies = this.list(DoctorWarehouseMaterialApply.builder()
+                .materialHandleId(materialHandleId)
+                .build());
+        if (applies.isEmpty())
+            return null;
 
-        return sqlSession.selectOne("findByMaterialHandle", materialHandleId);
+
+        Optional<DoctorWarehouseMaterialApply> groupApply = applies.stream().filter(a -> a.getApplyType().intValue() == WarehouseMaterialApplyType.GROUP.getValue()).findAny();
+
+        return groupApply.orElse(applies.get(0));
+
+//        return sqlSession.selectOne("findByMaterialHandle", materialHandleId);
     }
 
     /**
