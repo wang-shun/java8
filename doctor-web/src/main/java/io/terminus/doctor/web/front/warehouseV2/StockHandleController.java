@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.warehouseV2;
 import com.google.api.client.util.Charsets;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
@@ -67,6 +68,8 @@ public class StockHandleController {
 
     @RpcConsumer
     private DoctorWarehouseStockHandleReadService doctorWarehouseStockHandleReadService;
+    @RpcConsumer
+    private DoctorWarehouseStockHandleWriteService doctorWarehouseStockHandleWriteService;
     @RpcConsumer
     private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
     @RpcConsumer
@@ -191,6 +194,11 @@ public class StockHandleController {
         return vo;
     }
 
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "{id:\\d+}")
+    public void delete(@PathVariable Long id) {
+        RespHelper.or500(doctorWarehouseStockHandleWriteService.delete(id));
+    }
 
     @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}/export")
     public void export(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) {
