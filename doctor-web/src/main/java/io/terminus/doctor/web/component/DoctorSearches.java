@@ -501,7 +501,7 @@ public class DoctorSearches {
     }
 
     //拼接下猪舍需要的字段
-    private List<SearchedBarn> getSearchedBarn(List<DoctorBarn> barns) {
+    public List<SearchedBarn> getSearchedBarn(List<DoctorBarn> barns) {
         return BeanMapper.mapList(barns, SearchedBarn.class).stream()
                 .map(barn -> {
                     PigType pigType = PigType.from(barn.getPigType());

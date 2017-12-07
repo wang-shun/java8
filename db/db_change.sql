@@ -1622,4 +1622,6 @@ ALTER TABLE doctor_warehouse_material_handle ADD before_inventory_quantity DECIM
 ALTER TABLE doctor_farms ADD column is_intelligent  smallint(6) DEFAULT 0 NULL
 COMMENT '是否是智能猪舍（物联网使用默认是0）1->智能猪场 0不是猪场' after extra;
 
-
+-- 物料领用添加领用类型 2017-11-28
+ALTER TABLE `pig_doctor`.`doctor_warehouse_material_apply`
+ADD COLUMN `apply_type` TINYINT(4) NOT NULL COMMENT '领用类型。0猪舍，1猪群，2母猪' AFTER `updated_at`;

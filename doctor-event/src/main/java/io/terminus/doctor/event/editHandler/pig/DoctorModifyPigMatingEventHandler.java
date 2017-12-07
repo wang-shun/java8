@@ -34,6 +34,13 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
     @Override
     protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         super.modifyHandleCheck(oldPigEvent, inputDto);
+
+        //不允许修改初配事件日期，初配事件还要影响其他复配事件的预产期，track中预产期，比较麻烦
+        if (Objects.equals(oldPigEvent.getCurrentMatingCount(), 1)) {
+            expectTrue(Objects.equals(oldPigEvent.getEventAt(), inputDto.eventAt()),
+                    "first.mate.date.is.not.modify");
+        }
+
         if (oldPigEvent.getCurrentMatingCount() > 1) {
             serialMateValid(oldPigEvent.getPigId(), oldPigEvent.getParity(), inputDto.eventAt());
         }
@@ -46,6 +53,7 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
                 .businessId(oldPigEvent.getPigId())
                 .oldEventAt(oldPigEvent.getEventAt())
                 .newEventAt(inputDto.eventAt())
+                .eventId(oldPigEvent.getId())
                 .build();
     }
 
@@ -59,6 +67,17 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
         doctorPigEvent.setOperatorId(newDto.getOperatorId());
         return doctorPigEvent;
     }
+
+    //因为不允许修改初配日期，不会影响track，所以注释，如果以后可以编辑初配事件再打开
+//    @Override
+//    public DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoorEventChangeDto changeDto) {
+//        DoctorPigEvent firstMateEvent = doctorPigEventDao.getFirstMateEvent(oldPigTrack.getPigId(), new Date());
+//        if (Objects.equals(firstMateEvent.getId(), changeDto.getEventId()) && oldPigTrack.getExtraMap().containsKey("judgePregDate")) {
+//            oldPigTrack.getExtraMap().put("judgePregDate", firstMateEvent.getJudgePregDate());
+//            oldPigTrack.setExtraMap(oldPigTrack.getExtraMap());
+//        }
+//        return oldPigTrack;
+//    }
 
     @Override
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {

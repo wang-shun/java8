@@ -387,7 +387,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 .farmId(newEvent.getFarmId())
                 .fromEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(oldEvent))
                 .toEvent(ToJsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(newEvent))
-                .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .type(DoctorEventModifyRequest.TYPE.GROUP.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
     }

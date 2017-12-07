@@ -1,8 +1,11 @@
 package io.terminus.doctor.event.editHandler.pig;
 
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorFosterByDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -66,7 +69,8 @@ public class DoctorModifyPigFosterEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected void triggerEventModifyHandle(DoctorPigEvent newPigEvent) {
-        super.triggerEventModifyHandle(newPigEvent);
+        DoctorPigEvent fosterByEvent = doctorPigEventDao.findByRelPigEventId(newPigEvent.getId());
+        doctorModifyPigFosterByEventHandler.modifyHandle(fosterByEvent, buildPigInputDto(newPigEvent));
     }
 
     @Override
@@ -85,6 +89,27 @@ public class DoctorModifyPigFosterEventHandler extends DoctorAbstractModifyPigEv
             oldPigTrack.setUnweanQty(EventUtil.plusInt(oldPigTrack.getUnweanQty(), deletePigEvent.getQuantity()));
         }
         return oldPigTrack;
+    }
+
+    public BasePigEventInputDto buildPigInputDto(DoctorPigEvent doctorPigEvent) {
+        DoctorFostersDto fostersDto = JSON_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorFostersDto.class);
+
+        DoctorFosterByDto fosterByDto = DoctorFosterByDto.builder()
+                .fromSowId(fostersDto.getPigId())
+                .fromSowCode(fostersDto.getPigCode())
+                .fosterByDate(DateUtil.toDate(fostersDto.getFostersDate()))
+                .fosterByCount(fostersDto.getFostersCount())
+                .boarFostersByCount(fostersDto.getBoarFostersCount())
+                .sowFostersByCount(fostersDto.getSowFostersCount())
+                .fosterByTotalWeight(fostersDto.getFosterTotalWeight())
+                .build();
+
+        fosterByDto.setRelPigEventId(doctorPigEvent.getId());
+        fosterByDto.setEventName(PigEvent.FOSTERS_BY.getName());
+        fosterByDto.setEventType(PigEvent.FOSTERS_BY.getKey());
+        fosterByDto.setEventDesc(PigEvent.FOSTERS_BY.getDesc());
+
+        return fosterByDto;
     }
 
 }

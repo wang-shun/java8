@@ -1559,13 +1559,9 @@
         GROUP BY barns.pig_type
         ) AS a
     </select>
-    
+
     <select id="getMonthlyLiveStockChangeFeedCountV2" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
-        ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
-        ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowSowFeedCount,
-        ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
-        ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowFeedCount,
         ifnull(max(CASE WHEN pig_type = 2 THEN result ELSE 0 END), 0) AS nurseryFeedCount,
         ifnull(max(CASE WHEN pig_type = 3 THEN result ELSE 0 END), 0) AS fattenFeedCount,
         ifnull(max(CASE WHEN pig_type = 4 THEN result ELSE 0 END), 0) +
@@ -1588,6 +1584,59 @@
         ) AS a
     </select>
 
+    <select id="getMonthlyLiveStockChangeQuantityAndAmount"  parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
+        SELECT
+        -- 保育
+        ifnull(max(CASE WHEN pig_type = 2 and type = 1 THEN quantity ELSE 0 END), 0) AS nurseryFeedCount,
+        ifnull(max(CASE WHEN pig_type = 2 AND type = 1 THEN amount ELSE 0 END), 0) AS nurseryFeedAmount,
+        ifnull(max(CASE WHEN pig_type = 2 AND type = 3 THEN amount ELSE 0 END), 0) AS nurseryVaccineAmount,
+        ifnull(max(CASE WHEN pig_type = 2 AND type = 4 THEN amount ELSE 0 END), 0) AS nurseryDrugAmount,
+        ifnull(max(CASE WHEN pig_type = 2 AND type = 5 THEN amount ELSE 0 END), 0) AS nurseryConsumerAmount,
+        -- 育肥
+        ifnull(max(CASE WHEN pig_type = 3 and type = 1 THEN quantity ELSE 0 END), 0) AS fattenFeedCount,
+        ifnull(max(CASE WHEN pig_type = 3 AND type = 1 THEN amount ELSE 0 END), 0) AS fattenFeedAmount,
+        ifnull(max(CASE WHEN pig_type = 3 AND type = 3 THEN amount ELSE 0 END), 0) AS fattenVaccineAmount,
+        ifnull(max(CASE WHEN pig_type = 3 AND type = 4 THEN amount ELSE 0 END), 0) AS fattenDrugAmount,
+        ifnull(max(CASE WHEN pig_type = 3 AND type = 5 THEN amount ELSE 0 END), 0) AS fattenConsumerAmount,
+        -- 后备
+        ifnull(max(CASE WHEN pig_type = 4 and type = 1 THEN quantity ELSE 0 END), 0) +
+        ifnull(max(CASE WHEN pig_type = 8 and type = 1 THEN quantity ELSE 0 END), 0) AS houbeiFeedCount,
+        ifnull(max(CASE WHEN pig_type = 4 AND type = 1 THEN amount ELSE 0 END), 0) +
+        ifnull(max(CASE WHEN pig_type = 8 AND type = 1 THEN amount ELSE 0 END), 0) AS houbeiFeedAmount,
+        ifnull(max(CASE WHEN pig_type = 4 AND type = 3 THEN amount ELSE 0 END), 0) +
+        ifnull(max(CASE WHEN pig_type = 8 AND type = 3 THEN amount ELSE 0 END), 0) AS houbeiVaccineAmount,
+        ifnull(max(CASE WHEN pig_type = 4 AND type = 4 THEN amount ELSE 0 END), 0) +
+        ifnull(max(CASE WHEN pig_type = 8 AND type = 4 THEN amount ELSE 0 END), 0) AS houbeiDrugAmount,
+        ifnull(max(CASE WHEN pig_type = 4 AND type = 5 THEN amount ELSE 0 END), 0) +
+        ifnull(max(CASE WHEN pig_type = 8 AND type = 5 THEN amount ELSE 0 END), 0) AS houbeiConsumerAmount,
+        -- 佩怀
+        ifnull(max(CASE WHEN pig_type = 5 and type = 1 THEN quantity ELSE 0 END), 0) +
+        ifnull(max(CASE WHEN pig_type = 6 and type = 1 THEN quantity ELSE 0 END), 0) AS peiHuaiFeedCount,
+        ifnull(max(CASE WHEN pig_type = 5 AND type = 1 THEN amount ELSE 0 END), 0) +
+        ifnull(max(CASE WHEN pig_type = 6 AND type = 1 THEN amount ELSE 0 END), 0) AS peiHuaiFeedAmount,
+        ifnull(max(CASE WHEN pig_type = 5 AND type = 3 THEN amount ELSE 0 END), 0) +
+        ifnull(max(CASE WHEN pig_type = 6 AND type = 3 THEN amount ELSE 0 END), 0) AS peiHuaiVaccineAmount,
+        ifnull(max(CASE WHEN pig_type = 5 AND type = 4 THEN amount ELSE 0 END), 0) +
+        ifnull(max(CASE WHEN pig_type = 6 AND type = 4 THEN amount ELSE 0 END), 0) AS peiHuaiDrugAmount,
+        ifnull(max(CASE WHEN pig_type = 5 AND type = 5 THEN amount ELSE 0 END), 0) +
+        ifnull(max(CASE WHEN pig_type = 6 AND type = 5 THEN amount ELSE 0 END), 0) AS peiHuaiConsumerAmount
+        FROM
+        (
+        SELECT
+        pig_type,
+        sum(quantity) as quantity,
+        sum(quantity * unit_price) AS amount,
+        type
+        FROM doctor_warehouse_material_apply t0
+        LEFT JOIN doctor_barns t1 ON t0.pig_barn_id = t1.id
+        WHERE apply_type = 0
+        <if test="farmId != null">AND t0.farm_id = #{farmId}</if>
+        <if test="startAt != null">AND t0.apply_date &gt;= #{startAt}</if>
+        <if test="endAt != null">AND t0.apply_date &lt;= #{endAt}</if>
+        GROUP BY t1.pig_type, type
+        ) AS a
+    </select>
+
     <select id="getFarrowSowApplyCount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
         ifnull(max(CASE WHEN type = 1 THEN amount ELSE 0 END), 0) AS farrowSowFeedAmount,
@@ -1600,7 +1649,7 @@
         (
         SELECT sum(quantity) AS quantity,sum(quantity * unit_price) AS amount,type
         FROM doctor_warehouse_material_apply
-        WHERE pig_group_id=-1
+        WHERE apply_type=2
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
         <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
@@ -1611,17 +1660,17 @@
 
     <select id="getFarrowApplyCount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
-        ifnull(max(CASE WHEN type = 1 THEN amount ELSE 0 END), 0) AS farrowFeedCount,
-        ifnull(max(CASE WHEN type = 1 THEN quantity ELSE 0 END), 0) AS farrowFeedAmount,
+        ifnull(max(CASE WHEN type = 1 THEN amount ELSE 0 END), 0) AS farrowFeedAmount,
+        ifnull(max(CASE WHEN type = 1 THEN quantity ELSE 0 END), 0) AS farrowFeedCount,
         ifnull(max(CASE WHEN type = 3 THEN amount ELSE 0 END), 0) AS farrowVaccineAmount,
         ifnull(max(CASE WHEN type = 4 THEN amount ELSE 0 END), 0) AS farrowDrugAmount,
         ifnull(max(CASE WHEN type = 5 THEN amount ELSE 0 END), 0) AS farrowConsumerAmount
         FROM
         (
         SELECT sum(quantity) AS quantity,sum(quantity * unit_price) AS amount,type
-        FROM doctor_warehouse_material_apply
-        WHERE pig_group_id!=-1
-        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        FROM doctor_warehouse_material_apply t0 LEFT JOIN doctor_barns t1 on t0.pig_barn_id=t1.id
+        WHERE apply_type=1 and (t1.pig_type=1 or t1.pig_type=7)
+        <if test="farmId != null">AND t0.farm_id = #{farmId}</if>
         <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
         <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
         GROUP BY type
@@ -1754,7 +1803,7 @@
                 GROUP BY t1.pig_type,material_type
         ) as res;
     </select>
-    
+
     <select id="getGroupApplyCount" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorGroupBatchSummary">
         SELECT
         ifnull(max(CASE WHEN type = 1 THEN amount ELSE 0 END), 0) AS feedAmount,

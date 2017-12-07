@@ -20,10 +20,12 @@ import io.terminus.doctor.event.dto.msg.DoctorMessageUserDto;
 import io.terminus.doctor.event.dto.msg.DoctorSuggestBarn;
 import io.terminus.doctor.event.dto.msg.RuleValue;
 import io.terminus.doctor.event.enums.Category;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorMessage;
 import io.terminus.doctor.event.model.DoctorMessageRule;
 import io.terminus.doctor.event.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.event.model.DoctorMessageUser;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorMessageReadService;
 import io.terminus.doctor.event.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.event.service.DoctorMessageRuleTemplateReadService;
@@ -55,7 +57,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 与消息和消息模板相关
@@ -75,6 +76,7 @@ public class DoctorMessages {
     private final DoctorMessageRuleReadService doctorMessageRuleReadService;
     private final DoctorMessageUserReadService doctorMessageUserReadService;
     private final DoctorMessageUserWriteService doctorMessageUserWriteService;
+    private final DoctorGroupReadService doctorGroupReadService;
     @Autowired
     private Exporter exporter;
 
@@ -87,7 +89,7 @@ public class DoctorMessages {
                           DoctorMessageRuleTemplateWriteService doctorMessageRuleTemplateWriteService,
                           DoctorMessageRuleReadService doctorMessageRuleReadService,
                           DoctorMessageUserReadService doctorMessageUserReadService,
-                          DoctorMessageUserWriteService doctorMessageUserWriteService) {
+                          DoctorMessageUserWriteService doctorMessageUserWriteService, DoctorGroupReadService doctorGroupReadService) {
         this.doctorMessageReadService = doctorMessageReadService;
         this.doctorMessageWriteService = doctorMessageWriteService;
         this.doctorMessageRuleTemplateReadService = doctorMessageRuleTemplateReadService;
@@ -95,6 +97,7 @@ public class DoctorMessages {
         this.doctorMessageRuleReadService = doctorMessageRuleReadService;
         this.doctorMessageUserReadService = doctorMessageUserReadService;
         this.doctorMessageUserWriteService = doctorMessageUserWriteService;
+        this.doctorGroupReadService = doctorGroupReadService;
     }
 
 
@@ -140,6 +143,10 @@ public class DoctorMessages {
             messageUserDto.setUserId(UserUtil.getUserId());
             messageUserDto.setMessageId(doctorMessage.getId());
             DoctorMessageUser messageUser = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(messageUserDto)).get(0);
+            if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
+                DoctorGroupTrack doctorGroupTrack = RespHelper.or500(doctorGroupReadService.findTrackByGroupId(doctorMessage.getBusinessId()));
+                doctorMessage.setQuantity(doctorGroupTrack.getQuantity());
+            }
             return new DoctorMessageWithUserDto(doctorMessage, messageUser);
         }).collect(Collectors.toList());
         msgDto.setPaging(new Paging<>(messagePaging.getTotal(), list));
@@ -430,7 +437,8 @@ public class DoctorMessages {
                 List<DoctorMessageUser> messageUsers = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto));
                 List<Long> ids = messageUsers.stream().map(DoctorMessageUser::getMessageId).collect(Collectors.toList());
                 List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessagesByIds(ids));
-                pigCount = messages.stream().filter(message -> notNull(message.getQuantity())).mapToInt(DoctorMessage::getQuantity).sum();
+                List<Long> groupIds = messages.stream().map(DoctorMessage::getBusinessId).collect(Collectors.toList());
+                pigCount = RespHelper.or500(doctorGroupReadService.sumPigletCount(groupIds));
             } else {
                 pigCount = RespHelper.or500(doctorMessageUserReadService.findBusinessListByCriteria(doctorMessageUserDto)).size();
             }

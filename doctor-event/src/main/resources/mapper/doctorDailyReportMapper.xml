@@ -689,7 +689,7 @@
             ifnull(sum(wean_nest),0) as weanNest,
             ifnull(sum(wean_count),0) as weanCount,
             CONVERT(ifnull(sum(wean_count*wean_avg_weight)/sum(wean_count),0),DECIMAL(10,2)) as weanAvgWeight,
-            CONVERT(ifnull(sum(wean_count*wean_day_age)/sum(wean_count),0),DECIMAL(10,2)) as weanDage,
+            CONVERT(ifnull(sum(wean_count*wean_day_age)/sum(wean_count),0),DECIMAL(10,2)) as weanDayAge,
 
             ifnull(sum(sow_ph_feed),0) as sowPhFeed,
             ifnull(sum(sow_ph_feed_amount),0) as sowPhFeedAmount,
@@ -709,23 +709,23 @@
             ifnull(sum(farrow_vaccination_amount),0) as farrowVaccinationAmount,
             ifnull(sum(farrow_consumable_amount),0) as farrowConsumableAmount,
 
-            ifnull(sum(nursery_feed),0) as farrowFeed,
-            ifnull(sum(nursery_feed_amount),0) as farrowFeedAmount,
-            ifnull(sum(nursery_medicine_amount),0) as farrowMedicineAmount,
-            ifnull(sum(nursery_vaccination_amount),0) as farrowVaccinationAmount,
-            ifnull(sum(nursery_consumable_amount),0) as farrowConsumableAmount,
+            ifnull(sum(nursery_feed),0) as nurseryFeed,
+            ifnull(sum(nursery_feed_amount),0) as nurseryFeedAmount,
+            ifnull(sum(nursery_medicine_amount),0) as nurseryMedicineAmount,
+            ifnull(sum(nursery_vaccination_amount),0) as nurseryVaccinationAmount,
+            ifnull(sum(nursery_consumable_amount),0) as nurseryConsumableAmount,
 
-            ifnull(sum(fatten_feed),0) as farrowFeed,
-            ifnull(sum(fatten_feed_amount),0) as farrowFeedAmount,
-            ifnull(sum(fatten_medicine_amount),0) as farrowMedicineAmount,
-            ifnull(sum(fatten_vaccination_amount),0) as farrowVaccinationAmount,
-            ifnull(sum(fatten_consumable_amount),0) as farrowConsumableAmount,
+            ifnull(sum(fatten_feed),0) as fattenFeed,
+            ifnull(sum(fatten_feed_amount),0) as fattenFeedAmount,
+            ifnull(sum(fatten_medicine_amount),0) as fattenMedicineAmount,
+            ifnull(sum(fatten_vaccination_amount),0) as fattenVaccinationAmount,
+            ifnull(sum(fatten_consumable_amount),0) as fattenConsumableAmount,
 
-            ifnull(sum(houbei_feed),0) as farrowFeed,
-            ifnull(sum(houbei_feed_amount),0) as farrowFeedAmount,
-            ifnull(sum(houbei_medicine_amount),0) as farrowMedicineAmount,
-            ifnull(sum(houbei_vaccination_amount),0) as farrowVaccinationAmount,
-            ifnull(sum(houbei_consumable_amount),0) as farrowConsumableAmount
+            ifnull(sum(houbei_feed),0) as houbeiFeed,
+            ifnull(sum(houbei_feed_amount),0) as houbeiFeedAmount,
+            ifnull(sum(houbei_medicine_amount),0) as houbeiMedicineAmount,
+            ifnull(sum(houbei_vaccination_amount),0) as houbeiVaccinationAmount,
+            ifnull(sum(houbei_consumable_amount),0) as houbeiConsumableAmount
 
         from doctor_daily_reports
         where farm_id = #{farmId}

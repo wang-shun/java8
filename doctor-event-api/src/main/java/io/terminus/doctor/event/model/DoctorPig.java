@@ -27,7 +27,7 @@ import static java.util.Objects.isNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorPig implements Serializable{
+public class DoctorPig implements Serializable {
 
     private static final long serialVersionUID = -5981942073814626473L;
 
@@ -52,6 +52,9 @@ public class DoctorPig implements Serializable{
      */
     private String rfid;
 
+    /**
+     * @see PigSex
+     */
     private Integer pigType;
 
     /**
@@ -87,6 +90,7 @@ public class DoctorPig implements Serializable{
 
     /**
      * 公猪类型
+     *
      * @see io.terminus.doctor.event.enums.BoarEntryType
      */
     private Integer boarType;
@@ -113,21 +117,21 @@ public class DoctorPig implements Serializable{
     private Date updatedAt;
 
     @SneakyThrows
-    public void setExtraMap(Map<String,Object> extraMap){
+    public void setExtraMap(Map<String, Object> extraMap) {
         this.extraMap = extraMap;
-        if(isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())){
+        if (isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())) {
             this.extra = "";
-        }else {
+        } else {
             this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
         }
     }
 
     @SneakyThrows
-    public void setExtra(String extra){
+    public void setExtra(String extra) {
         this.extra = extra;
-        if(Strings.isNullOrEmpty(extra)){
+        if (Strings.isNullOrEmpty(extra)) {
             this.extraMap = Collections.emptyMap();
-        }else {
+        } else {
             this.extraMap = OBJECT_MAPPER.readValue(extra, JacksonType.MAP_OF_OBJECT);
         }
     }
@@ -145,23 +149,23 @@ public class DoctorPig implements Serializable{
         @Getter
         private String desc;
 
-        PigSex(Integer key, String desc){
+        PigSex(Integer key, String desc) {
             this.key = key;
             this.desc = desc;
         }
 
-        public static PigSex from(Integer key){
-            for(PigSex pigSex : PigSex.values()){
-                if(Objects.equals(pigSex.getKey(), key)){
+        public static PigSex from(Integer key) {
+            for (PigSex pigSex : PigSex.values()) {
+                if (Objects.equals(pigSex.getKey(), key)) {
                     return pigSex;
                 }
             }
             return null;
         }
 
-        public static PigSex from(String desc){
-            for(PigSex pigSex : PigSex.values()){
-                if(Objects.equals(pigSex.getDesc(), desc)){
+        public static PigSex from(String desc) {
+            for (PigSex pigSex : PigSex.values()) {
+                if (Objects.equals(pigSex.getDesc(), desc)) {
                     return pigSex;
                 }
             }

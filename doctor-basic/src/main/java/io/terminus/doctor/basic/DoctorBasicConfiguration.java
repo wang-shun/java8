@@ -41,7 +41,7 @@ import java.util.List;
 @Configuration
 @ComponentScan({"io.terminus.doctor.basic"})
 @Import({DoctorCommonConfiguration.class})
-@EnableCaching
+//@EnableCaching()
 public class DoctorBasicConfiguration {
 
     @Configuration

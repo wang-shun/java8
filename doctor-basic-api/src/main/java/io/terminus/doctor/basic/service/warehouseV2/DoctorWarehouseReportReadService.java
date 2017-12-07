@@ -23,7 +23,7 @@ public interface DoctorWarehouseReportReadService {
      * @param farmId
      * @return
      */
-    Response<AmountAndQuantityDto> countFarmBalance(Long farmId);
+//    Response<AmountAndQuantityDto> countFarmBalance(Long farmId);
 
     Response<AmountAndQuantityDto> countFarmBalance(Long farmId, Long skuId);
 
@@ -34,7 +34,7 @@ public interface DoctorWarehouseReportReadService {
      * @param type
      * @return
      */
-    Response<AmountAndQuantityDto> countWarehouseTypeBalance(Long farmId, Integer type);
+//    Response<AmountAndQuantityDto> countWarehouseTypeBalance(Long farmId, Integer type);
 
     /**
      * 统计猪厂下，各个类型的余量和余额
@@ -74,15 +74,15 @@ public interface DoctorWarehouseReportReadService {
     /**
      * 统计仓库下某一个供应商的物料的余额和余量
      *
-     * @param warehouseId
-     * @param materialId
-     * @param vendorName
-     * @return
+//     * @param warehouseId
+//     * @param materialId
+//     * @param vendorName
+//     * @return
      */
-    Response<AmountAndQuantityDto> countMaterialBalance(Long warehouseId, Long materialId, String vendorName);
+//    Response<AmountAndQuantityDto> countMaterialBalance(Long warehouseId, Long materialId, String vendorName);
 
 
-    Response<AmountAndQuantityDto> countBalance(List<DoctorWarehousePurchase> purchases);
+//    Response<AmountAndQuantityDto> countBalance(List<DoctorWarehousePurchase> purchases);
 
     Response<AmountAndQuantityDto> countBalance(Long farmId, Integer warehouseType, Long warehouseId, Long materialId, String vendorName);
 

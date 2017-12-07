@@ -51,4 +51,16 @@ public interface DoctorWarehouseMaterialApplyReadService {
 
 
     Response<Map<Integer, DoctorWarehouseMaterialApply>> listEachWarehouseTypeLastApply(Long farmId);
+
+    /**
+     * 仓库月度领用记录
+     *
+     * @param warehouseId
+     * @param applyYear   领用年
+     * @param applyMonth  领用月份
+     * @param skuName     可为null
+     * @return
+     */
+    Response<List<DoctorWarehouseMaterialApply>> month(Long warehouseId, Integer applyYear, Integer applyMonth, String skuName);
+
 }

@@ -7,6 +7,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockStatisticsDto;
+import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
@@ -19,8 +20,6 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -122,6 +121,7 @@ public class ReportController {
                                     .farmId(farmId)
                                     .handleYear(year)
                                     .handleMonth(month)
+                                    .deleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue())
                                     .build(),
                             WarehouseMaterialHandleType.OUT,
                             WarehouseMaterialHandleType.IN,
@@ -151,13 +151,16 @@ public class ReportController {
             for (DoctorWareHouse wareHouse : warehouseResponse.getResult()) {
                 AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), year, month));
 
-
                 balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
                         .amount((lastMonthBalance.containsKey(wareHouse.getId()) ? lastMonthBalance.get(wareHouse.getId()).getAmount() : 0) + balance.getAmount())
                         .build());
 
-                lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount(), balance.getQuantity()));
+                if (lastMonthBalance.containsKey(wareHouse.getId())) {
+                    AmountAndQuantityDto a = lastMonthBalance.get(wareHouse.getId());
+                    lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount() + a.getAmount(), balance.getQuantity().add(a.getQuantity())));
+                } else
+                    lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount(), balance.getQuantity()));
 
                 long inAmount;
                 if (!inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.IN))
@@ -377,43 +380,38 @@ public class ReportController {
                 return Collections.emptyList();
             criteria.put("skuIds", skuIds);
         }
-//        if (StringUtils.isNotBlank(materialName))
-//            criteria.put("materialNameLike", materialName);
 
         Response<List<DoctorWarehouseMaterialHandle>> materialHandleResponse = doctorWarehouseMaterialHandleReadService.advList(criteria);
         if (!materialHandleResponse.isSuccess())
             throw new JsonResponseException(materialHandleResponse.getError());
 
-        Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(DoctorWarehouseMaterialApply.builder()
-                .warehouseId(warehouseId)
-                .materialName(StringUtils.isBlank(materialName) ? null : materialName)
-                .applyYear(date.get(Calendar.YEAR))
-                .applyMonth(date.get(Calendar.MONTH) + 1)
-                .build());
-        if (!applyResponse.isSuccess())
-            throw new JsonResponseException(applyResponse.getError());
+//        List<DoctorWarehouseMaterialApply> applies = RespHelper.or500(doctorWarehouseMaterialApplyReadService.month(warehouseId, date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, null));
+//
+//        Map<Long/*MaterialHandleId*/, DoctorWarehouseMaterialApply> handleApply = new HashMap<>();
+//        for (DoctorWarehouseMaterialApply apply : applies) {
+//            handleApply.put(apply.getMaterialHandleId(), apply);
+//        }
+        Map<Long, List<DoctorWarehouseMaterialApply>> handleApply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.month(warehouseId, date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, null)).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialApply::getMaterialHandleId));
 
-
-        Map<Long/*MaterialHandleId*/, DoctorWarehouseMaterialApply> handleApply = new HashMap<>();
-        for (DoctorWarehouseMaterialApply apply : applyResponse.getResult()) {
-            handleApply.put(apply.getMaterialHandleId(), apply);
-        }
 
         Map<Long, List<DoctorWarehouseSku>> skuMap = RespHelper.or500(doctorWarehouseSkuReadService.findByIds(materialHandleResponse.getResult().stream().map(DoctorWarehouseMaterialHandle::getMaterialId).collect(Collectors.toList()))).stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
 
         List<WarehouseMaterialHandleVo> vos = new ArrayList<>(materialHandleResponse.getResult().size());
         for (DoctorWarehouseMaterialHandle handle : materialHandleResponse.getResult()) {
 
-            String pigBarnName, pigGroupName;
+            String pigBarnName, pigGroupName = null;
             if (!handleApply.containsKey(handle.getId()))
                 pigBarnName = pigGroupName = null;
             else {
-                pigBarnName = handleApply.get(handle.getId()).getPigBarnName();
-                pigGroupName = handleApply.get(handle.getId()).getPigGroupName();
-            }
 
-//            if (!skuMap.containsKey(handle.getMaterialId()))
-//                throw new InvalidException("warehouse.sku.not.found", handle.getMaterialId());
+                for (DoctorWarehouseMaterialApply a : handleApply.get(handle.getId())) {
+                    if (a.getPigGroupId() != null)
+                        pigGroupName = a.getPigGroupName();
+                }
+//                pigGroupName = handleApply.get(handle.getId()).get(0).getPigGroupName();
+                pigBarnName = handleApply.get(handle.getId()).get(0).getPigBarnName();
+
+            }
 
             WarehouseMaterialHandleVo handleVo = WarehouseMaterialHandleVo.builder()
                     .materialName(handle.getMaterialName())
@@ -438,6 +436,12 @@ public class ReportController {
                 handleVo.setUnit(null == unit ? "" : unit.getName());
 //                handleVo.setUnit(skuMap.get(handle.getMaterialId()).get(0).getUnit());
             }
+
+            if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()) {
+                DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(handle.getOtherTransferHandleId()));
+                handleVo.setTransferInWarehouseName(transferInHandle.getWarehouseName());
+            }
+
 
             vos.add(handleVo);
         }
@@ -466,11 +470,9 @@ public class ReportController {
         criteria.put("applyMonth", date.get(Calendar.MONTH) + 1);
         criteria.put("warehouseId", warehouseId);
 
-//        if (StringUtils.isNotBlank(materialName))
-//            criteria.put("materialNameLike", materialName);
         if (null != pigBarnId)
             criteria.put("pigBarnId", pigBarnId);
-        if (null != type)
+        if (null != type) //物料类型
             criteria.put("type", type);
 
         if (StringUtils.isNotBlank(materialName)) {
@@ -484,7 +486,7 @@ public class ReportController {
             criteria.put("skuIds", skuIds);
         }
 
-        criteria.put("groupOrBarn", "barn");
+        criteria.put("applyType", WarehouseMaterialApplyType.BARN.getValue());
         Response<List<DoctorWarehouseMaterialApply>> applyResponse = doctorWarehouseMaterialApplyReadService.list(criteria);
         if (!applyResponse.isSuccess())
             throw new JsonResponseException(applyResponse.getError());
@@ -493,13 +495,10 @@ public class ReportController {
 
         List<WarehouseMaterialApplyVo> vos = new ArrayList<>(applyResponse.getResult().size());
         for (DoctorWarehouseMaterialApply apply : applyResponse.getResult()) {
-//            if (!skuMap.containsKey(apply.getMaterialId()))
-//                throw new InvalidException("warehouse.sku.not.found");
 
             WarehouseMaterialApplyVo vo = new WarehouseMaterialApplyVo();
             BeanUtils.copyProperties(apply, vo);
             if (skuMap.containsKey(apply.getMaterialId())) {
-//                vo.setUnit(skuMap.get(apply.getMaterialId()).get(0).getUnit());
                 DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(skuMap.get(apply.getMaterialId()).get(0).getUnit())));
                 vo.setUnit(null == unit ? "" : unit.getName());
                 vo.setCode(skuMap.get(apply.getMaterialId()).get(0).getCode());
@@ -575,7 +574,8 @@ public class ReportController {
         } else if (null != pigGroupId)
             criteria.put("pigGroupId", pigGroupId);
         else
-            criteria.put("groupOrBarn", "group");
+//            criteria.put("groupOrBarn", "group");
+            criteria.put("applyType", WarehouseMaterialApplyType.GROUP.getValue());
 
         if (StringUtils.isNotBlank(materialName)) {
             Map<String, Object> skuParams = new HashMap<>();
@@ -609,9 +609,6 @@ public class ReportController {
                 throw new JsonResponseException(groupResponse.getError());
             if (null == groupResponse.getResult())
                 throw new JsonResponseException("pig.group.not.found");
-//            if (!skuMap.containsKey(apply.getMaterialId()))
-//                throw new InvalidException("warehouse.sku.not.found", apply.getMaterialId());
-
 
             WarehousePigGroupApplyVo applyVo = WarehousePigGroupApplyVo.builder()
                     .pigGroupId(apply.getPigGroupId())
@@ -630,6 +627,7 @@ public class ReportController {
                     .quantity(apply.getQuantity())
                     .unitPrice(apply.getUnitPrice())
                     .amount(apply.getQuantity().multiply(new BigDecimal(apply.getUnitPrice())).longValue())
+                    .applyDate(apply.getApplyDate())
                     .build();
 
             if (skuMap.containsKey(apply.getMaterialId())) {

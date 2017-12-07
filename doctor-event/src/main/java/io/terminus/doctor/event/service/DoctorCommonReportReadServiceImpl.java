@@ -251,7 +251,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
 //        Date startAt = getSumAtStart(report.getSumAt(), report.getType());
 //        Date endAt = getSumAtEnd(report.getSumAt(), report.getType());
         Date startAt = report.getSumFrom();
-        Date endAt = report.getSumTo();
+        Date endAt = report.getSumTo().after(new Date()) ? new Date() : report.getSumTo();
         doctorCommonReportDto.setFarmId(report.getFarmId());
         doctorCommonReportDto.setDate(report.getSumAt());
         DoctorDailyReportSum dailyReportSum = doctorDailyReportDao.findDailyReportSum(farmId, startAt, endAt);

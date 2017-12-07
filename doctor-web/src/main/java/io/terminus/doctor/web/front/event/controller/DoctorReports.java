@@ -244,11 +244,12 @@ public class DoctorReports {
     }
 
     /**
-     * 分页查询猪群批次总结
+     * 查询猪群批次总结
      * @return 批次总结
      */
     @RequestMapping(value = "/group/batch", method = RequestMethod.GET)
-    public DoctorGroupBatchSummary getGroupBatchSummary(@RequestParam("groupId") Long groupId, @RequestParam("fcc") Double fcc) {
+    public DoctorGroupBatchSummary getGroupBatchSummary(@RequestParam("groupId") Long groupId,
+                                                        @RequestParam(value = "fcc", required = false) Double fcc) {
         DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
         return RespHelper.or500(doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(groupDetail, fcc));
     }

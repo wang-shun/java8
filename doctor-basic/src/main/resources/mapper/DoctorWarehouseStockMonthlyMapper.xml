@@ -30,12 +30,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `warehouse_id`, `material_id`, `handle_year`, `handle_month`, `balance_quantity`, `balacne_amount`, 
+        `warehouse_id`, `material_id`, `handle_year`, `handle_month`, `balance_quantity`, `balacne_amount`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{warehouseId}, #{materialId}, #{handleYear}, #{handleMonth}, #{balanceQuantity}, #{balacneAmount}, 
+        #{warehouseId}, #{materialId}, #{handleYear}, #{handleMonth}, #{balanceQuantity}, #{balacneAmount},
         now(), now()
     </sql>
 
@@ -95,29 +95,66 @@
     </update>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM <include refid="tb"/>
+        DELETE FROM
+        <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-    
+
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
     <select id="list" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
+    </select>
+
+    <select id="statistics" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
+        SELECT
+        sum(balance_quantity) as balanceQuantity,sum(balacne_amount) as balacneAmount,warehouse_id,material_id
+        FROM
+        <include refid="tb"/>
+        <where>
+            <if test="warehouseId !=null">
+                AND warehouse_id=#{warehouseId}
+            </if>
+            <if test="warehouseIds !=null and warehouseIds.size() >0">
+                AND
+                <foreach collection="warehouseIds" item="t" open="(" separator="or" close=")">
+                    warehouse_id=#{t}
+                </foreach>
+            </if>
+            <if test="skuId !=null">
+                AND material_id=#{skuId}
+            </if>
+        </where>
+        GROUP BY warehouse_id,material_id
+    </select>
+
+    <select id="statisticsGroupBySku" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
+        SELECT
+        material_id,sum(balacne_amount) as balacneAmount,sum(balance_quantity) as balanceQuantity
+        FROM
+        <include refid="tb"/>
+        where warehouse_id =#{warehouseId}
+        GROUP BY material_id
     </select>
 
 </mapper>
