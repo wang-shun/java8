@@ -56,6 +56,7 @@ public class DoctorWarehouseMaterialApplyManager {
         materialApply.setMaterialHandleId(handle.getId());
         materialApply.setPigBarnId(outDetail.getApplyPigBarnId());
         materialApply.setPigBarnName(outDetail.getApplyPigBarnName());
+
         if (null != outDetail.getApplyPigGroupId()) { //猪群和母猪领用
             if (outDetail.getApplyPigGroupId() == -1) {
                 materialApply.setPigGroupId(-1L);
@@ -75,9 +76,9 @@ public class DoctorWarehouseMaterialApplyManager {
         } else { //猪舍领用
             materialApply.setApplyType(WarehouseMaterialApplyType.BARN.getValue());
         }
-
+        
         materialApply.setApplyStaffName(outDetail.getApplyStaffName());
-
+        materialApply.setApplyStaffId(outDetail.getApplyStaffId());
         doctorWarehouseMaterialApplyDao.create(materialApply);
     }
 
