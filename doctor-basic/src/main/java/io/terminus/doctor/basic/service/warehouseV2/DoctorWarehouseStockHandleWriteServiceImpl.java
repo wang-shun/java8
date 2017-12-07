@@ -92,7 +92,11 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             BigDecimal thisSkuAllInQuantity = thisSkuHandles.stream().filter(h -> WarehouseMaterialHandleType.isBigIn(h.getType())).map(DoctorWarehouseMaterialHandle::getQuantity).reduce((a, b) -> a.add(b)).orElse(new BigDecimal(0));
             log.debug("check stock is enough for delete,stock[{}],out[{}],in[{}]", stock.getQuantity(), thisSkuAllOutQuantity, thisSkuAllInQuantity);
             if (stock.getQuantity().add(thisSkuAllOutQuantity).compareTo(thisSkuAllInQuantity) < 0)
-                throw new InvalidException("stock.not.enough", needValidSkuHandle.get(skuId).get(0).getWarehouseName(), needValidSkuHandle.get(skuId).get(0).getMaterialName(), stock.getQuantity(), sku.getUnit());
+                throw new InvalidException("stock.not.enough.rollback",
+                        needValidSkuHandle.get(skuId).get(0).getWarehouseName(),
+                        needValidSkuHandle.get(skuId).get(0).getMaterialName(),
+                        stock.getQuantity(),
+                        sku.getUnit(), thisSkuAllInQuantity);
         }
 
         handles.stream().forEach(h -> {
