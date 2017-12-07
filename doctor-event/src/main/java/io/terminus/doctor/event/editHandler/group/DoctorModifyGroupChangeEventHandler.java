@@ -234,6 +234,7 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
         event.setPrice(change.getPrice());          //销售单价(分)(基础价)
         event.setBaseWeight(change.getBaseWeight());//基础重量
         event.setOverPrice(change.getOverPrice());  //超出价格(分/kg)
+        event.setAmount(change.getAmount());
         if (Objects.equals(change.getChangeTypeId(), DoctorBasicEnums.SALE.getId())) {
 
             //保育猪的特殊逻辑, 其他猪类的销售 金额 = 重量 * 单价
