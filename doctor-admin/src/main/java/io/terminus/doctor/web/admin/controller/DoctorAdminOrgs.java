@@ -2,15 +2,21 @@ package io.terminus.doctor.web.admin.controller;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Params;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
 import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.service.DoctorDepartmentReadService;
 import io.terminus.doctor.user.service.DoctorDepartmentWriteService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
+import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.web.admin.dto.DoctorAvailableBindDto;
+import io.terminus.parana.user.model.LoginType;
+import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: admin端 公司api
@@ -38,6 +48,10 @@ public class DoctorAdminOrgs {
     private DoctorDepartmentReadService doctorDepartmentReadService;
     @RpcConsumer
     private DoctorDepartmentWriteService doctorDepartmentWriteService;
+    @RpcConsumer
+    private DoctorUserReadService doctorUserReadService;
+    @RpcConsumer
+    private DoctorServiceStatusReadService doctorServiceStatusReadService;
 
     /**
      * 查询全部公司
@@ -46,6 +60,25 @@ public class DoctorAdminOrgs {
     @RequestMapping(value = "/all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<DoctorOrg> findAllOrgs() {
         return RespHelper.or500(doctorOrgReadService.findAllOrgs());
+    }
+
+    /**
+     * 查询全部开通猪场软件服务的公司
+     * @return 公司列表
+     */
+    @RequestMapping(value = "/all/open/service", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<DoctorOrg> findAllOpenDoctortOrgs() {
+        List<DoctorOrg> orgs =  RespHelper.or500(doctorOrgReadService.findAllOrgs());
+
+        return orgs.stream().filter(doctorOrg -> {
+            Response<User> userResponse = doctorUserReadService.findBy(doctorOrg.getMobile(), LoginType.MOBILE);
+            if (!userResponse.isSuccess()) {
+                return false;
+            }
+
+            DoctorServiceStatus doctorServiceStatus = RespHelper.or500(doctorServiceStatusReadService.findByUserId(userResponse.getResult().getId()));
+            return notNull(doctorServiceStatus) && Objects.equals(doctorServiceStatus.getPigdoctorStatus(), DoctorServiceStatus.Status.OPENED.value());
+        }).collect(Collectors.toList());
     }
 
     /**
