@@ -319,6 +319,7 @@ CREATE TABLE `doctor_warehouse_material_apply` (
   `pig_group_name` varchar(64) DEFAULT NULL COMMENT '领用猪群名称',
   `material_id` bigint(20) NOT NULL COMMENT '物料编号',
   `apply_date` datetime DEFAULT NULL COMMENT '领用日期',
+  `apply_staff_id` bigint(20) DEFAULT NULL COMMENT '领用人编号',
   `apply_staff_name` varchar(64) DEFAULT NULL COMMENT '领用人',
   `apply_year` smallint(12) NOT NULL COMMENT '领用年',
   `apply_month` tinyint(4) NOT NULL COMMENT '领用月',
@@ -330,8 +331,11 @@ CREATE TABLE `doctor_warehouse_material_apply` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `apply_type` tinyint(4) NOT NULL COMMENT '领用类型。0猪舍，1猪群，2母猪',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `index_farm` (`farm_id`),
+  KEY `index_warehouse` (`warehouse_id`)
 ) COMMENT='仓库物料领用表';
+
 CREATE TABLE `doctor_warehouse_sku` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
   `org_id` bigint(20) NOT NULL COMMENT '公司编号',
