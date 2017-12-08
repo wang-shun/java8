@@ -148,16 +148,17 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
                 throw new InvalidException("warehouse.sku.type.not.support", type);
         }
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("type", type);
-        params.put("orgId", orgId);
+//        Map<String, Object> params = new HashMap<>();
+//        params.put("type", type);
+//        params.put("orgId", orgId);
 //        params.put("status", WarehouseSkuStatus.NORMAL.getValue());
 
-        List<DoctorWarehouseSku> skus = doctorWarehouseSkuDao.list(params);
-        if (skus.isEmpty())
+//        List<DoctorWarehouseSku> skus = doctorWarehouseSkuDao.list(params);
+        String lastCode = doctorWarehouseSkuDao.findLastCode(orgId, type);
+        if (StringUtils.isBlank(lastCode))
             return Response.ok(prefix + "0001");
 
-        String lasSkuCode = skus.get(0).getCode().substring(prefix.length());
+        String lasSkuCode = lastCode.substring(prefix.length());
 //        if (!NumberUtils.isNumber(lasSkuCode))
 //            throw new InvalidException("warehouse.sku.code.format.illegal", lasSkuCode);
 

@@ -136,4 +136,12 @@
         ORDER BY `id` DESC
     </select>
 
+    <select id="findLastCode" parameterType="map" resultType="String">
+        SELECT code
+        FROM <include refid="tb"/>
+        WHERE org_id=#{orgId} and type=#{type}
+        ORDER BY `code` DESC
+        LIMIT 1
+    </select>
+
 </mapper>
