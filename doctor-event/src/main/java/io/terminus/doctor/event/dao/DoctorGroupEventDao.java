@@ -6,6 +6,7 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
+import io.terminus.doctor.event.dto.DoctorPigSalesExportDto;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.springframework.stereotype.Repository;
@@ -283,5 +284,17 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     @Deprecated
     public void updateAvgDayAge(Long id, Integer avgDayAge) {
         sqlSession.update(sqlId("updateAvgDayAge"), ImmutableMap.of("id", id, "avgDayAge", avgDayAge));
+    }
+
+    public List<DoctorPigSalesExportDto> findNurseSales(Map<String, Object> map) {
+        return sqlSession.selectList(sqlId("findNurseSales"), map);
+    }
+
+    public List<DoctorPigSalesExportDto> findReverseSales(Map<String, Object> map) {
+        return sqlSession.selectList(sqlId("findReverseSales"), map);
+    }
+
+    public List<DoctorPigSalesExportDto> findFattenSales(Map<String, Object> map) {
+        return sqlSession.selectList(sqlId("findFattenSales"), map);
     }
 }
