@@ -53,7 +53,10 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
             return null;
 
 
-        Optional<DoctorWarehouseMaterialApply> groupApply = applies.stream().filter(a -> a.getApplyType().intValue() == WarehouseMaterialApplyType.GROUP.getValue()).findAny();
+        Optional<DoctorWarehouseMaterialApply> groupApply = applies.stream()
+                .filter(a -> a.getApplyType().intValue() == WarehouseMaterialApplyType.GROUP.getValue()
+                        || a.getApplyType().intValue() == WarehouseMaterialApplyType.SOW.getValue()
+                ).findAny();
 
         return groupApply.orElse(applies.get(0));
 
